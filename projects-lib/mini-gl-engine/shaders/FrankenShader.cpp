@@ -20,6 +20,7 @@ namespace GLEngine {
         //
         
         std::string vertexShader =
+        "#version 120\n"
         "attribute vec4 aPosition;\n"
         "uniform mat4 uMVP;\n"
         "VARIABLES"
@@ -105,10 +106,21 @@ namespace GLEngine {
 
             findAndReplaceAll(&vertexShader,
                 "SHADER_CODE",
+                
+                /*
                 "  mat4 v_gradient_ = mat4(0);\n"
-                "  for (int i=0;i<4;i++){\n"
-                "    v_gradient_ += uSkinGradientMatrix[(int)(aSkinIndex[i])] * aSkinWeight[i];\n"
+                "  for (int i=0;i<4;i++) {\n"
+                "    v_gradient_ += uSkinGradientMatrix[int(aSkinIndex[i])] * aSkinWeight[i];\n"
                 "  }\n"
+                //*/
+
+                // MACOS shader 120 compatible
+                "  mat4 v_gradient_ = uSkinGradientMatrix[int(aSkinIndex.x)] * aSkinWeight.x;\n"
+                "  v_gradient_ += uSkinGradientMatrix[int(aSkinIndex.y)] * aSkinWeight.y;\n"
+                "  v_gradient_ += uSkinGradientMatrix[int(aSkinIndex.z)] * aSkinWeight.z;\n"
+                "  v_gradient_ += uSkinGradientMatrix[int(aSkinIndex.w)] * aSkinWeight.w;\n"
+                // */
+
                 "  vec4 inputPosition = v_gradient_ * aPosition;\n"
                 "  mat3 v_gradient_mat3 = mat3(v_gradient_);\n"
                 "  mat3 v_gradient_IT = inverse_transpose_rotation_3( v_gradient_mat3 );\n"
@@ -269,6 +281,7 @@ namespace GLEngine {
         
         
         std::string fragmentShader =
+            "#version 120\n"
             "uniform vec4 uMaterialAlbedoColor;\n"
             "uniform float uMaterialRoughness;\n"
             "uniform float uMaterialMetallic;\n"
