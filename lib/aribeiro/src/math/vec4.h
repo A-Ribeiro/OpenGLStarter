@@ -315,7 +315,7 @@ class _SSE2_ALIGN_PRE vec4{
         static const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
         diff_abs = _mm_andnot_ps(_vec4_sign_mask, diff_abs);
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || true
 
         diff_abs = _mm_hadd_ps(diff_abs, diff_abs);
         diff_abs = _mm_hadd_ps(diff_abs, diff_abs);

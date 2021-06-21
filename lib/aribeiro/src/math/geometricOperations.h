@@ -19,7 +19,7 @@ namespace aRibeiro {
     ARIBEIRO_INLINE __m128 dot_sse_3(const __m128 &a, const __m128 &b) {
         __m128 mul0 = _mm_mul_ps(a, b);
         
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || true
 
         _mm_f32_(mul0, 3) = 0;
         mul0 = _mm_hadd_ps(mul0, mul0);
@@ -42,7 +42,7 @@ namespace aRibeiro {
     ARIBEIRO_INLINE __m128 dot_sse_4(const __m128 &a, const __m128 &b) {
         __m128 mul0 = _mm_mul_ps(a, b);
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || true
 
         mul0 = _mm_hadd_ps(mul0, mul0);
         mul0 = _mm_hadd_ps(mul0, mul0);

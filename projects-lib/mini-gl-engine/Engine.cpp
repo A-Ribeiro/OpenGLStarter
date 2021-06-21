@@ -139,6 +139,9 @@ printf("Card: %s\n",vendor.c_str());
 #endif
                     glFinish();
 
+            } else {
+                //avoid linux 100% CPU usage
+                aRibeiro::PlatformSleep::sleepMillis(100);
             }
 
             //On windows OS, this sleep millist causes stuttering on rendering...

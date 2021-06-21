@@ -601,7 +601,7 @@ namespace aRibeiro {
 
             __m128 accumulator = _mm_add_ps(accumulator_a, accumulator_b);
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || true
 
             accumulator = _mm_hadd_ps(accumulator, accumulator);
             accumulator = _mm_hadd_ps(accumulator, accumulator);

@@ -305,7 +305,7 @@ class _SSE2_ALIGN_PRE vec3{
 
         _mm_f32_(diff_abs, 3) = 0.0f;
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || true
 
         diff_abs = _mm_hadd_ps(diff_abs, diff_abs);
         diff_abs = _mm_hadd_ps(diff_abs, diff_abs);
