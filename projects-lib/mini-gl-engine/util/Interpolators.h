@@ -191,7 +191,7 @@ namespace GLEngine {
         aRibeiro::quat lastReturned;
 
     public:
-        typename aRibeiro::aligned_vector< Key<aRibeiro::quat> > keys;
+        aRibeiro::aligned_vector< Key<aRibeiro::quat> > keys;
 
         SlerpInterpolator()
         {
