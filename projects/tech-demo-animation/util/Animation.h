@@ -5,7 +5,7 @@
 //#include <mini-gl-engine/Component.h>
 #include <mini-gl-engine/Transform.h>
 //#include <mini-gl-engine/Engine.h>
-#include <mini-gl-engine/interpolators.h>
+#include <mini-gl-engine/Interpolators.h>
 #include <data-model/Animation.h>
 
 namespace GLEngine {
