@@ -133,9 +133,9 @@ printf("Card: %s\n",vendor.c_str());
 #if defined(_WIN32)
                 if (wglGetCurrentContext() != NULL)
 #elif defined(__linux__)
-                if (glXGetCurrentContext() != NULL)
+                // if (glXGetCurrentContext() != NULL) // not tested
 #elif defined(__APPLE__)
-                if (CGLGetCurrentContext() != NULL)
+                // if (CGLGetCurrentContext() != NULL) // not working...
 #endif
                     glFinish();
 
