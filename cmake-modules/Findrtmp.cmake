@@ -1,0 +1,21 @@
+
+FIND_PATH(RTMP_INCLUDE_DIR librtmp/rtmp.h)
+FIND_LIBRARY(RTMP_LIBRARIES NAMES rtmp)
+
+IF(RTMP_INCLUDE_DIR AND RTMP_LIBRARIES)
+	SET(RTMP_FOUND TRUE)
+ENDIF(RTMP_INCLUDE_DIR AND RTMP_LIBRARIES)
+
+IF(RTMP_FOUND)
+	IF (NOT Librtmp_FIND_QUIETLY)
+		MESSAGE(STATUS "Found rtmp includes:  ${RTMP_INCLUDE_DIR}/librtmp/rtmp.h")
+		MESSAGE(STATUS "                      ${RTMP_INCLUDE_DIR}/librtmp/log.h")
+		MESSAGE(STATUS "                      ${RTMP_INCLUDE_DIR}/librtmp/amf.h")
+		MESSAGE(STATUS "                      ${RTMP_INCLUDE_DIR}/librtmp/http.h")
+		MESSAGE(STATUS "Found rtmp library: ${RTMP_LIBRARIES}")
+	ENDIF (NOT Librtmp_FIND_QUIETLY)
+ELSE(RTMP_FOUND)
+	IF (Librtmp_FIND_REQUIRED)
+		MESSAGE(FATAL_ERROR "Could NOT find rtmp development files")
+	ENDIF (Librtmp_FIND_REQUIRED)
+ENDIF(RTMP_FOUND)

@@ -1,0 +1,6 @@
+#ifndef _rtvideo_h__
+#define _rtvideo_h__
+
+@cmake_includes@
+
+#endif

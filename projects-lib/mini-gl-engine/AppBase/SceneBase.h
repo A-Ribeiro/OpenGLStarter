@@ -1,0 +1,58 @@
+#ifndef _SceneBase_H_
+#define _SceneBase_H_
+
+#include <mini-gl-engine/ComponentCamera.h>
+#include <mini-gl-engine/Transform.h>
+
+#include <mini-gl-engine/RenderPipeline.h>
+#include <mini-gl-engine/ResourceHelper.h>
+
+#include <aribeiro/aribeiro.h>
+
+namespace GLEngine {
+
+    class _SSE2_ALIGN_PRE SceneBase {
+
+    protected:
+
+        Components::ComponentCamera *camera;
+        GLEngine::Transform *root;
+
+        //to load skybox, textures, cubemaps, 3DModels and setup materials
+        virtual void loadResources()=0;
+        //to load the scene graph
+        virtual void loadGraph()=0;
+        //to bind the resources to the current graph
+        virtual void bindResourcesToGraph()=0;
+
+        //clear all loaded scene
+        virtual void unloadAll()=0;
+
+    public:
+        aRibeiro::PlatformTime *time;
+        RenderPipeline *renderPipeline;
+        ResourceHelper *resourceHelper;
+
+        SceneBase(aRibeiro::PlatformTime *_time,
+                RenderPipeline *_renderPipeline,
+                ResourceHelper *_resourceHelper);
+        
+        void load();
+        void unload();
+
+        virtual ~SceneBase();
+
+        virtual void draw();
+
+        // Precompute the modified scene graph transforms
+        //   after this call, can use the visited flag to true when using transforms
+        //  Need to call this before the draw from RenderPipeline
+        virtual void precomputeSceneGraphAndCamera();
+
+        SSE2_CLASS_NEW_OPERATOR
+
+    } _SSE2_ALIGN_POS;
+
+}
+
+#endif

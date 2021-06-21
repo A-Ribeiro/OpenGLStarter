@@ -1,0 +1,48 @@
+#ifndef aribeiro_H
+#define aribeiro_H
+
+@cmake_includes@
+
+#ifdef _WIN32
+
+#define WIN_LEAN_AND_MEAN
+
+#include <Windows.h>
+#include <wchar.h>
+
+#ifndef swprintf
+	#define swprintf _snwprintf
+#endif
+
+#endif
+
+
+// In RPI:
+//         the buffers sent to the GL API,
+//         access aligned data,
+//         and need the buffer size to be
+//         16 bytes aligned also.
+// Use this definition
+//
+template <typename C>
+static C* ogl_indexbuffer_malloc(size_t s) {
+#ifdef ARIBEIRO_RPI
+    size_t alloc_s = s*sizeof(C);
+    size_t complete_16bytes = ( 16 - alloc_s % 16 ) % 16;
+    return (C*)aligned_alloc(16,  alloc_s + complete_16bytes );
+#else
+    return (C*)malloc(s*sizeof(C));
+#endif
+}
+
+template <typename C>
+static void ogl_indexbuffer_free(C *&ptr) {
+    if (ptr != NULL) {
+        C * aux = ptr;
+        ptr = NULL;
+        free(aux);
+    }
+}
+
+
+#endif

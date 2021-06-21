@@ -1,0 +1,6 @@
+#ifndef ft2_wrapper__h__
+#define ft2_wrapper__h__
+
+@cmake_includes@
+
+#endif

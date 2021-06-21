@@ -1,0 +1,6 @@
+#ifndef rtaudio_wrapper__h__
+#define rtaudio_wrapper__h__
+
+@cmake_includes@
+
+#endif

@@ -1,0 +1,6 @@
+#ifndef md5_wrapper__h__
+#define md5_wrapper__h__
+
+@cmake_includes@
+
+#endif

@@ -1,0 +1,13 @@
+encoding:
+  "utf-8"
+markdown_ext:
+  "markdown,mkdown,mkdn,mkd,md"
+markdown:
+  CommonMark
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+#include:
+#  - index.md

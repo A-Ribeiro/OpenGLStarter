@@ -1,0 +1,6 @@
+#ifndef opengl_wrapper__h__
+#define opengl_wrapper__h__
+
+@cmake_includes@
+
+#endif

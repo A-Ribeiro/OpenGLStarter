@@ -1,0 +1,26 @@
+set( IrrXML_SRCS
+  CXMLReaderImpl.h
+  heapsort.h
+  irrArray.h
+  irrString.h
+  irrTypes.h
+  irrXML.cpp
+  irrXML.h
+)
+
+if ( MSVC )
+  ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
+  ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+endif ( MSVC )
+
+add_library(IrrXML STATIC ${IrrXML_SRCS})
+
+# set the target's folder (for IDEs that support it, e.g. Visual Studio)
+set_target_properties(IrrXML PROPERTIES FOLDER "LIBS/assimp")
+
+set(IRRXML_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "IrrXML_Include" )
+set(IRRXML_LIBRARY "IrrXML" CACHE INTERNAL "IrrXML" )
+
+install(TARGETS IrrXML
+  ARCHIVE DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+  COMPONENT ${LIBASSIMP_COMPONENT})

@@ -1,0 +1,6 @@
+#ifndef zlib_wrapper__h__
+#define zlib_wrapper__h__
+
+@cmake_includes@
+
+#endif

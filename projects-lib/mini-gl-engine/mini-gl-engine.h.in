@@ -1,0 +1,6 @@
+#ifndef mini_gl_engine_h__
+#define mini_gl_engine_h__
+
+@cmake_includes@
+
+#endif

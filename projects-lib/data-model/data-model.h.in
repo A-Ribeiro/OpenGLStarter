@@ -1,0 +1,6 @@
+#ifndef data_model__h__
+#define data_model__h__
+
+@cmake_includes@
+
+#endif
