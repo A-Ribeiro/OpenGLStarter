@@ -129,7 +129,14 @@ printf("Card: %s\n",vendor.c_str());
 
                 //force terminate all GL commands after swap buffers...
                 // reduces a bit of stuttering
+
+#if defined(_WIN32)
                 if (wglGetCurrentContext() != NULL)
+#elif defined(__linux__)
+                if (glXGetCurrentContext() != NULL)
+#elif defined(__APPLE__)
+                if (CGLGetCurrentContext() != NULL)
+#endif
                     glFinish();
 
             }
