@@ -17,9 +17,13 @@ namespace aRibeiro {
 #if defined(ARIBEIRO_SSE2)
 
     ARIBEIRO_INLINE __m128 dot_sse_3(const __m128 &a, const __m128 &b) {
+#if true
+
+        return _mm_dp_ps( a, b, 0x77 );
+
+#elif defined(_MSC_VER) || true
+
         __m128 mul0 = _mm_mul_ps(a, b);
-        
-#if defined(_MSC_VER) || true
 
         _mm_f32_(mul0, 3) = 0;
         mul0 = _mm_hadd_ps(mul0, mul0);
@@ -27,6 +31,9 @@ namespace aRibeiro {
 
         return mul0;
 #else
+
+        __m128 mul0 = _mm_mul_ps(a, b);
+
         //swp0 = [1,0,0,3]
         __m128 swp0 = _mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(3, 0, 0, 1));
         //add0 = [0+1,1+0,2+0,3+3]
@@ -40,15 +47,22 @@ namespace aRibeiro {
     }
 
     ARIBEIRO_INLINE __m128 dot_sse_4(const __m128 &a, const __m128 &b) {
-        __m128 mul0 = _mm_mul_ps(a, b);
+#if true
 
-#if defined(_MSC_VER) || true
+        return _mm_dp_ps( a, b, 0xff );
+
+#elif defined(_MSC_VER) || true
+
+        __m128 mul0 = _mm_mul_ps(a, b);
 
         mul0 = _mm_hadd_ps(mul0, mul0);
         mul0 = _mm_hadd_ps(mul0, mul0);
 
         return mul0;
 #else
+        
+        __m128 mul0 = _mm_mul_ps(a, b);
+
         //swp0 = [1,0,3,2]
         __m128 swp0 = _mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
         //add0 = [0+1,1+0,2+3,3+2]

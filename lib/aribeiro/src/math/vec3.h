@@ -303,14 +303,19 @@ class _SSE2_ALIGN_PRE vec3{
         static const __m128 _vec3_sign_mask = _mm_load_(-0.f,-0.f,-0.f,0.0f);
         diff_abs = _mm_andnot_ps(_vec3_sign_mask, diff_abs);
 
-        _mm_f32_(diff_abs, 3) = 0.0f;
+#if true
 
-#if defined(_MSC_VER) || true
+        diff_abs = _mm_dp_ps( diff_abs, diff_abs, 0x77 );
+
+#elif defined(_MSC_VER) || true
+
+        _mm_f32_(diff_abs, 3) = 0.0f;
 
         diff_abs = _mm_hadd_ps(diff_abs, diff_abs);
         diff_abs = _mm_hadd_ps(diff_abs, diff_abs);
 
 #else
+
         //swp0 = [1,0,3,2]
         __m128 swp0 = _mm_shuffle_ps(diff_abs, diff_abs, _MM_SHUFFLE(2, 3, 0, 1));
         //add0 = [0+1,1+0,2+3,3+2]

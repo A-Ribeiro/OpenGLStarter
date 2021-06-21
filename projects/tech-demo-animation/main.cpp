@@ -8,7 +8,27 @@ static AppBase * CreateAppInstance() {
 }
 
 int main(int argc, char* argv[]) {
-    
+
+    __m128 a = _mm_load_(1,2,3,4), 
+           b = _mm_load_(5,6,7,8);
+    __m128 c = dot_sse_4(a,b);
+
+    printf(" %f %f %f %f \n", _mm_f32_(c,0), _mm_f32_(c,1), _mm_f32_(c,2), _mm_f32_(c,3) );
+
+    c = dot_sse_3(a,b);
+
+    printf(" %f %f %f %f \n", _mm_f32_(c,0), _mm_f32_(c,1), _mm_f32_(c,2), _mm_f32_(c,3) );
+
+    c = _mm_dp_ps( a,b, 0xff );
+
+    printf(" %f %f %f %f \n", _mm_f32_(c,0), _mm_f32_(c,1), _mm_f32_(c,2), _mm_f32_(c,3) );
+
+    c = _mm_dp_ps( a,b, 0x77 );
+
+    printf(" %f %f %f %f \n", _mm_f32_(c,0), _mm_f32_(c,1), _mm_f32_(c,2), _mm_f32_(c,3) );
+
+
+    //return 0;
     
     /*
 
