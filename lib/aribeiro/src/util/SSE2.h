@@ -9,19 +9,19 @@
 
 #if defined(ARIBEIRO_SSE2)
 
-    //#include <xmmintrin.h> // SSE1
-    //#include <emmintrin.h> // SSE2
-    #include <x86intrin.h> // Everything on SIMD...
-
-
     #ifdef _MSC_VER //_WIN32
         //  Windows
         //#ifdef _MSC_VER
-        #include <intrin.h>
+        #include <intrin.h> // Everything on SIMD...
         //#else
         //#define cpuid(info, x)    __cpuidex(info, x, 0)
         //#endif
     #else
+
+        //#include <xmmintrin.h> // SSE1
+        //#include <emmintrin.h> // SSE2
+        #include <x86intrin.h> // Everything on SIMD...
+
         //  GCC Intrinsics
         #include <cpuid.h>
         void cpuid(int info[4], int InfoType);
