@@ -601,8 +601,21 @@ namespace aRibeiro {
 
             __m128 accumulator = _mm_add_ps(accumulator_a, accumulator_b);
 
+#if defined(_MSC_VER)
+
             accumulator = _mm_hadd_ps(accumulator, accumulator);
             accumulator = _mm_hadd_ps(accumulator, accumulator);
+
+#else
+            //swp0 = [1,0,3,2]
+            __m128 swp0 = _mm_shuffle_ps(accumulator, accumulator, _MM_SHUFFLE(2, 3, 0, 1));
+            //add0 = [0+1,1+0,2+3,3+2]
+            __m128 add0 = _mm_add_ps(accumulator, swp0);
+            //swp1 = [3+2,2+3,1+0,0+1]
+            __m128 swp1 = _mm_shuffle_ps(add0, add0, _MM_SHUFFLE(0, 1, 2, 3));
+            //add1 = [0+1+3+2,1+0+2+3,2+3+1+0,3+2+0+1]
+            accumulator = _mm_add_ps(add0, swp1);
+#endif
 
             if (_mm_f32_(accumulator, 0) > EPSILON2)
                 return false;
