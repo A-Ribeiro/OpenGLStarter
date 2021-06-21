@@ -43,9 +43,9 @@ namespace GLEngine {
             if (t_node != NULL){
 
                 printf("   --channel %i (node: %s)\n",i, node_anim.nodeName.c_str());
-                printf("     positions: %u\n",node_anim.positionKeys.size());
-                printf("     scales: %u\n",node_anim.scalingKeys.size());
-                printf("     rotations: %u\n",node_anim.rotationKeys.size());
+                printf("     positions: %lu\n",node_anim.positionKeys.size());
+                printf("     scales: %lu\n",node_anim.scalingKeys.size());
+                printf("     rotations: %lu\n",node_anim.rotationKeys.size());
 
                 NodeAnimation result;
 
