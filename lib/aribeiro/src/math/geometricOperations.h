@@ -76,11 +76,52 @@ namespace aRibeiro {
 
     }
 
+    ARIBEIRO_INLINE __m128 max_sse_4(const __m128 &a) {
+        __m128 swp1 = _mm_shuffle_ps(a, a, _MM_SHUFFLE(1, 0, 3, 2));
+        __m128 max1 = _mm_max_ps(a, swp1);
+        __m128 swp2 = _mm_shuffle_ps(max1, max1, _MM_SHUFFLE(0, 1, 0, 1));
+        __m128 max2 = _mm_max_ps(max1, swp2);
+        return max2;
+    }
+
+    ARIBEIRO_INLINE __m128 max_sse_3(const __m128 &_a) {
+        __m128 aux = _mm_shuffle_ps(_a, _a, _MM_SHUFFLE(0, 2, 1, 0));
+        return max_sse_4(aux);
+    }
+
+    ARIBEIRO_INLINE __m128 max_sse_2(const __m128 &a) {
+        __m128 swp1 = _mm_shuffle_ps(a, a, _MM_SHUFFLE(1, 0, 1, 0));
+        __m128 swp2 = _mm_shuffle_ps(a, a, _MM_SHUFFLE(0, 1, 0, 1));
+        __m128 max = _mm_max_ps(swp1, swp2);
+        return max;
+    }
+
+    ARIBEIRO_INLINE __m128 min_sse_4(const __m128 &a) {
+        __m128 swp1 = _mm_shuffle_ps(a, a, _MM_SHUFFLE(1, 0, 3, 2));
+        __m128 min1 = _mm_min_ps(a, swp1);
+        __m128 swp2 = _mm_shuffle_ps(min1, min1, _MM_SHUFFLE(0, 1, 0, 1));
+        __m128 min2 = _mm_min_ps(min1, swp2);
+        return min2;
+    }
+
+    ARIBEIRO_INLINE __m128 min_sse_3(const __m128 &_a) {
+        __m128 aux = _mm_shuffle_ps(_a, _a, _MM_SHUFFLE(0, 2, 1, 0));
+        return min_sse_4(aux);
+    }
+
+    ARIBEIRO_INLINE __m128 min_sse_2(const __m128 &a) {
+        __m128 swp1 = _mm_shuffle_ps(a, a, _MM_SHUFFLE(1, 0, 1, 0));
+        __m128 swp2 = _mm_shuffle_ps(a, a, _MM_SHUFFLE(0, 1, 0, 1));
+        __m128 min = _mm_min_ps(swp1, swp2);
+        return min;
+    }
+
     ARIBEIRO_INLINE __m128 clamp_sse_4(const __m128& value, const __m128& min, const __m128& max) {
         __m128 maxStep = _mm_max_ps(value, min);
         __m128 minStep = _mm_min_ps(maxStep, max);
         return minStep;
     }
+
 #elif defined(ARIBEIRO_NEON)
 
 
@@ -296,7 +337,7 @@ namespace aRibeiro {
         //much faster
         __m128 result = v.array_sse;
         //_mm_f32_(result, 3) = 1.0f;
-        _mm_blend_ps(result, _vec4_one_sse, 0x8);
+        result = _mm_blend_ps(result, _vec4_one_sse, 0x8);
 
         return result;
 #elif defined(ARIBEIRO_NEON)
@@ -2746,7 +2787,11 @@ namespace aRibeiro {
     /// \return The greater value from the parameter
     ///
     ARIBEIRO_INLINE float maximum(const vec2 &a) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_f32_(max_sse_2(a.array_sse), 0);
+#else
         return (a.x > a.y) ? (a.x) : (a.y);
+#endif
     }
 
     /// \brief Return the greater value from the parameter
@@ -2767,7 +2812,11 @@ namespace aRibeiro {
     /// \return The greater value from the parameter
     ///
     ARIBEIRO_INLINE float maximum(const vec3 &a) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_f32_(max_sse_3(a.array_sse), 0);
+#else
         return (a.x > a.y) ? ((a.x > a.z) ? (a.x) : (a.z)) : ((a.y > a.z) ? (a.y) : (a.z));
+#endif
     }
 
     /// \brief Return the greater value from the parameter
@@ -2788,7 +2837,11 @@ namespace aRibeiro {
     /// \return The greater value from the parameter
     ///
     ARIBEIRO_INLINE float maximum(const vec4 &a) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_f32_(max_sse_4(a.array_sse), 0);
+#else
         return (a.x > a.y) ? ((a.x > a.z) ? ((a.x > a.w) ? (a.x) : (a.w)) : (a.z)) : ((a.y > a.z) ? ((a.y > a.w) ? (a.y) : (a.w)) : ((a.z > a.w) ? (a.z) : (a.w)));
+#endif
     }
 
     /// \brief Component-wise maximum value from two vectors
@@ -2911,7 +2964,11 @@ namespace aRibeiro {
     /// \return The smaller value from the parameter
     ///
     ARIBEIRO_INLINE float minimum(const vec2 &a) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_f32_(min_sse_2(a.array_sse), 0);
+#else
         return (a.x < a.y) ? (a.x) : (a.y);
+#endif
     }
 
     /// \brief Return the smaller value from the parameter
@@ -2932,7 +2989,11 @@ namespace aRibeiro {
     /// \return The smaller value from the parameter
     ///
     ARIBEIRO_INLINE float minimum(const vec3 &a) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_f32_(min_sse_3(a.array_sse), 0);
+#else
         return (a.x < a.y) ? ((a.x < a.z) ? (a.x) : (a.z)) : ((a.y < a.z) ? (a.y) : (a.z));
+#endif
     }
 
     /// \brief Return the smaller value from the parameter
@@ -2953,7 +3014,11 @@ namespace aRibeiro {
     /// \return The smaller value from the parameter
     ///
     ARIBEIRO_INLINE float minimum(const vec4 &a) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_f32_(min_sse_4(a.array_sse), 0);
+#else
         return (a.x < a.y) ? ((a.x < a.z) ? ((a.x < a.w) ? (a.x) : (a.w)) : (a.z)) : ((a.y < a.z) ? ((a.y < a.w) ? (a.y) : (a.w)) : ((a.z < a.w) ? (a.z) : (a.w)));
+#endif
     }
     /// \brief Component-wise minimum value from two vectors
     ///
@@ -3651,16 +3716,21 @@ namespace aRibeiro {
 */
 //much faster
 //const __m128 _one = _mm_load_( 0,0,0,1 );
-        mat4 r(m.array_sse[0], m.array_sse[1], m.array_sse[2], _vec4_0001_sse);//_one
-        r.array_sse[0] = _mm_and_ps(r.array_sse[0], _vec3_valid_bits_sse);
-        r.array_sse[1] = _mm_and_ps(r.array_sse[1], _vec3_valid_bits_sse);
-        r.array_sse[2] = _mm_and_ps(r.array_sse[2], _vec3_valid_bits_sse);
+        __m128 a = m.array_sse[0];
+        __m128 b = m.array_sse[1];
+        __m128 c = m.array_sse[2];
+
+        a = _mm_and_ps(a, _vec3_valid_bits_sse);
+        b = _mm_and_ps(b, _vec3_valid_bits_sse);
+        c = _mm_and_ps(c, _vec3_valid_bits_sse);
+
+        return mat4(a, b, c, _vec4_0001_sse);//_one
+        
         /*
         _mm_f32_(r.array_sse[0], 3) = 0;
         _mm_f32_(r.array_sse[1], 3) = 0;
         _mm_f32_(r.array_sse[2], 3) = 0;
         */
-        return r;
 #elif defined(ARIBEIRO_NEON)
         /*
         const float32x4_t _valuemask = (float32x4_t){ 1,1,1,0 };
@@ -4595,7 +4665,23 @@ namespace aRibeiro {
         float b01 = a22 * a11 - a12 * a21;
         float b11 = a12 * a20 - a22 * a10;
         float b21 = a21 * a10 - a11 * a20;
+        
+        float det = 1.0f / (a00 * b01 + a01 * b11 + a02 * b21);
 
+#ifdef ARIBEIRO_SSE2
+        
+        __m128 a = _mm_setr_ps(b01, b11, b21, 0);
+        __m128 b = _mm_setr_ps((a02 * a21 - a22 * a01), (a22 * a00 - a02 * a20), (a01 * a20 - a21 * a00), 0);
+        __m128 c = _mm_setr_ps((a12 * a01 - a02 * a11), (a02 * a10 - a12 * a00), (a11 * a00 - a01 * a10), 0);
+
+        __m128 det_sse = _mm_set1_ps(det);
+
+        a = _mm_mul_ps(a, det_sse);
+        b = _mm_mul_ps(b, det_sse);
+        c = _mm_mul_ps(c, det_sse);
+
+        return mat4(a,b,c,_vec4_0001_sse);
+#else
         mat4 result(
             b01, (a02 * a21 - a22 * a01), (a12 * a01 - a02 * a11), 0,
             b11, (a22 * a00 - a02 * a20), (a02 * a10 - a12 * a00), 0,
@@ -4603,13 +4689,12 @@ namespace aRibeiro {
             0, 0, 0, 1
         );
 
-        float det = 1.0f / (a00 * b01 + a01 * b11 + a02 * b21);
-
         result[0] *= det;
         result[1] *= det;
         result[2] *= det;
 
         return result;
+#endif
     }
 
     /// \brief Creates a translation 4x4 matrix
@@ -4628,10 +4713,7 @@ namespace aRibeiro {
     ///
     ARIBEIRO_INLINE mat4 translate(const float &_x_, const float &_y_, const float &_z_) {
 #if defined(ARIBEIRO_SSE2)
-        return mat4(mat4_IdentityMatrix.array_sse[0],
-            mat4_IdentityMatrix.array_sse[1],
-            mat4_IdentityMatrix.array_sse[2],
-            _mm_load_(_x_, _y_, _z_, 1));
+        return mat4(_vec4_1000_sse,_vec4_0100_sse,_vec4_0010_sse,_mm_load_(_x_, _y_, _z_, 1));
 #elif defined(ARIBEIRO_NEON)
 
         return mat4(mat4_IdentityMatrix.array_neon[0],
@@ -4667,12 +4749,10 @@ namespace aRibeiro {
     ///
     ARIBEIRO_INLINE mat4 translate(const vec3 &_v_) {
 #if defined(ARIBEIRO_SSE2)
-        mat4 result = mat4(mat4_IdentityMatrix.array_sse[0],
-            mat4_IdentityMatrix.array_sse[1],
-            mat4_IdentityMatrix.array_sse[2],
-            _v_.array_sse);
+        __m128 aux = _v_.array_sse;
+        aux = _mm_blend_ps(aux, _vec4_one_sse, 0x8);
+        mat4 result = mat4(_vec4_1000_sse,_vec4_0100_sse,_vec4_0010_sse, aux);
         //_mm_f32_(result.array_sse[3], 3) = 1.0f;
-        result.array_sse[3] = _mm_blend_ps(result.array_sse[3], _vec4_one_sse, 0x8);
         return result;
 #elif defined(ARIBEIRO_NEON)
         mat4 result = mat4(mat4_IdentityMatrix.array_neon[0],
@@ -4707,13 +4787,10 @@ namespace aRibeiro {
     ///
     ARIBEIRO_INLINE mat4 translate(const vec4 &_v_) {
 #if defined(ARIBEIRO_SSE2)
-
-        mat4 result = mat4(mat4_IdentityMatrix.array_sse[0],
-            mat4_IdentityMatrix.array_sse[1],
-            mat4_IdentityMatrix.array_sse[2],
-            _v_.array_sse);
+        __m128 aux = _v_.array_sse;
+        aux = _mm_blend_ps(aux, _vec4_one_sse, 0x8);
+        mat4 result = mat4(_vec4_1000_sse,_vec4_0100_sse,_vec4_0010_sse, aux);
         //_mm_f32_(result.array_sse[3], 3) = 1.0f; // much faster than make a lot of multiplications
-        result.array_sse[3] = _mm_blend_ps(result.array_sse[3], _vec4_one_sse, 0x8);
         return result;
 
         /*
@@ -4811,12 +4888,7 @@ namespace aRibeiro {
         __m128 a = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xe);
         __m128 b = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xd);
         __m128 c = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xb);
-        return aRibeiro::mat4(
-            a,
-            b,
-            c,
-            _vec4_0001_sse
-        );
+        return aRibeiro::mat4(a,b,c,_vec4_0001_sse);
 
         /*
         return mat4(
@@ -4865,12 +4937,7 @@ namespace aRibeiro {
         __m128 a = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xe);
         __m128 b = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xd);
         __m128 c = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xb);
-        return aRibeiro::mat4(
-            a,
-            b,
-            c,
-            _vec4_0001_sse
-        );
+        return aRibeiro::mat4(a,b,c,_vec4_0001_sse);
 
         /*
         return mat4(
@@ -5535,6 +5602,7 @@ namespace aRibeiro {
         z = normalize(lookTo)*-1;
         x = normalize(cross(up, z));
         y = normalize(cross(z, x));
+
         return //scale(0.002f,0.002f,0.002f)*
             mat4(x.x, x.y, x.z, -dot(x, position),
                 y.x, y.y, y.z, -dot(y, position),
@@ -6645,6 +6713,186 @@ namespace aRibeiro {
 
         return slerp(current, target, maxAngleVariation / deltaAngle);
     }
+
+
+
+    //
+    // new functions
+    //
+    ARIBEIRO_INLINE vec2 sign(const vec2&v) {
+#ifdef ARIBEIRO_SSE2
+        __m128 sign_aux = _mm_and_ps(v.array_sse, _vec2_sign_mask_sse);
+        __m128 sign = _mm_or_ps(sign_aux, _vec2_one_sse);
+        return sign;
+#else
+        return vec2( sign(v.x), sign(v.y) );
+#endif
+    }
+    ARIBEIRO_INLINE vec3 sign(const vec3&v) {
+#ifdef ARIBEIRO_SSE2
+        __m128 sign_aux = _mm_and_ps(v.array_sse, _vec3_sign_mask_sse);
+        __m128 sign = _mm_or_ps(sign_aux, _vec3_one_sse);
+        return sign;
+#else
+        return vec3(sign(v.x), sign(v.y), sign(v.z));
+#endif
+    }
+    ARIBEIRO_INLINE vec4 sign(const vec4&v) {
+#ifdef ARIBEIRO_SSE2
+        __m128 sign_aux = _mm_and_ps(v.array_sse, _vec4_sign_mask_sse);
+        __m128 sign = _mm_or_ps(sign_aux, _vec4_one_sse);
+        return sign;
+#else
+        return vec4(sign(v.x), sign(v.y), sign(v.z), sign(v.w));
+#endif
+    }
+
+    ARIBEIRO_INLINE vec2 floor(const vec2&v) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_floor_ps(v.array_sse);
+#else
+        return vec2(::floor(v.x), ::floor(v.y));
+#endif
+    }
+    ARIBEIRO_INLINE vec3 floor(const vec3&v) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_floor_ps(v.array_sse);
+#else
+        return vec3(::floor(v.x), ::floor(v.y), ::floor(v.z));
+#endif
+    }
+    ARIBEIRO_INLINE vec4 floor(const vec4&v) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_floor_ps(v.array_sse);
+#else
+        return vec4(::floor(v.x), ::floor(v.y), ::floor(v.z), ::floor(v.w));
+#endif
+    }
+
+    ARIBEIRO_INLINE vec2 ceil(const vec2&v) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_ceil_ps(v.array_sse);
+#else
+        return vec2(::ceil(v.x), ::ceil(v.y));
+#endif
+    }
+    ARIBEIRO_INLINE vec3 ceil(const vec3&v) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_ceil_ps(v.array_sse);
+#else
+        return vec3(::ceil(v.x), ::ceil(v.y), ::ceil(v.z));
+#endif
+    }
+    ARIBEIRO_INLINE vec4 ceil(const vec4&v) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_ceil_ps(v.array_sse);
+#else
+        return vec4(::ceil(v.x), ::ceil(v.y), ::ceil(v.z), ::ceil(v.w));
+#endif
+    }
+
+    ARIBEIRO_INLINE vec2 round(const vec2&v) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_round_ps(v.array_sse, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+#else
+        return vec2(::roundf(v.x), ::roundf(v.y));
+#endif
+    }
+    ARIBEIRO_INLINE vec3 round(const vec3&v) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_round_ps(v.array_sse, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+#else
+        return vec3(::roundf(v.x), ::roundf(v.y), ::roundf(v.z));
+#endif
+    }
+    ARIBEIRO_INLINE vec4 round(const vec4&v) {
+#ifdef ARIBEIRO_SSE2
+        return _mm_round_ps(v.array_sse, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+#else
+        return vec4(::roundf(v.x), ::roundf(v.y), ::roundf(v.z), ::roundf(v.w));
+#endif
+    }
+
+
+//
+// mat4 operations
+//
+    ARIBEIRO_INLINE mat4 clamp(const mat4& value, const mat4& min, const mat4& max) {
+        return mat4(
+            clamp(value[0], min[0], max[0]),
+            clamp(value[1], min[1], max[1]),
+            clamp(value[2], min[2], max[2]),
+            clamp(value[3], min[3], max[3])
+        );
+    }
+    ARIBEIRO_INLINE float dot(const mat4& a, const mat4& b) {
+        float dota = dot(a[0], b[0]);
+        float dotb = dot(a[1], b[1]);
+        float dotc = dot(a[2], b[2]);
+        float dotd = dot(a[3], b[3]);
+        return dota + dotb + dotc + dotd;
+    }
+
+    ARIBEIRO_INLINE mat4 normalize(const mat4& vec) {
+        mat4 result = vec;
+        if (vec == mat4(0)) return vec;
+        //const float TOLERANCE = 1e-6f;
+        // Don't normalize if we don't have to
+        float mag2 = dot(vec, vec);
+        if (absv(mag2) > EPSILON2 && absv(mag2 - 1.0f) > EPSILON2)
+            result = (vec * (1.0f / sqrtf(mag2)));
+        return result;
+    }
+    ARIBEIRO_INLINE float sqrLength(const mat4 &a) {
+        return dot(a, a);
+    }
+    ARIBEIRO_INLINE float length(const mat4 &a) {
+        return sqrtf(dot(a, a));
+    }
+    ARIBEIRO_INLINE float sqrDistance(const mat4 &a, const mat4 &b) {
+        mat4 ab = b - a;
+        return dot(ab, ab);
+    }
+    ARIBEIRO_INLINE float distance(const mat4 &a, const mat4 &b) {
+        mat4 ab = b - a;
+        return sqrtf(dot(ab, ab));
+    }
+    ARIBEIRO_INLINE float maximum(const mat4 &a) {
+        vec4 max_a = maximum(a[0], a[1]);
+        vec4 max_b = maximum(a[2], a[3]);
+        vec4 max_c = maximum(max_a, max_b);
+        return maximum(max_c);
+    }
+
+    ARIBEIRO_INLINE mat4 maximum(const mat4 &a, const mat4 &b) {
+        return mat4(maximum(a[0], b[0]), maximum(a[1], b[1]), maximum(a[2], b[2]), maximum(a[3], b[3]));
+    }
+    ARIBEIRO_INLINE float minimum(const mat4 &a) {
+        vec4 min_a = minimum(a[0], a[1]);
+        vec4 min_b = minimum(a[2], a[3]);
+        vec4 min_c = minimum(min_a, min_b);
+        return minimum(min_c);
+    }
+    ARIBEIRO_INLINE mat4 minimum(const mat4 &a, const mat4 &b) {
+        return mat4(minimum(a[0], b[0]), minimum(a[1], b[1]), minimum(a[2], b[2]), minimum(a[3], b[3]));
+    }
+    ARIBEIRO_INLINE mat4 absv(const mat4 &a) {
+        return mat4(absv(a[0]), absv(a[1]), absv(a[2]), absv(a[3]));
+    }
+    ARIBEIRO_INLINE mat4 sign(const mat4&a) {
+        return mat4(sign(a[0]), sign(a[1]), sign(a[2]), sign(a[3]));
+    }
+    ARIBEIRO_INLINE mat4 floor(const mat4&a) {
+        return mat4(floor(a[0]), floor(a[1]), floor(a[2]), floor(a[3]));
+    }
+    ARIBEIRO_INLINE mat4 ceil(const mat4&a) {
+        return mat4(ceil(a[0]), ceil(a[1]), ceil(a[2]), ceil(a[3]));
+    }
+    ARIBEIRO_INLINE mat4 round(const mat4&a) {
+        return mat4(round(a[0]), round(a[1]), round(a[2]), round(a[3]));
+    }
+
+
 
 }
 
