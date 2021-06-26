@@ -4578,7 +4578,11 @@ namespace aRibeiro {
         _b *= det;
         _c *= det;
 
+#ifdef ARIBEIRO_SSE2
+        return mat4(toVec4(_a), toVec4(_b), toVec4(_c), _vec4_0001_sse);
+#else
         return mat4(toVec4(_a), toVec4(_b), toVec4(_c), vec4(0, 0, 0, 1));
+#endif
     }
 
 
@@ -4592,10 +4596,12 @@ namespace aRibeiro {
         float b11 = a12 * a20 - a22 * a10;
         float b21 = a21 * a10 - a11 * a20;
 
-        mat4 result(b01, (a02 * a21 - a22 * a01), (a12 * a01 - a02 * a11), 0,
+        mat4 result(
+            b01, (a02 * a21 - a22 * a01), (a12 * a01 - a02 * a11), 0,
             b11, (a22 * a00 - a02 * a20), (a02 * a10 - a12 * a00), 0,
             b21, (a01 * a20 - a21 * a00), (a11 * a00 - a01 * a10), 0,
-            0, 0, 0, 1);
+            0, 0, 0, 1
+        );
 
         float det = 1.0f / (a00 * b01 + a01 * b11 + a02 * b21);
 
@@ -4802,12 +4808,24 @@ namespace aRibeiro {
     ///
     ARIBEIRO_INLINE mat4 scale(const vec3 &_v_) {
 #if defined(ARIBEIRO_SSE2)
+        __m128 a = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xe);
+        __m128 b = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xd);
+        __m128 c = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xb);
+        return aRibeiro::mat4(
+            a,
+            b,
+            c,
+            _vec4_0001_sse
+        );
+
+        /*
         return mat4(
             _mm_load_(_v_.x, 0, 0, 0),
             _mm_load_(0, _v_.y, 0, 0),
             _mm_load_(0, 0, _v_.z, 0),
             _vec4_0001_sse
         );
+        */
 #elif defined(ARIBEIRO_NEON)
         return mat4((float32x4_t) { _v_.x, 0, 0, 0 },
             (float32x4_t) {
@@ -4844,12 +4862,24 @@ namespace aRibeiro {
     ///
     ARIBEIRO_INLINE mat4 scale(const vec4 &_v_) {
 #if defined(ARIBEIRO_SSE2)
+        __m128 a = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xe);
+        __m128 b = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xd);
+        __m128 c = _mm_blend_ps(_v_.array_sse, _vec4_zero_sse, 0xb);
+        return aRibeiro::mat4(
+            a,
+            b,
+            c,
+            _vec4_0001_sse
+        );
+
+        /*
         return mat4(
             _mm_load_(_v_.x, 0, 0, 0),
             _mm_load_(0, _v_.y, 0, 0),
             _mm_load_(0, 0, _v_.z, 0),
             _vec4_0001_sse
         );
+        */
 #elif defined(ARIBEIRO_NEON)
         return mat4((float32x4_t) { _v_.x, 0, 0, 0 },
             (float32x4_t) {
@@ -4886,11 +4916,15 @@ namespace aRibeiro {
     ARIBEIRO_INLINE mat4 xRotate(const float &_phi_) {
         float c = cos(_phi_);
         float s = sin(_phi_);
+#ifdef ARIBEIRO_SSE2
+        return mat4(_vec4_1000_sse, vec4(0, c, s, 0), vec4(0, -s, c, 0), _vec4_0001_sse);
+#else
         return mat4(
             1, 0, 0, 0,
             0, c, -s, 0,
             0, s, c, 0,
             0, 0, 0, 1);
+#endif
     }
     //------------------------------------------------------------------------------
     /// \brief Creates a rotation 4x4 matrix over the Y axis
@@ -4911,11 +4945,15 @@ namespace aRibeiro {
     ARIBEIRO_INLINE mat4 yRotate(const float &_theta_) {
         float c = cos(_theta_);
         float s = sin(_theta_);
+#ifdef ARIBEIRO_SSE2
+        return mat4(vec4(c, 0, -s, 0), _vec4_0100_sse, vec4(s, 0, c, 0), _vec4_0001_sse);
+#else
         return mat4(
             c, 0, s, 0,
             0, 1, 0, 0,
             -s, 0, c, 0,
             0, 0, 0, 1);
+#endif
     }
     //------------------------------------------------------------------------------
     /// \brief Creates a rotation 4x4 matrix over the Z axis
@@ -4936,11 +4974,15 @@ namespace aRibeiro {
     ARIBEIRO_INLINE mat4 zRotate(const float &_psi_) {
         float c = cos(_psi_);
         float s = sin(_psi_);
+#ifdef ARIBEIRO_SSE2
+        return mat4(vec4(c, s, 0, 0), vec4(-s, c, 0, 0), _vec4_0010_sse, _vec4_0001_sse);
+#else
         return mat4(
             c, -s, 0, 0,
             s, c, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1);
+#endif
     }
     //------------------------------------------------------------------------------
     /// \brief Creates a rotation 4x4 matrix over the Euler angles
@@ -5811,7 +5853,7 @@ namespace aRibeiro {
     }
     //------------------------------------------------------------------------------
     //
-    // quaternion operations based on http://assimp.sourceforge.net/,
+    // quaternion operations based on:
     //  http://www.gpwiki.org/index.php/OpenGL:Tutorials:Using_Quaternions_to_represent_rotation
     //  and http://www.gamedev.net/page/resources/_/reference/programming/math-and-physics/quaternions/quaternion-powers-r1095
     //
