@@ -48,6 +48,16 @@ int main(int argc, char* argv[]) {
 
     printf("%f %f %f %f\n", sign.m128_f32[0], sign.m128_f32[1], sign.m128_f32[2], sign.m128_f32[3]);
 
+    {
+        __m128 a = _mm_setr_ps(1, 2, 3, 4);
+        __m128 b = _mm_setr_ps(5, 6, 7, 8);
+        __m128 c = _mm_blend_ps(a, b, 0x8);
+
+        c.m128_f32[1] = 0.0f;
+
+        printf("%f %f %f %f\n", c.m128_f32[0], c.m128_f32[1], c.m128_f32[2], c.m128_f32[3]);
+    }
+
 
     //return 0;
     

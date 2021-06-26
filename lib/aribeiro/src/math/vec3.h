@@ -305,7 +305,9 @@ class _SSE2_ALIGN_PRE vec3{
 
 #if true //defined(_MSC_VER) ||
 
-        _mm_f32_(diff_abs, 3) = 0.0f;
+        //_mm_f32_(diff_abs, 3) = 0.0f;
+        const __m128 _vec3_valid_bits = _mm_castsi128_ps(_mm_set_epi32(0, (int)0xffffffff, (int)0xffffffff, (int)0xffffffff));
+        diff_abs = _mm_and_ps(diff_abs, _vec3_valid_bits);
 
         diff_abs = _mm_hadd_ps(diff_abs, diff_abs);
         diff_abs = _mm_hadd_ps(diff_abs, diff_abs);
@@ -561,7 +563,10 @@ class _SSE2_ALIGN_PRE vec3{
         //__m128 param = _mm_and_ps(v.array_sse, _vec3_valid_bits);
 
         __m128 param = v.array_sse;
-        _mm_f32_(param, 3) = 1.0f;
+        //_mm_f32_(param, 3) = 1.0f;
+
+        const __m128 _one_one = _mm_setr_ps(1.0f, 1.0f, 1.0f, 1.0f);
+        param = _mm_blend_ps(param, _one_one, 0x8);
 
         array_sse = _mm_div_ps(array_sse, param);
 #elif defined(ARIBEIRO_NEON)

@@ -761,6 +761,9 @@ INLINE_OPERATION_IMPLEMENTATION(vec4)
     const __m128 _vec4_minus_one_sse = _mm_set1_ps(-1.0f);
     const __m128 _vec4_valid_bits_sse = _mm_castsi128_ps(_mm_set1_epi32((int)0xffffffff));
 
+    const __m128 _vec4_1000_sse = _mm_setr_ps(1.0f, 0.0f, 0.0f, 0.0f);
+    const __m128 _vec4_0100_sse = _mm_setr_ps(0.0f, 1.0f, 0.0f, 0.0f);
+    const __m128 _vec4_0010_sse = _mm_setr_ps(0.0f, 0.0f, 1.0f, 0.0f);
     const __m128 _vec4_0001_sse = _mm_setr_ps(0.0f, 0.0f, 0.0f, 1.0f);
 
     #pragma pack(pop)

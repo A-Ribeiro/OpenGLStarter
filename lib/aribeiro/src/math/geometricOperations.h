@@ -295,7 +295,9 @@ namespace aRibeiro {
 
         //much faster
         __m128 result = v.array_sse;
-        _mm_f32_(result, 3) = 1.0f;
+        //_mm_f32_(result, 3) = 1.0f;
+        _mm_blend_ps(result, _vec4_one_sse, 0x8);
+
         return result;
 #elif defined(ARIBEIRO_NEON)
 
@@ -560,12 +562,18 @@ namespace aRibeiro {
     ///
     ARIBEIRO_INLINE float dot(const vec2& a, const vec2& b) {
 #if defined(ARIBEIRO_SSE2)
+#if true
+
+        return _mm_f32_(_mm_dp_ps(a.array_sse, b.array_sse, 0x33),0);
+
+#elif defined(_MSC_VER) || true
         __m128 mul0 = _mm_mul_ps(a.array_sse, b.array_sse);
         //swp0 = [1,0,0,3]
         __m128 swp0 = _mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(0, 0, 0, 1));
         //add0 = [0+1,1+0,2+0,3+3]
         __m128 add0 = _mm_add_ps(mul0, swp0);
         return _mm_f32_(add0, 0);
+#endif
 #elif defined(ARIBEIRO_NEON)
         float32x4_t mul0 = vmulq_f32(a.array_neon, b.array_neon);
         return mul0[0] + mul0[1];
@@ -1322,7 +1330,9 @@ namespace aRibeiro {
 #if defined(ARIBEIRO_SSE2)
         //much faster
         quat result = quat(v.array_sse);
-        _mm_f32_(result.array_sse, 3) = 0;
+        //_mm_f32_(result.array_sse, 3) = 0;
+        result = _mm_and_ps(result.array_sse, _vec3_valid_bits_sse);
+
         result = a ^ result ^ conjugate(a);
         //const __m128 _const_n = _mm_load_( 1,1,1,0 );
         //quat result = a ^ quat( _mm_mul_ps( v.array_sse, _const_n) ) ^ conjugate(a);
@@ -1381,9 +1391,11 @@ namespace aRibeiro {
         */
         //much faster
         quat result = quat(v.array_sse);
-        _mm_f32_(result.array_sse, 3) = 0;
+        //_mm_f32_(result.array_sse, 3) = 0;
+        result = _mm_and_ps(result.array_sse, _vec3_valid_bits_sse);
         result = a ^ result ^ conjugate(a);
-        _mm_f32_(result.array_sse, 3) = _mm_f32_(v.array_sse, 3);
+        //_mm_f32_(result.array_sse, 3) = _mm_f32_(v.array_sse, 3);
+        result.array_sse = _mm_blend_ps(result.array_sse, v.array_sse, 0x8);
         return result.array_sse;
 #elif defined(ARIBEIRO_NEON)
 
@@ -3640,9 +3652,14 @@ namespace aRibeiro {
 //much faster
 //const __m128 _one = _mm_load_( 0,0,0,1 );
         mat4 r(m.array_sse[0], m.array_sse[1], m.array_sse[2], _vec4_0001_sse);//_one
+        r.array_sse[0] = _mm_and_ps(r.array_sse[0], _vec3_valid_bits_sse);
+        r.array_sse[1] = _mm_and_ps(r.array_sse[1], _vec3_valid_bits_sse);
+        r.array_sse[2] = _mm_and_ps(r.array_sse[2], _vec3_valid_bits_sse);
+        /*
         _mm_f32_(r.array_sse[0], 3) = 0;
         _mm_f32_(r.array_sse[1], 3) = 0;
         _mm_f32_(r.array_sse[2], 3) = 0;
+        */
         return r;
 #elif defined(ARIBEIRO_NEON)
         /*
@@ -4648,7 +4665,8 @@ namespace aRibeiro {
             mat4_IdentityMatrix.array_sse[1],
             mat4_IdentityMatrix.array_sse[2],
             _v_.array_sse);
-        _mm_f32_(result.array_sse[3], 3) = 1.0f;
+        //_mm_f32_(result.array_sse[3], 3) = 1.0f;
+        result.array_sse[3] = _mm_blend_ps(result.array_sse[3], _vec4_one_sse, 0x8);
         return result;
 #elif defined(ARIBEIRO_NEON)
         mat4 result = mat4(mat4_IdentityMatrix.array_neon[0],
@@ -4688,8 +4706,8 @@ namespace aRibeiro {
             mat4_IdentityMatrix.array_sse[1],
             mat4_IdentityMatrix.array_sse[2],
             _v_.array_sse);
-        _mm_f32_(result.array_sse[3], 3) = 1.0f; // much faster than make a lot of multiplications
-
+        //_mm_f32_(result.array_sse[3], 3) = 1.0f; // much faster than make a lot of multiplications
+        result.array_sse[3] = _mm_blend_ps(result.array_sse[3], _vec4_one_sse, 0x8);
         return result;
 
         /*
@@ -5559,9 +5577,15 @@ namespace aRibeiro {
             y.array_sse,
             z.array_sse,
             _vec4_0001_sse); //_w
+        
+        m.array_sse[0] = _mm_and_ps(m.array_sse[0], _vec3_valid_bits_sse);
+        m.array_sse[1] = _mm_and_ps(m.array_sse[1], _vec3_valid_bits_sse);
+        m.array_sse[2] = _mm_and_ps(m.array_sse[2], _vec3_valid_bits_sse);
+        /*
         _mm_f32_(m.array_sse[0], 3) = 0;
         _mm_f32_(m.array_sse[1], 3) = 0;
         _mm_f32_(m.array_sse[2], 3) = 0;
+        */
 
         /*
         const __m128 mask = _mm_load_(1, 1, 1, 0);
@@ -5630,9 +5654,14 @@ namespace aRibeiro {
             y.array_sse,
             z.array_sse,
             _vec4_0001_sse); // _w
+        m.array_sse[0] = _mm_and_ps(m.array_sse[0], _vec3_valid_bits_sse);
+        m.array_sse[1] = _mm_and_ps(m.array_sse[1], _vec3_valid_bits_sse);
+        m.array_sse[2] = _mm_and_ps(m.array_sse[2], _vec3_valid_bits_sse);
+        /*
         _mm_f32_(m.array_sse[0], 3) = 0;
         _mm_f32_(m.array_sse[1], 3) = 0;
         _mm_f32_(m.array_sse[2], 3) = 0;
+        */
 
         /*
          const __m128 mask = _mm_load_(1, 1, 1, 0);
@@ -5810,8 +5839,10 @@ namespace aRibeiro {
         float t = 1.0f - dot(v, v);
         //const float EPSILON = 1e-6f;
         quat result(v.array_sse);
-        if (t < EPSILON)
-            _mm_f32_(result.array_sse, 3) = 0.0f;
+        if (t < EPSILON) {
+            result.array_sse = _mm_and_ps(result.array_sse, _vec3_valid_bits_sse);
+            //_mm_f32_(result.array_sse, 3) = 0.0f;
+        }
         else
             _mm_f32_(result.array_sse, 3) = sqrt(t);
         return result;
@@ -6015,60 +6046,61 @@ namespace aRibeiro {
 #if defined(ARIBEIRO_SSE2)
 
 
-        __m128 x2y2z2 = _mm_mul_ps(q.array_sse, q.array_sse);
-
-        __m128 op0 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 1, 0, 0));
-        __m128 op1 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 2, 2, 1));
-
-        __m128 xy_xz_yz = _mm_mul_ps(op0, op1);
-
-        __m128 wx_wy_wz = _mm_mul_ps(
-
-            _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(3, 3, 3, 3))
-
-            //_mm_set1_ps(_mm_f32_(q.array_sse,3))
-            ,
-            q.array_sse);
-
-        const __m128 _2 = _mm_set1_ps(2.0f);
-
-
-        __m128 m0 =
-            _mm_mul_ps(_2, _mm_load_(
-            (_mm_f32_(x2y2z2, 1) + _mm_f32_(x2y2z2, 2)),
-                (_mm_f32_(xy_xz_yz, 0) + _mm_f32_(wx_wy_wz, 2)),
-                (_mm_f32_(xy_xz_yz, 1) - _mm_f32_(wx_wy_wz, 1)),
-                0
-            ));
-
-        _mm_f32_(m0, 0) = 1.0f - _mm_f32_(m0, 0);
-
-
-        __m128 m1 =
-            _mm_mul_ps(_2, _mm_load_(
-            (_mm_f32_(xy_xz_yz, 0) - _mm_f32_(wx_wy_wz, 2)),
-                (_mm_f32_(x2y2z2, 0) + _mm_f32_(x2y2z2, 2)),
-                (_mm_f32_(xy_xz_yz, 2) + _mm_f32_(wx_wy_wz, 0)),
-                0
-            ));
-        _mm_f32_(m1, 1) = 1.0f - _mm_f32_(m1, 1);
-
-        __m128 m2 =
-            _mm_mul_ps(_2, _mm_load_(
-            (_mm_f32_(xy_xz_yz, 1) + _mm_f32_(wx_wy_wz, 1)),
-                (_mm_f32_(xy_xz_yz, 2) - _mm_f32_(wx_wy_wz, 0)),
-                (_mm_f32_(x2y2z2, 0) + _mm_f32_(x2y2z2, 1)),
-                0
-            ));
-
-        _mm_f32_(m2, 2) = 1.0f - _mm_f32_(m2, 2);
-
-        //const __m128 m3 = _mm_load_(0,0,0,1.0f);
-
-        return mat4(m0, m1, m2, _vec4_0001_sse);//m3
-
-
         /*
+                __m128 x2y2z2 = _mm_mul_ps(q.array_sse, q.array_sse);
+
+                __m128 op0 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 1, 0, 0));
+                __m128 op1 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 2, 2, 1));
+
+                __m128 xy_xz_yz = _mm_mul_ps(op0, op1);
+
+                __m128 wx_wy_wz = _mm_mul_ps(
+
+                    _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(3, 3, 3, 3))
+
+                    //_mm_set1_ps(_mm_f32_(q.array_sse,3))
+                    ,
+                    q.array_sse);
+
+                const __m128 _2 = _mm_set1_ps(2.0f);
+
+
+                __m128 m0 =
+                    _mm_mul_ps(_2, _mm_load_(
+                    (_mm_f32_(x2y2z2, 1) + _mm_f32_(x2y2z2, 2)),
+                        (_mm_f32_(xy_xz_yz, 0) + _mm_f32_(wx_wy_wz, 2)),
+                        (_mm_f32_(xy_xz_yz, 1) - _mm_f32_(wx_wy_wz, 1)),
+                        0
+                    ));
+
+                _mm_f32_(m0, 0) = 1.0f - _mm_f32_(m0, 0);
+
+
+                __m128 m1 =
+                    _mm_mul_ps(_2, _mm_load_(
+                    (_mm_f32_(xy_xz_yz, 0) - _mm_f32_(wx_wy_wz, 2)),
+                        (_mm_f32_(x2y2z2, 0) + _mm_f32_(x2y2z2, 2)),
+                        (_mm_f32_(xy_xz_yz, 2) + _mm_f32_(wx_wy_wz, 0)),
+                        0
+                    ));
+                _mm_f32_(m1, 1) = 1.0f - _mm_f32_(m1, 1);
+
+                __m128 m2 =
+                    _mm_mul_ps(_2, _mm_load_(
+                    (_mm_f32_(xy_xz_yz, 1) + _mm_f32_(wx_wy_wz, 1)),
+                        (_mm_f32_(xy_xz_yz, 2) - _mm_f32_(wx_wy_wz, 0)),
+                        (_mm_f32_(x2y2z2, 0) + _mm_f32_(x2y2z2, 1)),
+                        0
+                    ));
+
+                _mm_f32_(m2, 2) = 1.0f - _mm_f32_(m2, 2);
+
+                //const __m128 m3 = _mm_load_(0,0,0,1.0f);
+
+                return aRibeiro::mat4(m0, m1, m2, _vec4_0001_sse);//m3
+
+
+                // */
 
         __m128 elm0 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 0, 0, 1));
         __m128 elm1 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 2, 1, 1));
@@ -6076,11 +6108,14 @@ namespace aRibeiro {
         elm0 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 3, 3, 2));
         elm1 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 1, 2, 2));
         __m128 op1 = _mm_mul_ps(elm0, elm1);
-        op1 = _mm_mul_ps((__m128){1.0f,1.0f,-1.0f,0.0f}, op1);
+        const __m128 mask01 = _mm_setr_ps(1.0f, 1.0f, -1.0f, 0.0f);
+        op1 = _mm_mul_ps(mask01, op1);
 
         __m128 m0_ = _mm_add_ps(op0, op1);
-        m0_ = _mm_mul_ps((__m128){-2.0f,2.0f,2.0f,0.0f}, m0_);
-        m0_[0] += 1.0f;
+        const __m128 mask02 = _mm_setr_ps(-2.0f, 2.0f, 2.0f, 0.0f);
+        m0_ = _mm_mul_ps(mask02, m0_);
+        //m0_[0] += 1.0f;
+        m0_ = _mm_add_ps(m0_, _vec4_1000_sse);
 
 
         elm0 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 1, 0, 0));
@@ -6089,11 +6124,14 @@ namespace aRibeiro {
         elm0 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 3, 2, 3));
         __m128 elm1_s = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 0, 2, 2));
         op1 = _mm_mul_ps(elm0, elm1_s);
-        op1 = _mm_mul_ps((__m128){-1.0f,1.0f,1.0f,0.0f}, op1);
+        const __m128 mask03 = _mm_setr_ps(-1.0f, 1.0f, 1.0f, 0.0f);
+        op1 = _mm_mul_ps(mask03, op1);
 
         __m128 m1_ = _mm_add_ps(op0, op1);
-        m1_ = _mm_mul_ps((__m128){2.0f,-2.0f,2.0f,0.0f}, m1_);
-        m1_[1] += 1.0f;
+        const __m128 mask04 = _mm_setr_ps(2.0f, -2.0f, 2.0f, 0.0f);
+        m1_ = _mm_mul_ps(mask04, m1_);
+        //m1_[1] += 1.0f;
+        m1_ = _mm_add_ps(m1_, _vec4_0100_sse);
 
 
         elm0 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 0, 1, 0));
@@ -6102,17 +6140,20 @@ namespace aRibeiro {
         elm0 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 1, 3, 3));
         elm1 = _mm_shuffle_ps(q.array_sse, q.array_sse, _MM_SHUFFLE(0, 1, 0, 1));
         op1 = _mm_mul_ps(elm0, elm1);
-        op1 = _mm_mul_ps((__m128){1.0f,-1.0f,1.0f,0.0f}, op1);
+        const __m128 mask05 = _mm_setr_ps(1.0f, -1.0f, 1.0f, 0.0f);
+        op1 = _mm_mul_ps(mask05, op1);
 
         __m128 m2_ = _mm_add_ps(op0, op1);
-        m2_ = _mm_mul_ps((__m128){2.0f,2.0f,-2.0f,0.0f}, m2_);
-        m2_[2] += 1.0f;
+        const __m128 mask06 = _mm_setr_ps(2.0f, 2.0f, -2.0f, 0.0f);
+        m2_ = _mm_mul_ps(mask06, m2_);
+        //m2_[2] += 1.0f;
+        m2_ = _mm_add_ps(m2_, _vec4_0010_sse);
 
-        __m128 m3_ = (__m128){0,0,0,1.0f};
+        //__m128 m3_ = (__m128){0,0,0,1.0f};
 
-        return mat4(m0_,m1_,m2_,m3_);
+        return aRibeiro::mat4(m0_, m1_, m2_, _vec4_0001_sse);
 
-        */
+        // */
 
         /*
         float x2 = q.x * q.x;
@@ -6148,9 +6189,10 @@ namespace aRibeiro {
 
         __m128 m3 = (__m128){0,0,0,1.0f};
 
-        return mat4(m0,m1,m2,m3);
+        return aRibeiro::mat4(m0,m1,m2,m3);
 
-         */
+         // */
+
 #elif defined(ARIBEIRO_NEON)
 
         float32x4_t x2y2z2 = vmulq_f32(q.array_neon, q.array_neon);
