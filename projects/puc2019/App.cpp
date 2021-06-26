@@ -8,9 +8,9 @@ App::App(int w, int h):AppBase(w,h){
     shaderVertexColor = new GLShaderVertexColor();
 
     //initialize all matrix
-    projection = mat4::IdentityMatrix;
-    camera = mat4::IdentityMatrix;
-    modelHierarchy = mat4::IdentityMatrix;
+    projection = mat4_IdentityMatrix;
+    camera = mat4_IdentityMatrix;
+    modelHierarchy = mat4_IdentityMatrix;
 
     //initialize auxiliary variables
     cameraPosition = vec3(0.0f,0.4f,2.0f);
@@ -60,7 +60,7 @@ void App::draw() {
     mat4 viewProjection = (mat4)projection * (mat4)camera;
 
     //setup hierarchy models and draw
-    modelHierarchy = mat4::IdentityMatrix;//reset transform
+    modelHierarchy = mat4_IdentityMatrix;//reset transform
 
     //
     // draw Ground

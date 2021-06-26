@@ -85,7 +85,7 @@ class _SSE2_ALIGN_PRE vec3{
     ///
     ARIBEIRO_INLINE vec3() {
 #if defined(ARIBEIRO_SSE2)
-        static const __m128 _vec3_zero_sse = _mm_set1_ps(0.0f);
+        const __m128 _vec3_zero_sse = _mm_set1_ps(0.0f);
         array_sse = _vec3_zero_sse;
 #elif defined(ARIBEIRO_NEON)
         array_neon = (float32x4_t){0,0,0,0};
@@ -300,7 +300,7 @@ class _SSE2_ALIGN_PRE vec3{
 #if defined(ARIBEIRO_SSE2)
         __m128 diff_abs = _mm_sub_ps(array_sse, v.array_sse);
         //abs
-        static const __m128 _vec3_sign_mask = _mm_load_(-0.f,-0.f,-0.f,0.0f);
+        const __m128 _vec3_sign_mask = _mm_load_(-0.f,-0.f,-0.f,0.0f);
         diff_abs = _mm_andnot_ps(_vec3_sign_mask, diff_abs);
 
 #if true //defined(_MSC_VER) ||
@@ -325,7 +325,7 @@ class _SSE2_ALIGN_PRE vec3{
         if (_mm_f32_(diff_abs, 0) > EPSILON2)
             return false;
 
-        //static const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+        //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
         //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
 
         /*
@@ -350,7 +350,7 @@ class _SSE2_ALIGN_PRE vec3{
         if (acc_2_elements[0] > EPSILON2)
             return false;
 
-        //static const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+        //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
         //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
 
         /*
@@ -490,11 +490,15 @@ class _SSE2_ALIGN_PRE vec3{
     ///
     ARIBEIRO_INLINE vec3 operator-() const{
 #if defined(ARIBEIRO_SSE2)
-        static const __m128 _vec3_sign_mask = _mm_load_(-0.f,-0.f,-0.f,0.0f);
+        const __m128 _vec3_sign_mask = _mm_setr_ps(-0.f,-0.f,-0.f,0.0f);
         return _mm_xor_ps(_vec3_sign_mask, array_sse);
 #elif defined(ARIBEIRO_NEON)
-        static const float32x4_t minus_one = (float32x4_t){-1.0f,-1.0f,-1.0f,0.0f};
+#if true
+        return vnegq_f32(array_neon);
+#else
+        const float32x4_t minus_one = (float32x4_t){-1.0f,-1.0f,-1.0f,0.0f};
         return vmulq_f32(minus_one, array_neon);
+#endif
 #else
         return vec3(-x,-y,-z);
 #endif
@@ -551,10 +555,21 @@ class _SSE2_ALIGN_PRE vec3{
     ///
     ARIBEIRO_INLINE vec3& operator/=(const vec3& v){
 #if defined(ARIBEIRO_SSE2)
-        __m128 param = _mm_load_(v.x,v.y,v.z,1.0f);
+        //__m128 param = _mm_load_(v.x,v.y,v.z,1.0f);
+
+        //const __m128 _vec3_valid_bits = _mm_castsi128_ps(_mm_set_epi32(0, (int)0xffffffff, (int)0xffffffff, (int)0xffffffff));
+        //__m128 param = _mm_and_ps(v.array_sse, _vec3_valid_bits);
+
+        __m128 param = v.array_sse;
+        _mm_f32_(param, 3) = 1.0f;
+
         array_sse = _mm_div_ps(array_sse, param);
 #elif defined(ARIBEIRO_NEON)
-        array_neon = vdivq_f32(array_neon, v.array_neon);
+
+        float32x4_t param = v.array_neon;
+        param[3] = 1.0f;
+
+        array_neon = vdivq_f32(array_neon, param);
 #else
         x/=v.x;
         y/=v.y;
@@ -738,6 +753,13 @@ class _SSE2_ALIGN_PRE vec3{
 INLINE_OPERATION_IMPLEMENTATION(vec3)
 
 #if defined(ARIBEIRO_SSE2)
+
+    const __m128 _vec3_zero_sse = _mm_set1_ps(0.0f);
+    const __m128 _vec3_sign_mask_sse = _mm_setr_ps(-0.f, -0.f, -0.f, 0.0f);
+    const __m128 _vec3_one_sse = _mm_setr_ps(1.0f, 1.0f, 1.0f, 0.0f);
+    const __m128 _vec3_minus_one_sse = _mm_setr_ps(-1.0f, -1.0f, -1.0f, 0.0f);
+    const __m128 _vec3_valid_bits_sse = _mm_castsi128_ps(_mm_set_epi32(0, (int)0xffffffff, (int)0xffffffff, (int)0xffffffff));
+
     #pragma pack(pop)
 #endif
 

@@ -75,8 +75,8 @@ RenderSystem::RenderSystem(){
     shaderVertexColor = new GLShaderVertexColor();
 
 
-    projection.top = mat4::IdentityMatrix;
-    model.top = mat4::IdentityMatrix;
+    projection.top = mat4_IdentityMatrix;
+    model.top = mat4_IdentityMatrix;
 
     color = vec4(1.0f);
 
@@ -103,14 +103,14 @@ void RenderSystem::pushProjetionAndConfigureParallel() {
     projection.push();
     projection.top = translate(-1.0f, -1.0f, 0.0f) * scale(2.0f / dimension.x, 2.0f / dimension.y, 0.0f);
     model.push();
-    model.top = mat4::IdentityMatrix;
+    model.top = mat4_IdentityMatrix;
 }
 
 void RenderSystem::pushProjetionAndConfigurePerpective(float aspectX) {
     projection.push();
     projection.top = projection_perspective(60.0f, aspectX, 0.001f, 1000.0f);
     model.push();
-    model.top = mat4::IdentityMatrix;
+    model.top = mat4_IdentityMatrix;
 }
 
 void RenderSystem::popProjection()
@@ -127,7 +127,7 @@ void RenderSystem::setupViewport(int w, int h) {
     glViewport(0, 0, w, h);
 
     projection.top = projection_perspective(60.0f, (double)w / (double)h, 0.001f, 1000.0f);
-    model.top = mat4::IdentityMatrix;
+    model.top = mat4_IdentityMatrix;
 
     dimension = vec2(w, h);
     dimension_inv.x = 2.0f / (float)w;

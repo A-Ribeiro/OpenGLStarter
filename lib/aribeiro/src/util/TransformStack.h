@@ -16,7 +16,7 @@ namespace aRibeiro {
     ///
     /// TransformStack<mat4> model;
     /// 
-    /// model.top = mat4::IdentityMatrix;
+    /// model.top = mat4_IdentityMatrix;
     ///
     /// model.push();
     /// model.top *= translate(10,0,0);
@@ -61,7 +61,7 @@ namespace aRibeiro {
         ///
         /// TransformStack<mat4> model;
         /// 
-        /// model.top = mat4::IdentityMatrix;
+        /// model.top = mat4_IdentityMatrix;
         ///
         /// //size here will be 0
         /// model.size();
@@ -85,7 +85,7 @@ namespace aRibeiro {
         }
 
         TransformStack() :_stack(0) {
-            top = T();// mat4::IdentityMatrix;
+            top = T();// mat4_IdentityMatrix;
         }
 
         /// \brief Save the current #top variable to the top of the internal stack
@@ -98,7 +98,7 @@ namespace aRibeiro {
         ///
         /// TransformStack<mat4> model;
         /// 
-        /// model.top = mat4::IdentityMatrix;
+        /// model.top = mat4_IdentityMatrix;
         ///
         /// model.push();
         /// model.top *= translate(10,0,0);
@@ -124,7 +124,7 @@ namespace aRibeiro {
         ///
         /// TransformStack<mat4> model;
         /// 
-        /// model.top = mat4::IdentityMatrix;
+        /// model.top = mat4_IdentityMatrix;
         ///
         /// model.push();
         /// model.top *= translate(10,0,0);
@@ -157,7 +157,7 @@ namespace aRibeiro {
         ///
         /// TransformStack<mat4> model;
         /// 
-        /// model = mat4::IdentityMatrix;
+        /// model = mat4_IdentityMatrix;
         ///
         /// \endcode
         ///

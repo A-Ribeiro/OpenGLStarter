@@ -41,7 +41,7 @@ public:
          <| |> - blue
          /\  - blue
          */
-        static const vec3 bodyVBuffer[] = {
+        const vec3 bodyVBuffer[] = {
             vec3(-0.25f,0.0f, 0.5f),
             vec3( 0.25f,0.0f, 0.5f),
             vec3( 0.25f,0.0f, -0.5f),
@@ -59,7 +59,7 @@ public:
             vec3(-0.125f,0.0f, 0.5f)
         };
 
-        static const vec4 bodyCBuffer[] = {
+        const vec4 bodyCBuffer[] = {
             // blue
             vec4(0.4f,0.4f,1.0f,1.0f),
             vec4(0.4f,0.4f,1.0f,1.0f),
@@ -85,14 +85,14 @@ public:
          <| |> - blue
          /\  - blue
          */
-        static const vec3 headVBuffer[] = {
+        const vec3 headVBuffer[] = {
             vec3(-0.25f,0.0f, -0.5f),
             vec3( 0.25f,0.0f, -0.5f),
             vec3( 0.0f,0.0f, -1.0f)
 
         };
 
-        static const vec4 headCBuffer[] = {
+        const vec4 headCBuffer[] = {
             // blue
             vec4(1.0f,0.7f,0.7f,1.0f),
             vec4(1.0f,0.7f,0.7f,1.0f),
@@ -102,7 +102,7 @@ public:
 
 
 
-        static const vec3 wingVBuffer[] = {
+        const vec3 wingVBuffer[] = {
             vec3( 0.0f,0.0f, -0.5f),
             vec3( 0.0f,0.0f, 0.5f),
             vec3( 0.75f,0.0f, 0.0f),
@@ -114,7 +114,7 @@ public:
 
         };
 
-        static const vec4 wingCBuffer[] = {
+        const vec4 wingCBuffer[] = {
             // blue
             vec4(0.7f,0.7f,1.0f,1.0f),
             vec4(0.4f,0.4f,1.0f,1.0f),
@@ -159,7 +159,7 @@ public:
          <| |> - blue
          /\  - blue
          */
-        static const vec3 bodyVBuffer[] = {
+        const vec3 bodyVBuffer[] = {
             vec3(-0.25f,0.0f, 0.5f),
             vec3( 0.25f,0.0f, 0.5f),
             vec3( 0.25f,0.0f, -0.5f),
@@ -177,7 +177,7 @@ public:
             vec3(-0.125f,0.0f, 0.5f)
         };
 
-        static const vec4 bodyCBuffer[] = {
+        const vec4 bodyCBuffer[] = {
             // blue
             vec4(1.0f,1.0f,0.4f,1.0f),
             vec4(1.0f,1.0f,0.4f,1.0f),
@@ -205,14 +205,14 @@ public:
          <| |> - blue
          /\  - blue
          */
-        static const vec3 headVBuffer[] = {
+        const vec3 headVBuffer[] = {
             vec3(-0.25f,0.0f, -0.5f),
             vec3( 0.25f,0.0f, -0.5f),
             vec3( 0.0f,0.0f, -1.0f)
 
         };
 
-        static const vec4 headCBuffer[] = {
+        const vec4 headCBuffer[] = {
             // blue
             vec4(1.0f,0.7f,0.7f,1.0f),
             vec4(1.0f,0.7f,0.7f,1.0f),
@@ -222,7 +222,7 @@ public:
 
 
 
-        static const vec3 wingVBuffer[] = {
+        const vec3 wingVBuffer[] = {
             vec3( 0.0f,0.0f, -0.5f),
             vec3( 0.0f,0.0f, 0.5f),
             vec3( 0.75f,0.0f, 0.0f),
@@ -234,7 +234,7 @@ public:
 
         };
 
-        static const vec4 wingCBuffer[] = {
+        const vec4 wingCBuffer[] = {
             // blue
             vec4(1.0f,1.0f,0.7f,1.0f),
             vec4(1.0f,1.0f,0.4f,1.0f),

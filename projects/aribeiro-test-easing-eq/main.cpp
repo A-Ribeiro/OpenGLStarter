@@ -166,7 +166,7 @@ CMakeFiles/aribeiro-test-easing-eq.dir/main.cpp.o  -o ../../bin/aribeiro-test-ea
     PlatformTime time;
     time.timeScale = 0.25f;
 
-    mvp = mat4::IdentityMatrix * scale(vec3((float)window.getSize().y / (float)window.getSize().x, 1.0f, 1.0f));
+    mvp = mat4_IdentityMatrix * scale(vec3((float)window.getSize().y / (float)window.getSize().x, 1.0f, 1.0f));
     shaderColor = new GLShaderColor();
 
     //load font
@@ -256,7 +256,7 @@ void processSingleEvent(sf::RenderWindow &window, sf::Event &event) {
     // Adjust the viewport when the window is resized
     if (event.type == sf::Event::Resized) {
         glViewport(0, 0, event.size.width, event.size.height);
-        mvp = mat4::IdentityMatrix * scale(vec3((float)event.size.height / (float)event.size.width, 1.0f, 1.0f));
+        mvp = mat4_IdentityMatrix * scale(vec3((float)event.size.height / (float)event.size.width, 1.0f, 1.0f));
     }
 
     if (event.type == sf::Event::JoystickButtonPressed) {

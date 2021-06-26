@@ -104,8 +104,8 @@ int main(int argc, char* argv[]) {
     // Data structures
     //
     PlatformTime time;
-    //mat4 mvp = mat4::IdentityMatrix * scale(vec3(0.5f));
-    mvp = mat4::IdentityMatrix * scale(vec3((float)window.getSize().y / (float)window.getSize().x, 1.0f, 1.0f));
+    //mat4 mvp = mat4_IdentityMatrix * scale(vec3(0.5f));
+    mvp = mat4_IdentityMatrix * scale(vec3((float)window.getSize().y / (float)window.getSize().x, 1.0f, 1.0f));
 
     GLSquare square;
     float color = 0.0f;
@@ -221,7 +221,7 @@ void processSingleEvent(sf::RenderWindow &window, sf::Event &event) {
     // Adjust the viewport when the window is resized
     if (event.type == sf::Event::Resized) {
         glViewport(0, 0, event.size.width, event.size.height);
-        mvp = mat4::IdentityMatrix * scale(vec3((float)event.size.height / (float)event.size.width, 1.0f, 1.0f));
+        mvp = mat4_IdentityMatrix * scale(vec3((float)event.size.height / (float)event.size.width, 1.0f, 1.0f));
     }
 
     if (event.type == sf::Event::JoystickButtonPressed) {

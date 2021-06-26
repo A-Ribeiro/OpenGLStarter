@@ -13,7 +13,7 @@ if( ARCH_TARGET STREQUAL x86 OR ARCH_TARGET STREQUAL x64 )
 			message(STATUS "             need to be aligned with ssealign<T,16>")
 			add_definitions_global(-DARIBEIRO_SSE2 /arch:SSE2) # /Gz __stdcall
 		else()
-			add_definitions_global(-DARIBEIRO_SSE2 -mmmx -msse -msse2 -mfpmath=sse -minline-all-stringops -finline-functions)
+			add_definitions_global(-DARIBEIRO_SSE2 -mmmx -msse -msse2 -msse3 -msse4.1 -mfpmath=sse -minline-all-stringops -finline-functions)
 		endif()
     endif()
 endif()

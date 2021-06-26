@@ -64,7 +64,7 @@ class _SSE2_ALIGN_PRE quat{
     ///
     ARIBEIRO_INLINE quat(){
 #if defined(ARIBEIRO_SSE2)
-        static const __m128 _load_0001_ = _mm_load_(0.0f,0.0f,0.0f,1.0f);
+        const __m128 _load_0001_ = _mm_load_(0.0f,0.0f,0.0f,1.0f);
         array_sse = _load_0001_;
 #elif defined(ARIBEIRO_NEON)
         array_neon = (float32x4_t){0.0f,0.0f,0.0f,1.0f};
@@ -158,8 +158,8 @@ class _SSE2_ALIGN_PRE quat{
 
         __m128 diff_abs = _mm_sub_ps(array_sse, v.array_sse);
         //abs
-        static const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
-        diff_abs = _mm_andnot_ps(_vec4_sign_mask, diff_abs);
+        //const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
+        diff_abs = _mm_andnot_ps(_vec4_sign_mask_sse, diff_abs);
 
 #if true //defined(_MSC_VER) || 
 
@@ -180,7 +180,7 @@ class _SSE2_ALIGN_PRE quat{
         if (_mm_f32_(diff_abs, 0) > EPSILON2)
             return false;
 
-        //static const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+        //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
         //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
 
         /*
@@ -203,7 +203,7 @@ class _SSE2_ALIGN_PRE quat{
         if (acc_2_elements[0] > EPSILON2)
             return false;
 
-        //static const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+        //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
         //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
 
         /*
@@ -246,10 +246,10 @@ class _SSE2_ALIGN_PRE quat{
     ///
     ARIBEIRO_INLINE quat operator-() const{
 #if defined(ARIBEIRO_SSE2)
-        static const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
-        return _mm_xor_ps(_vec4_sign_mask, array_sse);
+        //const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
+        return _mm_xor_ps(_vec4_sign_mask_sse, array_sse);
 #elif defined(ARIBEIRO_NEON)
-        static const float32x4_t minus_one = (float32x4_t){-1.0f,-1.0f,-1.0f,-1.0f};
+        const float32x4_t minus_one = (float32x4_t){-1.0f,-1.0f,-1.0f,-1.0f};
         return vmulq_f32(minus_one, array_neon);
 #else
         return quat(-x,-y,-z,-w);
@@ -330,7 +330,12 @@ class _SSE2_ALIGN_PRE quat{
 
 } _SSE2_ALIGN_POS;
 
+const quat quat_Identity;
+
 #if defined(ARIBEIRO_SSE2)
+    
+    const __m128 _quat_conjugate_mask_sse = _mm_load_(-0.f, -0.f, -0.f, 0.f);
+
     #pragma pack(pop)
 #endif
 

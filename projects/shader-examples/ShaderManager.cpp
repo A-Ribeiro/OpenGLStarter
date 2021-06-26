@@ -479,10 +479,10 @@ void ShaderManager::draw_ShaderBlur(GLShader *baseshader, GLint ogl_primitive, c
         RenderSystem * render = RenderSystem::getSingleton();
 
         render->projection.push();
-        render->projection.top = mat4::IdentityMatrix;
+        render->projection.top = mat4_IdentityMatrix;
 
         render->model.push();
-        render->model.top = mat4::IdentityMatrix;// * scale (1,-1,1);
+        render->model.top = mat4_IdentityMatrix;// * scale (1,-1,1);
 
         render->shader->enable();
         render->shader->setColor(vec4(1.0f));

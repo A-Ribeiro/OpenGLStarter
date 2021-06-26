@@ -929,8 +929,11 @@ IF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
   INCLUDE_DIRECTORIES(${C4D_INCLUDES})
 ENDIF (ASSIMP_BUILD_NONFREE_C4D_IMPORTER)
 
-ADD_LIBRARY( assimp ${assimp_src} )
+ADD_LIBRARY(assimp SHARED ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
+
+#[Alessandro] ... set the macro to import the lib correctly
+target_compile_definitions(assimp PUBLIC -DASSIMP_DLL)
 
 TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>

@@ -473,7 +473,7 @@ void Tetris::render(const unsigned int time_ms, const vec2 &screenCenter) {
         //glMatrixMode(GL_MODELVIEW);
 
         render->projection.push();
-        render->projection.top = mat4::IdentityMatrix;
+        render->projection.top = mat4_IdentityMatrix;
 
         render->model.top =
             translate(-1, -1, 0) *

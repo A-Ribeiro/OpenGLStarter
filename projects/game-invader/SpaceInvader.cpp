@@ -53,7 +53,7 @@ void SpaceInvader::draw() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    render->model.top = mat4::IdentityMatrix;
+    render->model.top = mat4_IdentityMatrix;
 
     gameState->render(time.deltaTime, render->dimension*0.5);
 

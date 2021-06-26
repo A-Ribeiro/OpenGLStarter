@@ -165,7 +165,7 @@ public:
 
         glDisable(GL_DEPTH_TEST);
         render->projection.push();
-        render->projection.top = mat4::IdentityMatrix;
+        render->projection.top = mat4_IdentityMatrix;
         render->model.top = translate(-1, -1, 0) * scale(1.0f/centerScreen.x, 1.0f/centerScreen.y, 1);
         char fps[32];
         static float deltaacc = 0;
@@ -264,7 +264,7 @@ public:
             glDisable(GL_DEPTH_TEST);
         
         render->projection.push();
-        render->projection.top = mat4::IdentityMatrix;
+        render->projection.top = mat4_IdentityMatrix;
         render->model.top = translate(-1, -1, 0) *
                             scale(2.0f / (float)w, 2.0f / (float)h, 1);
         render->drawTexture_center(cursor, cursorPos);

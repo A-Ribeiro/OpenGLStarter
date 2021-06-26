@@ -18,18 +18,20 @@ namespace openglWrapper {
 
     class GLStripText;
 
-    struct GLFontGlyphInfo {
+    struct _SSE2_ALIGN_PRE GLFontGlyphInfo {
         //base calculations
         aRibeiro::vec2 texBegin, texEnd;
         aRibeiro::vec2 dimension;
         aRibeiro::vec2 beforeStart, advance;
         //used for render
         aRibeiro::vec2 TexcoordVertex2fStrip[6 * 2];
-    };
+
+        SSE2_CLASS_NEW_OPERATOR
+    } _SSE2_ALIGN_POS;
 
     class GLFont {
         FontHeader mHeader;
-        std::map<UTF32, GLFontGlyphInfo> mGlyphs;
+        aRibeiro::aligned_map<UTF32, GLFontGlyphInfo> mGlyphs;
         //GLuint mTextureID;
 
         GLTexture texture;
@@ -71,7 +73,7 @@ namespace openglWrapper {
 
         float getLineHeight();
     private:
-        struct VertexAttrib {
+        struct _SSE2_ALIGN_PRE VertexAttrib {
             aRibeiro::vec2 uv;
             aRibeiro::vec4 color;
             aRibeiro::vec2 pos;
@@ -83,7 +85,9 @@ namespace openglWrapper {
                 this->color = color;
                 this->pos = pos;
             }
-        };
+
+            SSE2_CLASS_NEW_OPERATOR
+        } _SSE2_ALIGN_POS;
         aRibeiro::aligned_vector<VertexAttrib> mModelBuffer;
         aRibeiro::vec2 putc_(wchar_t c, const aRibeiro::vec2& p, bool repeatFirstPtn, bool repeatLastPtn, const aRibeiro::vec4& color, float basex);
     };

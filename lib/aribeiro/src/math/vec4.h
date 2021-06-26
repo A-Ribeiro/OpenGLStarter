@@ -84,7 +84,7 @@ class _SSE2_ALIGN_PRE vec4{
     ///
     ARIBEIRO_INLINE vec4(){
 #if defined(ARIBEIRO_SSE2)
-        static const __m128 _vec4_zero_sse = _mm_set1_ps(0.0f);
+        const __m128 _vec4_zero_sse = _mm_set1_ps(0.0f);
         array_sse = _vec4_zero_sse;
 #elif defined(ARIBEIRO_NEON)
         array_neon = (float32x4_t){0,0,0,0};
@@ -312,7 +312,7 @@ class _SSE2_ALIGN_PRE vec4{
 
         __m128 diff_abs = _mm_sub_ps(array_sse, v.array_sse);
         //abs
-        static const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
+        const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
         diff_abs = _mm_andnot_ps(_vec4_sign_mask, diff_abs);
 
 #if true //defined(_MSC_VER) ||
@@ -334,7 +334,7 @@ class _SSE2_ALIGN_PRE vec4{
         if (_mm_f32_(diff_abs, 0) > EPSILON2)
             return false;
 
-        //static const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+        //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
         //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
 
         /*
@@ -356,7 +356,7 @@ class _SSE2_ALIGN_PRE vec4{
         if (acc_2_elements[0] > EPSILON2)
             return false;
 
-        //static const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+        //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
         //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
 
         /*
@@ -494,11 +494,15 @@ class _SSE2_ALIGN_PRE vec4{
     ///
     ARIBEIRO_INLINE vec4 operator-() const{
 #if defined(ARIBEIRO_SSE2)
-        static const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
+        const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
         return _mm_xor_ps(_vec4_sign_mask, array_sse);
 #elif defined(ARIBEIRO_NEON)
-        static const float32x4_t minus_one = (float32x4_t){-1.0f,-1.0f,-1.0f,-1.0f};
+#if true
+        return vnegq_f32(array_neon);
+#else
+        const float32x4_t minus_one = (float32x4_t) { -1.0f, -1.0f, -1.0f, -1.0f };
         return vmulq_f32(minus_one, array_neon);
+#endif
 #else
         return vec4(-x,-y,-z,-w);
 #endif
@@ -750,6 +754,15 @@ class _SSE2_ALIGN_PRE vec4{
 INLINE_OPERATION_IMPLEMENTATION(vec4)
 
 #if defined(ARIBEIRO_SSE2)
+
+    const __m128 _vec4_zero_sse = _mm_set1_ps(0.0f);
+    const __m128 _vec4_sign_mask_sse = _mm_set1_ps(-0.f);
+    const __m128 _vec4_one_sse = _mm_set1_ps(1.0f);
+    const __m128 _vec4_minus_one_sse = _mm_set1_ps(-1.0f);
+    const __m128 _vec4_valid_bits_sse = _mm_castsi128_ps(_mm_set1_epi32((int)0xffffffff));
+
+    const __m128 _vec4_0001_sse = _mm_setr_ps(0.0f, 0.0f, 0.0f, 1.0f);
+
     #pragma pack(pop)
 #endif
 

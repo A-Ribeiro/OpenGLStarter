@@ -168,8 +168,14 @@ class _SSE2_ALIGN_PRE vec2{
     /// \param b Destiny vector
     ///
     ARIBEIRO_INLINE vec2( const vec2 &a, const vec2 &b ){
+#if defined(ARIBEIRO_SSE2)
+        array_sse = _mm_sub_ps(b.array_sse, a.array_sse);
+#elif defined(ARIBEIRO_NEON)
+        array_neon = vsubq_f32(b.array_neon, a.array_neon);
+#else
         x = b.x - a.x;
         y = b.y - a.y;
+#endif
     }
 
     /// \brief Compare vectors considering #EPSILON (equal)
@@ -195,7 +201,74 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return true if the values are the same considering #EPSILON
     ///
     ARIBEIRO_INLINE bool operator==(const vec2&v) const {
-        
+#if defined(ARIBEIRO_SSE2)
+        __m128 diff_abs = _mm_sub_ps(array_sse, v.array_sse);
+        //abs
+        const __m128 _vec2_sign_mask = _mm_load_(-0.f, -0.f, 0.f, 0.0f);
+        diff_abs = _mm_andnot_ps(_vec2_sign_mask, diff_abs);
+
+#if true //defined(_MSC_VER) ||
+
+        _mm_f32_(diff_abs, 2) = 0.0f;
+        _mm_f32_(diff_abs, 3) = 0.0f;
+
+        diff_abs = _mm_hadd_ps(diff_abs, diff_abs);
+        diff_abs = _mm_hadd_ps(diff_abs, diff_abs);
+
+#else
+
+        //swp0 = [1,0,3,2]
+        __m128 swp0 = _mm_shuffle_ps(diff_abs, diff_abs, _MM_SHUFFLE(2, 3, 0, 1));
+        //add0 = [0+1,1+0,2+3,3+2]
+        __m128 add0 = _mm_add_ps(diff_abs, swp0);
+        //swp1 = [3+2,2+3,1+0,0+1]
+        __m128 swp1 = _mm_shuffle_ps(add0, add0, _MM_SHUFFLE(0, 1, 2, 3));
+        //add1 = [0+1+3+2,1+0+2+3,2+3+1+0,3+2+0+1]
+        diff_abs = _mm_add_ps(add0, swp1);
+#endif
+
+        if (_mm_f32_(diff_abs, 0) > EPSILON2)
+            return false;
+
+        //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+        //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
+
+        /*
+        for(int i=0;i<3;i++){
+            if (_mm_f32_(diff_abs,i) > EPSILON)
+                return false;
+        }
+        */
+
+        return true;
+#elif defined(ARIBEIRO_NEON)
+
+        float32x4_t diff_abs = vsubq_f32(array_neon, v.array_neon);
+        //abs
+        diff_abs = vabsq_f32(diff_abs);
+
+        diff_abs[2] = 0.0f;
+        diff_abs[3] = 0.0f;
+
+        float32x2_t acc_2_elements = vadd_f32(vget_high_f32(diff_abs), vget_low_f32(diff_abs));
+        acc_2_elements = vpadd_f32(acc_2_elements, acc_2_elements);
+
+        if (acc_2_elements[0] > EPSILON2)
+            return false;
+
+        //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+        //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
+
+        /*
+        for(int i=0;i<3;i++){
+            if (diff_abs[i] > EPSILON)
+                return false;
+        }
+        */
+
+        return true;
+
+#else
         float accumulator = 0.0f;
         for (int i = 0; i < 2; i++) {
             accumulator += absv(array[i] - v.array[i]);
@@ -211,6 +284,7 @@ class _SSE2_ALIGN_PRE vec2{
         */
         return true;
         //return memcmp(array, v.array, sizeof(float) * 2) == 0;
+#endif
     }
 
     /// \brief Compare vectors considering #EPSILON (not equal)
@@ -260,8 +334,14 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return A reference to the current instance after the increment
     ///
     ARIBEIRO_INLINE vec2& operator+=(const vec2& v){
+#if defined(ARIBEIRO_SSE2)
+        array_sse = _mm_add_ps(array_sse, v.array_sse);
+#elif defined(ARIBEIRO_NEON)
+        array_neon = vaddq_f32(array_neon, v.array_neon);
+#else
         x+=v.x;
         y+=v.y;
+#endif
         return (*this);
     }
 
@@ -285,8 +365,14 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return A reference to the current instance after the decrement
     ///
     ARIBEIRO_INLINE vec2& operator-=(const vec2& v){
+#if defined(ARIBEIRO_SSE2)
+        array_sse = _mm_sub_ps(array_sse, v.array_sse);
+#elif defined(ARIBEIRO_NEON)
+        array_neon = vsubq_f32(array_neon, v.array_neon);
+#else
         x-=v.x;
         y-=v.y;
+#endif
         return (*this);
     }
 
@@ -309,7 +395,19 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return A copy of the current instance after the negation operation
     ///
     ARIBEIRO_INLINE vec2 operator-()const{
+#if defined(ARIBEIRO_SSE2)
+        const __m128 _vec2_sign_mask = _mm_setr_ps(-0.f, -0.f, 0.f, 0.0f);
+        return _mm_xor_ps(_vec2_sign_mask, array_sse);
+#elif defined(ARIBEIRO_NEON)
+#if true
+        return vnegq_f32(array_neon);
+#else
+        const float32x4_t minus_one = (float32x4_t) { -1.0f, -1.0f, 0.0f, 0.0f };
+        return vmulq_f32(minus_one, array_neon);
+#endif
+#else
         return vec2(-x,-y);
+#endif
     }
 
     /// \brief Component-wise multiply operator overload
@@ -332,8 +430,14 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return A reference to the current instance after the multiplication
     ///
     ARIBEIRO_INLINE vec2& operator*=(const vec2& v){
+#if defined(ARIBEIRO_SSE2)
+        array_sse = _mm_mul_ps(array_sse, v.array_sse);
+#elif defined(ARIBEIRO_NEON)
+        array_neon = vmulq_f32(array_neon, v.array_neon);
+#else
         x*=v.x;
         y*=v.y;
+#endif
         return (*this);
     }
 
@@ -357,8 +461,28 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return A reference to the current instance after the division
     ///
     ARIBEIRO_INLINE vec2& operator/=(const vec2& v){
+#if defined(ARIBEIRO_SSE2)
+        //__m128 param = _mm_load_(v.x,v.y,v.z,1.0f);
+
+        //const __m128 _vec3_valid_bits = _mm_castsi128_ps(_mm_set_epi32(0, (int)0xffffffff, (int)0xffffffff, (int)0xffffffff));
+        //__m128 param = _mm_and_ps(v.array_sse, _vec3_valid_bits);
+
+        __m128 param = v.array_sse;
+        _mm_f32_(param, 2) = 1.0f;
+        _mm_f32_(param, 3) = 1.0f;
+
+        array_sse = _mm_div_ps(array_sse, param);
+#elif defined(ARIBEIRO_NEON)
+
+        float32x4_t param = v.array_neon;
+        param[2] = 1.0f;
+        param[3] = 1.0f;
+
+        array_neon = vdivq_f32(array_neon, param);
+#else
         x/=v.x;
         y/=v.y;
+#endif
         return (*this);
     }
 
@@ -382,8 +506,14 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return A reference to the current instance after the increment
     ///
     ARIBEIRO_INLINE vec2& operator+=(const float &v){
+#if defined(ARIBEIRO_SSE2)
+        array_sse = _mm_add_ps(array_sse, _mm_set1_ps(v));
+#elif defined(ARIBEIRO_NEON)
+        array_neon = vaddq_f32(array_neon, vset1(v));
+#else
         x+=v;
         y+=v;
+#endif
         return (*this);
     }
 
@@ -407,8 +537,14 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return A reference to the current instance after the decrement
     ///
     ARIBEIRO_INLINE vec2& operator-=(const float &v){
+#if defined(ARIBEIRO_SSE2)
+        array_sse = _mm_sub_ps(array_sse, _mm_set1_ps(v));
+#elif defined(ARIBEIRO_NEON)
+        array_neon = vsubq_f32(array_neon, vset1(v));
+#else
         x-=v;
         y-=v;
+#endif
         return (*this);
     }
 
@@ -432,8 +568,14 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return A reference to the current instance after the decrement
     ///
     ARIBEIRO_INLINE vec2& operator*=(const float &v){
+#if defined(ARIBEIRO_SSE2)
+        array_sse = _mm_mul_ps(array_sse, _mm_set1_ps(v));
+#elif defined(ARIBEIRO_NEON)
+        array_neon = vmulq_f32(array_neon, vset1(v));
+#else
         x*=v;
         y*=v;
+#endif
         return (*this);
     }
 
@@ -457,8 +599,14 @@ class _SSE2_ALIGN_PRE vec2{
     /// \return A reference to the current instance after the division
     ///
     ARIBEIRO_INLINE vec2& operator/=(const float &v){
+#if defined(ARIBEIRO_SSE2)
+        array_sse = _mm_div_ps(array_sse, _mm_set1_ps(v));
+#elif defined(ARIBEIRO_NEON)
+        array_neon = vmulq_f32(array_neon, vset1(1.0f / v));
+#else
         x/=v;
         y/=v;
+#endif
         return (*this);
     }
 
@@ -515,6 +663,13 @@ class _SSE2_ALIGN_PRE vec2{
 INLINE_OPERATION_IMPLEMENTATION(vec2)
 
 #if defined(ARIBEIRO_SSE2)
+
+    const __m128 _vec2_zero_sse = _mm_set1_ps(0.0f);
+    const __m128 _vec2_sign_mask_sse = _mm_setr_ps(-0.f, -0.f, 0.f, 0.0f);
+    const __m128 _vec2_one_sse = _mm_setr_ps(1.0f, 1.0f, 0.0f, 0.0f);
+    const __m128 _vec2_minus_one_sse = _mm_setr_ps(-1.0f, -1.0f, 0.0f, 0.0f);
+    const __m128 _vec2_valid_bits_sse = _mm_castsi128_ps(_mm_set_epi32(0, 0, (int)0xffffffff, (int)0xffffffff));
+
     #pragma pack(pop)
 #endif
 

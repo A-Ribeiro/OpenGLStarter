@@ -27,6 +27,27 @@ int main(int argc, char* argv[]) {
 
     printf(" %f %f %f %f \n", _mm_f32_(c,0), _mm_f32_(c,1), _mm_f32_(c,2), _mm_f32_(c,3) );
 
+    const float _float_bitsign = -.0f; // -0.f = 1 << 31
+    const uint32_t _float_bitsign_uint32_t = (*(uint32_t*)(&_float_bitsign));
+    const float _float_one = 1.0f;
+    const uint32_t _float_one_uint32_t = (*(uint32_t*)(&_float_one));
+
+    float value = 99.0f;
+    uint32_t &value_int = *(uint32_t*)(&value);
+    uint32_t sign_int = (value_int & _float_bitsign_uint32_t) | _float_one_uint32_t;
+    float &sign_result = *(float*)(&sign_int);
+
+    printf("Sign: %f\n", sign_result);
+
+    const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
+    const __m128 _vec4_one_mask = _mm_set1_ps(1.0f); // -0.f = 1 << 31
+    
+    __m128 sse_value = _mm_setr_ps(-123.123f , 0.0f, 10.02f, 456.24f);
+    __m128 sign_aux = _mm_and_ps(sse_value, _vec4_sign_mask);
+    __m128 sign = _mm_or_ps(sign_aux, _vec4_one_mask);
+
+    printf("%f %f %f %f\n", sign.m128_f32[0], sign.m128_f32[1], sign.m128_f32[2], sign.m128_f32[3]);
+
 
     //return 0;
     

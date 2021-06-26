@@ -45,7 +45,7 @@ namespace GLEngine {
 
         inputcubemap->active(0);
 
-        static const aRibeiro::vec3 vertex[] = {
+        const aRibeiro::vec3 vertex[] = {
             aRibeiro::vec3(-1,-1,0),aRibeiro::vec3(-1,1,0),aRibeiro::vec3(1,1,0),
             aRibeiro::vec3(-1,-1,0),aRibeiro::vec3(1,1,0),aRibeiro::vec3(1,-1,0),
 
@@ -65,9 +65,9 @@ namespace GLEngine {
             aRibeiro::vec3(-1,-1,0),aRibeiro::vec3(1,1,0),aRibeiro::vec3(1,-1,0),
         };
 
-        static const float _min = (0.5f / (1024.0f / 2.0f) - 1.0f);
-        static const float _max = (1023.5f / (1024.0f / 2.0f) - 1.0f);
-        static const aRibeiro::vec3 uv[] = {
+        const float _min = (0.5f / (1024.0f / 2.0f) - 1.0f);
+        const float _max = (1023.5f / (1024.0f / 2.0f) - 1.0f);
+        const aRibeiro::vec3 uv[] = {
             //_posx
             aRibeiro::vec3(1,_max,_max), aRibeiro::vec3(1,_min,_max), aRibeiro::vec3(1,_min,_min),
             aRibeiro::vec3(1,_max,_max), aRibeiro::vec3(1,_min,_min), aRibeiro::vec3(1,_max,_min),

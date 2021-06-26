@@ -70,7 +70,7 @@ namespace aRibeiro {
     ARIBEIRO_INLINE float32x4_t vshuffle_0333(const float32x4_t &a)
     {
         float32x4_t r = vshuffle_3333(a);
-        //static const float32x4_t _zero = vset1(0);
+        //const float32x4_t _zero = vset1(0);
         float32x4_t _zero = vshuffle_0000(a);
         return vextq_f32(r, _zero, 1);
     }
@@ -335,12 +335,11 @@ namespace aRibeiro {
 #endif
 
 
-    static const float _float_bitsign = -.0f; // -0.f = 1 << 31
-    static const uint32_t _float_bitsign_uint32_t = (*(uint32_t*)(&_float_bitsign));
-    static const uint32_t _float_bitsign_uint32_t_neg = ~_float_bitsign_uint32_t;
-
-    static const float _float_one = 1.0f;
-    static const uint32_t _float_one_uint32_t = (*(uint32_t*)(&_float_one));
+    const float _float_bitsign = -.0f; // -0.f = 1 << 31
+    const uint32_t _float_bitsign_uint32_t = (*(uint32_t*)(&_float_bitsign));
+    const uint32_t _float_bitsign_uint32_t_neg = ~_float_bitsign_uint32_t;
+    const float _float_one = 1.0f;
+    const uint32_t _float_one_uint32_t = (*(uint32_t*)(&_float_one));
 
     /// \brief Compute the absolute value of a number
     ///
@@ -555,7 +554,11 @@ namespace aRibeiro {
         //result |= _float_one_uint32_t;
         //return *((float*)&result);
         //return a & _float_bitsign;
-        return (a >= 0) ? 1.0f : -1.0f;
+        //return (a >= 0) ? 1.0f : -1.0f;
+
+        uint32_t &value_int = *(uint32_t*)(&a);
+        uint32_t sign_int = (value_int & _float_bitsign_uint32_t) | _float_one_uint32_t;
+        return *(float*)(&sign_int);
     }
 
 

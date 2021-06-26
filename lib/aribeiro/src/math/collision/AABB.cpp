@@ -67,8 +67,8 @@ namespace collision {
     }
     //--------------------------------------------------------------------------
     AABB::AABB() {
-        static const vec3 __zero = vec3(0);
-        min_box = max_box = __zero;
+        //const vec3 __zero = vec3(0);
+        min_box = max_box = _vec3_zero_sse;
     }
     //--------------------------------------------------------------------------
     /*

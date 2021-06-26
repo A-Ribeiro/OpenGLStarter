@@ -44,7 +44,7 @@ void CGReproducer::render(float elapsedTime, const vec2 &screenCenter) {
 
     spaceInvader->render->pushProjetionAndConfigureParallel();
 
-    spaceInvader->render->model.top = mat4::IdentityMatrix;
+    spaceInvader->render->model.top = mat4_IdentityMatrix;
 
     glDisable(GL_DEPTH_TEST);
 

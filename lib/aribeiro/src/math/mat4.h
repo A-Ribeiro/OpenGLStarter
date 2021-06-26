@@ -67,8 +67,6 @@ namespace aRibeiro {
 
         }_SSE2_ALIGN_POS;
 
-        static const mat4 IdentityMatrix;///<An static Identity matrix
-
 #if defined(ARIBEIRO_SSE2)
     //special SSE2 constructor
         ARIBEIRO_INLINE mat4(const __m128 &a, const __m128 &b, const __m128 &c, const __m128 &d) {
@@ -112,8 +110,13 @@ namespace aRibeiro {
         /// \author Alessandro Ribeiro
         ///
         ARIBEIRO_INLINE mat4() {
-
-            *this = mat4::IdentityMatrix;
+            const mat4 mat4_IdentityMatrix(
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            );
+            *this = mat4_IdentityMatrix;
         }
         //---------------------------------------------------------------------------
         /// \brief Constructs a 4x4 matrix
@@ -134,15 +137,17 @@ namespace aRibeiro {
         ///
         ARIBEIRO_INLINE mat4(const float &value) {
 #if defined(ARIBEIRO_SSE2)
-            array_sse[0] = _mm_set1_ps(value);
-            array_sse[1] = array_sse[0];
-            array_sse[2] = array_sse[0];
-            array_sse[3] = array_sse[0];
+            __m128 data = _mm_set1_ps(value);
+            array_sse[0] = data;
+            array_sse[1] = data;
+            array_sse[2] = data;
+            array_sse[3] = data;
 #elif defined(ARIBEIRO_NEON)
-            array_neon[0] = vset1(value);
-            array_neon[1] = array_neon[0];
-            array_neon[2] = array_neon[0];
-            array_neon[3] = array_neon[0];
+            float32x4_t data = vset1(value);
+            array_neon[0] = data;
+            array_neon[1] = data;
+            array_neon[2] = data;
+            array_neon[3] = data;
 #else
             _11 = _12 = _13 = _14 = _21 = _22 = _23 = _24 =
                 _31 = _32 = _33 = _34 = _41 = _42 = _43 = _44 = value;
@@ -581,20 +586,20 @@ namespace aRibeiro {
 
 #if defined(ARIBEIRO_SSE2)
 
-            static const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
+            //const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
 
             __m128 diff_abs[4];
             diff_abs[0] = _mm_sub_ps(array_sse[0], v.array_sse[0]);
-            diff_abs[0] = _mm_andnot_ps(_vec4_sign_mask, diff_abs[0]); //abs
+            diff_abs[0] = _mm_andnot_ps(_vec4_sign_mask_sse, diff_abs[0]); //abs
 
             diff_abs[1] = _mm_sub_ps(array_sse[1], v.array_sse[1]);
-            diff_abs[1] = _mm_andnot_ps(_vec4_sign_mask, diff_abs[1]); //abs
+            diff_abs[1] = _mm_andnot_ps(_vec4_sign_mask_sse, diff_abs[1]); //abs
 
             diff_abs[2] = _mm_sub_ps(array_sse[2], v.array_sse[2]);
-            diff_abs[2] = _mm_andnot_ps(_vec4_sign_mask, diff_abs[2]); //abs
+            diff_abs[2] = _mm_andnot_ps(_vec4_sign_mask_sse, diff_abs[2]); //abs
 
             diff_abs[3] = _mm_sub_ps(array_sse[3], v.array_sse[3]);
-            diff_abs[3] = _mm_andnot_ps(_vec4_sign_mask, diff_abs[3]); //abs
+            diff_abs[3] = _mm_andnot_ps(_vec4_sign_mask_sse, diff_abs[3]); //abs
 
             __m128 accumulator_a = _mm_add_ps(diff_abs[0], diff_abs[1]);
             __m128 accumulator_b = _mm_add_ps(diff_abs[2], diff_abs[3]);
@@ -621,7 +626,7 @@ namespace aRibeiro {
                 return false;
 
             /*
-            //static const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+            //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
             //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
             for(int j=0;j<4;j++){
                 for(int i=0;i<4;i++){
@@ -661,7 +666,7 @@ namespace aRibeiro {
                 return false;
 
             /*
-            //static const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
+            //const __m128 epsilon = _mm_set1_ps(1e-4f); // -0.f = 1 << 31
             //_mm_shuffle_ps(mul0, mul0, _MM_SHUFFLE(2, 3, 0, 1));
             for(int j=0;j<4;j++){
                 for(int i=0;i<4;i++){
@@ -813,18 +818,18 @@ namespace aRibeiro {
 #if defined(ARIBEIRO_SSE2)
             mat4 result;
 
-            static const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
+            //const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
 
-            result.array_sse[0] = _mm_xor_ps(_vec4_sign_mask, array_sse[0]);
-            result.array_sse[1] = _mm_xor_ps(_vec4_sign_mask, array_sse[1]);
-            result.array_sse[2] = _mm_xor_ps(_vec4_sign_mask, array_sse[2]);
-            result.array_sse[3] = _mm_xor_ps(_vec4_sign_mask, array_sse[3]);
+            result.array_sse[0] = _mm_xor_ps(_vec4_sign_mask_sse, array_sse[0]);
+            result.array_sse[1] = _mm_xor_ps(_vec4_sign_mask_sse, array_sse[1]);
+            result.array_sse[2] = _mm_xor_ps(_vec4_sign_mask_sse, array_sse[2]);
+            result.array_sse[3] = _mm_xor_ps(_vec4_sign_mask_sse, array_sse[3]);
 
             return result;
 
 #elif defined(ARIBEIRO_NEON)
 
-            static const float32x4_t neg = vset1(-1.0f);
+            const float32x4_t neg = vset1(-1.0f);
 
             return mat4(
                 vmulq_f32(array_neon[0], neg),
@@ -860,6 +865,17 @@ namespace aRibeiro {
         /// \return The matrix with the division result
         ///
         ARIBEIRO_INLINE mat4& operator/=(const mat4& v) {
+#if defined(ARIBEIRO_SSE2)
+            array_sse[0] = _mm_div_ps(array_sse[0], v.array_sse[0]);
+            array_sse[1] = _mm_div_ps(array_sse[1], v.array_sse[1]);
+            array_sse[2] = _mm_div_ps(array_sse[2], v.array_sse[2]);
+            array_sse[3] = _mm_div_ps(array_sse[3], v.array_sse[3]);
+#elif defined(ARIBEIRO_NEON)
+            array_neon[0] = vdivq_f32(array_neon[0], v.array_neon[0]);
+            array_neon[1] = vdivq_f32(array_neon[0], v.array_neon[1]);
+            array_neon[2] = vdivq_f32(array_neon[0], v.array_neon[2]);
+            array_neon[3] = vdivq_f32(array_neon[0], v.array_neon[3]);
+#else
             mat4 operant(
                 1.0f / v.a1, 1.0f / v.b1, 1.0f / v.c1, 1.0f / v.d1,
                 1.0f / v.a2, 1.0f / v.b2, 1.0f / v.c2, 1.0f / v.d2,
@@ -867,6 +883,7 @@ namespace aRibeiro {
                 1.0f / v.a4, 1.0f / v.b4, 1.0f / v.c4, 1.0f / v.d4
             );
             (*this) *= operant;
+#endif
             return *this;
         }
 
@@ -1047,6 +1064,13 @@ namespace aRibeiro {
     };
 
     INLINE_OPERATION_IMPLEMENTATION(mat4)
+
+    const mat4 mat4_IdentityMatrix (
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    );
 
 #if defined(ARIBEIRO_SSE2)
 #pragma pack(pop)

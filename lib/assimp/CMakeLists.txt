@@ -40,7 +40,7 @@ PROJECT( assimp )
 
 # All supported options ###############################################
 
-OPTION( BUILD_SHARED_LIBS
+OPTION( ASSIMP_BUILD_SHARED_LIBS
   "Build package with shared libraries."
   OFF
 )
@@ -136,16 +136,16 @@ IF(MSVC)
 ENDIF(MSVC)
 
 IF (BUILD_FRAMEWORK)
-  SET (BUILD_SHARED_LIBS ON)
+  SET (ASSIMP_BUILD_SHARED_LIBS ON)
   MESSAGE(STATUS "Framework bundle building enabled")
 ENDIF(BUILD_FRAMEWORK)
 
-IF(NOT BUILD_SHARED_LIBS)
+IF(NOT ASSIMP_BUILD_SHARED_LIBS)
   MESSAGE(STATUS "Shared libraries disabled")
   SET(LINK_SEARCH_START_STATIC TRUE)
 ELSE()
   MESSAGE(STATUS "Shared libraries enabled")
-ENDIF(NOT BUILD_SHARED_LIBS)
+ENDIF(NOT ASSIMP_BUILD_SHARED_LIBS)
 
 # Define here the needed parameters
 SET (ASSIMP_VERSION_MAJOR 4)
@@ -365,6 +365,7 @@ IF( NOT ZLIB_FOUND )
   SET(ZLIB_FOUND 1)
   set(ZLIB_LIBRARY )
   #set(ZLIB_LIBRARY zlib )
+  set(ZLIB_LIBRARIES zlib)
   set(ZLIB_INCLUDE_DIR ${CMAKE_HOME_DIRECTORY}/include/zlib )
   
   
@@ -382,11 +383,11 @@ IF ( NOT IOS )
       use_pkgconfig(UNZIP minizip)
   ENDIF( NOT ASSIMP_BUILD_MINIZIP )
 ELSE ( NOT IOS )
-    IF(NOT BUILD_SHARED_LIBS)
+    IF(NOT ASSIMP_BUILD_SHARED_LIBS)
     IF( NOT ASSIMP_BUILD_MINIZIP )
           use_pkgconfig(UNZIP minizip)
     ENDIF( NOT ASSIMP_BUILD_MINIZIP )
-    ENDIF (NOT BUILD_SHARED_LIBS)
+    ENDIF (NOT ASSIMP_BUILD_SHARED_LIBS)
 ENDIF ( NOT IOS )
 
 IF ( ASSIMP_NO_EXPORT )

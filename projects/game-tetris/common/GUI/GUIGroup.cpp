@@ -80,7 +80,7 @@ void GUIGroup::render(const unsigned int time_ms, const bool showCursor) {
     render->projection.push();
     render->model.push();
 
-    render->projection.top = mat4::IdentityMatrix;
+    render->projection.top = mat4_IdentityMatrix;
     render->model.top = translate(-1, -1, 0) * scale(screenRes_inv.x, screenRes_inv.y, 1);
 
     GLboolean depthTest;

@@ -33,8 +33,8 @@ App::App(sf::RenderWindow *window, int w, int h):
     shaderVertexColor = new GLShaderVertexColor();
 
     //initialize all matrix
-    projection = mat4::IdentityMatrix;
-    //camera = mat4::IdentityMatrix;
+    projection = mat4_IdentityMatrix;
+    //camera = mat4_IdentityMatrix;
 
     //initialize auxiliary variables
     //cameraPosition = vec3(0.0f,5.0f,10.0f);

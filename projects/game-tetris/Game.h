@@ -710,7 +710,7 @@ public:
             projection_perspective_rh_negative_one(45.0, center.x / center.y, 0.001, 1000) *
             scale(0.001, 0.001, 0.001);
 
-        render->model.top = mat4::IdentityMatrix;
+        render->model.top = mat4_IdentityMatrix;
 
         //glMatrixMode(GL_PROJECTION);
         //glPushMatrix();

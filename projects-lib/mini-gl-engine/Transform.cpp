@@ -863,10 +863,10 @@ namespace GLEngine {
         localRotation = quat();
         localScale = vec3(1.0f);
         
-        localRotationBase = mat4::IdentityMatrix;
-        localMatrix = mat4::IdentityMatrix;
-        localMatrixInverseTranspose = mat4::IdentityMatrix;
-        localMatrixInverse = mat4::IdentityMatrix;
+        localRotationBase = mat4_IdentityMatrix;
+        localMatrix = mat4_IdentityMatrix;
+        localMatrixInverseTranspose = mat4_IdentityMatrix;
+        localMatrixInverse = mat4_IdentityMatrix;
         
         localRotationBaseDirty = false;
         localMatrixDirty = false;
@@ -874,24 +874,24 @@ namespace GLEngine {
         localMatrixInverseDirty = false;
         
         matrixDirty = false;
-        matrix = mat4::IdentityMatrix;
-        matrixParent = mat4::IdentityMatrix;
+        matrix = mat4_IdentityMatrix;
+        matrixParent = mat4_IdentityMatrix;
         matrixInverseTransposeDirty = false;
-        matrixInverseTranspose = mat4::IdentityMatrix;
-        //matrixInverseTransposeParent = mat4::IdentityMatrix;
+        matrixInverseTranspose = mat4_IdentityMatrix;
+        //matrixInverseTransposeParent = mat4_IdentityMatrix;
         matrixInverseDirty = false;
-        matrixInverse = mat4::IdentityMatrix;
-        matrixInverseParent = mat4::IdentityMatrix;
+        matrixInverse = mat4_IdentityMatrix;
+        matrixInverseParent = mat4_IdentityMatrix;
         
         //model = NULL;
         
         visited = true;
         
-        renderMVP = mat4::IdentityMatrix;
-        renderMV = mat4::IdentityMatrix;
-        renderMVIT = mat4::IdentityMatrix;
-        renderMVInv = mat4::IdentityMatrix;
-        renderViewProjection = mat4::IdentityMatrix;
+        renderMVP = mat4_IdentityMatrix;
+        renderMV = mat4_IdentityMatrix;
+        renderMVIT = mat4_IdentityMatrix;
+        renderMVInv = mat4_IdentityMatrix;
+        renderViewProjection = mat4_IdentityMatrix;
         
         renderDirty = true;
     }

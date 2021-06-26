@@ -369,8 +369,8 @@ public:
 
             glDisable(GL_DEPTH_TEST);
 
-            render->projection.top = mat4::IdentityMatrix;
-            render->model.top = mat4::IdentityMatrix;
+            render->projection.top = mat4_IdentityMatrix;
+            render->model.top = mat4_IdentityMatrix;
 
             drawNormalizedMappedQuad();
 
@@ -407,7 +407,7 @@ public:
 
         GUIGroup::render(time_ms, false);
 
-        render->projection.top = mat4::IdentityMatrix;
+        render->projection.top = mat4_IdentityMatrix;
         render->model.top = translate(-1, -1, 0) * scale(screenRes_inv.x, screenRes_inv.y, 1);
 
         char txt[32];
@@ -559,7 +559,7 @@ public:
             frameCount = 0;
         }
 
-        render->projection.top = mat4::IdentityMatrix;
+        render->projection.top = mat4_IdentityMatrix;
         render->model.top = translate(-1, -1, 0) * scale(screenRes_inv.x, screenRes_inv.y, 1);
 
 
