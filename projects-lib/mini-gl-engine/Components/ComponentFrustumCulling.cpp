@@ -29,7 +29,7 @@ namespace GLEngine {
                 
                 sphere = collision::Sphere(
                                         toVec3(m * toPtn4(sphereCenter)),
-                                        sphereRadius * maximum(maximum(scale.x, scale.y), scale.z)
+                                        sphereRadius * maximum(scale)
                                         );
             } else if (cullingShape == CullingShapeAABB){
                 mat4 &m = transform[0]->getMatrix(visitedFlag);
