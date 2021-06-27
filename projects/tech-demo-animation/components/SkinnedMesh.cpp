@@ -337,7 +337,7 @@ namespace GLEngine {
 
 
             std::vector<Component*> all_materials = model_base->findComponentsInChildren(ComponentMaterial::Type);
-            ARIBEIRO_ABORT(all_materials.size() != 1, "Trying to load a skinned model with %i material data (it must be 1).\n", all_materials.size());
+            ARIBEIRO_ABORT(all_materials.size() != 1, "Trying to load a skinned model with %lu material data (it must be 1).\n", all_materials.size());
             componentMaterial = (ComponentMaterial*)all_materials[0];
 
             if (isGPUSkinning) {

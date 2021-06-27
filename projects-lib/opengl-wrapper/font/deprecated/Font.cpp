@@ -55,23 +55,32 @@ namespace openglWrapper {
         FILE* in = fopen(basofFile, "rb");
         if (in) {
             FontFileBinHeader binHeader;
-            fread(&binHeader, sizeof(FontFileBinHeader), 1, in);
+            size_t readed_size;
+            readed_size = fread(&binHeader, sizeof(FontFileBinHeader), 1, in);
+            ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
             if (memcmp(&binHeader, ".asilva.lum.font", 16) == 0) {
                 //valid basof file :)
 
                 //byte order -- the default pack for structs is 4bytes align ... there are 5 shorts... in the structure (unaligned...)
                 //   to read correctly -- need short by short reading.
-                fread(&result->mHeader.mTexW, sizeof(short), 1, in);//texW
-                fread(&result->mHeader.mTexH, sizeof(short), 1, in);//texH
-                fread(&result->mHeader.nSpaceWidth, sizeof(short), 1, in);
-                fread(&result->mHeader.mGlyphHeight, sizeof(short), 1, in);//new line height
-                fread(&result->mHeader.mGlyphCount, sizeof(unsigned short), 1, in);//numberOfGlyphs
+                readed_size = fread(&result->mHeader.mTexW, sizeof(short), 1, in);//texW
+                ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
+                readed_size = fread(&result->mHeader.mTexH, sizeof(short), 1, in);//texH
+                ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
+                readed_size = fread(&result->mHeader.nSpaceWidth, sizeof(short), 1, in);
+                ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
+                readed_size = fread(&result->mHeader.mGlyphHeight, sizeof(short), 1, in);//new line height
+                ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
+                readed_size = fread(&result->mHeader.mGlyphCount, sizeof(unsigned short), 1, in);//numberOfGlyphs
+                ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
 
                 for (int i = 0; i < result->mHeader.mGlyphCount; i++) {
                     UTF32 c;
                     FontGlyphInfo glyphInfo;
-                    fread(&c, sizeof(UTF32), 1, in);
-                    fread(&glyphInfo, sizeof(glyphInfo), 1, in);
+                    readed_size = fread(&c, sizeof(UTF32), 1, in);
+                    ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
+                    readed_size = fread(&glyphInfo, sizeof(glyphInfo), 1, in);
+                    ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
                     result->mGlyphs[c] = glyphInfo;
                 }
 
@@ -83,10 +92,12 @@ namespace openglWrapper {
                 unsigned int bufferInsertPos = 0;
                 while (!feof(in) && bufferInsertPos < bufferTotalSize) {
                     char c;
-                    fread(&c, sizeof(char), 1, in);
+                    readed_size = fread(&c, sizeof(char), 1, in);
+                    ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
                     if (c == '\x00' || c == '\xff') {
                         //rle decompress
-                        fread(&rle_count, sizeof(char), 1, in);
+                        readed_size = fread(&rle_count, sizeof(char), 1, in);
+                        ARIBEIRO_ABORT(readed_size != 1, "Error to read basof file.\n");
                         memset(&result->luminancePointer[bufferInsertPos], (unsigned char)c, rle_count);
                         bufferInsertPos += rle_count;
                     }
