@@ -26,7 +26,7 @@ add_library( ${PROJECT_NAME} STATIC ${PUBLIC_HEADERS} ${PRIVATE_HEADERS} ${SRC} 
 # set the target's folder (for IDEs that support it, e.g. Visual Studio)
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "LIBS")
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC -DGLEW_STATIC)
+target_compile_definitions(${PROJECT_NAME} PUBLIC -DGLEW_STATIC -DGLEW_NO_GLU)
 
 #if(OS_TARGET STREQUAL win)
 

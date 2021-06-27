@@ -9,41 +9,41 @@
 
 namespace model {
 
-    enum VertexFormat {
-        CONTAINS_POS = (1 << 0), // float3 position
-        CONTAINS_NORMAL = (1 << 1), // float3 normal
-        CONTAINS_BINORMAL = (1 << 2), // float3 binormal
-        CONTAINS_TANGENT = (1 << 3), // float3 tangent
-        //CONTAINS_COL = (1 << 4), // unsigned byte 4 color
+    //enum VertexFormat {
+        const uint32_t CONTAINS_POS = (1 << 0); // float3 position
+        const uint32_t CONTAINS_NORMAL = (1 << 1); // float3 normal
+        const uint32_t CONTAINS_BINORMAL = (1 << 2); // float3 binormal
+        const uint32_t CONTAINS_TANGENT = (1 << 3); // float3 tangent
+        //CONTAINS_COL = (1 << 4); // unsigned byte 4 color
 
-        CONTAINS_UV0 = (1 << 5), // float2
-        CONTAINS_UV1 = (1 << 6), // float2
-        CONTAINS_UV2 = (1 << 7), // float2
-        CONTAINS_UV3 = (1 << 8), // float2
-        CONTAINS_UV4 = (1 << 9), // float2
-        CONTAINS_UV5 = (1 << 10), // float2
-        CONTAINS_UV6 = (1 << 11), // float2
-        CONTAINS_UV7 = (1 << 12), // float2
+        const uint32_t CONTAINS_UV0 = (1 << 5); // float2
+        const uint32_t CONTAINS_UV1 = (1 << 6); // float2
+        const uint32_t CONTAINS_UV2 = (1 << 7); // float2
+        const uint32_t CONTAINS_UV3 = (1 << 8); // float2
+        const uint32_t CONTAINS_UV4 = (1 << 9); // float2
+        const uint32_t CONTAINS_UV5 = (1 << 10); // float2
+        const uint32_t CONTAINS_UV6 = (1 << 11); // float2
+        const uint32_t CONTAINS_UV7 = (1 << 12); // float2
 
-        CONTAINS_COLOR0 = (1 << 13), // byte4
-        CONTAINS_COLOR1 = (1 << 14), // byte4
-        CONTAINS_COLOR2 = (1 << 15), // byte4
-        CONTAINS_COLOR3 = (1 << 16), // byte4
-        CONTAINS_COLOR4 = (1 << 17), // byte4
-        CONTAINS_COLOR5 = (1 << 18), // byte4
-        CONTAINS_COLOR6 = (1 << 19), // byte4
-        CONTAINS_COLOR7 = (1 << 20), // byte4
+        const uint32_t CONTAINS_COLOR0 = (1 << 13); // byte4
+        const uint32_t CONTAINS_COLOR1 = (1 << 14); // byte4
+        const uint32_t CONTAINS_COLOR2 = (1 << 15); // byte4
+        const uint32_t CONTAINS_COLOR3 = (1 << 16); // byte4
+        const uint32_t CONTAINS_COLOR4 = (1 << 17); // byte4
+        const uint32_t CONTAINS_COLOR5 = (1 << 18); // byte4
+        const uint32_t CONTAINS_COLOR6 = (1 << 19); // byte4
+        const uint32_t CONTAINS_COLOR7 = (1 << 20); // byte4
 
         // PAIR MATRIX[*] + PAIR float4(vertexindex) float4(weight)
-        CONTAINS_VERTEX_WEIGHT16 = (1 << 27),
-        CONTAINS_VERTEX_WEIGHT32 = (1 << 28),
-        CONTAINS_VERTEX_WEIGHT64 = (1 << 29),
-        CONTAINS_VERTEX_WEIGHT96 = (1 << 30),
-        CONTAINS_VERTEX_WEIGHT128 = (1 << 31),
+        const uint32_t CONTAINS_VERTEX_WEIGHT16 = (1 << 27);
+        const uint32_t CONTAINS_VERTEX_WEIGHT32 = (1 << 28);
+        const uint32_t CONTAINS_VERTEX_WEIGHT64 = (1 << 29);
+        const uint32_t CONTAINS_VERTEX_WEIGHT96 = (1 << 30);
+        const uint32_t CONTAINS_VERTEX_WEIGHT128 = (1 << 31);
 
-        CONTAINS_VERTEX_WEIGHT_ANY = CONTAINS_VERTEX_WEIGHT16 | CONTAINS_VERTEX_WEIGHT32 | CONTAINS_VERTEX_WEIGHT64 | CONTAINS_VERTEX_WEIGHT96 | CONTAINS_VERTEX_WEIGHT128
+        const uint32_t CONTAINS_VERTEX_WEIGHT_ANY = CONTAINS_VERTEX_WEIGHT16 | CONTAINS_VERTEX_WEIGHT32 | CONTAINS_VERTEX_WEIGHT64 | CONTAINS_VERTEX_WEIGHT96 | CONTAINS_VERTEX_WEIGHT128;
 
-    };
+    //};
 
     class _SSE2_ALIGN_PRE Geometry {
 
