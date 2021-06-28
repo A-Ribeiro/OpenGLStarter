@@ -605,7 +605,8 @@ namespace aRibeiro {
 #if defined(ARIBEIRO_SSE2)
 #if true
 
-        return _mm_f32_(_mm_dp_ps(a.array_sse, b.array_sse, 0x33),0);
+        __m128 dp = _mm_dp_ps(a.array_sse, b.array_sse, 0x33);
+        return _mm_f32_(dp,0);
 
 #elif defined(_MSC_VER) || true
         __m128 mul0 = _mm_mul_ps(a.array_sse, b.array_sse);
@@ -1577,7 +1578,8 @@ namespace aRibeiro {
         //const __m128 _vec4_sign_mask = _mm_set1_ps(-0.f); // -0.f = 1 << 31
         dot0 = _mm_andnot_ps(_vec4_sign_mask_sse, dot0);
 
-        __m128 cosA = clamp_sse_4(dot0, _vec4_minus_one_sse, _vec4_one_sse);
+        //__m128 cosA = clamp_sse_4(dot0, _vec4_minus_one_sse, _vec4_one_sse);
+        __m128 cosA = _mm_min_ps(dot0, _vec4_one_sse);
         
         return acos(_mm_f32_(cosA, 0)) * 2.0f;
 #elif defined(ARIBEIRO_NEON)
@@ -1586,11 +1588,13 @@ namespace aRibeiro {
 
         float32x4_t dot0 = dot_neon_4(normalize(a).array_neon, normalize(b).array_neon);
         dot0 = vabsq_f32(dot0);
-        float32x4_t cosA = clamp_neon_4(dot0, _minus_one, _one);
+        //float32x4_t cosA = clamp_neon_4(dot0, _minus_one, _one);
+        float32x4_t cosA = vminq_f32(dot0, _one);
+        
         return acos(cosA[0]) * 2.0f;
 #else
         return acos(
-            clamp(absv(dot(normalize(a), normalize(b))), -1.0f, 1.0f)
+            minimum(absv(dot(normalize(a), normalize(b))), 1.0f)
         ) * 2.0f;
         //return acos( dot(normalize(vec3(a.x, a.y, a.z)), normalize(vec3(b.x, b.y, b.z))) );
 #endif
