@@ -1,0 +1,11 @@
+#pragma once
+
+// "For this is how God loved the world:
+// he gave his only Son, so that everyone
+// who believes in him may not perish
+// but may have eternal life."
+//
+// John 3:16
+
+@configure_COMPILE_DEFINITIONS@
+

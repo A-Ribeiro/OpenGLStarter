@@ -1,0 +1,30 @@
+
+#################
+# CMake folders #
+#################
+
+/build/
+/include/
+#/libs/
+/libs/3rdparty
+
+
+######################
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Visual Code Editor
+/.vscode/
+
+#/docs/
+
+buildFlags.h
+
+/valgrind-out.txt

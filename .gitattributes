@@ -1,0 +1,35 @@
+# Autodetect text files
+* text=auto
+
+# ...Unless the name matches the following
+# overriding patterns
+
+# Definitively text files 
+*.txt text
+*.bat text
+*.cs text
+*.sln text
+*.config text
+*.csproj text
+*.js text
+*.css text
+*.php text
+*.html text
+*.json text
+*.url text
+*.xml text
+*.java text
+
+# Ensure those won't be messed up with
+*.jpg binary
+*.png binary
+*.exe binary
+*.dll binary
+*.data binary
+*.gif binary
+*.zip binary
+*.woff2 binary
+*.apk binary
+*.jar binary
+*.pptx binary
+

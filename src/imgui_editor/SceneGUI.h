@@ -1,0 +1,42 @@
+#pragma once
+
+#include <appkit-gl-engine/AppBase/SceneBase.h>
+#include <appkit-gl-engine/util/Button.h>
+
+class App;
+
+class SceneGUI : public AppKit::GLEngine::SceneBase {
+protected:
+    //to load skybox, textures, cubemaps, 3DModels and setup materials
+    virtual void loadResources();
+    //to load the scene graph
+    virtual void loadGraph();
+    //to bind the resources to the current graph
+    virtual void bindResourcesToGraph();
+
+    //clear all loaded scene
+    virtual void unloadAll();
+    
+    AppKit::OpenGL::GLTexture *cursorTexture;
+    AppKit::OpenGL::GLFont2Builder fontBuilder;
+
+public:
+
+    AppKit::GLEngine::Components::ComponentFontToMesh* fps;
+    float f_fps;
+
+    AppKit::GLEngine::Transform* cursorTransform;
+
+    App *app;
+    AppKit::GLEngine::RenderWindowRegion *renderWindow;
+
+    SceneGUI(App *app, AppKit::GLEngine::RenderWindowRegion *renderWindow);
+    ~SceneGUI();
+
+    virtual void draw();
+
+    void OnUpdate(Platform::Time *time);
+
+    void OnViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue);
+};
+

@@ -1,0 +1,33 @@
+{
+    "title": "Service Testing Types",
+    "entries": [
+        {
+            "type":"service",
+            "name":"Windows Notepad",
+            "command":"notepad",
+            "args":"",
+            "has_windows_special_signal":false
+        },
+        {
+            "type":"service",
+            "name":"MacOS Terminal",
+            "command":"/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+            "args":"./",
+            "has_windows_special_signal":false
+        },
+        {
+            "type":"run_once",
+            "name":"RunOnce (exit: 5s)",
+            "command":"imgui-example",
+            "args":"",
+            "timeout_ms":5000
+        },
+        {
+            "type":"run_once",
+            "name":"gnome-terminal admin",
+            "command":"gnome-terminal",
+            "args":"-- sudo bash",
+            "timeout_ms":60000
+        }
+    ]
+}

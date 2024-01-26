@@ -1,0 +1,56 @@
+#include "Inspector.h"
+#include "../ImGuiMenu.h"
+#include "../ImGuiManager.h"
+
+Inspector::Inspector() : View()
+{
+}
+Inspector::~Inspector() {
+    clearComponents();
+}
+
+void Inspector::addComponent(InspectorImGuiComponent*v) {
+    components.push_back(v);
+}
+void Inspector::removeComponent(InspectorImGuiComponent*v) {
+    for (auto it = components.begin(); it != components.end(); it++)
+    {
+        if ((*it) == v) {
+            components.erase(it);
+            return;
+        }
+    }
+}
+void Inspector::clearComponents() {
+    for (auto& v : components)
+        if (v != NULL)
+            delete v;
+    components.clear();
+}
+
+View* Inspector::Init()
+{
+    addComponent(new InspectorImGuiComponent_Transform());
+    addComponent(new InspectorImGuiComponent_Transform());
+
+	ImGuiMenu::Instance()->AddMenu(
+		"Window/Inspector", "", [this]()
+		{ printf("Window/Inspector\n"); },
+		&this->active);
+	return this;
+}
+
+void Inspector::RenderAndLogic()
+{
+	if (!active)
+		return;
+	auto flags = ImGuiWindowFlags_NoCollapse; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	if (ImGui::Begin("Inspector", NULL, flags))
+	{
+        for (size_t i=0;i<components.size();i++)
+            components[i]->renderAndLogic(i);
+	}
+	ImGui::End();
+    ImGui::PopStyleVar();
+}

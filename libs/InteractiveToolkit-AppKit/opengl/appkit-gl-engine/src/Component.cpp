@@ -1,0 +1,66 @@
+#include <appkit-gl-engine/Component.h>
+#include <appkit-gl-engine/Transform.h>
+
+#include <appkit-gl-engine/StartEventManager.h>
+
+
+#include <appkit-gl-engine/SharedPointer/SharedPointerDatabase.h>
+
+namespace AppKit
+{
+    namespace GLEngine
+    {
+
+        Component::Component(const Component &v) {}
+        void Component::operator=(const Component &v) {}
+
+        Component::Component(ComponentType type)
+        {
+            this->type_const_ref = type;
+            // transform = NULL;
+            // mStartCalled = false;
+            StartEventManager::Instance()->registerNewComponent(this);
+        }
+
+        ComponentType Component::getType() const
+        {
+            return type_const_ref;
+            // return type.c_str();
+        }
+
+        bool Component::compareType(ComponentType t) const
+        {
+            return (type_const_ref == t);
+            // if (type_const_ref == t)
+            // return true;
+            // return strcmp(type_const_ref,t) == 0;
+        }
+
+        Component::~Component()
+        {
+            SharedPointerDatabase::Instance()->notifyDeletion(this);
+            StartEventManager::Instance()->unregisterComponent(this);
+        }
+
+        void Component::start()
+        {
+        }
+
+        // void Component::callStartOnce() {
+        //     if (mStartCalled)
+        //         return;
+        //     mStartCalled = true;
+        //     start();
+        // }
+
+        void Component::attachToTransform(Transform *t)
+        {
+        }
+
+        void Component::detachFromTransform(Transform *t)
+        {
+        }
+
+    }
+
+}
