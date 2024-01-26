@@ -53,15 +53,9 @@ git submodule update
 
 ## Related Links
 
-https://github.com/A-Ribeiro/aRibeiroCore
+https://github.com/A-Ribeiro/InteractiveToolkit
 
-https://github.com/A-Ribeiro/aRibeiroPlatform
-
-https://github.com/A-Ribeiro/aRibeiroData
-
-https://github.com/A-Ribeiro/aRibeiroWrappers
-
-https://github.com/A-Ribeiro/aRibeiroTests
+https://github.com/A-Ribeiro/InteractiveToolkit-Extension
 
 ## Tools
 
