@@ -148,6 +148,12 @@ void MainScene::bindResourcesToGraph(){
     // call resize
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
     resize( engine->app->window->getSize() );
+
+    //Add AABB for all meshs...
+    {
+        //root->traversePreOrder_DepthFirst( AddAABBMesh );
+        resourceHelper->addAABBMesh(root);
+    }
 }
 
 //clear all loaded scene
@@ -185,6 +191,8 @@ void MainScene::draw() {
             uint8_t* in_buffer = (uint8_t*)data_buffer.data;
             uint8_t* out_buffer = (uint8_t*)aux_rgb_buffer.data;
             
+            //memset(aux_rgb_buffer.data, 128, 1920 * 1080 * 4);
+
             m_YUV2RGB_Multithread.yuy2_to_rgba(in_buffer, out_buffer, 1920, 1080);
             /*
             for (int y = 0; y < 1080; y++) {

@@ -112,26 +112,37 @@ public:
         int division = jobDivider;
         int h_per_block = height / jobDivider; // +(((height % jobDivider) > 0) ? 1 : 0);
 
-        if (height % jobDivider)
-        {
-            // or we choose divison + 1 or we choose h_per_block + 1
-            int div_plus_1_total = (division + 1) * h_per_block;
-            int h_per_block_plus_1_total = division * (h_per_block + 1);
-            if (div_plus_1_total < h_per_block_plus_1_total)
-                division++;
-            else
-                h_per_block++;
-        }
+        if (h_per_block == 0)
+            h_per_block++;
 
-        for (int block = 0; block < division; block++)
+        // if (height % jobDivider)
+        // {
+        //     // or we choose divison + 1 or we choose h_per_block + 1
+        //     int div_plus_1_total = (division + 1) * h_per_block;
+        //     int h_per_block_plus_1_total = division * (h_per_block + 1);
+        //     if (div_plus_1_total < h_per_block_plus_1_total)
+        //         division++;
+        //     else
+        //         h_per_block++;
+        // }
+
+        int block = 0;
+
+        job.block = block;
+        job.blockStart = block * h_per_block;
+        job.blockEnd = (block + 1) * h_per_block;
+
+        while (job.blockStart < height)
         {
-            job.block = block;
-            job.blockStart = block * h_per_block;
-            job.blockEnd = (block + 1) * h_per_block;
             if (height < job.blockEnd)
                 job.blockEnd = height;
 
             queue.enqueue(job);
+
+            block++;
+            job.block = block;
+            job.blockStart = block * h_per_block;
+            job.blockEnd = (block + 1) * h_per_block;
         }
 
         for (int block = 0; block < division; block++)
