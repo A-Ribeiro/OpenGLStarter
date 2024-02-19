@@ -4,6 +4,7 @@
 #include <appkit-gl-engine/util/Button.h>
 
 #include <InteractiveToolkit/Platform/IPC/LowLatencyQueueIPC.h>
+#include <InteractiveToolkit-Extension/image/PNG.h>
 
 ITK_INLINE
 static int iClamp(int v)
@@ -91,6 +92,8 @@ public:
                     job.out_buffer[index * 4 + 0] = YUV2RO(y, u, v);
                     job.out_buffer[index * 4 + 1] = YUV2GO(y, u, v);
                     job.out_buffer[index * 4 + 2] = YUV2BO(y, u, v);
+                    job.out_buffer[index * 4 + 3] = 255;
+
                 }
             }
 
@@ -126,6 +129,7 @@ public:
         //         h_per_block++;
         // }
 
+        int jobs_dispatched = 0;
         int block = 0;
 
         job.block = block;
@@ -139,14 +143,24 @@ public:
 
             queue.enqueue(job);
 
-            block++;
+            jobs_dispatched ++;
+            block ++;
             job.block = block;
             job.blockStart = block * h_per_block;
             job.blockEnd = (block + 1) * h_per_block;
         }
 
-        for (int block = 0; block < division; block++)
+        for (int block = 0; block < jobs_dispatched; block++)
             semaphore.blockingAcquire();
+
+        // job.blockStart = 0;
+        // job.blockEnd = height;
+
+        // queue.enqueue(job);
+        // semaphore.blockingAcquire();
+
+        // ITKExtension::Image::PNG::writePNG("output.png", width*2, height, 1, (char*)in_buffer);
+        // ITK_ABORT(true,"Exit\n");
     }
 
     YUV2RGB_Multithread(int threadCount, int jobDivider) : semaphore(0)
