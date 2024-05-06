@@ -351,22 +351,21 @@ namespace AppKit
             sf::WindowBase *window = static_cast<sf::WindowBase *>(usr1Handle);
 
             sf::Event event;
-            while (window->isOpen() && window->pollEvent(event))
+            event = window->pollEvent();
+            while (window->isOpen() && event)
             {
 
                 // check if need to sleep and wait for other window events
                 if (!alwaysDraw)
                 {
-                    if (!window->hasFocus() && event.type != sf::Event::Closed && event.type != sf::Event::Resized)
+                    if (!window->hasFocus() && event.is<sf::Event::Closed>() && event.is<sf::Event::Resized>())
                     {
                         Platform::Sleep::millis(100);
                         continue;
                     }
                 }
 
-                switch (event.type)
-                {
-                case sf::Event::Closed:
+                if (event.is<sf::Event::Closed>())
                 { //!< The window requested to be closed (no data)
                     WindowEvent windowEvent;
                     memset(&windowEvent, 0, sizeof(WindowEvent));
@@ -375,17 +374,18 @@ namespace AppKit
                     targetInputManager->onWindowEvent(windowEvent);
                     break;
                 }
-                case sf::Event::Resized:
+                else if (event.is<sf::Event::Resized>())
                 { //!< The window was resized (data in event.size)
+                    auto value = event.getIf<sf::Event::Resized>();
                     WindowEvent windowEvent;
                     memset(&windowEvent, 0, sizeof(WindowEvent));
                     windowEvent.window = this;
                     windowEvent.type = WindowEventType::Resized;
-                    windowEvent.resized = MathCore::vec2i(event.size.width, event.size.height);
+                    windowEvent.resized = MathCore::vec2i(value->size.x, value->size.y);
                     targetInputManager->onWindowEvent(windowEvent);
                     break;
                 }
-                case sf::Event::LostFocus:
+                else if (event.is<sf::Event::FocusLost>())
                 { //!< The window lost the focus (no data)
                     WindowEvent windowEvent;
                     memset(&windowEvent, 0, sizeof(WindowEvent));
@@ -394,7 +394,7 @@ namespace AppKit
                     targetInputManager->onWindowEvent(windowEvent);
                     break;
                 }
-                case sf::Event::GainedFocus:
+                else if (event.is<sf::Event::FocusGained>())
                 { //!< The window gained the focus (no data)
                     WindowEvent windowEvent;
                     memset(&windowEvent, 0, sizeof(WindowEvent));
@@ -403,93 +403,100 @@ namespace AppKit
                     targetInputManager->onWindowEvent(windowEvent);
                     break;
                 }
-                case sf::Event::TextEntered:
+                else if (event.is<sf::Event::TextEntered>())
                 { //!< A character was entered (data in event.text)
+                    auto value = event.getIf<sf::Event::TextEntered>();
                     WindowEvent windowEvent;
                     memset(&windowEvent, 0, sizeof(WindowEvent));
                     windowEvent.window = this;
                     windowEvent.type = WindowEventType::TextEntered;
-                    windowEvent.textEntered = event.text.unicode;
+                    windowEvent.textEntered = value->unicode;
                     targetInputManager->onWindowEvent(windowEvent);
                     break;
                 }
-                case sf::Event::KeyPressed:
+                else if (event.is<sf::Event::KeyPressed>())
                 { //!< A key was pressed (data in event.key)
-                    if ((int)event.key.code < 0 || (int)event.key.code >= (int)Devices::KeyCode::Count)
+                    auto value = event.getIf<sf::Event::KeyPressed>();
+                    if ((int)value->code < 0 || (int)value->code >= (int)Devices::KeyCode::Count)
                         break;
                     KeyboardEvent keyboardEvent;
                     memset(&keyboardEvent, 0, sizeof(KeyboardEvent));
                     keyboardEvent.type = KeyboardEventType::KeyPressed;
-                    keyboardEvent.code = reverse_key_mapping[(int)event.key.code];
-                    keyboardEvent.alt = event.key.alt;
-                    keyboardEvent.control = event.key.control;
-                    keyboardEvent.shift = event.key.shift;
-                    keyboardEvent.system = event.key.system;
+                    keyboardEvent.code = reverse_key_mapping[(int)value->code];
+                    keyboardEvent.alt = value->alt;
+                    keyboardEvent.control = value->control;
+                    keyboardEvent.shift = value->shift;
+                    keyboardEvent.system = value->system;
                     targetInputManager->onKeyboardEvent(keyboardEvent);
                     break;
                 }
-                case sf::Event::KeyReleased:
+                else if (event.is<sf::Event::KeyReleased>())
                 { //!< A key was released (data in event.key)
-                    if ((int)event.key.code < 0 || (int)event.key.code >= (int)Devices::KeyCode::Count)
+                    auto value = event.getIf<sf::Event::KeyReleased>();
+                    if ((int)value->code < 0 || (int)value->code >= (int)Devices::KeyCode::Count)
                         break;
                     KeyboardEvent keyboardEvent;
                     memset(&keyboardEvent, 0, sizeof(KeyboardEvent));
                     keyboardEvent.type = KeyboardEventType::KeyReleased;
-                    keyboardEvent.code = reverse_key_mapping[(int)event.key.code];
-                    keyboardEvent.alt = event.key.alt;
-                    keyboardEvent.control = event.key.control;
-                    keyboardEvent.shift = event.key.shift;
-                    keyboardEvent.system = event.key.system;
+                    keyboardEvent.code = reverse_key_mapping[(int)value->code];
+                    keyboardEvent.alt = value->alt;
+                    keyboardEvent.control = value->control;
+                    keyboardEvent.shift = value->shift;
+                    keyboardEvent.system = value->system;
                     targetInputManager->onKeyboardEvent(keyboardEvent);
                     break;
                 }
-                case sf::Event::MouseWheelScrolled:
+                else if (event.is<sf::Event::MouseWheelScrolled>())
                 { //!< The mouse wheel was scrolled (data in event.mouseWheelScroll)
+                    auto value = event.getIf<sf::Event::MouseWheelScrolled>();
                     MouseEvent mouseEvent;
                     memset(&mouseEvent, 0, sizeof(MouseEvent));
-                    if (event.mouseWheelScroll.wheel == sf::Mouse::Wheel::Horizontal)
+                    if (value->wheel == sf::Mouse::Wheel::Horizontal)
                         mouseEvent.type = MouseEventType::HorizontalWheelScrolled;
                     else
                         mouseEvent.type = MouseEventType::VerticalWheelScrolled;
-                    mouseEvent.position = MathCore::vec2i(event.mouseWheelScroll.x, event.mouseWheelScroll.y);
-                    mouseEvent.wheelDelta = event.mouseWheelScroll.delta;
+                    mouseEvent.position = MathCore::vec2i(value->position.x, value->position.y);
+                    mouseEvent.wheelDelta = value->delta;
                     targetInputManager->onMouseEvent(mouseEvent);
                     break;
                 }
-                case sf::Event::MouseButtonPressed:
+                else if (event.is<sf::Event::MouseButtonPressed>())
                 { //!< A mouse button was pressed (data in event.mouseButton)
-                    if ((int)event.mouseButton.button >= (int)Devices::MouseButton::Count)
+                    auto value = event.getIf<sf::Event::MouseButtonPressed>();
+                    if ((int)value->button >= (int)Devices::MouseButton::Count)
                         break;
                     MouseEvent mouseEvent;
                     memset(&mouseEvent, 0, sizeof(MouseEvent));
                     mouseEvent.type = MouseEventType::ButtonPressed;
-                    mouseEvent.position = MathCore::vec2i(event.mouseButton.x, event.mouseButton.y);
-                    mouseEvent.button = reverse_mouse_btn_mapping[(int)event.mouseButton.button];
+                    mouseEvent.position = MathCore::vec2i(value->position.x, value->position.y);
+                    mouseEvent.button = reverse_mouse_btn_mapping[(int)value->button];
                     targetInputManager->onMouseEvent(mouseEvent);
                     break;
                 }
-                case sf::Event::MouseButtonReleased:
+                else if (event.is<sf::Event::MouseButtonReleased>())
                 { //!< A mouse button was released (data in event.mouseButton)
-                    if ((int)event.mouseButton.button >= (int)Devices::MouseButton::Count)
+                    auto value = event.getIf<sf::Event::MouseButtonReleased>();
+                    if ((int)value->button >= (int)Devices::MouseButton::Count)
                         break;
                     MouseEvent mouseEvent;
                     memset(&mouseEvent, 0, sizeof(MouseEvent));
                     mouseEvent.type = MouseEventType::ButtonReleased;
-                    mouseEvent.position = MathCore::vec2i(event.mouseButton.x, event.mouseButton.y);
-                    mouseEvent.button = reverse_mouse_btn_mapping[(int)event.mouseButton.button];
+                    mouseEvent.position = MathCore::vec2i(value->position.x, value->position.y);
+                    mouseEvent.button = reverse_mouse_btn_mapping[(int)value->button];
                     targetInputManager->onMouseEvent(mouseEvent);
                     break;
                 }
-                case sf::Event::MouseMoved:
+                else if (event.is<sf::Event::MouseMoved>())
                 { //!< The mouse cursor moved (data in event.mouseMove)
+                    auto value = event.getIf<sf::Event::MouseMoved>();
                     MouseEvent mouseEvent;
                     memset(&mouseEvent, 0, sizeof(MouseEvent));
                     mouseEvent.type = MouseEventType::Moved;
-                    mouseEvent.position = MathCore::vec2i(event.mouseMove.x, event.mouseMove.y);
+                    mouseEvent.position = MathCore::vec2i(value->position.x, value->position.y);
                     targetInputManager->onMouseEvent(mouseEvent);
                     break;
                 }
-                case sf::Event::MouseEntered:
+                else if (event.is<sf::Event::MouseEntered>())
                 { //!< The mouse cursor entered the area of the window (no data)
                     WindowEvent windowEvent;
                     memset(&windowEvent, 0, sizeof(WindowEvent));
@@ -498,7 +505,7 @@ namespace AppKit
                     targetInputManager->onWindowEvent(windowEvent);
                     break;
                 }
-                case sf::Event::MouseLeft:
+                else if (event.is<sf::Event::MouseLeft>())
                 { //!< The mouse cursor left the area of the window (no data)
                     WindowEvent windowEvent;
                     memset(&windowEvent, 0, sizeof(WindowEvent));
@@ -507,100 +514,110 @@ namespace AppKit
                     targetInputManager->onWindowEvent(windowEvent);
                     break;
                 }
-                case sf::Event::JoystickButtonPressed:
+                else if (event.is<sf::Event::JoystickButtonPressed>())
                 { //!< A joystick button was pressed (data in event.joystickButton)
+                    auto value = event.getIf<sf::Event::JoystickButtonPressed>();
                     JoystickEvent joystickEvent;
                     memset(&joystickEvent, 0, sizeof(JoystickEvent));
                     joystickEvent.type = JoystickEventButtonPressed;
-                    joystickEvent.joystickId = event.joystickButton.joystickId;
-                    joystickEvent.button = event.joystickButton.button;
+                    joystickEvent.joystickId = value->joystickId;
+                    joystickEvent.button = value->button;
                     targetInputManager->onJoystickEvent(joystickEvent);
                     break;
                 }
-                case sf::Event::JoystickButtonReleased:
+                else if (event.is<sf::Event::JoystickButtonReleased>())
                 { //!< A joystick button was released (data in event.joystickButton)
+                    auto value = event.getIf<sf::Event::JoystickButtonReleased>();
                     JoystickEvent joystickEvent;
                     memset(&joystickEvent, 0, sizeof(JoystickEvent));
                     joystickEvent.type = JoystickEventButtonReleased;
-                    joystickEvent.joystickId = event.joystickButton.joystickId;
-                    joystickEvent.button = event.joystickButton.button;
+                    joystickEvent.joystickId = value->joystickId;
+                    joystickEvent.button = value->button;
                     targetInputManager->onJoystickEvent(joystickEvent);
                     break;
                 }
-                case sf::Event::JoystickMoved:
+                else if (event.is<sf::Event::JoystickMoved>())
                 { //!< The joystick moved along an axis (data in event.joystickMove)
-                    if ((int)event.joystickMove.axis >= (int)Devices::JoystickAxis::Count)
+                    auto value = event.getIf<sf::Event::JoystickMoved>();
+                    if ((int)value->axis >= (int)Devices::JoystickAxis::Count)
                         break;
                     JoystickEvent joystickEvent;
                     memset(&joystickEvent, 0, sizeof(JoystickEvent));
                     joystickEvent.type = JoystickEventMoved;
-                    joystickEvent.joystickId = event.joystickMove.joystickId;
-                    joystickEvent.move.axis = reverse_joystick_axis_mapping[(int)event.joystickMove.axis];
-                    joystickEvent.move.value = event.joystickMove.position;
+                    joystickEvent.joystickId = value->joystickId;
+                    joystickEvent.move.axis = reverse_joystick_axis_mapping[(int)value->axis];
+                    joystickEvent.move.value = value->position;
                     targetInputManager->onJoystickEvent(joystickEvent);
                     break;
                 }
-                case sf::Event::JoystickConnected:
+                else if (event.is<sf::Event::JoystickConnected>())
                 { //!< A joystick was connected (data in event.joystickConnect)
+                    auto value = event.getIf<sf::Event::JoystickConnected>();
                     JoystickEvent joystickEvent;
                     memset(&joystickEvent, 0, sizeof(JoystickEvent));
                     joystickEvent.type = JoystickEventConnected;
-                    joystickEvent.joystickId = event.joystickConnect.joystickId;
+                    joystickEvent.joystickId = value->joystickId;
                     targetInputManager->onJoystickEvent(joystickEvent);
                     break;
                 }
-                case sf::Event::JoystickDisconnected:
+                else if (event.is<sf::Event::JoystickDisconnected>())
                 { //!< A joystick was disconnected (data in event.joystickConnect)
+                    auto value = event.getIf<sf::Event::JoystickDisconnected>();
                     JoystickEvent joystickEvent;
                     memset(&joystickEvent, 0, sizeof(JoystickEvent));
                     joystickEvent.type = JoystickEventDisconnected;
-                    joystickEvent.joystickId = event.joystickConnect.joystickId;
+                    joystickEvent.joystickId = value->joystickId;
                     targetInputManager->onJoystickEvent(joystickEvent);
                     break;
                 }
-                case sf::Event::TouchBegan:
+                else if (event.is<sf::Event::TouchBegan>())
                 { //!< A touch event began (data in event.touch)
+                    auto value = event.getIf<sf::Event::TouchBegan>();
                     TouchEvent touchEvent;
                     memset(&touchEvent, 0, sizeof(TouchEvent));
                     touchEvent.type = TouchEventType::Began;
-                    touchEvent.finger = event.touch.finger;
-                    touchEvent.position = MathCore::vec2i(event.touch.x, event.touch.y);
+                    touchEvent.finger = value->finger;
+                    touchEvent.position = MathCore::vec2i(value->position.x, value->position.y);
                     targetInputManager->onTouchEvent(touchEvent);
                     break;
                 }
-                case sf::Event::TouchMoved:
+                else if (event.is<sf::Event::TouchMoved>())
                 { //!< A touch moved (data in event.touch)
+                    auto value = event.getIf<sf::Event::TouchMoved>();
                     TouchEvent touchEvent;
                     memset(&touchEvent, 0, sizeof(TouchEvent));
                     touchEvent.type = TouchEventType::Moved;
-                    touchEvent.finger = event.touch.finger;
-                    touchEvent.position = MathCore::vec2i(event.touch.x, event.touch.y);
+                    touchEvent.finger = value->finger;
+                    touchEvent.position = MathCore::vec2i(value->position.x, value->position.y);
                     targetInputManager->onTouchEvent(touchEvent);
                     break;
                 }
-                case sf::Event::TouchEnded:
+                else if (event.is<sf::Event::TouchEnded>())
                 { //!< A touch event ended (data in event.touch)
+                    auto value = event.getIf<sf::Event::TouchEnded>();
                     TouchEvent touchEvent;
                     memset(&touchEvent, 0, sizeof(TouchEvent));
                     touchEvent.type = TouchEventType::Ended;
-                    touchEvent.finger = event.touch.finger;
-                    touchEvent.position = MathCore::vec2i(event.touch.x, event.touch.y);
+                    touchEvent.finger = value->finger;
+                    touchEvent.position = MathCore::vec2i(value->position.x, value->position.y);
                     targetInputManager->onTouchEvent(touchEvent);
                     break;
                 }
-                case sf::Event::SensorChanged:
+                else if (event.is<sf::Event::SensorChanged>())
                 { //!< A sensor value changed (data in event.sensor)
-                    if ((int)event.sensor.type >= (int)Devices::SensorType::Count)
+                    auto value = event.getIf<sf::Event::SensorChanged>();
+                    if ((int)value->type >= (int)Devices::SensorType::Count)
                         break;
                     SensorEvent sensorEvent;
                     memset(&sensorEvent, 0, sizeof(SensorEvent));
-                    sensorEvent.type = reverse_sensor_type_mapping[(int)event.sensor.type];
-                    sensorEvent.value = MathCore::vec3f(event.sensor.x, event.sensor.y, event.sensor.z);
+                    sensorEvent.type = reverse_sensor_type_mapping[(int)value->type];
+                    sensorEvent.value = MathCore::vec3f(value->value.x, value->value.y, value->value.z);
                     targetInputManager->onSensorEvent(sensorEvent);
                     break;
                 }
-                default:
-                    printf("[Window] Event not recognized: %i\n", event.type);
+                else
+                {
+                    printf("[Window] Event not recognized.\n");
                     break;
                 }
             }
