@@ -11,7 +11,7 @@ set(ADD_DIRS)
 
 if(WIN32)
 
-    
+    list(APPEND ADD_LIBS user32 gdi32 shcore )
 
 elseif(APPLE)
 elseif(UNIX)
