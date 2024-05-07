@@ -99,6 +99,10 @@ if (NOT TARGET InteractiveToolkit-Extension)
     add_subdirectory(libs/InteractiveToolkit-Extension "${CMAKE_BINARY_DIR}/lib/InteractiveToolkit-Extension")
 endif()
 
+if (NOT TARGET InteractiveToolkit-DPI)
+    add_subdirectory(libs/InteractiveToolkit-DPI "${CMAKE_BINARY_DIR}/lib/InteractiveToolkit-DPI")
+endif()
+
 # include window source
 if (NOT TARGET appkit-window)
     add_subdirectory(libs/InteractiveToolkit-AppKit/common/appkit-window "${CMAKE_BINARY_DIR}/lib/appkit-window")

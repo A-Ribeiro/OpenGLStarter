@@ -12,5 +12,6 @@ add_executable( ${PROJECT_NAME} ${PUBLIC_HEADERS} ${SRC} )
 target_link_libraries(${PROJECT_NAME}
 PUBLIC 
     appkit-window
+    InteractiveToolkit-DPI
 )
 
