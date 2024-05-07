@@ -183,6 +183,23 @@ namespace DPI
         return 0;
     }
 
+    MathCore::vec2i Display::MonitorPositionPixels(int monitor_num) {
+        if (monitor_num == -1)
+            monitor_num = MonitorDefault();
+
+        std::vector<_MonitorInfo> allMonitors;
+        EnumDisplayMonitors(NULL, NULL, _FillMonitorVector, (LPARAM)&allMonitors);
+
+        _MonitorInfo& selectedMonitor = allMonitors[monitor_num];
+
+        MathCore::vec2i result(
+            selectedMonitor.monitorInfoEx.rcMonitor.left,
+            selectedMonitor.monitorInfoEx.rcMonitor.top
+        );
+
+        return result;
+    }
+
     MathCore::vec2i Display::MonitorCurrentResolutionPixels(int monitor_num)
     {
         if (monitor_num == -1)
