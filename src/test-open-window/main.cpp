@@ -11,15 +11,19 @@ int main(int argc, char *argv[])
 
     auto screen_size_mm = DPI::Display::MonitorRealSizeMillimeters();
     auto screen_size_in = DPI::Display::MonitorRealSizeInches();
+    auto screen_pos_pixels = DPI::Display::MonitorPositionPixels();
     auto screen_size_pixels = DPI::Display::MonitorCurrentResolutionPixels();
     auto dpif = DPI::Display::MonitorDPIf();
     auto dpii = DPI::Display::MonitorDPIi();
 
     std::cout << "Size(mm): " << screen_size_mm.x << ", " << screen_size_mm.y << std::endl;
     std::cout << "Size(in): " << screen_size_in.x << ", " << screen_size_in.y << std::endl;
+    std::cout << "CurrPos(pixels): " << screen_pos_pixels.x << ", " << screen_pos_pixels.y << std::endl;
     std::cout << "CurrRes(pixels): " << screen_size_pixels.x << ", " << screen_size_pixels.y << std::endl;
     std::cout << "DPIf: " << dpif.x << ", " << dpif.y << std::endl;
     std::cout << "DPIi: " << dpii.x << ", " << dpii.y << std::endl;
+
+    
 
 
     return 0;

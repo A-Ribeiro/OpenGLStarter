@@ -11,6 +11,7 @@ namespace DPI {
 
         static int MonitorDefault() ;
 
+        static MathCore::vec2i MonitorPositionPixels(int monitor_num = -1);
         static MathCore::vec2i MonitorCurrentResolutionPixels(int monitor_num = -1);
         static MathCore::vec2f MonitorRealSizeMillimeters(int monitor_num = -1);
         static MathCore::vec2f MonitorRealSizeInches(int monitor_num = -1);

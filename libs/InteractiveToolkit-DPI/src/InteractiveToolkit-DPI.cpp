@@ -35,6 +35,29 @@ namespace DPI
         return result;
     }
 
+    MathCore::vec2i Display::MonitorPositionPixels(int monitor_num) 
+    {
+        if (monitor_num == -1)
+            monitor_num = MonitorDefault();
+
+        ::Display *pdsp = NULL;
+        ::Window pRootWindow;
+        ::XWindowAttributes xwa;
+
+        pdsp = XOpenDisplay(NULL);
+        ITK_ABORT(!pdsp, "Failed to open default display.\n");
+
+        pRootWindow = RootWindow(pdsp, monitor_num);
+
+        XGetWindowAttributes( pdsp, pRootWindow, &xwa );
+
+        MathCore::vec2i result(xwa.x, xwa.y);
+
+        XCloseDisplay(pdsp);
+
+        return result;
+    }
+
     MathCore::vec2i Display::MonitorCurrentResolutionPixels(int monitor_num)
     {
         if (monitor_num == -1)
