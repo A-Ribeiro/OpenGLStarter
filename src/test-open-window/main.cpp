@@ -25,15 +25,12 @@ int main(int argc, char *argv[])
 
     
 
-
-    return 0;
-
     printf("Hello World\n");
 
     AppKit::Window::WindowConfig wConfig(
         "Interactive Window",
-        AppKit::Window::WindowStyle::Default,
-        AppKit::Window::VideoMode(1280, 720, 32)
+        AppKit::Window::WindowStyle::Borderless,
+        AppKit::Window::VideoMode(screen_size_pixels.x, screen_size_pixels.y, 32)
     );
 
 

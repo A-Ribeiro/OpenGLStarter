@@ -64,7 +64,7 @@ namespace DPI
             monitor_num = MonitorDefault();
 
         ::Display *pdsp = NULL;
-        ::Screen *pscr = NULL;
+        ::Screen* pscr = NULL;
 
         pdsp = XOpenDisplay(NULL);
         ITK_ABORT(!pdsp, "Failed to open default display.\n");
@@ -84,8 +84,8 @@ namespace DPI
         if (monitor_num == -1)
             monitor_num = MonitorDefault();
 
-        ::Display *pdsp = NULL;
-        ::Screen *pscr = NULL;
+        ::Display* pdsp = NULL;
+        ::Screen* pscr = NULL;
 
         pdsp = XOpenDisplay(NULL);
         ITK_ABORT(!pdsp, "Failed to open default display.\n");
@@ -115,12 +115,12 @@ namespace DPI
         return ComputeDPIi(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
     }
 
-    MathCore::vec2f Display::ComputeDPIf( const MathCore::vec2i & resolution, const MathCore::vec2f & realSizeInches ) {
-        return (MathCore::vec2f) resolution / realSizeInches;
+    MathCore::vec2f Display::ComputeDPIf(const MathCore::vec2i& resolution, const MathCore::vec2f& realSizeInches) {
+        return (MathCore::vec2f)resolution / realSizeInches;
     }
 
-    MathCore::vec2i Display::ComputeDPIi( const MathCore::vec2i & resolution, const MathCore::vec2f & realSizeInches ) {
-        return (MathCore::vec2i)( ComputeDPIf(resolution, realSizeInches)  + 0.5f );
+    MathCore::vec2i Display::ComputeDPIi(const MathCore::vec2i& resolution, const MathCore::vec2f& realSizeInches) {
+        return (MathCore::vec2i)(ComputeDPIf(resolution, realSizeInches) + 0.5f);
     }
 }
 
@@ -130,16 +130,19 @@ namespace DPI
 
 namespace DPI
 {
-    struct _MonitorInfo{
+    struct _MonitorInfo {
         HMONITOR hMonitor;
         HDC hdcMonitor;
         MONITORINFOEX monitorInfoEx;
         uint32_t dpi_x;
         uint32_t dpi_y;
+        DEVICE_SCALE_FACTOR deviceScaleFactor;
+        float scaleFactor;
+        DEVMODE devMode;
     };
 
     BOOL CALLBACK _FillMonitorVector(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
-        std::vector<_MonitorInfo> &allMonitors = *(std::vector<_MonitorInfo>*)dwData;
+        std::vector<_MonitorInfo>& allMonitors = *(std::vector<_MonitorInfo>*)dwData;
 
         MONITORINFOEX miex;
         memset(&miex, 0, sizeof(MONITORINFOEX));
@@ -151,12 +154,24 @@ namespace DPI
             this_monitor.hdcMonitor = hdcMonitor;
             this_monitor.monitorInfoEx = miex;
 
-            if (GetDpiForMonitor(hMonitor, MDT_DEFAULT, &this_monitor.dpi_x, &this_monitor.dpi_y) != S_OK) {
-                HDC screen = GetDC(0);
+            if (GetDpiForMonitor(hMonitor, MDT_RAW_DPI, &this_monitor.dpi_x, &this_monitor.dpi_y) != S_OK) {
+                /*HDC screen = GetDC(0);
                 this_monitor.dpi_x = GetDeviceCaps(screen, LOGPIXELSX);
                 this_monitor.dpi_y = GetDeviceCaps(screen, LOGPIXELSY);
-                ReleaseDC(0, screen);
+                ReleaseDC(0, screen);*/
+                return FALSE;
             }
+
+            this_monitor.devMode.dmSize = sizeof(DEVMODE);
+            if (EnumDisplaySettings(miex.szDevice, ENUM_CURRENT_SETTINGS, &this_monitor.devMode) == 0) {
+                return FALSE;
+            }
+
+            if (GetScaleFactorForMonitor(hMonitor, &this_monitor.deviceScaleFactor) != S_OK) {
+                return FALSE;
+            }
+
+            this_monitor.scaleFactor = (float)this_monitor.devMode.dmPelsWidth / (float)(this_monitor.monitorInfoEx.rcMonitor.right - this_monitor.monitorInfoEx.rcMonitor.left);
 
             allMonitors.push_back(this_monitor);
         }
@@ -192,9 +207,9 @@ namespace DPI
 
         _MonitorInfo& selectedMonitor = allMonitors[monitor_num];
 
-        MathCore::vec2i result(
-            selectedMonitor.monitorInfoEx.rcMonitor.left,
-            selectedMonitor.monitorInfoEx.rcMonitor.top
+        MathCore::vec2i result = MathCore::vec2i(
+            selectedMonitor.devMode.dmPosition.x,
+            selectedMonitor.devMode.dmPosition.y
         );
 
         return result;
@@ -210,11 +225,11 @@ namespace DPI
 
         _MonitorInfo &selectedMonitor = allMonitors[monitor_num];
 
-        MathCore::vec2i result(
-            selectedMonitor.monitorInfoEx.rcMonitor.right - selectedMonitor.monitorInfoEx.rcMonitor.left, 
-            selectedMonitor.monitorInfoEx.rcMonitor.bottom - selectedMonitor.monitorInfoEx.rcMonitor.top
-            );
-
+        MathCore::vec2i result =  MathCore::vec2i(
+            selectedMonitor.devMode.dmPelsWidth,
+            selectedMonitor.devMode.dmPelsHeight
+        );
+        
         return result;
     }
 
@@ -233,12 +248,22 @@ namespace DPI
 
         _MonitorInfo& selectedMonitor = allMonitors[monitor_num];
 
-        MathCore::vec2f size_pixels(
-            selectedMonitor.monitorInfoEx.rcMonitor.right - selectedMonitor.monitorInfoEx.rcMonitor.left,
-            selectedMonitor.monitorInfoEx.rcMonitor.bottom - selectedMonitor.monitorInfoEx.rcMonitor.top
+        MathCore::vec2f size_pixels = MathCore::vec2f(
+            selectedMonitor.devMode.dmPelsWidth,
+            selectedMonitor.devMode.dmPelsHeight
         );
 
-        MathCore::vec2f size_in = size_pixels / MathCore::vec2f(selectedMonitor.dpi_x, selectedMonitor.dpi_y);
+        MathCore::vec2f size_in = size_pixels / (MathCore::vec2f(selectedMonitor.dpi_x, selectedMonitor.dpi_y) * selectedMonitor.scaleFactor);
+
+
+        //MathCore::vec2f size_pixels(
+        //    selectedMonitor.monitorInfoEx.rcMonitor.right - selectedMonitor.monitorInfoEx.rcMonitor.left,
+        //    selectedMonitor.monitorInfoEx.rcMonitor.bottom - selectedMonitor.monitorInfoEx.rcMonitor.top
+        //);
+
+        //MathCore::vec2f size_in = size_pixels / MathCore::vec2f(selectedMonitor.dpi_x, selectedMonitor.dpi_y);
+
+
         return size_in;
     }
 
