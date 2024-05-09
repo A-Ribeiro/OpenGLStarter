@@ -185,25 +185,34 @@ namespace DPI
 
         MathCore::vec2f result;
 
-        // using get screen resources
-        auto screen_info = XRRGetScreenResourcesCurrent(dpy, rootWindowID);
-        ITK_ABORT(!screen_info, "XRandr screen info not found.\n");
-        for (int i = 0; i < screen_info->noutput; i++)
-        {
-            XRROutputInfo *output_info = XRRGetOutputInfo(dpy,
-                                                          screen_info,
-                                                          screen_info->outputs[i]);
+        int nmonitors;
+        auto monitor_info = XRRGetMonitors( dpy, rootWindowID, true, &nmonitors );
+        ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
+        result = MathCore::vec2i(monitor_info[0].mwidth, monitor_info[0].mheight);
 
-            bool connected = (output_info->connection == RR_Connected);
-            if (connected)
-            {
-                result = MathCore::vec2f(output_info->mm_width, output_info->mm_height);
-            }
-            XRRFreeOutputInfo(output_info);
-            if (connected)
-                break;
-        }
-        XRRFreeScreenResources(screen_info);
+        // // using get screen resources
+        // auto screen_info = XRRGetScreenResourcesCurrent(dpy, rootWindowID);
+        // ITK_ABORT(!screen_info, "XRandr screen info not found.\n");
+        // printf("%i\n", screen_info->noutput);
+        // for (int i = 0; i < screen_info->noutput; i++)
+        // {
+        //     XRROutputInfo *output_info = XRRGetOutputInfo(dpy,
+        //                                                   screen_info,
+        //                                                   screen_info->outputs[i]);
+
+        //     bool connected = (output_info->connection == RR_Connected);
+        //     if (connected)
+        //     {
+        //         result = MathCore::vec2f(output_info->mm_width, output_info->mm_height);
+        //     }
+        //     XRRFreeOutputInfo(output_info);
+        //     if (connected)
+        //         break;
+        // }
+        // XRRFreeScreenResources(screen_info);
+
+        XRRFreeMonitors(monitor_info);
+
         XCloseDisplay(dpy);
 
         return result;
