@@ -48,6 +48,8 @@ int main(int argc, char *argv[])
     glConfig.minorVersion = 1;
 
     AppKit::Window::GLWindow window(wConfig, glConfig);
+    
+    window.setPosition( screen_pos_pixels );
 
     AppKit::Window::InputManager inputManager;
 
