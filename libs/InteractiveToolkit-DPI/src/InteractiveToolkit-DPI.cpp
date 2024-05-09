@@ -67,7 +67,7 @@ namespace DPI
         //using get monitors
         int nmonitors;
         auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
-        ITK_ABORT(!monitor_info, "XRandr monitor info not found.\n");
+        ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
         result = MathCore::vec2i(monitor_info[0].x, monitor_info[0].y);
         XRRFreeMonitors(monitor_info);
 
@@ -135,7 +135,7 @@ namespace DPI
         //using get monitors
         int nmonitors;
         auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
-        ITK_ABORT(!monitor_info, "XRandr monitor info not found.\n");
+        ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
         result = MathCore::vec2i(monitor_info[0].width, monitor_info[0].height);
         XRRFreeMonitors(monitor_info);
 
@@ -190,12 +190,11 @@ namespace DPI
         ITK_ABORT(!screen_info, "XRandr screen info not found.\n");
         for (int i = 0; i < screen_info->noutput; i++)
         {
-            bool connected = false;
             XRROutputInfo *output_info = XRRGetOutputInfo(dpy,
                                                           screen_info,
                                                           screen_info->outputs[i]);
 
-            connected = (output_info->connection == RR_Connected);
+            bool connected = (output_info->connection == RR_Connected);
             if (connected)
             {
                 result = MathCore::vec2f(output_info->mm_width, output_info->mm_height);
