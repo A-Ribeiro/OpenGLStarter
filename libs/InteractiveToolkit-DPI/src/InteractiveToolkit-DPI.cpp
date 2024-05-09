@@ -131,14 +131,31 @@ namespace DPI
 namespace DPI
 {
     struct _MonitorInfo {
-        HMONITOR hMonitor;
-        HDC hdcMonitor;
-        MONITORINFOEX monitorInfoEx;
-        uint32_t dpi_x;
-        uint32_t dpi_y;
-        DEVICE_SCALE_FACTOR deviceScaleFactor;
-        float scaleFactor;
-        DEVMODE devMode;
+        //HMONITOR hMonitor;
+        //HDC hdcMonitor;
+        //MONITORINFOEX monitorInfoEx;
+        //uint32_t dpi_x;
+        //uint32_t dpi_y;
+        //DEVICE_SCALE_FACTOR deviceScaleFactor;
+        //float scaleFactor;
+        //DEVMODE devMode;
+
+        int x_pixels;
+        int y_pixels;
+
+        int width_virtual_pixels;
+        int height_virtual_pixels;
+
+        int width_pixels;
+        int height_pixels;
+
+        int width_mm;
+        int height_mm;
+
+        float scale_factor;
+
+        bool is_primary;
+
     };
 
     BOOL CALLBACK _FillMonitorVector(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
@@ -150,28 +167,63 @@ namespace DPI
         if (GetMonitorInfo(hMonitor, &miex)) {
 
             _MonitorInfo this_monitor;
-            this_monitor.hMonitor = hMonitor;
-            this_monitor.hdcMonitor = hdcMonitor;
-            this_monitor.monitorInfoEx = miex;
+            memset(&this_monitor, 0, sizeof(_MonitorInfo));
+            //this_monitor.hMonitor = hMonitor;
+            //this_monitor.hdcMonitor = hdcMonitor;
+            //this_monitor.monitorInfoEx = miex;
 
-            if (GetDpiForMonitor(hMonitor, MDT_RAW_DPI, &this_monitor.dpi_x, &this_monitor.dpi_y) != S_OK) {
-                /*HDC screen = GetDC(0);
-                this_monitor.dpi_x = GetDeviceCaps(screen, LOGPIXELSX);
-                this_monitor.dpi_y = GetDeviceCaps(screen, LOGPIXELSY);
-                ReleaseDC(0, screen);*/
-                return FALSE;
+            HDC dc = CreateDC(("DISPLAY"), miex.szDevice, NULL, NULL);
+            if (dc) {
+
+                //SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE);
+
+                this_monitor.width_virtual_pixels = GetDeviceCaps(dc, HORZRES);//miex.rcMonitor.right - miex.rcMonitor.left;//GetDeviceCaps(dc, HORZRES);//
+                this_monitor.height_virtual_pixels = GetDeviceCaps(dc, VERTRES);//miex.rcMonitor.bottom - miex.rcMonitor.top;//GetDeviceCaps(dc, VERTRES);//
+
+                this_monitor.width_mm = GetDeviceCaps(dc, HORZSIZE);
+                this_monitor.height_mm = GetDeviceCaps(dc, VERTSIZE);
+
+                this_monitor.is_primary = (miex.dwFlags == MONITORINFOF_PRIMARY);
+
+                DEVMODE devMode;
+                memset(&devMode, 0, sizeof(DEVMODE));
+                devMode.dmSize = sizeof(DEVMODE);
+				if (!EnumDisplaySettings(miex.szDevice, ENUM_CURRENT_SETTINGS, &devMode)) {
+                    return FALSE;
+                }
+
+                this_monitor.x_pixels = devMode.dmPosition.x;
+                this_monitor.y_pixels = devMode.dmPosition.y;
+
+                this_monitor.width_pixels = devMode.dmPelsWidth;
+                this_monitor.height_pixels = devMode.dmPelsHeight;
+
+                this_monitor.scale_factor = (float)this_monitor.width_pixels / (float)(this_monitor.width_virtual_pixels);
+                //printf("%f\n", this_monitor.scale_factor);
+
+                ReleaseDC(NULL, dc);
             }
-
-            this_monitor.devMode.dmSize = sizeof(DEVMODE);
-            if (EnumDisplaySettings(miex.szDevice, ENUM_CURRENT_SETTINGS, &this_monitor.devMode) == 0) {
+            else
                 return FALSE;
-            }
 
-            if (GetScaleFactorForMonitor(hMonitor, &this_monitor.deviceScaleFactor) != S_OK) {
-                return FALSE;
-            }
+            //if (GetDpiForMonitor(hMonitor, MDT_RAW_DPI, &this_monitor.dpi_x, &this_monitor.dpi_y) != S_OK) {
+            //    /*HDC screen = GetDC(0);
+            //    this_monitor.dpi_x = GetDeviceCaps(screen, LOGPIXELSX);
+            //    this_monitor.dpi_y = GetDeviceCaps(screen, LOGPIXELSY);
+            //    ReleaseDC(0, screen);*/
+            //    return FALSE;
+            //}
 
-            this_monitor.scaleFactor = (float)this_monitor.devMode.dmPelsWidth / (float)(this_monitor.monitorInfoEx.rcMonitor.right - this_monitor.monitorInfoEx.rcMonitor.left);
+            //this_monitor.devMode.dmSize = sizeof(DEVMODE);
+            //if (EnumDisplaySettings(miex.szDevice, ENUM_CURRENT_SETTINGS, &this_monitor.devMode) == 0) {
+            //    return FALSE;
+            //}
+
+            //if (GetScaleFactorForMonitor(hMonitor, &this_monitor.deviceScaleFactor) != S_OK) {
+            //    return FALSE;
+            //}
+
+            //this_monitor.scaleFactor = (float)this_monitor.devMode.dmPelsWidth / (float)(this_monitor.monitorInfoEx.rcMonitor.right - this_monitor.monitorInfoEx.rcMonitor.left);
 
             allMonitors.push_back(this_monitor);
         }
@@ -191,7 +243,7 @@ namespace DPI
         EnumDisplayMonitors(NULL, NULL, _FillMonitorVector, (LPARAM)&allMonitors);
 
         for (size_t i = 0; i < allMonitors.size();i++) {
-            if (allMonitors[i].monitorInfoEx.dwFlags == MONITORINFOF_PRIMARY)
+            if (allMonitors[i].is_primary)
                 return (int)i;
         }
 
@@ -208,8 +260,8 @@ namespace DPI
         _MonitorInfo& selectedMonitor = allMonitors[monitor_num];
 
         MathCore::vec2i result = MathCore::vec2i(
-            selectedMonitor.devMode.dmPosition.x,
-            selectedMonitor.devMode.dmPosition.y
+            selectedMonitor.x_pixels,
+            selectedMonitor.y_pixels
         );
 
         return result;
@@ -226,19 +278,14 @@ namespace DPI
         _MonitorInfo &selectedMonitor = allMonitors[monitor_num];
 
         MathCore::vec2i result =  MathCore::vec2i(
-            selectedMonitor.devMode.dmPelsWidth,
-            selectedMonitor.devMode.dmPelsHeight
+            selectedMonitor.width_pixels,
+            selectedMonitor.height_pixels
         );
         
         return result;
     }
 
     MathCore::vec2f Display::MonitorRealSizeMillimeters(int monitor_num)
-    {
-        return (MathCore::vec2f)MonitorRealSizeInches(monitor_num) * 25.4f;
-    }
-
-    MathCore::vec2f Display::MonitorRealSizeInches(int monitor_num)
     {
         if (monitor_num == -1)
             monitor_num = MonitorDefault();
@@ -248,23 +295,17 @@ namespace DPI
 
         _MonitorInfo& selectedMonitor = allMonitors[monitor_num];
 
-        MathCore::vec2f size_pixels = MathCore::vec2f(
-            selectedMonitor.devMode.dmPelsWidth,
-            selectedMonitor.devMode.dmPelsHeight
+        MathCore::vec2f result = MathCore::vec2f(
+            selectedMonitor.width_mm,
+            selectedMonitor.height_mm
         );
 
-        MathCore::vec2f size_in = size_pixels / (MathCore::vec2f(selectedMonitor.dpi_x, selectedMonitor.dpi_y) * selectedMonitor.scaleFactor);
+        return result;
+    }
 
-
-        //MathCore::vec2f size_pixels(
-        //    selectedMonitor.monitorInfoEx.rcMonitor.right - selectedMonitor.monitorInfoEx.rcMonitor.left,
-        //    selectedMonitor.monitorInfoEx.rcMonitor.bottom - selectedMonitor.monitorInfoEx.rcMonitor.top
-        //);
-
-        //MathCore::vec2f size_in = size_pixels / MathCore::vec2f(selectedMonitor.dpi_x, selectedMonitor.dpi_y);
-
-
-        return size_in;
+    MathCore::vec2f Display::MonitorRealSizeInches(int monitor_num)
+    {
+        return MonitorRealSizeMillimeters(monitor_num) / 25.4f;
     }
 
     MathCore::vec2f Display::MonitorDPIf(int monitor_num)
