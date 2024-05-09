@@ -23,8 +23,6 @@ int main(int argc, char *argv[])
     std::cout << "DPIf: " << dpif.x << ", " << dpif.y << std::endl;
     std::cout << "DPIi: " << dpii.x << ", " << dpii.y << std::endl;
 
-    
-
     printf("Hello World\n");
 
     AppKit::Window::WindowConfig wConfig(
