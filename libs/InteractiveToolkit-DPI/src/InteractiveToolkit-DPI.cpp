@@ -5,6 +5,7 @@
 // https://www.khronos.org/opengl/wiki/Programming_OpenGL_in_Linux:_Changing_the_Screen_Resolution
 
 #include <X11/Xlib.h>
+#include <X11/extensions/Xrandr.h>
 
 namespace DPI
 {
@@ -84,18 +85,36 @@ namespace DPI
         if (monitor_num == -1)
             monitor_num = MonitorDefault();
 
-        ::Display* pdsp = NULL;
-        ::Screen* pscr = NULL;
+        auto dpy = XOpenDisplay(NULL);
+        ITK_ABORT(!dpy, "Failed to open default display.\n");
 
-        pdsp = XOpenDisplay(NULL);
-        ITK_ABORT(!pdsp, "Failed to open default display.\n");
+        //auto pscr = ScreenOfDisplay(dpy, monitor_num);
+        //ITK_ABORT(!pscr, "Failed to obtain the default screen of given display.\n");
+        //MathCore::vec2f result(pscr->mwidth, pscr->mheight);
 
-        pscr = ScreenOfDisplay(pdsp, monitor_num);
-        ITK_ABORT(!pscr, "Failed to obtain the default screen of given display.\n");
+        auto rootWindowID = RootWindow(dpy, monitor_num);
 
-        MathCore::vec2f result(pscr->mwidth, pscr->mheight);
+        auto screenConfiguration = XRRGetScreenInfo (dpy, rootWindowID);
+        ITK_ABORT(!screenConfiguration, "Failed to obtain the default screen of given display.\n");
 
-        XCloseDisplay(pdsp);
+        Rotation original_rotation;
+        auto current_size_index = XRRConfigCurrentConfiguration (screenConfiguration, &original_rotation);
+        int nsize;
+        auto sizes = XRRConfigSizes(screenConfiguration, &nsize);
+
+        MathCore::vec2f result = 
+            MathCore::vec2f(sizes[current_size_index].mwidth, sizes[current_size_index].mheight) 
+            ;
+        // for (i = 0; i < nsize; i++) {
+        //     printf ("%c%-2d %5d x %-5d  (%4dmm x%4dmm )",
+        //         i == current_size ? '*' : ' ',
+        //         i, sizes[i].width, sizes[i].height,
+        //         sizes[i].mwidth, sizes[i].mheight);
+        //     // ...
+        // }
+
+
+        XCloseDisplay(dpy);
 
         return result;
     }

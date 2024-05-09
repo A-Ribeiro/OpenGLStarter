@@ -16,10 +16,10 @@ if(WIN32)
 elseif(APPLE)
 elseif(UNIX)
 
-    find_package(X11 REQUIRED QUIET)
+    find_package(X11 REQUIRED COMPONENTS Xrandr QUIET)
 
-    list(APPEND ADD_LIBS ${X11_LIBRARIES} )
-    list(APPEND ADD_DIRS ${X11_INCLUDE_DIR} )
+    list(APPEND ADD_LIBS X11::X11 X11::Xrandr  )
+    #list(APPEND ADD_DIRS ${X11_INCLUDE_DIR} ${X11_Xrandr_INCLUDE_PATH} )
 
 endif()
 
