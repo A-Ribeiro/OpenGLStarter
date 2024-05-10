@@ -86,9 +86,24 @@ namespace DPI {
 
     };
 
+#if defined(_WIN32)
+        // Window handle is HWND (HWND__*) or (HWND) on Windows
+        typedef HWND__ *NativeWindowHandleType;
+#elif defined(__linux__)
+        // Window handle is Window (unsigned long) on Unix - X11
+        typedef unsigned long NativeWindowHandleType;
+#elif defined(__APPLE__)
+        // Window handle is NSWindow or NSView (void*) on Mac OS X - Cocoa
+        typedef void *NativeWindowHandleType;
+#else
+        typedef void *NativeWindowHandleType;
+#endif
+
     struct Display {
 
         static std::vector<Monitor> QueryMonitors(int *monitorDefaultIndex);
+
+        static void setFullscreenAttribute( const NativeWindowHandleType &nativeWindow );
 
         static int MonitorCount();
 

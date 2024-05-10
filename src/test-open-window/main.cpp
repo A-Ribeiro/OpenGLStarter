@@ -80,7 +80,11 @@ int main(int argc, char *argv[])
 
     AppKit::Window::GLWindow window(wConfig, glConfig);
 
+    //window.requestFocus();
+    //DPI::Display::setFullscreenAttribute(window.getNativeWindowHandle());
+
     window.setPosition(selectedMonitor->Position());
+    window.setLockMouseCursorInside(false);
 
     AppKit::Window::InputManager inputManager;
 

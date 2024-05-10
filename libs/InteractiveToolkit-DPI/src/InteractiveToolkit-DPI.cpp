@@ -5,6 +5,7 @@
 // https://www.khronos.org/opengl/wiki/Programming_OpenGL_in_Linux:_Changing_the_Screen_Resolution
 
 #include <X11/Xlib.h>
+#include <X11/Xatom.h>
 #include <X11/extensions/Xrandr.h>
 
 namespace DPI
@@ -53,17 +54,20 @@ namespace DPI
         return NULL;
     }
 
-    static float getRefreshRateFromMode( const XRRModeInfo * mode_info ) {
+    static float getRefreshRateFromMode(const XRRModeInfo *mode_info)
+    {
         float rate = 0.0f;
         if (mode_info->hTotal && mode_info->vTotal)
             rate = ((float)mode_info->dotClock /
                     ((float)mode_info->hTotal * (float)mode_info->vTotal));
-        
-        if (mode_info->modeFlags & RR_DoubleScan){
+
+        if (mode_info->modeFlags & RR_DoubleScan)
+        {
             rate *= 0.5f;
         }
 
-        if (mode_info->modeFlags & RR_Interlace){
+        if (mode_info->modeFlags & RR_Interlace)
+        {
             rate *= 2.0f;
         }
         return rate;
@@ -127,7 +131,8 @@ namespace DPI
                     auto mode_info = getModeFromIDX(dpy, screenResources, mode_idx);
                     if (!mode_info)
                         continue;
-                    if (mode_info->modeFlags & RR_Interlace){
+                    if (mode_info->modeFlags & RR_Interlace)
+                    {
                         continue; // skip interlace modes...
                     }
 
@@ -187,6 +192,87 @@ namespace DPI
 
         XCloseDisplay(dpy);
         return result;
+    }
+
+    static void change_compositor_fullscreen(::Display *dpy, const NativeWindowHandleType &nativeWindow)
+    {
+        const Atom netWmBypassCompositor = XInternAtom(dpy, "_NET_WM_BYPASS_COMPOSITOR", False);
+        if (netWmBypassCompositor)
+        {
+            constexpr unsigned long bypassCompositor = 1;
+
+            XChangeProperty(dpy,
+                            nativeWindow,
+                            netWmBypassCompositor,
+                            XA_CARDINAL,
+                            32,
+                            PropModeReplace,
+                            reinterpret_cast<const unsigned char *>(&bypassCompositor),
+                            1);
+        }
+    }
+
+    static void change_window_fullscreen(::Display *dpy, const NativeWindowHandleType &nativeWindow)
+    {
+        Atom wm_state = XInternAtom(dpy, "_NET_WM_STATE", True);
+        Atom wm_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", True);
+        XChangeProperty(dpy, nativeWindow, wm_state, XA_ATOM, 32, PropModeReplace, (unsigned char *)&wm_fullscreen, 1);
+    }
+
+    static void send_change_fullscreen(::Display *dpy, const NativeWindowHandleType &nativeWindow)
+    {
+
+        const Atom netWmState = XInternAtom(dpy, "_NET_WM_STATE", true);
+        const Atom netWmStateFullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", true);
+
+        auto event = XEvent();
+        event.type = ClientMessage;
+        event.xclient.window = nativeWindow;
+        event.xclient.format = 32;
+        event.xclient.message_type = netWmState;
+        event.xclient.data.l[0] = 1; // _NET_WM_STATE_ADD
+        event.xclient.data.l[1] = static_cast<long>(netWmStateFullscreen);
+        event.xclient.data.l[2] = 0; // No second property
+        event.xclient.data.l[3] = 1; // Normal window
+
+        const int result = XSendEvent(dpy,
+                                      DefaultRootWindow(dpy),
+                                      False,
+                                      SubstructureNotifyMask | SubstructureRedirectMask,
+                                      &event);
+
+        // XEvent x_event;
+        // Atom wm_fullscreen;
+
+        // x_event.type = ClientMessage;
+        // x_event.xclient.window = nativeWindow;
+        // x_event.xclient.message_type = XInternAtom(dpy, "_NET_WM_STATE", False);
+        // x_event.xclient.format = 32;
+        // x_event.xclient.data.l[0] = i_state;
+        // wm_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+        // x_event.xclient.data.l[1] = wm_fullscreen;
+        // x_event.xclient.data.l[2] = 0;
+
+        // XSendEvent(dpy,
+        // //RootWindow(dpy, DefaultScreen(dpy)),
+        // DefaultRootWindow(dpy),
+        // False, ClientMessage, &x_event);
+    }
+
+    void Display::setFullscreenAttribute(const NativeWindowHandleType &nativeWindow)
+    {
+        auto dpy = XOpenDisplay(NULL);
+        ITK_ABORT(!dpy, "Failed to open default display.\n");
+
+        XMapWindow(dpy, nativeWindow);
+
+        change_window_fullscreen(dpy, nativeWindow);
+        change_compositor_fullscreen(dpy, nativeWindow);
+        send_change_fullscreen(dpy, nativeWindow);
+
+        XFlush(dpy);
+
+        XCloseDisplay(dpy);
     }
 
     int Display::MonitorCount()
