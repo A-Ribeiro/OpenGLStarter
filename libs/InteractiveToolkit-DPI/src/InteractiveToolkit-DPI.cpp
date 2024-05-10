@@ -10,6 +10,185 @@
 namespace DPI
 {
 
+    static XRROutputInfo *getOutputFromIDX(::Display *dpy, XRRScreenResources *res, const RROutput &output_idx)
+    {
+        for (int k = 0; k < res->noutput; k++)
+        {
+            if (output_idx == res->outputs[k])
+            {
+                XRROutputInfo *output_info = XRRGetOutputInfo(dpy,
+                                                              res,
+                                                              res->outputs[k]);
+                // XRRFreeOutputInfo(output_info);
+                return output_info;
+            }
+        }
+
+        return NULL;
+    }
+
+    static XRRModeInfo *getModeFromIDX(::Display *dpy, XRRScreenResources *res, const RRMode &mode_idx)
+    {
+        for (int k = 0; k < res->nmode; k++)
+        {
+            if (mode_idx == res->modes[k].id)
+            {
+                return &res->modes[k];
+            }
+        }
+        return NULL;
+    }
+
+    static XRRCrtcInfo *getCrtcFromIDX(::Display *dpy, XRRScreenResources *res, const RRCrtc &crtc_idx)
+    {
+        for (int k = 0; k < res->ncrtc; k++)
+        {
+            if (crtc_idx == res->crtcs[k])
+            {
+                XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(dpy, res, res->crtcs[k]);
+                return crtc_info;
+                // XRRFreeCrtcInfo(crtc_info);
+            }
+        }
+        return NULL;
+    }
+
+    static float getRefreshRateFromMode( const XRRModeInfo * mode_info ) {
+        float rate = 0.0f;
+        if (mode_info->hTotal && mode_info->vTotal)
+            rate = ((float)mode_info->dotClock /
+                    ((float)mode_info->hTotal * (float)mode_info->vTotal));
+        
+        if (mode_info->modeFlags & RR_DoubleScan){
+            rate *= 0.5f;
+        }
+
+        if (mode_info->modeFlags & RR_Interlace){
+            rate *= 2.0f;
+        }
+        return rate;
+    }
+
+    std::vector<Monitor> Display::QueryMonitors(int *monitorDefaultIndex)
+    {
+        *monitorDefaultIndex = 0;
+
+        std::vector<Monitor> result;
+
+        auto dpy = XOpenDisplay(NULL);
+        ITK_ABORT(!dpy, "Failed to open default display.\n");
+
+        auto rootWindowID = XDefaultRootWindow(dpy);
+
+        auto screenResources = XRRGetScreenResourcesCurrent(dpy, rootWindowID);
+        ITK_ABORT(!screenResources, "XRandr screen resources not found.\n");
+
+        int nmonitors;
+        auto monitor_info_array = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
+
+        for (int i = 0; i < nmonitors; i++)
+        {
+            auto monitor_info = &monitor_info_array[i];
+
+            Monitor monitor;
+
+            monitor.name = XGetAtomName(dpy, monitor_info->name);
+
+            monitor.scaleFactor = 1.0f;
+            monitor.primary = monitor_info->primary != 0;
+
+            if (monitor.primary)
+                *monitorDefaultIndex = i;
+
+            monitor.x = monitor_info->x;
+            monitor.y = monitor_info->y;
+
+            monitor.width = monitor_info->width;
+            monitor.height = monitor_info->height;
+
+            monitor.mwidth = monitor_info->mwidth;
+            monitor.mheight = monitor_info->mheight;
+
+            monitor.current_freq_index = 0;
+            monitor.current_mode_index = 0;
+
+            for (int j = 0; j < monitor_info->noutput; j++)
+            {
+                auto output_idx = monitor_info->outputs[j];
+                auto output_info = getOutputFromIDX(dpy, screenResources, output_idx);
+                if (!output_info)
+                    continue;
+
+                monitor.port = output_info->name;
+
+                for (int k = 0; k < output_info->nmode; k++)
+                {
+                    auto mode_idx = output_info->modes[k];
+                    auto mode_info = getModeFromIDX(dpy, screenResources, mode_idx);
+                    if (!mode_info)
+                        continue;
+                    if (mode_info->modeFlags & RR_Interlace){
+                        continue; // skip interlace modes...
+                    }
+
+                    float rate = getRefreshRateFromMode(mode_info);
+
+                    Mode &mode = monitor.getOrCreateMode(mode_info->width, mode_info->height);
+                    mode.freqs.push_back(rate);
+
+                    if (k < output_info->npreferred)
+                    {
+                        monitor.prefered_freq_index.push_back(mode.freqs.size() - 1);
+                        monitor.prefered_mode_index.push_back(monitor.getModeIndex(mode_info->width, mode_info->height));
+                    }
+                }
+
+                {
+                    auto crtc_info = getCrtcFromIDX(dpy, screenResources, output_info->crtc);
+                    ITK_ABORT(!crtc_info, "XRandr crtc not found.\n");
+
+                    auto mode_info = getModeFromIDX(dpy, screenResources, crtc_info->mode);
+                    ITK_ABORT(!mode_info, "XRandr crtc mode not found.\n");
+
+                    float rate = getRefreshRateFromMode(mode_info);
+
+                    Mode &mode = monitor.getOrCreateMode(mode_info->width, mode_info->height);
+
+                    monitor.current_mode_index = monitor.getModeIndex(mode_info->width, mode_info->height);
+                    monitor.current_freq_index = 0;
+
+                    float nearest = MathCore::FloatTypeInfo<float>::max;
+
+                    for (int k = 0; k < (int)mode.freqs.size(); k++)
+                    {
+                        float dst = MathCore::OP<float>::abs(rate - mode.freqs[k]);
+                        if (dst < nearest)
+                        {
+                            nearest = dst;
+                            monitor.current_freq_index = k;
+                        }
+                    }
+
+                    XRRFreeCrtcInfo(crtc_info);
+                }
+
+                XRRFreeOutputInfo(output_info);
+            }
+
+            // compute scale factor
+            // monitor.scaleFactor = (float) monitor.height / (float) monitor.getCurrentMode().height;
+
+            result.push_back(monitor);
+        }
+
+        XRRFreeMonitors(monitor_info_array);
+
+        XRRFreeScreenResources(screenResources);
+
+        XCloseDisplay(dpy);
+        return result;
+    }
+
     int Display::MonitorCount()
     {
         ::Display *pdsp = NULL;
@@ -56,7 +235,6 @@ namespace DPI
 
         // XCloseDisplay(pdsp);
 
-
         auto dpy = XOpenDisplay(NULL);
         ITK_ABORT(!dpy, "Failed to open default display.\n");
 
@@ -64,7 +242,7 @@ namespace DPI
 
         MathCore::vec2i result;
 
-        //using get monitors
+        // using get monitors
         int nmonitors;
         auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
         ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
@@ -132,7 +310,7 @@ namespace DPI
         // }
         // XRRFreeScreenResources(screen_info);
 
-        //using get monitors
+        // using get monitors
         int nmonitors;
         auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
         ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
@@ -186,7 +364,7 @@ namespace DPI
         MathCore::vec2f result;
 
         int nmonitors;
-        auto monitor_info = XRRGetMonitors( dpy, rootWindowID, true, &nmonitors );
+        auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
         ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
         result = MathCore::vec2i(monitor_info[0].mwidth, monitor_info[0].mheight);
 
@@ -233,14 +411,14 @@ namespace DPI
         return ComputeDPIi(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
     }
 
-    MathCore::vec2f Display::ComputeDPIf(const MathCore::vec2i &resolution, const MathCore::vec2f &realSizeInches)
+    MathCore::vec2f Display::ComputeDPIf(const MathCore::vec2i &sizePixels, const MathCore::vec2f &realSizeInches)
     {
-        return (MathCore::vec2f)resolution / realSizeInches;
+        return (MathCore::vec2f)sizePixels / realSizeInches;
     }
 
-    MathCore::vec2i Display::ComputeDPIi(const MathCore::vec2i &resolution, const MathCore::vec2f &realSizeInches)
+    MathCore::vec2i Display::ComputeDPIi(const MathCore::vec2i &sizePixels, const MathCore::vec2f &realSizeInches)
     {
-        return (MathCore::vec2i)(ComputeDPIf(resolution, realSizeInches) + 0.5f);
+        return (MathCore::vec2i)(ComputeDPIf(sizePixels, realSizeInches) + 0.5f);
     }
 }
 

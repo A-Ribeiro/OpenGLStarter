@@ -5,7 +5,90 @@
 
 namespace DPI {
 
+    class Mode {
+        public:
+        int width,height;
+        std::vector<float> freqs;
+    };
+
+    class Monitor {
+    public:
+        std::string name;
+        std::string port;
+        int x,y,width,height,mwidth,mheight;
+        float scaleFactor;
+        bool primary;
+
+        std::vector<int> prefered_mode_index;
+        std::vector<int> prefered_freq_index;
+
+        int current_mode_index;
+        int current_freq_index;
+
+        std::vector<Mode> modes;
+
+        MathCore::vec2i Position() const {
+            return MathCore::vec2i(x,y); 
+        }
+
+        MathCore::vec2i SizePixels() const {
+            return MathCore::vec2i(width,height); 
+        }
+
+        MathCore::vec2f SizeMillimeters() const {
+            return MathCore::vec2f(mwidth,mheight); 
+        }
+
+        MathCore::vec2f SizeInches() const {
+            return SizeMillimeters() / 25.4f; 
+        }
+
+        Mode& getOrCreateMode(int width, int height) {
+            for(auto & mode: modes){
+                if (mode.width == width && mode.height == height)
+                    return mode;
+            }
+            Mode newMode;
+            newMode.width = width;
+            newMode.height = height;
+            modes.push_back(newMode);
+            return modes[modes.size()-1]; 
+        }
+
+        int getModeIndex(int width, int height) const {
+            for(int i=0;i<(int)modes.size();i++){
+                auto &mode = modes[i];
+                if (mode.width == width && mode.height == height)
+                    return i;
+            }
+            return 0;
+        }
+
+        Mode getCurrentMode() const {
+            Mode result = modes[current_mode_index];
+            float aux = result.freqs[current_freq_index];
+            result.freqs.clear();
+            result.freqs.push_back(aux);
+            return result;
+        }
+
+        std::vector<Mode> getPreferedModes() const {
+            std::vector<Mode> result;
+            for (int i=0;i<(int)prefered_mode_index.size();i++){
+                Mode aux_mode = modes[prefered_mode_index[i]];
+                float aux = aux_mode.freqs[prefered_freq_index[i]];
+                aux_mode.freqs.clear();
+                aux_mode.freqs.push_back(aux);
+                result.push_back(aux_mode);
+            }
+            return result;
+        }
+
+    };
+
     struct Display {
+
+        static std::vector<Monitor> QueryMonitors(int *monitorDefaultIndex);
 
         static int MonitorCount();
 
@@ -18,8 +101,8 @@ namespace DPI {
         static MathCore::vec2f MonitorDPIf(int monitor_num = -1);
         static MathCore::vec2i MonitorDPIi(int monitor_num = -1);
 
-        static MathCore::vec2f ComputeDPIf( const MathCore::vec2i & resolution, const MathCore::vec2f & realSizeInches );
-        static MathCore::vec2i ComputeDPIi( const MathCore::vec2i & resolution, const MathCore::vec2f & realSizeInches );
+        static MathCore::vec2f ComputeDPIf( const MathCore::vec2i & sizePixels, const MathCore::vec2f & realSizeInches );
+        static MathCore::vec2i ComputeDPIi( const MathCore::vec2i & sizePixels, const MathCore::vec2f & realSizeInches );
 
     };
 }

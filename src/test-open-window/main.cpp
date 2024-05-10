@@ -9,12 +9,47 @@ int main(int argc, char *argv[])
     ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
     Platform::Thread::staticInitialization();
 
-    auto screen_size_mm = DPI::Display::MonitorRealSizeMillimeters();
-    auto screen_size_in = DPI::Display::MonitorRealSizeInches();
-    auto screen_pos_pixels = DPI::Display::MonitorPositionPixels();
-    auto screen_size_pixels = DPI::Display::MonitorCurrentResolutionPixels();
-    auto dpif = DPI::Display::MonitorDPIf();
-    auto dpii = DPI::Display::MonitorDPIi();
+    int monitorDefault = 0;
+    auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
+
+    for (const auto &monitor : allMonitors)
+    {
+        std::cout << "Monitor: " << monitor.name << "(port: " << monitor.port << ")" << std::endl;
+        std::cout << "    Primary: " << monitor.primary << std::endl;
+        std::cout << "    ScaleFactor: " << monitor.scaleFactor << std::endl;
+        std::cout << "    Pos(pixels): " << monitor.x << ", " << monitor.y << std::endl;
+        std::cout << "    Size(pixels): " << monitor.width << ", " << monitor.height << std::endl;
+        std::cout << "    Size(mm): " << monitor.mwidth << ", " << monitor.mheight << std::endl;
+        std::cout << "    Current Mode: " << monitor.modes[monitor.current_mode_index].width
+                  << ", " << monitor.modes[monitor.current_mode_index].height
+                  << " @" << monitor.modes[monitor.current_mode_index].freqs[monitor.current_freq_index] << std::endl;
+        std::cout << "    Prefered Modes: " << std::endl;
+
+        for (const auto &preferedMode : monitor.getPreferedModes())
+        {
+            std::cout << "        " << preferedMode.width
+                      << ", " << preferedMode.height
+                      << " @" << preferedMode.freqs[0] << std::endl;
+        }
+
+        std::cout << "    Modes: " << std::endl;
+        for (const auto &mode : monitor.modes)
+        {
+            std::cout << "        " << mode.width << ", " << mode.height;
+            for (const auto &freq : mode.freqs)
+                std::cout << " @" << freq;
+            std::cout << std::endl;
+        }
+    }
+
+    auto selectedMonitor = &allMonitors[monitorDefault];
+
+    auto screen_size_mm = selectedMonitor->SizeMillimeters();
+    auto screen_size_in = selectedMonitor->SizeInches();
+    auto screen_pos_pixels = selectedMonitor->Position();
+    auto screen_size_pixels = selectedMonitor->SizePixels();
+    auto dpif = DPI::Display::ComputeDPIf(screen_size_pixels,screen_size_in);
+    auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels,screen_size_in);
 
     std::cout << "Size(mm): " << screen_size_mm.x << ", " << screen_size_mm.y << std::endl;
     std::cout << "Size(in): " << screen_size_in.x << ", " << screen_size_in.y << std::endl;
@@ -28,41 +63,40 @@ int main(int argc, char *argv[])
     AppKit::Window::WindowConfig wConfig(
         "Interactive Window",
         AppKit::Window::WindowStyle::Borderless,
-        AppKit::Window::VideoMode(screen_size_pixels.x, screen_size_pixels.y, 32)
-    );
-
+        AppKit::Window::VideoMode(selectedMonitor->SizePixels().x, selectedMonitor->SizePixels().y, 32));
 
     AppKit::Window::GLContextConfig glConfig;
     glConfig.vSync = true;
-    
+
     // GL Context Settings
     glConfig.depthBits = 24;
     glConfig.stencilBits = 0;
     glConfig.antialiasingLevel = 0;
     glConfig.sRgbCapable = true;
     glConfig.coreAttribute = false;
-    
+
     glConfig.majorVersion = 2;
     glConfig.minorVersion = 1;
 
     AppKit::Window::GLWindow window(wConfig, glConfig);
-    
-    window.setPosition( screen_pos_pixels );
+
+    window.setPosition(selectedMonitor->Position());
 
     AppKit::Window::InputManager inputManager;
 
-    inputManager.onWindowEvent.add([&](const AppKit::Window::WindowEvent &event){
+    inputManager.onWindowEvent.add([&](const AppKit::Window::WindowEvent &event)
+                                   {
         if (event.type == AppKit::Window::WindowEventType::Closed)
-            window.close();
-    });
+            window.close(); });
 
-    inputManager.onKeyboardEvent.add([&](const AppKit::Window::KeyboardEvent &event){
+    inputManager.onKeyboardEvent.add([&](const AppKit::Window::KeyboardEvent &event)
+                                     {
         if (event.code == AppKit::Window::Devices::KeyCode::Escape)
-            window.close();
-    });
+            window.close(); });
 
-    while (window.isOpen()){
-        
+    while (window.isOpen())
+    {
+
         window.glSwapBuffers();
         window.forwardWindowEventsToInputManager(false, &inputManager);
     }
