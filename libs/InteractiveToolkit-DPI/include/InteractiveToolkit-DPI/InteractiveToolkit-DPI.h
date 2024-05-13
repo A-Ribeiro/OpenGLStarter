@@ -103,18 +103,19 @@ namespace DPI {
 
         static std::vector<Monitor> QueryMonitors(int *monitorDefaultIndex);
 
-        static void setFullscreenAttribute( const NativeWindowHandleType &nativeWindow );
+        static void setFullscreenAttribute( const NativeWindowHandleType &nativeWindow, const Monitor *monitor );
 
-        static int MonitorCount();
 
-        static int MonitorDefault() ;
+        // static int MonitorCount();
 
-        static MathCore::vec2i MonitorPositionPixels(int monitor_num = -1);
-        static MathCore::vec2i MonitorCurrentResolutionPixels(int monitor_num = -1);
-        static MathCore::vec2f MonitorRealSizeMillimeters(int monitor_num = -1);
-        static MathCore::vec2f MonitorRealSizeInches(int monitor_num = -1);
-        static MathCore::vec2f MonitorDPIf(int monitor_num = -1);
-        static MathCore::vec2i MonitorDPIi(int monitor_num = -1);
+        // static int MonitorDefault() ;
+
+        // static MathCore::vec2i MonitorPositionPixels(int monitor_num = -1);
+        // static MathCore::vec2i MonitorCurrentResolutionPixels(int monitor_num = -1);
+        // static MathCore::vec2f MonitorRealSizeMillimeters(int monitor_num = -1);
+        // static MathCore::vec2f MonitorRealSizeInches(int monitor_num = -1);
+        // static MathCore::vec2f MonitorDPIf(int monitor_num = -1);
+        // static MathCore::vec2i MonitorDPIi(int monitor_num = -1);
 
         static MathCore::vec2f ComputeDPIf( const MathCore::vec2i & sizePixels, const MathCore::vec2f & realSizeInches );
         static MathCore::vec2i ComputeDPIi( const MathCore::vec2i & sizePixels, const MathCore::vec2f & realSizeInches );

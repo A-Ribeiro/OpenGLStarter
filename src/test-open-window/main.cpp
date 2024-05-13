@@ -4,6 +4,9 @@
 #include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
 #include <iostream>
 
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+
 int main(int argc, char *argv[])
 {
     ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
@@ -48,8 +51,8 @@ int main(int argc, char *argv[])
     auto screen_size_in = selectedMonitor->SizeInches();
     auto screen_pos_pixels = selectedMonitor->Position();
     auto screen_size_pixels = selectedMonitor->SizePixels();
-    auto dpif = DPI::Display::ComputeDPIf(screen_size_pixels,screen_size_in);
-    auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels,screen_size_in);
+    auto dpif = DPI::Display::ComputeDPIf(screen_size_pixels, screen_size_in);
+    auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
 
     std::cout << "Size(mm): " << screen_size_mm.x << ", " << screen_size_mm.y << std::endl;
     std::cout << "Size(in): " << screen_size_in.x << ", " << screen_size_in.y << std::endl;
@@ -80,11 +83,7 @@ int main(int argc, char *argv[])
 
     AppKit::Window::GLWindow window(wConfig, glConfig);
 
-    //window.requestFocus();
-    //DPI::Display::setFullscreenAttribute(window.getNativeWindowHandle());
-
-    window.setPosition(selectedMonitor->Position());
-    window.setLockMouseCursorInside(false);
+    DPI::Display::setFullscreenAttribute(window.getNativeWindowHandle(), selectedMonitor);
 
     AppKit::Window::InputManager inputManager;
 
@@ -95,8 +94,44 @@ int main(int argc, char *argv[])
 
     inputManager.onKeyboardEvent.add([&](const AppKit::Window::KeyboardEvent &event)
                                      {
-        if (event.code == AppKit::Window::Devices::KeyCode::Escape)
-            window.close(); });
+                                         if (event.code == AppKit::Window::Devices::KeyCode::Escape)
+                                             window.close();
+                                         if (event.type == AppKit::Window::KeyboardEventType::KeyPressed &&
+                                             event.code == AppKit::Window::Devices::KeyCode::F)
+                                         {
+
+                                             sf::RenderWindow *_window = reinterpret_cast<sf::RenderWindow *>(window.getLibraryHandle());
+                                             auto pos = _window->getPosition();
+                                             std::cout << "pos: " << pos.x << ", " << pos.y << std::endl;
+                                             auto size = _window->getSize();
+                                             std::cout << "size: " << size.x << ", " << size.y << std::endl;
+
+                                             window.setVisible(false);
+
+                                             // DPI::Display::setFullscreenAttribute2(window.getNativeWindowHandle(), selectedMonitor->Position());
+                                             // window.setPosition(selectedMonitor->Position());
+
+                                             // DPI::Display::setFullscreenAttribute(window.getNativeWindowHandle(), selectedMonitor->Position());
+
+                                             // _window->setPosition(sf::Vector2i(32,32));
+                                             //_window->requestFocus();
+
+                                             // window.setSize(MathCore::vec2i(100, 100));
+                                             window.setVisible(true);
+
+                                             DPI::Display::setFullscreenAttribute(window.getNativeWindowHandle(), selectedMonitor);
+
+                                             // window.setLockMouseCursorInside(true);
+
+                                             // DPI::Display::setFullscreenAttribute(window.getNativeWindowHandle(), selectedMonitor->Position());
+
+                                             pos = _window->getPosition();
+                                             std::cout << "pos: " << pos.x << ", " << pos.y << std::endl;
+                                             size = _window->getSize();
+                                             std::cout << "size: " << size.x << ", " << size.y << std::endl;
+                                         }
+                                         // DPI::Display::setFullscreenAttribute(window.getNativeWindowHandle(), selectedMonitor->Position());
+                                     });
 
     while (window.isOpen())
     {

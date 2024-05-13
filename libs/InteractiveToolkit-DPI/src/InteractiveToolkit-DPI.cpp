@@ -194,6 +194,100 @@ namespace DPI
         return result;
     }
 
+    static void grad_window_focus(::Display *dpy, const NativeWindowHandleType &nativeWindow)
+    {
+        Atom netActiveWindow = XInternAtom(dpy, "_NET_WM_BYPASS_COMPOSITOR", False);
+
+        // Only try to grab focus if the window is mapped
+        XWindowAttributes attr;
+        XGetWindowAttributes(dpy, nativeWindow, &attr);
+
+        if (attr.map_state == IsUnmapped)
+            return;
+
+        if (netActiveWindow)
+        {
+
+            ::Time time = 0;
+
+            const Atom netWmUserTime = XInternAtom(dpy, "_NET_WM_USER_TIME", False);
+            if (netWmUserTime)
+            {
+                Atom real_type;
+                int real_format;
+                unsigned long items_read, items_left;
+                int *data = NULL;
+                if (XGetWindowProperty(dpy, nativeWindow,
+                                       netWmUserTime,
+                                       0L, 2L, False,
+                                       XA_CARDINAL,
+                                       &real_type,
+                                       &real_format,
+                                       &items_read,
+                                       &items_left,
+                                       (unsigned char **)&data) == Success &&
+                    items_read)
+                    time = *data;
+
+                if (data)
+                    XFree(data);
+            }
+
+            auto event = XEvent();
+            event.type = ClientMessage;
+            event.xclient.window = nativeWindow;
+            event.xclient.format = 32;
+            event.xclient.message_type = netActiveWindow;
+            event.xclient.data.l[0] = 1; // Normal application
+            event.xclient.data.l[1] = static_cast<long>(time);
+            event.xclient.data.l[2] = 0; // We don't know the currently active window
+
+            const int result = XSendEvent(dpy,
+                                          DefaultRootWindow(dpy),
+                                          False,
+                                          SubstructureNotifyMask | SubstructureRedirectMask,
+                                          &event);
+
+            XFlush(dpy);
+        }
+        else
+        {
+            XRaiseWindow(dpy, nativeWindow);
+            XSetInputFocus(dpy, nativeWindow, RevertToPointerRoot, CurrentTime);
+            XFlush(dpy);
+        }
+    }
+
+    static void update_window_hints(::Display *dpy, const NativeWindowHandleType &nativeWindow, const MathCore::vec2i &monitorPosition, const MathCore::vec2i &monitorSize)
+    {
+        XSizeHints sizeHints{};
+        long flags = 0;
+        XGetWMNormalHints(dpy, nativeWindow, &sizeHints, &flags);
+        sizeHints.flags &= ~(PMinSize | PMaxSize);
+
+        sizeHints.flags |= USPosition;
+
+        //sizeHints.flags |= PMinSize | PMaxSize | USPosition;
+
+        sizeHints.min_width = sizeHints.max_width = monitorSize.width;
+        sizeHints.min_height = sizeHints.max_height = monitorSize.height;
+        
+        sizeHints.x = monitorPosition.x;
+        sizeHints.y = monitorPosition.y;
+
+        XSetWMNormalHints(dpy, nativeWindow, &sizeHints);
+
+        // {
+        //     XSizeHints sizeHints{};
+        //     sizeHints.flags     = PMinSize | PMaxSize | USPosition;
+        //     sizeHints.min_width = sizeHints.max_width = static_cast<int>(width);
+        //     sizeHints.min_height = sizeHints.max_height = static_cast<int>(height);
+        //     sizeHints.x                                 = windowPosition.x;
+        //     sizeHints.y                                 = windowPosition.y;
+        //     XSetWMNormalHints(m_display.get(), m_window, &sizeHints);
+        // }
+    }
+
     static void change_compositor_fullscreen(::Display *dpy, const NativeWindowHandleType &nativeWindow)
     {
         const Atom netWmBypassCompositor = XInternAtom(dpy, "_NET_WM_BYPASS_COMPOSITOR", False);
@@ -222,280 +316,297 @@ namespace DPI
     static void send_change_fullscreen(::Display *dpy, const NativeWindowHandleType &nativeWindow)
     {
 
-        const Atom netWmState = XInternAtom(dpy, "_NET_WM_STATE", true);
-        const Atom netWmStateFullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", true);
+        const int _NET_WM_STATE_REMOVE = 0; /* remove/unset property */
+        const int _NET_WM_STATE_ADD = 1;    /* add/set property */
+        const int _NET_WM_STATE_TOGGLE = 2; /* toggle property  */
 
         auto event = XEvent();
         event.type = ClientMessage;
         event.xclient.window = nativeWindow;
         event.xclient.format = 32;
-        event.xclient.message_type = netWmState;
-        event.xclient.data.l[0] = 1; // _NET_WM_STATE_ADD
-        event.xclient.data.l[1] = static_cast<long>(netWmStateFullscreen);
+        event.xclient.message_type = XInternAtom(dpy, "_NET_WM_STATE", False);
+        event.xclient.data.l[0] = _NET_WM_STATE_ADD;
+        event.xclient.data.l[1] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
         event.xclient.data.l[2] = 0; // No second property
         event.xclient.data.l[3] = 1; // Normal window
+        event.xclient.data.l[4] = 0; // unused
 
         const int result = XSendEvent(dpy,
                                       DefaultRootWindow(dpy),
                                       False,
                                       SubstructureNotifyMask | SubstructureRedirectMask,
+                                      //ClientMessage,
                                       &event);
-
-        // XEvent x_event;
-        // Atom wm_fullscreen;
-
-        // x_event.type = ClientMessage;
-        // x_event.xclient.window = nativeWindow;
-        // x_event.xclient.message_type = XInternAtom(dpy, "_NET_WM_STATE", False);
-        // x_event.xclient.format = 32;
-        // x_event.xclient.data.l[0] = i_state;
-        // wm_fullscreen = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
-        // x_event.xclient.data.l[1] = wm_fullscreen;
-        // x_event.xclient.data.l[2] = 0;
-
-        // XSendEvent(dpy,
-        // //RootWindow(dpy, DefaultScreen(dpy)),
-        // DefaultRootWindow(dpy),
-        // False, ClientMessage, &x_event);
     }
 
-    void Display::setFullscreenAttribute(const NativeWindowHandleType &nativeWindow)
+    void Display::setFullscreenAttribute(const NativeWindowHandleType &nativeWindow, const Monitor *monitor )
     {
+
         auto dpy = XOpenDisplay(NULL);
         ITK_ABORT(!dpy, "Failed to open default display.\n");
 
-        XMapWindow(dpy, nativeWindow);
+        // {
 
-        change_window_fullscreen(dpy, nativeWindow);
-        change_compositor_fullscreen(dpy, nativeWindow);
+        //     // XWindowAttributes wa;
+        //     // XGetWindowAttributes(dpy, nativeWindow, &wa);
+        //     // constexpr unsigned long eventMask = FocusChangeMask | ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |
+        //     //                         PointerMotionMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask |
+        //     //                         EnterWindowMask | LeaveWindowMask | VisibilityChangeMask | PropertyChangeMask;
+
+
+        //     XSetWindowAttributes attributes;
+        //     //attributes.colormap   = wa.colormap;
+        //     //attributes.event_mask = eventMask;//wa.your_event_mask;
+        //     attributes.override_redirect = false;//wa.override_redirect;
+
+        //     XChangeWindowAttributes(
+        //         dpy, nativeWindow,
+        //         CWOverrideRedirect, //, CWEventMask | CWOverrideRedirect | CWColormap,
+        //         &attributes);
+
+        //     XFlush(dpy);
+        // }
+
+        auto pos = monitor->Position();
+        auto res = monitor->SizePixels();
+
+        update_window_hints(dpy, nativeWindow, pos, res);
+        XFlush(dpy);
+
+        // grad_window_focus(dpy, nativeWindow);
+        // change_window_fullscreen(dpy, nativeWindow);
+        // send_change_fullscreen(dpy, nativeWindow);
+
+        XMoveWindow(dpy, nativeWindow, pos.x, pos.y);
+        XFlush(dpy);
+        //change_compositor_fullscreen(dpy,nativeWindow);
         send_change_fullscreen(dpy, nativeWindow);
-
         XFlush(dpy);
 
         XCloseDisplay(dpy);
     }
 
-    int Display::MonitorCount()
-    {
-        ::Display *pdsp = NULL;
+    // int Display::MonitorCount()
+    // {
+    //     ::Display *pdsp = NULL;
 
-        pdsp = XOpenDisplay(NULL);
-        ITK_ABORT(!pdsp, "Failed to open default display.\n");
+    //     pdsp = XOpenDisplay(NULL);
+    //     ITK_ABORT(!pdsp, "Failed to open default display.\n");
 
-        int result = ScreenCount(pdsp);
+    //     int result = ScreenCount(pdsp);
 
-        XCloseDisplay(pdsp);
-        return result;
-    }
+    //     XCloseDisplay(pdsp);
+    //     return result;
+    // }
 
-    int Display::MonitorDefault()
-    {
-        ::Display *pdsp = NULL;
+    // int Display::MonitorDefault()
+    // {
+    //     ::Display *pdsp = NULL;
 
-        pdsp = XOpenDisplay(NULL);
-        ITK_ABORT(!pdsp, "Failed to open default display.\n");
+    //     pdsp = XOpenDisplay(NULL);
+    //     ITK_ABORT(!pdsp, "Failed to open default display.\n");
 
-        int result = DefaultScreen(pdsp);
+    //     int result = DefaultScreen(pdsp);
 
-        XCloseDisplay(pdsp);
-        return result;
-    }
+    //     XCloseDisplay(pdsp);
+    //     return result;
+    // }
 
-    MathCore::vec2i Display::MonitorPositionPixels(int monitor_num)
-    {
-        if (monitor_num == -1)
-            monitor_num = MonitorDefault();
+    // MathCore::vec2i Display::MonitorPositionPixels(int monitor_num)
+    // {
+    //     if (monitor_num == -1)
+    //         monitor_num = MonitorDefault();
 
-        // ::Display *pdsp = NULL;
-        // ::Window pRootWindow;
-        // ::XWindowAttributes xwa;
+    //     // ::Display *pdsp = NULL;
+    //     // ::Window pRootWindow;
+    //     // ::XWindowAttributes xwa;
 
-        // pdsp = XOpenDisplay(NULL);
-        // ITK_ABORT(!pdsp, "Failed to open default display.\n");
+    //     // pdsp = XOpenDisplay(NULL);
+    //     // ITK_ABORT(!pdsp, "Failed to open default display.\n");
 
-        // pRootWindow = RootWindow(pdsp, monitor_num);
+    //     // pRootWindow = RootWindow(pdsp, monitor_num);
 
-        // XGetWindowAttributes(pdsp, pRootWindow, &xwa);
+    //     // XGetWindowAttributes(pdsp, pRootWindow, &xwa);
 
-        // MathCore::vec2i result(xwa.x, xwa.y);
+    //     // MathCore::vec2i result(xwa.x, xwa.y);
 
-        // XCloseDisplay(pdsp);
+    //     // XCloseDisplay(pdsp);
 
-        auto dpy = XOpenDisplay(NULL);
-        ITK_ABORT(!dpy, "Failed to open default display.\n");
+    //     auto dpy = XOpenDisplay(NULL);
+    //     ITK_ABORT(!dpy, "Failed to open default display.\n");
 
-        auto rootWindowID = RootWindow(dpy, monitor_num);
+    //     auto rootWindowID = RootWindow(dpy, monitor_num);
 
-        MathCore::vec2i result;
+    //     MathCore::vec2i result;
 
-        // using get monitors
-        int nmonitors;
-        auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
-        ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
-        result = MathCore::vec2i(monitor_info[0].x, monitor_info[0].y);
-        XRRFreeMonitors(monitor_info);
+    //     // using get monitors
+    //     int nmonitors;
+    //     auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
+    //     ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
+    //     result = MathCore::vec2i(monitor_info[0].x, monitor_info[0].y);
+    //     XRRFreeMonitors(monitor_info);
 
-        XCloseDisplay(dpy);
+    //     XCloseDisplay(dpy);
 
-        return result;
+    //     return result;
 
-        return result;
-    }
+    //     return result;
+    // }
 
-    MathCore::vec2i Display::MonitorCurrentResolutionPixels(int monitor_num)
-    {
-        if (monitor_num == -1)
-            monitor_num = MonitorDefault();
+    // MathCore::vec2i Display::MonitorCurrentResolutionPixels(int monitor_num)
+    // {
+    //     if (monitor_num == -1)
+    //         monitor_num = MonitorDefault();
 
-        // ::Display *pdsp = NULL;
-        // ::Screen *pscr = NULL;
+    //     // ::Display *pdsp = NULL;
+    //     // ::Screen *pscr = NULL;
 
-        // pdsp = XOpenDisplay(NULL);
-        // ITK_ABORT(!pdsp, "Failed to open default display.\n");
+    //     // pdsp = XOpenDisplay(NULL);
+    //     // ITK_ABORT(!pdsp, "Failed to open default display.\n");
 
-        // pscr = ScreenOfDisplay(pdsp, monitor_num);
-        // ITK_ABORT(!pscr, "Failed to obtain the default screen of given display.\n");
+    //     // pscr = ScreenOfDisplay(pdsp, monitor_num);
+    //     // ITK_ABORT(!pscr, "Failed to obtain the default screen of given display.\n");
 
-        // MathCore::vec2i result(pscr->width, pscr->height);
+    //     // MathCore::vec2i result(pscr->width, pscr->height);
 
-        // XCloseDisplay(pdsp);
+    //     // XCloseDisplay(pdsp);
 
-        auto dpy = XOpenDisplay(NULL);
-        ITK_ABORT(!dpy, "Failed to open default display.\n");
+    //     auto dpy = XOpenDisplay(NULL);
+    //     ITK_ABORT(!dpy, "Failed to open default display.\n");
 
-        auto rootWindowID = RootWindow(dpy, monitor_num);
+    //     auto rootWindowID = RootWindow(dpy, monitor_num);
 
-        MathCore::vec2i result;
+    //     MathCore::vec2i result;
 
-        // using get screen resources
-        // auto screen_info = XRRGetScreenResourcesCurrent(dpy, rootWindowID);
-        // ITK_ABORT(!screen_info, "XRandr screen info not found.\n");
-        // for (int i = 0; i < screen_info->noutput; i++)
-        // {
-        //     bool connected = false;
-        //     XRROutputInfo *output_info = XRRGetOutputInfo(dpy,
-        //                                                   screen_info,
-        //                                                   screen_info->outputs[i]);
+    //     // using get screen resources
+    //     // auto screen_info = XRRGetScreenResourcesCurrent(dpy, rootWindowID);
+    //     // ITK_ABORT(!screen_info, "XRandr screen info not found.\n");
+    //     // for (int i = 0; i < screen_info->noutput; i++)
+    //     // {
+    //     //     bool connected = false;
+    //     //     XRROutputInfo *output_info = XRRGetOutputInfo(dpy,
+    //     //                                                   screen_info,
+    //     //                                                   screen_info->outputs[i]);
 
-        //     connected = (output_info->connection == RR_Connected);
-        //     if (connected){
+    //     //     connected = (output_info->connection == RR_Connected);
+    //     //     if (connected){
 
-        //         for(int j=0;j<screen_info->nmode;j++){
-        //             XRRModeInfo *mode_info = &screen_info->modes[j];
-        //             mode_info->
+    //     //         for(int j=0;j<screen_info->nmode;j++){
+    //     //             XRRModeInfo *mode_info = &screen_info->modes[j];
+    //     //             mode_info->
 
-        //         }
+    //     //         }
 
-        //         //RRMode currentMode = output_info->modes[output_info->nmode];
+    //     //         //RRMode currentMode = output_info->modes[output_info->nmode];
 
-        //         result = MathCore::vec2i(output_info->mm_width, output_info->mm_height);
-        //     }
-        //     XRRFreeOutputInfo(output_info);
-        //     if (connected)
-        //         break;
-        // }
-        // XRRFreeScreenResources(screen_info);
+    //     //         result = MathCore::vec2i(output_info->mm_width, output_info->mm_height);
+    //     //     }
+    //     //     XRRFreeOutputInfo(output_info);
+    //     //     if (connected)
+    //     //         break;
+    //     // }
+    //     // XRRFreeScreenResources(screen_info);
 
-        // using get monitors
-        int nmonitors;
-        auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
-        ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
-        result = MathCore::vec2i(monitor_info[0].width, monitor_info[0].height);
-        XRRFreeMonitors(monitor_info);
+    //     // using get monitors
+    //     int nmonitors;
+    //     auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
+    //     ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
+    //     result = MathCore::vec2i(monitor_info[0].width, monitor_info[0].height);
+    //     XRRFreeMonitors(monitor_info);
 
-        XCloseDisplay(dpy);
+    //     XCloseDisplay(dpy);
 
-        return result;
-    }
+    //     return result;
+    // }
 
-    MathCore::vec2f Display::MonitorRealSizeMillimeters(int monitor_num)
-    {
-        if (monitor_num == -1)
-            monitor_num = MonitorDefault();
+    // MathCore::vec2f Display::MonitorRealSizeMillimeters(int monitor_num)
+    // {
+    //     if (monitor_num == -1)
+    //         monitor_num = MonitorDefault();
 
-        auto dpy = XOpenDisplay(NULL);
-        ITK_ABORT(!dpy, "Failed to open default display.\n");
+    //     auto dpy = XOpenDisplay(NULL);
+    //     ITK_ABORT(!dpy, "Failed to open default display.\n");
 
-        // auto pscr = ScreenOfDisplay(dpy, monitor_num);
-        // ITK_ABORT(!pscr, "Failed to obtain the default screen of given display.\n");
-        // MathCore::vec2f result(pscr->mwidth, pscr->mheight);
+    //     // auto pscr = ScreenOfDisplay(dpy, monitor_num);
+    //     // ITK_ABORT(!pscr, "Failed to obtain the default screen of given display.\n");
+    //     // MathCore::vec2f result(pscr->mwidth, pscr->mheight);
 
-        auto rootWindowID = RootWindow(dpy, monitor_num);
+    //     auto rootWindowID = RootWindow(dpy, monitor_num);
 
-        // auto screenConfiguration = XRRGetScreenInfo (dpy, rootWindowID);
-        // ITK_ABORT(!screenConfiguration, "Failed to obtain the default screen of given display.\n");
+    //     // auto screenConfiguration = XRRGetScreenInfo (dpy, rootWindowID);
+    //     // ITK_ABORT(!screenConfiguration, "Failed to obtain the default screen of given display.\n");
 
-        // Rotation original_rotation;
-        // auto current_size_index = XRRConfigCurrentConfiguration (screenConfiguration, &original_rotation);
-        // int nsize;
-        // auto sizes = XRRConfigSizes(screenConfiguration, &nsize);
+    //     // Rotation original_rotation;
+    //     // auto current_size_index = XRRConfigCurrentConfiguration (screenConfiguration, &original_rotation);
+    //     // int nsize;
+    //     // auto sizes = XRRConfigSizes(screenConfiguration, &nsize);
 
-        // MathCore::vec2f result =
-        //     MathCore::vec2f(sizes[current_size_index].mwidth, sizes[current_size_index].mheight) ;
+    //     // MathCore::vec2f result =
+    //     //     MathCore::vec2f(sizes[current_size_index].mwidth, sizes[current_size_index].mheight) ;
 
-        // using get monitors
-        // int nmonitors;
-        // auto monitor_info = XRRGetMonitors( dpy, rootWindowID, true, &nmonitors );
-        // MathCore::vec2f result =
-        //     MathCore::vec2f(monitor_info[0].mwidth, monitor_info[0].mheight) ;
+    //     // using get monitors
+    //     // int nmonitors;
+    //     // auto monitor_info = XRRGetMonitors( dpy, rootWindowID, true, &nmonitors );
+    //     // MathCore::vec2f result =
+    //     //     MathCore::vec2f(monitor_info[0].mwidth, monitor_info[0].mheight) ;
 
-        // for (i = 0; i < nsize; i++) {
-        //     printf ("%c%-2d %5d x %-5d  (%4dmm x%4dmm )",
-        //         i == current_size ? '*' : ' ',
-        //         i, sizes[i].width, sizes[i].height,
-        //         sizes[i].mwidth, sizes[i].mheight);
-        //     // ...
-        // }
+    //     // for (i = 0; i < nsize; i++) {
+    //     //     printf ("%c%-2d %5d x %-5d  (%4dmm x%4dmm )",
+    //     //         i == current_size ? '*' : ' ',
+    //     //         i, sizes[i].width, sizes[i].height,
+    //     //         sizes[i].mwidth, sizes[i].mheight);
+    //     //     // ...
+    //     // }
 
-        MathCore::vec2f result;
+    //     MathCore::vec2f result;
 
-        int nmonitors;
-        auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
-        ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
-        result = MathCore::vec2i(monitor_info[0].mwidth, monitor_info[0].mheight);
+    //     int nmonitors;
+    //     auto monitor_info = XRRGetMonitors(dpy, rootWindowID, true, &nmonitors);
+    //     ITK_ABORT(!monitor_info || nmonitors <= 0, "XRandr monitor info not found.\n");
+    //     result = MathCore::vec2i(monitor_info[0].mwidth, monitor_info[0].mheight);
 
-        // // using get screen resources
-        // auto screen_info = XRRGetScreenResourcesCurrent(dpy, rootWindowID);
-        // ITK_ABORT(!screen_info, "XRandr screen info not found.\n");
-        // printf("%i\n", screen_info->noutput);
-        // for (int i = 0; i < screen_info->noutput; i++)
-        // {
-        //     XRROutputInfo *output_info = XRRGetOutputInfo(dpy,
-        //                                                   screen_info,
-        //                                                   screen_info->outputs[i]);
+    //     // // using get screen resources
+    //     // auto screen_info = XRRGetScreenResourcesCurrent(dpy, rootWindowID);
+    //     // ITK_ABORT(!screen_info, "XRandr screen info not found.\n");
+    //     // printf("%i\n", screen_info->noutput);
+    //     // for (int i = 0; i < screen_info->noutput; i++)
+    //     // {
+    //     //     XRROutputInfo *output_info = XRRGetOutputInfo(dpy,
+    //     //                                                   screen_info,
+    //     //                                                   screen_info->outputs[i]);
 
-        //     bool connected = (output_info->connection == RR_Connected);
-        //     if (connected)
-        //     {
-        //         result = MathCore::vec2f(output_info->mm_width, output_info->mm_height);
-        //     }
-        //     XRRFreeOutputInfo(output_info);
-        //     if (connected)
-        //         break;
-        // }
-        // XRRFreeScreenResources(screen_info);
+    //     //     bool connected = (output_info->connection == RR_Connected);
+    //     //     if (connected)
+    //     //     {
+    //     //         result = MathCore::vec2f(output_info->mm_width, output_info->mm_height);
+    //     //     }
+    //     //     XRRFreeOutputInfo(output_info);
+    //     //     if (connected)
+    //     //         break;
+    //     // }
+    //     // XRRFreeScreenResources(screen_info);
 
-        XRRFreeMonitors(monitor_info);
+    //     XRRFreeMonitors(monitor_info);
 
-        XCloseDisplay(dpy);
+    //     XCloseDisplay(dpy);
 
-        return result;
-    }
+    //     return result;
+    // }
 
-    MathCore::vec2f Display::MonitorRealSizeInches(int monitor_num)
-    {
-        return (MathCore::vec2f)MonitorRealSizeMillimeters(monitor_num) / 25.4f;
-    }
+    // MathCore::vec2f Display::MonitorRealSizeInches(int monitor_num)
+    // {
+    //     return (MathCore::vec2f)MonitorRealSizeMillimeters(monitor_num) / 25.4f;
+    // }
 
-    MathCore::vec2f Display::MonitorDPIf(int monitor_num)
-    {
-        return ComputeDPIf(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
-    }
+    // MathCore::vec2f Display::MonitorDPIf(int monitor_num)
+    // {
+    //     return ComputeDPIf(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
+    // }
 
-    MathCore::vec2i Display::MonitorDPIi(int monitor_num)
-    {
-        return ComputeDPIi(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
-    }
+    // MathCore::vec2i Display::MonitorDPIi(int monitor_num)
+    // {
+    //     return ComputeDPIi(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
+    // }
 
     MathCore::vec2f Display::ComputeDPIf(const MathCore::vec2i &sizePixels, const MathCore::vec2f &realSizeInches)
     {
