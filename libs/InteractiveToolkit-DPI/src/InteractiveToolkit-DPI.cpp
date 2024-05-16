@@ -96,7 +96,11 @@ namespace DPI
 
             Monitor monitor;
 
-            monitor.name = XGetAtomName(dpy, monitor_info->name);
+            {
+                auto atom_name = XGetAtomName(dpy, monitor_info->name);
+                monitor.name = atom_name;
+                XFree(atom_name);
+            }
 
             monitor.scaleFactor = 1.0f;
             monitor.primary = monitor_info->primary != 0;
