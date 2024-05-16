@@ -862,6 +862,11 @@ namespace DPI
     }
 
     void Display::setFullscreenAttribute(const NativeWindowHandleType& nativeWindow, const Monitor* monitor) {
+        SetWindowPos(nativeWindow, nullptr, monitor->x, monitor->y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+        //if (m_cursorGrabbed)
+            //grabCursor(true);
+
     }
 
     //int Display::MonitorCount()
