@@ -180,6 +180,7 @@ namespace DPI
 
                     int freq_index = 0;
                     float nearest = MathCore::FloatTypeInfo<float>::max;
+                    Mode &mode = monitor.getOrCreateMode(mode_info->width, mode_info->height);
                     for (int k = 0; k < (int)mode.freqs.size(); k++)
                     {
                         float dst = MathCore::OP<float>::abs(rate - mode.freqs[k]);
