@@ -141,11 +141,57 @@ namespace DPI
                     Mode &mode = monitor.getOrCreateMode(mode_info->width, mode_info->height);
                     mode.freqs.push_back(rate);
 
-                    if (k < output_info->npreferred)
-                    {
-                        monitor.prefered_freq_index.push_back(mode.freqs.size() - 1);
-                        monitor.prefered_mode_index.push_back(monitor.getModeIndex(mode_info->width, mode_info->height));
+                    //if (k < output_info->npreferred)
+                    //{
+                    //    monitor.prefered_freq_index.push_back(mode.freqs.size() - 1);
+                    //    monitor.prefered_mode_index.push_back(monitor.getModeIndex(mode_info->width, mode_info->height));
+                    //}
+                }
+
+                // sort modes and freqs
+                {
+                    std::sort(monitor.modes.begin(),
+                        monitor.modes.end(),
+                        [](const Mode& a, const Mode& b) {
+                            return a.width * a.height > b.width * b.height;
+                        });
+
+                    for (auto& mode : monitor.modes) {
+                        std::sort(mode.freqs.begin(),
+                            mode.freqs.end(),
+                            [](const float& a, const float& b) {
+                                return a > b;
+                            });
                     }
+                }
+
+                for (int k = 0; k < output_info->npreferred; k++)
+                {
+                    auto mode_idx = output_info->modes[k];
+                    auto mode_info = getModeFromIDX(dpy, screenResources, mode_idx);
+                    if (!mode_info)
+                        continue;
+                    if (mode_info->modeFlags & RR_Interlace)
+                    {
+                        continue; // skip interlace modes...
+                    }
+
+                    float rate = getRefreshRateFromMode(mode_info);
+
+                    int freq_index = 0;
+                    float nearest = MathCore::FloatTypeInfo<float>::max;
+                    for (int k = 0; k < (int)mode.freqs.size(); k++)
+                    {
+                        float dst = MathCore::OP<float>::abs(rate - mode.freqs[k]);
+                        if (dst < nearest)
+                        {
+                            nearest = dst;
+                            freq_index = k;
+                        }
+                    }
+
+                    monitor.prefered_freq_index.push_back(freq_index);
+                    monitor.prefered_mode_index.push_back(monitor.getModeIndex(mode_info->width, mode_info->height));
                 }
 
                 {
@@ -728,6 +774,23 @@ namespace DPI
                         devMode_aux.dmSize = sizeof(DEVMODE);
                     }
 
+                    // sort modes and freqs
+                    {
+                        std::sort(this_monitor.modes.begin(),
+                            this_monitor.modes.end(),
+                            [](const Mode& a, const Mode& b) {
+                                return a.width * a.height > b.width * b.height;
+                            });
+
+                        for (auto& mode : this_monitor.modes) {
+                            std::sort(mode.freqs.begin(),
+                                mode.freqs.end(),
+                                [](const float& a, const float& b) {
+                                    return a > b;
+                                });
+                        }
+                    }
+
                     {
                         Mode& mode = this_monitor.getOrCreateMode(devMode.dmPelsWidth, devMode.dmPelsHeight);
 
@@ -858,6 +921,7 @@ namespace DPI
                 break;
             }
         }
+
         return allMonitors;
     }
 
