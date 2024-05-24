@@ -46,6 +46,8 @@ void Project::RenderAndLogic()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (ImGui::Begin("Project", NULL, flags))
 	{
+        auto imGuiManager = ImGuiManager::Instance();
+
 		// display_order.push_back(ImGui::GetCurrentWindow());
 
 		ImVec2 vMin = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
@@ -54,16 +56,16 @@ void Project::RenderAndLogic()
 
 		auto size = vMax - vMin;
 
-		size.x -= 8.0f;
+		size.x -= 8.0f * imGuiManager->GlobalScale;
 		float h = size.y;
-		static float sz1 = size.x * 0.15f + 4.0f;
+		static float sz1 = size.x * 0.15f + 4.0f * imGuiManager->GlobalScale;
 		float sz2 = size.x - sz1;
 		if (sz2 < 0)
 		{
 			sz2 = 8;
 			sz1 = size.x - sz2;
 		}
-		Splitter(true, 8.0f, &sz1, &sz2, 8, 8, h);
+		Splitter(true, 8.0f * imGuiManager->GlobalScale, &sz1, &sz2, 8, 8, h);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, originalPadding);
 		ImGui::BeginChild("1", ImVec2(sz1, h), true, ImGuiWindowFlags_HorizontalScrollbar);
 		// vMin = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
@@ -117,6 +119,10 @@ void Project::RenderAndLogic()
 
         ImVec2 icon_size = ImVec2(100,80);
         ImVec2 spacing = ImVec2(4,4);
+
+        icon_size *= imGuiManager->GlobalScale;
+        spacing *= imGuiManager->GlobalScale;
+
 
 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, spacing);
 

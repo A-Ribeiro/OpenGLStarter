@@ -3,6 +3,8 @@
 #include "../OpenFolderDialog.h"
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
+#include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
+
 
 ImGuiManager::ImGuiManager()
 {
@@ -22,6 +24,19 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 AppKit::Window::InputManager* inputManager, 
 const std::string& base_path)
 {
+    // DPI Computation
+    {
+        int monitorDefault = 0;
+        auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
+
+        auto selectedMonitor = &allMonitors[monitorDefault];
+
+        auto screen_size_in = selectedMonitor->SizeInches();
+        auto screen_size_pixels = selectedMonitor->SizePixels();
+        auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
+
+        this->GlobalScale = (float)dpii.y / 96.0f;
+    }
 	//load all icons
 	{
 		icons[(int)IconType::Small_BoxNode] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/boxnode.png");
@@ -103,6 +118,9 @@ const std::string& base_path)
 	ImGui_WindowGL_InitForOpenGL(WindowUserData::Create(window, inputManager));
 	OPENGL_CMD(ImGui_ImplOpenGL3_Init(glsl_version));
 
+    // float DPIScale = 3.0f;
+    // ImGui::GetStyle().ScaleAllSizes(1.0f/DPIScale);
+
 	// Load Fonts
 	// - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
 	// - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -110,14 +128,14 @@ const std::string& base_path)
 	// - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
 	// - Read 'docs/FONTS.md' for more instructions and details.
 	// - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-	// io.Fonts->AddFontDefault();
-	auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f);
-	// io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-	// io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-	// io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-	// ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-	IM_ASSERT(font != NULL);
-    //ImGui::PushFont(font);
+	// // io.Fonts->AddFontDefault();
+	// auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
+	// // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
+	// // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+	// // io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
+	// // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+	// IM_ASSERT(font != NULL);
+    // //ImGui::PushFont(font);
 
 	//
 	// Initialize menus
@@ -133,6 +151,33 @@ const std::string& base_path)
 
 	ImGuiMenu::Instance()->AddMenu("Window/<<>>", "", NULL);
 	ImGuiMenu::Instance()->AddMenu("Window/Reset Layout", "", std::bind(&ImGuiManager::ResetLayout, this));
+
+    this->imGuiStyleBackup = style;
+    this->applyGlobalScale();
+}
+
+void ImGuiManager::applyGlobalScale() {
+
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    style = this->imGuiStyleBackup;
+    style.ScaleAllSizes(this->GlobalScale);
+
+    AppKit::Window::GLWindow* window = AppKit::GLEngine::Engine::Instance()->window;
+    window->setSize( (MathCore::vec2f)window->getSize() * this->GlobalScale );
+
+    AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
+    window->setPosition(
+        (MathCore::vec2i(vm.width, vm.height)
+        - window->getSize()) / 2
+    );
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->Clear();
+
+    auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
+	IM_ASSERT(font != NULL);
+
 }
 
 void ImGuiManager::Finalize()
@@ -201,6 +246,18 @@ void ImGuiManager::ResetLayout()
 	reset_layout = true;
 	for (auto& view : views)
 		view->active = true;
+
+    // static ImGuiStyle savedStyle = ImGui::GetStyle();
+
+    // ImGui::GetStyle() = savedStyle;
+
+    // float DPIScale = 1.5f;
+    // ImGui::GetStyle().ScaleAllSizes(DPIScale);
+
+    // ImGui::GetIO().FontGlobalScale = DPIScale;
+
+    //ImGui::GetMainViewport()->DpiScale = DPIScale;
+
 }
 
 void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Time *time)
@@ -222,10 +279,10 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_WindowGL_NewFrame();
 
-    float DPIScale = 1.25f;
+    //float DPIScale = 1.25f;
 
-    io.DisplaySize = ImVec2((float)windowSize.width, (float)windowSize.height) / DPIScale;
-    io.DisplayFramebufferScale = ImVec2(1.0f,1.0f) * DPIScale;
+    //io.DisplaySize = ImVec2((float)windowSize.width, (float)windowSize.height) / DPIScale;
+    //io.DisplayFramebufferScale = ImVec2(1.0f,1.0f) * DPIScale;
 
 	ImGui::NewFrame();
 

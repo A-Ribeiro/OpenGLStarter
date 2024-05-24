@@ -47,6 +47,7 @@ bool HierarchyTreeNode::removeUIDRecursive(int32_t uid)
 
 void HierarchyTreeNode::renderRecursive(ImGuiID id_sel, int32_t selected_UID, bool* any_click_occured)//, Platform::Time* time)
 {
+    auto imGuiManager = ImGuiManager::Instance();
 
 	// ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
 	// int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
@@ -66,11 +67,11 @@ void HierarchyTreeNode::renderRecursive(ImGuiID id_sel, int32_t selected_UID, bo
 
 	ImGui::SetNextItemOpen(opened);
 
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 2));
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 2) * imGuiManager->GlobalScale);
 
 
 	// Tree Node Header
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 2)); // Tighten spacing
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 2) * imGuiManager->GlobalScale); // Tighten spacing
 	//ImGui::AlignTextToFramePadding();
 
 	
@@ -107,9 +108,9 @@ void HierarchyTreeNode::renderRecursive(ImGuiID id_sel, int32_t selected_UID, bo
 	const ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
 	const ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
 	const ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.0f); // 50% opaque white
-	
-	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ( ImGui::GetFrameHeight() - 16.0f ) * 0.5f);
-	ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), uv_min, uv_max, tint_col, border_col);
+
+	ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ( ImGui::GetFrameHeight() - my_tex_h * imGuiManager->GlobalScale ) * 0.5f);
+	ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h) * imGuiManager->GlobalScale, uv_min, uv_max, tint_col, border_col);
 
 	ImGui::SameLine();
 	

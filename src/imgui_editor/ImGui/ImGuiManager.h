@@ -13,6 +13,10 @@ class ImGuiManager
     std::string base_path;
 
 public:
+
+    float GlobalScale;
+    ImGuiStyle imGuiStyleBackup;
+
     //ImGuiMenu menu;
 
     AppKit::OpenGL::GLTexture* icons[(int)IconType::Count];
@@ -49,4 +53,6 @@ public:
     void ResetLayout();
 
     void RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Time* time);
+
+    void applyGlobalScale();
 };
