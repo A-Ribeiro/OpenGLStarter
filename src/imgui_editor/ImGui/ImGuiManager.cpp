@@ -36,6 +36,8 @@ const std::string& base_path)
         auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
 
         this->GlobalScale = (float)dpii.y / 96.0f;
+
+        mainMonitorCenter = selectedMonitor->Position() + screen_size_pixels / 2;
     }
 	//load all icons
 	{
@@ -166,10 +168,13 @@ void ImGuiManager::applyGlobalScale() {
     AppKit::Window::GLWindow* window = AppKit::GLEngine::Engine::Instance()->window;
     window->setSize( (MathCore::vec2f)window->getSize() * this->GlobalScale );
 
-    AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
+    //AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
     window->setPosition(
-        (MathCore::vec2i(vm.width, vm.height)
-        - window->getSize()) / 2
+        (
+            //MathCore::vec2i(vm.width, vm.height)
+        - window->getSize()
+        ) / 2
+        + mainMonitorCenter
     );
 
     ImGuiIO& io = ImGui::GetIO();

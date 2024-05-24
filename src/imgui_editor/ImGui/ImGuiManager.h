@@ -16,6 +16,7 @@ public:
 
     float GlobalScale;
     ImGuiStyle imGuiStyleBackup;
+    MathCore::vec2i mainMonitorCenter;
 
     //ImGuiMenu menu;
 

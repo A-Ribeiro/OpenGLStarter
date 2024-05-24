@@ -33,6 +33,10 @@ class App : public AppBase {
     ServiceController serviceController;
 public:
 
+    float GlobalScale;
+    ImGuiStyle imGuiStyleBackup;
+    MathCore::vec2i mainMonitorCenter;
+
     App();
     ~App();
     virtual void draw();
@@ -41,4 +45,6 @@ public:
     void onGainFocus();
     void onLostFocus();
     void onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue);
+
+    void applyGlobalScale();
 };

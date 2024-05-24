@@ -24,6 +24,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "TOOL")
 target_link_libraries(${PROJECT_NAME} PUBLIC 
     appkit-gl-engine
     appkit-window-imgui
+    InteractiveToolkit-DPI
 )
 
 if (ARIBEIRO_LINUX_LOADER_USE_USR_LOCAL_PATH)

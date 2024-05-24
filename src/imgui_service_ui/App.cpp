@@ -9,6 +9,8 @@ using namespace MathCore;
 
 #include <appkit-gl-base/platform/PlatformGL.h> // include gl headers
 #include <backend/imgui_impl_window_gl.h>
+#include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
+
 
 App::App()
 {
@@ -57,6 +59,22 @@ App::App()
     screenRenderWindow.setHandleWindowCloseButtonEnabled(true);
     screenRenderWindow.setViewportFromRealWindowSizeEnabled(true);
     screenRenderWindow.setEventForwardingEnabled(true);
+
+    // DPI Computation
+    {
+        int monitorDefault = 0;
+        auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
+
+        auto selectedMonitor = &allMonitors[monitorDefault];
+
+        auto screen_size_in = selectedMonitor->SizeInches();
+        auto screen_size_pixels = selectedMonitor->SizePixels();
+        auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
+
+        this->GlobalScale = (float)dpii.y / 96.0f;
+
+        mainMonitorCenter = selectedMonitor->Position() + screen_size_pixels / 2;
+    }
 }
 
 void App::load() {
@@ -113,7 +131,7 @@ void App::load() {
     // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f);
+    //auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
     //io.Fonts->AddFontDefault();
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
@@ -122,8 +140,41 @@ void App::load() {
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
+    this->imGuiStyleBackup = ImGui::GetStyle();
+
+    this->applyGlobalScale();
+
     fade->fadeOut(3.0f,NULL);
 }
+
+void App::applyGlobalScale() {
+
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    style = this->imGuiStyleBackup;
+    style.ScaleAllSizes(this->GlobalScale);
+
+    AppKit::Window::GLWindow* window = AppKit::GLEngine::Engine::Instance()->window;
+    window->setSize( (MathCore::vec2f)window->getSize() * this->GlobalScale );
+
+    //AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
+    window->setPosition(
+        (
+            //MathCore::vec2i(vm.width, vm.height)
+        - window->getSize()
+        ) / 2
+        +
+        mainMonitorCenter
+    );
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->Clear();
+
+    auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
+	IM_ASSERT(font != NULL);
+
+}
+
 
 App::~App(){
     
