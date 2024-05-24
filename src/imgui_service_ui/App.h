@@ -36,6 +36,7 @@ public:
     float GlobalScale;
     ImGuiStyle imGuiStyleBackup;
     MathCore::vec2i mainMonitorCenter;
+    MathCore::vec2i windowResolution;
 
     App();
     ~App();

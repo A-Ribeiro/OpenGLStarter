@@ -72,8 +72,11 @@ App::App()
         auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
 
         this->GlobalScale = (float)dpii.y / 96.0f;
+        if (this->GlobalScale < 1.0f)
+            this->GlobalScale = 1.0f;
 
         mainMonitorCenter = selectedMonitor->Position() + screen_size_pixels / 2;
+        windowResolution = window->getSize();
     }
 }
 
@@ -153,9 +156,11 @@ void App::applyGlobalScale() {
 
     style = this->imGuiStyleBackup;
     style.ScaleAllSizes(this->GlobalScale);
+    if (this->GlobalScale < 1.0f)
+        style.MouseCursorScale = 1.0f;
 
     AppKit::Window::GLWindow* window = AppKit::GLEngine::Engine::Instance()->window;
-    window->setSize( (MathCore::vec2f)window->getSize() * this->GlobalScale );
+    window->setSize( (MathCore::vec2f)windowResolution * this->GlobalScale );
 
     //AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
     window->setPosition(
@@ -163,8 +168,7 @@ void App::applyGlobalScale() {
             //MathCore::vec2i(vm.width, vm.height)
         - window->getSize()
         ) / 2
-        +
-        mainMonitorCenter
+        + mainMonitorCenter
     );
 
     ImGuiIO& io = ImGui::GetIO();
