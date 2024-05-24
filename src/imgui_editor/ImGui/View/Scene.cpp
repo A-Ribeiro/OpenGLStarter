@@ -39,6 +39,11 @@ void Scene::RenderAndLogic()
 
         ImVec2 pos = min;//ImGui::GetWindowPos();
         ImVec2 size = max - min;//ImGui::GetWindowSize();
+
+        ImGuiIO& io = ImGui::GetIO();
+
+        pos *= io.DisplayFramebufferScale;
+        size *= io.DisplayFramebufferScale;
         
         //ImGuiViewport *viewport = ImGui::GetMainViewport();
         if (size.x > 0 && size.y > 0) {
@@ -64,7 +69,7 @@ void Scene::RenderAndLogic()
                 const ImVec2 uv_max = ImVec2(1.0f, 0.0f);                 // Lower-right
                 const ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
                 const ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.0f); // 50% opaque white
-                ImGui::Image(my_tex_id, size, uv_min, uv_max, tint_col, border_col);
+                ImGui::Image(my_tex_id, size / io.DisplayFramebufferScale, uv_min, uv_max, tint_col, border_col);
             }
             else {
                 RenderWindowRegion->Viewport = newViewport;

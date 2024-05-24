@@ -221,6 +221,12 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 	//  Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_WindowGL_NewFrame();
+
+    float DPIScale = 1.25f;
+
+    io.DisplaySize = ImVec2((float)windowSize.width, (float)windowSize.height) / DPIScale;
+    io.DisplayFramebufferScale = ImVec2(1.0f,1.0f) * DPIScale;
+
 	ImGui::NewFrame();
 
 	ImGuiMenu::Instance()->RenderAndLogic();
