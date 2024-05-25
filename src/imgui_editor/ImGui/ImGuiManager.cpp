@@ -9,7 +9,7 @@
 ImGuiManager::ImGuiManager()
 {
 	reset_layout = true;
-    innerViewport = NULL;
+	innerViewport = NULL;
 
 	memset(icons, 0, sizeof(AppKit::OpenGL::GLTexture*) * (int)IconType::Count);
 }
@@ -20,57 +20,57 @@ ImGuiManager* ImGuiManager::Instance()
 	return &_ImGuiManager;
 }
 
-void ImGuiManager::Initialize(AppKit::Window::GLWindow* window, 
-AppKit::Window::InputManager* inputManager, 
-const std::string& base_path)
+void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
+	AppKit::Window::InputManager* inputManager,
+	const std::string& base_path)
 {
-    // DPI Computation
-    {
-        int monitorDefault = 0;
-        auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
+	// DPI Computation
+	{
+		int monitorDefault = 0;
+		auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
 
-        auto selectedMonitor = &allMonitors[monitorDefault];
+		auto selectedMonitor = &allMonitors[monitorDefault];
 
-        auto screen_size_in = selectedMonitor->SizeInches();
-        auto screen_size_pixels = selectedMonitor->SizePixels();
-        auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
+		auto screen_size_in = selectedMonitor->SizeInches();
+		auto screen_size_pixels = selectedMonitor->SizePixels();
+		auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
 
-        this->GlobalScale = (float)dpii.y / 96.0f;
+		this->GlobalScale = (float)dpii.y / 96.0f;
 		if (this->GlobalScale < 1.0f)
 			this->GlobalScale = 1.0f;
 
-        mainMonitorCenter = selectedMonitor->Position() + screen_size_pixels / 2;
+		mainMonitorCenter = selectedMonitor->Position() + screen_size_pixels / 2;
 		windowResolution = window->getSize();
-    }
+	}
 	//load all icons
 	{
 		icons[(int)IconType::Small_BoxNode] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/boxnode.png");
-        stretch[(int)IconType::Small_BoxNode] = false;
+		stretch[(int)IconType::Small_BoxNode] = false;
 
 		icons[(int)IconType::Small_BoxNode_Filled] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/boxnode_filled.png");
-        stretch[(int)IconType::Small_BoxNode_Filled] = false;
+		stretch[(int)IconType::Small_BoxNode_Filled] = false;
 
 		icons[(int)IconType::Small_Folder_Empty] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/uxwing/Small_Folder_Empty.png");
-        stretch[(int)IconType::Small_Folder_Empty] = false;
+		stretch[(int)IconType::Small_Folder_Empty] = false;
 		icons[(int)IconType::Small_Folder_Filled] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/uxwing/Small_Folder_Filled.png");
-        stretch[(int)IconType::Small_Folder_Filled] = false;
+		stretch[(int)IconType::Small_Folder_Filled] = false;
 
 		icons[(int)IconType::Big_Folder_Empty] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/uxwing/Big_Folder_Empty.png");
-        stretch[(int)IconType::Big_Folder_Empty] = true;
+		stretch[(int)IconType::Big_Folder_Empty] = true;
 		icons[(int)IconType::Big_Folder_Filled] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/uxwing/Big_Folder_Filled.png");
-        stretch[(int)IconType::Big_Folder_Filled] = true;
+		stretch[(int)IconType::Big_Folder_Filled] = true;
 
 		icons[(int)IconType::Big_File_Generic] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/uxwing/Big_File_Generic.png");
-        stretch[(int)IconType::Big_File_Generic] = false;
+		stretch[(int)IconType::Big_File_Generic] = false;
 
 
-        //icons[(int)IconType::Big_Folder_Filled]->generateMipMap();
-        for( auto icon:icons) {
-            icon->generateMipMap();
-        }
+		//icons[(int)IconType::Big_Folder_Filled]->generateMipMap();
+		for (auto icon : icons) {
+			icon->generateMipMap();
+		}
 	}
 
-    innerViewport = new InnerViewport( (App*)AppKit::GLEngine::Engine::Instance()->app, true );
+	innerViewport = new InnerViewport((App*)AppKit::GLEngine::Engine::Instance()->app, true);
 
 	this->base_path = base_path;
 
@@ -88,6 +88,9 @@ const std::string& base_path)
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+
+	CustomSettings::Init();
+
 	ImGuiIO& io = ImGui::GetIO();
 	(void)io;
 	// dont save windows positions...
@@ -101,15 +104,15 @@ const std::string& base_path)
 	io.MouseDoubleClickTime = 0.30f;
 
 	// Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+	ImGui::StyleColorsDark();
 	// ImGui::StyleColorsLight();
 	// ImGui::StyleColorsClassic();
 
-    ImGuiStyle& style = ImGui::GetStyle();
-    ImVec4* colors = style.Colors;
+	ImGuiStyle& style = ImGui::GetStyle();
+	ImVec4* colors = style.Colors;
 
-    colors[ImGuiCol_WindowBg]               = ImVec4(0.2f, 0.2f, 0.2f, 0.94f);
-    colors[ImGuiCol_TitleBg]                = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
+	colors[ImGuiCol_WindowBg] = ImVec4(0.2f, 0.2f, 0.2f, 0.94f);
+	colors[ImGuiCol_TitleBg] = ImVec4(0.1f, 0.1f, 0.1f, 1.00f);
 
 	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
 	//ImGuiStyle& style = ImGui::GetStyle();
@@ -123,8 +126,8 @@ const std::string& base_path)
 	ImGui_WindowGL_InitForOpenGL(WindowUserData::Create(window, inputManager));
 	OPENGL_CMD(ImGui_ImplOpenGL3_Init(glsl_version));
 
-    // float DPIScale = 3.0f;
-    // ImGui::GetStyle().ScaleAllSizes(1.0f/DPIScale);
+	// float DPIScale = 3.0f;
+	// ImGui::GetStyle().ScaleAllSizes(1.0f/DPIScale);
 
 	// Load Fonts
 	// - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -140,7 +143,7 @@ const std::string& base_path)
 	// // io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
 	// // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	// IM_ASSERT(font != NULL);
-    // //ImGui::PushFont(font);
+	// //ImGui::PushFont(font);
 
 	//
 	// Initialize menus
@@ -157,51 +160,51 @@ const std::string& base_path)
 	ImGuiMenu::Instance()->AddMenu("Window/<<>>", "", NULL);
 	ImGuiMenu::Instance()->AddMenu("Window/Reset Layout", "", std::bind(&ImGuiManager::ResetLayout, this));
 
-    this->imGuiStyleBackup = style;
-    this->applyGlobalScale();
+	this->imGuiStyleBackup = style;
+	this->applyGlobalScale();
 }
 
 void ImGuiManager::applyGlobalScale() {
 
-    ImGuiStyle& style = ImGui::GetStyle();
+	ImGuiStyle& style = ImGui::GetStyle();
 
-    style = this->imGuiStyleBackup;
-    style.ScaleAllSizes(this->GlobalScale);
+	style = this->imGuiStyleBackup;
+	style.ScaleAllSizes(this->GlobalScale);
 	if (this->GlobalScale < 1.0f)
 		style.MouseCursorScale = 1.0f;
 
-    AppKit::Window::GLWindow* window = AppKit::GLEngine::Engine::Instance()->window;
-    window->setSize( (MathCore::vec2f)windowResolution * this->GlobalScale );
+	AppKit::Window::GLWindow* window = AppKit::GLEngine::Engine::Instance()->window;
+	window->setSize((MathCore::vec2f)windowResolution * this->GlobalScale);
 
-    //AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
-    window->setPosition(
-        (
-            //MathCore::vec2i(vm.width, vm.height)
-        - window->getSize()
-        ) / 2
-        + mainMonitorCenter
-    );
+	//AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
+	window->setPosition(
+		(
+			//MathCore::vec2i(vm.width, vm.height)
+			-window->getSize()
+			) / 2
+		+ mainMonitorCenter
+	);
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->Clear();
+	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->Clear();
 
-    auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
+	auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
 	IM_ASSERT(font != NULL);
 
 }
 
 void ImGuiManager::Finalize()
 {
-    if (innerViewport != NULL){
-        delete innerViewport;
-        innerViewport = NULL;
-    }
+	if (innerViewport != NULL) {
+		delete innerViewport;
+		innerViewport = NULL;
+	}
 
 	for (auto& tex : icons) {
-        if (tex != NULL) {
-		    delete tex;
-            tex = NULL;
-        }
+		if (tex != NULL) {
+			delete tex;
+			tex = NULL;
+		}
 	}
 
 	// Cleanup
@@ -257,20 +260,22 @@ void ImGuiManager::ResetLayout()
 	for (auto& view : views)
 		view->active = true;
 
-    // static ImGuiStyle savedStyle = ImGui::GetStyle();
+	CustomSettings::Instance()->reset();
 
-    // ImGui::GetStyle() = savedStyle;
+	// static ImGuiStyle savedStyle = ImGui::GetStyle();
 
-    // float DPIScale = 1.5f;
-    // ImGui::GetStyle().ScaleAllSizes(DPIScale);
+	// ImGui::GetStyle() = savedStyle;
 
-    // ImGui::GetIO().FontGlobalScale = DPIScale;
+	// float DPIScale = 1.5f;
+	// ImGui::GetStyle().ScaleAllSizes(DPIScale);
 
-    //ImGui::GetMainViewport()->DpiScale = DPIScale;
+	// ImGui::GetIO().FontGlobalScale = DPIScale;
+
+	//ImGui::GetMainViewport()->DpiScale = DPIScale;
 
 }
 
-void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Time *time)
+void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Time* time)
 {
 
 	AppKit::GLEngine::GLRenderState* renderState = AppKit::GLEngine::GLRenderState::Instance();
@@ -281,18 +286,18 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 	renderState->Viewport = iRect(windowSize.width, windowSize.height);
 
 	// draw UI
-	
+
 	ImGuiIO& io = ImGui::GetIO();
-	io.DeltaTime = MathCore::OP<float>::maximum(time->unscaledDeltaTime, 1.0f/1000.0f); // set the time elapsed since the previous frame (in seconds)
+	io.DeltaTime = MathCore::OP<float>::maximum(time->unscaledDeltaTime, 1.0f / 1000.0f); // set the time elapsed since the previous frame (in seconds)
 
 	//  Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_WindowGL_NewFrame();
 
-    //float DPIScale = 1.25f;
+	//float DPIScale = 1.25f;
 
-    //io.DisplaySize = ImVec2((float)windowSize.width, (float)windowSize.height) / DPIScale;
-    //io.DisplayFramebufferScale = ImVec2(1.0f,1.0f) * DPIScale;
+	//io.DisplaySize = ImVec2((float)windowSize.width, (float)windowSize.height) / DPIScale;
+	//io.DisplayFramebufferScale = ImVec2(1.0f,1.0f) * DPIScale;
 
 	ImGui::NewFrame();
 

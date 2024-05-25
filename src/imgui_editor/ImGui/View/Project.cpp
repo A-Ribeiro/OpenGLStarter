@@ -56,16 +56,25 @@ void Project::RenderAndLogic()
 
 		auto size = vMax - vMin;
 
-		size.x -= 8.0f * imGuiManager->GlobalScale;
+        float thick_size = 8.0f * imGuiManager->GlobalScale;
+
+		size.x -= thick_size;
 		float h = size.y;
-		static float sz1 = size.x * 0.15f + 4.0f * imGuiManager->GlobalScale;
+		float sz1 = size.x * 0.35f + thick_size * 0.5f;
+
+        auto settings = CustomSettings::Instance();
+        if (settings->splitterPos >= 0)
+            sz1 = settings->splitterPos;
+
 		float sz2 = size.x - sz1;
-		if (sz2 < 0)
+		if (sz2 < thick_size)
 		{
-			sz2 = 8;
+			sz2 = thick_size;
 			sz1 = size.x - sz2;
 		}
-		Splitter(true, 8.0f * imGuiManager->GlobalScale, &sz1, &sz2, 8, 8, h);
+		Splitter(true, thick_size, &sz1, &sz2, thick_size * 2.0f, thick_size * 2.0f, h);
+        settings->splitterPos = sz1;
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, originalPadding);
 		ImGui::BeginChild("1", ImVec2(sz1, h), true, ImGuiWindowFlags_HorizontalScrollbar);
 		// vMin = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();

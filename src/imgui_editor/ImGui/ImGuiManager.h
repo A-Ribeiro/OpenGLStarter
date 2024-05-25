@@ -4,6 +4,7 @@
 #include "View/all.h"
 
 #include "ImGuiMenu.h"
+#include "CustomSettings.h"
 
 class InnerViewport;
 
