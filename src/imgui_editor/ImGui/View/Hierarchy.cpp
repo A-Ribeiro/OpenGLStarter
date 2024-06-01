@@ -35,6 +35,32 @@ View* Hierarchy::Init()
 		"Window/Hierarchy", "", [this]()
 		{ printf("Window/Hierarchy\n"); },
 		&this->active);
+
+    // debug
+    {
+        OnHover.add([](HierarchyTreeNode* node, bool hovered){
+            printf("OnHover on %s: %i\n", node->name.c_str(), hovered);
+        });
+        OnSingleClick.add([](HierarchyTreeNode* node){
+            printf("OnSingleClick on %s\n", node->name.c_str());
+        });
+        OnDoubleClick.add([](HierarchyTreeNode* node){
+            printf("OnDoubleClick on %s\n", node->name.c_str());
+        });
+        OnExpand.add([](HierarchyTreeNode* node){
+            printf("OnExpand on %s\n", node->name.c_str());
+        });
+        OnCollapse.add([](HierarchyTreeNode* node){
+            printf("OnCollapse on %s\n", node->name.c_str());
+        });
+        OnSelect.add([](HierarchyTreeNode* node){
+            if (node == NULL)
+                printf("OnSelect on NULL\n");
+            else
+                printf("OnSelect on %s\n", node->name.c_str());
+        });
+    }
+    
 	return this;
 }
 
@@ -68,6 +94,7 @@ void Hierarchy::RenderAndLogic()
 			// printf("reset selection...\n");
 			// ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
 			ImGui::GetStateStorage()->SetInt(id_sel, 0);
+            this->OnSelect(NULL);
 		}
 	}
 	ImGui::End();

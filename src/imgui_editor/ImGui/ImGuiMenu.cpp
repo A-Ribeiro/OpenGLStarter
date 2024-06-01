@@ -5,6 +5,7 @@ MenuItemController::MenuItemController()
 	index = 0;
 	check_variable_ptr = NULL;
 	callback = NULL;
+    visible = true;
 }
 bool MenuItemController::IsLeaf()
 {
@@ -12,6 +13,9 @@ bool MenuItemController::IsLeaf()
 }
 void MenuItemController::render(const std::string& parentName, bool isRoot)
 {
+    if (!visible)
+        return;
+
 	if (IsLeaf()) {
 		if (parentName.compare("<<>>") == 0) {
 			ImGui::Separator();
@@ -101,4 +105,12 @@ void ImGuiMenu::RenderAndLogic() {
 		menu.render("");
 		ImGui::EndMainMenuBar();
 	}
+}
+
+MenuItemController& ImGuiMenu::getController(const std::string& path){
+    auto string_splitted = ITKCommon::StringUtil::tokenizer(path, "/");
+	auto* tree_node = &menu;
+	for (auto& entry : string_splitted)
+		tree_node = &tree_node->childrenMap[entry];
+    return *tree_node;
 }

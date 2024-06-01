@@ -1,5 +1,7 @@
 #pragma once
 
+#include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
+
 #include <InteractiveToolkit/MathCore/MathCore.h>
 
 #include <InteractiveToolkit/Platform/Tool/DebugConsoleIPC.h>

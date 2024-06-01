@@ -11,12 +11,16 @@ public:
     
     //AppKit::OpenGL::GLTexture **icon_alias;
     // AppKit::OpenGL::GLTexture *icon;
+    // std::string path;
     std::string name;
     int32_t uid;
     std::vector<HierarchyTreeNode> children;
     IconType type;
 
-    int opened;
+    //bool opened;
+    EventCore::PressReleaseDetector expanded;
+    EventCore::PressReleaseDetector hovered;
+    
 
     bool isLeaf();
     bool isNode();

@@ -12,6 +12,7 @@ public:
     std::string shortcut;
     bool *check_variable_ptr;
     int index;
+    bool visible;
 
     MenuItemController();
     bool IsLeaf();
@@ -40,4 +41,7 @@ public:
     void UpdateUI();
 
     void RenderAndLogic();
+
+    MenuItemController& getController(const std::string& path);
+
 };

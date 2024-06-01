@@ -24,4 +24,13 @@ public:
     View* Init();
 
     void RenderAndLogic();
+
+    EventCore::Event<void(HierarchyTreeNode*, bool)> OnHover;
+    EventCore::Event<void(HierarchyTreeNode*)> OnSingleClick;
+    EventCore::Event<void(HierarchyTreeNode*)> OnDoubleClick;
+    EventCore::Event<void(HierarchyTreeNode*)> OnExpand;
+    EventCore::Event<void(HierarchyTreeNode*)> OnCollapse;
+    EventCore::Event<void(HierarchyTreeNode*)> OnSelect;
+
+
 };
