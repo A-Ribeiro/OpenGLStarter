@@ -33,4 +33,10 @@ public:
     EventCore::Event<void(HierarchyTreeNode*)> OnSelect;
 
 
+    EventCore::PressReleaseDetector A_detector;
+    EventCore::PressReleaseDetector X_detector;
+    EventCore::PressReleaseDetector C_detector;
+    EventCore::PressReleaseDetector V_detector;
+
+
 };

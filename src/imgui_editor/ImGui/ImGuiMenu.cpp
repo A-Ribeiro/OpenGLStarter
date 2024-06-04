@@ -6,6 +6,7 @@ MenuItemController::MenuItemController()
 	check_variable_ptr = NULL;
 	callback = NULL;
     visible = true;
+    enabled = true;
 }
 bool MenuItemController::IsLeaf()
 {
@@ -13,15 +14,16 @@ bool MenuItemController::IsLeaf()
 }
 void MenuItemController::render(const std::string& parentName, bool isRoot)
 {
-    if (!visible)
+    if (!visible) {
         return;
+    }
 
 	if (IsLeaf()) {
 		if (parentName.compare("<<>>") == 0) {
 			ImGui::Separator();
 		}
 		else
-			if (ImGui::MenuItem(parentName.c_str(), shortcut.c_str(), (check_variable_ptr) ? check_variable_ptr : NULL))
+			if (ImGui::MenuItem(parentName.c_str(), shortcut.c_str(), (check_variable_ptr) ? check_variable_ptr : NULL, enabled))
 				callback();
 	}
 	else {
@@ -31,7 +33,7 @@ void MenuItemController::render(const std::string& parentName, bool isRoot)
 				child.render(child.parentName, false);
 		}
 		else
-			if (ImGui::BeginMenu(parentName.c_str())) {
+			if (ImGui::BeginMenu(parentName.c_str(), enabled)) {
 				for (auto& child : childrenSorted)
 					child.render(child.parentName, false);
 				ImGui::EndMenu();
@@ -110,7 +112,8 @@ void ImGuiMenu::RenderAndLogic() {
 MenuItemController& ImGuiMenu::getController(const std::string& path){
     auto string_splitted = ITKCommon::StringUtil::tokenizer(path, "/");
 	auto* tree_node = &menu;
-	for (auto& entry : string_splitted)
+	for (auto& entry : string_splitted){
 		tree_node = &tree_node->childrenMap[entry];
+    }
     return *tree_node;
 }

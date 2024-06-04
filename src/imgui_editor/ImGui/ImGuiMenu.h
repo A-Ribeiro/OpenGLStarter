@@ -13,6 +13,7 @@ public:
     bool *check_variable_ptr;
     int index;
     bool visible;
+    bool enabled;
 
     MenuItemController();
     bool IsLeaf();
