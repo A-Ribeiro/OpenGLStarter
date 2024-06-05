@@ -27,11 +27,11 @@ View* Hierarchy::Init()
 	//texture_alias[Icon_Model] = texture_model;
 
 	// creating testing node
-	root = HierarchyTreeNode(uid_incrementer++, IconType::Small_BoxNode, "root");
-	root.children.push_back(HierarchyTreeNode(uid_incrementer++, IconType::Small_BoxNode, "child1"));
-	root.children.push_back(HierarchyTreeNode(uid_incrementer++, IconType::Small_BoxNode_Filled, "child2"));
-	root.children[root.children.size() - 1].children.push_back(HierarchyTreeNode(uid_incrementer++, IconType::Small_BoxNode, "child2leaf"));
-	root.children.push_back(HierarchyTreeNode(uid_incrementer++, IconType::Small_BoxNode, "child3"));
+	root = TreeNode(uid_incrementer++, IconType::Small_BoxNode, "root");
+	root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_BoxNode, "child1"));
+	root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_BoxNode_Filled, "child2"));
+	root.children[root.children.size() - 1].children.push_back(TreeNode(uid_incrementer++, IconType::Small_BoxNode, "child2leaf"));
+	root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_BoxNode, "child3"));
 
 	ImGuiMenu::Instance()->AddMenu(
 		"Window/Hierarchy", "", [this]()
@@ -40,36 +40,27 @@ View* Hierarchy::Init()
 
     // debug
     {
-        OnHover.add([](HierarchyTreeNode* node, bool hovered){
-            printf("OnHover on %s: %i\n", node->name.c_str(), hovered);
+        OnHover.add([](TreeNode* node, bool hovered){
+            printf("[Hierarchy][Tree] OnHover on %s: %i\n", node->name.c_str(), hovered);
         });
-        OnSingleClick.add([](HierarchyTreeNode* node){
-            printf("OnSingleClick on %s\n", node->name.c_str());
+        OnSingleClick.add([](TreeNode* node){
+            printf("[Hierarchy][Tree] OnSingleClick on %s\n", node->name.c_str());
         });
-        OnDoubleClick.add([](HierarchyTreeNode* node){
-            printf("OnDoubleClick on %s\n", node->name.c_str());
+        OnDoubleClick.add([](TreeNode* node){
+            printf("[Hierarchy][Tree] OnDoubleClick on %s\n", node->name.c_str());
         });
-        OnExpand.add([](HierarchyTreeNode* node){
-            printf("OnExpand on %s\n", node->name.c_str());
+        OnExpand.add([](TreeNode* node){
+            printf("[Hierarchy][Tree] OnExpand on %s\n", node->name.c_str());
         });
-        OnCollapse.add([](HierarchyTreeNode* node){
-            printf("OnCollapse on %s\n", node->name.c_str());
+        OnCollapse.add([](TreeNode* node){
+            printf("[Hierarchy][Tree] OnCollapse on %s\n", node->name.c_str());
         });
-        OnSelect.add([](HierarchyTreeNode* node){
-            // auto &controller = ImGuiMenu::Instance()->getController("Actions/Node");
-            // printf("Modifing: %s\n", controller.parentName.c_str());
-
+        OnSelect.add([](TreeNode* node){
             if (node == NULL) {
-                // for(auto &chld: controller.childrenMap)
-                //     chld.second.enabled = false;
-                printf("OnSelect on NULL\n");
+                printf("[Hierarchy][Tree] OnSelect on NULL\n");
             } else {
-                // for(auto &chld: controller.childrenMap)
-                //     chld.second.enabled = true;
-                printf("OnSelect on %s\n", node->name.c_str());
+                printf("[Hierarchy][Tree] OnSelect on %s\n", node->name.c_str());
             }
-
-            // ImGuiMenu::Instance()->UpdateUI();
         });
     }
 
@@ -80,36 +71,15 @@ void Hierarchy::RenderAndLogic()
 {
 	if (!active)
 		return;
-	bool deselect_all = false;
+	
 	auto flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
 	if (ImGui::Begin("Hierarchy", NULL, flags))
 	{
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
-		if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly))
-		{
-			if (ImGui::IsMouseClicked(0) || ImGui::IsKeyDown(ImGuiKey_Escape))
-			{
-				// printf("Clicked on begin...\n");
-				deselect_all = true;
-			}
-		}
+		
+		root.render("##hierarchy_sel", this);
 
-		ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
-		int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
-
-		bool any_click_occured = false;
-		root.renderRecursive(id_sel, selected_UID, &any_click_occured);// , & time);
-		if (any_click_occured)
-			deselect_all = false;
-
-		if (deselect_all)
-		{
-			// printf("reset selection...\n");
-			// ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
-			ImGui::GetStateStorage()->SetInt(id_sel, 0);
-            this->OnSelect(NULL);
-		}
 	} else {
         on_hover_detector.setState(false);
         on_focus_detector.setState(false);

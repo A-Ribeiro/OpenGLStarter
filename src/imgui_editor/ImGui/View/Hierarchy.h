@@ -2,8 +2,9 @@
 
 #include "common.h"
 #include "all.h"
+#include "TreeNode.h"
 
-class Hierarchy : public View
+class Hierarchy : public View, public TreeHolder
 {
 
     //Platform::Time time;
@@ -13,7 +14,7 @@ class Hierarchy : public View
 
     AppKit::OpenGL::GLTexture *texture_alias[2];*/
 
-    HierarchyTreeNode root;
+    TreeNode root;
     int32_t uid_incrementer;
 
 public:
@@ -26,12 +27,5 @@ public:
     View* Init();
 
     void RenderAndLogic();
-
-    EventCore::Event<void(HierarchyTreeNode*, bool)> OnHover;
-    EventCore::Event<void(HierarchyTreeNode*)> OnSingleClick;
-    EventCore::Event<void(HierarchyTreeNode*)> OnDoubleClick;
-    EventCore::Event<void(HierarchyTreeNode*)> OnExpand;
-    EventCore::Event<void(HierarchyTreeNode*)> OnCollapse;
-    EventCore::Event<void(HierarchyTreeNode*)> OnSelect;
 
 };

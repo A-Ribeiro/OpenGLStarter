@@ -39,10 +39,10 @@ class FileRef {
 
 };
 
-class Project : public View
+class Project : public View, public TreeHolder
 {
 
-    HierarchyTreeNode root;
+    TreeNode root;
     int32_t uid_incrementer;
 
 public:

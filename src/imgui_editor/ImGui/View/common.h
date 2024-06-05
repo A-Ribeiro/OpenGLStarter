@@ -54,7 +54,7 @@ enum class IconType : uint8_t
 class MenuItemController;
 class ImGuiMenu;
 
-class HierarchyTreeNode;
+class TreeNode;
 
 class View;
 class Console;

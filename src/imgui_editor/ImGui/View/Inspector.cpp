@@ -7,58 +7,65 @@ const ViewType Inspector::Type = "Inspector";
 Inspector::Inspector() : View(Inspector::Type)
 {
 }
-Inspector::~Inspector() {
+Inspector::~Inspector()
+{
     clearComponents();
 }
 
-void Inspector::addComponent(InspectorImGuiComponent*v) {
+void Inspector::addComponent(InspectorImGuiComponent *v)
+{
     components.push_back(v);
 }
-void Inspector::removeComponent(InspectorImGuiComponent*v) {
+void Inspector::removeComponent(InspectorImGuiComponent *v)
+{
     for (auto it = components.begin(); it != components.end(); it++)
     {
-        if ((*it) == v) {
+        if ((*it) == v)
+        {
             components.erase(it);
             return;
         }
     }
 }
-void Inspector::clearComponents() {
-    for (auto& v : components)
+void Inspector::clearComponents()
+{
+    for (auto &v : components)
         if (v != NULL)
             delete v;
     components.clear();
 }
 
-View* Inspector::Init()
+View *Inspector::Init()
 {
     addComponent(new InspectorImGuiComponent_Transform());
     addComponent(new InspectorImGuiComponent_Transform());
 
-	ImGuiMenu::Instance()->AddMenu(
-		"Window/Inspector", "", [this]()
-		{ printf("Window/Inspector\n"); },
-		&this->active);
-	return this;
+    ImGuiMenu::Instance()->AddMenu(
+        "Window/Inspector", "", [this]()
+        { printf("Window/Inspector\n"); },
+        &this->active);
+    return this;
 }
 
 void Inspector::RenderAndLogic()
 {
-	if (!active)
-		return;
-	auto flags = ImGuiWindowFlags_NoCollapse; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
+    if (!active)
+        return;
+    auto flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNavInputs; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	if (ImGui::Begin("Inspector", NULL, flags))
-	{
+    if (ImGui::Begin("Inspector", NULL, flags))
+    {
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
-        for (size_t i=0;i<components.size();i++)
+        for (size_t i = 0; i < components.size(); i++)
             components[i]->renderAndLogic(i);
-	} else {
+    }
+    else
+    {
         on_hover_detector.setState(false);
         on_focus_detector.setState(false);
     }
-	ImGui::End();
+    ImGui::End();
     ImGui::PopStyleVar();
 
     computeOnHoverAndOnFocus();

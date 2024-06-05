@@ -1,8 +1,8 @@
-#include "HierarchyTreeNode.h"
+#include "TreeNode.h"
 #include "../ImGuiMenu.h"
 #include "../ImGuiManager.h"
 
-HierarchyTreeNode::HierarchyTreeNode()
+TreeNode::TreeNode()
 {
     this->uid = 0;
     // this->icon_alias = NULL;
@@ -12,7 +12,7 @@ HierarchyTreeNode::HierarchyTreeNode()
     this->expanded.setState(true);
     this->hovered.setState(false);
 }
-HierarchyTreeNode::HierarchyTreeNode(int32_t uid, IconType type, std::string name)
+TreeNode::TreeNode(int32_t uid, IconType type, std::string name)
 {
     this->uid = uid;
     // this->icon_alias = icon_alias;
@@ -23,16 +23,16 @@ HierarchyTreeNode::HierarchyTreeNode(int32_t uid, IconType type, std::string nam
     this->hovered.setState(false);
 }
 
-bool HierarchyTreeNode::isLeaf()
+bool TreeNode::isLeaf()
 {
     return children.size() == 0;
 }
-bool HierarchyTreeNode::isNode()
+bool TreeNode::isNode()
 {
     return children.size() > 0;
 }
 
-bool HierarchyTreeNode::removeUIDRecursive(int32_t uid)
+bool TreeNode::removeUIDRecursive(int32_t uid)
 {
     for (auto it = children.begin(); it != children.end(); it++)
     {
@@ -49,7 +49,7 @@ bool HierarchyTreeNode::removeUIDRecursive(int32_t uid)
     return false;
 }
 
-void HierarchyTreeNode::renderRecursive(ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured) //, Platform::Time* time)
+void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured) //, Platform::Time* time)
 {
     auto imGuiManager = ImGuiManager::Instance();
 
@@ -136,22 +136,51 @@ void HierarchyTreeNode::renderRecursive(ImGuiID id_sel, int32_t selected_UID, bo
     if (node_open)
     {
         for (auto &child : children)
-            child.renderRecursive(id_sel, selected_UID, any_click_occured); // , time);
+            child.renderRecursive(treeHolder, id_sel, selected_UID, any_click_occured); // , time);
 
         if (this->isNode())
             ImGui::TreePop();
     }
 
     if (hovered.down || hovered.up)
-        imGuiManager->hierarchy.OnHover(this, hovered.pressed);
+        treeHolder->OnHover(this, hovered.pressed);
     if (send_single_click)
-        imGuiManager->hierarchy.OnSingleClick(this);
+        treeHolder->OnSingleClick(this);
     if (send_on_select)
-        imGuiManager->hierarchy.OnSelect(this);
+        treeHolder->OnSelect(this);
     if (send_double_click)
-        imGuiManager->hierarchy.OnDoubleClick(this);
+        treeHolder->OnDoubleClick(this);
     if (expanded.down)
-        imGuiManager->hierarchy.OnExpand(this);
+        treeHolder->OnExpand(this);
     if (expanded.up)
-        imGuiManager->hierarchy.OnCollapse(this);
+        treeHolder->OnCollapse(this);
+}
+
+void TreeNode::render(const char* str_imgui_id, TreeHolder *treeHolder) {
+    bool deselect_all = false;
+
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly))
+    {
+        if (ImGui::IsMouseClicked(0) || ImGui::IsKeyPressed(ImGuiKey_Escape, false))
+        {
+            // printf("Clicked on begin...\n");
+            deselect_all = true;
+        }
+    }
+
+    ImGuiID id_sel = ImGui::GetID(str_imgui_id);
+    int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
+
+    bool any_click_occured = false;
+    this->renderRecursive(treeHolder, id_sel, selected_UID, &any_click_occured);// , & time);
+    if (any_click_occured)
+        deselect_all = false;
+
+    if (deselect_all)
+    {
+        // printf("reset selection...\n");
+        // ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
+        ImGui::GetStateStorage()->SetInt(id_sel, 0);
+        treeHolder->OnSelect(NULL);
+    }
 }
