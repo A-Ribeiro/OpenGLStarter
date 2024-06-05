@@ -5,13 +5,13 @@
 
 
 
-void ShortCutCategory::createMenus() const {
+void ShortCutCategory::createMenus() {
 
     for(auto& shortcut : shortCuts) {
         ImGuiMenu::Instance()->AddMenu(
 		shortcut.menuPath, 
         shortcut.shortcutStr, 
-        [&]()
+        []()
 		{ 
             printf("-not-implemented-menu-action-\n");
         });
@@ -21,21 +21,36 @@ void ShortCutCategory::createMenus() const {
     setActive(false);
 }
 
-void ShortCutCategory::setActive(bool active) const {
+void ShortCutCategory::setActive(bool active) {
     for(auto& shortcut : shortCuts) {
         auto &controller = ImGuiMenu::Instance()->getController(shortcut.menuPath);
-        if (menuSetItemVisible)
+        if (menuSetItemVisible){
+            printf("[ShortCutCategory::setActive] individual visible: %i\n", (int)active);
             controller.visible = active;
-        if (menuSetItemEnabled)
+        }
+        if (menuSetItemEnabled){
+            printf("[ShortCutCategory::setActive] individual enabled: %i\n", (int)active);
             controller.enabled = active;
+        }
+
+        controller.callback = [&shortcut]()
+		{ 
+            if (shortcut.shortCutState.pressed)
+                return;
+            shortcut.shortCutState.setState(true);
+            shortcut.shortCutState.setState(false);
+        };
+
     }
 
     if (menuSetVisible.length() != 0){
+        printf("[ShortCutCategory::setActive] update visible\n");
         auto &controller = ImGuiMenu::Instance()->getController(menuSetVisible);
         controller.visible = active;
     }
 
     if (menuSetEnabled.length() != 0){
+        printf("[ShortCutCategory::setActive] update enabled\n");
         auto &controller = ImGuiMenu::Instance()->getController(menuSetEnabled);
         controller.enabled = active;
     }
@@ -149,7 +164,8 @@ void ShortcutManager::addShortcut(
         bool menuSetItemEnabled,
         const std::vector<ShortCut> &shortcuts
 ){
-    const auto &added = shortCutMap[category] = ShortCutCategory(
+    auto &added = shortCutMap[category] = ShortCutCategory(
+        category,
         menuSetVisible,
         menuSetEnabled,
         menuSetItemVisible,
@@ -163,9 +179,15 @@ void ShortcutManager::addShortcut(
 void ShortcutManager::setActionShortCutByCategory(
     const std::string &category
 ){
+    if (actionMenu.name.compare(category) == 0)
+        return;
+
+    actionMenu.setActive(false);
+
     auto it = shortCutMap.find(category);
-    if (it != shortCutMap.end())
+    if (it != shortCutMap.end()){
         actionMenu = it->second;
-    else
+        actionMenu.setActive(true);
+    } else
         actionMenu = ShortCutCategory();
 }

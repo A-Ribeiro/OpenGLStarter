@@ -57,6 +57,7 @@ public:
 
 class ShortCutCategory{
     public:
+    std::string name;
     std::string menuSetVisible;//"Actions"
     std::string menuSetEnabled;//"Actions"
     bool menuSetItemVisible;
@@ -68,20 +69,23 @@ class ShortCutCategory{
         menuSetEnabled = "";
     }
 
-    ShortCutCategory(const std::string &menuSetVisible,
+    ShortCutCategory(
+        std::string name,
+        const std::string &menuSetVisible,
         const std::string &menuSetEnabled,
         bool menuSetItemVisible,
         bool menuSetItemEnabled,
         const std::vector<ShortCut> &shortcuts){
+        this->name = name;
         this->menuSetVisible = menuSetVisible;
         this->menuSetEnabled = menuSetEnabled;
-        this->menuSetItemEnabled = menuSetItemVisible;
+        this->menuSetItemVisible = menuSetItemVisible;
         this->menuSetItemEnabled = menuSetItemEnabled;
         this->shortCuts = shortcuts;
     }
 
-    void createMenus() const;
-    void setActive(bool active) const;
+    void createMenus();
+    void setActive(bool active);
 };
 
 class ShortcutManager : public View
