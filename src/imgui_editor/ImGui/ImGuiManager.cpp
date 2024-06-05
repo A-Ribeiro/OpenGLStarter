@@ -165,6 +165,16 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 
 	this->imGuiStyleBackup = style;
 	this->applyGlobalScale();
+
+    // Debug
+    {
+        OnHover.add([](View *view, bool v){
+            printf("OnHover on view: %s -> %i\n",view->type, (int)v);
+        });
+        OnFocus.add([](View *view, bool v){
+            printf("OnFocus on view: %s -> %i\n",view->type, (int)v);
+        });
+    }
 }
 
 void ImGuiManager::applyGlobalScale() {

@@ -40,6 +40,10 @@ public:
 
     std::vector<View*> views;
 
+    EventCore::Event<void(View*,bool)> OnHover;
+    EventCore::Event<void(View*,bool)> OnFocus;
+
+
     ImGuiManager();
 
     static ImGuiManager* Instance();

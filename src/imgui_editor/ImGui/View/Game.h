@@ -7,6 +7,8 @@ class Game : public View
 {
 
 public:
+    static const ViewType Type;
+
     Game();
 
     View* Init();

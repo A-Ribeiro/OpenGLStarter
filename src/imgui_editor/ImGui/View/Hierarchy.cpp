@@ -2,7 +2,9 @@
 #include "../ImGuiMenu.h"
 #include "../ImGuiManager.h"
 
-Hierarchy::Hierarchy() : View()
+const ViewType Hierarchy::Type = "Hierarchy";
+
+Hierarchy::Hierarchy() : View(Hierarchy::Type)
 {
 	//texture_transform = NULL;
 	//texture_model = NULL;
@@ -82,7 +84,9 @@ void Hierarchy::RenderAndLogic()
 	auto flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
 	if (ImGui::Begin("Hierarchy", NULL, flags))
 	{
-		if (ImGui::IsWindowHovered())
+        on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly));
+        on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
+		if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly))
 		{
 			if (ImGui::IsMouseClicked(0) || ImGui::IsKeyDown(ImGuiKey_Escape))
 			{
@@ -106,7 +110,11 @@ void Hierarchy::RenderAndLogic()
 			ImGui::GetStateStorage()->SetInt(id_sel, 0);
             this->OnSelect(NULL);
 		}
-	}
+	} else {
+        on_hover_detector.setState(false);
+        on_focus_detector.setState(false);
+    }
 	ImGui::End();
 
+    computeOnHoverAndOnFocus();
 }

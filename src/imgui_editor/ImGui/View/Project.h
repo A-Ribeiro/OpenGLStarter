@@ -46,6 +46,7 @@ class Project : public View
     int32_t uid_incrementer;
 
 public:
+    static const ViewType Type;
 
     std::vector<FileRef> files;
 

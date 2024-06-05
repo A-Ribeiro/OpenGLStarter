@@ -59,8 +59,9 @@ void ShortCutCategory::setActive(bool active) {
     ImGuiMenu::Instance()->UpdateUI();
 }
 
+const ViewType ShortcutManager::Type = "ShortcutManager";
 
-ShortcutManager::ShortcutManager(){
+ShortcutManager::ShortcutManager(): View(ShortcutManager::Type){
     
 }
 

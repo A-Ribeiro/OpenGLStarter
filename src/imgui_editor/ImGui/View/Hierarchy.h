@@ -17,6 +17,8 @@ class Hierarchy : public View
     int32_t uid_incrementer;
 
 public:
+    static const ViewType Type;
+
     Hierarchy();
 
     ~Hierarchy();
@@ -31,6 +33,5 @@ public:
     EventCore::Event<void(HierarchyTreeNode*)> OnExpand;
     EventCore::Event<void(HierarchyTreeNode*)> OnCollapse;
     EventCore::Event<void(HierarchyTreeNode*)> OnSelect;
-
 
 };

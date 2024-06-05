@@ -4,8 +4,9 @@
 
 bool drawFile(int id, const char* name, bool *selected, IconType icon, ImVec2 size );
 
+const ViewType Project::Type = "Project";
 
-Project::Project() : View()
+Project::Project() : View(Project::Type)
 {
 	uid_incrementer = 1;
 
@@ -46,6 +47,9 @@ void Project::RenderAndLogic()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (ImGui::Begin("Project", NULL, flags))
 	{
+        on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly));
+        on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
+
         auto imGuiManager = ImGuiManager::Instance();
 
 		// display_order.push_back(ImGui::GetCurrentWindow());
@@ -82,7 +86,7 @@ void Project::RenderAndLogic()
 		// ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 0, 255, 255 ) );
 
 		bool deselect_all = false;
-		if (ImGui::IsWindowHovered())
+		if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly))
 		{
 			if (ImGui::IsMouseClicked(0) || ImGui::IsKeyDown(ImGuiKey_Escape))
 			{
@@ -155,9 +159,14 @@ ImGui::PopStyleVar();
 
 		ImGui::EndChild();
 		ImGui::PopStyleVar();
-	}
+	} else {
+        on_hover_detector.setState(false);
+        on_focus_detector.setState(false);
+    }
 	ImGui::End();
 	ImGui::PopStyleVar();
+
+    computeOnHoverAndOnFocus();
 }
 
 bool drawFile(int id, const char* name, bool *selected, IconType icon, ImVec2 size ) {

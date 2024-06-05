@@ -106,6 +106,7 @@ class ShortcutManager : public View
     > shortCutMap;
 
 public:
+    static const ViewType Type;
 
     ShortCutCategory actionMenu;
 

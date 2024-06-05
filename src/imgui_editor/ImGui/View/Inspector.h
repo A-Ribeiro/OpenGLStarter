@@ -7,6 +7,7 @@ class Inspector : public View
 {
     std::vector< InspectorImGuiComponent* > components;
 public:
+    static const ViewType Type;
 
     void addComponent(InspectorImGuiComponent*);
     void removeComponent(InspectorImGuiComponent*);

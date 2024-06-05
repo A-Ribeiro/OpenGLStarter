@@ -7,6 +7,8 @@ class Scene : public View
 {
 
 public:
+    static const ViewType Type;
+
     Scene();
 
     View* Init();

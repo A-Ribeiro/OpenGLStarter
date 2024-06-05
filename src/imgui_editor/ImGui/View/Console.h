@@ -13,6 +13,8 @@ class Console : public View
     int scroll_last_item;
 
 public:
+    static const ViewType Type;
+
     bool autoScroll;
 
     Console();
