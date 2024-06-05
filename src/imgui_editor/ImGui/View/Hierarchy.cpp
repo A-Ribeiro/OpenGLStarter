@@ -54,44 +54,20 @@ View* Hierarchy::Init()
             printf("OnCollapse on %s\n", node->name.c_str());
         });
         OnSelect.add([](HierarchyTreeNode* node){
-            auto &controller = ImGuiMenu::Instance()->getController("Actions/Node");
-            printf("Modifing: %s\n", controller.parentName.c_str());
+            // auto &controller = ImGuiMenu::Instance()->getController("Actions/Node");
+            // printf("Modifing: %s\n", controller.parentName.c_str());
 
-            if (node == NULL) {
-                for(auto &chld: controller.childrenMap)
-                    chld.second.enabled = false;
-                printf("OnSelect on NULL\n");
-            } else {
-                for(auto &chld: controller.childrenMap)
-                    chld.second.enabled = true;
-                printf("OnSelect on %s\n", node->name.c_str());
-            }
+            // if (node == NULL) {
+            //     for(auto &chld: controller.childrenMap)
+            //         chld.second.enabled = false;
+            //     printf("OnSelect on NULL\n");
+            // } else {
+            //     for(auto &chld: controller.childrenMap)
+            //         chld.second.enabled = true;
+            //     printf("OnSelect on %s\n", node->name.c_str());
+            // }
 
-            ImGuiMenu::Instance()->UpdateUI();
-        });
-    }
-
-    // hierachy menu
-    {
-    	ImGuiMenu::Instance()->AddMenu(
-		"Actions/Node/Add", "Ctrl+A", [&]()
-		{ 
-            printf("Actions/Node/Add\n");
-        });
-        ImGuiMenu::Instance()->AddMenu(
-		"Actions/Node/Cut", "Ctrl+X", [&]()
-		{ 
-            printf("Actions/Node/Cut\n");
-        });
-        ImGuiMenu::Instance()->AddMenu(
-		"Actions/Node/Copy", "Ctrl+C", [&]()
-		{ 
-            printf("Actions/Node/Copy\n");
-        });
-        ImGuiMenu::Instance()->AddMenu(
-		"Actions/Node/Paste", "Ctrl+V", [&]()
-		{ 
-            printf("Actions/Node/Paste\n");
+            // ImGuiMenu::Instance()->UpdateUI();
         });
     }
 
@@ -132,18 +108,5 @@ void Hierarchy::RenderAndLogic()
 		}
 	}
 	ImGui::End();
-
-    using namespace AppKit::Window::Devices;
-
-    bool ctrl_pressed = Keyboard::isPressed(KeyCode::LControl) || Keyboard::isPressed(KeyCode::RControl);
-
-    A_detector.setState(Keyboard::isPressed(KeyCode::A));
-    X_detector.setState(Keyboard::isPressed(KeyCode::X));
-    C_detector.setState(Keyboard::isPressed(KeyCode::C));
-    V_detector.setState(Keyboard::isPressed(KeyCode::V));
-
-    if (ctrl_pressed && A_detector.down){
-        printf("[shortcut Ctrl+A]\n");
-    }
 
 }

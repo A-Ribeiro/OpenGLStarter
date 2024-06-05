@@ -148,7 +148,7 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	//
 	// Initialize menus
 	//
-	ImGuiMenu::Instance()->Clear();
+	//ImGuiMenu::Instance()->Clear();
 	views.clear();
 	views.push_back(hierarchy.Init());
 	views.push_back(project.Init());
@@ -156,6 +156,7 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	views.push_back(scene.Init());
 	views.push_back(game.Init());
 	views.push_back(inspector.Init());
+    views.push_back(shortcutManager.Init());
 
 	ImGuiMenu::Instance()->AddMenu("Window/<<>>", "", NULL);
 	ImGuiMenu::Instance()->AddMenu("Window/Reset Layout", "", std::bind(&ImGuiManager::ResetLayout, this));

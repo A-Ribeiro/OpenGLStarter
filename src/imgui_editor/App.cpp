@@ -59,13 +59,7 @@ App::App()
 
 void App::load()
 {
-    ImGuiManager::Instance()->Initialize(
-        window,
-        &this->screenRenderWindow.inputManager,
-        ITKCommon::Path::getDocumentsPath("Milky Way Studio", "imgui_editor"));
-    fade->fadeOut(0.5f, NULL);
-
-    
+    ImGuiMenu::Instance()->Clear();
     ImGuiMenu::Instance()->AddMenu("File/Open Folder", "",
         [this]() {
             std::string out;
@@ -81,6 +75,12 @@ void App::load()
     ImGuiMenu::Instance()->AddMenu("File/<<>>", "", NULL);
     ImGuiMenu::Instance()->AddMenu("File/Quit", "Ctrl+Q", [this]()
         { this->exitApp(); });
+
+    ImGuiManager::Instance()->Initialize(
+        window,
+        &this->screenRenderWindow.inputManager,
+        ITKCommon::Path::getDocumentsPath("Milky Way Studio", "imgui_editor"));
+    fade->fadeOut(0.5f, NULL);
 }
 
 App::~App()

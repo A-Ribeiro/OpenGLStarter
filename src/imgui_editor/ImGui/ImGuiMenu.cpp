@@ -29,8 +29,11 @@ void MenuItemController::render(const std::string& parentName, bool isRoot)
 	else {
 		if (isRoot) {
 			//root level
-			for (auto& child : childrenSorted)
+            //printf("root lvl\n");
+			for (auto& child : childrenSorted){
+                //printf("   %s\n", child.parentName.c_str());
 				child.render(child.parentName, false);
+            }
 		}
 		else
 			if (ImGui::BeginMenu(parentName.c_str(), enabled)) {
@@ -67,19 +70,23 @@ ImGuiMenu* ImGuiMenu::Instance()
 }
 
 ImGuiMenu::ImGuiMenu() {
-	global_index = 0;
+	global_index = 1;
 }
 
 void ImGuiMenu::AddMenu(const std::string& path, const std::string& shortcut, std::function<void(void)> callback, bool* check_variable_ptr)
 {
 	auto string_splitted = ITKCommon::StringUtil::tokenizer(path, "/");
 	auto* tree_node = &menu;
-	for (auto& entry : string_splitted)
+    if (tree_node->index == 0)
+	    tree_node->index = global_index++;
+	for (auto& entry : string_splitted) {
 		tree_node = &tree_node->childrenMap[entry];
+        if (tree_node->index == 0)
+	        tree_node->index = global_index++;
+    }
 	tree_node->callback = callback;
 	tree_node->shortcut = shortcut;
 	tree_node->check_variable_ptr = check_variable_ptr;
-	tree_node->index = global_index++;
 }
 
 bool ImGuiMenu::GetCheckState(const std::string& path) {

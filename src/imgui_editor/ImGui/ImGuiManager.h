@@ -6,6 +6,8 @@
 #include "ImGuiMenu.h"
 #include "CustomSettings.h"
 
+#include "ShortcutManager.h"
+
 class InnerViewport;
 
 class ImGuiManager
@@ -33,6 +35,8 @@ public:
     Scene scene;
     Game game;
     Inspector inspector;
+
+    ShortcutManager shortcutManager;
 
     std::vector<View*> views;
 
