@@ -11,10 +11,7 @@ void ShortCutCategory::createMenus() {
         ImGuiMenu::Instance()->AddMenu(
 		shortcut.menuPath, 
         shortcut.shortcutStr, 
-        []()
-		{ 
-            printf("-not-implemented-menu-action-\n");
-        });
+        nullptr);
     }
     ImGuiMenu::Instance()->UpdateUI();
 
@@ -33,13 +30,17 @@ void ShortCutCategory::setActive(bool active) {
             controller.enabled = active;
         }
 
-        controller.callback = [&shortcut]()
-		{ 
-            if (shortcut.shortCutState.pressed)
-                return;
-            shortcut.shortCutState.setState(true);
-            shortcut.shortCutState.setState(false);
-        };
+        if (active){
+            controller.callback = [&shortcut]()
+            { 
+                if (shortcut.shortCutState.pressed)
+                    return;
+                shortcut.shortCutState.setState(true);
+                shortcut.shortCutState.setState(false);
+            };}
+        else {
+            controller.callback = nullptr;
+        }
 
     }
 
@@ -117,6 +118,83 @@ View* ShortcutManager::Init(){
                         //deactivate
                         printf("deactivate Ctrl+A\n");
                     }
+                ),
+                ShortCut(
+                    "Action/Remove",//menuPath
+                    "Ctrl+D",//shortcutStr
+                    true,//ctrl,
+                    false,//shift,
+                    false,//alt,
+                    false,//window,
+                    KeyCode::D, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("activate Ctrl+D\n");
+                    },
+                    [](){
+                        //deactivate
+                        printf("deactivate Ctrl+D\n");
+                    }
+                ),
+                ShortCut(
+                    "Action/<<>>",//menuPath
+                    "",//shortcutStr
+                    false,//ctrl,
+                    false,//shift,
+                    false,//alt,
+                    false,//window,
+                    KeyCode::Unknown //AppKit::Window::Devices::KeyCode keyCode,
+                ),
+                ShortCut(
+                    "Action/Copy",//menuPath
+                    "Ctrl+C",//shortcutStr
+                    true,//ctrl,
+                    false,//shift,
+                    false,//alt,
+                    false,//window,
+                    KeyCode::C, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("activate Ctrl+C\n");
+                    },
+                    [](){
+                        //deactivate
+                        printf("deactivate Ctrl+C\n");
+                    }
+                ),
+                ShortCut(
+                    "Action/Cut",//menuPath
+                    "Ctrl+X",//shortcutStr
+                    true,//ctrl,
+                    false,//shift,
+                    false,//alt,
+                    false,//window,
+                    KeyCode::X, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("activate Ctrl+X\n");
+                    },
+                    [](){
+                        //deactivate
+                        printf("deactivate Ctrl+X\n");
+                    }
+                ),
+                ShortCut(
+                    "Action/Paste",//menuPath
+                    "Ctrl+V",//shortcutStr
+                    true,//ctrl,
+                    false,//shift,
+                    false,//alt,
+                    false,//window,
+                    KeyCode::V, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("activate Ctrl+V\n");
+                    },
+                    [](){
+                        //deactivate
+                        printf("deactivate Ctrl+V\n");
+                    }
                 )
             }
         );
@@ -139,6 +217,9 @@ void ShortcutManager::RenderAndLogic(){
     bool window_pressed = Keyboard::isPressed(KeyCode::LSystem) || Keyboard::isPressed(KeyCode::RSystem);
 
     for(auto& shortcut : actionMenu.shortCuts){
+        if (shortcut.keyCode == KeyCode::Unknown)
+            continue;
+
         shortcut.keyCodeState.setState(Keyboard::isPressed(shortcut.keyCode));
         
         bool match_special_keys = 

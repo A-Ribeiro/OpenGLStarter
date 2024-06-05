@@ -158,7 +158,7 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	views.push_back(inspector.Init());
     views.push_back(shortcutManager.Init());
 
-	ImGuiMenu::Instance()->AddMenu("Window/<<>>", "", NULL);
+	ImGuiMenu::Instance()->AddMenu("Window/<<>>", "", nullptr);
 	ImGuiMenu::Instance()->AddMenu("Window/Reset Layout", "", std::bind(&ImGuiManager::ResetLayout, this));
 
     ImGuiMenu::Instance()->makeLast("Window");

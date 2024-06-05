@@ -23,8 +23,10 @@ void MenuItemController::render(const std::string& parentName, bool isRoot)
 			ImGui::Separator();
 		}
 		else
-			if (ImGui::MenuItem(parentName.c_str(), shortcut.c_str(), (check_variable_ptr) ? check_variable_ptr : NULL, enabled))
-				callback();
+			if (ImGui::MenuItem(parentName.c_str(), shortcut.c_str(), (check_variable_ptr) ? check_variable_ptr : NULL, enabled)){
+                if (callback != nullptr)
+                    callback();
+            }
 	}
 	else {
 		if (isRoot) {
@@ -101,6 +103,8 @@ void ImGuiMenu::makeLast(const std::string& path)
 	        tree_node->index = global_index++;
     }
     tree_node->index = global_index++;
+
+    menu.UpdateUI();
 }
 
 bool ImGuiMenu::GetCheckState(const std::string& path) {
