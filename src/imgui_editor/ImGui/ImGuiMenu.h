@@ -34,6 +34,7 @@ public:
     ImGuiMenu();
 
     void AddMenu(const std::string& path, const std::string& shortcut, std::function<void(void)> callback, bool* check_variable_ptr = NULL);
+    void makeLast(const std::string& path);
 
     bool GetCheckState(const std::string& path);
 

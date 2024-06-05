@@ -30,7 +30,10 @@ public:
         shortcutStr = "";
     }
 
-    ShortCut(bool ctrl,
+    ShortCut(
+        const std::string &menuPath,//"Actions/Add"
+        const std::string &shortcutStr,//"Ctrl+A"
+        bool ctrl,
     bool shift,
     bool alt,
     bool window,
@@ -38,7 +41,8 @@ public:
     const EventCore::Callback<void()> &activate = nullptr,
     const EventCore::Callback<void()> &deactivate = nullptr
     ) {
-
+        this->menuPath = menuPath;
+        this->shortcutStr = shortcutStr;
         this->ctrl = ctrl;
         this->shift = shift;
         this->alt = alt;

@@ -56,11 +56,11 @@ View* ShortcutManager::Init(){
 
     // hierachy menu
     {
-    	ImGuiMenu::Instance()->AddMenu(
-		"Actions/Add", "Ctrl+A", [&]()
-		{ 
-            printf("Actions/Add\n");
-        });
+    	// ImGuiMenu::Instance()->AddMenu(
+		// "Actions/Add", "Ctrl+A", [&]()
+		// { 
+        //     printf("Actions/Add\n");
+        // });
         // ImGuiMenu::Instance()->AddMenu(
 		// "Actions/Cut", "Ctrl+X", [&]()
 		// { 
@@ -76,6 +76,37 @@ View* ShortcutManager::Init(){
 		// { 
         //     printf("Actions/Paste\n");
         // });
+
+        using namespace AppKit::Window::Devices;
+
+        addShortcut(
+            "Action:Hierarchy",//category
+            "",//menuSetVisible
+            "",//menuSetEnabled
+            false,//menuSetItemVisible
+            true,//menuSetItemEnabled
+            {
+                ShortCut(
+                    "Action/Add",//menuPath
+                    "Ctrl+A",//shortcutStr
+                    true,//ctrl,
+                    false,//shift,
+                    false,//alt,
+                    false,//window,
+                    KeyCode::A, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("activate Ctrl+A\n");
+                    },
+                    [](){
+                        //deactivate
+                        printf("deactivate Ctrl+A\n");
+                    }
+                )
+            }
+        );
+
+        setActionShortCutByCategory("Action:Hierarchy");
 
 
     }
@@ -125,6 +156,8 @@ void ShortcutManager::addShortcut(
         menuSetItemEnabled,
         shortcuts);
     
+    added.createMenus();
+
 }
 
 void ShortcutManager::setActionShortCutByCategory(

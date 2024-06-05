@@ -89,6 +89,20 @@ void ImGuiMenu::AddMenu(const std::string& path, const std::string& shortcut, st
 	tree_node->check_variable_ptr = check_variable_ptr;
 }
 
+void ImGuiMenu::makeLast(const std::string& path)
+{
+	auto string_splitted = ITKCommon::StringUtil::tokenizer(path, "/");
+	auto* tree_node = &menu;
+    if (tree_node->index == 0)
+	    tree_node->index = global_index++;
+	for (auto& entry : string_splitted) {
+		tree_node = &tree_node->childrenMap[entry];
+        if (tree_node->index == 0)
+	        tree_node->index = global_index++;
+    }
+    tree_node->index = global_index++;
+}
+
 bool ImGuiMenu::GetCheckState(const std::string& path) {
 	auto string_splitted = ITKCommon::StringUtil::tokenizer(path, "/");
 	auto* tree_node = &menu;

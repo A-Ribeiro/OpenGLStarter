@@ -57,15 +57,15 @@ View* Hierarchy::Init()
             // auto &controller = ImGuiMenu::Instance()->getController("Actions/Node");
             // printf("Modifing: %s\n", controller.parentName.c_str());
 
-            // if (node == NULL) {
-            //     for(auto &chld: controller.childrenMap)
-            //         chld.second.enabled = false;
-            //     printf("OnSelect on NULL\n");
-            // } else {
-            //     for(auto &chld: controller.childrenMap)
-            //         chld.second.enabled = true;
-            //     printf("OnSelect on %s\n", node->name.c_str());
-            // }
+            if (node == NULL) {
+                // for(auto &chld: controller.childrenMap)
+                //     chld.second.enabled = false;
+                printf("OnSelect on NULL\n");
+            } else {
+                // for(auto &chld: controller.childrenMap)
+                //     chld.second.enabled = true;
+                printf("OnSelect on %s\n", node->name.c_str());
+            }
 
             // ImGuiMenu::Instance()->UpdateUI();
         });

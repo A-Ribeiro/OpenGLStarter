@@ -161,6 +161,8 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	ImGuiMenu::Instance()->AddMenu("Window/<<>>", "", NULL);
 	ImGuiMenu::Instance()->AddMenu("Window/Reset Layout", "", std::bind(&ImGuiManager::ResetLayout, this));
 
+    ImGuiMenu::Instance()->makeLast("Window");
+
 	this->imGuiStyleBackup = style;
 	this->applyGlobalScale();
 }
