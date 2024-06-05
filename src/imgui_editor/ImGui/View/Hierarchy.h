@@ -2,7 +2,6 @@
 
 #include "common.h"
 #include "all.h"
-#include "TreeNode.h"
 
 class Hierarchy : public View, public TreeHolder
 {

@@ -7,12 +7,12 @@ class TreeHolder
 {
     public:
 
-    EventCore::Event<void(TreeNode*, bool)> OnHover;
-    EventCore::Event<void(TreeNode*)> OnSingleClick;
-    EventCore::Event<void(TreeNode*)> OnDoubleClick;
-    EventCore::Event<void(TreeNode*)> OnExpand;
-    EventCore::Event<void(TreeNode*)> OnCollapse;
-    EventCore::Event<void(TreeNode*)> OnSelect;
+    EventCore::Event<void(TreeNode*, bool)> OnTreeHover;
+    EventCore::Event<void(TreeNode*)> OnTreeSingleClick;
+    EventCore::Event<void(TreeNode*)> OnTreeDoubleClick;
+    EventCore::Event<void(TreeNode*)> OnTreeExpand;
+    EventCore::Event<void(TreeNode*)> OnTreeCollapse;
+    EventCore::Event<void(TreeNode*)> OnTreeSelect;
 };
 
 class TreeNode

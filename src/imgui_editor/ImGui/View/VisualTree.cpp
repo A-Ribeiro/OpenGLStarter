@@ -1,4 +1,4 @@
-#include "TreeNode.h"
+#include "VisualTree.h"
 #include "../ImGuiMenu.h"
 #include "../ImGuiManager.h"
 
@@ -143,17 +143,17 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
     }
 
     if (hovered.down || hovered.up)
-        treeHolder->OnHover(this, hovered.pressed);
+        treeHolder->OnTreeHover(this, hovered.pressed);
     if (send_single_click)
-        treeHolder->OnSingleClick(this);
+        treeHolder->OnTreeSingleClick(this);
     if (send_on_select)
-        treeHolder->OnSelect(this);
+        treeHolder->OnTreeSelect(this);
     if (send_double_click)
-        treeHolder->OnDoubleClick(this);
+        treeHolder->OnTreeDoubleClick(this);
     if (expanded.down)
-        treeHolder->OnExpand(this);
+        treeHolder->OnTreeExpand(this);
     if (expanded.up)
-        treeHolder->OnCollapse(this);
+        treeHolder->OnTreeCollapse(this);
 }
 
 void TreeNode::render(const char* str_imgui_id, TreeHolder *treeHolder) {
@@ -181,6 +181,6 @@ void TreeNode::render(const char* str_imgui_id, TreeHolder *treeHolder) {
         // printf("reset selection...\n");
         // ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
         ImGui::GetStateStorage()->SetInt(id_sel, 0);
-        treeHolder->OnSelect(NULL);
+        treeHolder->OnTreeSelect(NULL);
     }
 }

@@ -3,7 +3,7 @@
 //base class
 #include "View.h"
 
-#include "TreeNode.h"
+#include "VisualTree.h"
 #include "InspectorImGuiComponent.h"
 
 //#include "../ImGuiMenu.h"

@@ -35,17 +35,17 @@ View *Project::Init()
 
     // debug
     {
-        OnHover.add([](TreeNode *node, bool hovered)
+        OnTreeHover.add([](TreeNode *node, bool hovered)
                     { printf("[Project][Tree] OnHover on %s: %i\n", node->name.c_str(), hovered); });
-        OnSingleClick.add([](TreeNode *node)
+        OnTreeSingleClick.add([](TreeNode *node)
                           { printf("[Project][Tree] OnSingleClick on %s\n", node->name.c_str()); });
-        OnDoubleClick.add([](TreeNode *node)
+        OnTreeDoubleClick.add([](TreeNode *node)
                           { printf("[Project][Tree] OnDoubleClick on %s\n", node->name.c_str()); });
-        OnExpand.add([](TreeNode *node)
+        OnTreeExpand.add([](TreeNode *node)
                      { printf("[Project][Tree] OnExpand on %s\n", node->name.c_str()); });
-        OnCollapse.add([](TreeNode *node)
+        OnTreeCollapse.add([](TreeNode *node)
                        { printf("[Project][Tree] OnCollapse on %s\n", node->name.c_str()); });
-        OnSelect.add([](TreeNode *node)
+        OnTreeSelect.add([](TreeNode *node)
                      {
             if (node == NULL) {
                 printf("[Project][Tree] OnSelect on NULL\n");
