@@ -18,6 +18,9 @@ public:
     std::string menuPath;//"Actions/Add"
     std::string shortcutStr;//"Ctrl+A"
 
+    bool menuSetItemVisible;
+    bool menuSetItemEnabled;
+
     ShortCut() {
         ctrl = false;
         shift = false;
@@ -28,11 +31,16 @@ public:
 
         menuPath = "";
         shortcutStr = "";
+
+        menuSetItemVisible = false;
+        menuSetItemEnabled = false;
     }
 
     ShortCut(
         const std::string &menuPath,//"Actions/Add"
         const std::string &shortcutStr,//"Ctrl+A"
+        bool menuSetItemVisible,
+        bool menuSetItemEnabled,
         bool ctrl,
     bool shift,
     bool alt,
@@ -43,6 +51,8 @@ public:
     ) {
         this->menuPath = menuPath;
         this->shortcutStr = shortcutStr;
+        this->menuSetItemVisible = menuSetItemVisible;
+        this->menuSetItemEnabled = menuSetItemEnabled;
         this->ctrl = ctrl;
         this->shift = shift;
         this->alt = alt;
@@ -60,8 +70,8 @@ class ShortCutCategory{
     std::string name;
     std::string menuSetVisible;//"Actions"
     std::string menuSetEnabled;//"Actions"
-    bool menuSetItemVisible;
-    bool menuSetItemEnabled;
+    // bool menuSetItemVisible;
+    // bool menuSetItemEnabled;
     std::vector<ShortCut> shortCuts;
 
     ShortCutCategory() {
@@ -73,14 +83,14 @@ class ShortCutCategory{
         std::string name,
         const std::string &menuSetVisible,
         const std::string &menuSetEnabled,
-        bool menuSetItemVisible,
-        bool menuSetItemEnabled,
+        // bool menuSetItemVisible,
+        // bool menuSetItemEnabled,
         const std::vector<ShortCut> &shortcuts){
         this->name = name;
         this->menuSetVisible = menuSetVisible;
         this->menuSetEnabled = menuSetEnabled;
-        this->menuSetItemVisible = menuSetItemVisible;
-        this->menuSetItemEnabled = menuSetItemEnabled;
+        // this->menuSetItemVisible = menuSetItemVisible;
+        // this->menuSetItemEnabled = menuSetItemEnabled;
         this->shortCuts = shortcuts;
     }
 
@@ -111,8 +121,8 @@ public:
         const std::string &category,
         const std::string &menuSetVisible,
         const std::string &menuSetEnabled,
-        bool menuSetItemVisible,
-        bool menuSetItemEnabled,
+        // bool menuSetItemVisible,
+        // bool menuSetItemEnabled,
         const std::vector<ShortCut> &shortcuts
     );
 

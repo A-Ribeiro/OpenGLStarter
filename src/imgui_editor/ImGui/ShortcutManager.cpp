@@ -21,11 +21,11 @@ void ShortCutCategory::createMenus() {
 void ShortCutCategory::setActive(bool active) {
     for(auto& shortcut : shortCuts) {
         auto &controller = ImGuiMenu::Instance()->getController(shortcut.menuPath);
-        if (menuSetItemVisible){
+        if (shortcut.menuSetItemVisible){
             printf("[ShortCutCategory::setActive] individual visible: %i\n", (int)active);
             controller.visible = active;
         }
-        if (menuSetItemEnabled){
+        if (shortcut.menuSetItemEnabled){
             printf("[ShortCutCategory::setActive] individual enabled: %i\n", (int)active);
             controller.enabled = active;
         }
@@ -96,19 +96,17 @@ View* ShortcutManager::Init(){
         using namespace AppKit::Window::Devices;
 
         addShortcut(
-            "Action:Hierarchy",//category
+            "Action:Template",//category
             "",//menuSetVisible
             "",//menuSetEnabled
-            false,//menuSetItemVisible
-            true,//menuSetItemEnabled
             {
                 ShortCut(
                     "Action/Add",//menuPath
                     "Ctrl+A",//shortcutStr
-                    true,//ctrl,
-                    false,//shift,
-                    false,//alt,
-                    false,//window,
+                    false,//menuSetItemVisible
+                    true,//menuSetItemEnabled
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
                     KeyCode::A, //AppKit::Window::Devices::KeyCode keyCode,
                     [](){
                         //activate
@@ -122,10 +120,10 @@ View* ShortcutManager::Init(){
                 ShortCut(
                     "Action/Remove",//menuPath
                     "Ctrl+D",//shortcutStr
-                    true,//ctrl,
-                    false,//shift,
-                    false,//alt,
-                    false,//window,
+                    false,//menuSetItemVisible
+                    true,//menuSetItemEnabled
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
                     KeyCode::D, //AppKit::Window::Devices::KeyCode keyCode,
                     [](){
                         //activate
@@ -139,19 +137,19 @@ View* ShortcutManager::Init(){
                 ShortCut(
                     "Action/<<>>",//menuPath
                     "",//shortcutStr
-                    false,//ctrl,
-                    false,//shift,
-                    false,//alt,
-                    false,//window,
+                    false,//menuSetItemVisible
+                    true,//menuSetItemEnabled
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
                     KeyCode::Unknown //AppKit::Window::Devices::KeyCode keyCode,
                 ),
                 ShortCut(
                     "Action/Copy",//menuPath
                     "Ctrl+C",//shortcutStr
-                    true,//ctrl,
-                    false,//shift,
-                    false,//alt,
-                    false,//window,
+                    false,//menuSetItemVisible
+                    true,//menuSetItemEnabled
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
                     KeyCode::C, //AppKit::Window::Devices::KeyCode keyCode,
                     [](){
                         //activate
@@ -165,10 +163,10 @@ View* ShortcutManager::Init(){
                 ShortCut(
                     "Action/Cut",//menuPath
                     "Ctrl+X",//shortcutStr
-                    true,//ctrl,
-                    false,//shift,
-                    false,//alt,
-                    false,//window,
+                    false,//menuSetItemVisible
+                    true,//menuSetItemEnabled
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
                     KeyCode::X, //AppKit::Window::Devices::KeyCode keyCode,
                     [](){
                         //activate
@@ -182,10 +180,10 @@ View* ShortcutManager::Init(){
                 ShortCut(
                     "Action/Paste",//menuPath
                     "Ctrl+V",//shortcutStr
-                    true,//ctrl,
-                    false,//shift,
-                    false,//alt,
-                    false,//window,
+                    false,//menuSetItemVisible
+                    true,//menuSetItemEnabled
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
                     KeyCode::V, //AppKit::Window::Devices::KeyCode keyCode,
                     [](){
                         //activate
@@ -199,8 +197,7 @@ View* ShortcutManager::Init(){
             }
         );
 
-        setActionShortCutByCategory("Action:Hierarchy");
-
+        //setActionShortCutByCategory("Action:Template");
 
     }
 
@@ -241,16 +238,16 @@ void ShortcutManager::addShortcut(
         const std::string &category,
         const std::string &menuSetVisible,
         const std::string &menuSetEnabled,
-        bool menuSetItemVisible,
-        bool menuSetItemEnabled,
+        // bool menuSetItemVisible,
+        // bool menuSetItemEnabled,
         const std::vector<ShortCut> &shortcuts
 ){
     auto &added = shortCutMap[category] = ShortCutCategory(
         category,
         menuSetVisible,
         menuSetEnabled,
-        menuSetItemVisible,
-        menuSetItemEnabled,
+        // menuSetItemVisible,
+        // menuSetItemEnabled,
         shortcuts);
     
     added.createMenus();
