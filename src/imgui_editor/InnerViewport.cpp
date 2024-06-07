@@ -2,6 +2,7 @@
 #include "App.h"
 #include "SceneGUI.h"
 #include "ImGui/ImGuiManager.h"
+#include <InteractiveToolkit-Extension/image/PNG.h>
 
 InnerViewport::InnerViewport(App *app, bool createFBO){
     sceneGUI = NULL;
@@ -91,6 +92,11 @@ void InnerViewport::OnUpdate(Platform::Time *time){
     
     //renderState->ClearColor = vec4(0.4f, 0.4f, 1.0f, 1.0f);
     renderState->ClearColor = MathCore::vec4f(0.8f, 0.8f, 0.8f, 1.0f);
+    // renderState->BlendMode = BlendModeAlpha;
+    // renderState->ColorWrite = ColorWriteAll;
+
+    // renderState->BlendMode.forceTriggerOnChange();
+    // renderState->ColorWrite.forceTriggerOnChange();
     
     FrontFaceType old_front_face = renderState->FrontFace;
     DepthTestType old_depth_test = renderState->DepthTest;
@@ -130,6 +136,26 @@ void InnerViewport::OnUpdate(Platform::Time *time){
     fade->draw();
     
     if (isFBO) {
+        // // Debug FBO output
+        // {
+        //     auto tex = renderWindow.fbo->readPixels();
+        //     ITKExtension::Image::PNG::writePNG(
+        //         "output.png",
+        //         tex.width,
+        //         tex.height,
+        //         tex.input_component_count,
+        //         (char*)tex.data,
+        //         false
+        //     );
+        //     tex.dispose();
+        //     Platform::Sleep::sec(5);
+        // }
+
+        // clear only the alpha channel - to render correctly in ImGUI
+        renderState->ColorWrite = ColorWriteAlpha;
+        glClear(GL_COLOR_BUFFER_BIT);
+        renderState->ColorWrite = ColorWriteAll;
+
         renderWindow.fbo->disable();
     }
 

@@ -149,12 +149,12 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
         f_fps = MathCore::OP<float>::move(f_fps, 1.0f / time->unscaledDeltaTime, time->unscaledDeltaTime * 100.0f);
 
     fontBuilder.faceColor = MathCore::vec4f(1, 1, 1, 1);
-    fontBuilder.strokeColor = MathCore::vec4f(0.0f, 0.0f, 0.0f, 1);
+    fontBuilder.strokeColor = MathCore::vec4f(0.3f, 0.3f, 0.3f, 1);
     fontBuilder.horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_left;
     fontBuilder.verticalAlign = AppKit::OpenGL::GLFont2VerticalAlign_bottom;
     fontBuilder.strokeOffset = MathCore::vec3f(0, 0, -0.001f);
     fontBuilder.drawFace = true;
-    fontBuilder.drawStroke = false;
+    fontBuilder.drawStroke = true;
 
     char txt[64];
     sprintf(txt, "%i fps", (int)(f_fps + 0.5f));
