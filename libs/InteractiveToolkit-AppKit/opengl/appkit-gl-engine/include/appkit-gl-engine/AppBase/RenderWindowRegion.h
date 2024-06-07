@@ -43,7 +43,7 @@ namespace AppKit
             std::vector<RenderWindowRegion *> innerWindowList;
             RenderWindowRegion *parent;
 
-            void OnViewportChanged(const AppKit::GLEngine::iRect &value,const AppKit::GLEngine::iRect &oldValue);
+            void OnWindowViewportChanged(const AppKit::GLEngine::iRect &value,const AppKit::GLEngine::iRect &oldValue);
 
             // void viewport_set_internal(const AppKit::GLEngine::iRect &viewport);
 
@@ -74,12 +74,17 @@ namespace AppKit
             MathCore::vec2f screenCenterF;        // Mouse FPS controller helper
             MathCore::vec2i screenCenterI; // used for FPS like mouse move
 
+            float viewportScaleFactor;
+            MathCore::vec2f windowToCameraScale;
+            MathCore::vec2f cameraToWindowScale;
+
             //
             // Properties
             //
             // EventCore::Property<MathCore::vec2i> WindowSize;
 
-            EventCore::Property<AppKit::GLEngine::iRect> Viewport;
+            EventCore::Property<AppKit::GLEngine::iRect> WindowViewport;// before apply viewportScaleFactor
+            EventCore::Property<AppKit::GLEngine::iRect> CameraViewport;// after apply viewportScaleFactor 
             EventCore::Property<MathCore::vec2f> MousePos;
             EventCore::Property<MathCore::vec2f> MousePosRelatedToCenter;
             EventCore::Property<MathCore::vec2f> MousePosRelatedToCenterNormalized;
@@ -103,9 +108,9 @@ namespace AppKit
             RenderWindowRegion();
             ~RenderWindowRegion();
 
-            AppKit::GLEngine::iRect getViewport() const;
+            AppKit::GLEngine::iRect getWindowViewport() const;
 
-            RenderWindowRegion *setViewport(const AppKit::GLEngine::iRect &viewport);
+            RenderWindowRegion *setWindowViewport(const AppKit::GLEngine::iRect &viewport);
             RenderWindowRegion *createFBO();
             RenderWindowRegion *setEventForwardingEnabled(bool v);
             RenderWindowRegion *setHandleWindowCloseButtonEnabled(bool v);
@@ -133,6 +138,7 @@ namespace AppKit
             MathCore::vec2f localCoordToNormalizedAppCoordRelativeToCenter(const MathCore::vec2i &input) const;
 
             bool isLocalInsideViewport(const MathCore::vec2i &input) const;
+
         };
 
     }

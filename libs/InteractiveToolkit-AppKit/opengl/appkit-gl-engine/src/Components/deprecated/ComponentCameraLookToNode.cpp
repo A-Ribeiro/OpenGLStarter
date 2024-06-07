@@ -27,11 +27,11 @@ namespace AppKit
                 renderWindowRegion = transform[0]->renderWindowRegion;
                 renderWindowRegion->OnLateUpdate.add(&ComponentCameraLookToNode::OnLateUpdate, this);
                 renderWindowRegion->MousePos.OnChange.add(&ComponentCameraLookToNode::OnMousePosChanged, this);
-                renderWindowRegion->Viewport.OnChange.add(&ComponentCameraLookToNode::OnViewportChanged, this);
+                renderWindowRegion->WindowViewport.OnChange.add(&ComponentCameraLookToNode::OnViewportChanged, this);
 
                 //renderWindowRegion->Viewport.triggerOnChange();
                 //renderWindowRegion->MousePos.triggerOnChange();
-                OnViewportChanged(renderWindowRegion->Viewport, renderWindowRegion->Viewport);
+                OnViewportChanged(renderWindowRegion->WindowViewport, renderWindowRegion->WindowViewport);
                 OnMousePosChanged(renderWindowRegion->MousePos, renderWindowRegion->MousePos);
             }
 
@@ -168,7 +168,7 @@ namespace AppKit
                 {
                     renderWindowRegion->OnLateUpdate.remove(&ComponentCameraLookToNode::OnLateUpdate, this);
                     renderWindowRegion->MousePos.OnChange.remove(&ComponentCameraLookToNode::OnMousePosChanged, this);
-                    renderWindowRegion->Viewport.OnChange.remove(&ComponentCameraLookToNode::OnViewportChanged, this);
+                    renderWindowRegion->WindowViewport.OnChange.remove(&ComponentCameraLookToNode::OnViewportChanged, this);
                 }
             }
 

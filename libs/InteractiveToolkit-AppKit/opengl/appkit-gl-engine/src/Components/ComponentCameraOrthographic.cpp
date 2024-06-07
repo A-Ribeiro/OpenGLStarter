@@ -63,16 +63,16 @@ namespace AppKit
                 // AppBase* appBase = Engine::Instance()->app;
                 if (renderWindowRegion != NULL)
                 {
-                    renderWindowRegion->Viewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
+                    renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
                 }
             }
 
             void ComponentCameraOrthographic::start()
             {
                 //renderWindowRegion = transform[0]->renderWindowRegion;
-                renderWindowRegion->Viewport.OnChange.add(&ComponentCameraOrthographic::OnViewportChanged, this);
+                renderWindowRegion->CameraViewport.OnChange.add(&ComponentCameraOrthographic::OnViewportChanged, this);
                 // call the first setup
-                OnViewportChanged(renderWindowRegion->Viewport, renderWindowRegion->Viewport);
+                OnViewportChanged(renderWindowRegion->CameraViewport, renderWindowRegion->CameraViewport);
             }
 
             void ComponentCameraOrthographic::OnUpdateCameraFloatParameter(const float &value, const float &oldValue)
@@ -108,7 +108,7 @@ namespace AppKit
                 MathCore::vec2i size;
 
                 if (renderWindowRegion != NULL)
-                    size = MathCore::vec2i(renderWindowRegion->Viewport.c_ptr()->w, renderWindowRegion->Viewport.c_ptr()->h);
+                    size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
                 else
                     size = Engine::Instance()->app->window->getSize();
 

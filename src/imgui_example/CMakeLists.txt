@@ -15,4 +15,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     # appkit-gl-base
     appkit-gl-engine
     appkit-window-imgui
+    InteractiveToolkit-DPI
 )

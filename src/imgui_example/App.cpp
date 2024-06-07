@@ -7,11 +7,32 @@ using namespace MathCore;
 
 #include <appkit-gl-base/platform/PlatformGL.h> // include gl headers
 #include <backend/imgui_impl_window_gl.h>
+#include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
 
 App::App()
 {
     //forward app reference that could be used by newly created components
     Engine::Instance()->app = this;
+
+        // DPI Computation
+    {
+        int monitorDefault = 0;
+        auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
+
+        auto selectedMonitor = &allMonitors[monitorDefault];
+
+        auto screen_size_in = selectedMonitor->SizeInches();
+        auto screen_size_pixels = selectedMonitor->SizePixels();
+        auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
+
+        this->GlobalScale = (float)dpii.y / 96.0f;
+        if (this->GlobalScale < 1.0f)
+            this->GlobalScale = 1.0f;
+
+        mainMonitorCenter = selectedMonitor->Position() + screen_size_pixels / 2;
+        windowResolution = window->getSize();
+    }
+
 
     resourceHelper.initialize();
 
@@ -35,7 +56,7 @@ App::App()
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
     AppBase::OnLostFocus.add(&App::onLostFocus, this);
 
-    screenRenderWindow.Viewport.OnChange.add(&App::onViewportChange, this);
+    screenRenderWindow.CameraViewport.OnChange.add(&App::onViewportChange, this);
 
     fade = new Fade(&time);
 
@@ -99,6 +120,10 @@ void App::load() {
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
+    this->imGuiStyleBackup = ImGui::GetStyle();
+
+    this->applyGlobalScale();
+
     fade->fadeOut(3.0f,NULL);
 }
 
@@ -143,12 +168,12 @@ void App::draw() {
 
     GLRenderState *renderState = GLRenderState::Instance();
     
-    iRect renderWindowViewport = this->screenRenderWindow.Viewport;
+    auto wViewport = this->screenRenderWindow.WindowViewport.c_ptr();
     renderState->Viewport = AppKit::GLEngine::iRect(
-            renderWindowViewport.x,
-            this->screenRenderWindow.Viewport.c_ptr()->h - 1 - renderWindowViewport.y - renderWindowViewport.h,
-            renderWindowViewport.w,
-            renderWindowViewport.h
+            wViewport->x,
+            this->screenRenderWindow.WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
+            wViewport->w,
+            wViewport->h
         );
     //renderState->Viewport = this->screenRenderWindow.Viewport;
 
@@ -243,4 +268,33 @@ void App::onLostFocus() {
 void App::onViewportChange(const iRect &value, const iRect &oldValue) {
     //GLRenderState *renderState = GLRenderState::Instance();
     //renderState->Viewport = AppKit::GLEngine::iRect(prop->value.width, prop->value.height);
+}
+
+void App::applyGlobalScale() {
+
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    style = this->imGuiStyleBackup;
+    style.ScaleAllSizes(this->GlobalScale);
+    if (this->GlobalScale < 1.0f)
+        style.MouseCursorScale = 1.0f;
+
+    AppKit::Window::GLWindow* window = AppKit::GLEngine::Engine::Instance()->window;
+    window->setSize( (MathCore::vec2f)windowResolution * this->GlobalScale );
+
+    //AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
+    window->setPosition(
+        (
+            //MathCore::vec2i(vm.width, vm.height)
+        - window->getSize()
+        ) / 2
+        + mainMonitorCenter
+    );
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->Clear();
+
+    auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
+	IM_ASSERT(font != NULL);
+
 }

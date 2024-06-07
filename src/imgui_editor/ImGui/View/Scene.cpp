@@ -24,6 +24,7 @@ void Scene::RenderAndLogic()
         return;
     auto flags = ImGuiWindowFlags_NoCollapse; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1, 0, 1, 1.0));
     if (ImGui::Begin("Scene", NULL, flags))
     {
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly));
@@ -56,8 +57,8 @@ void Scene::RenderAndLogic()
             RenderWindowRegion* RenderWindowRegion = &ImGuiManager::Instance()->innerViewport->renderWindow;
             //resize viewport
             iRect newViewport = iRect(pos.x,pos.y,size.x,size.y);
-            bool viewportChanged = RenderWindowRegion->Viewport.c_val() != newViewport;
-            RenderWindowRegion->Viewport = newViewport;
+            bool viewportChanged = RenderWindowRegion->WindowViewport.c_val() != newViewport;
+            RenderWindowRegion->WindowViewport = newViewport;
             //image draw
             if (RenderWindowRegion->fbo) {
 
@@ -77,7 +78,7 @@ void Scene::RenderAndLogic()
                 ImGui::Image(my_tex_id, size / io.DisplayFramebufferScale, uv_min, uv_max, tint_col, border_col);
             }
             else {
-                RenderWindowRegion->Viewport = newViewport;
+                RenderWindowRegion->WindowViewport = newViewport;
             }
         } else {
             ImGuiManager::Instance()->innerViewport->setVisible(false);
@@ -89,6 +90,7 @@ void Scene::RenderAndLogic()
         on_focus_detector.setState(false);
     }
     ImGui::End();
+    ImGui::PopStyleColor();
     ImGui::PopStyleVar();
 
     computeOnHoverAndOnFocus();

@@ -25,11 +25,11 @@ namespace AppKit
                 renderWindowRegion->moveMouseToScreenCenter();                    // queue update to screen center
 
                 renderWindowRegion->MousePos.OnChange.add(&ComponentCameraMove::OnMousePosChanged, this);
-                renderWindowRegion->Viewport.OnChange.add(&ComponentCameraMove::OnViewportChanged, this);
+                renderWindowRegion->WindowViewport.OnChange.add(&ComponentCameraMove::OnViewportChanged, this);
 
                 renderWindowRegion->OnLateUpdate.add(&ComponentCameraMove::OnLateUpdate, this);
 
-                OnViewportChanged(renderWindowRegion->Viewport,renderWindowRegion->Viewport);
+                OnViewportChanged(renderWindowRegion->WindowViewport,renderWindowRegion->WindowViewport);
                 OnMousePosChanged(renderWindowRegion->MousePos,renderWindowRegion->MousePos);
 
                 // AppBase* app = Engine::Instance()->app;
@@ -148,7 +148,7 @@ namespace AppKit
                     renderWindowRegion->OnLateUpdate.remove(&ComponentCameraMove::OnLateUpdate, this);
 
                     renderWindowRegion->MousePos.OnChange.remove(&ComponentCameraMove::OnMousePosChanged, this);
-                    renderWindowRegion->Viewport.OnChange.remove(&ComponentCameraMove::OnViewportChanged, this);
+                    renderWindowRegion->WindowViewport.OnChange.remove(&ComponentCameraMove::OnViewportChanged, this);
                 }
             }
 

@@ -27,7 +27,7 @@ namespace AppKit
 
             // resize(AppKit::GLEngine::Engine::Instance()->app->WindowSize);
 
-            resize(MathCore::vec2i(root->renderWindowRegion->Viewport.c_ptr()->w, root->renderWindowRegion->Viewport.c_ptr()->h));
+            resize(MathCore::vec2i(root->renderWindowRegion->CameraViewport.c_ptr()->w, root->renderWindowRegion->CameraViewport.c_ptr()->h));
 
             selected = false;
         }
@@ -49,7 +49,7 @@ namespace AppKit
         void Button::updateText(const std::string &newText)
         {
             rendered_text = newText;
-            resize(MathCore::vec2i(root->renderWindowRegion->Viewport.c_ptr()->w, root->renderWindowRegion->Viewport.c_ptr()->h));
+            resize(MathCore::vec2i(root->renderWindowRegion->CameraViewport.c_ptr()->w, root->renderWindowRegion->CameraViewport.c_ptr()->h));
             // resize(AppKit::GLEngine::Engine::Instance()->app->WindowSize);
         }
 

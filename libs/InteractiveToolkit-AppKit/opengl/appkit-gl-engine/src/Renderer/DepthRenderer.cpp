@@ -173,7 +173,7 @@ namespace AppKit
             // screen or FBO?
             if (renderWindowRegion->fbo == NULL)
             {
-                fbo.setSize(renderWindowRegion->Viewport.c_ptr()->w, renderWindowRegion->Viewport.c_ptr()->h);
+                fbo.setSize(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
                 fbo.blitFromBackBuffer(0, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             }
             else
@@ -200,7 +200,7 @@ namespace AppKit
 
         void DepthRenderer::method2_render_just_depth(Transform *root, Components::ComponentCamera *camera)
         {
-            fbo.setSize(root->renderWindowRegion->Viewport.c_ptr()->w, root->renderWindowRegion->Viewport.c_ptr()->h);
+            fbo.setSize(root->renderWindowRegion->CameraViewport.c_ptr()->w, root->renderWindowRegion->CameraViewport.c_ptr()->h);
             fbo.enable();
 
             GLRenderState *state = GLRenderState::Instance();

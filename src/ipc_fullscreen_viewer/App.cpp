@@ -32,7 +32,7 @@ App::App()
 #endif
 
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
-    AppBase::screenRenderWindow.Viewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow.CameraViewport.OnChange.add(&App::onViewportChange, this);
 
     fade = new Fade(&time);
 

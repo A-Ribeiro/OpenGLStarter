@@ -26,7 +26,7 @@ namespace AppKit
                 case AppKit::Window::WindowEventType::Resized:
                     if (force_viewport_from_real_window_size)
                     {
-                        setViewport(AppKit::GLEngine::iRect(evt.resized.width, evt.resized.height));
+                        setWindowViewport(AppKit::GLEngine::iRect(evt.resized.width, evt.resized.height));
                     }
                     break;
                 default:
@@ -51,10 +51,10 @@ namespace AppKit
         void RenderWindowRegion::onMouseEvent(const AppKit::Window::MouseEvent &evt)
         {
             AppKit::Window::MouseEvent local_evt = evt;
-            local_evt.position.x -= Viewport.c_ptr()->x;
+            local_evt.position.x -= WindowViewport.c_ptr()->x;
 
             // local_evt.position.y = parent->Viewport.c_ptr()->h -1 - Viewport.c_ptr()->h - local_evt.position.y,
-            local_evt.position.y -= Viewport.c_ptr()->y;
+            local_evt.position.y -= WindowViewport.c_ptr()->y;
 
             if (evt.type == AppKit::Window::MouseEventType::ButtonPressed &&
                 !isLocalInsideViewport(local_evt.position))
@@ -100,8 +100,8 @@ namespace AppKit
         void RenderWindowRegion::onTouchEvent(const AppKit::Window::TouchEvent &evt)
         {
             AppKit::Window::TouchEvent local_evt = evt;
-            local_evt.position.x -= Viewport.c_ptr()->x;
-            local_evt.position.y -= Viewport.c_ptr()->y;
+            local_evt.position.x -= WindowViewport.c_ptr()->x;
+            local_evt.position.y -= WindowViewport.c_ptr()->y;
 
             for (size_t i = 0; i < innerWindowList.size(); i++)
             {
@@ -119,10 +119,12 @@ namespace AppKit
         RenderWindowRegion::RenderWindowRegion()
         //: Viewport(this, &RenderWindowRegion::getViewport, &RenderWindowRegion::viewport_set_internal)
         {
+            viewportScaleFactor = 1.0f;
             forward_events = false;
             handle_window_close = false;
             force_viewport_from_real_window_size = false;
-            Viewport = AppKit::GLEngine::iRect(0, 0, 0, 0);
+            WindowViewport = AppKit::GLEngine::iRect(0, 0, 0, 0);
+            CameraViewport = AppKit::GLEngine::iRect(0, 0, 0, 0);
             normalization_factor = 1.0f;
             fbo = NULL;
             color_buffer = NULL;
@@ -134,7 +136,7 @@ namespace AppKit
 
             inputManager.onMouseEvent.add(&RenderWindowRegion::onMouseEvent, this);
             inputManager.onWindowEvent.add(&RenderWindowRegion::onWindowEvent, this);
-            Viewport.OnChange.add(&RenderWindowRegion::OnViewportChanged, this);
+            WindowViewport.OnChange.add(&RenderWindowRegion::OnWindowViewportChanged, this);
         }
         RenderWindowRegion::~RenderWindowRegion()
         {
@@ -142,7 +144,7 @@ namespace AppKit
 
             inputManager.onMouseEvent.remove(&RenderWindowRegion::onMouseEvent, this);
             inputManager.onWindowEvent.remove(&RenderWindowRegion::onWindowEvent, this);
-            Viewport.OnChange.remove(&RenderWindowRegion::OnViewportChanged, this);
+            WindowViewport.OnChange.remove(&RenderWindowRegion::OnWindowViewportChanged, this);
             
 
             // handle_window_close = false;
@@ -166,7 +168,7 @@ namespace AppKit
         // screenCenterI = MathCore::vec2i::Create(0,0);
         }
 
-        void RenderWindowRegion::OnViewportChanged(const AppKit::GLEngine::iRect &value,const AppKit::GLEngine::iRect &oldValue)
+        void RenderWindowRegion::OnWindowViewportChanged(const AppKit::GLEngine::iRect &value,const AppKit::GLEngine::iRect &oldValue)
         {
 
             AppKit::GLEngine::iRect viewport = value;
@@ -182,24 +184,42 @@ namespace AppKit
             else
                 normalization_factor = 1.0f / (float)screenCenterI.x;
 
-            if (fbo != NULL)
-                fbo->setSize(viewport.w, viewport.h);
+            MathCore::vec2f size = MathCore::vec2f(viewport.w,viewport.h) / viewportScaleFactor;
+            MathCore::vec2i sizei = (MathCore::vec2i)(MathCore::OP<MathCore::vec2f>::round(size) + 0.5f);
+
+            if (fbo != NULL){
+                fbo->setSize(sizei.width, sizei.height);
+            }
+
+            CameraViewport = AppKit::GLEngine::iRect(
+                //viewport.x, viewport.y,
+                sizei.width,
+                sizei.height
+            );
+
+            windowToCameraScale.width = (float)CameraViewport.c_ptr()->w / (float)viewport.w;
+            windowToCameraScale.height = (float)CameraViewport.c_ptr()->h / (float)viewport.h;
+
+            cameraToWindowScale.width = (float)viewport.w / (float)CameraViewport.c_ptr()->w;
+            cameraToWindowScale.height = (float)viewport.h / (float)CameraViewport.c_ptr()->h;
+
+            //cameraToWindowScale
         }
 
-        AppKit::GLEngine::iRect RenderWindowRegion::getViewport() const
+        AppKit::GLEngine::iRect RenderWindowRegion::getWindowViewport() const
         {
-            return *Viewport.c_ptr();
+            return *WindowViewport.c_ptr();
         }
 
         // void RenderWindowRegion::viewport_set_internal(const AppKit::GLEngine::iRect &viewport)
         // {
         //     setViewport(viewport);
         // }
-        RenderWindowRegion *RenderWindowRegion::setViewport(const AppKit::GLEngine::iRect &viewport)
+        RenderWindowRegion *RenderWindowRegion::setWindowViewport(const AppKit::GLEngine::iRect &viewport)
         {
             // this->viewport = viewport;
 
-            Viewport = viewport;
+            WindowViewport = viewport;
 
             return this;
         }
@@ -208,12 +228,16 @@ namespace AppKit
         {
             if (fbo != NULL)
                 return this;
+            
+            int w = CameraViewport.c_ptr()->w;
+            int h = CameraViewport.c_ptr()->h;
+            
             fbo = new AppKit::OpenGL::GLDynamicFBO();
-            fbo->setSize(Viewport.c_ptr()->w, Viewport.c_ptr()->h);
+            fbo->setSize(w, h);
 
-            color_buffer = new AppKit::OpenGL::GLTexture(Viewport.c_ptr()->w, Viewport.c_ptr()->h, GL_RGBA);
+            color_buffer = new AppKit::OpenGL::GLTexture(w, h, GL_RGBA);
             // z_buffer = new AppKit::OpenGL::GLTexture(viewport.w,viewport.h,GL_DEPTH_COMPONENT24);
-            z_render_buffer = new AppKit::OpenGL::GLRenderBuffer(Viewport.c_ptr()->w, Viewport.c_ptr()->h, GL_DEPTH_COMPONENT24);
+            z_render_buffer = new AppKit::OpenGL::GLRenderBuffer(w, h, GL_DEPTH_COMPONENT24);
 
             fbo->enable();
 
@@ -277,7 +301,7 @@ namespace AppKit
                 return;
 
             MathCore::vec2i size = app->window->getSize();
-            setViewport(AppKit::GLEngine::iRect(size.width, size.height));
+            setWindowViewport(AppKit::GLEngine::iRect(size.width, size.height));
         }
 
         void RenderWindowRegion::forceMouseToCoord(const MathCore::vec2i &iPos) const
@@ -296,8 +320,8 @@ namespace AppKit
             {
 
                 MathCore::vec2i iParentPos;
-                iParentPos.x = iPos.x + Viewport.c_ptr()->x;
-                iParentPos.y = iPos.y + Viewport.c_ptr()->y;
+                iParentPos.x = iPos.x + WindowViewport.c_ptr()->x;
+                iParentPos.y = iPos.y + WindowViewport.c_ptr()->y;
 
                 parent->forceMouseToCoord(iParentPos);
             }
@@ -351,8 +375,8 @@ namespace AppKit
             while (parent_walker != NULL)
             {
 
-                offset_x += parent_walker->Viewport.c_ptr()->x;
-                offset_y += parent_walker->Viewport.c_ptr()->y;
+                offset_x += parent_walker->WindowViewport.c_ptr()->x;
+                offset_y += parent_walker->WindowViewport.c_ptr()->y;
 
                 parent_walker = parent_walker->parent;
             }
@@ -366,7 +390,7 @@ namespace AppKit
 
         MathCore::vec2f RenderWindowRegion::localCoordToAppCoord(const MathCore::vec2i &input) const
         {
-            return MathCore::vec2f(input.x, Viewport.c_ptr()->h - 1 - input.y);
+            return MathCore::vec2f(input.x, WindowViewport.c_ptr()->h - 1 - input.y);
         }
 
         MathCore::vec2f RenderWindowRegion::appCoordRelativeToCenter(const MathCore::vec2f &appCoord) const
@@ -381,12 +405,12 @@ namespace AppKit
 
         MathCore::vec2f RenderWindowRegion::localCoordToNormalizedAppCoordRelativeToCenter(const MathCore::vec2i &input) const
         {
-            return (MathCore::vec2f(input.x, Viewport.c_ptr()->h - 1 - input.y) - screenCenterF) * normalization_factor;
+            return (MathCore::vec2f(input.x, WindowViewport.c_ptr()->h - 1 - input.y) - screenCenterF) * normalization_factor;
         }
 
         bool RenderWindowRegion::isLocalInsideViewport(const MathCore::vec2i &input) const
         {
-            return input.x < Viewport.c_ptr()->w && input.y < Viewport.c_ptr()->h;
+            return input.x < WindowViewport.c_ptr()->w && input.y < WindowViewport.c_ptr()->h;
         }
 
     }

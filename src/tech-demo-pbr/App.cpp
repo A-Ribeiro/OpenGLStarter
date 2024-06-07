@@ -30,7 +30,7 @@ App::App()
 #endif
 
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
-    AppBase::screenRenderWindow.Viewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow.CameraViewport.OnChange.add(&App::onViewportChange, this);
     AppBase::screenRenderWindow.inputManager.onMouseEvent.add(&App::OnMouseEvent, this);
 
     // AppBase::OnMouseDown.add(this, &App::onMouseDown);
@@ -70,7 +70,7 @@ App::~App()
 {
 
     AppBase::OnGainFocus.remove(&App::onGainFocus, this);
-    AppBase::screenRenderWindow.Viewport.OnChange.remove(&App::onViewportChange, this);
+    AppBase::screenRenderWindow.CameraViewport.OnChange.remove(&App::onViewportChange, this);
     AppBase::screenRenderWindow.inputManager.onMouseEvent.remove(&App::OnMouseEvent, this);
 
     if (activeScene != NULL)

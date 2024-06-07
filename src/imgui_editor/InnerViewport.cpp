@@ -1,7 +1,7 @@
 #include "InnerViewport.h"
 #include "App.h"
 #include "SceneGUI.h"
-
+#include "ImGui/ImGuiManager.h"
 
 InnerViewport::InnerViewport(App *app, bool createFBO){
     sceneGUI = NULL;
@@ -10,7 +10,8 @@ InnerViewport::InnerViewport(App *app, bool createFBO){
     this->app = app;
     this->fade = new Fade(&app->time, &this->renderWindow);
 
-    renderWindow.Viewport = iRect(100,100,300,200);
+    renderWindow.WindowViewport = iRect(100,100,300,200);
+    renderWindow.viewportScaleFactor = ImGuiManager::Instance()->GlobalScale;
     app->screenRenderWindow.addChild(&renderWindow);
 
     if (createFBO) {
@@ -104,11 +105,12 @@ void InnerViewport::OnUpdate(Platform::Time *time){
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
     else {
+        auto wViewport = renderWindow.WindowViewport.c_ptr();
         renderState->Viewport = AppKit::GLEngine::iRect(
-            renderWindow.Viewport.c_ptr()->x,
-            app->screenRenderWindow.Viewport.c_ptr()->h - 1 - renderWindow.Viewport.c_ptr()->y - renderWindow.Viewport.c_ptr()->h,
-            renderWindow.Viewport.c_ptr()->w,
-            renderWindow.Viewport.c_ptr()->h
+            wViewport->x,
+            app->screenRenderWindow.WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
+            wViewport->w,
+            wViewport->h
         );
 
         glEnable(GL_SCISSOR_TEST);

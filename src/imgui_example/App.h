@@ -27,6 +27,11 @@ class App : public AppBase {
     ImVec4 clear_color;
 public:
 
+    float GlobalScale;
+    ImGuiStyle imGuiStyleBackup;
+    MathCore::vec2i mainMonitorCenter;
+    MathCore::vec2i windowResolution;
+
     App();
     ~App();
     virtual void draw();
@@ -35,5 +40,7 @@ public:
     void onGainFocus();
     void onLostFocus();
     void onViewportChange(const iRect &value, const iRect &oldValue);
+
+    void applyGlobalScale();
 };
 

@@ -124,7 +124,7 @@ void App::draw()
     GLRenderState *renderState = GLRenderState::Instance();
     
     renderState->ClearColor = vec4f(0.0f, 0.0f, 0.0f, 1.0f);
-    renderState->Viewport = AppKit::GLEngine::iRect(screenRenderWindow.Viewport.c_ptr()->w,screenRenderWindow.Viewport.c_ptr()->h);
+    renderState->Viewport = AppKit::GLEngine::iRect(screenRenderWindow.CameraViewport.c_ptr()->w,screenRenderWindow.CameraViewport.c_ptr()->h);
 
     renderState->FrontFace = FrontFaceCCW;
     renderState->DepthTest = DepthTestDisabled;

@@ -40,7 +40,7 @@ namespace AppKit
                 // AppBase* appBase = Engine::Instance()->app;
                 if (renderWindowRegion != NULL)
                 {
-                    renderWindowRegion->Viewport.OnChange.remove(&ComponentCameraPerspective::OnViewportChanged, this);
+                    renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraPerspective::OnViewportChanged, this);
                 }
             }
 
@@ -50,10 +50,10 @@ namespace AppKit
 
                 // AppBase* appBase = Engine::Instance()->app;
 
-                renderWindowRegion->Viewport.OnChange.add(&ComponentCameraPerspective::OnViewportChanged, this);
+                renderWindowRegion->CameraViewport.OnChange.add(&ComponentCameraPerspective::OnViewportChanged, this);
 
                 // call the first setup
-                OnViewportChanged(renderWindowRegion->Viewport, renderWindowRegion->Viewport);
+                OnViewportChanged(renderWindowRegion->CameraViewport, renderWindowRegion->CameraViewport);
             }
 
             void ComponentCameraPerspective::OnUpdateCameraFloatParameter(const float &value, const float &oldValue)
@@ -84,7 +84,7 @@ namespace AppKit
                 MathCore::vec2i size;
 
                 if (renderWindowRegion != NULL)
-                    size = MathCore::vec2i(renderWindowRegion->Viewport.c_ptr()->w, renderWindowRegion->Viewport.c_ptr()->h);
+                    size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
                 else
                     size = Engine::Instance()->app->window->getSize();
 

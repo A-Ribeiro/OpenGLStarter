@@ -70,7 +70,7 @@ void SceneGUI::bindResourcesToGraph(){
     // call resize
     //AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
     //resize( MathCore::vec2i::Create(this->renderWindow->Viewport.value.w,this->renderWindow->Viewport.value.h) );
-    OnViewportChange(this->renderWindow->Viewport, this->renderWindow->Viewport);
+    OnViewportChange(this->renderWindow->CameraViewport, this->renderWindow->CameraViewport);
 
     //Add AABB for all meshs...
     {
@@ -78,12 +78,12 @@ void SceneGUI::bindResourcesToGraph(){
         resourceHelper->addAABBMesh(root);
     }
 
-    this->renderWindow->Viewport.OnChange.add(&SceneGUI::OnViewportChange, this);
+    this->renderWindow->CameraViewport.OnChange.add(&SceneGUI::OnViewportChange, this);
 }
 
 //clear all loaded scene
 void SceneGUI::unloadAll(){
-    this->renderWindow->Viewport.OnChange.remove(&SceneGUI::OnViewportChange, this);
+    this->renderWindow->CameraViewport.OnChange.remove(&SceneGUI::OnViewportChange, this);
 
     ResourceHelper::releaseTransformRecursive(&root);
 
@@ -163,7 +163,7 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
     fps->transform[0]->setLocalScale(MathCore::vec3f(28.0f / fontBuilder.glFont2.size));
 
 
-    MathCore::vec3f pos3D = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenter, 0.0f);
+    MathCore::vec3f pos3D = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenter * this->renderWindow->windowToCameraScale, 0.0f);
 
     if (cursorTransform != NULL)
         cursorTransform->setLocalPosition(pos3D);

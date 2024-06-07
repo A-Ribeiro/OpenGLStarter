@@ -205,7 +205,7 @@ namespace AppKit
             softShader.setDepthTextureComponent24(1);
             softShader.setColor(particleSystem->textureColor);
 
-            iRect s = particleSystem->transform[0]->renderWindowRegion->Viewport;
+            iRect s = particleSystem->transform[0]->renderWindowRegion->CameraViewport;
             MathCore::vec2f ss = MathCore::vec2f(s.w, s.h);
             softShader.setScreenSize(ss);
 
