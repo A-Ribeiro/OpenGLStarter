@@ -152,9 +152,9 @@ void InnerViewport::OnUpdate(Platform::Time *time){
         // }
 
         // clear only the alpha channel - to render correctly in ImGUI
-        renderState->ColorWrite = ColorWriteAlpha;
-        glClear(GL_COLOR_BUFFER_BIT);
-        renderState->ColorWrite = ColorWriteAll;
+        // renderState->ColorWrite = ColorWriteAlpha;
+        // glClear(GL_COLOR_BUFFER_BIT);
+        // renderState->ColorWrite = ColorWriteAll;
 
         renderWindow.fbo->disable();
     }

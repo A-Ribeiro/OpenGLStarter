@@ -79,18 +79,18 @@ void Scene::RenderAndLogic()
                 const ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
                 const ImVec4 border_col = ImVec4(0.0f, 0.0f, 0.0f, 0.0f); // 50% opaque white
 
-                {
-                    // Clear in Pink
-                    ImVec2 sz = size / io.DisplayFramebufferScale;
-                    auto *draw_list = ImGui::GetWindowDrawList();
-                    draw_list->AddRectFilled(
-                        pos,
-                        pos + sz,
-                        ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 1.0f, 1.0f)),
-                        0.0f, // rounding
-                        ImDrawFlags_None
-                    );
-                }
+                // {
+                //     // Clear in Pink
+                //     ImVec2 sz = size / io.DisplayFramebufferScale;
+                //     auto *draw_list = ImGui::GetWindowDrawList();
+                //     draw_list->AddRectFilled(
+                //         pos,
+                //         pos + sz,
+                //         ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 1.0f, 1.0f)),
+                //         0.0f, // rounding
+                //         ImDrawFlags_None
+                //     );
+                // }
                 
                 ImGui::Image(my_tex_id, size / io.DisplayFramebufferScale, uv_min, uv_max, tint_col, border_col);
             }

@@ -235,7 +235,7 @@ namespace AppKit
             fbo = new AppKit::OpenGL::GLDynamicFBO();
             fbo->setSize(w, h);
 
-            color_buffer = new AppKit::OpenGL::GLTexture(w, h, GL_RGBA);
+            color_buffer = new AppKit::OpenGL::GLTexture(w, h, GL_RGB);
             // z_buffer = new AppKit::OpenGL::GLTexture(viewport.w,viewport.h,GL_DEPTH_COMPONENT24);
             z_render_buffer = new AppKit::OpenGL::GLRenderBuffer(w, h, GL_DEPTH_COMPONENT24);
 
