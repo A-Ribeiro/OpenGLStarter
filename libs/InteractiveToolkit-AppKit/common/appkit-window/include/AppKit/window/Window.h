@@ -33,6 +33,16 @@ namespace AppKit
 
         class Window
         {
+        protected:
+            // cached event structures
+            WindowEvent windowEventg;
+            KeyboardEvent keyboardEventg;
+            MouseEvent mouseEventg;
+            JoystickEvent joystickEventg;
+            TouchEvent touchEventg;
+            SensorEvent sensorEventg;
+
+            bool key_states[(int)Devices::KeyCode::Count];
 
         protected:
 
@@ -44,6 +54,8 @@ namespace AppKit
             void *usr3Handle;
 
             WindowConfig windowConfig;
+
+            Window();
 
         public:
             InputManager inputManager;

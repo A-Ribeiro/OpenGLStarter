@@ -69,6 +69,7 @@ namespace AppKit
 
         enum class MouseEventType : uint8_t
         {
+            None = 0,
             VerticalWheelScrolled,
             HorizontalWheelScrolled,
             ButtonPressed,
