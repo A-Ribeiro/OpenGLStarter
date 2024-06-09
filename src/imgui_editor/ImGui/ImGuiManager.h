@@ -7,6 +7,7 @@
 #include "CustomSettings.h"
 
 #include "ShortcutManager.h"
+#include "ContextMenu.h"
 
 class InnerViewport;
 
@@ -37,6 +38,8 @@ public:
     Inspector inspector;
 
     ShortcutManager shortcutManager;
+
+    ContextMenu contextMenu;
 
     std::vector<View*> views;
 

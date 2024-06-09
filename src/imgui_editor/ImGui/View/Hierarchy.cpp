@@ -44,6 +44,9 @@ View* Hierarchy::Init()
             printf("[Hierarchy][Tree] OnHover on %s: %i\n", node->name.c_str(), hovered);
         });
         OnTreeSingleClick.add([](TreeNode* node){
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+                ImGuiManager::Instance()->contextMenu.open();
+
             printf("[Hierarchy][Tree] OnSingleClick on %s\n", node->name.c_str());
         });
         OnTreeDoubleClick.add([](TreeNode* node){
@@ -77,13 +80,14 @@ void Hierarchy::RenderAndLogic()
 	{
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
-		
+
 		root.render("##hierarchy_sel", this);
 
 	} else {
         on_hover_detector.setState(false);
         on_focus_detector.setState(false);
     }
+
 	ImGui::End();
 
     computeOnHoverAndOnFocus();

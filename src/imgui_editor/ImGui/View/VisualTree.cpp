@@ -56,8 +56,10 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
     // ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
     // int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
 
-    ImGuiTreeNodeFlags parent_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;                                                               // | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-    ImGuiTreeNodeFlags leaf_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanAvailWidth; // | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+    ImGuiTreeNodeFlags parent_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth; // | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+    ImGuiTreeNodeFlags leaf_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Leaf |
+                                    // ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                    ImGuiTreeNodeFlags_SpanAvailWidth; // | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
     bool selected = (selected_UID == this->uid);
     uint32_t selected_uint32 = ImGuiTreeNodeFlags_Selected & -(selected & 0x1);
     parent_flags = (parent_flags & ~ImGuiTreeNodeFlags_Selected) | selected_uint32;
@@ -80,18 +82,20 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
     // force tree selection size
     ImGui::GetCurrentContext()->CurrentWindow->DC.CurrLineSize.y = ImGui::GetFrameHeight(); // 16;
 
-    bool node_open = ImGui::TreeNodeEx("##hierarchy_root", flag_to_use);
+    char txt[64];
+    sprintf(txt, "##node_%i", uid);
+    bool node_open = ImGui::TreeNodeEx(txt, flag_to_use);
     bool send_single_click = false;
     bool send_double_click = false;
     bool send_on_select = false;
 
-    if (ImGui::IsItemClicked())
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Left) || ImGui::IsItemClicked(ImGuiMouseButton_Right))
     { // && !ImGui::IsItemToggledOpen()) {
         *any_click_occured = true;
         // deselect_all = false;
         // printf("click root\n");
         // time->update();
-        if (this->uid == selected_UID && ImGui::IsMouseDoubleClicked(0))
+        if (this->uid == selected_UID && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
             // double click
             // printf("double click\n");
@@ -102,9 +106,12 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
         {
             // printf("single click\n");
             send_single_click = true;
-            
-            send_on_select = (ImGui::GetStateStorage()->GetInt(id_sel,0) != this->uid);
-            ImGui::GetStateStorage()->SetInt(id_sel, this->uid);
+
+            // if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+            {
+                send_on_select = (ImGui::GetStateStorage()->GetInt(id_sel, 0) != this->uid);
+                ImGui::GetStateStorage()->SetInt(id_sel, this->uid);
+            }
         }
     }
     hovered.setState(ImGui::IsItemHovered());
@@ -133,30 +140,34 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
 
     expanded.setState(node_open);
 
+    // event dispatching
+    {
+        if (hovered.down || hovered.up)
+            treeHolder->OnTreeHover(this, hovered.pressed);
+        if (send_single_click)
+            treeHolder->OnTreeSingleClick(this);
+        if (send_on_select)
+            treeHolder->OnTreeSelect(this);
+        if (send_double_click)
+            treeHolder->OnTreeDoubleClick(this);
+        if (expanded.down)
+            treeHolder->OnTreeExpand(this);
+        if (expanded.up)
+            treeHolder->OnTreeCollapse(this);
+    }
+
     if (node_open)
     {
         for (auto &child : children)
             child.renderRecursive(treeHolder, id_sel, selected_UID, any_click_occured); // , time);
 
-        if (this->isNode())
-            ImGui::TreePop();
+        // if (this->isNode())
+        ImGui::TreePop();
     }
-
-    if (hovered.down || hovered.up)
-        treeHolder->OnTreeHover(this, hovered.pressed);
-    if (send_single_click)
-        treeHolder->OnTreeSingleClick(this);
-    if (send_on_select)
-        treeHolder->OnTreeSelect(this);
-    if (send_double_click)
-        treeHolder->OnTreeDoubleClick(this);
-    if (expanded.down)
-        treeHolder->OnTreeExpand(this);
-    if (expanded.up)
-        treeHolder->OnTreeCollapse(this);
 }
 
-void TreeNode::render(const char* str_imgui_id, TreeHolder *treeHolder) {
+void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder)
+{
     bool deselect_all = false;
 
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly))
@@ -172,7 +183,7 @@ void TreeNode::render(const char* str_imgui_id, TreeHolder *treeHolder) {
     int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
 
     bool any_click_occured = false;
-    this->renderRecursive(treeHolder, id_sel, selected_UID, &any_click_occured);// , & time);
+    this->renderRecursive(treeHolder, id_sel, selected_UID, &any_click_occured); // , & time);
     if (any_click_occured)
         deselect_all = false;
 
