@@ -11,6 +11,7 @@ TreeNode::TreeNode()
     this->type = IconType::Small_BoxNode;
     this->expanded.setState(true);
     this->hovered.setState(false);
+    this->isRoot = false;
 }
 TreeNode::TreeNode(int32_t uid, IconType type, std::string name)
 {

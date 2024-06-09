@@ -23,15 +23,14 @@ public:
     TreeNode();
     TreeNode(int32_t uid, IconType type, std::string name = "node");
     
-    //AppKit::OpenGL::GLTexture **icon_alias;
-    // AppKit::OpenGL::GLTexture *icon;
-    // std::string path;
     std::string name;
     int32_t uid;
     std::vector<TreeNode> children;
     IconType type;
+    
+    // the container needs to specify if this is a root node of not...
+    bool isRoot;
 
-    //bool opened;
     EventCore::PressReleaseDetector expanded;
     EventCore::PressReleaseDetector hovered;
 

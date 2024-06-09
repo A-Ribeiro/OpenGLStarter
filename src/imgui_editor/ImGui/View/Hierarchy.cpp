@@ -28,6 +28,7 @@ View* Hierarchy::Init()
 
 	// creating testing node
 	root = TreeNode(uid_incrementer++, IconType::Small_BoxNode, "root");
+    root.isRoot = true;
 	root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_BoxNode, "child1"));
 	root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_BoxNode_Filled, "child2"));
 	root.children[root.children.size() - 1].children.push_back(TreeNode(uid_incrementer++, IconType::Small_BoxNode, "child2leaf"));

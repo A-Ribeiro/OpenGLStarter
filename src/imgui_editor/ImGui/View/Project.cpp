@@ -23,6 +23,7 @@ View *Project::Init()
 
     // creating testing node
     root = TreeNode(uid_incrementer++, IconType::Small_Folder_Filled, "/");
+    root.isRoot = true;
     root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child1"));
     root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_Folder_Filled, "child2"));
     root.children[root.children.size() - 1].children.push_back(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child2leaf"));
