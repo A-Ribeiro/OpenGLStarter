@@ -45,7 +45,7 @@ View* Hierarchy::Init()
             printf("[Hierarchy][Tree] OnHover on %s: %i\n", node->name.c_str(), hovered);
         });
         OnTreeSingleClick.add([](TreeNode* node){
-            if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
                 ImGuiManager::Instance()->contextMenu.open();
 
             printf("[Hierarchy][Tree] OnSingleClick on %s\n", node->name.c_str());

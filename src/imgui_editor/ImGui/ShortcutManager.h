@@ -3,6 +3,12 @@
 #include "./View/common.h"
 #include "./View/all.h"
 
+enum class MenuBehaviour : uint8_t {
+    None,
+    SetItemVisibility,
+    SetItemEnabled
+};
+
 class ShortCut{
 public: 
     bool ctrl;
@@ -15,11 +21,13 @@ public:
 
     EventCore::PressReleaseDetector shortCutState;
 
-    std::string menuPath;//"Actions/Add"
-    std::string shortcutStr;//"Ctrl+A"
+    std::string mainMenuPath;//"Actions/Add"
+    MenuBehaviour mainMenuBehaviour;
 
-    bool menuSetItemVisible;
-    bool menuSetItemEnabled;
+    std::string contextMenuPath;//"Add"
+    MenuBehaviour contextMenuBehaviour;
+
+    std::string shortcutStr;//"Ctrl+A"
 
     ShortCut() {
         ctrl = false;
@@ -29,30 +37,41 @@ public:
 
         keyCode = AppKit::Window::Devices::KeyCode::Unknown;
 
-        menuPath = "";
-        shortcutStr = "";
+        mainMenuPath = "";
+        mainMenuBehaviour = MenuBehaviour::None;
 
-        menuSetItemVisible = false;
-        menuSetItemEnabled = false;
+        contextMenuPath = "";
+        contextMenuBehaviour = MenuBehaviour::None;
+
+        shortcutStr = "";
     }
 
     ShortCut(
-        const std::string &menuPath,//"Actions/Add"
-        const std::string &shortcutStr,//"Ctrl+A"
-        bool menuSetItemVisible,
-        bool menuSetItemEnabled,
-        bool ctrl,
-    bool shift,
-    bool alt,
-    bool window,
-    AppKit::Window::Devices::KeyCode keyCode,
+        const std::string &mainMenuPath,//"Actions/Add"
+        MenuBehaviour mainMenuBehaviour,
+
+        const std::string &contextMenuPath = "",//"Add"
+        MenuBehaviour contextMenuBehaviour = MenuBehaviour::None,
+
+        const std::string &shortcutStr = "",//"Ctrl+A"
+
+        bool ctrl = false,
+        bool shift = false,
+        bool alt = false,
+        bool window = false,
+
+    AppKit::Window::Devices::KeyCode keyCode = AppKit::Window::Devices::KeyCode::Unknown,
+
     const EventCore::Callback<void()> &activate = nullptr,
     const EventCore::Callback<void()> &deactivate = nullptr
     ) {
-        this->menuPath = menuPath;
+        this->mainMenuPath = mainMenuPath;
+        this->mainMenuBehaviour = mainMenuBehaviour;
+
+        this->contextMenuPath = contextMenuPath;
+        this->contextMenuBehaviour = contextMenuBehaviour;
+
         this->shortcutStr = shortcutStr;
-        this->menuSetItemVisible = menuSetItemVisible;
-        this->menuSetItemEnabled = menuSetItemEnabled;
         this->ctrl = ctrl;
         this->shift = shift;
         this->alt = alt;
@@ -68,29 +87,15 @@ public:
 class ShortCutCategory{
     public:
     std::string name;
-    std::string menuSetVisible;//"Actions"
-    std::string menuSetEnabled;//"Actions"
-    // bool menuSetItemVisible;
-    // bool menuSetItemEnabled;
     std::vector<ShortCut> shortCuts;
 
     ShortCutCategory() {
-        menuSetVisible = "";
-        menuSetEnabled = "";
     }
 
     ShortCutCategory(
         std::string name,
-        const std::string &menuSetVisible,
-        const std::string &menuSetEnabled,
-        // bool menuSetItemVisible,
-        // bool menuSetItemEnabled,
         const std::vector<ShortCut> &shortcuts){
         this->name = name;
-        this->menuSetVisible = menuSetVisible;
-        this->menuSetEnabled = menuSetEnabled;
-        // this->menuSetItemVisible = menuSetItemVisible;
-        // this->menuSetItemEnabled = menuSetItemEnabled;
         this->shortCuts = shortcuts;
     }
 
@@ -120,10 +125,6 @@ public:
 
     void addShortcut(
         const std::string &category,
-        const std::string &menuSetVisible,
-        const std::string &menuSetEnabled,
-        // bool menuSetItemVisible,
-        // bool menuSetItemEnabled,
         const std::vector<ShortCut> &shortcuts
     );
 

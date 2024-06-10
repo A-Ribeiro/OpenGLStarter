@@ -125,10 +125,13 @@ void ImGuiMenu::UpdateUI() {
 	menu.UpdateUI();
 }
 
-void ImGuiMenu::RenderAndLogic() {
+void ImGuiMenu::RenderAndLogic(bool isContextMenu) {
 	if (menu.childrenSorted.size() == 0)
 		UpdateUI();
-	if (ImGui::BeginMainMenuBar()) {
+    if (isContextMenu){
+        menu.render("");
+    }
+    else if (ImGui::BeginMainMenuBar()) {
 		menu.render("");
 		ImGui::EndMainMenuBar();
 	}

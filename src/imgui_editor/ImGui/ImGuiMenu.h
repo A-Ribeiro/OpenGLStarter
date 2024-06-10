@@ -42,7 +42,7 @@ public:
 
     void UpdateUI();
 
-    void RenderAndLogic();
+    void RenderAndLogic(bool isContextMenu = false);
 
     MenuItemController& getController(const std::string& path);
 

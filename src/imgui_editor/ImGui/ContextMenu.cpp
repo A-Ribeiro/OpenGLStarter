@@ -5,50 +5,89 @@
 
 const ViewType ContextMenu::Type = "ContextMenu";
 
-ContextMenu::ContextMenu(): View(ContextMenu::Type){
+ContextMenu::ContextMenu() : View(ContextMenu::Type)
+{
     openContextMenuTriggered = false;
 }
 
-ContextMenu::~ContextMenu(){
+ContextMenu::~ContextMenu()
+{
 
 }
 
-View* ContextMenu::Init(){
+View *ContextMenu::Init()
+{
+
+
+    // imGuiMenu.AddMenu(
+	// 	"New/Object", 
+    //     "", 
+    //     nullptr);
+    // imGuiMenu.AddMenu(
+	// 	"New/Transform", 
+    //     "", 
+    //     nullptr);
+    
+    // imGuiMenu.AddMenu(
+	// 	"<<>>", 
+    //     "", 
+    //     nullptr);
+
+    // imGuiMenu.AddMenu(
+	// 	"Transform/Objectº", 
+    //     "", 
+    //     nullptr);
+
+    // imGuiMenu.UpdateUI();
+
+
     return this;
 }
 
-void ContextMenu::RenderAndLogic() {
+void ContextMenu::RenderAndLogic()
+{
 
     if (ImGui::BeginPopupContextVoid("DefaultContextMenu",
-    ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_NoOpenOverExistingPopup | ImGuiPopupFlags_NoReopen
-    | ImGuiPopupFlags_MouseButtonMask_
-    ))
+                                     ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_NoOpenOverExistingPopup //| ImGuiPopupFlags_NoReopen
+                                         | ImGuiPopupFlags_MouseButtonMask_))
     {
-        ImGui::Text("ContextMenu");
-        ImGui::Separator();
-        if (ImGui::Selectable("Option 1")){
+        
+        imGuiMenu.RenderAndLogic(true);
 
-        }
-        if (ImGui::Selectable("Option 2")){
+        // ImGui::Text("ContextMenu");
+        // ImGui::Separator();
+        // if (ImGui::Selectable("Option 1"))
+        // {
+        // }
+        // if (ImGui::Selectable("Option 2"))
+        // {
+        // }
+        // ImGui::Separator();
+        // if (ImGui::Selectable("Option 3"))
+        // {
+        // }
 
-        }
-        ImGui::Separator();
-        if (ImGui::Selectable("Option 3")){
+        // if (ImGui::BeginMenu("Menu", true))
+        // {
+        //     if (ImGui::MenuItem("Custom", NULL, false))
+        //     {
+        //         // ImGui::CloseCurrentPopup();
+        //     }
+        // }
 
-        }
         ImGui::EndPopup();
     }
-    //configure popup
-    //ImGui::OpenPopupOnItemClick("DefaultContextMenu", ImGuiPopupFlags_NoOpenOverItems);
-    
-    if (openContextMenuTriggered){
+    // configure popup
+    // ImGui::OpenPopupOnItemClick("DefaultContextMenu", ImGuiPopupFlags_NoOpenOverItems);
+
+    if (openContextMenuTriggered)
+    {
         openContextMenuTriggered = false;
         ImGui::OpenPopup("DefaultContextMenu");
     }
-
-
 }
 
-void ContextMenu::open() {
+void ContextMenu::open()
+{
     openContextMenuTriggered = true;
 }

@@ -739,8 +739,9 @@ namespace AppKit
                     targetInputManager->onSensorEvent(sensorEventg);
                     //break;
                 }
-                else
-                {
+                else if (event.is<sf::Event::MouseMovedRaw>()){
+
+                } else {
                     printf("[Window] Event not recognized.\n");
                     //break;
                 }

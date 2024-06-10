@@ -2,7 +2,7 @@
 
 #include "./View/common.h"
 #include "./View/all.h"
-
+#include "./ImGuiMenu.h"
 
 class ContextMenu : public View
 {
@@ -10,6 +10,8 @@ class ContextMenu : public View
 
 public:
     static const ViewType Type;
+
+    ImGuiMenu imGuiMenu;
 
     ContextMenu();
 
