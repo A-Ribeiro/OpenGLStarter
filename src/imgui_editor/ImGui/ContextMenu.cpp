@@ -7,7 +7,7 @@ const ViewType ContextMenu::Type = "ContextMenu";
 
 ContextMenu::ContextMenu() : View(ContextMenu::Type)
 {
-    openContextMenuTriggered = false;
+	openContextMenuTriggered = false;
 }
 
 ContextMenu::~ContextMenu()
@@ -15,79 +15,81 @@ ContextMenu::~ContextMenu()
 
 }
 
-View *ContextMenu::Init()
+View* ContextMenu::Init()
 {
 
 
-    // imGuiMenu.AddMenu(
+	// imGuiMenu.AddMenu(
 	// 	"New/Object", 
-    //     "", 
-    //     nullptr);
-    // imGuiMenu.AddMenu(
+	//     "", 
+	//     nullptr);
+	// imGuiMenu.AddMenu(
 	// 	"New/Transform", 
-    //     "", 
-    //     nullptr);
-    
-    // imGuiMenu.AddMenu(
+	//     "", 
+	//     nullptr);
+
+	// imGuiMenu.AddMenu(
 	// 	"<<>>", 
-    //     "", 
-    //     nullptr);
+	//     "", 
+	//     nullptr);
 
-    // imGuiMenu.AddMenu(
+	// imGuiMenu.AddMenu(
 	// 	"Transform/Objectº", 
-    //     "", 
-    //     nullptr);
+	//     "", 
+	//     nullptr);
 
-    // imGuiMenu.UpdateUI();
+	// imGuiMenu.UpdateUI();
 
 
-    return this;
+	return this;
 }
 
 void ContextMenu::RenderAndLogic()
 {
 
-    if (ImGui::BeginPopupContextVoid("DefaultContextMenu",
-                                     ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_NoOpenOverExistingPopup //| ImGuiPopupFlags_NoReopen
-                                         | ImGuiPopupFlags_MouseButtonMask_))
-    {
-        
-        imGuiMenu.RenderAndLogic(true);
+	if (ImGui::BeginPopupContextVoid("DefaultContextMenu",
+		ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_NoOpenOverExistingPopup //| ImGuiPopupFlags_NoReopen
 
-        // ImGui::Text("ContextMenu");
-        // ImGui::Separator();
-        // if (ImGui::Selectable("Option 1"))
-        // {
-        // }
-        // if (ImGui::Selectable("Option 2"))
-        // {
-        // }
-        // ImGui::Separator();
-        // if (ImGui::Selectable("Option 3"))
-        // {
-        // }
+		| (ImGuiPopupFlags_MouseButtonMiddle + 1) // avoid associate the context menu with a button...
+	))
+	{
 
-        // if (ImGui::BeginMenu("Menu", true))
-        // {
-        //     if (ImGui::MenuItem("Custom", NULL, false))
-        //     {
-        //         // ImGui::CloseCurrentPopup();
-        //     }
-        // }
+		imGuiMenu.RenderAndLogic(true);
 
-        ImGui::EndPopup();
-    }
-    // configure popup
-    // ImGui::OpenPopupOnItemClick("DefaultContextMenu", ImGuiPopupFlags_NoOpenOverItems);
+		// ImGui::Text("ContextMenu");
+		// ImGui::Separator();
+		// if (ImGui::Selectable("Option 1"))
+		// {
+		// }
+		// if (ImGui::Selectable("Option 2"))
+		// {
+		// }
+		// ImGui::Separator();
+		// if (ImGui::Selectable("Option 3"))
+		// {
+		// }
 
-    if (openContextMenuTriggered)
-    {
-        openContextMenuTriggered = false;
-        ImGui::OpenPopup("DefaultContextMenu");
-    }
+		// if (ImGui::BeginMenu("Menu", true))
+		// {
+		//     if (ImGui::MenuItem("Custom", NULL, false))
+		//     {
+		//         // ImGui::CloseCurrentPopup();
+		//     }
+		// }
+
+		ImGui::EndPopup();
+	}
+	// configure popup
+	// ImGui::OpenPopupOnItemClick("DefaultContextMenu", ImGuiPopupFlags_NoOpenOverItems);
+
+	if (openContextMenuTriggered)
+	{
+		openContextMenuTriggered = false;
+		ImGui::OpenPopup("DefaultContextMenu");
+	}
 }
 
 void ContextMenu::open()
 {
-    openContextMenuTriggered = true;
+	openContextMenuTriggered = true;
 }

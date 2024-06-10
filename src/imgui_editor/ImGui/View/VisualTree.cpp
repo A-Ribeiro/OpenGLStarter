@@ -171,7 +171,7 @@ void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder)
 {
     bool deselect_all = false;
 
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_RectOnly))
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
     {
         if (ImGui::IsMouseClicked(0) || ImGui::IsKeyPressed(ImGuiKey_Escape, false))
         {
