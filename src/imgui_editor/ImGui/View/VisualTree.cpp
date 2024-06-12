@@ -90,6 +90,35 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
     bool send_double_click = false;
     bool send_on_select = false;
 
+    if (ImGui::BeginDragDropTarget())
+    {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TREE_NODE"))
+        {
+            int aux;
+            memcpy(&aux, payload->Data, sizeof(int));
+            printf("drop aux: %i\n", aux);
+        }
+        ImGui::EndDragDropTarget();
+    }
+    // draw line on drag from any tree node.
+    if (ImGui::IsItemActive() && ImGui::IsMouseDown(ImGuiMouseButton_Left)){
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f); // Draw a line between the button and the mouse cursor
+
+        if (ImGui::BeginDragDropSource())
+        {
+
+            int aux = 37;
+            printf("drag aux: %i\n", aux);
+
+            ImGui::SetDragDropPayload("TREE_NODE", &aux, sizeof(int), ImGuiCond_Once);
+
+            ImGui::EndDragDropSource();
+        }
+
+    }
+
+
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left) || ImGui::IsItemClicked(ImGuiMouseButton_Right))
     { // && !ImGui::IsItemToggledOpen()) {
         *any_click_occured = true;
