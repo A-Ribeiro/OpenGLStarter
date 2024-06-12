@@ -47,11 +47,7 @@ View* ContextMenu::Init()
 void ContextMenu::RenderAndLogic()
 {
 
-	if (ImGui::BeginPopupContextVoid("DefaultContextMenu",
-		ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_NoOpenOverExistingPopup //| ImGuiPopupFlags_NoReopen
-
-		| (ImGuiPopupFlags_MouseButtonMiddle + 1) // avoid associate the context menu with a button...
-	))
+	if (ImGui::BeginPopup("DefaultContextMenu"))
 	{
 
 		imGuiMenu.RenderAndLogic(true);
