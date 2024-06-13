@@ -2,26 +2,41 @@
 #include "../ImGuiMenu.h"
 #include "../ImGuiManager.h"
 
+const char * DRAG_PAYLOAD_ID_HIERARCHY_TREE = "HIERARCHY_TREE";
+const char * DRAG_PAYLOAD_ID_PROJECT_TREE = "PROJECT_TREE";
+
 TreeNode::TreeNode()
 {
     this->uid = 0;
     // this->icon_alias = NULL;
     // this->path = "-not-initialized-";
-    this->name = "-not-initialized-";
+    snprintf(this->name, 64, "-not-initialized-");
+
     this->type = IconType::Small_BoxNode;
     this->expanded.setState(true);
     this->hovered.setState(false);
+
     this->isRoot = false;
+    snprintf(this->prefix_id, 64, "-not-set-");
+    snprintf(this->drag_payload_identifier, 32, "-not-set-");
+
 }
-TreeNode::TreeNode(int32_t uid, IconType type, std::string name)
+
+TreeNode::TreeNode(int32_t uid, IconType type, const char *name)
 {
     this->uid = uid;
     // this->icon_alias = icon_alias;
     // this->path = path;
-    this->name = name;
+    snprintf(this->name, 64, "%s", name);
+
     this->type = type;
     this->expanded.setState(true);
     this->hovered.setState(false);
+
+    this->isRoot = false;
+    snprintf(this->prefix_id, 64, "-not-set-");
+    snprintf(this->drag_payload_identifier, 32, "-not-set-");
+
 }
 
 bool TreeNode::isLeaf()
@@ -83,8 +98,8 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
     // force tree selection size
     ImGui::GetCurrentContext()->CurrentWindow->DC.CurrLineSize.y = ImGui::GetFrameHeight(); // 16;
 
-    char txt[64];
-    sprintf(txt, "##node_%i", uid);
+    char txt[128];
+    snprintf(txt, 128, "##%s_%i", this->prefix_id, uid);
     bool node_open = ImGui::TreeNodeEx(txt, flag_to_use);
     bool send_single_click = false;
     bool send_double_click = false;
@@ -92,11 +107,12 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
 
     if (ImGui::BeginDragDropTarget())
     {
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TREE_NODE"))
-        {
-            int aux;
-            memcpy(&aux, payload->Data, sizeof(int));
-            printf("drop aux: %i\n", aux);
+        const ImGuiPayload* payload;
+        for(const auto * drop_target: this->drop_payload_identifier){
+            if (payload = ImGui::AcceptDragDropPayload(drop_target)){
+                //(const char* drag_payload, void *src, TreeNode*target)
+                treeHolder->OnTreeDragDrop(drop_target, payload->Data, this);
+            }            
         }
         ImGui::EndDragDropTarget();
     }
@@ -105,17 +121,11 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
         ImGuiIO& io = ImGui::GetIO();
         ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f); // Draw a line between the button and the mouse cursor
 
-        if (ImGui::BeginDragDropSource())
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip))
         {
-
-            int aux = 37;
-            printf("drag aux: %i\n", aux);
-
-            ImGui::SetDragDropPayload("TREE_NODE", &aux, sizeof(int), ImGuiCond_Once);
-
+            ImGui::SetDragDropPayload(this->drag_payload_identifier, this, sizeof(TreeNode*), ImGuiCond_Once);
             ImGui::EndDragDropSource();
         }
-
     }
 
 
@@ -163,7 +173,7 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
     ImGui::SameLine();
 
     ImGui::AlignTextToFramePadding();
-    ImGui::Text("%s", this->name.c_str());
+    ImGui::Text("%s", this->name);
 
     ImGui::PopStyleVar();
     ImGui::PopStyleVar();
@@ -224,4 +234,36 @@ void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder)
         ImGui::GetStateStorage()->SetInt(id_sel, 0);
         treeHolder->OnTreeSelect(NULL);
     }
+}
+
+TreeNode &TreeNode::setIsRoot(bool is_root){
+    this->isRoot = is_root;
+    return *this;
+}
+TreeNode &TreeNode::setPrefixID(const char *value){
+    snprintf(this->prefix_id, 64, "%s", value);
+    return *this;
+}
+TreeNode &TreeNode::setDragPayloadID(const char *value){
+    snprintf(this->drag_payload_identifier, 32, "%s", value);
+    return *this;
+}
+TreeNode &TreeNode::setDropPayload(const std::vector<const char*> &value) {
+    this->drop_payload_identifier = value;
+    return *this;
+}
+TreeNode &TreeNode::addDropPayload(const char *value) {
+    this->drop_payload_identifier.push_back(value);
+    return *this;
+}
+
+
+TreeNode &TreeNode::addChild(const TreeNode &treeNode){
+    children.push_back(treeNode);
+    
+    return children.back().
+        setIsRoot(false).
+        setPrefixID(this->prefix_id).
+        setDragPayloadID(this->drag_payload_identifier).
+        setDropPayload(this->drop_payload_identifier);
 }

@@ -23,11 +23,19 @@ View *Project::Init()
 
     // creating testing node
     root = TreeNode(uid_incrementer++, IconType::Small_Folder_Filled, "/");
-    root.isRoot = true;
-    root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child1"));
-    root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_Folder_Filled, "child2"));
-    root.children[root.children.size() - 1].children.push_back(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child2leaf"));
-    root.children.push_back(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child3"));
+    
+    root.setIsRoot(true).
+        setPrefixID("HierarchyTree").
+        setDragPayloadID(DRAG_PAYLOAD_ID_PROJECT_TREE).
+        setDropPayload({
+            DRAG_PAYLOAD_ID_HIERARCHY_TREE,
+            DRAG_PAYLOAD_ID_PROJECT_TREE
+        });
+
+    root.addChild(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child1"));
+    root.addChild(TreeNode(uid_incrementer++, IconType::Small_Folder_Filled, "child2"));
+    root.children.back().addChild(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child2leaf"));
+    root.addChild(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child3"));
 
     ImGuiMenu::Instance()->AddMenu(
         "Window/Project", "", [this]()
@@ -37,22 +45,25 @@ View *Project::Init()
     // debug
     {
         OnTreeHover.add([](TreeNode *node, bool hovered)
-                    { printf("[Project][Tree] OnHover on %s: %i\n", node->name.c_str(), hovered); });
+                    { printf("[Project][Tree] OnHover on %s: %i\n", node->name, hovered); });
         OnTreeSingleClick.add([](TreeNode *node)
-                          { printf("[Project][Tree] OnSingleClick on %s\n", node->name.c_str()); });
+                          { printf("[Project][Tree] OnSingleClick on %s\n", node->name); });
         OnTreeDoubleClick.add([](TreeNode *node)
-                          { printf("[Project][Tree] OnDoubleClick on %s\n", node->name.c_str()); });
+                          { printf("[Project][Tree] OnDoubleClick on %s\n", node->name); });
         OnTreeExpand.add([](TreeNode *node)
-                     { printf("[Project][Tree] OnExpand on %s\n", node->name.c_str()); });
+                     { printf("[Project][Tree] OnExpand on %s\n", node->name); });
         OnTreeCollapse.add([](TreeNode *node)
-                       { printf("[Project][Tree] OnCollapse on %s\n", node->name.c_str()); });
+                       { printf("[Project][Tree] OnCollapse on %s\n", node->name); });
         OnTreeSelect.add([](TreeNode *node)
                      {
             if (node == NULL) {
                 printf("[Project][Tree] OnSelect on NULL\n");
             } else {
-                printf("[Project][Tree] OnSelect on %s\n", node->name.c_str());
+                printf("[Project][Tree] OnSelect on %s\n", node->name);
             } });
+        OnTreeDragDrop.add([](const char* drag_payload, void *src, TreeNode*target){
+            printf("[Project][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
+        });
     }
     return this;
 }
