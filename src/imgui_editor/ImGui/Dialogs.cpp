@@ -88,6 +88,8 @@ void Dialogs::RenderAndLogic()
         }
         
         ImGui::PushItemWidth(-1);
+        if (ImGui::IsWindowAppearing())
+            ImGui::SetKeyboardFocusHere();
         ImGui::InputText("##label", aux_str_1024, 1024, ImGuiInputTextFlags_AutoSelectAll);
         ImGui::PopItemWidth();
         //ImGui::SetItemDefaultFocus();
