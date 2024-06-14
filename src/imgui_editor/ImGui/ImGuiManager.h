@@ -8,6 +8,7 @@
 
 #include "ShortcutManager.h"
 #include "ContextMenu.h"
+#include "Dialogs.h"
 
 class InnerViewport;
 
@@ -40,6 +41,7 @@ public:
     ShortcutManager shortcutManager;
 
     ContextMenu contextMenu;
+    Dialogs dialogs;
 
     std::vector<View*> views;
 

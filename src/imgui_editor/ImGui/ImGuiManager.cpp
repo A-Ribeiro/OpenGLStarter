@@ -158,6 +158,7 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	views.push_back(inspector.Init());
     views.push_back(shortcutManager.Init());
     views.push_back(contextMenu.Init());
+    views.push_back(dialogs.Init());
 
 	ImGuiMenu::Instance()->AddMenu("Window/<<>>", "", nullptr);
 	ImGuiMenu::Instance()->AddMenu("Window/Reset Layout", "", std::bind(&ImGuiManager::ResetLayout, this));

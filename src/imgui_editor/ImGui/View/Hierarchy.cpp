@@ -60,8 +60,14 @@ View* Hierarchy::Init()
 
             printf("[Hierarchy][Tree] OnSingleClick on %s\n", node->name);
         });
-        OnTreeDoubleClick.add([](std::shared_ptr<TreeNode> node){
+        OnTreeDoubleClick.add([=](std::shared_ptr<TreeNode> node){
             printf("[Hierarchy][Tree] OnDoubleClick on %s\n", node->name);
+            ImGuiManager::Instance()->dialogs.showEnterTextOK(node->name, 
+            [=](const std::string &new_str){
+                printf("new text: %s\n", new_str.c_str());
+                //node->name = new_str;
+
+            });
         });
         OnTreeExpand.add([](std::shared_ptr<TreeNode> node){
             printf("[Hierarchy][Tree] OnExpand on %s\n", node->name);
