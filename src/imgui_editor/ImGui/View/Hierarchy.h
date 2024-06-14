@@ -13,8 +13,12 @@ class Hierarchy : public View, public TreeHolder
 
     AppKit::OpenGL::GLTexture *texture_alias[2];*/
 
-    TreeNode root;
+    // trick to make root have a self() valid method call
+    std::shared_ptr<TreeNode> self_root;
+    std::shared_ptr<TreeNode> root;
     int32_t uid_incrementer;
+
+    EventCore::Event<void()> PostAction;
 
 public:
     static const ViewType Type;

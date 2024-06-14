@@ -19,6 +19,8 @@ TreeNode::TreeNode()
     this->isRoot = false;
     snprintf(this->prefix_id, 64, "-not-set-");
     snprintf(this->drag_payload_identifier, 32, "-not-set-");
+
+    this->parent = nullptr;
 }
 
 TreeNode::TreeNode(int32_t uid, TreeNodeIconType iconType, const char *name)
@@ -35,6 +37,8 @@ TreeNode::TreeNode(int32_t uid, TreeNodeIconType iconType, const char *name)
     this->isRoot = false;
     snprintf(this->prefix_id, 64, "-not-set-");
     snprintf(this->drag_payload_identifier, 32, "-not-set-");
+
+    this->parent = nullptr;
 }
 
 bool TreeNode::isLeaf()
@@ -46,16 +50,28 @@ bool TreeNode::isNode()
     return children.size() > 0;
 }
 
-bool TreeNode::removeUIDRecursive(int32_t uid)
-{
+bool TreeNode::removeUID(int32_t uid) {
     for (auto it = children.begin(); it != children.end(); it++)
     {
-        if ((*it).uid == uid)
+        if ((*it)->uid == uid)
         {
             children.erase(it);
             return true;
         }
-        else if ((*it).removeUIDRecursive(uid))
+    }
+    return false;
+}
+
+bool TreeNode::removeUIDRecursive(int32_t uid)
+{
+    for (auto it = children.begin(); it != children.end(); it++)
+    {
+        if ((*it)->uid == uid)
+        {
+            children.erase(it);
+            return true;
+        }
+        else if ((*it)->removeUIDRecursive(uid))
         {
             return true;
         }
@@ -63,32 +79,33 @@ bool TreeNode::removeUIDRecursive(int32_t uid)
     return false;
 }
 
-TreeNode * TreeNode::findUID(int32_t uid) {
-    if (this->uid == uid){
-        return this;
-    }
+std::shared_ptr<TreeNode> TreeNode::findUID(int32_t uid) {
     for (auto &chld : children)
     {
-        TreeNode *result = chld.findUID(uid);
-        if (result)
-            return result;
+        if (chld->uid == uid)
+            return chld;
+        else {
+            auto result = chld->findUID(uid);
+            if (result != nullptr)
+                return result;
+        }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool TreeNode::isChild(int32_t uid) const
 {
     for (const auto &chld : children)
     {
-        if (chld.uid == uid){
+        if (chld->uid == uid){
             return true;
-        } else if (chld.isChild(uid))
+        } else if (chld->isChild(uid))
             return true;
     }
     return false;
 }
 
-void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured) //, Platform::Time* time)
+void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured) //, Platform::Time* time)
 {
     auto imGuiManager = ImGuiManager::Instance();
 
@@ -148,15 +165,20 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
         {
             if (payload = ImGui::AcceptDragDropPayload(drop_target))
             {
-                //(const char* drag_payload, void *src, TreeNode*target)
-                // treeHolder->OnTreeDragDrop(drop_target, payload->Data, this);
-                treeHolder->tree_drop_payload_id = drop_target;
+                // //(const char* drag_payload, void *src, TreeNode*target)
+                // // treeHolder->OnTreeDragDrop(drop_target, payload->Data, this);
+                // treeHolder->tree_drop_payload_id = drop_target;
                 
-                treeHolder->tree_drop_child = (void*)*(intptr_t*)payload->Data;
+                // treeHolder->tree_drop_child = (void*)*(intptr_t*)payload->Data;
 
-                //memcpy(&treeHolder->tree_drop_child, &payload->Data, sizeof(intptr_t));
-                //treeHolder->tree_drop_child = payload->Data;
-                treeHolder->tree_drop_new_parent = this;
+                // //memcpy(&treeHolder->tree_drop_child, &payload->Data, sizeof(intptr_t));
+                // //treeHolder->tree_drop_child = payload->Data;
+                // treeHolder->tree_drop_new_parent = self;
+
+                treeHolder->OnTreeDragDrop(drop_target, 
+                    (void*)*(intptr_t*)payload->Data,
+                    self
+                );
             }
         }
         ImGui::EndDragDropTarget();
@@ -169,7 +191,9 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
 
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip))
         {
-            intptr_t ptr_this = (intptr_t)this;
+            if (treeHolder->aux_dragdrop != self)
+                treeHolder->aux_dragdrop = self;
+            intptr_t ptr_this = (intptr_t)&treeHolder->aux_dragdrop;
             ImGui::SetDragDropPayload(this->drag_payload_identifier, &ptr_this, sizeof(TreeNode *), ImGuiCond_Once);
             ImGui::EndDragDropSource();
         }
@@ -229,35 +253,36 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
     // event dispatching
     {
         if (hovered.down || hovered.up)
-            treeHolder->OnTreeHover(this, hovered.pressed);
+            treeHolder->OnTreeHover(self, hovered.pressed);
         if (send_single_click)
-            treeHolder->OnTreeSingleClick(this);
+            treeHolder->OnTreeSingleClick(self);
         if (send_on_select)
-            treeHolder->OnTreeSelect(this);
+            treeHolder->OnTreeSelect(self);
         if (send_double_click)
-            treeHolder->OnTreeDoubleClick(this);
+            treeHolder->OnTreeDoubleClick(self);
         if (expanded.down)
-            treeHolder->OnTreeExpand(this);
+            treeHolder->OnTreeExpand(self);
         if (expanded.up)
-            treeHolder->OnTreeCollapse(this);
+            treeHolder->OnTreeCollapse(self);
     }
 
     if (node_open)
     {
         for (auto &child : children)
-            child.renderRecursive(treeHolder, id_sel, selected_UID, any_click_occured); // , time);
+            child->renderRecursive(treeHolder, child, id_sel, selected_UID, any_click_occured); // , time);
 
         // if (this->isNode())
         ImGui::TreePop();
     }
 }
 
-void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder)
+void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self_root)
 {
 
-    treeHolder->tree_drop_payload_id = NULL;
-    treeHolder->tree_drop_child = NULL;
-    treeHolder->tree_drop_new_parent = NULL;
+    // treeHolder->tree_drop_payload_id = NULL;
+    // treeHolder->tree_drop_child = NULL;
+    // treeHolder->tree_drop_new_parent = NULL;
+    // treeHolder->aux_dragdrop = nullptr;
 
     bool deselect_all = false;
 
@@ -274,7 +299,7 @@ void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder)
     int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
 
     bool any_click_occured = false;
-    this->renderRecursive(treeHolder, id_sel, selected_UID, &any_click_occured); // , & time);
+    this->renderRecursive(treeHolder, self_root, id_sel, selected_UID, &any_click_occured); // , & time);
     if (any_click_occured)
         deselect_all = false;
 
@@ -283,18 +308,18 @@ void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder)
         // printf("reset selection...\n");
         // ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
         ImGui::GetStateStorage()->SetInt(id_sel, 0);
-        treeHolder->OnTreeSelect(NULL);
+        treeHolder->OnTreeSelect(nullptr);
     }
 
-    if (treeHolder->tree_drop_payload_id != NULL &&
-        treeHolder->tree_drop_child != NULL &&
-        treeHolder->tree_drop_new_parent != NULL)
-    {
-        treeHolder->OnTreeDragDrop(
-            treeHolder->tree_drop_payload_id,
-            treeHolder->tree_drop_child,
-            treeHolder->tree_drop_new_parent);
-    }
+    // if (treeHolder->tree_drop_payload_id != NULL &&
+    //     treeHolder->tree_drop_child != NULL &&
+    //     treeHolder->tree_drop_new_parent != NULL)
+    // {
+    //     treeHolder->OnTreeDragDrop(
+    //         treeHolder->tree_drop_payload_id,
+    //         treeHolder->tree_drop_child,
+    //         treeHolder->tree_drop_new_parent);
+    // }
 }
 
 TreeNode &TreeNode::setIsRoot(bool is_root)
@@ -323,24 +348,59 @@ TreeNode &TreeNode::addDropPayload(const char *value)
     return *this;
 }
 
-TreeNode &TreeNode::addChild(const TreeNode &treeNode)
-{
-    children.push_back(treeNode);
-
-    return children.back().setIsRoot(false).setPrefixID(this->prefix_id).setDragPayloadID(this->drag_payload_identifier).setDropPayload(this->drop_payload_identifier);
+std::shared_ptr<TreeNode> TreeNode::self() {
+    if (this->parent != nullptr)
+        return this->parent->findUID(this->uid);
+    return nullptr;
 }
 
-bool TreeNode::Reparent(TreeNode *root, const TreeNode & child, int32_t new_parent_uid)
-{
+std::shared_ptr<TreeNode> TreeNode::removeSelf(){
+    std::shared_ptr<TreeNode> result = nullptr;
+    if (this->parent != nullptr){
+        result = this->parent->findUID(this->uid);
+        if (result != nullptr)
+            this->parent->removeUID(this->uid);
+    }
+    return result;
+}
 
-    if (child.isChild(new_parent_uid))
+void TreeNode::makeFirst(){
+    if (this->parent != nullptr){
+        auto self = this->parent->findUID(this->uid);
+        if (self == nullptr)
+            return;
+        this->parent->removeUID(this->uid);
+        this->parent->children.insert(this->parent->children.begin(), self);
+    }
+}
+void TreeNode::makeLast(){
+    if (this->parent != nullptr){
+        auto self = this->parent->findUID(this->uid);
+        if (self == nullptr)
+            return;
+        this->parent->removeUID(this->uid);
+        this->parent->children.push_back(self);
+    }
+}
+
+TreeNode &TreeNode::addChild(std::shared_ptr<TreeNode> treeNode)
+{
+    treeNode->removeSelf();
+    treeNode->parent = this;
+    children.push_back(treeNode);
+    return children.back()->setIsRoot(false).setPrefixID(this->prefix_id).setDragPayloadID(this->drag_payload_identifier).setDropPayload(this->drop_payload_identifier);
+}
+
+bool TreeNode::Reparent(std::shared_ptr<TreeNode> child, std::shared_ptr<TreeNode> new_parent)
+{
+    if (child->isChild(new_parent->uid))
         return false;
 
-    TreeNode child_copy = child;
+    // TreeNode child_copy = child;
+    // root->removeUIDRecursive(child_copy.uid);
+    // TreeNode *new_parent_node = root->findUID(new_parent_uid);
 
-    root->removeUIDRecursive(child_copy.uid);
-    TreeNode *new_parent_node = root->findUID(new_parent_uid);
-    new_parent_node->addChild(child_copy);
+    new_parent->addChild(child);
 
     return true;
 }

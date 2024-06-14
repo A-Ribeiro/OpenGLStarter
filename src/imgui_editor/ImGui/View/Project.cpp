@@ -22,9 +22,11 @@ View *Project::Init()
 {
 
     // creating testing node
-    root = TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "/");
+    self_root = TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "-empty-");
+    root = TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "/");
+    self_root->addChild(root);
     
-    root.setIsRoot(true).
+    root->setIsRoot(true).
         setPrefixID("HierarchyTree").
         setDragPayloadID(DRAG_PAYLOAD_ID_PROJECT_TREE).
         setDropPayload({
@@ -32,10 +34,10 @@ View *Project::Init()
             DRAG_PAYLOAD_ID_PROJECT_TREE
         });
 
-    root.addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "child1"));
-    root.addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "child2"));
-    root.children.back().addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "child2leaf"));
-    root.addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "child3"));
+    root->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "child1"));
+    root->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "child2"));
+    root->children.back()->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "child2leaf"));
+    root->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "child3"));
 
     ImGuiMenu::Instance()->AddMenu(
         "Window/Project", "", [this]()
@@ -44,24 +46,24 @@ View *Project::Init()
 
     // debug
     {
-        OnTreeHover.add([](TreeNode *node, bool hovered)
+        OnTreeHover.add([](std::shared_ptr<TreeNode> node, bool hovered)
                     { printf("[Project][Tree] OnHover on %s: %i\n", node->name, hovered); });
-        OnTreeSingleClick.add([](TreeNode *node)
+        OnTreeSingleClick.add([](std::shared_ptr<TreeNode> node)
                           { printf("[Project][Tree] OnSingleClick on %s\n", node->name); });
-        OnTreeDoubleClick.add([](TreeNode *node)
+        OnTreeDoubleClick.add([](std::shared_ptr<TreeNode> node)
                           { printf("[Project][Tree] OnDoubleClick on %s\n", node->name); });
-        OnTreeExpand.add([](TreeNode *node)
+        OnTreeExpand.add([](std::shared_ptr<TreeNode> node)
                      { printf("[Project][Tree] OnExpand on %s\n", node->name); });
-        OnTreeCollapse.add([](TreeNode *node)
+        OnTreeCollapse.add([](std::shared_ptr<TreeNode> node)
                        { printf("[Project][Tree] OnCollapse on %s\n", node->name); });
-        OnTreeSelect.add([](TreeNode *node)
+        OnTreeSelect.add([](std::shared_ptr<TreeNode> node)
                      {
             if (node == NULL) {
                 printf("[Project][Tree] OnSelect on NULL\n");
             } else {
                 printf("[Project][Tree] OnSelect on %s\n", node->name);
             } });
-        OnTreeDragDrop.add([](const char* drag_payload, void *src, TreeNode*target){
+        OnTreeDragDrop.add([](const char* drag_payload, void *src, std::shared_ptr<TreeNode> target){
             printf("[Project][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
         });
     }
@@ -118,7 +120,7 @@ void Project::RenderAndLogic()
         // vMax = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
         // ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 0, 255, 255 ) );
 
-        root.render("##project_sel", this);
+        root->render("##project_sel", this, root);
 
         ImGui::EndChild();
         ImGui::PopStyleVar();

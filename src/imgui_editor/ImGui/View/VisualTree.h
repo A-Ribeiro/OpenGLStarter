@@ -14,19 +14,24 @@ class TreeNode;
 class TreeHolder
 {
 protected:
-    const char *tree_drop_payload_id;
-    void *tree_drop_child;
-    TreeNode *tree_drop_new_parent;
+    // const char *tree_drop_payload_id;
+    // void *tree_drop_child;
+
+    // std::shared_ptr<TreeNode> tree_drop_new_parent;
+    // // TreeNode *tree_drop_new_parent;
+
+    std::shared_ptr<TreeNode> aux_dragdrop;
+
 
 public:
-    EventCore::Event<void(TreeNode *, bool)> OnTreeHover;
-    EventCore::Event<void(TreeNode *)> OnTreeSingleClick;
-    EventCore::Event<void(TreeNode *)> OnTreeDoubleClick;
-    EventCore::Event<void(TreeNode *)> OnTreeExpand;
-    EventCore::Event<void(TreeNode *)> OnTreeCollapse;
-    EventCore::Event<void(TreeNode *)> OnTreeSelect;
+    EventCore::Event<void(std::shared_ptr<TreeNode>, bool)> OnTreeHover;
+    EventCore::Event<void(std::shared_ptr<TreeNode>)> OnTreeSingleClick;
+    EventCore::Event<void(std::shared_ptr<TreeNode>)> OnTreeDoubleClick;
+    EventCore::Event<void(std::shared_ptr<TreeNode>)> OnTreeExpand;
+    EventCore::Event<void(std::shared_ptr<TreeNode>)> OnTreeCollapse;
+    EventCore::Event<void(std::shared_ptr<TreeNode>)> OnTreeSelect;
 
-    EventCore::Event<void(const char *drag_payload, void *src, TreeNode *target)> OnTreeDragDrop;
+    EventCore::Event<void(const char *drag_payload, void *src, std::shared_ptr<TreeNode>target)> OnTreeDragDrop;
 
     friend class TreeNode;
 };
@@ -39,11 +44,19 @@ enum class TreeNodeIconType : uint8_t
 
 class TreeNode
 {
-protected:
-    void renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured); // , Platform::Time* time);
-public:
+    // avoid copy, using copy constructors
+    TreeNode(const TreeNode &) {}
+    void operator=(const TreeNode &) {}
+
     TreeNode();
+    
+
+protected:
+    void renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured); // , Platform::Time* time);
+public:
+
     TreeNode(int32_t uid, TreeNodeIconType iconType, const char *name);
+    
 
     TreeNode &setIsRoot(bool is_root);
     TreeNode &setPrefixID(const char *value);
@@ -53,9 +66,10 @@ public:
 
     TreeNode &addDropPayload(const char *value);
 
+    TreeNode *parent;
     char name[64];
     int32_t uid;
-    std::vector<TreeNode> children;
+    std::vector<std::shared_ptr<TreeNode>> children;
     
     TreeNodeIconType iconType;
 
@@ -73,14 +87,24 @@ public:
     bool isLeaf();
     bool isNode();
 
+    bool removeUID(int32_t uid);
     bool removeUIDRecursive(int32_t uid);
-    TreeNode * findUID(int32_t uid);
+    std::shared_ptr<TreeNode> findUID(int32_t uid);
+
+    std::shared_ptr<TreeNode> self();
+    std::shared_ptr<TreeNode> removeSelf();
+    void makeFirst();
+    void makeLast();
 
     bool isChild(int32_t uid) const;
 
-    void render(const char *str_imgui_id, TreeHolder *treeHolder);
+    void render(const char *str_imgui_id, TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self_root);
 
-    TreeNode &addChild(const TreeNode &treeNode);
+    TreeNode &addChild(std::shared_ptr<TreeNode> treeNode);
 
-    static bool Reparent(TreeNode *root, const TreeNode & child, int32_t new_parent_uid);
+    static bool Reparent(std::shared_ptr<TreeNode> child, std::shared_ptr<TreeNode> new_parent);
+
+    static inline std::shared_ptr<TreeNode> CreateShared(int32_t uid, TreeNodeIconType iconType, const char *name){
+        return std::make_shared<TreeNode>(uid, iconType, name);
+    }
 };
