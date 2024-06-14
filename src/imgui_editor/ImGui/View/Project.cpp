@@ -22,7 +22,7 @@ View *Project::Init()
 {
 
     // creating testing node
-    root = TreeNode(uid_incrementer++, IconType::Small_Folder_Filled, "/");
+    root = TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "/");
     
     root.setIsRoot(true).
         setPrefixID("HierarchyTree").
@@ -32,10 +32,10 @@ View *Project::Init()
             DRAG_PAYLOAD_ID_PROJECT_TREE
         });
 
-    root.addChild(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child1"));
-    root.addChild(TreeNode(uid_incrementer++, IconType::Small_Folder_Filled, "child2"));
-    root.children.back().addChild(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child2leaf"));
-    root.addChild(TreeNode(uid_incrementer++, IconType::Small_Folder_Empty, "child3"));
+    root.addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "child1"));
+    root.addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "child2"));
+    root.children.back().addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "child2leaf"));
+    root.addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Folder, "child3"));
 
     ImGuiMenu::Instance()->AddMenu(
         "Window/Project", "", [this]()

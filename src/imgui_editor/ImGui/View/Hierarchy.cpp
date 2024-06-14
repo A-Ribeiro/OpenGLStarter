@@ -27,7 +27,7 @@ View* Hierarchy::Init()
 	//texture_alias[Icon_Model] = texture_model;
 
 	// creating testing node
-	root = TreeNode(uid_incrementer++, IconType::Small_BoxNode, "root");
+	root = TreeNode(uid_incrementer++, TreeNodeIconType::Hierarchy, "root");
 
     root.setIsRoot(true).
         setPrefixID("HierarchyTree").
@@ -37,10 +37,10 @@ View* Hierarchy::Init()
             DRAG_PAYLOAD_ID_PROJECT_TREE
         });
 
-    root.addChild(TreeNode(uid_incrementer++, IconType::Small_BoxNode, "child1"));
-	root.addChild(TreeNode(uid_incrementer++, IconType::Small_BoxNode_Filled, "child2"));
-    root.children.back().addChild(TreeNode(uid_incrementer++, IconType::Small_BoxNode, "child2leaf"));
-	root.addChild(TreeNode(uid_incrementer++, IconType::Small_BoxNode, "child3"));
+    root.addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Hierarchy, "child1"));
+	root.addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Hierarchy, "child2"));
+    root.children.back().addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Hierarchy, "child2leaf"));
+	root.addChild(TreeNode(uid_incrementer++, TreeNodeIconType::Hierarchy, "child3"));
 
 	ImGuiMenu::Instance()->AddMenu(
 		"Window/Hierarchy", "", [this]()
@@ -74,8 +74,18 @@ View* Hierarchy::Init()
                 printf("[Hierarchy][Tree] OnSelect on %s\n", node->name);
             }
         });
-        OnTreeDragDrop.add([](const char* drag_payload, void *src, TreeNode*target){
+        OnTreeDragDrop.add([&](const char* drag_payload, void *src, TreeNode*target){
             printf("[Hierarchy][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
+            if (drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
+                TreeNode* tsrc = (TreeNode*)src;
+                printf("                  Trying to reparent %s to %s !\n", tsrc->name, target->name);
+
+                if (TreeNode::Reparent(&root, *tsrc, target->uid)){
+                    printf("                  Reparent OK!\n");
+                }else {
+                    printf("                  Reparent Fail!\n");
+                }
+            }
         });
     }
 

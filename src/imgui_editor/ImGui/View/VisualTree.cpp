@@ -2,8 +2,8 @@
 #include "../ImGuiMenu.h"
 #include "../ImGuiManager.h"
 
-const char * DRAG_PAYLOAD_ID_HIERARCHY_TREE = "HIERARCHY_TREE";
-const char * DRAG_PAYLOAD_ID_PROJECT_TREE = "PROJECT_TREE";
+const char *DRAG_PAYLOAD_ID_HIERARCHY_TREE = "HIERARCHY_TREE";
+const char *DRAG_PAYLOAD_ID_PROJECT_TREE = "PROJECT_TREE";
 
 TreeNode::TreeNode()
 {
@@ -12,31 +12,29 @@ TreeNode::TreeNode()
     // this->path = "-not-initialized-";
     snprintf(this->name, 64, "-not-initialized-");
 
-    this->type = IconType::Small_BoxNode;
+    this->iconType = TreeNodeIconType::Hierarchy;
     this->expanded.setState(true);
     this->hovered.setState(false);
 
     this->isRoot = false;
     snprintf(this->prefix_id, 64, "-not-set-");
     snprintf(this->drag_payload_identifier, 32, "-not-set-");
-
 }
 
-TreeNode::TreeNode(int32_t uid, IconType type, const char *name)
+TreeNode::TreeNode(int32_t uid, TreeNodeIconType iconType, const char *name)
 {
     this->uid = uid;
     // this->icon_alias = icon_alias;
     // this->path = path;
     snprintf(this->name, 64, "%s", name);
 
-    this->type = type;
+    this->iconType = iconType;
     this->expanded.setState(true);
     this->hovered.setState(false);
 
     this->isRoot = false;
     snprintf(this->prefix_id, 64, "-not-set-");
     snprintf(this->drag_payload_identifier, 32, "-not-set-");
-
 }
 
 bool TreeNode::isLeaf()
@@ -65,6 +63,31 @@ bool TreeNode::removeUIDRecursive(int32_t uid)
     return false;
 }
 
+TreeNode * TreeNode::findUID(int32_t uid) {
+    if (this->uid == uid){
+        return this;
+    }
+    for (auto &chld : children)
+    {
+        TreeNode *result = chld.findUID(uid);
+        if (result)
+            return result;
+    }
+    return NULL;
+}
+
+bool TreeNode::isChild(int32_t uid) const
+{
+    for (const auto &chld : children)
+    {
+        if (chld.uid == uid){
+            return true;
+        } else if (chld.isChild(uid))
+            return true;
+    }
+    return false;
+}
+
 void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured) //, Platform::Time* time)
 {
     auto imGuiManager = ImGuiManager::Instance();
@@ -82,9 +105,22 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
     leaf_flags = (leaf_flags & ~ImGuiTreeNodeFlags_Selected) | selected_uint32;
 
     ImGuiTreeNodeFlags flag_to_use = parent_flags;
+    
+    IconType iconToUse = IconType::Small_BoxNode_Filled;
+
+    if (iconType == TreeNodeIconType::Hierarchy)
+        iconToUse = IconType::Small_BoxNode_Filled;
+    else if (iconType == TreeNodeIconType::Folder)
+        iconToUse = IconType::Small_Folder_Filled;
+
     if (this->isLeaf())
     {
         flag_to_use = leaf_flags;
+
+        if (iconType == TreeNodeIconType::Hierarchy)
+            iconToUse = IconType::Small_BoxNode;
+        else if (iconType == TreeNodeIconType::Folder)
+            iconToUse = IconType::Small_Folder_Empty;
     }
 
     ImGui::SetNextItemOpen(expanded.pressed);
@@ -107,27 +143,37 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
 
     if (ImGui::BeginDragDropTarget())
     {
-        const ImGuiPayload* payload;
-        for(const auto * drop_target: this->drop_payload_identifier){
-            if (payload = ImGui::AcceptDragDropPayload(drop_target)){
+        const ImGuiPayload *payload;
+        for (const char *drop_target : this->drop_payload_identifier)
+        {
+            if (payload = ImGui::AcceptDragDropPayload(drop_target))
+            {
                 //(const char* drag_payload, void *src, TreeNode*target)
-                treeHolder->OnTreeDragDrop(drop_target, payload->Data, this);
-            }            
+                // treeHolder->OnTreeDragDrop(drop_target, payload->Data, this);
+                treeHolder->tree_drop_payload_id = drop_target;
+                
+                treeHolder->tree_drop_child = (void*)*(intptr_t*)payload->Data;
+
+                //memcpy(&treeHolder->tree_drop_child, &payload->Data, sizeof(intptr_t));
+                //treeHolder->tree_drop_child = payload->Data;
+                treeHolder->tree_drop_new_parent = this;
+            }
         }
         ImGui::EndDragDropTarget();
     }
     // draw line on drag from any tree node.
-    if (ImGui::IsItemActive() && ImGui::IsMouseDown(ImGuiMouseButton_Left)){
-        ImGuiIO& io = ImGui::GetIO();
+    if (ImGui::IsItemActive() && ImGui::IsMouseDown(ImGuiMouseButton_Left))
+    {
+        ImGuiIO &io = ImGui::GetIO();
         ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f); // Draw a line between the button and the mouse cursor
 
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip))
         {
-            ImGui::SetDragDropPayload(this->drag_payload_identifier, this, sizeof(TreeNode*), ImGuiCond_Once);
+            intptr_t ptr_this = (intptr_t)this;
+            ImGui::SetDragDropPayload(this->drag_payload_identifier, &ptr_this, sizeof(TreeNode *), ImGuiCond_Once);
             ImGui::EndDragDropSource();
         }
     }
-
 
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left) || ImGui::IsItemClicked(ImGuiMouseButton_Right))
     { // && !ImGui::IsItemToggledOpen()) {
@@ -158,7 +204,7 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
 
     ImGui::SameLine();
 
-    AppKit::OpenGL::GLTexture *texture_ogl = ImGuiManager::Instance()->icons[(int)this->type];
+    AppKit::OpenGL::GLTexture *texture_ogl = ImGuiManager::Instance()->icons[(int)iconToUse];
     ImTextureID my_tex_id = (ImTextureID)(ogltex_to_imguitex)texture_ogl->mTexture;
     float my_tex_w = (float)texture_ogl->width * 0.5f;
     float my_tex_h = (float)texture_ogl->height * 0.5f;
@@ -208,6 +254,11 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, ImGuiID id_sel, int32_t s
 
 void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder)
 {
+
+    treeHolder->tree_drop_payload_id = NULL;
+    treeHolder->tree_drop_child = NULL;
+    treeHolder->tree_drop_new_parent = NULL;
+
     bool deselect_all = false;
 
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
@@ -234,36 +285,62 @@ void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder)
         ImGui::GetStateStorage()->SetInt(id_sel, 0);
         treeHolder->OnTreeSelect(NULL);
     }
+
+    if (treeHolder->tree_drop_payload_id != NULL &&
+        treeHolder->tree_drop_child != NULL &&
+        treeHolder->tree_drop_new_parent != NULL)
+    {
+        treeHolder->OnTreeDragDrop(
+            treeHolder->tree_drop_payload_id,
+            treeHolder->tree_drop_child,
+            treeHolder->tree_drop_new_parent);
+    }
 }
 
-TreeNode &TreeNode::setIsRoot(bool is_root){
+TreeNode &TreeNode::setIsRoot(bool is_root)
+{
     this->isRoot = is_root;
     return *this;
 }
-TreeNode &TreeNode::setPrefixID(const char *value){
+TreeNode &TreeNode::setPrefixID(const char *value)
+{
     snprintf(this->prefix_id, 64, "%s", value);
     return *this;
 }
-TreeNode &TreeNode::setDragPayloadID(const char *value){
+TreeNode &TreeNode::setDragPayloadID(const char *value)
+{
     snprintf(this->drag_payload_identifier, 32, "%s", value);
     return *this;
 }
-TreeNode &TreeNode::setDropPayload(const std::vector<const char*> &value) {
+TreeNode &TreeNode::setDropPayload(const std::vector<const char *> &value)
+{
     this->drop_payload_identifier = value;
     return *this;
 }
-TreeNode &TreeNode::addDropPayload(const char *value) {
+TreeNode &TreeNode::addDropPayload(const char *value)
+{
     this->drop_payload_identifier.push_back(value);
     return *this;
 }
 
-
-TreeNode &TreeNode::addChild(const TreeNode &treeNode){
+TreeNode &TreeNode::addChild(const TreeNode &treeNode)
+{
     children.push_back(treeNode);
-    
-    return children.back().
-        setIsRoot(false).
-        setPrefixID(this->prefix_id).
-        setDragPayloadID(this->drag_payload_identifier).
-        setDropPayload(this->drop_payload_identifier);
+
+    return children.back().setIsRoot(false).setPrefixID(this->prefix_id).setDragPayloadID(this->drag_payload_identifier).setDropPayload(this->drop_payload_identifier);
+}
+
+bool TreeNode::Reparent(TreeNode *root, const TreeNode & child, int32_t new_parent_uid)
+{
+
+    if (child.isChild(new_parent_uid))
+        return false;
+
+    TreeNode child_copy = child;
+
+    root->removeUIDRecursive(child_copy.uid);
+    TreeNode *new_parent_node = root->findUID(new_parent_uid);
+    new_parent_node->addChild(child_copy);
+
+    return true;
 }
