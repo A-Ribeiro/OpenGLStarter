@@ -79,10 +79,14 @@ View* Hierarchy::Init()
         OnTreeDragDrop.add([&](const char* drag_payload, void *src, std::shared_ptr<TreeNode>target){
             printf("[Hierarchy][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
             if (drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
+                std::shared_ptr<TreeNode> source_node = ((TreeNode*)src)->self();
+                printf("                  Before PostAction %s to %s !\n", source_node->name, target->name);
+
                 PostAction.add([=](){
-                    std::shared_ptr<TreeNode>* tsrc = (std::shared_ptr<TreeNode>*)src;
-                    printf("                  Trying to reparent %s to %s !\n", (*tsrc)->name, target->name);
-                    if (TreeNode::Reparent(*tsrc, target)){
+                    printf("                  [PostAction]\n");
+
+                    printf("                  Trying to reparent %s to %s !\n", source_node->name, target->name);
+                    if (TreeNode::Reparent(source_node, target)){
                         printf("                  Reparent OK!\n");
                     }else {
                         printf("                  Reparent Fail!\n");

@@ -20,7 +20,8 @@ protected:
     // std::shared_ptr<TreeNode> tree_drop_new_parent;
     // // TreeNode *tree_drop_new_parent;
 
-    std::shared_ptr<TreeNode> aux_dragdrop;
+    //std::shared_ptr<TreeNode> aux_dragdrop;
+    // TreeNode* aux_dragdrop;
 
 
 public:

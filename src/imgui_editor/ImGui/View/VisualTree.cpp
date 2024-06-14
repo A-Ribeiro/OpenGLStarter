@@ -191,10 +191,8 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
 
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip))
         {
-            if (treeHolder->aux_dragdrop != self)
-                treeHolder->aux_dragdrop = self;
-            intptr_t ptr_this = (intptr_t)&treeHolder->aux_dragdrop;
-            ImGui::SetDragDropPayload(this->drag_payload_identifier, &ptr_this, sizeof(TreeNode *), ImGuiCond_Once);
+            intptr_t ptr_this = (intptr_t)this;
+            ImGui::SetDragDropPayload(this->drag_payload_identifier, &ptr_this, sizeof(intptr_t), ImGuiCond_Once);
             ImGui::EndDragDropSource();
         }
     }
