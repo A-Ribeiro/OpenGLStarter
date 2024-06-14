@@ -77,9 +77,9 @@ View* Hierarchy::Init()
             }
         });
         OnTreeDragDrop.add([&](const char* drag_payload, void *src, std::shared_ptr<TreeNode>target){
-            PostAction.add([=](){
-                printf("[Hierarchy][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
-                if (drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
+            printf("[Hierarchy][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
+            if (drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
+                PostAction.add([=](){
                     std::shared_ptr<TreeNode>* tsrc = (std::shared_ptr<TreeNode>*)src;
                     printf("                  Trying to reparent %s to %s !\n", (*tsrc)->name, target->name);
                     if (TreeNode::Reparent(*tsrc, target)){
@@ -87,9 +87,10 @@ View* Hierarchy::Init()
                     }else {
                         printf("                  Reparent Fail!\n");
                     }
-                }
-            });
+                });
+            }
         });
+        
     }
 
 	return this;
