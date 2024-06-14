@@ -65,13 +65,21 @@ void Dialogs::RenderAndLogic()
 	{
         bool needs_update = false;
         ImVec2 w_pos = ImGui::GetWindowPos();
-        ImVec2 w_size = ImGui::GetWindowSize();
+        ImVec2 w_max = ImGui::GetWindowSize() + w_pos;
         if (w_pos.x < 0){
             w_pos.x = 0;
             needs_update = true;
         }
         if (w_pos.y < 0){
             w_pos.y = 0;
+            needs_update = true;
+        }
+        if (w_max.x > ImGui::GetIO().DisplaySize.x){
+            w_pos.x += ImGui::GetIO().DisplaySize.x - w_max.x;
+            needs_update = true;
+        }
+        if (w_max.y > ImGui::GetIO().DisplaySize.y){
+            w_pos.y += ImGui::GetIO().DisplaySize.y - w_max.y;
             needs_update = true;
         }
         if (needs_update){
