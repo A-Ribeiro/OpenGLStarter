@@ -27,7 +27,7 @@ void Scene::RenderAndLogic()
     // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1, 0, 1, 1.0));
     if (ImGui::Begin("Scene", NULL, flags))
     {
-        on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows));
+        on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
 
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
