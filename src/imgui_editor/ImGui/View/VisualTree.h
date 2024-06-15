@@ -67,6 +67,8 @@ public:
 
     TreeNode &addDropPayload(const char *value);
 
+    TreeNode &setName(const char *value);
+
     TreeNode *parent;
     char name[64];
     int32_t uid;

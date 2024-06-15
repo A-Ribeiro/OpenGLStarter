@@ -346,6 +346,11 @@ TreeNode &TreeNode::addDropPayload(const char *value)
     return *this;
 }
 
+TreeNode &TreeNode::setName(const char *value) {
+    snprintf(this->name, 64, "%s", value);
+    return *this;
+}
+
 std::shared_ptr<TreeNode> TreeNode::self() {
     if (this->parent != nullptr)
         return this->parent->findUID(this->uid);

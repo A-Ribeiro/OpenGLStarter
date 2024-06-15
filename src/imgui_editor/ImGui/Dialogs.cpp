@@ -46,8 +46,9 @@ View* Dialogs::Init()
 
 void Dialogs::RenderAndLogic()
 {
+    ImGuiManager *imGuiManager = ImGuiManager::Instance();
 
-    ImGui::SetNextWindowSize( ImVec2(300,-1), ImGuiCond_Always );
+    ImGui::SetNextWindowSize( ImVec2(300.0f * imGuiManager->GlobalScale,-1), ImGuiCond_Appearing );
 //    ImGui::SetNextWindowPos( ImGui::GetIO().DisplaySize * 0.5f, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     ImGui::SetNextWindowPos( ImGui::GetIO().MousePos, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
