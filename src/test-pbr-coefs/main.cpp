@@ -11,11 +11,11 @@
 #include "linear_depth.h"
 #include "generation.h"
 
-#if defined(WIN32)
-    #include "FileIterator.h"
-#endif
+#include "FileIterator.h"
 
 #include <regex>
+
+#include <inttypes.h>
 
 int main(int argc, char *argv[])
 {
@@ -51,15 +51,15 @@ int main(int argc, char *argv[])
     argv_.push_back("Another\\ Space\\ String");
     printf("cmd: \'%s\'\n",  ITKCommon::StringUtil::argvToCmd(argv_).c_str() );*/
 
-#if defined(WIN32)
-    Directory dir = Directory(ITKCommon::Path::getExecutablePath(argv[0]));
+    Directory dir = Directory(ITKCommon::Path::getWorkingPath());
 
     for (auto & file : dir) {
         printf("file: %s\n", file.full_path.c_str());
-        printf("      %s\n", file.lastWriteTime.formattedLocal().c_str());
+        printf("      weekDay: %i\n", file.creationTime.dayOfWeek);
+        printf("      Creation: %s\n", file.creationTime.toString().c_str());
+        printf("      Modification: %s\n", file.lastWriteTime.toString().c_str());
         printf("      size: %" PRIu64 " KB\n", file.size / 1024);
     }
-#endif
 
     return 0;
 }
