@@ -11,6 +11,10 @@
 #include "linear_depth.h"
 #include "generation.h"
 
+#if defined(WIN32)
+    #include "FileIterator.h"
+#endif
+
 #include <regex>
 
 int main(int argc, char *argv[])
@@ -28,7 +32,7 @@ int main(int argc, char *argv[])
     //sunFlowerValues();
 
     
-    auto s = "test \\\\\" ";
+    /*auto s = "test \\\\\" ";
     printf("original: %s\n", s);
     auto v = ITKCommon::StringUtil::quote_cmd(s);
     printf("quote_cmd: %s\n", v.c_str());
@@ -45,8 +49,17 @@ int main(int argc, char *argv[])
     argv_.push_back("");
     argv_.push_back("AnotherString");
     argv_.push_back("Another\\ Space\\ String");
-    printf("cmd: \'%s\'\n",  ITKCommon::StringUtil::argvToCmd(argv_).c_str() );
+    printf("cmd: \'%s\'\n",  ITKCommon::StringUtil::argvToCmd(argv_).c_str() );*/
 
+#if defined(WIN32)
+    Directory dir = Directory(ITKCommon::Path::getExecutablePath(argv[0]));
+
+    for (auto & file : dir) {
+        printf("file: %s\n", file.full_path.c_str());
+        printf("      %s\n", file.lastWriteTime.formattedLocal().c_str());
+        printf("      size: %" PRIu64 " KB\n", file.size / 1024);
+    }
+#endif
 
     return 0;
 }
