@@ -110,8 +110,13 @@ public:
 
 		// Prefix increment
 		const_iterator& operator++() {
-			BOOL next_valid = FindNextFileW(hFind, &findfiledata);
+			
+			if (hFind == INVALID_HANDLE_VALUE) {
+				fileInfo = FileInfo();
+				return;
+			}
 
+			BOOL next_valid = FindNextFileW(hFind, &findfiledata);
 			processCurrentValue(next_valid);
 
 			return *this;
