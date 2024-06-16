@@ -113,7 +113,7 @@ public:
 			
 			if (hFind == INVALID_HANDLE_VALUE) {
 				fileInfo = FileInfo();
-				return;
+				return *this;
 			}
 
 			BOOL next_valid = FindNextFileW(hFind, &findfiledata);
