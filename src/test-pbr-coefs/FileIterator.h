@@ -5,6 +5,22 @@
 #include <InteractiveToolkit/ITKCommon/Path.h>
 #include <InteractiveToolkit/Platform/platform_common.h>
 
+#if defined(_WIN32)
+
+#ifndef timegm
+    #define timegm _mkgmtime
+#endif
+
+#ifndef localtime_r
+#define localtime_r(a,b) localtime_s(b,a)
+#endif
+
+#ifndef gmtime_r
+#define gmtime_r(a,b) gmtime_s(b,a)
+#endif
+
+#endif
+
 // UTC Date Information
 struct Date
 {
@@ -66,15 +82,34 @@ struct Date
 
         time_t unix_time = toUnixTimeSec();
         tm local_time;
-
+        
         if (local)
             localtime_r(&unix_time, &local_time);
         else
             gmtime_r(&unix_time, &local_time);
         
-        strftime(result,80,"%F %T",&local_time);
+        strftime(result,64,"%F %T",&local_time);
 
         return result;
+    }
+
+    Date toLocal() const {
+
+        time_t unix_time = toUnixTimeSec();
+        tm local_time;
+
+        localtime_r(&unix_time, &local_time);
+
+        return Date(
+            local_time.tm_year + 1900,
+            local_time.tm_mon + 1,
+            local_time.tm_wday,
+            local_time.tm_mday,
+            local_time.tm_hour,
+            local_time.tm_min,
+            local_time.tm_sec,
+            milliseconds
+        );
     }
 };
 
@@ -200,7 +235,7 @@ public:
         const_iterator operator++(int)
         {
             const_iterator tmp = *this;
-            (*this)++;
+            ++(*this);
             return tmp;
         }
 
@@ -405,6 +440,51 @@ public:
 #endif
 
             fileInfo = v.fileInfo;
+        }
+
+
+        const_iterator(const_iterator&& v) noexcept
+        {
+#if defined(_WIN32)
+            findfiledata = v.findfiledata;
+            hFind = v.hFind;
+#elif defined(__APPLE__) || defined(__linux__)
+            entry = v.entry;
+            dp = v.dp;
+#endif
+            fileInfo = v.fileInfo;
+
+
+#if defined(_WIN32)
+            memset(&v.findfiledata, 0, sizeof(WIN32_FIND_DATAW));
+            v.hFind = INVALID_HANDLE_VALUE;
+#elif defined(__APPLE__) || defined(__linux__)
+            v.entry = NULL;
+            v.dp = NULL;
+#endif
+            v.fileInfo = FileInfo();
+        }
+
+        void operator=(const_iterator&& v) noexcept
+        {
+#if defined(_WIN32)
+            findfiledata = v.findfiledata;
+            hFind = v.hFind;
+#elif defined(__APPLE__) || defined(__linux__)
+            entry = v.entry;
+            dp = v.dp;
+#endif
+            fileInfo = v.fileInfo;
+
+
+#if defined(_WIN32)
+            memset(&v.findfiledata, 0, sizeof(WIN32_FIND_DATAW));
+            v.hFind = INVALID_HANDLE_VALUE;
+#elif defined(__APPLE__) || defined(__linux__)
+            v.entry = NULL;
+            v.dp = NULL;
+#endif
+            v.fileInfo = FileInfo();
         }
 
 #if defined(_WIN32)

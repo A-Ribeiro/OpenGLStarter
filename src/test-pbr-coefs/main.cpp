@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
 
     for (auto & file : dir) {
         printf("file: %s\n", file.full_path.c_str());
-        printf("      weekDay: %i\n", file.creationTime.dayOfWeek);
         printf("      Creation: %s\n", file.creationTime.toString().c_str());
         printf("      Modification: %s\n", file.lastWriteTime.toString().c_str());
         printf("      size: %" PRIu64 " KB\n", file.size / 1024);
