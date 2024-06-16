@@ -287,7 +287,8 @@ public:
             // skip . and ..
             struct statx sb;
             int dirfd = AT_FDCWD;
-            unsigned int mask = STATX_ALL;
+            //unsigned int mask = STATX_ALL;
+            unsigned int mask = STATX_MODE | STATX_MTIME | STATX_SIZE | STATX_BTIME;
             int flags = AT_SYMLINK_NOFOLLOW;
             bool stat_success = false;
 
