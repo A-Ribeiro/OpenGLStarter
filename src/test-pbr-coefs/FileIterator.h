@@ -410,7 +410,7 @@ public:
                     localTime.tm_hour,
                     localTime.tm_min,
                     localTime.tm_sec,
-                    sb.stx_mtime.tv_nsec/1000000);
+                    sb.stx_btime.tv_nsec/1000000);
 
                 fileInfo.size = (uint64_t)sb.stx_size;
             }
