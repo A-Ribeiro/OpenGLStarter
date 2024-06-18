@@ -86,8 +86,8 @@ namespace ITKCommon
                 const reference operator*() const { return fileInfo; }
                 const pointer operator->() const { return &fileInfo; }
 
-                // Prefix increment
-                const_iterator &operator++()
+                // Postfix increment
+                const_iterator &operator++(int)
                 {
 #if defined(_WIN32)
                     if (hFind == INVALID_HANDLE_VALUE)
@@ -112,11 +112,11 @@ namespace ITKCommon
                     return *this;
                 }
 
-                // Postfix increment
-                const_iterator operator++(int)
+                // Prefix increment
+                const_iterator operator++()
                 {
                     const_iterator tmp = *this;
-                    ++(*this);
+                    (*this)++;
                     return tmp;
                 }
 
