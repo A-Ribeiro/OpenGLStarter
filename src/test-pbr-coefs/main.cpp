@@ -14,7 +14,9 @@
 //#include "FileIterator.h"
 
 //#include "Date.h"
-#include "FileSystem/Directory.h"
+//#include "FileSystem/Directory.h"
+
+#include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
 
 #include <regex>
 
@@ -63,19 +65,19 @@ int main(int argc, char *argv[])
         printf("      size: %" PRIu64 " KB\n", file.size / 1024);
     }
 
-     auto date = ITKCommon::Date::NowUTC();
-     printf("Now: %s\n", date.toISOString().c_str());
-     printf("Now(local): %s\n", date.toLocal().toString().c_str());
-     printf("ns %u\n", date.nanoseconds);
+    auto date = ITKCommon::Date::NowUTC();
+    printf("Now: %s\n", date.toISOString().c_str());
+    printf("Now(local): %s\n", date.toLocal().toString().c_str());
+    printf("ns %u\n", date.nanoseconds);
 
 
-     Platform::Time tim;
-     int64_t t = 0;
-     while (t < INT64_C(2000000)) {
-         tim.update();
-         t += tim.deltaTimeMicro;
-         printf("t: %" PRIi64 "\n", t);
-     }
+    //  Platform::Time tim;
+    //  int64_t t = 0;
+    //  while (t < INT64_C(5000000)) {
+    //      tim.update();
+    //      t += tim.deltaTimeMicro;
+    //      printf("t: %" PRIi64 "\n", t);
+    //  }
      
 
 
