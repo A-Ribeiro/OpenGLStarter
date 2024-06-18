@@ -10,11 +10,23 @@ namespace ITKCommon
 
 #if defined(_WIN32)
 
-    time_t timegm(struct tm *timeptr)
+    struct tm* localtime_r(const time_t* sourceTime, struct tm* tmDest)
+    {
+        localtime_s(tmDest, sourceTime);
+        return tmDest;
+    }
+
+    struct tm* gmtime_r(const time_t* sourceTime, struct tm* tmDest)
+    {
+        gmtime_s(tmDest, sourceTime);
+        return tmDest;
+    }
+    
+    time_t timegm(struct tm* timeptr)
     {
         return _mkgmtime(timeptr);
     }
-
+    
     time_t timelocal(struct tm *timeptr)
     {
         time_t utc_time = timegm(timeptr);
@@ -23,17 +35,7 @@ namespace ITKCommon
         return timegm(&local_tm);
     }
 
-    struct tm *localtime_r(const time_t *sourceTime, struct tm *tmDest)
-    {
-        localtime_s(tmDest, sourceTime);
-        return tmDest;
-    }
-
-    struct tm *gmtime_r(const time_t *sourceTime, struct tm *tmDest)
-    {
-        gmtime_s(tmDest, sourceTime);
-        return tmDest;
-    }
+    
 
 #endif
 
@@ -186,7 +188,36 @@ namespace ITKCommon
         {
             // time elapsed since Jan 1 1970 00:00:00 UTC
             struct timespec res;
+#if defined(_WIN32)
+            // https://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
+            {
+                const uint64_t MS_PER_SEC = UINT64_C(1000);     // MS = milliseconds
+                const uint64_t US_PER_MS = UINT64_C(1000);     // US = microseconds
+                const uint64_t HNS_PER_US = UINT64_C(10);       // HNS = hundred-nanoseconds (e.g., 1 hns = 100 ns)
+                const uint64_t NS_PER_US = UINT64_C(1000);
+
+                const uint64_t HNS_PER_SEC = (MS_PER_SEC * US_PER_MS * HNS_PER_US);
+                const uint64_t NS_PER_HNS = UINT64_C(100);    // NS = nanoseconds
+                const uint64_t NS_PER_SEC = (MS_PER_SEC * US_PER_MS * NS_PER_US);
+
+                FILETIME ft;
+                ULARGE_INTEGER hnsTime;
+
+                GetSystemTimePreciseAsFileTime(&ft);
+
+                hnsTime.LowPart = ft.dwLowDateTime;
+                hnsTime.HighPart = ft.dwHighDateTime;
+
+                // To get POSIX Epoch as baseline, subtract the number of hns intervals from Jan 1, 1601 to Jan 1, 1970.
+                hnsTime.QuadPart -= UINT64_C(11644473600) * HNS_PER_SEC;
+
+                // modulus by hns intervals per second first, then convert to ns, as not to lose resolution
+                res.tv_nsec = (long)((hnsTime.QuadPart % HNS_PER_SEC) * NS_PER_HNS);
+                res.tv_sec = (long)(hnsTime.QuadPart / HNS_PER_SEC);
+            }
+#elif defined(__APPLE__) || defined(__linux__)
             clock_gettime(CLOCK_REALTIME, &res);
+#endif
             return FromTimeSpecUTC(res);
         }
 
@@ -225,14 +256,14 @@ namespace ITKCommon
         static Date FromSystemTime_win32(const SYSTEMTIME &_stime)
         {
             return Date(
-                stUTC.wYear,
-                stUTC.wMonth,
-                stUTC.wDayOfWeek,
-                stUTC.wDay,
-                stUTC.wHour,
-                stUTC.wMinute,
-                stUTC.wSecond,
-                stUTC.wMilliseconds * 1000000 // nsec
+                _stime.wYear,
+                _stime.wMonth,
+                _stime.wDayOfWeek,
+                _stime.wDay,
+                _stime.wHour,
+                _stime.wMinute,
+                _stime.wSecond,
+                _stime.wMilliseconds * 1000000 // nsec
             );
         }
 #endif

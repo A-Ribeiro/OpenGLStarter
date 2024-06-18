@@ -92,7 +92,7 @@ namespace ITKCommon
 #if defined(_WIN32)
                     if (hFind == INVALID_HANDLE_VALUE)
                     {
-                        fileInfo = FileInfo();
+                        fileInfo = value_type();
                         return *this;
                     }
 
@@ -156,7 +156,7 @@ namespace ITKCommon
                     {
                         FindClose(hFind);
                         hFind = INVALID_HANDLE_VALUE;
-                        fileInfo = FileInfo();
+                        fileInfo = value_type();
                     }
                     else
                     {
