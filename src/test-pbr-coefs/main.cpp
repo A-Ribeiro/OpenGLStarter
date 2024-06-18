@@ -11,7 +11,10 @@
 #include "linear_depth.h"
 #include "generation.h"
 
-#include "FileIterator.h"
+//#include "FileIterator.h"
+
+//#include "Date.h"
+#include "FileSystem/Directory.h"
 
 #include <regex>
 
@@ -51,14 +54,20 @@ int main(int argc, char *argv[])
     argv_.push_back("Another\\ Space\\ String");
     printf("cmd: \'%s\'\n",  ITKCommon::StringUtil::argvToCmd(argv_).c_str() );*/
 
-    Directory dir = Directory(ITKCommon::Path::getWorkingPath());
+    ITKCommon::FileSystem::Directory dir(ITKCommon::Path::getWorkingPath());
 
     for (auto & file : dir) {
         printf("file: %s\n", file.full_path.c_str());
-        printf("      Creation: %s\n", file.creationTime.toString().c_str());
-        printf("      Modification: %s\n", file.lastWriteTime.toString().c_str());
+        printf("      Creation: %s\n", file.creationTime.toString(true).c_str());
+        printf("      Modification: %s\n", file.lastWriteTime.toString(true).c_str());
         printf("      size: %" PRIu64 " KB\n", file.size / 1024);
     }
+
+    // auto date = ITKCommon::Date::NowUTC();
+    // printf("Now: %s\n", date.toISOString().c_str());
+    // printf("Now(local): %s\n", date.toLocal().toString().c_str());
+    // printf("ns %u\n", date.nanoseconds);
+
 
     return 0;
 }
