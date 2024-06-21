@@ -9,6 +9,8 @@
 
 #include "VideoMode.h"
 
+#include <stdio.h> // snprintf
+
 namespace AppKit
 {
 
