@@ -20,8 +20,6 @@
 
 #include <regex>
 
-#include <inttypes.h>
-
 int main(int argc, char *argv[])
 {
     ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
