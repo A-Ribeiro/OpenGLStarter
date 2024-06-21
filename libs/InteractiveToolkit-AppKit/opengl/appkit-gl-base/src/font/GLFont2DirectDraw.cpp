@@ -22,7 +22,7 @@ namespace AppKit
             OPENGL_CMD(glEnableVertexAttribArray(aColor));
             OPENGL_CMD(glVertexAttribPointer(aColor, 4, GL_FLOAT, false, sizeof(GLFont2Builder_VertexAttrib), &fontBuilder->vertexAttrib[0].color));
 
-            OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, fontBuilder->vertexAttrib.size()));
+            OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, (GLsizei)fontBuilder->vertexAttrib.size()));
 
             OPENGL_CMD(glDisableVertexAttribArray(aPosition));
             OPENGL_CMD(glDisableVertexAttribArray(aUV));

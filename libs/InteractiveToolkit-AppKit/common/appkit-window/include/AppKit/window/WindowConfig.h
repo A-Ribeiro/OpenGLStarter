@@ -36,7 +36,7 @@ namespace AppKit
             {
                 memset(this, 0, sizeof(WindowConfig));
 
-                strncpy(this->windowName, windowName, 256);
+                snprintf(this->windowName, 256, "%s", windowName);
 
                 this->windowStyle = windowStyle;
                 this->videoMode = videoMode;

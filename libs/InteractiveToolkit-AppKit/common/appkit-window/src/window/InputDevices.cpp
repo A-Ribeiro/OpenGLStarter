@@ -54,7 +54,7 @@ namespace AppKit
                 memset(&result, 0, sizeof(JoystickInfo));
 
                 sf::Joystick::Identification id_info = sf::Joystick::getIdentification(id);
-                strncpy(result.name, id_info.name.toAnsiString().c_str(), 256);
+                snprintf(result.name, 256, "%s", id_info.name.toAnsiString().c_str());
 
                 result.productId = id_info.productId;
                 result.vendorId = id_info.vendorId;
