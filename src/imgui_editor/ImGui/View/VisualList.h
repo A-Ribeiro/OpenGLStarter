@@ -26,6 +26,7 @@ public:
     friend class TreeNode;
 };
 
+class VisualList;
 
 // class ListElement
 // {
@@ -37,61 +38,82 @@ public:
     
 
 // protected:
-//     void renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured); // , Platform::Time* time);
+
+//     char name[64];
+//     char name_tolower_no_accent[64];
+
+//     VisualList *parent;
 // public:
 
-//     TreeNode(int32_t uid, TreeNodeIconType iconType, const char *name);
+//     ListElement(int32_t uid, const char *name);
+
+//     ListElement &setName(const char *value);
+//     inline const char* getName()const;
+//     inline const char* getNameToLowerNoAccents()const;
+
     
-
-//     TreeNode &setIsRoot(bool is_root);
-//     TreeNode &setPrefixID(const char *value);
-//     TreeNode &setDragPayloadID(const char *value);
-
-//     TreeNode &setDropPayload(const std::vector<const char *> &value);
-
-//     TreeNode &addDropPayload(const char *value);
-
-//     TreeNode &setName(const char *value);
-
-//     TreeNode *parent;
-//     char name[64];
 //     int32_t uid;
-//     std::vector<std::shared_ptr<TreeNode>> children;
     
-//     TreeNodeIconType iconType;
+//     IconType getIcon()const;
 
-//     // the container needs to specify if this is a root node of not...
-//     bool isRoot;
-//     // identify the nodes created in this tree
+//     EventCore::PressReleaseDetector hovered;
+
+//     std::shared_ptr<ListElement> self();
+//     std::shared_ptr<ListElement> removeSelf();
+
+//     void makeFirst();
+//     void makeLast();
+
+//     void render(const char *str_imgui_id_selection, ListHolder *listHolder);
+
+//     static inline std::shared_ptr<ListElement> CreateShared(int32_t uid, TreeNodeIconType iconType, const char *name){
+//         return std::make_shared<ListElement>(uid, iconType, name);
+//     }
+
+//     friend class VisualList;
+// };
+
+// class VisualList
+// {
+//     public:
+
+//     std::vector<std::shared_ptr<ListElement>> items;
+
 //     char prefix_id[64];
 //     char drag_payload_identifier[32];
 
 //     std::vector<const char *> drop_payload_identifier;
 
-//     EventCore::PressReleaseDetector expanded;
-//     EventCore::PressReleaseDetector hovered;
+//     VisualList &setPrefixID(const char *value);
+//     VisualList &setDragPayloadID(const char *value);
+//     VisualList &setDropPayload(const std::vector<const char *> &value);
+//     VisualList &addDropPayload(const char *value);
 
-//     bool isLeaf();
-//     bool isNode();
-
-//     bool removeUID(int32_t uid);
-//     bool removeUIDRecursive(int32_t uid);
-//     std::shared_ptr<TreeNode> findUID(int32_t uid);
-
-//     std::shared_ptr<TreeNode> self();
-//     std::shared_ptr<TreeNode> removeSelf();
+//     std::shared_ptr<VisualList> self();
+//     std::shared_ptr<VisualList> removeSelf();
 //     void makeFirst();
 //     void makeLast();
 
-//     bool isChild(int32_t uid) const;
+//     bool removeUID(int32_t uid);
+//     std::shared_ptr<VisualList> findUID(int32_t uid);
 
-//     void render(const char *str_imgui_id, TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self_root);
+//     ListElement &addChild(std::shared_ptr<ListElement> listElement);
 
-//     TreeNode &addChild(std::shared_ptr<TreeNode> treeNode);
 
-//     static bool Reparent(std::shared_ptr<TreeNode> child, std::shared_ptr<TreeNode> new_parent);
+//     void render(const char *str_imgui_id_selection, ListHolder *listHolder);
 
-//     static inline std::shared_ptr<ListElement> CreateShared(int32_t uid, TreeNodeIconType iconType, const char *name){
-//         return std::make_shared<ListElement>(uid, iconType, name);
+//     void sort(const std::function<int(const std::shared_ptr<ListElement>&,const std::shared_ptr<ListElement>&)> &comparer = Comparer_ASC){
+//         std::sort(
+//             items.begin(),items.end(),
+//             comparer
+//         );
 //     }
+
+//     static int Comparer_ASC (const std::shared_ptr<ListElement>&a,const std::shared_ptr<ListElement>&b){
+//         return strcmp(a->name_tolower_no_accent, b->name_tolower_no_accent);
+//     }
+//     static int Comparer_DESC (const std::shared_ptr<ListElement>&a,const std::shared_ptr<ListElement>&b){
+//         return strcmp(b->name_tolower_no_accent, a->name_tolower_no_accent);
+//     }
+
 // };

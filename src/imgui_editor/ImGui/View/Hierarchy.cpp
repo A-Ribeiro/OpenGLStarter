@@ -52,45 +52,45 @@ View* Hierarchy::Init()
     // debug
     {
         OnTreeHover.add([](std::shared_ptr<TreeNode> node, bool hovered){
-            printf("[Hierarchy][Tree] OnHover on %s: %i\n", node->name, hovered);
+            printf("[Hierarchy][Tree] OnHover on %s: %i\n", node->getName(), hovered);
         });
         OnTreeSingleClick.add([](std::shared_ptr<TreeNode> node){
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
                 ImGuiManager::Instance()->contextMenu.open();
 
-            printf("[Hierarchy][Tree] OnSingleClick on %s\n", node->name);
+            printf("[Hierarchy][Tree] OnSingleClick on %s\n", node->getName());
         });
         OnTreeDoubleClick.add([=](std::shared_ptr<TreeNode> node){
-            printf("[Hierarchy][Tree] OnDoubleClick on %s\n", node->name);
-            ImGuiManager::Instance()->dialogs.showEnterTextOK(node->name, 
+            printf("[Hierarchy][Tree] OnDoubleClick on %s\n", node->getName());
+            ImGuiManager::Instance()->dialogs.showEnterTextOK(node->getName(), 
             [=](const std::string &new_str){
                 printf("new text: %s\n", new_str.c_str());
                 node->setName(new_str.c_str());
             });
         });
         OnTreeExpand.add([](std::shared_ptr<TreeNode> node){
-            printf("[Hierarchy][Tree] OnExpand on %s\n", node->name);
+            printf("[Hierarchy][Tree] OnExpand on %s\n", node->getName());
         });
         OnTreeCollapse.add([](std::shared_ptr<TreeNode> node){
-            printf("[Hierarchy][Tree] OnCollapse on %s\n", node->name);
+            printf("[Hierarchy][Tree] OnCollapse on %s\n", node->getName());
         });
         OnTreeSelect.add([](std::shared_ptr<TreeNode> node){
             if (node == NULL) {
                 printf("[Hierarchy][Tree] OnSelect on NULL\n");
             } else {
-                printf("[Hierarchy][Tree] OnSelect on %s\n", node->name);
+                printf("[Hierarchy][Tree] OnSelect on %s\n", node->getName());
             }
         });
         OnTreeDragDrop.add([&](const char* drag_payload, void *src, std::shared_ptr<TreeNode>target){
             printf("[Hierarchy][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
             if (drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
                 std::shared_ptr<TreeNode> source_node = ((TreeNode*)src)->self();
-                printf("                  Before PostAction %s to %s !\n", source_node->name, target->name);
+                printf("                  Before PostAction %s to %s !\n", source_node->getName(), target->getName());
 
                 PostAction.add([=](){
                     printf("                  [PostAction]\n");
 
-                    printf("                  Trying to reparent %s to %s !\n", source_node->name, target->name);
+                    printf("                  Trying to reparent %s to %s !\n", source_node->getName(), target->getName());
                     if (TreeNode::Reparent(source_node, target)){
                         printf("                  Reparent OK!\n");
                     }else {

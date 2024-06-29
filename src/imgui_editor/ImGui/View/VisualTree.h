@@ -53,6 +53,10 @@ class TreeNode
     
 
 protected:
+    
+    char name[64];
+    char name_tolower_no_accent[64];
+
     void renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured); // , Platform::Time* time);
 public:
 
@@ -62,15 +66,14 @@ public:
     TreeNode &setIsRoot(bool is_root);
     TreeNode &setPrefixID(const char *value);
     TreeNode &setDragPayloadID(const char *value);
-
     TreeNode &setDropPayload(const std::vector<const char *> &value);
-
     TreeNode &addDropPayload(const char *value);
-
     TreeNode &setName(const char *value);
 
+    inline const char* getName()const{return name;}
+    inline const char* getNameToLowerNoAccents()const{return name_tolower_no_accent;}
+
     TreeNode *parent;
-    char name[64];
     int32_t uid;
     std::vector<std::shared_ptr<TreeNode>> children;
     
@@ -101,7 +104,7 @@ public:
 
     bool isChild(int32_t uid) const;
 
-    void render(const char *str_imgui_id, TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self_root);
+    void render(const char *str_imgui_id_selection, TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self_root);
 
     TreeNode &addChild(std::shared_ptr<TreeNode> treeNode);
 

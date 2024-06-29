@@ -10,7 +10,8 @@ TreeNode::TreeNode()
     this->uid = 0;
     // this->icon_alias = NULL;
     // this->path = "-not-initialized-";
-    snprintf(this->name, 64, "-not-initialized-");
+    //snprintf(this->name, 64, "-not-initialized-");
+    setName("-not-initialized-");
 
     this->iconType = TreeNodeIconType::Hierarchy;
     this->expanded.setState(true);
@@ -28,7 +29,8 @@ TreeNode::TreeNode(int32_t uid, TreeNodeIconType iconType, const char *name)
     this->uid = uid;
     // this->icon_alias = icon_alias;
     // this->path = path;
-    snprintf(this->name, 64, "%s", name);
+    // snprintf(this->name, 64, "%s", name);
+    setName(name);
 
     this->iconType = iconType;
     this->expanded.setState(true);
@@ -274,7 +276,7 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
     }
 }
 
-void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self_root)
+void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self_root)
 {
 
     // treeHolder->tree_drop_payload_id = NULL;
@@ -293,7 +295,7 @@ void TreeNode::render(const char *str_imgui_id, TreeHolder *treeHolder, std::sha
         }
     }
 
-    ImGuiID id_sel = ImGui::GetID(str_imgui_id);
+    ImGuiID id_sel = ImGui::GetID(str_imgui_id_selection);
     int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
 
     bool any_click_occured = false;
@@ -348,6 +350,9 @@ TreeNode &TreeNode::addDropPayload(const char *value)
 
 TreeNode &TreeNode::setName(const char *value) {
     snprintf(this->name, 64, "%s", value);
+    std::string lower_no_accents = ITKCommon::StringUtil::removeAccents(this->name);
+    lower_no_accents = ITKCommon::StringUtil::toLower(lower_no_accents);
+    snprintf(this->name_tolower_no_accent, 64, "%s", lower_no_accents.c_str());
     return *this;
 }
 

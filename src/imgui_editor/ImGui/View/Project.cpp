@@ -47,21 +47,21 @@ View *Project::Init()
     // debug
     {
         OnTreeHover.add([](std::shared_ptr<TreeNode> node, bool hovered)
-                    { printf("[Project][Tree] OnHover on %s: %i\n", node->name, hovered); });
+                    { printf("[Project][Tree] OnHover on %s: %i\n", node->getName(), hovered); });
         OnTreeSingleClick.add([](std::shared_ptr<TreeNode> node)
-                          { printf("[Project][Tree] OnSingleClick on %s\n", node->name); });
+                          { printf("[Project][Tree] OnSingleClick on %s\n", node->getName()); });
         OnTreeDoubleClick.add([](std::shared_ptr<TreeNode> node)
-                          { printf("[Project][Tree] OnDoubleClick on %s\n", node->name); });
+                          { printf("[Project][Tree] OnDoubleClick on %s\n", node->getName()); });
         OnTreeExpand.add([](std::shared_ptr<TreeNode> node)
-                     { printf("[Project][Tree] OnExpand on %s\n", node->name); });
+                     { printf("[Project][Tree] OnExpand on %s\n", node->getName()); });
         OnTreeCollapse.add([](std::shared_ptr<TreeNode> node)
-                       { printf("[Project][Tree] OnCollapse on %s\n", node->name); });
+                       { printf("[Project][Tree] OnCollapse on %s\n", node->getName()); });
         OnTreeSelect.add([](std::shared_ptr<TreeNode> node)
                      {
             if (node == NULL) {
                 printf("[Project][Tree] OnSelect on NULL\n");
             } else {
-                printf("[Project][Tree] OnSelect on %s\n", node->name);
+                printf("[Project][Tree] OnSelect on %s\n", node->getName());
             } });
         OnTreeDragDrop.add([](const char* drag_payload, void *src, std::shared_ptr<TreeNode> target){
             printf("[Project][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
