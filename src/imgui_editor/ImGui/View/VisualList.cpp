@@ -31,7 +31,7 @@ bool VisualList::CustomImGuiCommand_DrawItem(
     // ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5,1.0) );
 
     // ImGui::SetCursorPos(pos);
-    char aux[64];
+    char aux[70];
     // sprintf(aux, "##%s_%i", name, id);
     sprintf(aux, "##%s_%i", prefix_id, id);
     bool result = ImGui::Selectable(aux, itemSelf->selected, ImGuiSelectableFlags_None | ImGuiSelectableFlags_NoPadWithHalfSpacing, size);
