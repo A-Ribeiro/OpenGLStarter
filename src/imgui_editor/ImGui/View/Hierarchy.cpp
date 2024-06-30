@@ -86,8 +86,7 @@ View* Hierarchy::Init()
             if (drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
                 std::shared_ptr<TreeNode> source_node = ((TreeNode*)src)->self();
                 printf("                  Before PostAction %s to %s !\n", source_node->getName(), target->getName());
-
-                PostAction.add([=](){
+                ImGuiManager::Instance()->PostAction.add([=](){
                     printf("                  [PostAction]\n");
 
                     printf("                  Trying to reparent %s to %s !\n", source_node->getName(), target->getName());
@@ -127,6 +126,6 @@ void Hierarchy::RenderAndLogic()
 
     computeOnHoverAndOnFocus();
 
-    PostAction();
-    PostAction.clear();
+    // PostAction();
+    // PostAction.clear();
 }

@@ -425,4 +425,8 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 
 	renderState->FrontFace = AppKit::GLEngine::FrontFaceCW;
 	renderState->DepthTest = AppKit::GLEngine::DepthTestLessEqual;
+
+
+    PostAction();
+    PostAction.clear();
 }

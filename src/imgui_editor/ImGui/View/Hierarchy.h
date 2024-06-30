@@ -18,7 +18,7 @@ class Hierarchy : public View, public TreeHolder
     std::shared_ptr<TreeNode> root;
     int32_t uid_incrementer;
 
-    EventCore::Event<void()> PostAction;
+    //EventCore::Event<void()> PostAction;
 
 public:
     static const ViewType Type;
