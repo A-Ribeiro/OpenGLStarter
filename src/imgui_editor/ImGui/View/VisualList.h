@@ -53,6 +53,9 @@ protected:
     char name[64];
     char name_tolower_no_accent[64];
 
+    // used for aux variable to imgui::selectable
+    bool selected;
+
 public:
     ListElement(int32_t uid, VisualList *visualList, const char *name, const IconType &icon);
 
