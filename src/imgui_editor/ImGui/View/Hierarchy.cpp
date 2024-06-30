@@ -116,7 +116,7 @@ void Hierarchy::RenderAndLogic()
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
 
-		root->render("##hierarchy_sel", this, root);
+		root->render("##hierarchy_sel", this);
 
 	} else {
         on_hover_detector.setState(false);

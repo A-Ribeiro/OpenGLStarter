@@ -276,8 +276,10 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
     }
 }
 
-void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self_root)
+void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder)
 {
+    if (!isRoot || this->parent->children.size() != 1)
+        return;
 
     // treeHolder->tree_drop_payload_id = NULL;
     // treeHolder->tree_drop_child = NULL;
@@ -299,6 +301,7 @@ void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder
     int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
 
     bool any_click_occured = false;
+    std::shared_ptr<TreeNode> &self_root = this->parent->children[0];
     this->renderRecursive(treeHolder, self_root, id_sel, selected_UID, &any_click_occured); // , & time);
     if (any_click_occured)
         deselect_all = false;

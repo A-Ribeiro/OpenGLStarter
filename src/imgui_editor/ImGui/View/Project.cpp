@@ -120,7 +120,7 @@ void Project::RenderAndLogic()
         // vMax = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
         // ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 0, 255, 255 ) );
 
-        root->render("##project_sel", this, root);
+        root->render("##project_sel", this);
 
         ImGui::EndChild();
         ImGui::PopStyleVar();
