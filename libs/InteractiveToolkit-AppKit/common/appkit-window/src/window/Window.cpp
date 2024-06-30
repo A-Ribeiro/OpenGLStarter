@@ -358,9 +358,10 @@ namespace AppKit
             // reset only mouse event, avoid call it several times in the loop...
             mouseEventg.type = MouseEventType::None;
 
-            sf::Event event;
-            while (window->isOpen() && (event = window->pollEvent()))
+            std::optional<sf::Event> event_reader;
+            while (window->isOpen() && (event_reader = window->pollEvent()))
             {
+                const sf::Event &event = event_reader.value();
 
                 // check if need to sleep and wait for other window events
                 if (!alwaysDraw)
