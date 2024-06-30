@@ -4,6 +4,7 @@
 #include "View.h"
 
 #include "VisualTree.h"
+#include "VisualList.h"
 #include "InspectorImGuiComponent.h"
 
 //#include "../ImGuiMenu.h"

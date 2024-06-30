@@ -4,8 +4,20 @@
 
 const char *DRAG_PAYLOAD_ID_PROJECT_LIST = "PROJECT_LIST";
 
+bool VisualList::CustomImGuiCommand_DrawItem(
+    std::shared_ptr<ListElement> &itemSelf,
+        int id, 
+        //const char *prefix_name, 
+        //const char *name, 
+        //bool *selected, 
+        //IconType icon, 
 
-bool CustomImGuiCommand_DrawItem(int id, const char *prefix_name, const char *name, bool *selected, IconType icon, ImVec2 size)
+        ImVec2 size, 
+        
+        ListHolder *listHolder,
+        bool *any_click_occured,
+        int32_t selected_UID,
+        ImGuiID id_sel)
 {
 
     // ImGui::SetWindowFontScale(0.9f);
@@ -20,9 +32,41 @@ bool CustomImGuiCommand_DrawItem(int id, const char *prefix_name, const char *na
 
     // ImGui::SetCursorPos(pos);
     char aux[64];
-    //sprintf(aux, "##%s_%i", name, id);
-    sprintf(aux, "%s_%i", prefix_name, id);
-    bool result = ImGui::Selectable(aux, selected, ImGuiSelectableFlags_None | ImGuiSelectableFlags_NoPadWithHalfSpacing, size);
+    // sprintf(aux, "##%s_%i", name, id);
+    sprintf(aux, "##%s_%i", prefix_id, id);
+    bool result = ImGui::Selectable(aux, itemSelf->selected, ImGuiSelectableFlags_None | ImGuiSelectableFlags_NoPadWithHalfSpacing, size);
+
+
+    bool send_single_click = false;
+    bool send_double_click = false;
+    bool send_on_select = false;
+
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Left) || ImGui::IsItemClicked(ImGuiMouseButton_Right))
+        { // && !ImGui::IsItemToggledOpen()) {
+            *any_click_occured = true;
+            // deselect_all = false;
+            // printf("click root\n");
+            // time->update();
+            if (itemSelf->uid == selected_UID && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+            {
+                // double click
+                // printf("double click\n");
+                // ImGui::GetStateStorage()->SetInt(id_sel, this->uid);
+                send_double_click = true;
+            }
+            else
+            {
+                // printf("single click\n");
+                send_single_click = true;
+
+                // if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+                {
+                    send_on_select = (ImGui::GetStateStorage()->GetInt(id_sel, 0) != itemSelf->uid);
+                    ImGui::GetStateStorage()->SetInt(id_sel, itemSelf->uid);
+                }
+            }
+        }
+        itemSelf->hovered.setState(ImGui::IsItemHovered());
 
     // ImGui::PopStyleVar();
     // ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(0xff, 0, 0, 0xff));
@@ -31,8 +75,8 @@ bool CustomImGuiCommand_DrawItem(int id, const char *prefix_name, const char *na
 
     ImGui::SetCursorPos(pos + ImVec2((size.x - image_size.x) * 0.5f, 0));
 
-    bool is_to_stretch_image = ImGuiManager::Instance()->stretch[(int)icon];
-    AppKit::OpenGL::GLTexture *texture_ogl = ImGuiManager::Instance()->icons[(int)icon];
+    bool is_to_stretch_image = ImGuiManager::Instance()->stretch[(int)itemSelf->icon];
+    AppKit::OpenGL::GLTexture *texture_ogl = ImGuiManager::Instance()->icons[(int)itemSelf->icon];
     ImTextureID my_tex_id = (ImTextureID)(ogltex_to_imguitex)texture_ogl->mTexture;
     // float my_tex_w = (float)texture_ogl->width * 0.5f;
     // float my_tex_h = (float)texture_ogl->height * 0.5f;
@@ -72,7 +116,7 @@ bool CustomImGuiCommand_DrawItem(int id, const char *prefix_name, const char *na
 
     float text_width = size.x;
 
-    ImVec2 text_size = ImGui::CalcTextSize(name, NULL, false, text_width);
+    ImVec2 text_size = ImGui::CalcTextSize(itemSelf->name, NULL, false, text_width);
 
     ImVec2 aux_pos = size - text_size;
     aux_pos.x = aux_pos.x * 0.5f;
@@ -82,7 +126,7 @@ bool CustomImGuiCommand_DrawItem(int id, const char *prefix_name, const char *na
 
     ImGui::SetCursorPos(aux_pos);
     ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + text_width);
-    ImGui::Text("%s", name);
+    ImGui::Text("%s", itemSelf->name);
     ImGui::PopTextWrapPos();
 
     ImGui::SetCursorPos(pos);
@@ -93,11 +137,23 @@ bool CustomImGuiCommand_DrawItem(int id, const char *prefix_name, const char *na
 
     // ImGui::SetWindowFontScale(1.0f);
 
+    // event dispatching
+    {
+        if (itemSelf->hovered.down || itemSelf->hovered.up)
+            listHolder->OnListHover(itemSelf, itemSelf->hovered.pressed);
+        if (send_single_click)
+            listHolder->OnListSingleClick(itemSelf);
+        if (send_on_select)
+            listHolder->OnListSelect(itemSelf);
+        if (send_double_click)
+            listHolder->OnListDoubleClick(itemSelf);
+    }
+
     return result;
 }
 
-
-ListElement::ListElement() {
+ListElement::ListElement()
+{
     uid = 0;
     visualList = NULL;
     this->setName("-not-set-");
@@ -105,7 +161,8 @@ ListElement::ListElement() {
     selected = false;
 }
 
-ListElement::ListElement(int32_t uid, VisualList *visualList, const char *name, const IconType &icon){
+ListElement::ListElement(int32_t uid, VisualList *visualList, const char *name, const IconType &icon)
+{
     this->uid = uid;
     this->visualList = visualList;
     this->setName(name);
@@ -113,7 +170,8 @@ ListElement::ListElement(int32_t uid, VisualList *visualList, const char *name, 
     selected = false;
 }
 
-ListElement &ListElement::setName(const char *value){
+ListElement &ListElement::setName(const char *value)
+{
     snprintf(this->name, 64, "%s", value);
     std::string lower_no_accents = ITKCommon::StringUtil::removeAccents(this->name);
     lower_no_accents = ITKCommon::StringUtil::toLower(lower_no_accents);
@@ -121,23 +179,27 @@ ListElement &ListElement::setName(const char *value){
     return *this;
 }
 
-ListElement &ListElement::setIcon(const IconType &icon){
+ListElement &ListElement::setIcon(const IconType &icon)
+{
     this->icon = icon;
     return *this;
 }
 
-std::shared_ptr<ListElement> ListElement::self(){
+std::shared_ptr<ListElement> ListElement::self()
+{
     return visualList->findUID(uid);
 }
 
-std::shared_ptr<ListElement> ListElement::removeSelf(){
+std::shared_ptr<ListElement> ListElement::removeSelf()
+{
     std::shared_ptr<ListElement> result = visualList->findUID(uid);
     if (result != nullptr)
         visualList->removeUID(uid);
     return result;
 }
 
-void ListElement::makeFirst(){
+void ListElement::makeFirst()
+{
     auto self = this->visualList->findUID(this->uid);
     if (self == nullptr)
         return;
@@ -145,7 +207,8 @@ void ListElement::makeFirst(){
     this->visualList->items.insert(this->visualList->items.begin(), self);
 }
 
-void ListElement::makeLast(){
+void ListElement::makeLast()
+{
     auto self = this->visualList->findUID(this->uid);
     if (self == nullptr)
         return;
@@ -153,45 +216,49 @@ void ListElement::makeLast(){
     this->visualList->items.push_back(self);
 }
 
-void ListElement::render(const char *str_imgui_id_selection, ListHolder *listHolder) {
-
+void ListElement::render(const char *str_imgui_id_selection, ListHolder *listHolder)
+{
 }
 
-
-VisualList::VisualList(){
+VisualList::VisualList()
+{
     uid_incrementer = 1;
 
     this->setPrefixID("-not-set-");
     this->setDragPayloadID("-not-set-");
-
 }
 
-
-VisualList &VisualList::setPrefixID(const char *value){
+VisualList &VisualList::setPrefixID(const char *value)
+{
     snprintf(this->prefix_id, 64, "%s", value);
     return *this;
 }
 
-VisualList &VisualList::setDragPayloadID(const char *value){
+VisualList &VisualList::setDragPayloadID(const char *value)
+{
     snprintf(this->drag_payload_identifier, 32, "%s", value);
     return *this;
 }
 
-VisualList &VisualList::setDropPayload(const std::vector<const char *> &value){
+VisualList &VisualList::setDropPayload(const std::vector<const char *> &value)
+{
     this->drop_payload_identifier = value;
     return *this;
 }
 
-VisualList &VisualList::addDropPayload(const char *value){
+VisualList &VisualList::addDropPayload(const char *value)
+{
     this->drop_payload_identifier.push_back(value);
     return *this;
 }
 
-void VisualList::clear(){
+void VisualList::clear()
+{
     uid_incrementer = 1;
     items.clear();
 }
-bool VisualList::removeUID(int32_t uid){
+bool VisualList::removeUID(int32_t uid)
+{
     for (auto it = items.begin(); it != items.end(); it++)
     {
         if ((*it)->uid == uid)
@@ -200,9 +267,10 @@ bool VisualList::removeUID(int32_t uid){
             return true;
         }
     }
-    return false;    
+    return false;
 }
-std::shared_ptr<ListElement> VisualList::findUID(int32_t uid){
+std::shared_ptr<ListElement> VisualList::findUID(int32_t uid)
+{
     for (auto &chld : items)
     {
         if (chld->uid == uid)
@@ -211,52 +279,93 @@ std::shared_ptr<ListElement> VisualList::findUID(int32_t uid){
     return nullptr;
 }
 
-std::shared_ptr<ListElement> VisualList::addItem(const char *name, const IconType &icon){
+std::shared_ptr<ListElement> VisualList::addItem(const char *name, const IconType &icon)
+{
     items.push_back(ListElement::CreateShared(uid_incrementer++, this, name, icon));
     return items.back();
 }
 
-void VisualList::render(const char *str_imgui_id_selection, ListHolder *listHolder){
+void VisualList::render(const char *str_imgui_id_selection, ListHolder *listHolder)
+{
 
-        ImVec2 area = ImGui::GetContentRegionAvail();
+    bool deselect_all = false;
 
-        ImVec2 icon_size = ImVec2(100, 80);
-        ImVec2 spacing = ImVec2(4, 4);
-
-        auto imGuiManager = ImGuiManager::Instance();
-
-        icon_size *= imGuiManager->GlobalScale;
-        spacing *= imGuiManager->GlobalScale;
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, spacing);
-
-        float count_size = icon_size.x;
-        for (size_t i = 0; i < items.size(); i++)
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
+    {
+        if (ImGui::IsMouseClicked(0) || ImGui::IsKeyPressed(ImGuiKey_Escape, false))
         {
-            auto &item = items[i];
+            // printf("Clicked on begin...\n");
+            deselect_all = true;
+        }
+    }
 
-            if (CustomImGuiCommand_DrawItem(i, 
-                prefix_id,
-                item->name, 
-                &item->selected, 
-                item->icon, 
-                icon_size))
-            {
-                for (size_t j = 0; j < items.size(); j++)
-                {
-                    if (i != j && items[j]->selected)
-                        items[j]->selected = false;
-                }
-            }
-            count_size += spacing.x + icon_size.x;
-            if (count_size > area.x)
-            {
-                count_size = icon_size.x;
-            }
-            else
-                ImGui::SameLine();
+    ImGuiID id_sel = ImGui::GetID(str_imgui_id_selection);
+    int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
+
+    bool any_click_occured = false;
+
+    ImVec2 area = ImGui::GetContentRegionAvail();
+
+    ImVec2 icon_size = ImVec2(100, 80);
+    ImVec2 spacing = ImVec2(4, 4);
+
+    auto imGuiManager = ImGuiManager::Instance();
+
+    icon_size *= imGuiManager->GlobalScale;
+    spacing *= imGuiManager->GlobalScale;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, spacing);
+
+    float count_size = icon_size.x;
+    for (size_t i = 0; i < items.size(); i++)
+    {
+        auto &item = items[i];
+
+        bool element_selected = selected_UID == item->uid;
+        if (item->selected != element_selected)
+            item->selected = element_selected;
+
+        if (CustomImGuiCommand_DrawItem(
+                item,
+                i,
+                icon_size,
+                listHolder,
+                &any_click_occured,
+                selected_UID,
+                id_sel))
+        {
+            // if (item->selected)
+            // {
+            //     selected_UID = item->uid;
+            //     ImGui::GetStateStorage()->SetInt(id_sel, 0);
+            // }
+
+            // for (size_t j = 0; j < items.size(); j++)
+            // {
+            //     if (i != j && items[j]->selected)
+            //         items[j]->selected = false;
+            // }
         }
 
-        ImGui::PopStyleVar();
+        count_size += spacing.x + icon_size.x;
+        if (count_size > area.x)
+        {
+            count_size = icon_size.x;
+        }
+        else
+            ImGui::SameLine();
+    }
 
+    ImGui::PopStyleVar();
+
+    if (any_click_occured)
+        deselect_all = false;
+
+    if (deselect_all)
+    {
+        // printf("reset selection...\n");
+        // ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
+        ImGui::GetStateStorage()->SetInt(id_sel, 0);
+        listHolder->OnListSelect(nullptr);
+    }
 }

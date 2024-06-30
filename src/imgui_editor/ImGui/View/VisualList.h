@@ -18,8 +18,6 @@ public:
     EventCore::Event<void(std::shared_ptr<ListElement>, bool)> OnListHover;
     EventCore::Event<void(std::shared_ptr<ListElement>)> OnListSingleClick;
     EventCore::Event<void(std::shared_ptr<ListElement>)> OnListDoubleClick;
-    EventCore::Event<void(std::shared_ptr<ListElement>)> OnListExpand;
-    EventCore::Event<void(std::shared_ptr<ListElement>)> OnListCollapse;
     EventCore::Event<void(std::shared_ptr<ListElement>)> OnListSelect;
 
     EventCore::Event<void(const char *drag_payload, void *src, std::shared_ptr<ListElement> target)> OnListDragDrop;
@@ -29,7 +27,7 @@ public:
 };
 
 
-IconType RandomListIcon()
+static inline IconType RandomListIcon()
 {
     IconType _icons[] = {
         IconType::Big_File_Generic,
@@ -98,6 +96,21 @@ protected:
     std::vector<const char *> drop_payload_identifier;
 
     int32_t uid_incrementer;
+
+    bool CustomImGuiCommand_DrawItem(
+        std::shared_ptr<ListElement> &itemSelf,
+        int id, 
+        //const char *prefix_name, 
+        //const char *name, 
+        //bool *selected, 
+        //IconType icon, 
+
+        ImVec2 size, 
+
+        ListHolder *listHolder,
+        bool *any_click_occured,
+        int32_t selected_UID,
+        ImGuiID id_sel);
 
 public:
     std::vector<std::shared_ptr<ListElement>> items;
