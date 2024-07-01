@@ -145,21 +145,20 @@ void Project::RenderAndLogic()
         Splitter(true, thick_size, &sz1, &sz2, thick_size * 2.0f, thick_size * 2.0f, h);
         settings->splitterPos = sz1;
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, originalPadding);
-        ImGui::BeginChild("1", ImVec2(sz1, h), true, ImGuiWindowFlags_HorizontalScrollbar);
-
-        // vMin = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
-        // vMax = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
-        // ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 0, 255, 255 ) );
+//        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, originalPadding);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::BeginChild("1", ImVec2(sz1, h), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_HorizontalScrollbar );
 
         root->render("##project_sel", this);
 
         ImGui::EndChild();
         ImGui::PopStyleVar();
 
+
         ImGui::SameLine();
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, originalPadding);
-        ImGui::BeginChild("2", ImVec2(sz2, h), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+//        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, originalPadding);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::BeginChild("2", ImVec2(sz2, h), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_AlwaysVerticalScrollbar);
         
         // // vMin = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
         // // vMax = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();

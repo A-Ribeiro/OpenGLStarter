@@ -41,6 +41,35 @@ bool VisualList::CustomImGuiCommand_DrawItem(
     bool send_double_click = false;
     bool send_on_select = false;
 
+    if (ImGui::BeginDragDropTarget())
+    {
+        const ImGuiPayload *payload;
+        for (const char *drop_target : this->drop_payload_identifier)
+        {
+            if (payload = ImGui::AcceptDragDropPayload(drop_target))
+            {
+                listHolder->OnListDragDrop(drop_target, 
+                    (void*)*(intptr_t*)payload->Data,
+                    itemSelf
+                );
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+    // draw line on drag from any tree node.
+    if (ImGui::IsItemActive() && ImGui::IsMouseDown(ImGuiMouseButton_Left))
+    {
+        ImGuiIO &io = ImGui::GetIO();
+        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImVec4(1,0,0,1)), 4.0f); // Draw a line between the button and the mouse cursor
+
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip))
+        {
+            intptr_t ptr_this = (intptr_t)this;
+            ImGui::SetDragDropPayload(this->drag_payload_identifier, &ptr_this, sizeof(intptr_t), ImGuiCond_Once);
+            ImGui::EndDragDropSource();
+        }
+    }
+
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left) || ImGui::IsItemClicked(ImGuiMouseButton_Right))
         { // && !ImGui::IsItemToggledOpen()) {
             *any_click_occured = true;
@@ -287,6 +316,25 @@ std::shared_ptr<ListElement> VisualList::addItem(const char *name, const IconTyp
 
 void VisualList::render(const char *str_imgui_id_selection, ListHolder *listHolder)
 {
+    auto window = ImGui::GetCurrentWindow();
+    ImRect window_frame = window->ClipRect;
+    window_frame.Expand(-3.5f);
+    if (ImGui::BeginDragDropTargetCustom( window_frame, window->ID ))
+    {
+        const ImGuiPayload *payload;
+        for (const char *drop_target : this->drop_payload_identifier)
+        {
+            if (payload = ImGui::AcceptDragDropPayload(drop_target))
+            {
+                listHolder->OnListDragDrop(drop_target, 
+                    (void*)*(intptr_t*)payload->Data,
+                    nullptr
+                );
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
 
     bool deselect_all = false;
 

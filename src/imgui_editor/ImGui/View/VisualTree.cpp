@@ -189,7 +189,7 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
     if (ImGui::IsItemActive() && ImGui::IsMouseDown(ImGuiMouseButton_Left))
     {
         ImGuiIO &io = ImGui::GetIO();
-        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f); // Draw a line between the button and the mouse cursor
+        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImVec4(1,0,0,1)), 4.0f); // Draw a line between the button and the mouse cursor
 
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip))
         {
@@ -276,10 +276,63 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
     }
 }
 
+void TreeNode::afterChild(TreeHolder *treeHolder) {
+
+    // auto window = ImGui::GetCurrentWindow();
+    // //ImRect window_frame = window->ContentRegionRect;
+
+    // ImVec2 padding = ImGui::GetStyle().WindowPadding;// + ImGui::GetStyle().FramePadding;
+
+    // ImRect window_frame;
+    // window_frame.Min = ImGui::GetWindowPos() + ImGui::GetWindowContentRegionMin() - padding;
+    // window_frame.Max = ImGui::GetWindowPos() + ImGui::GetWindowContentRegionMax() + padding;
+
+    // //if (ImGui::BeginDragDropTargetCustom( window_frame, window->ID ))
+    // if (ImGui::BeginDragDropTarget())
+    // {
+    //     const ImGuiPayload *payload;
+    //     for (const char *drop_target : this->drop_payload_identifier)
+    //     {
+    //         if (payload = ImGui::AcceptDragDropPayload(drop_target))
+    //         {
+    //             treeHolder->OnTreeDragDrop(drop_target, 
+    //                 (void*)*(intptr_t*)payload->Data,
+    //                 nullptr
+    //             );
+    //         }
+    //     }
+    //     ImGui::EndDragDropTarget();
+    // }
+
+
+}
+
 void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder)
 {
     if (!isRoot || this->parent->children.size() != 1)
         return;
+
+
+    auto window = ImGui::GetCurrentWindow();
+    ImRect window_frame = window->ClipRect;
+    window_frame.Expand(-3.5f);
+
+    if (ImGui::BeginDragDropTargetCustom( window_frame, window->ID ))
+    {
+        const ImGuiPayload *payload;
+        for (const char *drop_target : this->drop_payload_identifier)
+        {
+            if (payload = ImGui::AcceptDragDropPayload(drop_target))
+            {
+                treeHolder->OnTreeDragDrop(drop_target, 
+                    (void*)*(intptr_t*)payload->Data,
+                    nullptr
+                );
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
 
     // treeHolder->tree_drop_payload_id = NULL;
     // treeHolder->tree_drop_child = NULL;

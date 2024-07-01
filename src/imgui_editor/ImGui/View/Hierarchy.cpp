@@ -84,18 +84,20 @@ View* Hierarchy::Init()
         OnTreeDragDrop.add([&](const char* drag_payload, void *src, std::shared_ptr<TreeNode>target){
             printf("[Hierarchy][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
             if (drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
-                std::shared_ptr<TreeNode> source_node = ((TreeNode*)src)->self();
-                printf("                  Before PostAction %s to %s !\n", source_node->getName(), target->getName());
-                ImGuiManager::Instance()->PostAction.add([=](){
-                    printf("                  [PostAction]\n");
+                if (target != nullptr){
+                    std::shared_ptr<TreeNode> source_node = ((TreeNode*)src)->self();
+                    printf("                  Before PostAction %s to %s !\n", source_node->getName(), target->getName());
+                    ImGuiManager::Instance()->PostAction.add([=](){
+                        printf("                  [PostAction]\n");
 
-                    printf("                  Trying to reparent %s to %s !\n", source_node->getName(), target->getName());
-                    if (TreeNode::Reparent(source_node, target)){
-                        printf("                  Reparent OK!\n");
-                    }else {
-                        printf("                  Reparent Fail!\n");
-                    }
-                });
+                        printf("                  Trying to reparent %s to %s !\n", source_node->getName(), target->getName());
+                        if (TreeNode::Reparent(source_node, target)){
+                            printf("                  Reparent OK!\n");
+                        }else {
+                            printf("                  Reparent Fail!\n");
+                        }
+                    });
+                }
             }
         });
         
@@ -110,6 +112,7 @@ void Hierarchy::RenderAndLogic()
 		return;
 	
 	auto flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (ImGui::Begin("Hierarchy", NULL, flags))
 	{
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
@@ -123,7 +126,7 @@ void Hierarchy::RenderAndLogic()
     }
 
 	ImGui::End();
-
+    ImGui::PopStyleVar();
     computeOnHoverAndOnFocus();
 
     // PostAction();
