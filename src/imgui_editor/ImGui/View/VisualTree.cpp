@@ -276,36 +276,36 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
     }
 }
 
-void TreeNode::afterChild(TreeHolder *treeHolder) {
+// void TreeNode::afterChild(TreeHolder *treeHolder) {
 
-    // auto window = ImGui::GetCurrentWindow();
-    // //ImRect window_frame = window->ContentRegionRect;
+//     // auto window = ImGui::GetCurrentWindow();
+//     // //ImRect window_frame = window->ContentRegionRect;
 
-    // ImVec2 padding = ImGui::GetStyle().WindowPadding;// + ImGui::GetStyle().FramePadding;
+//     // ImVec2 padding = ImGui::GetStyle().WindowPadding;// + ImGui::GetStyle().FramePadding;
 
-    // ImRect window_frame;
-    // window_frame.Min = ImGui::GetWindowPos() + ImGui::GetWindowContentRegionMin() - padding;
-    // window_frame.Max = ImGui::GetWindowPos() + ImGui::GetWindowContentRegionMax() + padding;
+//     // ImRect window_frame;
+//     // window_frame.Min = ImGui::GetWindowPos() + ImGui::GetWindowContentRegionMin() - padding;
+//     // window_frame.Max = ImGui::GetWindowPos() + ImGui::GetWindowContentRegionMax() + padding;
 
-    // //if (ImGui::BeginDragDropTargetCustom( window_frame, window->ID ))
-    // if (ImGui::BeginDragDropTarget())
-    // {
-    //     const ImGuiPayload *payload;
-    //     for (const char *drop_target : this->drop_payload_identifier)
-    //     {
-    //         if (payload = ImGui::AcceptDragDropPayload(drop_target))
-    //         {
-    //             treeHolder->OnTreeDragDrop(drop_target, 
-    //                 (void*)*(intptr_t*)payload->Data,
-    //                 nullptr
-    //             );
-    //         }
-    //     }
-    //     ImGui::EndDragDropTarget();
-    // }
+//     // //if (ImGui::BeginDragDropTargetCustom( window_frame, window->ID ))
+//     // if (ImGui::BeginDragDropTarget())
+//     // {
+//     //     const ImGuiPayload *payload;
+//     //     for (const char *drop_target : this->drop_payload_identifier)
+//     //     {
+//     //         if (payload = ImGui::AcceptDragDropPayload(drop_target))
+//     //         {
+//     //             treeHolder->OnTreeDragDrop(drop_target, 
+//     //                 (void*)*(intptr_t*)payload->Data,
+//     //                 nullptr
+//     //             );
+//     //         }
+//     //     }
+//     //     ImGui::EndDragDropTarget();
+//     // }
 
 
-}
+// }
 
 void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder)
 {

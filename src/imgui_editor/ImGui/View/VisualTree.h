@@ -101,7 +101,7 @@ public:
     bool isChild(int32_t uid) const;
 
     void render(const char *str_imgui_id_selection, TreeHolder *treeHolder);
-    void afterChild(TreeHolder *treeHolder);
+    //void afterChild(TreeHolder *treeHolder);
 
     TreeNode &addChild(std::shared_ptr<TreeNode> treeNode);
 
