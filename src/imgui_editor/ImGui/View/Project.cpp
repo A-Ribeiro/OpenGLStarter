@@ -146,7 +146,8 @@ void Project::RenderAndLogic()
         settings->splitterPos = sz1;
 
 //        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, originalPadding);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)*imGuiManager->GlobalScale);
         ImGui::BeginChild("1", ImVec2(sz1, h), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_HorizontalScrollbar );
 
         root->render("##project_sel", this);
@@ -157,7 +158,8 @@ void Project::RenderAndLogic()
 
         ImGui::SameLine();
 //        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, originalPadding);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)*imGuiManager->GlobalScale);
         ImGui::BeginChild("2", ImVec2(sz2, h), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_AlwaysVerticalScrollbar);
         
         // // vMin = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
