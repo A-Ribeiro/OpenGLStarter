@@ -39,6 +39,37 @@
 
 // };
 
+class FileTreeData:public TreeData
+{
+protected:
+public:
+    static TreeDataType Type;
+
+    ITKCommon::FileSystem::File file;
+    //IconType iconToUse;
+    bool has_files;
+
+    FileTreeData(const ITKCommon::FileSystem::File &file):TreeData(FileTreeData::Type){
+        this->file = file;
+        //iconToUse = IconType::Small_Folder_Filled;
+        has_files = false;
+    }
+
+    virtual IconType getIcon(){
+        if (has_files)
+            return IconType::Small_Folder_Filled;
+        else
+            return IconType::Small_Folder_Empty;
+    }
+
+    static inline std::shared_ptr<FileTreeData> CreateShared(const ITKCommon::FileSystem::File &file)
+    {
+        return std::make_shared<FileTreeData>(file);
+    }
+
+};
+
+
 class Project : public View, public TreeHolder, public ListHolder
 {
 
@@ -70,9 +101,9 @@ public:
         uid_incrementer = 10;
     }
 
-    std::shared_ptr<TreeNode> createTreeNode(const std::string &name)
+    std::shared_ptr<TreeNode> createTreeNode(const std::string &name, std::shared_ptr<FileTreeData> data)
     {
-        return TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, name.c_str());
+        return TreeNode::CreateShared(uid_incrementer++, data, name.c_str());
     }
 
     VisualList & getVisualList() {

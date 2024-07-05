@@ -27,8 +27,8 @@ View* Hierarchy::Init()
 	//texture_alias[Icon_Model] = texture_model;
 
 	// creating testing node
-    self_root = TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Hierarchy, "-empty-");
-	root = TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Hierarchy, "root");
+    self_root = TreeNode::CreateShared(uid_incrementer++, nullptr, "-empty-");
+	root = TreeNode::CreateShared(uid_incrementer++, nullptr, "root");
     self_root->addChild(root);
 
     root->setIsRoot(true).
@@ -39,10 +39,10 @@ View* Hierarchy::Init()
             DRAG_PAYLOAD_ID_PROJECT_TREE
         });
 
-    root->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Hierarchy, "child1"));
-	root->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Hierarchy, "child2"));
-    root->children.back()->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Hierarchy, "child2leaf"));
-	root->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Hierarchy, "child3"));
+    root->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child1"));
+	root->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child2"));
+    root->children.back()->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child2leaf"));
+	root->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child3"));
 
 	ImGuiMenu::Instance()->AddMenu(
 		"Window/Hierarchy", "", [this]()

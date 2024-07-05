@@ -64,6 +64,10 @@ void Editor::openFolder(const std::string &path) {
         auto &root = project.getTreeRoot();
         root->setName(project_directory.getName().c_str());
 
+        root->data = FileTreeData::CreateShared(
+            project_directory.toFile()
+        );
+
         struct _To_insert_struct {
             Directory dir_info;
             std::shared_ptr<TreeNode> insert_where;
@@ -82,11 +86,18 @@ void Editor::openFolder(const std::string &path) {
             auto first = _to_insert[0];
             _to_insert.erase(_to_insert.begin());
 
+            std::shared_ptr<FileTreeData> firstData = std::dynamic_pointer_cast<FileTreeData>(first.insert_where->data);
+
+            firstData->has_files = false;
+
             for(auto &entry: first.dir_info){
+
+                firstData->has_files = true;
+
                 if (entry.isDirectory){
 
                     // add element to visual tree
-                    auto tree_node = project.createTreeNode( entry.name );
+                    auto tree_node = project.createTreeNode( entry.name, FileTreeData::CreateShared( entry ) );
                     first.insert_where->addChild(tree_node);
 
                     // enqueue element to get subdirectories

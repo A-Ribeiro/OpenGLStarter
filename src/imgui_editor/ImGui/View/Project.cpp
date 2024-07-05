@@ -2,6 +2,8 @@
 #include "../ImGuiMenu.h"
 #include "../ImGuiManager.h"
 
+TreeDataType FileTreeData::Type = "FileTreeData";
+
 bool drawFile(int id, const char *name, bool *selected, IconType icon, ImVec2 size);
 
 const ViewType Project::Type = "Project";
@@ -34,8 +36,11 @@ View *Project::Init()
     visualList.addItem("teste.png",RandomListIcon());
 
     // creating testing node
-    self_root = TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "-empty-");
-    root = TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "/");
+    self_root = TreeNode::CreateShared(uid_incrementer++, nullptr, "-empty-");
+    root = TreeNode::CreateShared(uid_incrementer++, 
+        FileTreeData::CreateShared( ITKCommon::FileSystem::File{} ), 
+        "/"
+    );
     self_root->addChild(root);
     
     root->setIsRoot(true).
@@ -46,10 +51,10 @@ View *Project::Init()
             DRAG_PAYLOAD_ID_PROJECT_TREE
         });
 
-    root->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "child1"));
-    root->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "child2"));
-    root->children.back()->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "child2leaf"));
-    root->addChild(TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, "child3"));
+    root->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child1"));
+    root->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child2"));
+    root->children.back()->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child2leaf"));
+    root->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child3"));
 
     ImGuiMenu::Instance()->AddMenu(
         "Window/Project", "", [this]()

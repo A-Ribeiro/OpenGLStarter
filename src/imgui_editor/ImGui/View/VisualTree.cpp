@@ -13,7 +13,7 @@ TreeNode::TreeNode()
     //snprintf(this->name, 64, "-not-initialized-");
     setName("-not-initialized-");
 
-    this->iconType = TreeNodeIconType::Hierarchy;
+    //this->iconType = TreeNodeIconType::Hierarchy;
     this->expanded.setState(true);
     this->hovered.setState(false);
 
@@ -24,7 +24,7 @@ TreeNode::TreeNode()
     this->parent = nullptr;
 }
 
-TreeNode::TreeNode(int32_t uid, TreeNodeIconType iconType, const char *name)
+TreeNode::TreeNode(int32_t uid, std::shared_ptr<TreeData> data, const char *name)
 {
     this->uid = uid;
     // this->icon_alias = icon_alias;
@@ -32,7 +32,7 @@ TreeNode::TreeNode(int32_t uid, TreeNodeIconType iconType, const char *name)
     // snprintf(this->name, 64, "%s", name);
     setName(name);
 
-    this->iconType = iconType;
+    this->data = data;
     this->expanded.setState(true);
     this->hovered.setState(false);
 
@@ -129,21 +129,24 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
 
     ImGuiTreeNodeFlags flag_to_use = parent_flags;
     
-    IconType iconToUse = IconType::Small_BoxNode_Filled;
+    IconType iconToUse = IconType::Small_BoxNode;
+    if (data != nullptr){
+        iconToUse = data->getIcon();
+    }
 
-    if (iconType == TreeNodeIconType::Hierarchy)
-        iconToUse = IconType::Small_BoxNode_Filled;
-    else if (iconType == TreeNodeIconType::Folder)
-        iconToUse = IconType::Small_Folder_Filled;
+    // if (iconType == TreeNodeIconType::Hierarchy)
+    //     iconToUse = IconType::Small_BoxNode_Filled;
+    // else if (iconType == TreeNodeIconType::Folder)
+    //     iconToUse = IconType::Small_Folder_Filled;
 
     if (this->isLeaf())
     {
         flag_to_use = leaf_flags;
 
-        if (iconType == TreeNodeIconType::Hierarchy)
-            iconToUse = IconType::Small_BoxNode;
-        else if (iconType == TreeNodeIconType::Folder)
-            iconToUse = IconType::Small_Folder_Empty;
+        // if (iconType == TreeNodeIconType::Hierarchy)
+        //     iconToUse = IconType::Small_BoxNode;
+        // else if (iconType == TreeNodeIconType::Folder)
+        //     iconToUse = IconType::Small_Folder_Empty;
     }
 
     ImGui::SetNextItemOpen(expanded.pressed);

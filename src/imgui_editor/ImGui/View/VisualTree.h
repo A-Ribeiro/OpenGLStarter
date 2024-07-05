@@ -36,10 +36,25 @@ public:
     friend class TreeNode;
 };
 
-enum class TreeNodeIconType : uint8_t
+// enum class TreeNodeIconType : uint8_t
+// {
+//     Hierarchy = 0,
+//     Folder
+// };
+
+typedef const char *TreeDataType;
+
+class TreeData
 {
-    Hierarchy = 0,
-    Folder
+protected:
+    TreeDataType type;
+    TreeData(TreeDataType type){ this->type = type; }
+public:
+    TreeDataType getType() const { return type; }
+    bool compareType(TreeDataType t) const {return this->type == t;}
+
+    virtual IconType getIcon()=0;
+    //virtual ~TreeData()=0;
 };
 
 class TreeNode
@@ -62,7 +77,7 @@ protected:
 
     void renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured); // , Platform::Time* time);
 public:
-    TreeNode(int32_t uid, TreeNodeIconType iconType, const char *name);
+    TreeNode(int32_t uid, std::shared_ptr<TreeData> data, const char *name);
 
     TreeNode &setIsRoot(bool is_root);
     TreeNode &setPrefixID(const char *value);
@@ -74,11 +89,13 @@ public:
     inline const char *getName() const { return name; }
     inline const char *getNameToLowerNoAccents() const { return name_tolower_no_accent; }
 
+    std::shared_ptr<TreeData> data;
+
     TreeNode *parent;
     int32_t uid;
     std::vector<std::shared_ptr<TreeNode>> children;
 
-    TreeNodeIconType iconType;
+    //TreeNodeIconType iconType;
 
     // // the container needs to specify if this is a root node of not...
     bool isRoot;
@@ -125,8 +142,8 @@ public:
 
     static bool Reparent(std::shared_ptr<TreeNode> child, std::shared_ptr<TreeNode> new_parent);
 
-    static inline std::shared_ptr<TreeNode> CreateShared(int32_t uid, TreeNodeIconType iconType, const char *name)
+    static inline std::shared_ptr<TreeNode> CreateShared(int32_t uid, std::shared_ptr<TreeData> data, const char *name)
     {
-        return std::make_shared<TreeNode>(uid, iconType, name);
+        return std::make_shared<TreeNode>(uid, data, name);
     }
 };
