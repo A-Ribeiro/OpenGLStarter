@@ -266,6 +266,11 @@ namespace Native
             available[LinuxDialogQarma] = Platform::Process::ApplicationExists("qarma");
             available[LinuxDialogKDialog] = Platform::Process::ApplicationExists("kdialog");
 
+            printf("[LinuxExternalDialogs] LinuxDialogZenity %i\n", (int)available[LinuxDialogZenity]);
+            printf("[LinuxExternalDialogs] LinuxDialogMatedialog %i\n", (int)available[LinuxDialogMatedialog]);
+            printf("[LinuxExternalDialogs] LinuxDialogQarma %i\n", (int)available[LinuxDialogQarma]);
+            printf("[LinuxExternalDialogs] LinuxDialogKDialog %i\n", (int)available[LinuxDialogKDialog]);
+
             if (available[LinuxDialogZenity] && available[LinuxDialogKDialog])
             {
                 char *buf = std::getenv("XDG_SESSION_DESKTOP");

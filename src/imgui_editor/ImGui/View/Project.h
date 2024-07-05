@@ -60,4 +60,14 @@ public:
     View* Init();
 
     void RenderAndLogic();
+
+    std::shared_ptr<TreeNode> & getTreeRoot() {
+        return root;
+    }
+
+    VisualList & getVisualList() {
+        return visualList;
+    }
+
+
 };

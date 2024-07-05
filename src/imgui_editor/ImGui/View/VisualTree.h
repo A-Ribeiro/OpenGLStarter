@@ -89,6 +89,7 @@ public:
     bool isLeaf();
     bool isNode();
 
+    void clear();
     bool removeUID(int32_t uid);
     bool removeUIDRecursive(int32_t uid);
     std::shared_ptr<TreeNode> findUID(int32_t uid);

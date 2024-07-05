@@ -31,4 +31,8 @@ public:
 
     void RenderAndLogic();
 
+    std::shared_ptr<TreeNode> &getTreeRoot() {
+        return root;
+    }
+
 };

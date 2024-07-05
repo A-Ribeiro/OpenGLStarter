@@ -52,6 +52,10 @@ bool TreeNode::isNode()
     return children.size() > 0;
 }
 
+void TreeNode::clear() {
+    children.clear();
+}
+
 bool TreeNode::removeUID(int32_t uid) {
     for (auto it = children.begin(); it != children.end(); it++)
     {

@@ -28,8 +28,12 @@ void Editor::init()
         imGuiMenu->UpdateUI();
     }
 
-
-
+    // empty hierarchy list, directory list and file list
+    {
+        imGuiManager->hierarchy.getTreeRoot()->clear();
+        imGuiManager->project.getTreeRoot()->clear();
+        imGuiManager->project.getVisualList().clear();
+    }
 
 }
 
