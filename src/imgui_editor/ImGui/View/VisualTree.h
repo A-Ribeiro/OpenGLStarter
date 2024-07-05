@@ -106,17 +106,21 @@ public:
 
     TreeNode &addChild(std::shared_ptr<TreeNode> treeNode);
 
-    void sort(const std::function<int(const std::shared_ptr<TreeNode>&,const std::shared_ptr<TreeNode>&)> &comparer = Comparer_ASC){
+    // check if a < b
+    void sort(const std::function<bool(const std::shared_ptr<TreeNode>&,const std::shared_ptr<TreeNode>&)> &comparer = Comparer_ASC){
         std::sort(children.begin(),children.end(),comparer);
     }
 
-    static int Comparer_ASC(const std::shared_ptr<TreeNode> &a, const std::shared_ptr<TreeNode> &b)
+    // check if a < b
+    static bool Comparer_ASC(const std::shared_ptr<TreeNode> &a, const std::shared_ptr<TreeNode> &b)
     {
-        return strcmp(a->name_tolower_no_accent, b->name_tolower_no_accent);
+        return strcmp(a->name_tolower_no_accent, b->name_tolower_no_accent) < 0;
     }
-    static int Comparer_DESC(const std::shared_ptr<TreeNode> &a, const std::shared_ptr<TreeNode> &b)
+
+    // check if a < b
+    static bool Comparer_DESC(const std::shared_ptr<TreeNode> &a, const std::shared_ptr<TreeNode> &b)
     {
-        return strcmp(b->name_tolower_no_accent, a->name_tolower_no_accent);
+        return strcmp(b->name_tolower_no_accent, a->name_tolower_no_accent) < 0;
     }
 
     static bool Reparent(std::shared_ptr<TreeNode> child, std::shared_ptr<TreeNode> new_parent);

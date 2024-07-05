@@ -35,4 +35,21 @@ public:
         return root;
     }
 
+    void clearTree() {
+        root->clear();
+        uid_incrementer = 10;
+    }
+
+    void clearSelection() {
+        
+        // tree
+        {
+            ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
+            //int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
+            ImGui::GetStateStorage()->SetInt(id_sel, 0);
+            this->OnTreeSelect(nullptr);
+        }
+
+    }
+
 };

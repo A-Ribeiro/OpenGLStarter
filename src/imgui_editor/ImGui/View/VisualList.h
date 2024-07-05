@@ -130,18 +130,22 @@ public:
 
     void render(const char *str_imgui_id_selection, ListHolder *listHolder);
 
-    void sort(const std::function<int(const std::shared_ptr<ListElement> &, const std::shared_ptr<ListElement> &)> &comparer = Comparer_ASC)
+    // check if a < b
+    void sort(const std::function<bool(const std::shared_ptr<ListElement> &, const std::shared_ptr<ListElement> &)> &comparer = Comparer_ASC)
     {
         std::sort(items.begin(), items.end(),comparer);
     }
     
-    static int Comparer_ASC(const std::shared_ptr<ListElement> &a, const std::shared_ptr<ListElement> &b)
+    // check if a < b
+    static bool Comparer_ASC(const std::shared_ptr<ListElement> &a, const std::shared_ptr<ListElement> &b)
     {
-        return strcmp(a->name_tolower_no_accent, b->name_tolower_no_accent);
+        return strcmp(a->name_tolower_no_accent, b->name_tolower_no_accent) < 0;
     }
-    static int Comparer_DESC(const std::shared_ptr<ListElement> &a, const std::shared_ptr<ListElement> &b)
+
+    // check if a < b
+    static bool Comparer_DESC(const std::shared_ptr<ListElement> &a, const std::shared_ptr<ListElement> &b)
     {
-        return strcmp(b->name_tolower_no_accent, a->name_tolower_no_accent);
+        return strcmp(b->name_tolower_no_accent, a->name_tolower_no_accent) < 0;
     }
 
     friend class ListElement;

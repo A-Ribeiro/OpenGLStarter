@@ -307,7 +307,7 @@ namespace Native
 
         bool open(const std::string &starting_path, std::string *output)
         {
-
+            printf("[LinuxExternalDialogs] starting_path: %s\n", starting_path.c_str());
             std::string path;
             int exit_code = -1;
 

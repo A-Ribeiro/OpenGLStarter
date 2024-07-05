@@ -65,9 +65,37 @@ public:
         return root;
     }
 
+    void clearTree() {
+        root->clear();
+        uid_incrementer = 10;
+    }
+
+    std::shared_ptr<TreeNode> createTreeNode(const std::string &name)
+    {
+        return TreeNode::CreateShared(uid_incrementer++, TreeNodeIconType::Folder, name.c_str());
+    }
+
     VisualList & getVisualList() {
         return visualList;
     }
 
+    void clearSelection() {
+        
+        // tree
+        {
+            ImGuiID id_sel = ImGui::GetID("##project_sel");
+            //int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
+            ImGui::GetStateStorage()->SetInt(id_sel, 0);
+            this->OnTreeSelect(nullptr);
+        }
+
+        // visual list
+        {
+            ImGuiID id_sel = ImGui::GetID("##proj_files_sel");
+            //int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
+            ImGui::GetStateStorage()->SetInt(id_sel, 0);
+            this->OnListSelect(nullptr);
+        }
+    }
 
 };

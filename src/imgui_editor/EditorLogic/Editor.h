@@ -20,5 +20,7 @@ public:
 
     void init();
 
+    void openFolder(const std::string &path);
+
     static Editor *Instance();
 };
