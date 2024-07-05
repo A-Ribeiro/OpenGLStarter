@@ -13,6 +13,8 @@ using namespace MathCore;
 #include "ImGui/ImGuiManager.h"
 #include "OpenFolderDialog.h"
 
+#include "EditorLogic/Editor.h"
+
 App::App()
 {
 // #if defined(ARIBEIRO_LINUX_LOADER_USE_USR_LOCAL_PATH)
@@ -80,6 +82,10 @@ void App::load()
         window,
         &this->screenRenderWindow.inputManager,
         ITKCommon::Path::getDocumentsPath("Milky Way Studio", "imgui_editor"));
+    
+
+    Editor::Instance()->init();
+    
     fade->fadeOut(0.5f, NULL);
 }
 
