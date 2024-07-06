@@ -71,7 +71,7 @@ App::App()
         auto screen_size_pixels = selectedMonitor->SizePixels();
         auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
 
-        this->GlobalScale = (float)dpii.y / 96.0f;
+        this->GlobalScale = (float)dpii.y / 120.0f;
         if (this->GlobalScale < 1.0f)
             this->GlobalScale = 1.0f;
 
@@ -158,6 +158,8 @@ void App::applyGlobalScale() {
     style.ScaleAllSizes(this->GlobalScale);
     if (this->GlobalScale < 1.0f)
         style.MouseCursorScale = 1.0f;
+    else
+        style.MouseCursorScale = this->GlobalScale;
 
     AppKit::Window::GLWindow* window = AppKit::GLEngine::Engine::Instance()->window;
     window->setSize( (MathCore::vec2f)windowResolution * this->GlobalScale );
