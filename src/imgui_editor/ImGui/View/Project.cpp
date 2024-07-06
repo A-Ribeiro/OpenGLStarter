@@ -12,6 +12,10 @@ Project::Project() : View(Project::Type)
 {
     uid_incrementer = 1;
 
+    clear_tree_selection = false;
+    clear_list_selection = false;
+
+
     // files.push_back(FileRef(FileRefType::File, "Very Big Name File.jpg"));
     // files.push_back(FileRef(FileRefType::File, "Another File.png"));
     // files.push_back(FileRef(FileRefType::File, "FileB.png"));
@@ -155,6 +159,13 @@ void Project::RenderAndLogic()
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)*imGuiManager->GlobalScale);
         ImGui::BeginChild("1", ImVec2(sz1, h), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_HorizontalScrollbar );
 
+        if (clear_tree_selection){
+            clear_tree_selection = false;
+            ImGuiID id_sel = ImGui::GetID("##project_sel");
+            ImGui::GetStateStorage()->SetInt(id_sel, 0);
+            this->OnTreeSelect(nullptr);
+        }
+
         root->render("##project_sel", this);
 
         ImGui::EndChild();
@@ -210,6 +221,12 @@ void Project::RenderAndLogic()
 
         // ImGui::PopStyleVar();
 
+        if (clear_list_selection){
+            clear_list_selection = false;
+            ImGuiID id_sel = ImGui::GetID("##proj_files_sel");
+            ImGui::GetStateStorage()->SetInt(id_sel, 0);
+            this->OnListSelect(nullptr);
+        }
 
         visualList.render("##proj_files_sel", this);
 

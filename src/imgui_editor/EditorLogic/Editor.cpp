@@ -48,7 +48,8 @@ void Editor::openFolder(const std::string &path) {
 
     // unselect project tree and project list
     {
-        imGuiManager->project.clearSelection();
+        imGuiManager->project.clearTreeSelection();
+        imGuiManager->project.clearListSelection();
     }
 
     // clear all lists and trees
@@ -83,39 +84,66 @@ void Editor::openFolder(const std::string &path) {
 
         int max_directories_to_include = 4096;
         while (_to_insert.size() > 0) {
+
             auto first = _to_insert[0];
             _to_insert.erase(_to_insert.begin());
 
             std::shared_ptr<FileTreeData> firstData = std::dynamic_pointer_cast<FileTreeData>(first.insert_where->data);
-
             firstData->has_files = false;
 
             for(auto &entry: first.dir_info){
-
                 firstData->has_files = true;
-
-                if (entry.isDirectory){
-
+                if (!entry.isDirectory)
+                    continue;
                     // add element to visual tree
                     auto tree_node = project.createTreeNode( entry.name, FileTreeData::CreateShared( entry ) );
                     first.insert_where->addChild(tree_node);
-
                     // enqueue element to get subdirectories
-                    _to_insert.push_back(_To_insert_struct{
-                        Directory(entry.full_path),
-                        tree_node
+                    _to_insert.push_back(_To_insert_struct{ 
+                        Directory(entry.full_path), 
+                        tree_node 
                     });
-
                     max_directories_to_include--;
                     if (max_directories_to_include <= 0){
                         _to_insert.clear();
                         break;
                     }
-                }
             }
 
             first.insert_where->sort();
         }
+    }
+
+    // on click on directory
+    {
+        imGuiManager->project.OnTreeSelect.clear();
+        imGuiManager->project.OnTreeSelect.add([&](std::shared_ptr<TreeNode> node){
+
+            auto &project = imGuiManager->project;
+            auto &visualList = project.getVisualList();
+
+            project.clearListSelection();
+            visualList.clear();
+            if (node == nullptr)
+                return;
+
+            std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);
+            if (!directoryInfo->has_files)
+                return;
+
+            Directory dir = Directory::FromFile(directoryInfo->file);
+            int max_files_to_include = 4096;
+            for( auto &entry : dir ) {
+                if (!entry.isFile)
+                    continue;
+                visualList.addItem( entry.name.c_str() , IconType::Big_File_Generic);
+                max_files_to_include--;
+                if (max_files_to_include <= 0)
+                    break;
+            }
+
+            visualList.sort();
+        });
 
     }
 

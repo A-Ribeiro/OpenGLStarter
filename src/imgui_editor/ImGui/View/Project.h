@@ -81,6 +81,9 @@ class Project : public View, public TreeHolder, public ListHolder
 
     VisualList visualList;
 
+    bool clear_tree_selection;
+    bool clear_list_selection;
+
 public:
     static const ViewType Type;
 
@@ -110,23 +113,16 @@ public:
         return visualList;
     }
 
-    void clearSelection() {
+    void clearTreeSelection() {
         
         // tree
-        {
-            ImGuiID id_sel = ImGui::GetID("##project_sel");
-            //int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
-            ImGui::GetStateStorage()->SetInt(id_sel, 0);
-            this->OnTreeSelect(nullptr);
-        }
+        clear_tree_selection = true;
+    }
 
+    void clearListSelection() {
+        
         // visual list
-        {
-            ImGuiID id_sel = ImGui::GetID("##proj_files_sel");
-            //int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
-            ImGui::GetStateStorage()->SetInt(id_sel, 0);
-            this->OnListSelect(nullptr);
-        }
+        clear_list_selection = true;
     }
 
 };
