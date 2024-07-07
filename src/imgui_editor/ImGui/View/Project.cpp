@@ -3,6 +3,7 @@
 #include "../ImGuiManager.h"
 
 TreeDataType FileTreeData::Type = "FileTreeData";
+ListDataType FileListData::Type = "FileListData";
 
 bool drawFile(int id, const char *name, bool *selected, IconType icon, ImVec2 size);
 
@@ -34,11 +35,11 @@ View *Project::Init()
             //,DRAG_PAYLOAD_ID_PROJECT_TREE
         });
     
-    visualList.addItem("testa.png",RandomListIcon());
-    visualList.addItem("testb.png",RandomListIcon());
-    visualList.addItem("testc.png",RandomListIcon());
-    visualList.addItem("testd.png",RandomListIcon());
-    visualList.addItem("teste.png",RandomListIcon());
+    visualList.addItem("testa.png",nullptr);
+    visualList.addItem("testb.png",nullptr);
+    visualList.addItem("testc.png",nullptr);
+    visualList.addItem("testd.png",nullptr);
+    visualList.addItem("teste.png",nullptr);
 
     // creating testing node
     self_root = TreeNode::CreateShared(uid_incrementer++, nullptr, "-empty-");

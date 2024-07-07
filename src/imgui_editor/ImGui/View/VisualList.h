@@ -41,6 +41,21 @@ static inline IconType RandomListIcon()
     return _icons[index];
 }
 
+typedef const char *ListDataType;
+
+class ListData
+{
+protected:
+    ListDataType type;
+    ListData(ListDataType type){ this->type = type; }
+public:
+    ListDataType getType() const { return type; }
+    bool compareType(ListDataType t) const {return this->type == t;}
+
+    virtual IconType getIcon()=0;
+    virtual ~ListData(){}
+};
+
 class ListElement
 {
     // avoid copy, using copy constructors
@@ -60,18 +75,20 @@ protected:
     bool selected;
 
 public:
-    ListElement(int32_t uid, VisualList *visualList, const char *name, const IconType &icon);
+    ListElement(int32_t uid, VisualList *visualList, const char *name, std::shared_ptr<ListData> data);
 
     ListElement &setName(const char *value);
     inline const char *getName() const { return name; }
     inline const char *getNameToLowerNoAccents() const { return name_tolower_no_accent; }
 
-    ListElement &setIcon(const IconType &icon);
+    std::shared_ptr<ListData> data;
+
+    // ListElement &setIcon(const IconType &icon);
 
     int32_t uid;
     VisualList *visualList;
 
-    IconType icon;
+    // IconType icon;
 
     EventCore::PressReleaseDetector hovered;
 
@@ -83,9 +100,9 @@ public:
 
     void render(const char *str_imgui_id_selection, ListHolder *listHolder);
 
-    static inline std::shared_ptr<ListElement> CreateShared(int32_t uid, VisualList *visualList, const char *name, const IconType &icon)
+    static inline std::shared_ptr<ListElement> CreateShared(int32_t uid, VisualList *visualList, const char *name, std::shared_ptr<ListData> data)
     {
-        return std::make_shared<ListElement>(uid, visualList, name, icon);
+        return std::make_shared<ListElement>(uid, visualList, name, data);
     }
 
     friend class VisualList;
@@ -136,7 +153,7 @@ public:
     bool removeUID(int32_t uid);
     std::shared_ptr<ListElement> findUID(int32_t uid);
 
-    std::shared_ptr<ListElement> addItem(const char *name, const IconType &icon);
+    std::shared_ptr<ListElement> addItem(const char *name, std::shared_ptr<ListData> data);
 
     void render(const char *str_imgui_id_selection, ListHolder *listHolder);
 

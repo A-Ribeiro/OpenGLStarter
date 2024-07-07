@@ -70,6 +70,42 @@ public:
 };
 
 
+
+class FileListData:public ListData
+{
+protected:
+public:
+    static ListDataType Type;
+
+    ITKCommon::FileSystem::File file;
+    //IconType iconToUse;
+    bool has_files;
+
+    FileListData(const ITKCommon::FileSystem::File &file):ListData(FileListData::Type){
+        this->file = file;
+        //iconToUse = IconType::Small_Folder_Filled;
+        has_files = false;
+    }
+
+    virtual IconType getIcon(){
+        if (file.isDirectory){
+            if (has_files)
+                return IconType::Big_Folder_Filled;
+            else
+                return IconType::Big_Folder_Empty;
+        }
+        return IconType::Big_File_Generic;
+    }
+
+    static inline std::shared_ptr<FileListData> CreateShared(const ITKCommon::FileSystem::File &file)
+    {
+        return std::make_shared<FileListData>(file);
+    }
+
+};
+
+
+
 class Project : public View, public TreeHolder, public ListHolder
 {
 
@@ -107,6 +143,11 @@ public:
     std::shared_ptr<TreeNode> createTreeNode(const std::string &name, std::shared_ptr<FileTreeData> data)
     {
         return TreeNode::CreateShared(uid_incrementer++, data, name.c_str());
+    }
+
+    std::shared_ptr<ListElement> createListElement(const std::string &name, std::shared_ptr<FileListData> data)
+    {
+        return visualList.addItem(name.c_str(), data);
     }
 
     VisualList & getVisualList() {

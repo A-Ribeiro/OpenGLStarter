@@ -54,7 +54,7 @@ public:
     bool compareType(TreeDataType t) const {return this->type == t;}
 
     virtual IconType getIcon()=0;
-    //virtual ~TreeData()=0;
+    virtual ~TreeData(){}
 };
 
 class TreeNode

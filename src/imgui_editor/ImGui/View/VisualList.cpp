@@ -103,8 +103,12 @@ bool VisualList::CustomImGuiCommand_DrawItem(
 
     ImGui::SetCursorPos(pos + ImVec2((size.x - image_size.x) * 0.5f, 0));
 
-    bool is_to_stretch_image = ImGuiManager::Instance()->stretch[(int)itemSelf->icon];
-    AppKit::OpenGL::GLTexture *texture_ogl = ImGuiManager::Instance()->icons[(int)itemSelf->icon];
+    IconType iconToUse = IconType::Small_BoxNode;
+    if (itemSelf->data != nullptr)
+        iconToUse = itemSelf->data->getIcon();
+    //auto icon = itemSelf->data->getIcon();
+    bool is_to_stretch_image = ImGuiManager::Instance()->stretch[(int)iconToUse];
+    AppKit::OpenGL::GLTexture *texture_ogl = ImGuiManager::Instance()->icons[(int)iconToUse];
     ImTextureID my_tex_id = (ImTextureID)(ogltex_to_imguitex)texture_ogl->mTexture;
     // float my_tex_w = (float)texture_ogl->width * 0.5f;
     // float my_tex_h = (float)texture_ogl->height * 0.5f;
@@ -197,16 +201,17 @@ ListElement::ListElement()
     uid = 0;
     visualList = NULL;
     this->setName("-not-set-");
-    this->setIcon(RandomListIcon());
+    // this->setIcon(RandomListIcon());
     selected = false;
 }
 
-ListElement::ListElement(int32_t uid, VisualList *visualList, const char *name, const IconType &icon)
+ListElement::ListElement(int32_t uid, VisualList *visualList, const char *name, std::shared_ptr<ListData> data)
 {
     this->uid = uid;
     this->visualList = visualList;
     this->setName(name);
-    this->setIcon(icon);
+    //this->setIcon(icon);
+    this->data = data;
     selected = false;
 }
 
@@ -222,11 +227,11 @@ ListElement &ListElement::setName(const char *value)
     return *this;
 }
 
-ListElement &ListElement::setIcon(const IconType &icon)
-{
-    this->icon = icon;
-    return *this;
-}
+// ListElement &ListElement::setIcon(const IconType &icon)
+// {
+//     this->icon = icon;
+//     return *this;
+// }
 
 std::shared_ptr<ListElement> ListElement::self()
 {
@@ -332,9 +337,9 @@ std::shared_ptr<ListElement> VisualList::findUID(int32_t uid)
     return nullptr;
 }
 
-std::shared_ptr<ListElement> VisualList::addItem(const char *name, const IconType &icon)
+std::shared_ptr<ListElement> VisualList::addItem(const char *name, std::shared_ptr<ListData> data)
 {
-    items.push_back(ListElement::CreateShared(uid_incrementer++, this, name, icon));
+    items.push_back(ListElement::CreateShared(uid_incrementer++, this, name, data));
     return items.back();
 }
 

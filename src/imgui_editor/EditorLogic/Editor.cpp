@@ -136,7 +136,7 @@ void Editor::openFolder(const std::string &path) {
             for( auto &entry : dir ) {
                 if (!entry.isFile)
                     continue;
-                visualList.addItem( entry.name.c_str() , IconType::Big_File_Generic);
+                visualList.addItem( entry.name.c_str(), FileListData::CreateShared(entry) );
                 max_files_to_include--;
                 if (max_files_to_include <= 0)
                     break;
@@ -145,6 +145,19 @@ void Editor::openFolder(const std::string &path) {
             visualList.sort();
         });
 
+    }
+
+    // on click on file
+    {
+        imGuiManager->project.OnListDoubleClick.clear();
+        imGuiManager->project.OnListDoubleClick.add([&](std::shared_ptr<ListElement> element){
+            if (element == nullptr)
+                return;
+            std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(element->data);
+            printf("Clicked in the file: %s\n", fileInfo->file.name.c_str());
+            printf("%s\n", fileInfo->file.full_path.c_str());
+
+        });
     }
 
 }
