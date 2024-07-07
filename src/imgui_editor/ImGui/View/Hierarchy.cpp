@@ -77,6 +77,8 @@ View* Hierarchy::Init()
         OnTreeSelect.add([](std::shared_ptr<TreeNode> node){
             if (node == NULL) {
                 printf("[Hierarchy][Tree] OnSelect on NULL\n");
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                    ImGuiManager::Instance()->contextMenu.open();
             } else {
                 printf("[Hierarchy][Tree] OnSelect on %s\n", node->getName());
             }

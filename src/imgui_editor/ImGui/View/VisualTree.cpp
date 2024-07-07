@@ -350,7 +350,9 @@ void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder
 
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
     {
-        if (ImGui::IsMouseClicked(0) || ImGui::IsKeyPressed(ImGuiKey_Escape, false))
+        if (ImGui::IsMouseClicked( ImGuiMouseButton_Left ) 
+        || ImGui::IsMouseClicked( ImGuiMouseButton_Right ) 
+        || ImGui::IsKeyPressed(ImGuiKey_Escape, false))
         {
             // printf("Clicked on begin...\n");
             deselect_all = true;
