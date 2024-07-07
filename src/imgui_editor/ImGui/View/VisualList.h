@@ -1,6 +1,8 @@
 #pragma once
 
 #include "common.h"
+#include "../ImGuiExt/CenteredText.h"
+
 // #include "all.h"
 
 //
@@ -48,8 +50,11 @@ class ListElement
     ListElement();
 
 protected:
+
     char name[64];
     char name_tolower_no_accent[64];
+
+    CenteredText centeredText;
 
     // used for aux variable to imgui::selectable
     bool selected;
@@ -90,6 +95,9 @@ class VisualList
 {
 protected:
 
+    ImVec2 element_rect_size;
+    ImVec2 element_spacing;
+
     char prefix_id[64];
     char drag_payload_identifier[32];
 
@@ -116,6 +124,8 @@ public:
     std::vector<std::shared_ptr<ListElement>> items;
 
     VisualList();
+    
+    void Init();
 
     VisualList &setPrefixID(const char *value);
     VisualList &setDragPayloadID(const char *value);

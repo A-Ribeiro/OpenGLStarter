@@ -26,6 +26,7 @@ Project::Project() : View(Project::Type)
 
 View *Project::Init()
 {
+    visualList.Init();
     visualList.setPrefixID("FileList").
         setDragPayloadID(DRAG_PAYLOAD_ID_PROJECT_LIST).
         setDropPayload({

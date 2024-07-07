@@ -19,6 +19,8 @@ class ImGuiManager
 
 public:
 
+    ImFont *font_half_size;
+
     float GlobalScale;
     ImGuiStyle imGuiStyleBackup;
     MathCore::vec2i mainMonitorCenter;

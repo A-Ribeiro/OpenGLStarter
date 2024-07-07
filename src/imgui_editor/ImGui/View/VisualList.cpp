@@ -4,20 +4,21 @@
 
 const char *DRAG_PAYLOAD_ID_PROJECT_LIST = "PROJECT_LIST";
 
+
 bool VisualList::CustomImGuiCommand_DrawItem(
     std::shared_ptr<ListElement> &itemSelf,
-        int id, 
-        //const char *prefix_name, 
-        //const char *name, 
-        //bool *selected, 
-        //IconType icon, 
+    int id,
+    // const char *prefix_name,
+    // const char *name,
+    // bool *selected,
+    // IconType icon,
 
-        ImVec2 size, 
-        
-        ListHolder *listHolder,
-        bool *any_click_occured,
-        int32_t selected_UID,
-        ImGuiID id_sel)
+    ImVec2 size,
+
+    ListHolder *listHolder,
+    bool *any_click_occured,
+    int32_t selected_UID,
+    ImGuiID id_sel)
 {
 
     // ImGui::SetWindowFontScale(0.9f);
@@ -36,7 +37,6 @@ bool VisualList::CustomImGuiCommand_DrawItem(
     sprintf(aux, "##%s_%i", prefix_id, id);
     bool result = ImGui::Selectable(aux, itemSelf->selected, ImGuiSelectableFlags_None | ImGuiSelectableFlags_NoPadWithHalfSpacing, size);
 
-
     bool send_single_click = false;
     bool send_double_click = false;
     bool send_on_select = false;
@@ -48,10 +48,9 @@ bool VisualList::CustomImGuiCommand_DrawItem(
         {
             if (payload = ImGui::AcceptDragDropPayload(drop_target))
             {
-                listHolder->OnListDragDrop(drop_target, 
-                    (void*)*(intptr_t*)payload->Data,
-                    itemSelf
-                );
+                listHolder->OnListDragDrop(drop_target,
+                                           (void *)*(intptr_t *)payload->Data,
+                                           itemSelf);
             }
         }
         ImGui::EndDragDropTarget();
@@ -60,7 +59,7 @@ bool VisualList::CustomImGuiCommand_DrawItem(
     if (ImGui::IsItemActive() && ImGui::IsMouseDown(ImGuiMouseButton_Left))
     {
         ImGuiIO &io = ImGui::GetIO();
-        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImVec4(1,0,0,1)), 4.0f); // Draw a line between the button and the mouse cursor
+        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 4.0f); // Draw a line between the button and the mouse cursor
 
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip))
         {
@@ -71,31 +70,31 @@ bool VisualList::CustomImGuiCommand_DrawItem(
     }
 
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left) || ImGui::IsItemClicked(ImGuiMouseButton_Right))
-        { // && !ImGui::IsItemToggledOpen()) {
-            *any_click_occured = true;
-            // deselect_all = false;
-            // printf("click root\n");
-            // time->update();
-            if (itemSelf->uid == selected_UID && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-            {
-                // double click
-                // printf("double click\n");
-                // ImGui::GetStateStorage()->SetInt(id_sel, this->uid);
-                send_double_click = true;
-            }
-            else
-            {
-                // printf("single click\n");
-                send_single_click = true;
+    { // && !ImGui::IsItemToggledOpen()) {
+        *any_click_occured = true;
+        // deselect_all = false;
+        // printf("click root\n");
+        // time->update();
+        if (itemSelf->uid == selected_UID && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        {
+            // double click
+            // printf("double click\n");
+            // ImGui::GetStateStorage()->SetInt(id_sel, this->uid);
+            send_double_click = true;
+        }
+        else
+        {
+            // printf("single click\n");
+            send_single_click = true;
 
-                // if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-                {
-                    send_on_select = (ImGui::GetStateStorage()->GetInt(id_sel, 0) != itemSelf->uid);
-                    ImGui::GetStateStorage()->SetInt(id_sel, itemSelf->uid);
-                }
+            // if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+            {
+                send_on_select = (ImGui::GetStateStorage()->GetInt(id_sel, 0) != itemSelf->uid);
+                ImGui::GetStateStorage()->SetInt(id_sel, itemSelf->uid);
             }
         }
-        itemSelf->hovered.setState(ImGui::IsItemHovered());
+    }
+    itemSelf->hovered.setState(ImGui::IsItemHovered());
 
     // ImGui::PopStyleVar();
     // ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(0xff, 0, 0, 0xff));
@@ -145,18 +144,30 @@ bool VisualList::CustomImGuiCommand_DrawItem(
 
     float text_width = size.x;
 
-    ImVec2 text_size = ImGui::CalcTextSize(itemSelf->name, NULL, false, text_width);
+    auto font = ImGuiManager::Instance()->font_half_size;
 
-    ImVec2 aux_pos = size - text_size;
-    aux_pos.x = aux_pos.x * 0.5f;
-    aux_pos.y = aux_pos.y * 0.5f + image_size.y * 0.5f;
+    //CenteredText centeredText;
+    //centeredText.setText(itemSelf->name, font, text_width);
 
-    aux_pos = pos + aux_pos;
+    ImVec2 offset = (size +  ImVec2(0, image_size.y)) * 0.5f;
+    itemSelf->centeredText.drawText(pos + offset, font);
 
-    ImGui::SetCursorPos(aux_pos);
-    ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + text_width);
-    ImGui::Text("%s", itemSelf->name);
-    ImGui::PopTextWrapPos();
+    // ImGui::PushFont(ImGuiManager::Instance()->font_half_size);
+
+    // ImVec2 text_size = ImGui::CalcTextSize(itemSelf->name, NULL, false, text_width);
+
+    // ImVec2 aux_pos = size - text_size;
+    // aux_pos.x = aux_pos.x * 0.5f;
+    // aux_pos.y = aux_pos.y * 0.5f + image_size.y * 0.5f;
+
+    // aux_pos = pos + aux_pos;
+
+    // ImGui::SetCursorPos(aux_pos);
+    // ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + text_width);
+    // ImGui::Text("%s", itemSelf->name);
+    // ImGui::PopTextWrapPos();
+
+    // ImGui::PopFont();
 
     ImGui::SetCursorPos(pos);
     ImGui::Dummy(size);
@@ -205,6 +216,9 @@ ListElement &ListElement::setName(const char *value)
     std::string lower_no_accents = ITKCommon::StringUtil::removeAccents(this->name);
     lower_no_accents = ITKCommon::StringUtil::toLower(lower_no_accents);
     snprintf(this->name_tolower_no_accent, 64, "%s", lower_no_accents.c_str());
+
+    centeredText.setText( this->name, ImGuiManager::Instance()->font_half_size, visualList->element_rect_size.x );
+
     return *this;
 }
 
@@ -255,6 +269,16 @@ VisualList::VisualList()
 
     this->setPrefixID("-not-set-");
     this->setDragPayloadID("-not-set-");
+
+}
+
+// called after GlobalScale Computation
+void VisualList::Init() {
+
+    auto imGuiManager = ImGuiManager::Instance();
+
+    element_rect_size = ImVec2(100, 80) * imGuiManager->GlobalScale;
+    element_spacing = ImVec2(4, 4) * imGuiManager->GlobalScale;
 }
 
 VisualList &VisualList::setPrefixID(const char *value)
@@ -319,22 +343,20 @@ void VisualList::render(const char *str_imgui_id_selection, ListHolder *listHold
     auto window = ImGui::GetCurrentWindow();
     ImRect window_frame = window->ClipRect;
     window_frame.Expand(-3.5f);
-    if (ImGui::BeginDragDropTargetCustom( window_frame, window->ID ))
+    if (ImGui::BeginDragDropTargetCustom(window_frame, window->ID))
     {
         const ImGuiPayload *payload;
         for (const char *drop_target : this->drop_payload_identifier)
         {
             if (payload = ImGui::AcceptDragDropPayload(drop_target))
             {
-                listHolder->OnListDragDrop(drop_target, 
-                    (void*)*(intptr_t*)payload->Data,
-                    nullptr
-                );
+                listHolder->OnListDragDrop(drop_target,
+                                           (void *)*(intptr_t *)payload->Data,
+                                           nullptr);
             }
         }
         ImGui::EndDragDropTarget();
     }
-
 
     bool deselect_all = false;
 
@@ -354,13 +376,12 @@ void VisualList::render(const char *str_imgui_id_selection, ListHolder *listHold
 
     ImVec2 area = ImGui::GetContentRegionAvail();
 
-    ImVec2 icon_size = ImVec2(100, 80);
-    ImVec2 spacing = ImVec2(4, 4);
+    ImVec2 icon_size = element_rect_size;//ImVec2(100, 80);
+    ImVec2 spacing = element_spacing;//ImVec2(4, 4);
 
-    auto imGuiManager = ImGuiManager::Instance();
-
-    icon_size *= imGuiManager->GlobalScale;
-    spacing *= imGuiManager->GlobalScale;
+    //auto imGuiManager = ImGuiManager::Instance();
+    //icon_size *= imGuiManager->GlobalScale;
+    //spacing *= imGuiManager->GlobalScale;
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, spacing);
 

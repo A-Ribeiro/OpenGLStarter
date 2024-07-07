@@ -8,6 +8,7 @@
 
 ImGuiManager::ImGuiManager()
 {
+    font_half_size = NULL;
 	reset_layout = true;
 	innerViewport = NULL;
 
@@ -145,6 +146,15 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	// IM_ASSERT(font != NULL);
 	// //ImGui::PushFont(font);
 
+    this->imGuiStyleBackup = style;
+	this->applyGlobalScale();
+
+    // render a NULL frame: force load fonts
+    //  Start the Dear ImGui frame
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_WindowGL_NewFrame();
+	ImGui::NewFrame();
+
 	//
 	// Initialize menus
 	//
@@ -165,9 +175,6 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 
     ImGuiMenu::Instance()->makeLast("Window");
 
-	this->imGuiStyleBackup = style;
-	this->applyGlobalScale();
-
     // Debug
     {
         OnHover.add([](View *view, bool v){
@@ -177,6 +184,10 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
             printf("OnFocus on view: %s -> %i\n",view->type, (int)v);
         });
     }
+
+
+    ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void ImGuiManager::applyGlobalScale() {
@@ -207,6 +218,19 @@ void ImGuiManager::applyGlobalScale() {
 
 	auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
 	IM_ASSERT(font != NULL);
+
+	font_half_size = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 12.0f * this->GlobalScale);
+	IM_ASSERT(font_half_size != NULL);
+
+    // io.Fonts->Build();
+
+    // while (!font_half_size->IsLoaded()) {
+    //     printf(".");
+    //     fflush(stdout);
+    //     Platform::Sleep::millis(1000);
+    // }
+    // printf("\n");
+
 
 }
 
