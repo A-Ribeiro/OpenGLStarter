@@ -37,6 +37,234 @@ void Editor::init()
         imGuiManager->project.getVisualList().clear();
     }
 
+    // register shortcut behaviour
+    {
+        using namespace AppKit::Window::Devices;
+
+        imGuiManager->shortcutManager.addShortcut(
+            "Action:FolderOps",//category
+            {
+                // set visibility root
+                ShortCut(
+                    "Action", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility // mainMenuBehaviour,
+                ),
+
+                ShortCut(
+                    "Action/New Scene", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "New Scene", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+                    
+                    "Ctrl+N",//shortcutStr
+                    
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::N, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("New Scene\n");
+
+                    }
+                ),
+                ShortCut(
+                    "Action/Refresh", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "Refresh", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "F5",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    false,false,false,false,
+                    KeyCode::F5, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("refresh\n");
+                    }
+                ),
+                ShortCut(
+                    "Action/<<>>", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "<<>>", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "",//shortcutStr
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::Unknown //AppKit::Window::Devices::KeyCode keyCode,
+                ),
+                ShortCut(
+
+                    "Action/Paste", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "Paste", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "Ctrl+V",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::V, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("paste folder\n");
+                    }
+                )
+            }
+        );
+
+        using namespace AppKit::Window::Devices;
+
+        imGuiManager->shortcutManager.addShortcut(
+            "Action:FileOps",//category
+            {
+                // set visibility root
+                ShortCut(
+                    "Action", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility // mainMenuBehaviour,
+                ),
+
+                ShortCut(
+                    "Action/Open", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "Open", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+                    
+                    "Ctrl+O",//shortcutStr
+                    
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::O, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("open \n");
+                    }
+                ),
+                ShortCut(
+                    "Action/Rename", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "Rename", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "F2",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    false,false,false,false,
+                    KeyCode::F2, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("rename\n");
+                    }
+                ),
+                ShortCut(
+                    "Action/<<>>", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "<<>>", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "",//shortcutStr
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::Unknown //AppKit::Window::Devices::KeyCode keyCode,
+                ),
+                ShortCut(
+                    "Action/Duplicate", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "Duplicate", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "Ctrl+D",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::D, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("file copy\n");
+                    },
+                    [](){
+                        //deactivate
+                        printf("deactivate Ctrl+C\n");
+                    }
+                ),
+                ShortCut(
+                    "Action/Copy", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "Copy", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "Ctrl+C",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::C, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("file copy\n");
+                    },
+                    [](){
+                        //deactivate
+                        printf("deactivate Ctrl+C\n");
+                    }
+                ),
+                ShortCut(
+                    "Action/Cut", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "Cut", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "Ctrl+X",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::X, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("file cut\n");
+                    },
+                    [](){
+                        //deactivate
+                        printf("deactivate Ctrl+X\n");
+                    }
+                ),
+                ShortCut(
+
+                    "Action/Paste", // "mainMenuPath"
+                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+
+                    "Paste", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "Ctrl+V",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::V, //AppKit::Window::Devices::KeyCode keyCode,
+                    [](){
+                        //activate
+                        printf("file paste\n");
+                    },
+                    [](){
+                        //deactivate
+                        printf("deactivate Ctrl+V\n");
+                    }
+                )
+            }
+        );
+
+    }
+
 }
 
 void Editor::openFolder(const std::string &path) {
@@ -127,6 +355,8 @@ void Editor::openFolder(const std::string &path) {
             if (node == nullptr)
                 return;
 
+            imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
+
             std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);
             if (!directoryInfo->has_files)
                 return;
@@ -144,7 +374,10 @@ void Editor::openFolder(const std::string &path) {
 
             visualList.sort();
         });
-
+        imGuiManager->project.OnTreeSingleClick.add([&](std::shared_ptr<TreeNode> node){
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                ImGuiManager::Instance()->contextMenu.open();
+        });
     }
 
     // on click on file
@@ -157,6 +390,19 @@ void Editor::openFolder(const std::string &path) {
             printf("Clicked in the file: %s\n", fileInfo->file.name.c_str());
             printf("%s\n", fileInfo->file.full_path.c_str());
 
+        });
+
+        imGuiManager->project.OnListSelect.add([&](std::shared_ptr<ListElement> element){
+            if (element == nullptr){
+                imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                    ImGuiManager::Instance()->contextMenu.open();
+            }else{
+                std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(element->data);
+                imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FileOps");
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                    ImGuiManager::Instance()->contextMenu.open();
+            }
         });
     }
 
