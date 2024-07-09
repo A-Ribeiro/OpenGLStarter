@@ -357,7 +357,7 @@ void Editor::openFolder(const std::string &path) {
                 printf("Tree event\n");
                 if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || 
                     ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-                    imGuiManager->shortcutManager.setActionShortCutByCategory("Action:Template");
+                    imGuiManager->shortcutManager.setActionShortCutByCategory("Action:None");
                 }
                 return;
             }
