@@ -12,6 +12,7 @@ Scene::Scene() : View(Scene::Type)
 View *Scene::Init()
 {
     ImGuiMenu::Instance()->AddMenu(
+        0,
         "Window/Scene", "", [this]()
         { printf("Window/Scene\n"); },
         &this->active);

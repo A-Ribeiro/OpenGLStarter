@@ -41,6 +41,7 @@ View *Inspector::Init()
     addComponent(new InspectorImGuiComponent_Transform());
 
     ImGuiMenu::Instance()->AddMenu(
+        0,
         "Window/Inspector", "", [this]()
         { printf("Window/Inspector\n"); },
         &this->active);

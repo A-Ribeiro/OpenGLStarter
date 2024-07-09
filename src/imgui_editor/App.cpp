@@ -62,7 +62,7 @@ App::App()
 void App::load()
 {
     ImGuiMenu::Instance()->Clear();
-    ImGuiMenu::Instance()->AddMenu("File/Open Folder", "",
+    ImGuiMenu::Instance()->AddMenu(0, "File/Open Folder", "",
         [this]() {
             std::string out;
             if (Native::OpenFolderDialog("./", &out) ){
@@ -74,8 +74,8 @@ void App::load()
         }
     );
 
-    ImGuiMenu::Instance()->AddMenu("File/<<>>", "", NULL);
-    ImGuiMenu::Instance()->AddMenu("File/Quit", "Ctrl+Q", [this]()
+    ImGuiMenu::Instance()->AddMenu(10000, "File/<<>>", "", NULL);
+    ImGuiMenu::Instance()->AddMenu(20000, "File/Quit", "Ctrl+Q", [this]()
         { this->exitApp(); });
 
     ImGuiManager::Instance()->Initialize(

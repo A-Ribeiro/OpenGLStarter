@@ -37,6 +37,7 @@ Console::~Console()
 View *Console::Init()
 {
     ImGuiMenu::Instance()->AddMenu(
+        0,
         "Window/Console", "", [this]()
         { printf("Window/Console\n"); },
         &this->active);

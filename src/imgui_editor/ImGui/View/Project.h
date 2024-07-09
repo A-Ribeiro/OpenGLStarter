@@ -104,7 +104,11 @@ public:
 
 };
 
-
+enum class ProjectClearMethod: uint8_t {
+    None,
+    ClearAndCallback,
+    ClearNoCallback
+};
 
 class Project : public View, public TreeHolder, public ListHolder
 {
@@ -117,8 +121,8 @@ class Project : public View, public TreeHolder, public ListHolder
 
     VisualList visualList;
 
-    bool clear_tree_selection;
-    bool clear_list_selection;
+    ProjectClearMethod clear_tree_selection;
+    ProjectClearMethod clear_list_selection;
 
 public:
     static const ViewType Type;
@@ -154,16 +158,16 @@ public:
         return visualList;
     }
 
-    void clearTreeSelection() {
+    void clearTreeSelection(ProjectClearMethod method) {
         
         // tree
-        clear_tree_selection = true;
+        clear_tree_selection = method;
     }
 
-    void clearListSelection() {
+    void clearListSelection(ProjectClearMethod method) {
         
         // visual list
-        clear_list_selection = true;
+        clear_list_selection = method;
     }
 
 };

@@ -13,8 +13,8 @@ Project::Project() : View(Project::Type)
 {
     uid_incrementer = 1;
 
-    clear_tree_selection = false;
-    clear_list_selection = false;
+    clear_tree_selection = ProjectClearMethod::None;
+    clear_list_selection = ProjectClearMethod::None;
 
 
     // files.push_back(FileRef(FileRefType::File, "Very Big Name File.jpg"));
@@ -63,6 +63,7 @@ View *Project::Init()
     root->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child3"));
 
     ImGuiMenu::Instance()->AddMenu(
+        0,
         "Window/Project", "", [this]()
         { printf("Window/Project\n"); },
         &this->active);
@@ -161,11 +162,15 @@ void Project::RenderAndLogic()
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)*imGuiManager->GlobalScale);
         ImGui::BeginChild("1", ImVec2(sz1, h), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_HorizontalScrollbar );
 
-        if (clear_tree_selection){
-            clear_tree_selection = false;
+        if (clear_tree_selection != ProjectClearMethod::None){
+            auto action = clear_tree_selection;
+            clear_tree_selection = ProjectClearMethod::None;
+    
             ImGuiID id_sel = ImGui::GetID("##project_sel");
             ImGui::GetStateStorage()->SetInt(id_sel, 0);
-            this->OnTreeSelect(nullptr);
+
+            if (action == ProjectClearMethod::ClearAndCallback)
+                this->OnTreeSelect(nullptr);
         }
 
         root->render("##project_sel", this);
@@ -223,11 +228,15 @@ void Project::RenderAndLogic()
 
         // ImGui::PopStyleVar();
 
-        if (clear_list_selection){
-            clear_list_selection = false;
+        if (clear_list_selection != ProjectClearMethod::None){
+            auto action = clear_list_selection;
+            clear_list_selection = ProjectClearMethod::None;
+
             ImGuiID id_sel = ImGui::GetID("##proj_files_sel");
             ImGui::GetStateStorage()->SetInt(id_sel, 0);
-            this->OnListSelect(nullptr);
+
+            if (action == ProjectClearMethod::ClearAndCallback)
+                this->OnListSelect(nullptr);
         }
 
         visualList.render("##proj_files_sel", this);

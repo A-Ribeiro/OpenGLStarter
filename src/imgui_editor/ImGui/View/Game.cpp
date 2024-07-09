@@ -11,6 +11,7 @@ Game::Game() : View(Game::Type)
 View* Game::Init()
 {
 	ImGuiMenu::Instance()->AddMenu(
+        0,
 		"Window/Game", "", [this]()
 		{ printf("Window/Game\n"); },
 		&this->active);

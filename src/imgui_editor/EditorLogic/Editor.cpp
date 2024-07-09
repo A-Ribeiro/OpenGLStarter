@@ -276,8 +276,8 @@ void Editor::openFolder(const std::string &path) {
 
     // unselect project tree and project list
     {
-        imGuiManager->project.clearTreeSelection();
-        imGuiManager->project.clearListSelection();
+        imGuiManager->project.clearTreeSelection( ProjectClearMethod::ClearAndCallback );
+        imGuiManager->project.clearListSelection( ProjectClearMethod::ClearAndCallback );
     }
 
     // clear all lists and trees
@@ -350,10 +350,17 @@ void Editor::openFolder(const std::string &path) {
             auto &project = imGuiManager->project;
             auto &visualList = project.getVisualList();
 
-            project.clearListSelection();
+            project.clearListSelection(ProjectClearMethod::ClearNoCallback);
             visualList.clear();
-            if (node == nullptr)
+
+            if (node == nullptr){
+                printf("Tree event\n");
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || 
+                    ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+                    imGuiManager->shortcutManager.setActionShortCutByCategory("Action:Template");
+                }
                 return;
+            }
 
             imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
 
@@ -392,11 +399,14 @@ void Editor::openFolder(const std::string &path) {
 
         });
 
+        imGuiManager->project.OnListSelect.clear();
         imGuiManager->project.OnListSelect.add([&](std::shared_ptr<ListElement> element){
             if (element == nullptr){
-                imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
-                if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                printf("List event\n");
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+                    imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
                     ImGuiManager::Instance()->contextMenu.open();
+                }
             }else{
                 std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(element->data);
                 imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FileOps");

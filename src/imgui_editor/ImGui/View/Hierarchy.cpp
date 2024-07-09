@@ -45,6 +45,7 @@ View* Hierarchy::Init()
 	root->addChild(TreeNode::CreateShared(uid_incrementer++, nullptr, "child3"));
 
 	ImGuiMenu::Instance()->AddMenu(
+        0,
 		"Window/Hierarchy", "", [this]()
 		{ printf("Window/Hierarchy\n"); },
 		&this->active);

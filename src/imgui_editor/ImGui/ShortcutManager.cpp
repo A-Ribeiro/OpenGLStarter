@@ -8,25 +8,39 @@
 void ShortCutCategory::createMenus() {
 
     // main menu entries
+    int increment = 0;
     for(auto& shortcut : shortCuts) {
         if (shortcut.mainMenuPath.compare("")==0)
             continue;
+        if ( ITKCommon::StringUtil::endsWith(shortcut.mainMenuPath, "<<>>") )
+            increment += 10000;
         ImGuiMenu::Instance()->AddMenu(
-		shortcut.mainMenuPath, 
-        shortcut.shortcutStr, 
-        nullptr);
+            increment,
+		    shortcut.mainMenuPath, 
+            shortcut.shortcutStr, 
+            nullptr
+        );
+        if ( ITKCommon::StringUtil::endsWith(shortcut.mainMenuPath, "<<>>") )
+            increment += 10000;
     }
     ImGuiMenu::Instance()->UpdateUI();
 
     // context menu entries
+    increment = 0;
     auto &ctxMenu = ImGuiManager::Instance()->contextMenu.imGuiMenu;
     for(auto& shortcut : shortCuts) {
         if (shortcut.contextMenuPath.compare("")==0)
             continue;
+        if ( ITKCommon::StringUtil::endsWith(shortcut.contextMenuPath, "<<>>") )
+            increment += 10000;
         ctxMenu.AddMenu(
-		shortcut.contextMenuPath, 
-        shortcut.shortcutStr, 
-        nullptr);
+            increment,
+            shortcut.contextMenuPath, 
+            shortcut.shortcutStr, 
+            nullptr
+        );
+        if ( ITKCommon::StringUtil::endsWith(shortcut.contextMenuPath, "<<>>") )
+            increment += 10000;
     }
     ctxMenu.UpdateUI();
 
