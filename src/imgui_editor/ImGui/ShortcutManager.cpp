@@ -157,32 +157,65 @@ View* ShortcutManager::Init(){
                     MenuBehaviour::SetItemVisibility // mainMenuBehaviour,
                 ),
 
+                // ShortCut(
+                //     "Action/Add", // "mainMenuPath"
+                //     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                //     "Add", // "contextMenuPath"
+                //     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+                    
+                //     "Ctrl+A",//shortcutStr
+                    
+                //     //ctrl,shift,alt,window,
+                //     true,false,false,false,
+                //     KeyCode::A, //AppKit::Window::Devices::KeyCode keyCode,
+                //     [](){
+                //         //activate
+                //         printf("activate Ctrl+A\n");
+                //     },
+                //     [](){
+                //         //deactivate
+                //         printf("deactivate Ctrl+A\n");
+                //     }
+                // ),
+                // ShortCut(
+                //     "Action/Remove", // "mainMenuPath"
+                //     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                //     "Remove", // "contextMenuPath"
+                //     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                //     "Ctrl+R",//shortcutStr
+
+                //     //ctrl,shift,alt,window,
+                //     true,false,false,false,
+                //     KeyCode::R, //AppKit::Window::Devices::KeyCode keyCode,
+                //     [](){
+                //         //activate
+                //         printf("activate Ctrl+R\n");
+                //     },
+                //     [](){
+                //         //deactivate
+                //         printf("deactivate Ctrl+R\n");
+                //     }
+                // ),
                 ShortCut(
-                    "Action/Add", // "mainMenuPath"
+                    "Action/<<>>", // "mainMenuPath"
                     MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
 
-                    "Add", // "contextMenuPath"
+                    "<<>>", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-                    
-                    "Ctrl+A",//shortcutStr
-                    
+
+                    "",//shortcutStr
                     //ctrl,shift,alt,window,
                     true,false,false,false,
-                    KeyCode::A, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
-                        //activate
-                        printf("activate Ctrl+A\n");
-                    },
-                    [](){
-                        //deactivate
-                        printf("deactivate Ctrl+A\n");
-                    }
+                    KeyCode::Unknown //AppKit::Window::Devices::KeyCode keyCode,
                 ),
                 ShortCut(
-                    "Action/Remove", // "mainMenuPath"
+                    "Action/Duplicate", // "mainMenuPath"
                     MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
 
-                    "Remove", // "contextMenuPath"
+                    "Duplicate", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
 
                     "Ctrl+D",//shortcutStr
@@ -198,18 +231,6 @@ View* ShortcutManager::Init(){
                         //deactivate
                         printf("deactivate Ctrl+D\n");
                     }
-                ),
-                ShortCut(
-                    "Action/<<>>", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
-
-                    "<<>>", // "contextMenuPath"
-                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-
-                    "",//shortcutStr
-                    //ctrl,shift,alt,window,
-                    true,false,false,false,
-                    KeyCode::Unknown //AppKit::Window::Devices::KeyCode keyCode,
                 ),
                 ShortCut(
                     "Action/Copy", // "mainMenuPath"

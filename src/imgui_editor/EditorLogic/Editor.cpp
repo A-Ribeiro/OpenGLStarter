@@ -3,7 +3,7 @@
 
 Editor::Editor()
 {
-    project_directory_set = false;
+    //project_directory_set = false;
 }
 
 void Editor::init()
@@ -51,10 +51,15 @@ void Editor::init()
                 ),
 
                 ShortCut(
-                    "Action/New Scene", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    "Action/New", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility // mainMenuBehaviour,
+                ),
 
-                    "New Scene", // "contextMenuPath"
+                ShortCut(
+                    "Action/New/Scene", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "New/Scene", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
                     
                     "Ctrl+N",//shortcutStr
@@ -70,7 +75,7 @@ void Editor::init()
                 ),
                 ShortCut(
                     "Action/Refresh", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "Refresh", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -131,7 +136,7 @@ void Editor::init()
 
                 ShortCut(
                     "Action/Open", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "Open", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -148,7 +153,7 @@ void Editor::init()
                 ),
                 ShortCut(
                     "Action/Rename", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "Rename", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -272,7 +277,7 @@ void Editor::openFolder(const std::string &path) {
 
     project_directory = Directory(ITKCommon::Path::getAbsolutePath(path));
     printf("project_directory: %s\n", project_directory.getBasePath().c_str());
-    project_directory_set = true;
+    //project_directory_set = true;
 
     // unselect project tree and project list
     {
@@ -296,6 +301,8 @@ void Editor::openFolder(const std::string &path) {
         root->data = FileTreeData::CreateShared(
             project_directory.toFile()
         );
+
+        selectedDirectoryInfo = std::dynamic_pointer_cast<FileTreeData>(root->data);
 
         struct _To_insert_struct {
             Directory dir_info;
@@ -362,9 +369,10 @@ void Editor::openFolder(const std::string &path) {
                 return;
             }
 
+            std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);
+            selectedDirectoryInfo = directoryInfo;
             imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
 
-            std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);
             if (!directoryInfo->has_files)
                 return;
 
@@ -382,6 +390,11 @@ void Editor::openFolder(const std::string &path) {
             visualList.sort();
         });
         imGuiManager->project.OnTreeSingleClick.add([&](std::shared_ptr<TreeNode> node){
+            
+            std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);
+            selectedDirectoryInfo = directoryInfo;
+            imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
+
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
                 ImGuiManager::Instance()->contextMenu.open();
         });
@@ -399,19 +412,31 @@ void Editor::openFolder(const std::string &path) {
 
         });
 
+        imGuiManager->project.OnListSingleClick.clear();
+        imGuiManager->project.OnListSingleClick.add([&](std::shared_ptr<ListElement> element){
+            std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(element->data);
+            selectedFileInfo = fileInfo;
+            imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FileOps");
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)){
+                ImGuiManager::Instance()->contextMenu.open();
+            }
+        });
+
         imGuiManager->project.OnListSelect.clear();
         imGuiManager->project.OnListSelect.add([&](std::shared_ptr<ListElement> element){
             if (element == nullptr){
                 printf("List event\n");
                 if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-                    imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
-                    ImGuiManager::Instance()->contextMenu.open();
-                }
-            }else{
-                std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(element->data);
-                imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FileOps");
-                if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-                    ImGuiManager::Instance()->contextMenu.open();
+                    if (selectedDirectoryInfo != nullptr){
+                        imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
+                        ImGuiManager::Instance()->contextMenu.open();
+                    }
+                } 
+                // else {
+                //     std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(element->data);
+                //     selectedFileInfo = fileInfo;
+                //     imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FileOps");
+                // }
             }
         });
     }

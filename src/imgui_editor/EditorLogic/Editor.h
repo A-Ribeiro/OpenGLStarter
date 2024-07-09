@@ -14,7 +14,10 @@ public:
     ImGuiMenu *imGuiMenu;
 
     ITKCommon::FileSystem::Directory project_directory;
-    bool project_directory_set;
+    //bool project_directory_set;
+
+    std::shared_ptr<FileTreeData> selectedDirectoryInfo;
+    std::shared_ptr<FileListData> selectedFileInfo;
 
     Editor();
 
