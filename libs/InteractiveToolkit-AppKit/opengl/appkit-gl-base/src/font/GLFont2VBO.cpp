@@ -26,8 +26,8 @@ namespace AppKit
                 count = 0;
                 return;
             }
-            vbo.uploadData(&vertexAttrib[0], sizeof(GLFont2Builder_VertexAttrib) * vertexAttrib.size(), true);
-            count = vertexAttrib.size();
+            vbo.uploadData(&vertexAttrib[0], sizeof(GLFont2Builder_VertexAttrib) * (int)vertexAttrib.size(), true);
+            count = (int)vertexAttrib.size();
         }
 
         void GLFont2VBO::draw(int aPosition, int aUV, int aColor)

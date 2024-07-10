@@ -120,7 +120,7 @@ namespace AppKit
         {
             //size_t count = wcslen(str);
 
-            size_t count = std::char_traits<char32_t>::length(str);
+            int count = (int)std::char_traits<char32_t>::length(str);
 
             char32_t c;
             MathCore::vec3f position = MathCore::vec3f(0);
@@ -163,7 +163,7 @@ namespace AppKit
             *ymin = position.y;
             *ymax = position.y + _1stLineMaxHeight;
 
-            for (size_t i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 c = str[i];
 
@@ -218,7 +218,7 @@ namespace AppKit
         GLFont2Builder *GLFont2Builder::u32build(const char32_t *str)
         {
             //size_t count = wcslen(str);
-            size_t count = std::char_traits<char32_t>::length(str);
+            int count = (int)std::char_traits<char32_t>::length(str);
 
             vertexAttrib.clear();
 
@@ -256,7 +256,7 @@ namespace AppKit
                 position.x = (_1stLinelength != 0) ? (-_1stLinelength) : (-computeStringLengthUntilNewLine(str, count, 0));
             }
 
-            for (size_t i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 c = str[i];
 

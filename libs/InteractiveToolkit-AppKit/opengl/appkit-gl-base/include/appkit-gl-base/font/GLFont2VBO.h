@@ -17,7 +17,7 @@ namespace AppKit
         {
         public:
             GLVertexBufferObject vbo; ///< current VBO
-            size_t count;             ///< current vertex count in the vbo
+            int count;             ///< current vertex count in the vbo
 
             GLFont2VBO();
 

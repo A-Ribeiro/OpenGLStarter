@@ -920,7 +920,7 @@ namespace DPI
         std::vector<Monitor> allMonitors;
         EnumDisplayMonitors(NULL, NULL, _FillMonitorVector, (LPARAM)&allMonitors);
         *monitorDefaultIndex = 0;
-        for (size_t i = 0; i < allMonitors.size(); i++) {
+        for (int i = 0; i < (int)allMonitors.size(); i++) {
             if (allMonitors[i].primary) {
                 *monitorDefaultIndex = i;
                 break;

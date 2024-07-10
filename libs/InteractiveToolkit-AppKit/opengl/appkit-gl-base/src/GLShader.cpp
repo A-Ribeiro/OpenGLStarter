@@ -231,7 +231,7 @@ namespace AppKit
             mVertShader = 0;
             mFragShader = 0;
 
-            sprintf(class_name, "GLShader");
+            snprintf(class_name, 128, "GLShader");
         }
 
         GLShader::~GLShader()

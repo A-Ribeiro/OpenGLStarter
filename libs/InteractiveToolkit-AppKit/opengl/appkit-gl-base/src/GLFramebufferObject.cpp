@@ -224,7 +224,7 @@ namespace AppKit
 
             if (GLAD_GL_ARB_draw_buffers)
                 // set the draw buffers to this FBO
-                OPENGL_CMD(glDrawBuffers(color.size(), DrawBuffersUnit));
+                OPENGL_CMD(glDrawBuffers((GLsizei)color.size(), DrawBuffersUnit));
 
             OPENGL_CMD(glBindFramebuffer(GL_FRAMEBUFFER, 0));
         }

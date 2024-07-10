@@ -36,7 +36,7 @@ namespace DPI {
         }
 
         MathCore::vec2f SizeMillimeters() const {
-            return MathCore::vec2f(mwidth,mheight); 
+            return MathCore::vec2f((float)mwidth, (float)mheight);
         }
 
         MathCore::vec2f SizeInches() const {

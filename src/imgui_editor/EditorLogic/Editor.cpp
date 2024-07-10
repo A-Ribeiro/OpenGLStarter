@@ -374,17 +374,18 @@ void Editor::openFolder(const std::string &path) {
                 //     ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
                 //     imGuiManager->shortcutManager.setActionShortCutByCategory("Action:None");
                 // }
-                return;
+                //return;
+            }
+            else {
+                std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);
+                selectedDirectoryInfo = directoryInfo;
+                imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
             }
 
-            std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);
-            selectedDirectoryInfo = directoryInfo;
-            imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
-
-            if (!directoryInfo->has_files)
+            if (!selectedDirectoryInfo->has_files)
                 return;
 
-            Directory dir = Directory::FromFile(directoryInfo->file);
+            Directory dir = Directory::FromFile(selectedDirectoryInfo->file);
             int max_files_to_include = 4096;
             for( auto &entry : dir ) {
                 if (!entry.isFile)
