@@ -52,7 +52,10 @@ void Editor::init()
 
                 ShortCut(
                     "Action/New", // "mainMenuPath"
-                    MenuBehaviour::SetItemVisibility // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "New", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility // MenuBehaviour contextMenuBehaviour,
                 ),
 
                 ShortCut(
