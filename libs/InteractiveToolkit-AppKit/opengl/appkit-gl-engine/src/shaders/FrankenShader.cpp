@@ -1553,7 +1553,7 @@ namespace AppKit
         {
 
             if (u_gradient_matrix_array >= 0)
-                OPENGL_CMD(glUniformMatrix4fv(u_gradient_matrix_array, gradient_matrix->size(), GL_FALSE, gradient_matrix->at(0).array));
+                OPENGL_CMD(glUniformMatrix4fv(u_gradient_matrix_array, (GLsizei)gradient_matrix->size(), GL_FALSE, gradient_matrix->at(0).array));
         }
 
         /*

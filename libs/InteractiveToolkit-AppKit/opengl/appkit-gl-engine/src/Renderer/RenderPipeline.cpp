@@ -953,7 +953,7 @@ namespace AppKit
                     unlitShader.setMVP(VP * model);
                     unlitShader.setColor(MathCore::CVT<MathCore::vec3f>::toPtn4(sunLight->sun.color));
 
-                    OPENGL_CMD(glDrawElements(GL_TRIANGLES, sunIndex.size(), GL_UNSIGNED_INT, &sunIndex[0]));
+                    OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)sunIndex.size(), GL_UNSIGNED_INT, &sunIndex[0]));
                 }
 
                 // OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, 6));

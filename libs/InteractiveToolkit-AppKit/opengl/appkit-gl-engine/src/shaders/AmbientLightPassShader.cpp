@@ -48,7 +48,7 @@ namespace AppKit
             MathCore::vec3f uvw;
             uvw.x = (MathCore::OP<MathCore::vec3f>::dot( MathCore::OP<MathCore::vec3f>::cross(bc, bp), Nnorm)) / areaTriangle;
             uvw.z = (MathCore::OP<MathCore::vec3f>::dot(MathCore::OP<MathCore::vec3f>::cross(bp, ba), Nnorm)) / areaTriangle;
-            uvw.y = 1.0 - uvw.x - uvw.z;
+            uvw.y = 1.0f - uvw.x - uvw.z;
             return uvw;
         }
 

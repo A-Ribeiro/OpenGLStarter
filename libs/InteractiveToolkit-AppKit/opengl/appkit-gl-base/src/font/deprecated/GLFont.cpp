@@ -147,7 +147,7 @@ namespace AppKit
             OPENGL_CMD(glEnableVertexAttribArray(GLShaderFont::vColor));
             OPENGL_CMD(glVertexAttribPointer(GLShaderFont::vColor, 4, GL_FLOAT, false, sizeof(VertexAttrib), &mModelBuffer[0].color));
 
-            OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, mModelBuffer.size()));
+            OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mModelBuffer.size()));
 
             OPENGL_CMD(glDisableVertexAttribArray(GLShaderFont::vPosition));
             OPENGL_CMD(glDisableVertexAttribArray(GLShaderFont::vUV));
@@ -346,7 +346,7 @@ namespace AppKit
         {
             MathCore::vec4f color(1, 0, 1, 1);
             MathCore::vec2f p;
-            size_t count = wcslen(string);
+            int count = (int)wcslen(string);
             GLStripText *result = new GLStripText(count * 6, &texture, globalShader);
 
             int pos = 0;

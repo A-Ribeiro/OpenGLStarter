@@ -275,7 +275,7 @@ namespace AppKit
                 {
                     // check for GPU eligibility
                     //  if pass: create the GPU data
-                    int matrix_uniform_count = bone_gradient.size();
+                    int matrix_uniform_count = (int)bone_gradient.size();
                     int max_uniform_matrix = 0;
 
                     if (matrix_uniform_count <= 16)

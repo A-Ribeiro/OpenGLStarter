@@ -95,9 +95,9 @@ namespace AppKit
                         vbo_index = new AppKit::OpenGL::GLVertexBufferObject();
                     }
 
-                    vbo_indexCount = indices.size();
-                    vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * vertices.size(), false);
-                    vbo_index->uploadIndex((void *)&indices[0], indices.size() * sizeof(uint32_t), false);
+                    vbo_indexCount = (int)indices.size();
+                    vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * (int)vertices.size(), false);
+                    vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), false);
                 }
 
                 void syncVBODynamic()
@@ -109,9 +109,9 @@ namespace AppKit
                         vbo_index = new AppKit::OpenGL::GLVertexBufferObject();
                     }
 
-                    vbo_indexCount = indices.size();
-                    vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * vertices.size(), true);
-                    vbo_index->uploadIndex((void *)&indices[0], indices.size() * sizeof(uint32_t), true);
+                    vbo_indexCount = (int)indices.size();
+                    vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * (int)vertices.size(), true);
+                    vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), true);
                 }
 
                 ~ComponentColorMesh()
@@ -133,7 +133,7 @@ namespace AppKit
                     else if (indices.size() > 0)
                     {
                         OPENGL_CMD(glEnableVertexAttribArray(positionLayout));
-                        OPENGL_CMD(glVertexAttribPointer(positionLayout, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertices[0]));
+                        OPENGL_CMD(glVertexAttribPointer(positionLayout, 3, GL_FLOAT, false, (GLsizei)sizeof(MathCore::vec3f), &vertices[0]));
                     }
                 }
 
@@ -145,7 +145,7 @@ namespace AppKit
                     }
                     else if (indices.size() > 0)
                     {
-                        OPENGL_CMD(glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]));
+                        OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, &indices[0]));
                     }
                 }
 

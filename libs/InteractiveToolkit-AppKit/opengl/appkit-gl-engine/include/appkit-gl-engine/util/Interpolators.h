@@ -141,7 +141,7 @@ namespace AppKit
                 }
                 else if (t >= keys[keys.size() - 1].time)
                 {
-                    lastIndexB = keys.size() - 1;
+                    lastIndexB = (int)keys.size() - 1;
                     lastIndexA = lastIndexB - 1;
                     lastTimeQuery = t;
                     lastReturned = keys[lastIndexB].value;
@@ -150,7 +150,7 @@ namespace AppKit
 
                 // binary search
                 int start_index = 0;
-                int end_index = keys.size() - 1;
+                int end_index = (int)keys.size() - 1;
                 int middle_index = (start_index + end_index) >> 1;
 
                 float t_start = keys[start_index].time;
@@ -404,7 +404,7 @@ namespace AppKit
                 }
                 else if (t >= keys[keys.size() - 1].time)
                 {
-                    lastIndexB = keys.size() - 1;
+                    lastIndexB = (int)keys.size() - 1;
                     lastIndexA = lastIndexB - 1;
                     lastTimeQuery = t;
                     lastReturned = keys[lastIndexB].value;
@@ -413,7 +413,7 @@ namespace AppKit
 
                 // binary search
                 int start_index = 0;
-                int end_index = keys.size() - 1;
+                int end_index = (int)keys.size() - 1;
                 int middle_index = (start_index + end_index) >> 1;
 
                 float t_start = keys[start_index].time;

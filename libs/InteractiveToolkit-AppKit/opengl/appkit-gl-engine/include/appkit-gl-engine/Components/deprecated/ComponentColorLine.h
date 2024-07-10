@@ -51,8 +51,8 @@ namespace AppKit
                     if (vbo_data == NULL)
                         vbo_data = new AppKit::OpenGL::GLVertexBufferObject();
 
-                    vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * vertices.size());
-                    vbo_vertexCount = vertices.size();
+                    vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * (int)vertices.size());
+                    vbo_vertexCount = (int)vertices.size();
                 }
 
                 void syncVBODynamic()
@@ -62,8 +62,8 @@ namespace AppKit
                     if (vbo_data == NULL)
                         vbo_data = new AppKit::OpenGL::GLVertexBufferObject();
 
-                    vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * vertices.size(), true);
-                    vbo_vertexCount = vertices.size();
+                    vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * (int)vertices.size(), true);
+                    vbo_vertexCount = (int)vertices.size();
                 }
 
                 virtual void setLayoutPointers(GLint positionLayout)
@@ -73,7 +73,7 @@ namespace AppKit
                     else if (vertices.size() > 0)
                     {
                         OPENGL_CMD(glEnableVertexAttribArray(positionLayout));
-                        OPENGL_CMD(glVertexAttribPointer(positionLayout, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertices[0]));
+                        OPENGL_CMD(glVertexAttribPointer(positionLayout, 3, GL_FLOAT, false, (GLsizei)sizeof(MathCore::vec3f), &vertices[0]));
                     }
                 }
 
@@ -83,7 +83,7 @@ namespace AppKit
                         vbo_data->drawArrays(GL_LINES, vbo_vertexCount);
                     else if (vertices.size() > 0)
                     {
-                        OPENGL_CMD(glDrawArrays(GL_LINES, 0, vertices.size()));
+                        OPENGL_CMD(glDrawArrays(GL_LINES, 0, (GLsizei)vertices.size()));
                     }
                 }
 

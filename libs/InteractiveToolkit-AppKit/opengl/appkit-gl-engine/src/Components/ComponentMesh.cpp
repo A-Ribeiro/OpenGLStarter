@@ -69,28 +69,28 @@ namespace AppKit
                 bool canSet = _dynamic || _static;
                 bool contains_attribute = (format & ITKExtension::Model::CONTAINS_POS) != 0;
                 if (contains_attribute && canSet)
-                    vbo_pos->uploadData((void *)&pos[0], sizeof(MathCore::vec3f) * pos.size(), _dynamic);
+                    vbo_pos->uploadData((void *)&pos[0], sizeof(MathCore::vec3f) * (int)pos.size(), _dynamic);
 
                 _dynamic = (model_dynamic_upload & ITKExtension::Model::CONTAINS_NORMAL) != 0;
                 _static = (model_static_upload & ITKExtension::Model::CONTAINS_NORMAL) != 0;
                 canSet = _dynamic || _static;
                 contains_attribute = (format & ITKExtension::Model::CONTAINS_NORMAL) != 0;
                 if (contains_attribute && canSet)
-                    vbo_normals->uploadData((void *)&normals[0], sizeof(MathCore::vec3f) * normals.size(), _dynamic);
+                    vbo_normals->uploadData((void *)&normals[0], sizeof(MathCore::vec3f) * (int)normals.size(), _dynamic);
 
                 _dynamic = (model_dynamic_upload & ITKExtension::Model::CONTAINS_TANGENT) != 0;
                 _static = (model_static_upload & ITKExtension::Model::CONTAINS_TANGENT) != 0;
                 canSet = _dynamic || _static;
                 contains_attribute = (format & ITKExtension::Model::CONTAINS_TANGENT) != 0;
                 if (contains_attribute && canSet)
-                    vbo_tangent->uploadData((void *)&tangent[0], sizeof(MathCore::vec3f) * tangent.size(), _dynamic);
+                    vbo_tangent->uploadData((void *)&tangent[0], sizeof(MathCore::vec3f) * (int)tangent.size(), _dynamic);
 
                 _dynamic = (model_dynamic_upload & ITKExtension::Model::CONTAINS_BINORMAL) != 0;
                 _static = (model_static_upload & ITKExtension::Model::CONTAINS_BINORMAL) != 0;
                 canSet = _dynamic || _static;
                 contains_attribute = (format & ITKExtension::Model::CONTAINS_BINORMAL) != 0;
                 if (contains_attribute && canSet)
-                    vbo_binormal->uploadData((void *)&binormal[0], sizeof(MathCore::vec3f) * binormal.size(), _dynamic);
+                    vbo_binormal->uploadData((void *)&binormal[0], sizeof(MathCore::vec3f) * (int)binormal.size(), _dynamic);
 
                 uint32_t bit_flag;
                 for (int i = 0; i < 8; i++)
@@ -101,7 +101,7 @@ namespace AppKit
                     canSet = _dynamic || _static;
                     contains_attribute = (format & bit_flag) != 0;
                     if (contains_attribute && canSet)
-                        vbo_uv[i]->uploadData((void *)&uv[i][0], sizeof(MathCore::vec3f) * uv[i].size(), _dynamic);
+                        vbo_uv[i]->uploadData((void *)&uv[i][0], sizeof(MathCore::vec3f) * (int)uv[i].size(), _dynamic);
 
                     bit_flag = (ITKExtension::Model::CONTAINS_COLOR0 << i);
                     _dynamic = (model_dynamic_upload & bit_flag) != 0;
@@ -109,7 +109,7 @@ namespace AppKit
                     canSet = _dynamic || _static;
                     contains_attribute = (format & bit_flag) != 0;
                     if (contains_attribute && canSet)
-                        vbo_color[i]->uploadData((void *)&color[i][0], sizeof(MathCore::vec4f) * color[i].size(), _dynamic);
+                        vbo_color[i]->uploadData((void *)&color[i][0], sizeof(MathCore::vec4f) * (int)color[i].size(), _dynamic);
                 }
 
                 _dynamic = (model_dynamic_upload & ITKExtension::Model::CONTAINS_VERTEX_WEIGHT_ANY) != 0;
@@ -118,12 +118,12 @@ namespace AppKit
                 contains_attribute = (format & ITKExtension::Model::CONTAINS_VERTEX_WEIGHT_ANY) != 0;
                 if (contains_attribute && canSet)
                 {
-                    vbo_skin_index->uploadData((void *)&skin_index[0], sizeof(MathCore::vec4f) * skin_index.size(), _dynamic);
-                    vbo_skin_weights->uploadData((void *)&skin_weights[0], sizeof(MathCore::vec4f) * skin_weights.size(), _dynamic);
+                    vbo_skin_index->uploadData((void *)&skin_index[0], sizeof(MathCore::vec4f) * (int)skin_index.size(), _dynamic);
+                    vbo_skin_weights->uploadData((void *)&skin_weights[0], sizeof(MathCore::vec4f) * (int)skin_weights.size(), _dynamic);
                 }
 
-                vbo_indexCount = indices.size();
-                vbo_index->uploadIndex((void *)&indices[0], indices.size() * sizeof(uint32_t), false);
+                vbo_indexCount = (int)indices.size();
+                vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), false);
             }
 
             void ComponentMesh::ComputeFormat()
@@ -339,7 +339,7 @@ namespace AppKit
                 }
                 else if (indices.size() > 0)
                 {
-                    OPENGL_CMD(glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]));
+                    OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, &indices[0]));
                 }
             }
 

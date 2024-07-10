@@ -105,7 +105,7 @@ namespace AppKit
         {
             if (vbo == NULL)
                 vbo = new AppKit::OpenGL::GLVertexBufferObject();
-            vbo->uploadData(&vertex[0], sizeof(MathCore::vec3f) * vertex.size());
+            vbo->uploadData(&vertex[0], sizeof(MathCore::vec3f) * (int)vertex.size());
         }
 
         void GLCubeMapSkyBox::draw(const MathCore::mat4f &viewMatrix, const MathCore::mat4f &projectionMatrix)

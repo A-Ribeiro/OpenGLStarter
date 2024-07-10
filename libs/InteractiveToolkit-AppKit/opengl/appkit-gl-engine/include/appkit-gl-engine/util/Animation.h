@@ -122,7 +122,7 @@ namespace AppKit
                 {
                     printf("  NEED SET LAST FRAME TIME!!!\n");
                     MathCore::vec3f valueToSet = position.getValue_ForwardLoop(max_duration);
-                    int i = position.keys.size() - 1;
+                    int i = (int)position.keys.size() - 1;
                     // remove all index
                     while (i > 0)
                     {

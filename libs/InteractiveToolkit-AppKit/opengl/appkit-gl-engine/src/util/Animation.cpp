@@ -85,7 +85,7 @@ namespace AppKit
                     result.setTransform(t_node, t_node == root_node);
 
                     if (result.isRootNode)
-                        root_node_animation_index = channels.size();
+                        root_node_animation_index = (int)channels.size();
 
                     channels.push_back(result);
                 }
@@ -196,7 +196,7 @@ namespace AppKit
 
             ITK_ABORT(transitions.size() > 0, "trying to add clip after the animation transition computation.\n");
 
-            clips_index[clip->name] = clips_array.size();
+            clips_index[clip->name] = (uint32_t)clips_array.size();
             clips_array.push_back(clip);
         }
 

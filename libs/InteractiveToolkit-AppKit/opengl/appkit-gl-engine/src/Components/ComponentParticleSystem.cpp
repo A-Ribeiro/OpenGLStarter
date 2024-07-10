@@ -76,10 +76,10 @@ namespace AppKit
 
                 // printf( "elapsed: %f particles count: %lu \n", elapsed_sec, particles.size() );
 
-                for (int i = particles.size() - 1; i >= 0; i--)
+                for (int i = (int)particles.size() - 1; i >= 0; i--)
                     particles[i].update(time->deltaTime);
 
-                for (int i = particles.size() - 1; i >= 0; i--)
+                for (int i = (int)particles.size() - 1; i >= 0; i--)
                 {
                     if (particles[i].canBeRemoved)
                         particles.erase(particles.begin() + i);
@@ -116,7 +116,7 @@ namespace AppKit
                 // |--------|--------|--------|--------|--------|
 
                 // 1 2 3 4 a b c
-                for (int i = particles.size() - 1; i >= particles.size() - emmissionToDo; i--)
+                for (int i = (int)particles.size() - 1; i >= particles.size() - emmissionToDo; i--)
                 {
                     if (particles[i].canBeRemoved)
                         particles.erase(particles.begin() + i);
@@ -259,7 +259,7 @@ namespace AppKit
                     p->update(rateElapsed_sec + (float)i * rateOverTime_inv);
                 }
 
-                for (int i = particles.size() - 1; i >= 0; i--)
+                for (int i = (int)particles.size() - 1; i >= 0; i--)
                 {
                     if (particles[i].canBeRemoved)
                         particles.erase(particles.begin() + i);
@@ -277,7 +277,7 @@ namespace AppKit
             {
 
                 MathCore::vec3f aux;
-                for (int i = particles.size() - 1; i >= 0; i--)
+                for (int i = (int)particles.size() - 1; i >= 0; i--)
                 {
                     // particles[i].distance_to_camera = aRibeiro::sqrDistance(particles[i].pos,cameraPos);
                     aux = particles[i].pos - cameraPos;
@@ -301,7 +301,7 @@ namespace AppKit
 
                     aabb = CollisionCore::AABB<MathCore::vec3f>(particle->pos - size, particle->pos + size);
 
-                    for (int i = particles.size() - 2; i >= 0; i--)
+                    for (int i = (int)particles.size() - 2; i >= 0; i--)
                     {
                         particle = &particles[i];
                         size = MathCore::vec3f(particle->size * 0.5f);

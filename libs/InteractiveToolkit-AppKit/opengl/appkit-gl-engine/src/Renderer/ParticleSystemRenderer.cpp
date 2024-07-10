@@ -67,7 +67,7 @@ namespace AppKit
             OPENGL_CMD(glEnableVertexAttribArray(debugLinesShader_AttribLocation_Pos));
             OPENGL_CMD(glVertexAttribPointer(debugLinesShader_AttribLocation_Pos, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &lines[0]));
 
-            OPENGL_CMD(glDrawArrays(GL_LINES, 0, lines.size()));
+            OPENGL_CMD(glDrawArrays(GL_LINES, 0, (GLsizei)lines.size()));
 
             OPENGL_CMD(glDisableVertexAttribArray(debugLinesShader_AttribLocation_Pos));
         }
@@ -142,7 +142,7 @@ namespace AppKit
             OPENGL_CMD(glEnableVertexAttribArray(normalShader_alpha));
             OPENGL_CMD(glVertexAttribPointer(normalShader_alpha, 1, GL_FLOAT, false, sizeof(NormalAttributes), &normalVertex[0].alpha));
 
-            OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, normalVertex.size()));
+            OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, (GLsizei)normalVertex.size()));
 
             OPENGL_CMD(glDisableVertexAttribArray(normalShader_pos));
             OPENGL_CMD(glDisableVertexAttribArray(normalShader_uv));
@@ -259,7 +259,7 @@ namespace AppKit
             OPENGL_CMD(glEnableVertexAttribArray(softShader_alpha));
             OPENGL_CMD(glVertexAttribPointer(softShader_alpha, 1, GL_FLOAT, false, sizeof(NormalAttributes), &normalVertex[0].alpha));
 
-            OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, normalVertex.size()));
+            OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, (GLsizei)normalVertex.size()));
 
             OPENGL_CMD(glDisableVertexAttribArray(softShader_pos));
             OPENGL_CMD(glDisableVertexAttribArray(softShader_uv));

@@ -1,5 +1,10 @@
 #pragma once
 
+#if defined(_WIN32)
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+
 #include "View/common.h"
 
 class CustomSettings {
@@ -159,3 +164,6 @@ public:
     }
 };
 
+#if defined(_WIN32)
+#pragma warning(pop)
+#endif
