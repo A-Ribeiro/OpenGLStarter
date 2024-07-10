@@ -365,10 +365,15 @@ void Editor::openFolder(const std::string &path) {
 
             if (node == nullptr){
                 printf("Tree event\n");
-                if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || 
-                    ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-                    imGuiManager->shortcutManager.setActionShortCutByCategory("Action:None");
-                }
+                selectedDirectoryInfo = std::dynamic_pointer_cast<FileTreeData>(project.getTreeRoot()->data);
+                imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
+
+                project.forceTreeSelection(project.getTreeRoot()->uid);
+                
+                // if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || 
+                //     ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+                //     imGuiManager->shortcutManager.setActionShortCutByCategory("Action:None");
+                // }
                 return;
             }
 
@@ -429,9 +434,14 @@ void Editor::openFolder(const std::string &path) {
         imGuiManager->project.OnListSelect.add([&](std::shared_ptr<ListElement> element){
             if (element == nullptr){
                 printf("List event\n");
+                if (selectedDirectoryInfo != nullptr){
+                    imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
+                } else {
+                    imGuiManager->shortcutManager.setActionShortCutByCategory("Action:None");
+                }
                 if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
                     if (selectedDirectoryInfo != nullptr){
-                        imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
+                        //imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
                         ImGuiManager::Instance()->contextMenu.open();
                     }
                 } 

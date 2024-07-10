@@ -11,6 +11,7 @@ const ViewType Project::Type = "Project";
 
 Project::Project() : View(Project::Type)
 {
+    force_tree_selection = 0;
     uid_incrementer = 1;
 
     clear_tree_selection = ProjectClearMethod::None;
@@ -171,6 +172,13 @@ void Project::RenderAndLogic()
 
             if (action == ProjectClearMethod::ClearAndCallback)
                 this->OnTreeSelect(nullptr);
+        }
+
+        if (force_tree_selection != 0){
+            ImGuiID id_sel = ImGui::GetID("##project_sel");
+            ImGui::GetStateStorage()->SetInt(id_sel, force_tree_selection);
+
+            force_tree_selection = 0;
         }
 
         root->render("##project_sel", this);

@@ -124,6 +124,8 @@ class Project : public View, public TreeHolder, public ListHolder
     ProjectClearMethod clear_tree_selection;
     ProjectClearMethod clear_list_selection;
 
+    int32_t force_tree_selection;
+
 public:
     static const ViewType Type;
 
@@ -168,6 +170,10 @@ public:
         
         // visual list
         clear_list_selection = method;
+    }
+
+    void forceTreeSelection(int uid){
+        force_tree_selection = uid;
     }
 
 };
