@@ -360,27 +360,34 @@ void Editor::openFolder(const std::string &path) {
             auto &project = imGuiManager->project;
             auto &visualList = project.getVisualList();
 
-            project.clearListSelection(ProjectClearMethod::ClearNoCallback);
-            visualList.clear();
-
             if (node == nullptr){
-                printf("Tree event\n");
-                selectedDirectoryInfo = std::dynamic_pointer_cast<FileTreeData>(project.getTreeRoot()->data);
+                
                 imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
 
-                project.forceTreeSelection(project.getTreeRoot()->uid);
-                
+                if (selectedDirectoryInfo == nullptr || selectedTreeNode == nullptr){
+                    selectedTreeNode = project.getTreeRoot();
+                    selectedDirectoryInfo = std::dynamic_pointer_cast<FileTreeData>(project.getTreeRoot()->data);
+                    project.forceTreeSelection(project.getTreeRoot()->uid);
+                } else {
+                    project.forceTreeSelection(selectedTreeNode->uid);
+                    project.clearListSelection(ProjectClearMethod::ClearNoCallback);
+                    return;
+                }
+
                 // if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || 
                 //     ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
                 //     imGuiManager->shortcutManager.setActionShortCutByCategory("Action:None");
                 // }
-                //return;
             }
             else {
                 std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);
+                selectedTreeNode = node;
                 selectedDirectoryInfo = directoryInfo;
                 imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
             }
+
+            project.clearListSelection(ProjectClearMethod::ClearNoCallback);
+            visualList.clear();
 
             if (!selectedDirectoryInfo->has_files)
                 return;

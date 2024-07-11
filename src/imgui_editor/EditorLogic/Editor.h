@@ -17,6 +17,9 @@ public:
     //bool project_directory_set;
 
     std::shared_ptr<FileTreeData> selectedDirectoryInfo;
+    std::shared_ptr<TreeNode> selectedTreeNode;
+
+
     std::shared_ptr<FileListData> selectedFileInfo;
 
     Editor();
