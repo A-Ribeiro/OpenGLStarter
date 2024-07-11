@@ -7,7 +7,7 @@
 //     public:
 // };
 
-class Editor
+class Editor : public EventCore::HandleCallback
 {
 public:
     ImGuiManager *imGuiManager;
@@ -27,6 +27,8 @@ public:
     void init();
 
     void openFolder(const std::string &path);
+
+    void createNewSceneOnCurrentDirectory();
 
     static Editor *Instance();
 };

@@ -70,11 +70,12 @@ void Editor::init()
                     //ctrl,shift,alt,window,
                     true,false,false,false,
                     KeyCode::N, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
-                        //activate
-                        printf("New Scene\n");
-
-                    }
+                    EventCore::CallbackWrapper(&Editor::createNewSceneOnCurrentDirectory, this)
+                    // [&](){
+                    //     //activate
+                    //     printf("New Scene\n");
+                    //     createNewSceneOnCurrentDirectory();
+                    // }
                 ),
                 ShortCut(
                     "Action/Refresh", // "mainMenuPath"
@@ -462,6 +463,102 @@ void Editor::openFolder(const std::string &path) {
         });
     }
 
+}
+
+#include <sstream>
+
+void Editor::createNewSceneOnCurrentDirectory() {
+
+    if (selectedDirectoryInfo == nullptr)
+        return;
+
+    ImGuiManager::Instance()->dialogs.showEnterTextOK("NewFile", 
+        [=](const std::string &new_str){
+
+            printf("createNewSceneOnCurrentDirectory\n");
+
+            if (selectedDirectoryInfo == nullptr)
+                return;
+            
+            std::string error;
+            
+            // remove all slashes
+            std::stringstream s_output;
+
+            //check if file exists
+            for(const auto &_c : new_str){
+#if defined(_WIN32)
+                if (_c == '<' || _c == '>' ||
+                _c == ':' || _c == '"' ||
+                _c == '/' || _c == '\\' ||
+                _c == '|' || _c == '?' ||
+                _c == '*' )
+                    continue;
+#elif defined(__linux__)
+                if (_c == '/')
+                    continue;
+#elif defined(__APPLE__)
+                if (_c == '/' || _c == ':' )
+                    continue;
+#endif
+                // ASCII control characters. Only Winows blocks, 
+                // but it is better to avoid on all systems
+                if (_c <= 31) 
+                    continue;
+
+                s_output << _c;
+            }
+            
+            auto aux = ITKCommon::StringUtil::trim(s_output.str());
+            if ( !ITKCommon::StringUtil::endsWith(aux, ".scene") ){
+                if (aux.length() == 0){
+                    error = "empty file name supplied";
+                    printf("%s\n", error.c_str());
+                    return;
+                } else {
+                    if (ITKCommon::StringUtil::endsWith(aux, "."))
+                        s_output << "scene";
+                    else
+                        s_output << ".scene";
+                }
+            }
+
+            std::string file_to_create = s_output.str();
+            file_to_create = ITKCommon::StringUtil::trim(file_to_create);
+
+            if (file_to_create.length() == 0) {
+                error = "empty file name supplied";
+                printf("%s\n", error.c_str());
+                return;
+            }
+
+#if defined(_WIN32)
+            // windows reserved words
+            const char * win32_reserved_words[] = { 
+                "CON", "PRN", "AUX", "NUL", 
+                "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+                "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+            };
+            const int total_words = 22;
+            auto parts = ITKCommon::StringUtil::tokenizer(ITKCommon::StringUtil::toUpper(file_to_create), "." );
+            for(const auto &item : parts){                
+                if (item.length() != 3 && item.length() != 4)
+                    continue;
+                for(int i=0;i<total_words;i++){
+                    if (item.compare(win32_reserved_words[i]) == 0) {
+                        error = "use of windows reserved words";
+                        return;
+                    }
+                }
+            }
+#endif
+
+            // create file pointed by file_to_create
+            printf("Creating file: %s\n", file_to_create.c_str());
+
+
+        }
+    );
 }
 
 Editor *Editor::Instance()
