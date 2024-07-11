@@ -34,13 +34,17 @@ add_library( ${PROJECT_NAME} STATIC ${PUBLIC_HEADERS} ${SRC} )
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "LIBS")
 
 #link libraries
-target_link_libraries(${PROJECT_NAME} PUBLIC 
+target_link_libraries(${PROJECT_NAME} 
+PUBLIC 
     InteractiveToolkit-Extension
+PRIVATE
     ${ADD_LIBS}
 )
 
 target_include_directories(
-    ${PROJECT_NAME} PUBLIC 
+    ${PROJECT_NAME} 
+PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+PRIVATE
     ${ADD_DIRS}
 )

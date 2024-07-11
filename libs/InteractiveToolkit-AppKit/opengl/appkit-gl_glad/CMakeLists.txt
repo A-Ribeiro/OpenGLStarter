@@ -29,11 +29,19 @@ if (UNIX)
     list(APPEND ADD_LIBS dl)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PUBLIC LinkOpenGL ${ADD_LIBS})
+target_link_libraries(${PROJECT_NAME} 
+PUBLIC
+    LinkOpenGL
+PRIVATE
+    ${ADD_LIBS}
+)
 
 
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/)
+target_include_directories(${PROJECT_NAME} 
+PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/
+)
 
 # copy_headers_to_include_directory(glad ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 # copy_headers_to_include_directory(KHR ${CMAKE_CURRENT_SOURCE_DIR}/include/KHR/)

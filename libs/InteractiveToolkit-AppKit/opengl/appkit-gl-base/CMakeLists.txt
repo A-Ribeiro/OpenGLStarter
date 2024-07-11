@@ -23,13 +23,15 @@ add_library( ${PROJECT_NAME} STATIC ${PUBLIC_HEADERS} ${SRC} ${PUBLIC_INL})
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "LIBS")
 
 target_link_libraries(
-    ${PROJECT_NAME} PUBLIC 
+    ${PROJECT_NAME}
+PUBLIC
     appkit-gl_glad
     InteractiveToolkit-Extension
 )
 
 target_include_directories(
-    ${PROJECT_NAME} PUBLIC 
+    ${PROJECT_NAME}
+PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
