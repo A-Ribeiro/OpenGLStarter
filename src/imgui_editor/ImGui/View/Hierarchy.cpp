@@ -63,7 +63,9 @@ View* Hierarchy::Init()
         });
         OnTreeDoubleClick.add([=](std::shared_ptr<TreeNode> node){
             printf("[Hierarchy][Tree] OnDoubleClick on %s\n", node->getName());
-            ImGuiManager::Instance()->dialogs.showEnterTextOK(node->getName(), 
+            if (node->isRoot)
+                return;
+            ImGuiManager::Instance()->dialogs.showEnterText_OKCancel(node->getName(), 
             [=](const std::string &new_str){
                 printf("new text: %s\n", new_str.c_str());
                 if (new_str.compare(node->getName()) != 0)

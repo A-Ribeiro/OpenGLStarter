@@ -287,8 +287,12 @@ void Editor::openFolder(const std::string &path) {
 
     // unselect project tree and project list
     {
-        imGuiManager->project.clearTreeSelection( ProjectClearMethod::ClearAndCallback );
-        imGuiManager->project.clearListSelection( ProjectClearMethod::ClearAndCallback );
+        imGuiManager->project.clearTreeSelection( ProjectClearMethod::ClearNoCallback );
+        imGuiManager->project.clearListSelection( ProjectClearMethod::ClearNoCallback );
+
+        selectedDirectoryInfo = nullptr;
+        selectedTreeNode = nullptr;
+        selectedFileInfo = nullptr;
     }
 
     // clear all lists and trees
@@ -455,7 +459,7 @@ void Editor::openFolder(const std::string &path) {
                         //imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FolderOps");
                         ImGuiManager::Instance()->contextMenu.open();
                     }
-                } 
+                }
                 // else {
                 //     std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(element->data);
                 //     selectedFileInfo = fileInfo;
@@ -464,6 +468,16 @@ void Editor::openFolder(const std::string &path) {
             }
         });
     }
+
+    imGuiManager->PostAction.add([&](){
+        imGuiManager->project.OnTreeSelect(
+            imGuiManager->project.getTreeRoot()
+        );
+        imGuiManager->project.forceTreeSelection(
+            imGuiManager->project.getTreeRoot()->uid
+        );
+    });
+    
 
 }
 
@@ -474,7 +488,7 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
     if (selectedDirectoryInfo == nullptr)
         return;
 
-    ImGuiManager::Instance()->dialogs.showEnterTextOK(fileName, 
+    ImGuiManager::Instance()->dialogs.showEnterText_OKCancel(fileName, 
         [&](const std::string &new_str){
 
             printf("createNewSceneOnCurrentDirectory\n");
@@ -528,7 +542,7 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
             s_output << aux;
             if ( !ITKCommon::StringUtil::endsWith(aux, ".scene") ){
                 if (aux.length() == 0){
-                    lastError = "empty file name supplied";
+                    lastError = "Empty file name supplied";
                     fileNameToCreate = aux;
                     return;
                 } else {
@@ -543,7 +557,7 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
             //file_to_create = ITKCommon::StringUtil::trim(file_to_create);
 
             if (file_to_create.length() == 0) {
-                lastError = "empty file name supplied";
+                lastError = "Empty file name supplied";
                 fileNameToCreate = aux;
                 return;
             }
@@ -562,7 +576,7 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
                     continue;
                 for(int i=0;i<total_words;i++){
                     if (item.compare(win32_reserved_words[i]) == 0) {
-                        lastError = "use of windows reserved words";
+                        lastError = "Use of windows reserved words";
                         fileNameToCreate = aux;
                         return;
                     }
@@ -577,7 +591,7 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
 
             //refresh and select
             if (ITKCommon::Path::isFile(full_path_file)){
-                lastError = "file already exists";
+                lastError = "File already exists";
                 fileNameToCreate = aux;
                 return;
             }
@@ -597,13 +611,18 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
             imGuiManager->PostAction.add([&, full_path_file](){
                 this->refreshCurrentFilesAndSelectPath(full_path_file);
             });
-        }
+        },
+        DialogPosition::OpenOnScreenCenter
     );
 }
 
 void Editor::showErrorAndRetry(const std::string &error, EventCore::Callback<void()> retry_callback) {
     printf("ERROR: %s\n", error.c_str());
-    retry_callback();
+    ImGuiManager::Instance()->dialogs.showInfo_OK(
+        std::string("Error: ") + error,
+        retry_callback,
+        DialogPosition::OpenOnScreenCenter
+    );
 }
 
 void Editor::refreshCurrentFilesAndSelectPath(const std::string &path_to_select) {

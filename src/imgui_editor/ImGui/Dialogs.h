@@ -4,16 +4,28 @@
 #include "./View/all.h"
 #include "./ImGuiMenu.h"
 
+#include "./ImGuiExt/CenteredText.h"
+
+enum class DialogPosition : uint8_t {
+    None,
+    OpenOnMouse,
+    OpenOnScreenCenter,
+
+    ForceCentering,
+};
+
 class Dialogs : public View
 {
-    bool openContextMenuTriggered;
+    DialogPosition open_EnterText_OKCancel;
+    char aux_str_1024_EnterText_OKCancel[1024];
+    EventCore::Callback<void(const std::string &v)> callback_EnterText_OKCancel;
+    ImVec2 pos_EnterText_OKCancel;
 
-    std::string startText;
-    char aux_str_1024[1024];
-    EventCore::Callback<void(const std::string &v)> callback;
-
-    ImVec2 pos;
-
+    DialogPosition open_showInfo_OK;
+    //char aux_str_1024_showInfo_OK[1024];
+    CenteredText text_showInfo_OK;
+    EventCore::Callback<void()> callback_showInfo_OK;
+    ImVec2 pos_showInfo_OK;
 
 public:
     static const ViewType Type;
@@ -26,6 +38,8 @@ public:
 
     void RenderAndLogic();
 
-    void showEnterTextOK(const std::string &startText, const EventCore::Callback<void(const std::string &v)> &OnChange);
-    
+    void showEnterText_OKCancel(const std::string &startText, const EventCore::Callback<void(const std::string &v)> &callback, DialogPosition dialogPosition = DialogPosition::OpenOnMouse);
+
+    void showInfo_OK(const std::string &infoText, const EventCore::Callback<void()> &callback, DialogPosition dialogPosition = DialogPosition::OpenOnMouse);
+
 };

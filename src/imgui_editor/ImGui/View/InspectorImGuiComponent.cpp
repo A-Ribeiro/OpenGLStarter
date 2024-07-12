@@ -28,12 +28,12 @@ void InspectorImGuiComponent::renderAndLogic(int count) {
     DrawRightAlignedButtonSet(buttons, 1);
     if (buttons[0].clicked) {
         printf("Clicked...\n");
-        ImGuiManager::Instance()->dialogs.showEnterTextOK("Dummy Text", 
-            [=](const std::string &new_str){
-                printf("new text: %s\n", new_str.c_str());
-                //node->name = new_str;
+        // ImGuiManager::Instance()->dialogs.showEnterText_OKCancel("Dummy Text", 
+        //     [=](const std::string &new_str){
+        //         printf("new text: %s\n", new_str.c_str());
+        //         //node->name = new_str;
 
-            });
+        //     });
     }
     if (opened) {
         sprintf(aux,"##%s_%i", this->title.c_str(), count);
