@@ -97,15 +97,39 @@ void Dialogs::RenderAndLogic()
 
         ImGui::Separator();
 
+        auto area = ImGui::GetContentRegionAvail();
+
+        ImGui::Dummy(ImVec2(area.x - 120 - 120 - ImGui::GetStyle().ItemSpacing.x ,0));
+        ImGui::SameLine(0.0f,0.0f);
+
+        ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(0.425f, 0.98f*0.7f, 0.425f, 0.40f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered,ImVec4(0.425f, 0.98f*0.7f, 0.425f, 1.00f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive,ImVec4(0.295f, 0.98f*0.7f, 0.295f, 1.00f));
         if (ImGui::Button("OK", ImVec2(120, 0))) {
             std::string input_string = aux_str_1024;
             //if (startText.compare(input_string) != 0){
-            if (callback != nullptr)
-                callback(input_string);
+            if (callback != nullptr){
+                auto _tmp = callback;
+                callback = nullptr;
+                _tmp(input_string);
+            }
             //}
-            callback = nullptr;
             ImGui::CloseCurrentPopup(); 
         }
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(0.98f*0.7f, 0.425f, 0.425f, 0.40f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered,ImVec4(0.98f*0.7f, 0.425f, 0.425f, 1.00f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive,ImVec4(0.98f*0.7f, 0.295f, 0.295f, 1.00f));
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup(); 
+        }
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
 
 		ImGui::EndPopup();
 	}

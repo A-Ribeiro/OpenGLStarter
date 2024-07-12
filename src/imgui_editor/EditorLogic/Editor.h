@@ -22,13 +22,18 @@ public:
 
     std::shared_ptr<FileListData> selectedFileInfo;
 
+    std::string lastError;
+    std::string fileNameToCreate;
+
     Editor();
 
     void init();
 
     void openFolder(const std::string &path);
 
-    void createNewSceneOnCurrentDirectory();
+    void createNewSceneOnCurrentDirectory(const std::string &fileName);
+
+    void showErrorAndRetry(const std::string &error, EventCore::Callback<void()> callback);
 
     void refreshCurrentFilesAndSelectPath(const std::string &path_to_select);
 
