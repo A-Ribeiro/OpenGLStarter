@@ -64,6 +64,8 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 		icons[(int)IconType::Big_File_Generic] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/uxwing/Big_File_Generic.png");
 		stretch[(int)IconType::Big_File_Generic] = false;
 
+		icons[(int)IconType::Big_File_Scene] = AppKit::OpenGL::GLTexture::loadFromFile("./resources/uxwing/Big_File_Scene.png");
+		stretch[(int)IconType::Big_File_Scene] = false;
 
 		//icons[(int)IconType::Big_Folder_Filled]->generateMipMap();
 		for (auto icon : icons) {

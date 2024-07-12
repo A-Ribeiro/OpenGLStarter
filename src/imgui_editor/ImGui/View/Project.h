@@ -78,23 +78,28 @@ public:
     static ListDataType Type;
 
     ITKCommon::FileSystem::File file;
-    //IconType iconToUse;
-    bool has_files;
+
+    IconType iconToUse;
+
+    //bool has_files;
 
     FileListData(const ITKCommon::FileSystem::File &file):ListData(FileListData::Type){
         this->file = file;
-        //iconToUse = IconType::Small_Folder_Filled;
-        has_files = false;
+        //has_files = false;
+        iconToUse = IconType::Big_File_Generic;
+        if ( ITKCommon::StringUtil::endsWith(file.name, ".scene"))
+            iconToUse = IconType::Big_File_Scene;
     }
 
     virtual IconType getIcon(){
-        if (file.isDirectory){
-            if (has_files)
-                return IconType::Big_Folder_Filled;
-            else
-                return IconType::Big_Folder_Empty;
-        }
-        return IconType::Big_File_Generic;
+        return iconToUse;
+        // if (file.isDirectory){
+        //     if (has_files)
+        //         return IconType::Big_Folder_Filled;
+        //     else
+        //         return IconType::Big_Folder_Empty;
+        // }
+        // return IconType::Big_File_Generic;
     }
 
     static inline std::shared_ptr<FileListData> CreateShared(const ITKCommon::FileSystem::File &file)

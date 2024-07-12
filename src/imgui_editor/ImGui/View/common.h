@@ -43,6 +43,7 @@ enum class IconType : uint8_t
     Big_Folder_Empty,
     Big_Folder_Filled,
     Big_File_Generic,
+    Big_File_Scene,
 
 
     Count // the last has the count of total icons...
