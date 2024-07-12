@@ -66,7 +66,8 @@ View* Hierarchy::Init()
             ImGuiManager::Instance()->dialogs.showEnterTextOK(node->getName(), 
             [=](const std::string &new_str){
                 printf("new text: %s\n", new_str.c_str());
-                node->setName(new_str.c_str());
+                if (new_str.compare(node->getName()) != 0)
+                    node->setName(new_str.c_str());
             });
         });
         OnTreeExpand.add([](std::shared_ptr<TreeNode> node){

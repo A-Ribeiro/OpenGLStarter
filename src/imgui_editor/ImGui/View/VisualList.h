@@ -74,6 +74,8 @@ protected:
     // used for aux variable to imgui::selectable
     bool selected;
 
+    bool scroll_to_this_item;
+
 public:
     ListElement(int32_t uid, VisualList *visualList, const char *name, std::shared_ptr<ListData> data);
 
@@ -97,6 +99,7 @@ public:
 
     void makeFirst();
     void makeLast();
+    void scrollToThisItem();
 
     void render(const char *str_imgui_id_selection, ListHolder *listHolder);
 

@@ -37,6 +37,11 @@ bool VisualList::CustomImGuiCommand_DrawItem(
     sprintf(aux, "##%s_%i", prefix_id, id);
     bool result = ImGui::Selectable(aux, itemSelf->selected, ImGuiSelectableFlags_None | ImGuiSelectableFlags_NoPadWithHalfSpacing, size);
 
+    if (itemSelf->scroll_to_this_item){
+        itemSelf->scroll_to_this_item = false;
+        ImGui::ScrollToItem(ImGuiScrollFlags_KeepVisibleEdgeY);
+    }
+
     bool send_single_click = false;
     bool send_double_click = false;
     bool send_on_select = false;
@@ -203,6 +208,7 @@ ListElement::ListElement()
     this->setName("-not-set-");
     // this->setIcon(RandomListIcon());
     selected = false;
+    scroll_to_this_item = false;
 }
 
 ListElement::ListElement(int32_t uid, VisualList *visualList, const char *name, std::shared_ptr<ListData> data)
@@ -213,6 +219,7 @@ ListElement::ListElement(int32_t uid, VisualList *visualList, const char *name, 
     //this->setIcon(icon);
     this->data = data;
     selected = false;
+    scroll_to_this_item = false;
 }
 
 ListElement &ListElement::setName(const char *value)
@@ -262,6 +269,10 @@ void ListElement::makeLast()
         return;
     this->visualList->removeUID(this->uid);
     this->visualList->items.push_back(self);
+}
+
+void ListElement::scrollToThisItem() {
+    scroll_to_this_item = true;
 }
 
 void ListElement::render(const char *str_imgui_id_selection, ListHolder *listHolder)

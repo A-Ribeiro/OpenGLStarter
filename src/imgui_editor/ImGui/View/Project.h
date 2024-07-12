@@ -125,6 +125,7 @@ class Project : public View, public TreeHolder, public ListHolder
     ProjectClearMethod clear_list_selection;
 
     int32_t force_tree_selection;
+    int32_t force_file_selection;
 
 public:
     static const ViewType Type;
@@ -174,6 +175,10 @@ public:
 
     void forceTreeSelection(int uid){
         force_tree_selection = uid;
+    }
+
+    void forceFilesSelection(int uid){
+        force_file_selection = uid;
     }
 
 };

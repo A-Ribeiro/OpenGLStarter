@@ -12,6 +12,7 @@ const ViewType Project::Type = "Project";
 Project::Project() : View(Project::Type)
 {
     force_tree_selection = 0;
+    force_file_selection = 0;
     uid_incrementer = 1;
 
     clear_tree_selection = ProjectClearMethod::None;
@@ -245,6 +246,13 @@ void Project::RenderAndLogic()
 
             if (action == ProjectClearMethod::ClearAndCallback)
                 this->OnListSelect(nullptr);
+        }
+
+        if (force_file_selection != 0){
+            ImGuiID id_sel = ImGui::GetID("##proj_files_sel");
+            ImGui::GetStateStorage()->SetInt(id_sel, force_file_selection);
+
+            force_file_selection = 0;
         }
 
         visualList.render("##proj_files_sel", this);

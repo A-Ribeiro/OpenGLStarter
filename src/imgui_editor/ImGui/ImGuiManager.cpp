@@ -426,6 +426,9 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 		ImGuiManager::Instance()->LoadLayout();
 	}
 
+    PostAction();
+    PostAction.clear();
+
 	// Rendering
 	ImGui::Render();
 
@@ -452,7 +455,4 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 	renderState->FrontFace = AppKit::GLEngine::FrontFaceCW;
 	renderState->DepthTest = AppKit::GLEngine::DepthTestLessEqual;
 
-
-    PostAction();
-    PostAction.clear();
 }

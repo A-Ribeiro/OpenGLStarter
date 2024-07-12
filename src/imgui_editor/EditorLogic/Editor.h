@@ -30,5 +30,7 @@ public:
 
     void createNewSceneOnCurrentDirectory();
 
+    void refreshCurrentFilesAndSelectPath(const std::string &path_to_select);
+
     static Editor *Instance();
 };

@@ -66,6 +66,8 @@ class TreeNode
     TreeNode();
 
 protected:
+    bool scroll_to_this_item;
+
     char name[64];
     char name_tolower_no_accent[64];
 
@@ -115,6 +117,8 @@ public:
     std::shared_ptr<TreeNode> removeSelf();
     void makeFirst();
     void makeLast();
+
+    void scrollToThisItem();
 
     bool isChild(int32_t uid) const;
 

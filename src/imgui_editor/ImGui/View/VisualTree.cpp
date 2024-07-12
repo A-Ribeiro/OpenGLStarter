@@ -22,6 +22,7 @@ TreeNode::TreeNode()
     snprintf(this->drag_payload_identifier, 32, "-not-set-");
 
     this->parent = nullptr;
+    scroll_to_this_item = false;
 }
 
 TreeNode::TreeNode(int32_t uid, std::shared_ptr<TreeData> data, const char *name)
@@ -41,6 +42,8 @@ TreeNode::TreeNode(int32_t uid, std::shared_ptr<TreeData> data, const char *name
     snprintf(this->drag_payload_identifier, 32, "-not-set-");
 
     this->parent = nullptr;
+
+    scroll_to_this_item = false;
 }
 
 bool TreeNode::isLeaf()
@@ -166,6 +169,11 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
     bool send_single_click = false;
     bool send_double_click = false;
     bool send_on_select = false;
+
+    if (scroll_to_this_item){
+        scroll_to_this_item = false;
+        ImGui::ScrollToItem(ImGuiScrollFlags_KeepVisibleEdgeY);
+    }
 
     if (ImGui::BeginDragDropTarget())
     {
@@ -454,6 +462,10 @@ void TreeNode::makeLast(){
         this->parent->removeUID(this->uid);
         this->parent->children.push_back(self);
     }
+}
+
+void TreeNode::scrollToThisItem() {
+    scroll_to_this_item = true;
 }
 
 TreeNode &TreeNode::addChild(std::shared_ptr<TreeNode> treeNode)

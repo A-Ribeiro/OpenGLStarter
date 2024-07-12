@@ -473,7 +473,7 @@ void Editor::createNewSceneOnCurrentDirectory() {
         return;
 
     ImGuiManager::Instance()->dialogs.showEnterTextOK("NewFile", 
-        [=](const std::string &new_str){
+        [&](const std::string &new_str){
 
             printf("createNewSceneOnCurrentDirectory\n");
 
@@ -510,6 +510,9 @@ void Editor::createNewSceneOnCurrentDirectory() {
             }
             
             auto aux = ITKCommon::StringUtil::trim(s_output.str());
+            // apply trim
+            s_output = std::stringstream();
+            s_output << aux;
             if ( !ITKCommon::StringUtil::endsWith(aux, ".scene") ){
                 if (aux.length() == 0){
                     error = "empty file name supplied";
@@ -524,7 +527,7 @@ void Editor::createNewSceneOnCurrentDirectory() {
             }
 
             std::string file_to_create = s_output.str();
-            file_to_create = ITKCommon::StringUtil::trim(file_to_create);
+            //file_to_create = ITKCommon::StringUtil::trim(file_to_create);
 
             if (file_to_create.length() == 0) {
                 error = "empty file name supplied";
@@ -547,6 +550,7 @@ void Editor::createNewSceneOnCurrentDirectory() {
                 for(int i=0;i<total_words;i++){
                     if (item.compare(win32_reserved_words[i]) == 0) {
                         error = "use of windows reserved words";
+                        printf("%s\n", error.c_str());
                         return;
                     }
                 }
@@ -556,9 +560,57 @@ void Editor::createNewSceneOnCurrentDirectory() {
             // create file pointed by file_to_create
             printf("Creating file: %s\n", file_to_create.c_str());
 
+            std::string full_path_file = selectedDirectoryInfo->file.full_path + file_to_create;
 
+            //refresh and select
+            if (ITKCommon::Path::isFile(full_path_file)){
+                error = "file already exists";
+                printf("%s\n", error.c_str());
+                return;
+            }
+
+            auto fout = fopen(full_path_file.c_str(), "wb");
+            if (!fout){
+                error = "cannot create file";
+                printf("%s\n", error.c_str());
+                return;
+            }
+            fclose(fout);
+#if defined(__linux__) || defined(__APPLE__)
+            chmod(full_path_file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP );
+#endif
+
+            //ITKCommon::FileSystem::File::FromPath(full_path_file);
+            imGuiManager->PostAction.add([&, full_path_file](){
+                this->refreshCurrentFilesAndSelectPath(full_path_file);
+            });
         }
     );
+}
+
+void Editor::refreshCurrentFilesAndSelectPath(const std::string &path_to_select) {
+
+    auto &project = imGuiManager->project;
+    auto &visualList = project.getVisualList();
+
+    // refresh current list
+    project.OnTreeSelect(selectedTreeNode);
+    
+    std::shared_ptr<ListElement> to_select;
+    for(auto &item:visualList.items){
+        std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(item->data);
+        if (fileInfo->file.full_path.compare(path_to_select) == 0){
+            to_select = item;
+            break;
+        }
+    }
+
+    if (to_select != nullptr){
+        project.OnListSingleClick(to_select);
+        project.forceFilesSelection(to_select->uid);
+        to_select->scrollToThisItem();
+    }
+
 }
 
 Editor *Editor::Instance()

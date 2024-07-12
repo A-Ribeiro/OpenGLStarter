@@ -99,10 +99,10 @@ void Dialogs::RenderAndLogic()
 
         if (ImGui::Button("OK", ImVec2(120, 0))) {
             std::string input_string = aux_str_1024;
-            if (startText.compare(input_string) != 0){
-                if (callback != nullptr)
-                    callback(input_string);
-            }
+            //if (startText.compare(input_string) != 0){
+            if (callback != nullptr)
+                callback(input_string);
+            //}
             callback = nullptr;
             ImGui::CloseCurrentPopup(); 
         }
