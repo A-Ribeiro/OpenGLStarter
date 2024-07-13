@@ -221,7 +221,7 @@ void ImGuiManager::applyGlobalScale() {
 	auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
 	IM_ASSERT(font != NULL);
 
-	font_half_size = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 12.0f * this->GlobalScale);
+	font_half_size = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 13.0f * this->GlobalScale);
 	IM_ASSERT(font_half_size != NULL);
 
     // io.Fonts->Build();

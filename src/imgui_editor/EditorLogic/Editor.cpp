@@ -511,36 +511,39 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
             });
             
             // remove all slashes
-            std::stringstream s_output;
+            std::u32string s_output;
+
+            auto new_str_utf32 = ITKCommon::StringUtil::utf8_to_utf32(new_str);
 
             //check if file exists
-            for(const auto &_c : new_str){
+            for(const auto &_c : new_str_utf32){
 #if defined(_WIN32)
-                if (_c == '<' || _c == '>' ||
-                _c == ':' || _c == '"' ||
-                _c == '/' || _c == '\\' ||
-                _c == '|' || _c == '?' ||
-                _c == '*' )
+                if (_c == U'<' || _c == U'>' ||
+                _c == U':' || _c == U'"' ||
+                _c == U'/' || _c == U'\\' ||
+                _c == U'|' || _c == U'?' ||
+                _c == U'*' )
                     continue;
 #elif defined(__linux__)
-                if (_c == '/')
+                if (_c == U'/')
                     continue;
 #elif defined(__APPLE__)
-                if (_c == '/' || _c == ':' )
+                if (_c == U'/' || _c == U':' )
                     continue;
 #endif
                 // ASCII control characters. Only Winows blocks, 
                 // but it is better to avoid on all systems
-                if (_c <= 31) 
+                if (_c <= 31)
                     continue;
 
-                s_output << _c;
+                s_output += _c;
             }
             
-            auto aux = ITKCommon::StringUtil::trim(s_output.str());
+            auto aux = ITKCommon::StringUtil::trim( ITKCommon::StringUtil::utf32_to_utf8(s_output) );
             // apply trim
-            s_output = std::stringstream();
-            s_output << aux;
+            //s_output = aux;
+            std::string file_to_create = aux;
+
             if ( !ITKCommon::StringUtil::endsWith(aux, ".scene") ){
                 if (aux.length() == 0){
                     lastError = "Empty file name supplied";
@@ -548,13 +551,13 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
                     return;
                 } else {
                     if (ITKCommon::StringUtil::endsWith(aux, "."))
-                        s_output << "scene";
+                        file_to_create += "scene";
                     else
-                        s_output << ".scene";
+                        file_to_create += ".scene";
                 }
             }
 
-            std::string file_to_create = s_output.str();
+            //std::string file_to_create = s_output;
             //file_to_create = ITKCommon::StringUtil::trim(file_to_create);
 
             if (file_to_create.length() == 0) {
@@ -577,7 +580,8 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
                     continue;
                 for(int i=0;i<total_words;i++){
                     if (item.compare(win32_reserved_words[i]) == 0) {
-                        lastError = "Use of windows reserved words";
+                        lastError = "Cannot use the reserved word: ";
+                        lastError += win32_reserved_words[i];
                         fileNameToCreate = aux;
                         return;
                     }
@@ -661,6 +665,15 @@ void Editor::refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode) {
                 // remove in case this folder was removed
                 treeNode->removeSelf();
                 project.OnTreeSelect(_parent);
+                project.forceTreeSelection(_parent->uid);
+                // imGuiManager->PostAction.add([&](){
+                //     imGuiManager->project.OnTreeSelect(
+                //         imGuiManager->project.getTreeRoot()
+                //     );
+                //     imGuiManager->project.forceTreeSelection(
+                //         imGuiManager->project.getTreeRoot()->uid
+                //     );
+                // });
                 return;
             }
         }
