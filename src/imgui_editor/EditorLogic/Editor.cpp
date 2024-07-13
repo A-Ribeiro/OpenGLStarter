@@ -170,9 +170,14 @@ void Editor::init()
                     //ctrl,shift,alt,window,
                     false,false,false,false,
                     KeyCode::F2, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
+                    [&](){
                         //activate
                         printf("rename\n");
+                        
+                        if (this->selectedFileInfo == nullptr)
+                            return;
+                        
+                        renameSelectedFile( this->selectedFileInfo->file.name );
                     }
                 ),
                 ShortCut(
@@ -505,7 +510,7 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
                 this->showErrorAndRetry(
                     lastError,
                     [&](){
-                        this->createNewSceneOnCurrentDirectory(this->fileNameToCreate);
+                        this->createNewSceneOnCurrentDirectory(this->_tmp_str);
                     }
                 );
             });
@@ -547,7 +552,7 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
             if ( !ITKCommon::StringUtil::endsWith(aux, ".scene") ){
                 if (aux.length() == 0){
                     lastError = "Empty file name supplied";
-                    fileNameToCreate = aux;
+                    _tmp_str = aux;
                     return;
                 } else {
                     if (ITKCommon::StringUtil::endsWith(aux, "."))
@@ -562,7 +567,7 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
 
             if (file_to_create.length() == 0) {
                 lastError = "Empty file name supplied";
-                fileNameToCreate = aux;
+                _tmp_str = aux;
                 return;
             }
 
@@ -597,14 +602,14 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
             //refresh and select
             if (ITKCommon::Path::isFile(full_path_file)){
                 lastError = "File already exists";
-                fileNameToCreate = aux;
+                _tmp_str = aux;
                 return;
             }
 
             auto fout = fopen(full_path_file.c_str(), "wb");
             if (!fout){
                 lastError = strerror(errno);
-                fileNameToCreate = aux;
+                _tmp_str = aux;
                 return;
             }
             fclose(fout);
@@ -770,6 +775,49 @@ void Editor::refreshCurrentFilesAndSelectPath(const std::string &path_to_select)
         project.forceFilesSelection(to_select->uid);
         to_select->scrollToThisItem();
     }
+
+}
+
+void Editor::renameSelectedFile(const std::string &newfileName) {
+
+    if (selectedTreeNode == nullptr || selectedFileInfo == nullptr)
+        return;
+    
+    ImGuiManager::Instance()->dialogs.showEnterText_OKCancel(
+        newfileName, 
+        [&](const std::string &new_str){
+            if (selectedTreeNode == nullptr || selectedFileInfo == nullptr)
+                return;
+            if (new_str.compare(selectedFileInfo->file.name) == 0)
+                return;
+
+            lastError = "";
+            _tmp_str = new_str;
+            EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
+                if (this->lastError.length() == 0)
+                    return;
+                this->showErrorAndRetry(
+                    lastError,
+                    [&](){
+                        this->renameSelectedFile(_tmp_str);
+                    }
+                );
+            });
+
+            std::string new_filename = selectedFileInfo->file.base_path + new_str;
+            int rc = rename(selectedFileInfo->file.full_path.c_str(),
+                new_filename.c_str()
+            );
+            if (rc!=0)
+                lastError = strerror(errno);
+            else {
+                imGuiManager->PostAction.add([&,new_filename](){
+                    refreshCurrentFilesAndSelectPath(new_filename);
+                });
+            }
+        },
+        DialogPosition::OpenOnScreenCenter
+    );
 
 }
 

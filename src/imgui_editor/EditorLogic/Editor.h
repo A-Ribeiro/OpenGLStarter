@@ -23,7 +23,7 @@ public:
     std::shared_ptr<FileListData> selectedFileInfo;
 
     std::string lastError;
-    std::string fileNameToCreate;
+    std::string _tmp_str;
 
     Editor();
 
@@ -38,6 +38,8 @@ public:
     void refreshCurrentFilesAndSelectPath(const std::string &path_to_select);
 
     void refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode);
+
+    void renameSelectedFile(const std::string &newfileName);
 
     static Editor *Instance();
 };
