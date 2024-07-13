@@ -37,5 +37,7 @@ public:
 
     void refreshCurrentFilesAndSelectPath(const std::string &path_to_select);
 
+    void refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode);
+
     static Editor *Instance();
 };

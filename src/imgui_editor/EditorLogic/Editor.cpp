@@ -91,9 +91,10 @@ void Editor::init()
                     //ctrl,shift,alt,window,
                     false,false,false,false,
                     KeyCode::F5, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
+                    [&](){
                         //activate
                         printf("refresh\n");
+                        refreshDirectoryStructure(selectedTreeNode);
                     }
                 ),
                 ShortCut(
@@ -625,13 +626,122 @@ void Editor::showErrorAndRetry(const std::string &error, EventCore::Callback<voi
     );
 }
 
+void Editor::refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode) {
+    
+    if (treeNode == nullptr)
+        return;
+    
+    using namespace ITKCommon::FileSystem;
+
+    auto &project = imGuiManager->project;
+
+    struct _To_insert_struct {
+        Directory dir_info;
+        std::shared_ptr<TreeNode> insert_where;
+        //std::vector< File > file_dir_list;
+        //std::map<std::string, bool > keep_children;//not expanded
+        std::map<std::string, std::shared_ptr<TreeNode> > childrenMap;
+    };
+
+    std::vector< _To_insert_struct > _to_insert;
+    {
+        auto selectedFile = std::dynamic_pointer_cast<FileTreeData>(treeNode->data);
+        _to_insert.push_back(_To_insert_struct{
+            Directory::FromFile(selectedFile->file),
+            treeNode
+        });
+    }
+
+    // create children map
+    {
+        auto &last_inserted_struct = _to_insert.back();
+        if (!last_inserted_struct.dir_info.isValid()){
+            if (!treeNode->isRoot) {
+                auto _parent = treeNode->parent->self();
+                // remove in case this folder was removed
+                treeNode->removeSelf();
+                project.OnTreeSelect(_parent);
+                return;
+            }
+        }
+        for(auto children: last_inserted_struct.insert_where->children) {
+            //last_inserted_struct.children_collapsed[children->getName()] = !children->expanded.pressed;
+            last_inserted_struct.childrenMap[children->getName()] = children;
+        }
+    }
+
+    int max_directories_to_include = 4096;
+    while (_to_insert.size() > 0) {
+
+        auto first = _to_insert[0];
+        _to_insert.erase(_to_insert.begin());
+
+        std::shared_ptr<FileTreeData> firstData = std::dynamic_pointer_cast<FileTreeData>(first.insert_where->data);
+        firstData->has_files = false;
+
+        for(auto &entry: first.dir_info){
+            firstData->has_files = true;
+            if (!entry.isDirectory)
+                continue;
+            
+            std::shared_ptr<TreeNode> tree_node;
+
+            // check if the node exists
+            auto _it = first.childrenMap.find(entry.name);
+            if ( _it == first.childrenMap.end()){
+                // add element to visual tree
+                tree_node = project.createTreeNode( entry.name, FileTreeData::CreateShared( entry ) );
+                first.insert_where->addChild(tree_node);
+            } else {
+                // element already exists
+                tree_node = _it->second;
+                first.childrenMap.erase(_it);
+            }
+
+            // enqueue element to get subdirectories
+            _to_insert.push_back(_To_insert_struct{ 
+                Directory(entry.full_path), 
+                tree_node 
+            });
+
+            // create children map
+            {
+                auto &last_inserted_struct = _to_insert.back();
+                for(auto children: last_inserted_struct.insert_where->children) {
+                    //last_inserted_struct.children_collapsed[children->getName()] = !children->expanded.pressed;
+                    last_inserted_struct.childrenMap[children->getName()] = children;
+                }
+            }
+
+
+            max_directories_to_include--;
+            if (max_directories_to_include <= 0){
+                _to_insert.clear();
+                break;
+            }
+        }
+
+        // remove names that were not removed from the Map
+        for(auto element:first.childrenMap){
+            element.second->removeSelf();
+        }
+
+        first.insert_where->sort();
+    }
+
+    project.OnTreeSelect(treeNode);
+}
+
 void Editor::refreshCurrentFilesAndSelectPath(const std::string &path_to_select) {
 
     auto &project = imGuiManager->project;
     auto &visualList = project.getVisualList();
 
+    // check if there is more files on selectedTreeNode
+    refreshDirectoryStructure(selectedTreeNode);
+
     // refresh current list
-    project.OnTreeSelect(selectedTreeNode);
+    // project.OnTreeSelect(selectedTreeNode);
     
     std::shared_ptr<ListElement> to_select;
     for(auto &item:visualList.items){
