@@ -122,9 +122,43 @@ void Editor::init()
                     //ctrl,shift,alt,window,
                     true,false,false,false,
                     KeyCode::V, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
+                    [&](){
                         //activate
                         printf("paste folder\n");
+                        if(this->selectedDirectoryInfo == nullptr)
+                            return;
+                        if (clipboardState == nullptr)
+                            return;
+                        
+                        if (clipboardState->compareType(CopyFile::Type)){
+                            auto copyFile = std::dynamic_pointer_cast<CopyFile>(clipboardState);
+
+                            auto input = copyFile->fileRef;
+                            auto output = this->selectedDirectoryInfo->file.full_path + input->file.name;
+                            this->copyFile(input,output,
+                            [&,output](){
+                                // on success
+                                clipboardState = nullptr;
+                                // refresh
+                                imGuiManager->PostAction.add([&,output](){
+                                    refreshCurrentFilesAndSelectPath(output);
+                                });
+                            });
+                        } else if (clipboardState->compareType(CutFile::Type)){
+                            auto cutFile = std::dynamic_pointer_cast<CutFile>(clipboardState);
+
+                            auto input = cutFile->fileRef;
+                            auto output = this->selectedDirectoryInfo->file.full_path + input->file.name;
+                            this->moveFile(input,output,
+                            [&,output](){
+                                // on success
+                                clipboardState = nullptr;
+                                // refresh
+                                imGuiManager->PostAction.add([&,output](){
+                                    refreshCurrentFilesAndSelectPath(output);
+                                });
+                            });
+                        }
                     }
                 )
             }
@@ -204,13 +238,21 @@ void Editor::init()
                     //ctrl,shift,alt,window,
                     true,false,false,false,
                     KeyCode::D, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
+                    [&](){
                         //activate
-                        printf("file copy\n");
-                    },
-                    [](){
-                        //deactivate
-                        printf("deactivate Ctrl+C\n");
+                        printf("file duplicate\n");
+                        if (this->selectedFileInfo != nullptr){
+                            std::string file_to_select_after_refresh = this->selectedFileInfo->file.full_path;
+                            duplicateFile(this->selectedFileInfo,
+                            [&, file_to_select_after_refresh](){
+                                // on success
+                                clipboardState = nullptr;
+                                // refresh
+                                imGuiManager->PostAction.add([&, file_to_select_after_refresh](){
+                                    refreshCurrentFilesAndSelectPath(file_to_select_after_refresh);
+                                });
+                            });
+                        }
                     }
                 ),
                 ShortCut(
@@ -225,13 +267,11 @@ void Editor::init()
                     //ctrl,shift,alt,window,
                     true,false,false,false,
                     KeyCode::C, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
+                    [&](){
                         //activate
                         printf("file copy\n");
-                    },
-                    [](){
-                        //deactivate
-                        printf("deactivate Ctrl+C\n");
+                        if (this->selectedFileInfo != nullptr)
+                            clipboardState = CopyFile::CreateShared(this->selectedFileInfo);
                     }
                 ),
                 ShortCut(
@@ -246,13 +286,11 @@ void Editor::init()
                     //ctrl,shift,alt,window,
                     true,false,false,false,
                     KeyCode::X, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
+                    [&](){
                         //activate
                         printf("file cut\n");
-                    },
-                    [](){
-                        //deactivate
-                        printf("deactivate Ctrl+X\n");
+                        if (this->selectedFileInfo != nullptr)
+                            clipboardState = CutFile::CreateShared(this->selectedFileInfo);
                     }
                 ),
                 ShortCut(
@@ -268,13 +306,43 @@ void Editor::init()
                     //ctrl,shift,alt,window,
                     true,false,false,false,
                     KeyCode::V, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
+                    [&](){
                         //activate
                         printf("file paste\n");
-                    },
-                    [](){
-                        //deactivate
-                        printf("deactivate Ctrl+V\n");
+                        if(this->selectedFileInfo == nullptr)
+                            return;
+                        if (clipboardState == nullptr)
+                            return;
+                        
+                        if (clipboardState->compareType(CopyFile::Type)){
+                            auto copyFile = std::dynamic_pointer_cast<CopyFile>(clipboardState);
+
+                            auto input = copyFile->fileRef;
+                            auto output = this->selectedFileInfo->file.base_path + input->file.name;
+                            this->copyFile(input,output,
+                            [&,output](){
+                                // on success
+                                clipboardState = nullptr;
+                                // refresh
+                                imGuiManager->PostAction.add([&,output](){
+                                    refreshCurrentFilesAndSelectPath(output);
+                                });
+                            });
+                        } else if (clipboardState->compareType(CutFile::Type)){
+                            auto cutFile = std::dynamic_pointer_cast<CutFile>(clipboardState);
+
+                            auto input = cutFile->fileRef;
+                            auto output = this->selectedFileInfo->file.base_path + input->file.name;
+                            this->moveFile(input,output,
+                            [&,output](){
+                                // on success
+                                clipboardState = nullptr;
+                                // refresh
+                                imGuiManager->PostAction.add([&,output](){
+                                    refreshCurrentFilesAndSelectPath(output);
+                                });
+                            });
+                        }
                     }
                 )
             }
@@ -637,6 +705,11 @@ void Editor::showErrorAndRetry(const std::string &error, EventCore::Callback<voi
 
 void Editor::refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode) {
     
+    imGuiManager->shortcutManager.lockChangeActionCategory();
+    EventCore::ExecuteOnScopeEnd _unlockChangeActionCategory([&](){
+        imGuiManager->shortcutManager.unlockChangeActionCategory();
+    });
+
     if (treeNode == nullptr)
         return;
     
@@ -752,6 +825,11 @@ void Editor::refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode) {
 
 void Editor::refreshCurrentFilesAndSelectPath(const std::string &path_to_select) {
 
+    imGuiManager->shortcutManager.lockChangeActionCategory();
+    EventCore::ExecuteOnScopeEnd _unlockChangeActionCategory([&](){
+        imGuiManager->shortcutManager.unlockChangeActionCategory();
+    });
+
     auto &project = imGuiManager->project;
     auto &visualList = project.getVisualList();
 
@@ -775,7 +853,6 @@ void Editor::refreshCurrentFilesAndSelectPath(const std::string &path_to_select)
         project.forceFilesSelection(to_select->uid);
         to_select->scrollToThisItem();
     }
-
 }
 
 void Editor::renameSelectedFile(const std::string &newfileName) {
@@ -820,6 +897,144 @@ void Editor::renameSelectedFile(const std::string &newfileName) {
     );
 
 }
+
+void Editor::copyFile(std::shared_ptr<FileListData> input, const std::string &outFileName, EventCore::Callback<void()> OnSuccess) {
+
+    lastError = "";
+    EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
+        if (this->lastError.length() == 0)
+            return;
+        this->showErrorAndRetry(
+            lastError,
+            [&](){
+                // this->copyFile(input,output);
+            }
+        );
+    });
+
+    auto input_file = input->file.full_path;
+    auto output_file = outFileName;
+
+    if (ITKCommon::Path::isFile(output_file)){
+        // file already exists
+        lastError = "File already exists";
+        return;
+    }
+
+    {
+        char buf[BUFSIZ];
+        size_t size;
+
+        FILE* source = fopen(input_file.c_str(), "rb");
+        if (!source){
+            // errno error
+            lastError = strerror(errno);
+            return;
+        }
+        EventCore::ExecuteOnScopeEnd _close_source([=](){
+            fclose(source);
+        });
+        FILE* dest = fopen(output_file.c_str(), "wb");
+        if (!dest){
+            // errno error
+            lastError = strerror(errno);
+            return;
+        }
+        EventCore::ExecuteOnScopeEnd _close_dest([=](){
+            fclose(dest);
+        });
+        while (size = fread(buf, 1, BUFSIZ, source)) {
+            fwrite(buf, 1, size, dest);
+        }
+    }
+    if (OnSuccess != nullptr)
+        OnSuccess();
+}
+
+void Editor::moveFile(std::shared_ptr<FileListData> input, const std::string &outFileName, EventCore::Callback<void()> OnSuccess) {
+    
+    lastError = "";
+    EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
+        if (this->lastError.length() == 0)
+            return;
+        this->showErrorAndRetry(
+            lastError,
+            [&](){
+                // this->moveFile(input,output);
+            }
+        );
+    });
+
+    auto input_file = input->file.full_path;
+    auto output_file = outFileName;
+
+    if (ITKCommon::Path::isFile(output_file)){
+        // file already exists
+        lastError = "File already exists";
+        return;
+    }
+
+    {
+        int rc = rename(
+            input_file.c_str(),
+            output_file.c_str()
+        );
+        if (rc!=0) {
+            lastError = strerror(errno);
+            return;
+        } else {
+            if (OnSuccess != nullptr)
+                OnSuccess();
+        }
+    }
+}
+
+void Editor::duplicateFile(std::shared_ptr<FileListData> input, EventCore::Callback<void()> OnSuccess) {
+    lastError = "";
+    EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
+        if (this->lastError.length() == 0)
+            return;
+        this->showErrorAndRetry(
+            lastError,
+            [&](){
+                // this->moveFile(input,output);
+            }
+        );
+    });
+
+    std::string input_file = input->file.name;
+    std::string input_ext;
+    bool has_ext = false;
+    {
+        size_t path_directory_index = input_file.find_last_of('.');
+        if (path_directory_index != std::string::npos)
+        {
+            has_ext = true;
+            input_ext = input_file.substr(
+                path_directory_index + 1, 
+                input_file.size() - 1 - path_directory_index
+            );
+            input_file = input_file.substr(0, path_directory_index);
+        }
+    }
+
+    input_file = input->file.base_path + input_file;
+
+    char output_file[1024];
+    int count = 0;
+    do {
+        if (has_ext)
+            snprintf(output_file, 1024, "%s %.3i.%s",input_file.c_str(), count, input_ext.c_str());
+        else
+            snprintf(output_file, 1024, "%s %.3i",input_file.c_str(), count);
+        count++;
+    } while(ITKCommon::Path::isFile(output_file));
+
+    // copyFile logic
+    printf("Duplicate outputfile: %s\n", output_file);
+    copyFile(input, output_file, OnSuccess);
+}
+
 
 Editor *Editor::Instance()
 {

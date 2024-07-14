@@ -2,10 +2,7 @@
 
 #include "../ImGui/ImGuiManager.h"
 #include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
-
-// class DirectoryExt: public ITKCommon::FileSystem::Directory {
-//     public:
-// };
+#include "Clipboard.h"
 
 class Editor : public EventCore::HandleCallback
 {
@@ -25,6 +22,8 @@ public:
     std::string lastError;
     std::string _tmp_str;
 
+    std::shared_ptr<ClipboardOperation> clipboardState;
+
     Editor();
 
     void init();
@@ -40,6 +39,11 @@ public:
     void refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode);
 
     void renameSelectedFile(const std::string &newfileName);
+
+    void copyFile(std::shared_ptr<FileListData> inFile, const std::string &outFileName, EventCore::Callback<void()> OnSuccess = nullptr);
+    void moveFile(std::shared_ptr<FileListData> inFile, const std::string &outFileName, EventCore::Callback<void()> OnSuccess = nullptr);
+
+    void duplicateFile(std::shared_ptr<FileListData> inFile, EventCore::Callback<void()> OnSuccess = nullptr);
 
     static Editor *Instance();
 };

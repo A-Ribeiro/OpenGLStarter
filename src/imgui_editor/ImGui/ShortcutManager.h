@@ -110,10 +110,15 @@ class ShortcutManager : public View
         ShortCutCategory
     > shortCutMap;
 
+    int lock_change_action_category;
+
 public:
     static const ViewType Type;
 
     ShortCutCategory actionMenu;
+
+    void lockChangeActionCategory();
+    void unlockChangeActionCategory();
 
     ShortcutManager();
 

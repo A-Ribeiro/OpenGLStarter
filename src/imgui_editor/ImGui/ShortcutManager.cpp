@@ -114,7 +114,18 @@ void ShortCutCategory::setActive(bool active) {
 const ViewType ShortcutManager::Type = "ShortcutManager";
 
 ShortcutManager::ShortcutManager(): View(ShortcutManager::Type){
-    
+    lock_change_action_category = 0;
+}
+
+void ShortcutManager::lockChangeActionCategory(){
+lock_change_action_category++;
+}
+void ShortcutManager::unlockChangeActionCategory() {
+lock_change_action_category--;
+if (lock_change_action_category < 0){
+    lock_change_action_category = 0;
+    printf("error... negative lock change category");
+}
 }
 
 ShortcutManager::~ShortcutManager(){
@@ -351,6 +362,8 @@ void ShortcutManager::addShortcut(
 void ShortcutManager::setActionShortCutByCategory(
     const std::string &category
 ){
+    if (lock_change_action_category != 0)
+        return;
     if (actionMenu.name.compare(category) == 0)
         return;
 
