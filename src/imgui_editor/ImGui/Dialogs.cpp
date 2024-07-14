@@ -9,6 +9,8 @@ Dialogs::Dialogs() : View(Dialogs::Type)
 {
 	open_EnterText_OKCancel = DialogPosition::None;
     open_showInfo_OK = DialogPosition::None;
+
+    show_Cancel_showInfo_OK = false;
 }
 
 Dialogs::~Dialogs()
@@ -218,7 +220,10 @@ void Dialogs::RenderAndLogic()
 
         auto area = ImGui::GetContentRegionAvail();
 
-        ImGui::Dummy(ImVec2(area.x - 120,0));
+        if (show_Cancel_showInfo_OK)
+            ImGui::Dummy(ImVec2(area.x - 120 - 120 - ImGui::GetStyle().ItemSpacing.x,0));
+        else
+            ImGui::Dummy(ImVec2(area.x - 120,0));
         ImGui::SameLine(0.0f,0.0f);
 
         ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(0.425f, 0.98f*0.7f, 0.425f, 0.40f));
@@ -235,6 +240,19 @@ void Dialogs::RenderAndLogic()
         ImGui::PopStyleColor();
         ImGui::PopStyleColor();
         ImGui::PopStyleColor();
+
+        if (show_Cancel_showInfo_OK){
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(0.98f*0.7f, 0.425f, 0.425f, 0.40f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,ImVec4(0.98f*0.7f, 0.425f, 0.425f, 1.00f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive,ImVec4(0.98f*0.7f, 0.295f, 0.295f, 1.00f));
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                ImGui::CloseCurrentPopup(); 
+            }
+            ImGui::PopStyleColor();
+            ImGui::PopStyleColor();
+            ImGui::PopStyleColor();
+        }
 
 		ImGui::EndPopup();
 	}
@@ -269,4 +287,17 @@ void Dialogs::showInfo_OK(const std::string &infoText, const EventCore::Callback
     );
     callback_showInfo_OK = callback;
 	open_showInfo_OK = dialogPosition;
+    show_Cancel_showInfo_OK = false;
+}
+
+void Dialogs::showInfo_OKCancel(const std::string &infoText, const EventCore::Callback<void()> &callback, DialogPosition dialogPosition){
+    text_showInfo_OK.setText(
+        infoText,
+        ImGui::GetCurrentContext()->Font,
+        300.0f * ImGuiManager::Instance()->GlobalScale - 
+        ImGui::GetStyle().WindowPadding.x * 2.0f
+    );
+    callback_showInfo_OK = callback;
+	open_showInfo_OK = dialogPosition;
+    show_Cancel_showInfo_OK = true;
 }

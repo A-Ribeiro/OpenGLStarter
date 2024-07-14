@@ -26,6 +26,7 @@ class Dialogs : public View
     CenteredText text_showInfo_OK;
     EventCore::Callback<void()> callback_showInfo_OK;
     ImVec2 pos_showInfo_OK;
+    bool show_Cancel_showInfo_OK;
 
 public:
     static const ViewType Type;
@@ -41,5 +42,7 @@ public:
     void showEnterText_OKCancel(const std::string &startText, const EventCore::Callback<void(const std::string &v)> &callback, DialogPosition dialogPosition = DialogPosition::OpenOnMouse);
 
     void showInfo_OK(const std::string &infoText, const EventCore::Callback<void()> &callback, DialogPosition dialogPosition = DialogPosition::OpenOnMouse);
+
+    void showInfo_OKCancel(const std::string &infoText, const EventCore::Callback<void()> &callback, DialogPosition dialogPosition = DialogPosition::OpenOnMouse);
 
 };

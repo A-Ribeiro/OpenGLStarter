@@ -45,5 +45,7 @@ public:
 
     void duplicateFile(std::shared_ptr<FileListData> inFile, EventCore::Callback<void()> OnSuccess = nullptr);
 
+    void deleteSelectedFile();
+
     static Editor *Instance();
 };

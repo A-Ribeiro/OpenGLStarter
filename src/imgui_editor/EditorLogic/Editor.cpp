@@ -215,6 +215,28 @@ void Editor::init()
                     }
                 ),
                 ShortCut(
+                    "Action/Remove", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "Remove", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "Delete",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    false,false,false,false,
+                    KeyCode::Delete, //AppKit::Window::Devices::KeyCode keyCode,
+                    [&](){
+                        //activate
+                        printf("delete\n");
+                        
+                        if (this->selectedFileInfo == nullptr)
+                            return;
+                        
+                        deleteSelectedFile();
+                    }
+                ),
+                ShortCut(
                     "Action/<<>>", // "mainMenuPath"
                     MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
 
@@ -828,6 +850,9 @@ void Editor::refreshCurrentFilesAndSelectPath(const std::string &path_to_select)
     imGuiManager->shortcutManager.lockChangeActionCategory();
     EventCore::ExecuteOnScopeEnd _unlockChangeActionCategory([&](){
         imGuiManager->shortcutManager.unlockChangeActionCategory();
+        if (selectedFileInfo != nullptr){
+            imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FileOps");
+        }
     });
 
     auto &project = imGuiManager->project;
@@ -1033,6 +1058,82 @@ void Editor::duplicateFile(std::shared_ptr<FileListData> input, EventCore::Callb
     // copyFile logic
     printf("Duplicate outputfile: %s\n", output_file);
     copyFile(input, output_file, OnSuccess);
+}
+
+
+void Editor::deleteSelectedFile() {
+    if (selectedTreeNode == nullptr || selectedFileInfo == nullptr)
+        return;
+    
+    std::string showText = 
+        std::string("Confirm to remove '")+ 
+        selectedFileInfo->file.name + 
+        std::string("' ?"); 
+
+
+
+    ImGuiManager::Instance()->dialogs.showInfo_OKCancel(
+        showText,
+        [&](){
+            if (selectedTreeNode == nullptr || selectedFileInfo == nullptr)
+                return;
+            lastError = "";
+            EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
+                if (this->lastError.length() == 0)
+                    return;
+                this->showErrorAndRetry(
+                    lastError,
+                    [&](){
+                    }
+                );
+            });
+
+            if (!ITKCommon::Path::isFile(selectedFileInfo->file.full_path.c_str())){
+                lastError = "File does not exist";
+                return;
+            }
+
+            if (remove(selectedFileInfo->file.full_path.c_str())!=0){
+                lastError = strerror(errno);
+                return;
+            }
+
+            auto &project = imGuiManager->project;
+            auto &visualList = project.getVisualList();
+
+            std::shared_ptr<ListElement> selectedListElement;
+            std::shared_ptr<ListElement> next_select;
+            bool end_on_next_iteration = false;
+            for(auto &item:visualList.items){
+                std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(item->data);
+                if (end_on_next_iteration){
+                    next_select = item;
+                    break;
+                }
+                if (fileInfo == selectedFileInfo){
+                    selectedListElement = item;
+                    end_on_next_iteration = true;
+                } else {
+                    next_select = item;
+                }
+            }
+
+            if (selectedListElement != nullptr)
+                selectedListElement->removeSelf();
+
+            if (next_select != nullptr){
+                project.OnListSingleClick(next_select);
+                project.forceFilesSelection(next_select->uid);
+                next_select->scrollToThisItem();
+            } else {
+                project.OnListSelect(nullptr);
+                project.clearListSelection(ProjectClearMethod::ClearNoCallback);
+            }
+
+        },
+        DialogPosition::OpenOnScreenCenter
+    );
+
 }
 
 
