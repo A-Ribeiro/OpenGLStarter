@@ -118,6 +118,32 @@ void Editor::init()
                         refreshDirectoryStructure(selectedTreeNode);
                     }
                 ),
+
+                ShortCut(
+                    "Action/Remove", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "Remove", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "Delete",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    false,false,false,false,
+                    KeyCode::Delete, //AppKit::Window::Devices::KeyCode keyCode,
+                    [&](){
+                        //activate
+                        printf("delete\n");
+                        
+                        if (this->selectedTreeNode == nullptr || this->selectedDirectoryInfo == nullptr )
+                            return;
+                        if (this->selectedTreeNode->isRoot)
+                            return;
+                        
+                        deleteSelectedDirectory();
+                    }
+                ),
+
                 ShortCut(
                     "Action/<<>>", // "mainMenuPath"
                     MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
@@ -1279,10 +1305,73 @@ void Editor::deleteSelectedFile() {
                 project.clearListSelection(ProjectClearMethod::ClearNoCallback);
             }
 
+            refreshDirectoryStructure(selectedTreeNode);
+
         },
         DialogPosition::OpenOnScreenCenter
     );
 
+}
+
+void Editor::deleteSelectedDirectory() {
+    
+    if (this->selectedTreeNode == nullptr || this->selectedDirectoryInfo == nullptr )
+        return;
+    if (this->selectedTreeNode->isRoot)
+        return;
+    
+    std::string showText = 
+        std::string("Confirm to remove '")+ 
+        selectedDirectoryInfo->file.name + 
+        std::string("' ?"); 
+
+
+
+    ImGuiManager::Instance()->dialogs.showInfo_OKCancel(
+        showText,
+        [&](){
+
+            if (this->selectedTreeNode == nullptr || this->selectedDirectoryInfo == nullptr )
+                return;
+            if (this->selectedTreeNode->isRoot)
+                return;
+            
+            lastError = "";
+            EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
+                if (this->lastError.length() == 0)
+                    return;
+                this->showErrorAndRetry(
+                    lastError,
+                    [&](){
+                    }
+                );
+            });
+
+            if (!ITKCommon::Path::isDirectory(selectedDirectoryInfo->file.full_path.c_str())){
+                lastError = "Directory does not exist";
+                return;
+            }
+
+#if defined(_WIN32)
+            std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(full_path_file);            
+            if (RemoveDirectoryW(_wstr.c_str(), NULL) == FALSE){
+                lastError = ITKPlatformUtil::getLastErrorMessage();
+                return;
+            }
+#elif defined(__linux__) || defined(__APPLE__)
+            
+            printf("remove: %s\n", selectedDirectoryInfo->file.full_path.c_str());
+            if ( remove(selectedDirectoryInfo->file.full_path.c_str() ) != 0 ) {
+                lastError = strerror(errno);
+                return;
+            }
+#endif
+
+            refreshDirectoryStructure(selectedTreeNode);
+
+        },
+        DialogPosition::OpenOnScreenCenter
+    );
 }
 
 

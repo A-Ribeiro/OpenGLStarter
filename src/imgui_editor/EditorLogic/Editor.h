@@ -49,5 +49,7 @@ public:
 
     void deleteSelectedFile();
 
+    void deleteSelectedDirectory();
+
     static Editor *Instance();
 };
