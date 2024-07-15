@@ -3,9 +3,16 @@
 
 #include <InteractiveToolkit/EventCore/ExecuteOnScopeEnd.h>
 
+#if defined(_WIN32)
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+
 Editor::Editor()
 {
     //project_directory_set = false;
+    imGuiManager = NULL;
+    imGuiMenu = NULL;
 }
 
 void Editor::init()
@@ -198,8 +205,8 @@ void Editor::init()
                         if (clipboardState == nullptr)
                             return;
                         
-                        if (clipboardState->compareType(CopyFile::Type)){
-                            auto copyFile = std::dynamic_pointer_cast<CopyFile>(clipboardState);
+                        if (clipboardState->compareType(CopyFileOP::Type)){
+                            auto copyFile = std::dynamic_pointer_cast<CopyFileOP>(clipboardState);
 
                             auto input = copyFile->fileRef;
                             auto output = this->selectedDirectoryInfo->file.full_path + input->file.name;
@@ -212,18 +219,20 @@ void Editor::init()
                                     refreshCurrentFilesAndSelectPath(output);
                                 });
                             });
-                        } else if (clipboardState->compareType(CutFile::Type)){
-                            auto cutFile = std::dynamic_pointer_cast<CutFile>(clipboardState);
+                        } else if (clipboardState->compareType(CutFileOP::Type)){
+                            auto cutFile = std::dynamic_pointer_cast<CutFileOP>(clipboardState);
 
+                            auto srcTreeNode = cutFile->treeNodeSource;
                             auto input = cutFile->fileRef;
                             auto output = this->selectedDirectoryInfo->file.full_path + input->file.name;
                             this->moveFile(input,output,
-                            [&,output](){
+                            [&, output, srcTreeNode](){
                                 // on success
                                 clipboardState = nullptr;
                                 // refresh
-                                imGuiManager->PostAction.add([&,output](){
+                                imGuiManager->PostAction.add([&,output,srcTreeNode](){
                                     refreshCurrentFilesAndSelectPath(output);
+                                    refreshDirectoryStructure(srcTreeNode, true);
                                 });
                             });
                         }
@@ -361,7 +370,7 @@ void Editor::init()
                         //activate
                         printf("file copy\n");
                         if (this->selectedFileInfo != nullptr)
-                            clipboardState = CopyFile::CreateShared(this->selectedFileInfo);
+                            clipboardState = CopyFileOP::CreateShared(this->selectedFileInfo);
                     }
                 ),
                 ShortCut(
@@ -379,8 +388,8 @@ void Editor::init()
                     [&](){
                         //activate
                         printf("file cut\n");
-                        if (this->selectedFileInfo != nullptr)
-                            clipboardState = CutFile::CreateShared(this->selectedFileInfo);
+                        if (this->selectedFileInfo != nullptr && this->selectedTreeNode != nullptr)
+                            clipboardState = CutFileOP::CreateShared(this->selectedTreeNode, this->selectedFileInfo);
                     }
                 ),
                 ShortCut(
@@ -404,8 +413,8 @@ void Editor::init()
                         if (clipboardState == nullptr)
                             return;
                         
-                        if (clipboardState->compareType(CopyFile::Type)){
-                            auto copyFile = std::dynamic_pointer_cast<CopyFile>(clipboardState);
+                        if (clipboardState->compareType(CopyFileOP::Type)){
+                            auto copyFile = std::dynamic_pointer_cast<CopyFileOP>(clipboardState);
 
                             auto input = copyFile->fileRef;
                             auto output = this->selectedFileInfo->file.base_path + input->file.name;
@@ -418,18 +427,20 @@ void Editor::init()
                                     refreshCurrentFilesAndSelectPath(output);
                                 });
                             });
-                        } else if (clipboardState->compareType(CutFile::Type)){
-                            auto cutFile = std::dynamic_pointer_cast<CutFile>(clipboardState);
+                        } else if (clipboardState->compareType(CutFileOP::Type)){
+                            auto cutFile = std::dynamic_pointer_cast<CutFileOP>(clipboardState);
 
+                            auto srcTreeNode = cutFile->treeNodeSource;
                             auto input = cutFile->fileRef;
                             auto output = this->selectedFileInfo->file.base_path + input->file.name;
                             this->moveFile(input,output,
-                            [&,output](){
+                            [&,output,srcTreeNode](){
                                 // on success
                                 clipboardState = nullptr;
                                 // refresh
-                                imGuiManager->PostAction.add([&,output](){
+                                imGuiManager->PostAction.add([&,output,srcTreeNode](){
                                     refreshCurrentFilesAndSelectPath(output);
+                                    refreshDirectoryStructure(srcTreeNode, true);
                                 });
                             });
                         }
@@ -745,7 +756,7 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
                     if (item.compare(win32_reserved_words[i]) == 0) {
                         lastError = "Cannot use the reserved word: ";
                         lastError += win32_reserved_words[i];
-                        fileNameToCreate = aux;
+                        _tmp_str = aux;
                         return;
                     }
                 }
@@ -764,7 +775,12 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
                 return;
             }
 
+#if defined(_WIN32)
+            auto fout = _wfopen( ITKCommon::StringUtil::string_to_WString(full_path_file).c_str(), L"wb");
+#elif defined(__linux__) || defined(__APPLE__)
             auto fout = fopen(full_path_file.c_str(), "wb");
+#endif
+
             if (!fout){
                 lastError = strerror(errno);
                 _tmp_str = aux;
@@ -867,7 +883,7 @@ void Editor::createNewDirectoryOnCurrentDirectory(const std::string &fileName)
                     if (item.compare(win32_reserved_words[i]) == 0) {
                         lastError = "Cannot use the reserved word: ";
                         lastError += win32_reserved_words[i];
-                        fileNameToCreate = aux;
+                        _tmp_str = aux;
                         return;
                     }
                 }
@@ -921,7 +937,7 @@ void Editor::showErrorAndRetry(const std::string &error, EventCore::Callback<voi
     );
 }
 
-void Editor::refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode) {
+void Editor::refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode, bool ignore_tree_select) {
     
     imGuiManager->shortcutManager.lockChangeActionCategory();
     EventCore::ExecuteOnScopeEnd _unlockChangeActionCategory([&](){
@@ -1038,7 +1054,8 @@ void Editor::refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode) {
         first.insert_where->sort();
     }
 
-    project.OnTreeSelect(treeNode);
+    if (!ignore_tree_select)
+        project.OnTreeSelect(treeNode);
 }
 
 void Editor::refreshCurrentFilesAndSelectPath(const std::string &path_to_select) {
@@ -1103,12 +1120,28 @@ void Editor::renameSelectedFile(const std::string &newfileName) {
             });
 
             std::string new_filename = selectedFileInfo->file.base_path + new_str;
-            int rc = rename(selectedFileInfo->file.full_path.c_str(),
-                new_filename.c_str()
-            );
-            if (rc!=0)
+
+#if defined(_WIN32)
+
+            std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(selectedFileInfo->file.full_path);
+            std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(new_filename);
+
+            if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
+                lastError = ITKPlatformUtil::getLastErrorMessage();
+                return;
+            }
+
+#elif defined(__linux__) || defined(__APPLE__)
+
+            if (rename(selectedFileInfo->file.full_path.c_str(), new_filename.c_str()) != 0) {
                 lastError = strerror(errno);
-            else {
+                return;
+            }
+
+#endif
+            
+
+            {
                 imGuiManager->PostAction.add([&,new_filename](){
                     refreshCurrentFilesAndSelectPath(new_filename);
                 });
@@ -1147,13 +1180,27 @@ void Editor::renameSelectedDirectory(const std::string &newdirname) {
             });
 
             std::string new_filename = selectedDirectoryInfo->file.base_path + new_str;
-            int rc = rename(selectedDirectoryInfo->file.full_path.c_str(),
-                new_filename.c_str()
-            );
-            if (rc!=0)
-                lastError = strerror(errno);
-            else {
 
+
+#if defined(_WIN32)
+
+            std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(selectedDirectoryInfo->file.full_path);
+            std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(new_filename);
+
+            if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
+                lastError = ITKPlatformUtil::getLastErrorMessage();
+                return;
+            }
+
+#elif defined(__linux__) || defined(__APPLE__)
+            
+            if (rename(selectedDirectoryInfo->file.full_path.c_str(), new_filename.c_str()) != 0) {
+                lastError = strerror(errno);
+                return;
+            }
+#endif
+
+            {
                 selectedDirectoryInfo->file = ITKCommon::FileSystem::File::FromPath(new_filename);
                 selectedTreeNode->setName(selectedDirectoryInfo->file.name.c_str());
                 selectedTreeNode->parent->sort();
@@ -1198,7 +1245,11 @@ void Editor::copyFile(std::shared_ptr<FileListData> input, const std::string &ou
         char buf[BUFSIZ];
         size_t size;
 
+#if defined(_WIN32)
+        FILE* source = _wfopen( ITKCommon::StringUtil::string_to_WString(input_file).c_str(), L"rb");
+#elif defined(__linux__) || defined(__APPLE__)
         FILE* source = fopen(input_file.c_str(), "rb");
+#endif
         if (!source){
             // errno error
             lastError = strerror(errno);
@@ -1207,7 +1258,12 @@ void Editor::copyFile(std::shared_ptr<FileListData> input, const std::string &ou
         EventCore::ExecuteOnScopeEnd _close_source([=](){
             fclose(source);
         });
+
+#if defined(_WIN32)
+        FILE* dest = _wfopen(ITKCommon::StringUtil::string_to_WString(output_file).c_str(), L"wb");
+#elif defined(__linux__) || defined(__APPLE__)
         FILE* dest = fopen(output_file.c_str(), "wb");
+#endif
         if (!dest){
             // errno error
             lastError = strerror(errno);
@@ -1248,17 +1304,26 @@ void Editor::moveFile(std::shared_ptr<FileListData> input, const std::string &ou
     }
 
     {
-        int rc = rename(
-            input_file.c_str(),
-            output_file.c_str()
-        );
-        if (rc!=0) {
+#if defined(_WIN32)
+
+        std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(input_file.c_str());
+        std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(output_file.c_str());
+
+        if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
+            lastError = ITKPlatformUtil::getLastErrorMessage();
+            return;
+        }
+
+#elif defined(__linux__) || defined(__APPLE__)
+
+        if (rename(input_file.c_str(), output_file.c_str()) != 0) {
             lastError = strerror(errno);
             return;
-        } else {
-            if (OnSuccess != nullptr)
-                OnSuccess();
         }
+#endif
+
+        if (OnSuccess != nullptr)
+            OnSuccess();
     }
 }
 
@@ -1341,10 +1406,19 @@ void Editor::deleteSelectedFile() {
                 return;
             }
 
-            if (remove(selectedFileInfo->file.full_path.c_str())!=0){
+#if defined(_WIN32)
+            std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(selectedFileInfo->file.full_path);
+            if (DeleteFileW(_wstr.c_str()) == FALSE) {
+                lastError = ITKPlatformUtil::getLastErrorMessage();
+                return;
+            }
+#elif defined(__linux__) || defined(__APPLE__)
+
+            if (remove(selectedFileInfo->file.full_path.c_str()) != 0) {
                 lastError = strerror(errno);
                 return;
             }
+#endif
 
             auto &project = imGuiManager->project;
             auto &visualList = project.getVisualList();
@@ -1443,8 +1517,8 @@ void Editor::deleteSelectedDirectory() {
             }
 
 #if defined(_WIN32)
-            std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(full_path_file);            
-            if (RemoveDirectoryW(_wstr.c_str(), NULL) == FALSE){
+            std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(selectedDirectoryInfo->file.full_path);
+            if (RemoveDirectoryW(_wstr.c_str()) == FALSE){
                 lastError = ITKPlatformUtil::getLastErrorMessage();
                 return;
             }
@@ -1456,8 +1530,8 @@ void Editor::deleteSelectedDirectory() {
                 return;
             }
 #endif
-
-            refreshDirectoryStructure(selectedTreeNode);
+            // if (!selectedTreeNode->isRoot)
+            refreshDirectoryStructure(selectedTreeNode->parent->self());
 
         },
         DialogPosition::OpenOnScreenCenter
@@ -1470,3 +1544,7 @@ Editor *Editor::Instance()
     static Editor _editor;
     return &_editor;
 }
+
+#if defined(_WIN32)
+#pragma warning(pop)
+#endif

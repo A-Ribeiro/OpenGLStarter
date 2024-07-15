@@ -1,4 +1,4 @@
 #include "Clipboard.h"
 
-ClipboardOperationType CopyFile::Type = "CopyFile";
-ClipboardOperationType CutFile::Type = "CutFile";
+ClipboardOperationType CopyFileOP::Type = "CopyFileOP";
+ClipboardOperationType CutFileOP::Type = "CutFileOP";

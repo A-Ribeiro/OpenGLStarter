@@ -19,31 +19,36 @@ protected:
     }
 };
 
-class CopyFile : public ClipboardOperation {
+class CopyFileOP : public ClipboardOperation {
     public:
 
     static ClipboardOperationType Type;
     std::shared_ptr<FileListData> fileRef;
-    CopyFile(std::shared_ptr<FileListData> fileRef): ClipboardOperation(CopyFile::Type) {
+    CopyFileOP(std::shared_ptr<FileListData> fileRef): ClipboardOperation(CopyFileOP::Type) {
         this->fileRef = fileRef;
     }
 
-    static std::shared_ptr<CopyFile> CreateShared(std::shared_ptr<FileListData> fileRef) {
-        return std::make_shared<CopyFile>(fileRef);
+    static std::shared_ptr<CopyFileOP> CreateShared(std::shared_ptr<FileListData> fileRef) {
+        return std::make_shared<CopyFileOP>(fileRef);
     }
 };
 
-class CutFile : public ClipboardOperation {
+class CutFileOP : public ClipboardOperation {
     public:
 
     static ClipboardOperationType Type;
 
     std::shared_ptr<FileListData> fileRef;
-    CutFile(std::shared_ptr<FileListData> fileRef): ClipboardOperation(CutFile::Type) {
+
+    std::shared_ptr <TreeNode> treeNodeSource;
+
+    CutFileOP(std::shared_ptr <TreeNode> treeNodeSource,
+              std::shared_ptr<FileListData> fileRef): ClipboardOperation(CutFileOP::Type) {
+        this->treeNodeSource = treeNodeSource;
         this->fileRef = fileRef;
     }
 
-    static std::shared_ptr<CutFile> CreateShared(std::shared_ptr<FileListData> fileRef) {
-        return std::make_shared<CutFile>(fileRef);
+    static std::shared_ptr<CutFileOP> CreateShared(std::shared_ptr <TreeNode> treeNodeSource, std::shared_ptr<FileListData> fileRef) {
+        return std::make_shared<CutFileOP>(treeNodeSource, fileRef);
     }
 };

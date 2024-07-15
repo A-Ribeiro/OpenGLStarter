@@ -38,7 +38,7 @@ public:
 
     void refreshCurrentFilesAndSelectPath(const std::string &path_to_select);
 
-    void refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode);
+    void refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode, bool ignore_tree_select = false);
 
     void renameSelectedFile(const std::string &newfileName);
     void renameSelectedDirectory(const std::string &newdirname);

@@ -54,11 +54,11 @@ void ShortCutCategory::setActive(bool active) {
             continue;
         auto &controller = ImGuiMenu::Instance()->getController(shortcut.mainMenuPath);
         if (shortcut.mainMenuBehaviour == MenuBehaviour::SetItemVisibility){
-            printf("[ShortCutCategory::setActive] individual visible: %i\n", (int)active);
+            //printf("[ShortCutCategory::setActive] individual visible: %i\n", (int)active);
             controller.visible = active;
         }
         else if (shortcut.mainMenuBehaviour == MenuBehaviour::SetItemEnabled){
-            printf("[ShortCutCategory::setActive] individual enabled: %i\n", (int)active);
+            //printf("[ShortCutCategory::setActive] individual enabled: %i\n", (int)active);
             controller.enabled = active;
         }
 
@@ -85,11 +85,11 @@ void ShortCutCategory::setActive(bool active) {
             continue;
         auto &controller = ctxMenu.getController(shortcut.contextMenuPath);
         if (shortcut.contextMenuBehaviour == MenuBehaviour::SetItemVisibility){
-            printf("[ShortCutCategory::setActive] individual visible: %i\n", (int)active);
+            //printf("[ShortCutCategory::setActive] individual visible: %i\n", (int)active);
             controller.visible = active;
         }
         else if (shortcut.contextMenuBehaviour == MenuBehaviour::SetItemEnabled){
-            printf("[ShortCutCategory::setActive] individual enabled: %i\n", (int)active);
+            //printf("[ShortCutCategory::setActive] individual enabled: %i\n", (int)active);
             controller.enabled = active;
         }
 
