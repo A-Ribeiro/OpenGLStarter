@@ -165,149 +165,69 @@ View* ShortcutManager::Init(){
             {
                 // set visibility root
                 ShortCut(
-                    "Action", // "mainMenuPath"
-                    MenuBehaviour::SetItemVisibility // mainMenuBehaviour,
-                ),
-
-                // ShortCut(
-                //     "Action/Add", // "mainMenuPath"
-                //     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
-
-                //     "Add", // "contextMenuPath"
-                //     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-                    
-                //     "Ctrl+A",//shortcutStr
-                    
-                //     //ctrl,shift,alt,window,
-                //     true,false,false,false,
-                //     KeyCode::A, //AppKit::Window::Devices::KeyCode keyCode,
-                //     [](){
-                //         //activate
-                //         printf("activate Ctrl+A\n");
-                //     },
-                //     [](){
-                //         //deactivate
-                //         printf("deactivate Ctrl+A\n");
-                //     }
-                // ),
-                // ShortCut(
-                //     "Action/Remove", // "mainMenuPath"
-                //     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
-
-                //     "Remove", // "contextMenuPath"
-                //     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-
-                //     "Ctrl+R",//shortcutStr
-
-                //     //ctrl,shift,alt,window,
-                //     true,false,false,false,
-                //     KeyCode::R, //AppKit::Window::Devices::KeyCode keyCode,
-                //     [](){
-                //         //activate
-                //         printf("activate Ctrl+R\n");
-                //     },
-                //     [](){
-                //         //deactivate
-                //         printf("deactivate Ctrl+R\n");
-                //     }
-                // ),
-                ShortCut(
-                    "Action/<<>>", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
-
-                    "<<>>", // "contextMenuPath"
-                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-
-                    "",//shortcutStr
-                    //ctrl,shift,alt,window,
-                    true,false,false,false,
-                    KeyCode::Unknown //AppKit::Window::Devices::KeyCode keyCode,
+                    "Action", MenuBehaviour::SetItemVisibility // "mainMenuPath"
                 ),
                 ShortCut(
-                    "Action/Duplicate", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    "Action/New", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "New", MenuBehaviour::SetItemVisibility // "contextMenuPath"
+                ),
 
-                    "Duplicate", // "contextMenuPath"
-                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-
-                    "Ctrl+D",//shortcutStr
-
-                    //ctrl,shift,alt,window,
-                    true,false,false,false,
-                    KeyCode::D, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
-                        //activate
-                        printf("activate Ctrl+D\n");
-                    },
-                    [](){
-                        //deactivate
-                        printf("deactivate Ctrl+D\n");
-                    }
+                ShortCut(
+                    "Action/Open", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Open", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Ctrl+O" //shortcutStr
                 ),
                 ShortCut(
-                    "Action/Copy", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
-
-                    "Copy", // "contextMenuPath"
-                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-
-                    "Ctrl+C",//shortcutStr
-
-                    //ctrl,shift,alt,window,
-                    true,false,false,false,
-                    KeyCode::C, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
-                        //activate
-                        printf("activate Ctrl+C\n");
-                    },
-                    [](){
-                        //deactivate
-                        printf("deactivate Ctrl+C\n");
-                    }
+                    "Action/New/Scene", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "New/Scene", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Ctrl+N" //shortcutStr
                 ),
                 ShortCut(
-                    "Action/Cut", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
-
-                    "Cut", // "contextMenuPath"
-                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-
-                    "Ctrl+X",//shortcutStr
-
-                    //ctrl,shift,alt,window,
-                    true,false,false,false,
-                    KeyCode::X, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
-                        //activate
-                        printf("activate Ctrl+X\n");
-                    },
-                    [](){
-                        //deactivate
-                        printf("deactivate Ctrl+X\n");
-                    }
+                    "Action/New/Directory", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "New/Directory", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Ctrl+N" //shortcutStr
                 ),
                 ShortCut(
+                    "Action/Refresh", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Refresh", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "F5" //shortcutStr
+                ),
+                ShortCut(
+                    "Action/Rename", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Rename", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "F2" //shortcutStr
+                ),
+                ShortCut(
+                    "Action/Remove", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Remove", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Delete" //shortcutStr
+                ),
 
-                    "Action/Paste", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
-
-                    "Paste", // "contextMenuPath"
-                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-
-                    "Ctrl+V",//shortcutStr
-
-                    //ctrl,shift,alt,window,
-                    true,false,false,false,
-                    KeyCode::V, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
-                        //activate
-                        printf("activate Ctrl+V\n");
-                    },
-                    [](){
-                        //deactivate
-                        printf("deactivate Ctrl+V\n");
-                    }
-                )
+                ShortCut(
+                    "Action/<<>>", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "<<>>", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "" //shortcutStr
+                ),
+                ShortCut(
+                    "Action/Duplicate", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Duplicate", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Ctrl+D" //shortcutStr
+                ),
+                ShortCut(
+                    "Action/Copy", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Copy", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Ctrl+C" //shortcutStr
+                ),
+                ShortCut(
+                    "Action/Cut", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Cut", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Ctrl+X" //shortcutStr
+                ),
+                ShortCut(
+                    "Action/Paste", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Paste", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Ctrl+V" //shortcutStr
+                )                
             }
         );
 

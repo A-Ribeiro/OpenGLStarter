@@ -167,7 +167,7 @@ void Editor::init()
 
                 ShortCut(
                     "Action/<<>>", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "<<>>", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -180,7 +180,7 @@ void Editor::init()
                 ShortCut(
 
                     "Action/Paste", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "Paste", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -306,7 +306,7 @@ void Editor::init()
                 ),
                 ShortCut(
                     "Action/<<>>", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "<<>>", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -318,7 +318,7 @@ void Editor::init()
                 ),
                 ShortCut(
                     "Action/Duplicate", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "Duplicate", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -347,7 +347,7 @@ void Editor::init()
                 ),
                 ShortCut(
                     "Action/Copy", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "Copy", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -366,7 +366,7 @@ void Editor::init()
                 ),
                 ShortCut(
                     "Action/Cut", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "Cut", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -386,7 +386,7 @@ void Editor::init()
                 ShortCut(
 
                     "Action/Paste", // "mainMenuPath"
-                    MenuBehaviour::SetItemEnabled, // mainMenuBehaviour,
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
                     "Paste", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
@@ -1369,16 +1369,33 @@ void Editor::deleteSelectedFile() {
             if (selectedListElement != nullptr)
                 selectedListElement->removeSelf();
 
+            refreshDirectoryStructure(selectedTreeNode);
+
             if (next_select != nullptr){
+
+                std::shared_ptr<FileListData> fileInfoNext = std::dynamic_pointer_cast<FileListData>(next_select->data);
+                for(auto &item:visualList.items){
+                    std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(item->data);
+                    if (fileInfo->file.full_path.compare(fileInfoNext->file.full_path) == 0){
+                        next_select = item;
+                        break;
+                    }
+                }
+
+            
                 project.OnListSingleClick(next_select);
                 project.forceFilesSelection(next_select->uid);
                 next_select->scrollToThisItem();
+
+                selectedFileInfo = std::dynamic_pointer_cast<FileListData>(next_select->data);
+
             } else {
                 project.OnListSelect(nullptr);
                 project.clearListSelection(ProjectClearMethod::ClearNoCallback);
-            }
 
-            refreshDirectoryStructure(selectedTreeNode);
+                selectedFileInfo = nullptr;
+
+            }
 
         },
         DialogPosition::OpenOnScreenCenter
