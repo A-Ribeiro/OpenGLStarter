@@ -115,6 +115,7 @@ const ViewType ShortcutManager::Type = "ShortcutManager";
 
 ShortcutManager::ShortcutManager(): View(ShortcutManager::Type){
     lock_change_action_category = 0;
+    input_blocked = false;
 }
 
 void ShortcutManager::lockChangeActionCategory(){
@@ -318,6 +319,9 @@ View* ShortcutManager::Init(){
 }
 
 void ShortcutManager::RenderAndLogic(){
+
+    if (input_blocked)
+        return;
 
     using namespace AppKit::Window::Devices;
 

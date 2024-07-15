@@ -120,6 +120,8 @@ public:
     void lockChangeActionCategory();
     void unlockChangeActionCategory();
 
+    bool input_blocked;
+
     ShortcutManager();
 
     ~ShortcutManager();

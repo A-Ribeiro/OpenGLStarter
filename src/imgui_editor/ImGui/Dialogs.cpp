@@ -72,6 +72,7 @@ void Dialogs::RenderAndLogic()
         | ImGuiWindowFlags_NoTitleBar
         ))
 	{
+        imGuiManager->shortcutManager.input_blocked = true;
         bool needs_update = false;
         ImVec2 w_pos = ImGui::GetWindowPos();
         ImVec2 w_max = ImGui::GetWindowSize() + w_pos;
@@ -121,6 +122,7 @@ void Dialogs::RenderAndLogic()
                 _tmp(input_string);
             }
             ImGui::CloseCurrentPopup(); 
+            imGuiManager->shortcutManager.input_blocked = false;
         }
         ImGui::PopStyleColor();
         ImGui::PopStyleColor();
@@ -132,6 +134,7 @@ void Dialogs::RenderAndLogic()
         ImGui::PushStyleColor(ImGuiCol_ButtonActive,ImVec4(0.98f*0.7f, 0.295f, 0.295f, 1.00f));
         if (ImGui::Button("Cancel", ImVec2(120, 0))) {
             ImGui::CloseCurrentPopup(); 
+            imGuiManager->shortcutManager.input_blocked = false;
         }
         ImGui::PopStyleColor();
         ImGui::PopStyleColor();
@@ -176,6 +179,8 @@ void Dialogs::RenderAndLogic()
         | ImGuiWindowFlags_NoTitleBar
         ))
 	{
+        imGuiManager->shortcutManager.input_blocked = true;
+
         bool needs_update = false;
         ImVec2 w_pos = ImGui::GetWindowPos();
         ImVec2 w_max = ImGui::GetWindowSize() + w_pos;
@@ -236,6 +241,7 @@ void Dialogs::RenderAndLogic()
                 _tmp();
             }
             ImGui::CloseCurrentPopup(); 
+            imGuiManager->shortcutManager.input_blocked = false;
         }
         ImGui::PopStyleColor();
         ImGui::PopStyleColor();
@@ -248,6 +254,7 @@ void Dialogs::RenderAndLogic()
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,ImVec4(0.98f*0.7f, 0.295f, 0.295f, 1.00f));
             if (ImGui::Button("Cancel", ImVec2(120, 0))) {
                 ImGui::CloseCurrentPopup(); 
+                imGuiManager->shortcutManager.input_blocked = false;
             }
             ImGui::PopStyleColor();
             ImGui::PopStyleColor();
