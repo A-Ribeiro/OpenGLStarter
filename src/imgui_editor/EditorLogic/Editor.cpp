@@ -910,21 +910,27 @@ void Editor::createNewDirectoryOnCurrentDirectory(const std::string &fileName)
                 return;
             }
 
-#if defined(_WIN32)
+// #if defined(_WIN32)
 
-            std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(full_path_file);            
-            if (CreateDirectoryW(_wstr.c_str(), NULL) == FALSE){
-                lastError = ITKPlatformUtil::getLastErrorMessage();
-                return;
-            }
+//             std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(full_path_file);            
+//             if (CreateDirectoryW(_wstr.c_str(), NULL) == FALSE){
+//                 lastError = ITKPlatformUtil::getLastErrorMessage();
+//                 _tmp_str = aux;
+//                 return;
+//             }
 
-#elif defined(__linux__) || defined(__APPLE__)
-            if (mkdir(full_path_file.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-                lastError = strerror(errno);
+// #elif defined(__linux__) || defined(__APPLE__)
+//             if (mkdir(full_path_file.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+//                 lastError = strerror(errno);
+//                 _tmp_str = aux;
+//                 return;
+//             }
+// #endif
+
+            if (!ITKCommon::FileSystem::Directory::mkdir(full_path_file.c_str(), &lastError)){
                 _tmp_str = aux;
                 return;
             }
-#endif
 
             //ITKCommon::FileSystem::File::FromPath(full_path_file);
             imGuiManager->PostAction.add([&, full_path_file](){
@@ -1129,24 +1135,26 @@ void Editor::renameSelectedFile(const std::string &newfileName) {
 
             std::string new_filename = selectedFileInfo->file.base_path + new_str;
 
-#if defined(_WIN32)
+// #if defined(_WIN32)
 
-            std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(selectedFileInfo->file.full_path);
-            std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(new_filename);
+//             std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(selectedFileInfo->file.full_path);
+//             std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(new_filename);
 
-            if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
-                lastError = ITKPlatformUtil::getLastErrorMessage();
+//             if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
+//                 lastError = ITKPlatformUtil::getLastErrorMessage();
+//                 return;
+//             }
+
+// #elif defined(__linux__) || defined(__APPLE__)
+
+//             if (rename(selectedFileInfo->file.full_path.c_str(), new_filename.c_str()) != 0) {
+//                 lastError = strerror(errno);
+//                 return;
+//             }
+
+// #endif
+            if (!ITKCommon::FileSystem::File::rename(selectedFileInfo->file.full_path.c_str(), new_filename.c_str(),&lastError))
                 return;
-            }
-
-#elif defined(__linux__) || defined(__APPLE__)
-
-            if (rename(selectedFileInfo->file.full_path.c_str(), new_filename.c_str()) != 0) {
-                lastError = strerror(errno);
-                return;
-            }
-
-#endif
             
 
             {
@@ -1187,29 +1195,32 @@ void Editor::renameSelectedDirectory(const std::string &newdirname) {
                 );
             });
 
-            std::string new_filename = selectedDirectoryInfo->file.base_path + new_str;
+            std::string new_dirname = selectedDirectoryInfo->file.base_path + new_str;
 
 
-#if defined(_WIN32)
+// #if defined(_WIN32)
 
-            std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(selectedDirectoryInfo->file.full_path);
-            std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(new_filename);
+//             std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(selectedDirectoryInfo->file.full_path);
+//             std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(new_dirname);
 
-            if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
-                lastError = ITKPlatformUtil::getLastErrorMessage();
-                return;
-            }
+//             if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
+//                 lastError = ITKPlatformUtil::getLastErrorMessage();
+//                 return;
+//             }
 
-#elif defined(__linux__) || defined(__APPLE__)
+// #elif defined(__linux__) || defined(__APPLE__)
             
-            if (rename(selectedDirectoryInfo->file.full_path.c_str(), new_filename.c_str()) != 0) {
-                lastError = strerror(errno);
+//             if (rename(selectedDirectoryInfo->file.full_path.c_str(), new_dirname.c_str()) != 0) {
+//                 lastError = strerror(errno);
+//                 return;
+//             }
+// #endif
+
+            if (!ITKCommon::FileSystem::Directory::rename(selectedDirectoryInfo->file.full_path.c_str(), new_dirname.c_str(),&lastError))
                 return;
-            }
-#endif
 
             {
-                selectedDirectoryInfo->file = ITKCommon::FileSystem::File::FromPath(new_filename);
+                selectedDirectoryInfo->file = ITKCommon::FileSystem::File::FromPath(new_dirname);
                 selectedTreeNode->setName(selectedDirectoryInfo->file.name.c_str());
                 selectedTreeNode->parent->sort();
                 selectedTreeNode->scrollToThisItem();
@@ -1249,41 +1260,45 @@ void Editor::copyFile(std::shared_ptr<FileListData> input, const std::string &ou
         return;
     }
 
-    {
-        char buf[BUFSIZ];
-        size_t size;
+//     {
+//         char buf[BUFSIZ];
+//         size_t size;
 
-#if defined(_WIN32)
-        FILE* source = _wfopen( ITKCommon::StringUtil::string_to_WString(input_file).c_str(), L"rb");
-#elif defined(__linux__) || defined(__APPLE__)
-        FILE* source = fopen(input_file.c_str(), "rb");
-#endif
-        if (!source){
-            // errno error
-            lastError = strerror(errno);
-            return;
-        }
-        EventCore::ExecuteOnScopeEnd _close_source([=](){
-            fclose(source);
-        });
+// #if defined(_WIN32)
+//         FILE* source = _wfopen( ITKCommon::StringUtil::string_to_WString(input_file).c_str(), L"rb");
+// #elif defined(__linux__) || defined(__APPLE__)
+//         FILE* source = fopen(input_file.c_str(), "rb");
+// #endif
+//         if (!source){
+//             // errno error
+//             lastError = strerror(errno);
+//             return;
+//         }
+//         EventCore::ExecuteOnScopeEnd _close_source([=](){
+//             fclose(source);
+//         });
 
-#if defined(_WIN32)
-        FILE* dest = _wfopen(ITKCommon::StringUtil::string_to_WString(output_file).c_str(), L"wb");
-#elif defined(__linux__) || defined(__APPLE__)
-        FILE* dest = fopen(output_file.c_str(), "wb");
-#endif
-        if (!dest){
-            // errno error
-            lastError = strerror(errno);
-            return;
-        }
-        EventCore::ExecuteOnScopeEnd _close_dest([=](){
-            fclose(dest);
-        });
-        while (size = fread(buf, 1, BUFSIZ, source)) {
-            fwrite(buf, 1, size, dest);
-        }
-    }
+// #if defined(_WIN32)
+//         FILE* dest = _wfopen(ITKCommon::StringUtil::string_to_WString(output_file).c_str(), L"wb");
+// #elif defined(__linux__) || defined(__APPLE__)
+//         FILE* dest = fopen(output_file.c_str(), "wb");
+// #endif
+//         if (!dest){
+//             // errno error
+//             lastError = strerror(errno);
+//             return;
+//         }
+//         EventCore::ExecuteOnScopeEnd _close_dest([=](){
+//             fclose(dest);
+//         });
+//         while (size = fread(buf, 1, BUFSIZ, source)) {
+//             fwrite(buf, 1, size, dest);
+//         }
+//     }
+
+    if (!ITKCommon::FileSystem::File::copy(input_file.c_str(),output_file.c_str(),&lastError))
+        return;
+
     if (OnSuccess != nullptr)
         OnSuccess();
 }
@@ -1312,23 +1327,25 @@ void Editor::moveFile(std::shared_ptr<FileListData> input, const std::string &ou
     }
 
     {
-#if defined(_WIN32)
+// #if defined(_WIN32)
 
-        std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(input_file.c_str());
-        std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(output_file.c_str());
+//         std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(input_file.c_str());
+//         std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(output_file.c_str());
 
-        if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
-            lastError = ITKPlatformUtil::getLastErrorMessage();
+//         if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
+//             lastError = ITKPlatformUtil::getLastErrorMessage();
+//             return;
+//         }
+
+// #elif defined(__linux__) || defined(__APPLE__)
+
+//         if (rename(input_file.c_str(), output_file.c_str()) != 0) {
+//             lastError = strerror(errno);
+//             return;
+//         }
+// #endif
+        if (!ITKCommon::FileSystem::File::move(input_file.c_str(), output_file.c_str(), &lastError))
             return;
-        }
-
-#elif defined(__linux__) || defined(__APPLE__)
-
-        if (rename(input_file.c_str(), output_file.c_str()) != 0) {
-            lastError = strerror(errno);
-            return;
-        }
-#endif
 
         if (OnSuccess != nullptr)
             OnSuccess();
@@ -1414,19 +1431,21 @@ void Editor::deleteSelectedFile() {
                 return;
             }
 
-#if defined(_WIN32)
-            std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(selectedFileInfo->file.full_path);
-            if (DeleteFileW(_wstr.c_str()) == FALSE) {
-                lastError = ITKPlatformUtil::getLastErrorMessage();
-                return;
-            }
-#elif defined(__linux__) || defined(__APPLE__)
+// #if defined(_WIN32)
+//             std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(selectedFileInfo->file.full_path);
+//             if (DeleteFileW(_wstr.c_str()) == FALSE) {
+//                 lastError = ITKPlatformUtil::getLastErrorMessage();
+//                 return;
+//             }
+// #elif defined(__linux__) || defined(__APPLE__)
 
-            if (remove(selectedFileInfo->file.full_path.c_str()) != 0) {
-                lastError = strerror(errno);
+//             if (remove(selectedFileInfo->file.full_path.c_str()) != 0) {
+//                 lastError = strerror(errno);
+//                 return;
+//             }
+// #endif
+            if (!ITKCommon::FileSystem::File::remove(selectedFileInfo->file.full_path.c_str(), &lastError))
                 return;
-            }
-#endif
 
             auto &project = imGuiManager->project;
             auto &visualList = project.getVisualList();
@@ -1524,20 +1543,24 @@ void Editor::deleteSelectedDirectory() {
                 return;
             }
 
-#if defined(_WIN32)
-            std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(selectedDirectoryInfo->file.full_path);
-            if (RemoveDirectoryW(_wstr.c_str()) == FALSE){
-                lastError = ITKPlatformUtil::getLastErrorMessage();
-                return;
-            }
-#elif defined(__linux__) || defined(__APPLE__)
+// #if defined(_WIN32)
+//             std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(selectedDirectoryInfo->file.full_path);
+//             if (RemoveDirectoryW(_wstr.c_str()) == FALSE){
+//                 lastError = ITKPlatformUtil::getLastErrorMessage();
+//                 return;
+//             }
+// #elif defined(__linux__) || defined(__APPLE__)
             
-            printf("remove: %s\n", selectedDirectoryInfo->file.full_path.c_str());
-            if ( remove(selectedDirectoryInfo->file.full_path.c_str() ) != 0 ) {
-                lastError = strerror(errno);
+//             printf("remove: %s\n", selectedDirectoryInfo->file.full_path.c_str());
+//             if ( remove(selectedDirectoryInfo->file.full_path.c_str() ) != 0 ) {
+//                 lastError = strerror(errno);
+//                 return;
+//             }
+// #endif
+
+            if (!ITKCommon::FileSystem::Directory::remove(selectedDirectoryInfo->file.full_path.c_str(), &lastError))
                 return;
-            }
-#endif
+
             // if (!selectedTreeNode->isRoot)
             refreshDirectoryStructure(selectedTreeNode->parent->self());
 
