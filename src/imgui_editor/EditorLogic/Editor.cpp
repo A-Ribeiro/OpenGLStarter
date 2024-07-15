@@ -775,18 +775,26 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
                 return;
             }
 
-#if defined(_WIN32)
-            auto fout = _wfopen( ITKCommon::StringUtil::string_to_WString(full_path_file).c_str(), L"wb");
-#elif defined(__linux__) || defined(__APPLE__)
-            auto fout = fopen(full_path_file.c_str(), "wb");
-#endif
+// #if defined(_WIN32)
+//             auto fout = _wfopen( ITKCommon::StringUtil::string_to_WString(full_path_file).c_str(), L"wb");
+// #elif defined(__linux__) || defined(__APPLE__)
+//             auto fout = fopen(full_path_file.c_str(), "wb");
+// #endif
 
-            if (!fout){
-                lastError = strerror(errno);
+//             if (!fout){
+//                 lastError = strerror(errno);
+//                 _tmp_str = aux;
+//                 return;
+//             }
+
+//             fclose(fout);
+
+            if (!ITKCommon::FileSystem::File::touch(full_path_file.c_str(), &lastError)){
+                //lastError = strerror(errno);
                 _tmp_str = aux;
                 return;
             }
-            fclose(fout);
+            
 #if defined(__linux__) || defined(__APPLE__)
             chmod(full_path_file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP );
 #endif
