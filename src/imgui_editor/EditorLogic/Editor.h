@@ -41,6 +41,8 @@ public:
     void refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode);
 
     void renameSelectedFile(const std::string &newfileName);
+    void renameSelectedDirectory(const std::string &newdirname);
+
 
     void copyFile(std::shared_ptr<FileListData> inFile, const std::string &outFileName, EventCore::Callback<void()> OnSuccess = nullptr);
     void moveFile(std::shared_ptr<FileListData> inFile, const std::string &outFileName, EventCore::Callback<void()> OnSuccess = nullptr);

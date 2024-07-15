@@ -120,6 +120,27 @@ void Editor::init()
                 ),
 
                 ShortCut(
+                    "Action/Rename", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "Rename", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "F2",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    false,false,false,false,
+                    KeyCode::F2, //AppKit::Window::Devices::KeyCode keyCode,
+                    [&](){
+                        //activate
+                        printf("rename\n");
+                        if (selectedDirectoryInfo == nullptr)
+                            return;
+                        renameSelectedDirectory(selectedDirectoryInfo->file.name);
+                    }
+                ),
+
+                ShortCut(
                     "Action/Remove", // "mainMenuPath"
                     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
@@ -1096,6 +1117,58 @@ void Editor::renameSelectedFile(const std::string &newfileName) {
         DialogPosition::OpenOnScreenCenter
     );
 
+}
+
+void Editor::renameSelectedDirectory(const std::string &newdirname) {
+    if (selectedTreeNode == nullptr || selectedDirectoryInfo == nullptr)
+        return;
+    if (selectedTreeNode->isRoot)
+        return;
+    
+    ImGuiManager::Instance()->dialogs.showEnterText_OKCancel(
+        newdirname,
+        [&](const std::string &new_str){
+            if (selectedTreeNode == nullptr || selectedDirectoryInfo == nullptr)
+                return;
+            if (new_str.compare(selectedDirectoryInfo->file.name) == 0)
+                return;
+
+            lastError = "";
+            _tmp_str = new_str;
+            EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
+                if (this->lastError.length() == 0)
+                    return;
+                this->showErrorAndRetry(
+                    lastError,
+                    [&](){
+                        this->renameSelectedDirectory(_tmp_str);
+                    }
+                );
+            });
+
+            std::string new_filename = selectedDirectoryInfo->file.base_path + new_str;
+            int rc = rename(selectedDirectoryInfo->file.full_path.c_str(),
+                new_filename.c_str()
+            );
+            if (rc!=0)
+                lastError = strerror(errno);
+            else {
+
+                selectedDirectoryInfo->file = ITKCommon::FileSystem::File::FromPath(new_filename);
+                selectedTreeNode->setName(selectedDirectoryInfo->file.name.c_str());
+                selectedTreeNode->parent->sort();
+                selectedTreeNode->scrollToThisItem();
+
+                imGuiManager->PostAction.add([&](){
+                    if (selectedTreeNode != nullptr){
+                        refreshDirectoryStructure(selectedTreeNode);
+
+                    }
+                });
+            }
+        },
+        DialogPosition::OpenOnScreenCenter
+    );
 }
 
 void Editor::copyFile(std::shared_ptr<FileListData> input, const std::string &outFileName, EventCore::Callback<void()> OnSuccess) {
