@@ -79,6 +79,27 @@ void Editor::init()
                         createNewSceneOnCurrentDirectory("NewFile");
                     }
                 ),
+                
+                ShortCut(
+                    "Action/New/Directory", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "New/Directory", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+                    
+                    "",//shortcutStr
+                    
+                    //ctrl,shift,alt,window,
+                    false,false,false,false,
+                    KeyCode::Unknown, //AppKit::Window::Devices::KeyCode keyCode,
+                    //EventCore::CallbackWrapper(&Editor::createNewSceneOnCurrentDirectory, this)
+                    [&](){
+                        //activate
+                        //printf("New Scene\n");
+                        createNewDirectoryOnCurrentDirectory("NewDirectory");
+                    }
+                ),
+
                 ShortCut(
                     "Action/Refresh", // "mainMenuPath"
                     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
@@ -711,6 +732,134 @@ void Editor::createNewSceneOnCurrentDirectory(const std::string &fileName) {
             imGuiManager->PostAction.add([&, full_path_file](){
                 this->refreshCurrentFilesAndSelectPath(full_path_file);
             });
+        },
+        DialogPosition::OpenOnScreenCenter
+    );
+}
+
+
+void Editor::createNewDirectoryOnCurrentDirectory(const std::string &fileName) 
+{
+    if (selectedDirectoryInfo == nullptr)
+        return;
+
+    ImGuiManager::Instance()->dialogs.showEnterText_OKCancel(fileName, 
+        [&](const std::string &new_str){
+
+            printf("createNewDirectoryOnCurrentDirectory\n");
+
+            if (selectedDirectoryInfo == nullptr)
+                return;
+            
+            lastError = "";
+            EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
+                printf("this->lastError.length(): %i\n", (int)this->lastError.length() );
+                if (this->lastError.length() == 0)
+                    return;
+                this->showErrorAndRetry(
+                    lastError,
+                    [&](){
+                        this->createNewDirectoryOnCurrentDirectory(this->_tmp_str);
+                    }
+                );
+            });
+            
+            // remove all slashes
+            std::u32string s_output;
+
+            auto new_str_utf32 = ITKCommon::StringUtil::utf8_to_utf32(new_str);
+
+            //check if file exists
+            for(const auto &_c : new_str_utf32){
+#if defined(_WIN32)
+                if (_c == U'<' || _c == U'>' ||
+                _c == U':' || _c == U'"' ||
+                _c == U'/' || _c == U'\\' ||
+                _c == U'|' || _c == U'?' ||
+                _c == U'*' )
+                    continue;
+#elif defined(__linux__)
+                if (_c == U'/')
+                    continue;
+#elif defined(__APPLE__)
+                if (_c == U'/' || _c == U':' )
+                    continue;
+#endif
+                // ASCII control characters. Only Winows blocks, 
+                // but it is better to avoid on all systems
+                if (_c <= 31)
+                    continue;
+
+                s_output += _c;
+            }
+            
+            auto aux = ITKCommon::StringUtil::trim( ITKCommon::StringUtil::utf32_to_utf8(s_output) );
+            // apply trim
+            //s_output = aux;
+            std::string file_to_create = aux;
+
+            if (file_to_create.length() == 0) {
+                lastError = "Empty directory name supplied";
+                _tmp_str = aux;
+                return;
+            }
+
+#if defined(_WIN32)
+            // windows reserved words
+            const char * win32_reserved_words[] = { 
+                "CON", "PRN", "AUX", "NUL", 
+                "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+                "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+            };
+            const int total_words = 22;
+            auto parts = ITKCommon::StringUtil::tokenizer(ITKCommon::StringUtil::toUpper(file_to_create), "." );
+            for(const auto &item : parts){                
+                if (item.length() != 3 && item.length() != 4)
+                    continue;
+                for(int i=0;i<total_words;i++){
+                    if (item.compare(win32_reserved_words[i]) == 0) {
+                        lastError = "Cannot use the reserved word: ";
+                        lastError += win32_reserved_words[i];
+                        fileNameToCreate = aux;
+                        return;
+                    }
+                }
+            }
+#endif
+
+            // create file pointed by file_to_create
+            printf("Creating directory: %s\n", file_to_create.c_str());
+
+            std::string full_path_file = selectedDirectoryInfo->file.full_path + file_to_create;
+
+            //refresh and select
+            if (ITKCommon::Path::isDirectory(full_path_file)){
+                lastError = "Directory already exists";
+                _tmp_str = aux;
+                return;
+            }
+
+#if defined(_WIN32)
+
+            std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(full_path_file);            
+            if (CreateDirectoryW(_wstr.c_str(), NULL) == FALSE){
+                lastError = ITKPlatformUtil::getLastErrorMessage();
+                return;
+            }
+
+#elif defined(__linux__) || defined(__APPLE__)
+            if (mkdir(full_path_file.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+                lastError = strerror(errno);
+                _tmp_str = aux;
+                return;
+            }
+#endif
+
+            //ITKCommon::FileSystem::File::FromPath(full_path_file);
+            imGuiManager->PostAction.add([&, full_path_file](){
+                this->refreshDirectoryStructure(selectedTreeNode);
+            });
+
         },
         DialogPosition::OpenOnScreenCenter
     );

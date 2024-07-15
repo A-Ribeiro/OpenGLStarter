@@ -32,6 +32,8 @@ public:
 
     void createNewSceneOnCurrentDirectory(const std::string &fileName);
 
+    void createNewDirectoryOnCurrentDirectory(const std::string &fileName);
+
     void showErrorAndRetry(const std::string &error, EventCore::Callback<void()> callback);
 
     void refreshCurrentFilesAndSelectPath(const std::string &path_to_select);
