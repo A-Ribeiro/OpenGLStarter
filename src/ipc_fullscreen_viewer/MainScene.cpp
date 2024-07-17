@@ -173,7 +173,7 @@ void MainScene::draw() {
 
     if (yuy2_queue.queue_header_ptr->size > 0 && yuy2_queue.read(&data_buffer)) {
         //new texture
-        int size_check = 1920 * 1080 * 2;
+        int64_t size_check = 1920 * 1080 * 2;
         if (data_buffer.size == size_check) {
             if (aux_rgb_buffer.size != 1920 * 1080 * 4) {
                 aux_rgb_buffer.setSize(1920 * 1080 * 4);
