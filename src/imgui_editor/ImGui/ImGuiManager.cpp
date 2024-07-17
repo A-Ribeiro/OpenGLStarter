@@ -260,7 +260,7 @@ void ImGuiManager::Finalize()
 void ImGuiManager::SaveLayout()
 {
 	// save layout
-	auto path = base_path + ITKCommon::PATH_SEPARATOR + "layout.ini";
+	auto path = base_path + ITKCommon::PATH_SEPARATOR + UTF32_STR(U"layout.ini");
     
 	size_t settings_size = 0;
 	const uint8_t* settings = (uint8_t*)ImGui::SaveIniSettingsToMemory(&settings_size);
@@ -282,7 +282,7 @@ void ImGuiManager::SaveLayout()
 void ImGuiManager::LoadLayout()
 {
 	// load layout
-	auto path = base_path + ITKCommon::PATH_SEPARATOR + "layout.ini";
+	auto path = base_path + ITKCommon::PATH_SEPARATOR + UTF32_STR(U"layout.ini");
 	std::string settings;
 
     auto file = ITKCommon::FileSystem::File::FromPath(path);
@@ -307,7 +307,7 @@ void ImGuiManager::LoadLayout()
 
 void ImGuiManager::DeleteLayout()
 {
-	auto path = base_path + ITKCommon::PATH_SEPARATOR + "layout.ini";
+	auto path = base_path + ITKCommon::PATH_SEPARATOR + UTF32_STR(U"layout.ini");
 	remove(path.c_str());
 }
 
