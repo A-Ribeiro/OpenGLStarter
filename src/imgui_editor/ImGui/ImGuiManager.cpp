@@ -4,6 +4,7 @@
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
+#include <InteractiveToolkit/ITKCommon/FileSystem/File.h>
 
 
 ImGuiManager::ImGuiManager()
@@ -260,34 +261,48 @@ void ImGuiManager::SaveLayout()
 {
 	// save layout
 	auto path = base_path + ITKCommon::PATH_SEPARATOR + "layout.ini";
+    
 	size_t settings_size = 0;
-	const char* settings = ImGui::SaveIniSettingsToMemory(&settings_size);
-	FILE* out = fopen(path.c_str(), "wb");
-	if (out)
-	{
-		printf("Saving layout...\n");
-		fwrite(settings, sizeof(char), settings_size, out);
-		fclose(out);
-	}
+	const uint8_t* settings = (uint8_t*)ImGui::SaveIniSettingsToMemory(&settings_size);
+
+    std::string errorStr;
+    if (!ITKCommon::FileSystem::File::WriteContentFromBinary(path.c_str(),settings,settings_size,false,&errorStr)){
+        fprintf(stderr, "ERROR: %s\n", errorStr.c_str());
+    }
+
+	// FILE* out = ITKCommon::FileSystem::File::fopen(path.c_str(), "wb");
+	// if (out)
+	// {
+	// 	printf("Saving layout...\n");
+	// 	fwrite(settings, sizeof(char), settings_size, out);
+	// 	fclose(out);
+	// }
 }
 
 void ImGuiManager::LoadLayout()
 {
 	// load layout
 	auto path = base_path + ITKCommon::PATH_SEPARATOR + "layout.ini";
-	std::vector<char> settings;
-	FILE* in = fopen(path.c_str(), "rb");
-	if (in)
-	{
-		printf("Loading saved layout...\n");
-		fseek(in, 0, SEEK_END);
-		int32_t size = (int32_t)ftell(in);
-		settings.resize(size + 1);
-		fseek(in, 0, SEEK_SET);
-		uint32_t readed_size = (uint32_t)fread(&settings[0], sizeof(uint8_t), size, in);
-		fclose(in);
-		ImGui::LoadIniSettingsFromMemory(&settings[0]);
-	}
+	std::string settings;
+
+    auto file = ITKCommon::FileSystem::File::FromPath(path);
+    if (file.readContentToString(&settings)) {
+        ImGui::LoadIniSettingsFromMemory(settings.c_str());
+    }
+
+	// FILE* in = ITKCommon::FileSystem::File::fopen(path.c_str(), "rb");
+	// if (in)
+	// {
+	// 	printf("Loading saved layout...\n");
+	// 	fseek(in, 0, SEEK_END);
+	// 	int32_t size = (int32_t)ftell(in);
+	// 	settings.resize(size + 1);
+	// 	fseek(in, 0, SEEK_SET);
+	// 	uint32_t readed_size = (uint32_t)fread(&settings[0], sizeof(uint8_t), size, in);
+	// 	fclose(in);
+	// 	ImGui::LoadIniSettingsFromMemory(&settings[0]);
+	// }
+
 }
 
 void ImGuiManager::DeleteLayout()

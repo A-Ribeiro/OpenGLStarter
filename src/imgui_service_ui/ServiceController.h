@@ -6,6 +6,8 @@
 #include <InteractiveToolkit/Platform/Process.h>
 #include <InteractiveToolkit/Platform/Thread.h>
 
+#include <InteractiveToolkit/ITKCommon/FileSystem/File.h>
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 
@@ -455,31 +457,45 @@ public:
             fillServiceList(document);
     }
 
-    void loadFromFile(const char *filename)
+    bool loadFromFile(const char *filename, std::string *errorStr = NULL)
     {
         entries.clear();
-        Platform::ObjectBuffer buffer;
+        
         // Default template parameter uses UTF8 and MemoryPoolAllocator.
         rapidjson::Document document;
 
-        FILE *in = fopen(filename, "rb");
-        if (in)
-        {
-            fseek(in, 0, SEEK_END);
-            int32_t size = (int32_t)ftell(in);
-            buffer.setSize(size + 1);
-            fseek(in, 0, SEEK_SET);
-            uint32_t readed_size = (uint32_t)fread(buffer.data, sizeof(uint8_t), size, in);
-            fclose(in);
-            ITK_ABORT(readed_size != size, "Read Command Error.\n");
-            buffer.data[size] = 0;//add \0 at end
-        }
-        document.ParseInsitu((char*)buffer.data);
+        std::string fileContent;
+        auto file = ITKCommon::FileSystem::File::FromPath(filename);
+        if (!file.readContentToString(&fileContent,errorStr))
+            return false;
 
-        if (!document.HasParseError())
-            fillServiceList(document);
-        else
-            printf("Error on load JSON file.\n");
+        document.ParseInsitu(&fileContent[0]);
+
+        // Platform::ObjectBuffer buffer;
+        // FILE *in = ITKCommon::FileSystem::File::fopen(filename, "rb");
+        // if (!in)
+        //     return false;
+
+        // {
+        //     fseek(in, 0, SEEK_END);
+        //     int32_t size = (int32_t)ftell(in);
+        //     buffer.setSize(size + 1);
+        //     fseek(in, 0, SEEK_SET);
+        //     uint32_t readed_size = (uint32_t)fread(buffer.data, sizeof(uint8_t), size, in);
+        //     fclose(in);
+        //     ITK_ABORT(readed_size != size, "Read Command Error.\n");
+        //     buffer.data[size] = 0;//add \0 at end
+        // }
+        // document.ParseInsitu((char*)buffer.data);
+
+        if (document.HasParseError()){
+            if (errorStr != NULL)
+                *errorStr = ITKCommon::PrintfToStdString("Error on load JSON file.\n");
+            return false;    
+        }
+
+        fillServiceList(document);        
+        return true;
     }
 
     void printContent() {
