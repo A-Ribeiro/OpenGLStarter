@@ -10,7 +10,7 @@
 #pragma warning(disable : 4996)
 #endif
 
-FolderFileOperations::FolderFileOperations() : OperationsCommon()
+FolderFileOperations::FolderFileOperations() //: OperationsCommon()
 {
     //project_directory_set = false;
     // imGuiManager = NULL;
@@ -21,7 +21,7 @@ void FolderFileOperations::init()
 {
     // imGuiManager = ImGuiManager::Instance();
     // imGuiMenu = ImGuiMenu::Instance();
-    OperationsCommon::init();
+    // OperationsCommon::init();
 
     {
         using namespace ITKCommon::FileSystem;

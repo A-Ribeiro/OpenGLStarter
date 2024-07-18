@@ -7,7 +7,7 @@
 //#include "Clipboard.h"
 
 
-class FolderFileOperations : public OperationsCommon
+class FolderFileOperations : virtual public OperationsCommon
 {
     public:
 

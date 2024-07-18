@@ -3,10 +3,10 @@
 #include "OperationsCommon.h"
 #include "FolderFileOperations.h"
 
-class Editor : public FolderFileOperations
+class Editor : virtual public OperationsCommon,
+               public FolderFileOperations
 {
 public:
-
     Editor();
 
     void init();

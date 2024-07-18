@@ -8,7 +8,7 @@
 #pragma warning(disable : 4996)
 #endif
 
-Editor::Editor():FolderFileOperations()
+Editor::Editor():OperationsCommon(),FolderFileOperations()
 {
 }
 
