@@ -12,16 +12,10 @@
 
 FolderFileOperations::FolderFileOperations() //: OperationsCommon()
 {
-    //project_directory_set = false;
-    // imGuiManager = NULL;
-    // imGuiMenu = NULL;
 }
 
 void FolderFileOperations::init()
 {
-    // imGuiManager = ImGuiManager::Instance();
-    // imGuiMenu = ImGuiMenu::Instance();
-    // OperationsCommon::init();
 
     {
         using namespace ITKCommon::FileSystem;
@@ -32,12 +26,7 @@ void FolderFileOperations::init()
             std::string out;
             if (Native::OpenFolderDialog(project_directory.getBasePath(), &out) ){
                 openFolder(ITKCommon::Path::getAbsolutePath(out));
-
-                // project_directory = Directory(ITKCommon::Path::getAbsolutePath(out));
-                // printf("project_directory: %s\n", project_directory.getBasePath().c_str());
-                // project_directory_set = true;
-                // time.update();
-            }       
+            }
         };
         imGuiMenu->UpdateUI();
     }
@@ -169,7 +158,7 @@ void FolderFileOperations::init()
                         if (this->selectedTreeNode == nullptr || this->selectedDirectoryInfo == nullptr )
                             return;
                         if (this->selectedTreeNode->isRoot){
-                            this->showErrorAndRetry("Cannot remove the root directory",[](){});
+                            this->showErrorAndRetry("Cannot remove the root directory",nullptr);
                             return;
                         }
                         
@@ -567,11 +556,6 @@ void FolderFileOperations::openFolder_FolderFileOperations(const std::string &pa
                     project.clearListSelection(ProjectClearMethod::ClearNoCallback);
                     return;
                 }
-
-                // if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || 
-                //     ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-                //     imGuiManager->shortcutManager.setActionShortCutByCategory("Action:None");
-                // }
             }
             else {
                 std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);
@@ -649,11 +633,6 @@ void FolderFileOperations::openFolder_FolderFileOperations(const std::string &pa
                         ImGuiManager::Instance()->contextMenu.open();
                     }
                 }
-                // else {
-                //     std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(element->data);
-                //     selectedFileInfo = fileInfo;
-                //     imGuiManager->shortcutManager.setActionShortCutByCategory("Action:FileOps");
-                // }
             }
         });
     }
@@ -711,7 +690,17 @@ bool FolderFileOperations::isUsingOSReservedWords(const std::string &in){
                 "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
             };
             const int total_words = 22;
-            auto parts = ITKCommon::StringUtil::tokenizer(ITKCommon::StringUtil::toUpper(in), "." );
+            //auto parts = ITKCommon::StringUtil::tokenizer(ITKCommon::StringUtil::toUpper(in), "." );
+            std::vector<std::string> parts;
+            size_t split_index = in.find_last_of('.');
+            if (split_index == -1)
+                parts.push_back(in);
+            else{
+                std::string filename_wo_ext = in.substr(0, split_index);
+                std::string ext = in.substr(split_index + 1, in.size() - 1 - split_index);
+                parts.push_back(filename_wo_ext);
+                parts.push_back(ext);
+            }
             for(const auto &item : parts){                
                 if (item.length() != 3 && item.length() != 4)
                     continue;
@@ -729,13 +718,13 @@ bool FolderFileOperations::isUsingOSReservedWords(const std::string &in){
 }
 
 std::string FolderFileOperations::removeSpacesBetweenLastDotParts(const std::string &in){    
-    size_t path_directory_index = in.find_last_of('.');
-    if (path_directory_index == -1)
+    size_t split_index = in.find_last_of('.');
+    if (split_index == -1)
         return ITKCommon::StringUtil::trim(in);
     else
     {
-        std::string filename_wo_ext = in.substr(0, path_directory_index);
-        std::string ext = in.substr(path_directory_index + 1, in.size() - 1 - path_directory_index);
+        std::string filename_wo_ext = in.substr(0, split_index);
+        std::string ext = in.substr(split_index + 1, in.size() - 1 - split_index);
         return ITKCommon::StringUtil::trim(filename_wo_ext) + "." + ITKCommon::StringUtil::trim(ext);
     }
 }
@@ -768,39 +757,6 @@ void FolderFileOperations::createNewSceneOnCurrentDirectory(const std::string &f
             });
             
             auto aux = removeOSForbiddenPathPattern(new_str);
-
-//             // remove all slashes
-//             std::u32string s_output;
-
-//             auto new_str_utf32 = ITKCommon::StringUtil::utf8_to_utf32(new_str);
-
-//             //check if file exists
-//             for(const auto &_c : new_str_utf32){
-// #if defined(_WIN32)
-//                 if (_c == U'<' || _c == U'>' ||
-//                 _c == U':' || _c == U'"' ||
-//                 _c == U'/' || _c == U'\\' ||
-//                 _c == U'|' || _c == U'?' ||
-//                 _c == U'*' )
-//                     continue;
-// #elif defined(__linux__)
-//                 if (_c == U'/')
-//                     continue;
-// #elif defined(__APPLE__)
-//                 if (_c == U'/' || _c == U':' )
-//                     continue;
-// #endif
-//                 // ASCII control characters. Only Winows blocks, 
-//                 // but it is better to avoid on all systems
-//                 if (_c <= 31)
-//                     continue;
-
-//                 s_output += _c;
-//             }
-            
-//             auto aux = ITKCommon::StringUtil::trim( ITKCommon::StringUtil::utf32_to_utf8(s_output) );
-            // apply trim
-            //s_output = aux;
             std::string file_to_create = aux;
 
             if ( !ITKCommon::StringUtil::endsWith(aux, ".scene") ){
@@ -816,37 +772,12 @@ void FolderFileOperations::createNewSceneOnCurrentDirectory(const std::string &f
                 }
             }
 
-            //std::string file_to_create = s_output;
-            //file_to_create = ITKCommon::StringUtil::trim(file_to_create);
-
             if (file_to_create.length() == 0) {
                 lastError = "Empty file name supplied";
                 _tmp_str = aux;
                 return;
             }
 
-// #if defined(_WIN32)
-//             // windows reserved words
-//             const char * win32_reserved_words[] = { 
-//                 "CON", "PRN", "AUX", "NUL", 
-//                 "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-//                 "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
-//             };
-//             const int total_words = 22;
-//             auto parts = ITKCommon::StringUtil::tokenizer(ITKCommon::StringUtil::toUpper(file_to_create), "." );
-//             for(const auto &item : parts){                
-//                 if (item.length() != 3 && item.length() != 4)
-//                     continue;
-//                 for(int i=0;i<total_words;i++){
-//                     if (item.compare(win32_reserved_words[i]) == 0) {
-//                         lastError = "Cannot use the reserved word: ";
-//                         lastError += win32_reserved_words[i];
-//                         _tmp_str = aux;
-//                         return;
-//                     }
-//                 }
-//             }
-// #endif
             if (isUsingOSReservedWords(file_to_create)){
                 _tmp_str = aux;
                 return;
@@ -864,22 +795,7 @@ void FolderFileOperations::createNewSceneOnCurrentDirectory(const std::string &f
                 return;
             }
 
-// #if defined(_WIN32)
-//             auto fout = _wfopen( ITKCommon::StringUtil::string_to_WString(full_path_file).c_str(), L"wb");
-// #elif defined(__linux__) || defined(__APPLE__)
-//             auto fout = fopen(full_path_file.c_str(), "wb");
-// #endif
-
-//             if (!fout){
-//                 lastError = strerror(errno);
-//                 _tmp_str = aux;
-//                 return;
-//             }
-
-//             fclose(fout);
-
             if (!ITKCommon::FileSystem::File::touch(full_path_file.c_str(), &lastError)){
-                //lastError = strerror(errno);
                 _tmp_str = aux;
                 return;
             }
@@ -888,7 +804,6 @@ void FolderFileOperations::createNewSceneOnCurrentDirectory(const std::string &f
             chmod(full_path_file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP );
 #endif
 
-            //ITKCommon::FileSystem::File::FromPath(full_path_file);
             imGuiManager->PostAction.add([&, full_path_file](){
                 this->refreshCurrentFilesAndSelectPath(full_path_file);
             });
@@ -924,73 +839,24 @@ void FolderFileOperations::createNewDirectoryOnCurrentDirectory(const std::strin
                 );
             });
             
-            // remove all slashes
-            std::u32string s_output;
+            auto aux = removeOSForbiddenPathPattern(new_str);
+            std::string dir_to_create = aux;
 
-            auto new_str_utf32 = ITKCommon::StringUtil::utf8_to_utf32(new_str);
-
-            //check if file exists
-            for(const auto &_c : new_str_utf32){
-#if defined(_WIN32)
-                if (_c == U'<' || _c == U'>' ||
-                _c == U':' || _c == U'"' ||
-                _c == U'/' || _c == U'\\' ||
-                _c == U'|' || _c == U'?' ||
-                _c == U'*' )
-                    continue;
-#elif defined(__linux__)
-                if (_c == U'/')
-                    continue;
-#elif defined(__APPLE__)
-                if (_c == U'/' || _c == U':' )
-                    continue;
-#endif
-                // ASCII control characters. Only Winows blocks, 
-                // but it is better to avoid on all systems
-                if (_c <= 31)
-                    continue;
-
-                s_output += _c;
-            }
-            
-            auto aux = ITKCommon::StringUtil::trim( ITKCommon::StringUtil::utf32_to_utf8(s_output) );
-            // apply trim
-            //s_output = aux;
-            std::string file_to_create = aux;
-
-            if (file_to_create.length() == 0) {
+            if (dir_to_create.length() == 0) {
                 lastError = "Empty directory name supplied";
                 _tmp_str = aux;
                 return;
             }
 
-#if defined(_WIN32)
-            // windows reserved words
-            const char * win32_reserved_words[] = { 
-                "CON", "PRN", "AUX", "NUL", 
-                "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-                "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
-            };
-            const int total_words = 22;
-            auto parts = ITKCommon::StringUtil::tokenizer(ITKCommon::StringUtil::toUpper(file_to_create), "." );
-            for(const auto &item : parts){                
-                if (item.length() != 3 && item.length() != 4)
-                    continue;
-                for(int i=0;i<total_words;i++){
-                    if (item.compare(win32_reserved_words[i]) == 0) {
-                        lastError = "Cannot use the reserved word: ";
-                        lastError += win32_reserved_words[i];
-                        _tmp_str = aux;
-                        return;
-                    }
-                }
+            if (isUsingOSReservedWords(dir_to_create)){
+                _tmp_str = aux;
+                return;
             }
-#endif
 
             // create file pointed by file_to_create
-            printf("Creating directory: '%s'\n", file_to_create.c_str());
+            printf("Creating directory: '%s'\n", dir_to_create.c_str());
 
-            std::string full_path_file = selectedDirectoryInfo->file.full_path + file_to_create;
+            std::string full_path_file = selectedDirectoryInfo->file.full_path + dir_to_create;
 
             //refresh and select
             if (ITKCommon::Path::isDirectory(full_path_file)){
@@ -999,29 +865,11 @@ void FolderFileOperations::createNewDirectoryOnCurrentDirectory(const std::strin
                 return;
             }
 
-// #if defined(_WIN32)
-
-//             std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(full_path_file);            
-//             if (CreateDirectoryW(_wstr.c_str(), NULL) == FALSE){
-//                 lastError = ITKPlatformUtil::getLastErrorMessage();
-//                 _tmp_str = aux;
-//                 return;
-//             }
-
-// #elif defined(__linux__) || defined(__APPLE__)
-//             if (mkdir(full_path_file.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-//                 lastError = strerror(errno);
-//                 _tmp_str = aux;
-//                 return;
-//             }
-// #endif
-
             if (!ITKCommon::FileSystem::Directory::mkdir(full_path_file.c_str(), &lastError)){
                 _tmp_str = aux;
                 return;
             }
 
-            //ITKCommon::FileSystem::File::FromPath(full_path_file);
             imGuiManager->PostAction.add([&, full_path_file](){
                 this->refreshDirectoryStructure(selectedTreeNode);
             });
@@ -1057,8 +905,6 @@ void FolderFileOperations::refreshDirectoryStructure(std::shared_ptr<TreeNode> t
     struct _To_insert_struct {
         Directory dir_info;
         std::shared_ptr<TreeNode> insert_where;
-        //std::vector< File > file_dir_list;
-        //std::map<std::string, bool > keep_children;//not expanded
         std::map<std::string, std::shared_ptr<TreeNode> > childrenMap;
     };
 
@@ -1066,8 +912,8 @@ void FolderFileOperations::refreshDirectoryStructure(std::shared_ptr<TreeNode> t
     {
         auto selectedFile = std::dynamic_pointer_cast<FileTreeData>(treeNode->data);
         _to_insert.push_back(_To_insert_struct{
-            Directory::FromFile(selectedFile->file),
-            treeNode
+            .dir_info=Directory::FromFile(selectedFile->file),
+            .insert_where=treeNode
         });
     }
 
@@ -1081,19 +927,10 @@ void FolderFileOperations::refreshDirectoryStructure(std::shared_ptr<TreeNode> t
                 treeNode->removeSelf();
                 project.OnTreeSelect(_parent);
                 project.forceTreeSelection(_parent->uid);
-                // imGuiManager->PostAction.add([&](){
-                //     imGuiManager->project.OnTreeSelect(
-                //         imGuiManager->project.getTreeRoot()
-                //     );
-                //     imGuiManager->project.forceTreeSelection(
-                //         imGuiManager->project.getTreeRoot()->uid
-                //     );
-                // });
                 return;
             }
         }
         for(auto children: last_inserted_struct.insert_where->children) {
-            //last_inserted_struct.children_collapsed[children->getName()] = !children->expanded.pressed;
             last_inserted_struct.childrenMap[children->getName()] = children;
         }
     }
@@ -1128,19 +965,17 @@ void FolderFileOperations::refreshDirectoryStructure(std::shared_ptr<TreeNode> t
 
             // enqueue element to get subdirectories
             _to_insert.push_back(_To_insert_struct{ 
-                Directory(entry.full_path), 
-                tree_node 
+                .dir_info=Directory(entry.full_path), 
+                .insert_where=tree_node
             });
 
             // create children map
             {
                 auto &last_inserted_struct = _to_insert.back();
                 for(auto children: last_inserted_struct.insert_where->children) {
-                    //last_inserted_struct.children_collapsed[children->getName()] = !children->expanded.pressed;
                     last_inserted_struct.childrenMap[children->getName()] = children;
                 }
             }
-
 
             max_directories_to_include--;
             if (max_directories_to_include <= 0){
@@ -1174,12 +1009,10 @@ void FolderFileOperations::refreshCurrentFilesAndSelectPath(const std::string &p
     auto &project = imGuiManager->project;
     auto &visualList = project.getVisualList();
 
-    // check if there is more files on selectedTreeNode
+    // refresh
     refreshDirectoryStructure(selectedTreeNode);
 
-    // refresh current list
-    // project.OnTreeSelect(selectedTreeNode);
-    
+    // select from parameter
     std::shared_ptr<ListElement> to_select;
     for(auto &item:visualList.items){
         std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(item->data);
@@ -1239,28 +1072,9 @@ void FolderFileOperations::renameSelectedFile(const std::string &newfileName) {
 
             std::string new_filename = selectedFileInfo->file.base_path + _tmp;
 
-// #if defined(_WIN32)
-
-//             std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(selectedFileInfo->file.full_path);
-//             std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(new_filename);
-
-//             if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
-//                 lastError = ITKPlatformUtil::getLastErrorMessage();
-//                 return;
-//             }
-
-// #elif defined(__linux__) || defined(__APPLE__)
-
-//             if (rename(selectedFileInfo->file.full_path.c_str(), new_filename.c_str()) != 0) {
-//                 lastError = strerror(errno);
-//                 return;
-//             }
-
-// #endif
             if (!ITKCommon::FileSystem::File::rename(selectedFileInfo->file.full_path.c_str(), new_filename.c_str(),&lastError))
                 return;
             
-
             {
                 imGuiManager->PostAction.add([&,new_filename](){
                     refreshCurrentFilesAndSelectPath(new_filename);
@@ -1314,25 +1128,6 @@ void FolderFileOperations::renameSelectedDirectory(const std::string &newdirname
 
             std::string new_dirname = selectedDirectoryInfo->file.base_path + _tmp;
 
-
-// #if defined(_WIN32)
-
-//             std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(selectedDirectoryInfo->file.full_path);
-//             std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(new_dirname);
-
-//             if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
-//                 lastError = ITKPlatformUtil::getLastErrorMessage();
-//                 return;
-//             }
-
-// #elif defined(__linux__) || defined(__APPLE__)
-            
-//             if (rename(selectedDirectoryInfo->file.full_path.c_str(), new_dirname.c_str()) != 0) {
-//                 lastError = strerror(errno);
-//                 return;
-//             }
-// #endif
-
             if (!ITKCommon::FileSystem::Directory::rename(selectedDirectoryInfo->file.full_path.c_str(), new_dirname.c_str(),&lastError))
                 return;
 
@@ -1360,12 +1155,7 @@ void FolderFileOperations::copyFile(std::shared_ptr<FileListData> input, const s
     EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
         if (this->lastError.length() == 0)
             return;
-        this->showErrorAndRetry(
-            lastError,
-            [&](){
-                // this->copyFile(input,output);
-            }
-        );
+        this->showErrorAndRetry(lastError,nullptr);
     });
 
     auto input_file = input->file.full_path;
@@ -1376,42 +1166,6 @@ void FolderFileOperations::copyFile(std::shared_ptr<FileListData> input, const s
         lastError = "File already exists";
         return;
     }
-
-//     {
-//         char buf[BUFSIZ];
-//         size_t size;
-
-// #if defined(_WIN32)
-//         FILE* source = _wfopen( ITKCommon::StringUtil::string_to_WString(input_file).c_str(), L"rb");
-// #elif defined(__linux__) || defined(__APPLE__)
-//         FILE* source = fopen(input_file.c_str(), "rb");
-// #endif
-//         if (!source){
-//             // errno error
-//             lastError = strerror(errno);
-//             return;
-//         }
-//         EventCore::ExecuteOnScopeEnd _close_source([=](){
-//             fclose(source);
-//         });
-
-// #if defined(_WIN32)
-//         FILE* dest = _wfopen(ITKCommon::StringUtil::string_to_WString(output_file).c_str(), L"wb");
-// #elif defined(__linux__) || defined(__APPLE__)
-//         FILE* dest = fopen(output_file.c_str(), "wb");
-// #endif
-//         if (!dest){
-//             // errno error
-//             lastError = strerror(errno);
-//             return;
-//         }
-//         EventCore::ExecuteOnScopeEnd _close_dest([=](){
-//             fclose(dest);
-//         });
-//         while (size = fread(buf, 1, BUFSIZ, source)) {
-//             fwrite(buf, 1, size, dest);
-//         }
-//     }
 
     if (!ITKCommon::FileSystem::File::copy(input_file.c_str(),output_file.c_str(),&lastError))
         return;
@@ -1426,12 +1180,7 @@ void FolderFileOperations::moveFile(std::shared_ptr<FileListData> input, const s
     EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
         if (this->lastError.length() == 0)
             return;
-        this->showErrorAndRetry(
-            lastError,
-            [&](){
-                // this->moveFile(input,output);
-            }
-        );
+        this->showErrorAndRetry(lastError,nullptr);
     });
 
     auto input_file = input->file.full_path;
@@ -1444,23 +1193,6 @@ void FolderFileOperations::moveFile(std::shared_ptr<FileListData> input, const s
     }
 
     {
-// #if defined(_WIN32)
-
-//         std::wstring _wstr_src = ITKCommon::StringUtil::string_to_WString(input_file.c_str());
-//         std::wstring _wstr_dst = ITKCommon::StringUtil::string_to_WString(output_file.c_str());
-
-//         if (MoveFileW(_wstr_src.c_str(), _wstr_dst.c_str()) == FALSE) {
-//             lastError = ITKPlatformUtil::getLastErrorMessage();
-//             return;
-//         }
-
-// #elif defined(__linux__) || defined(__APPLE__)
-
-//         if (rename(input_file.c_str(), output_file.c_str()) != 0) {
-//             lastError = strerror(errno);
-//             return;
-//         }
-// #endif
         if (!ITKCommon::FileSystem::File::move(input_file.c_str(), output_file.c_str(), &lastError))
             return;
 
@@ -1474,12 +1206,7 @@ void FolderFileOperations::duplicateFile(std::shared_ptr<FileListData> input, Ev
     EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
         if (this->lastError.length() == 0)
             return;
-        this->showErrorAndRetry(
-            lastError,
-            [&](){
-                // this->moveFile(input,output);
-            }
-        );
+        this->showErrorAndRetry(lastError,nullptr);
     });
 
     std::string input_file = input->file.name;
@@ -1520,12 +1247,10 @@ void FolderFileOperations::deleteSelectedFile() {
     if (selectedTreeNode == nullptr || selectedFileInfo == nullptr)
         return;
     
-    std::string showText = 
-        std::string("Confirm to remove '")+ 
-        selectedFileInfo->file.name + 
-        std::string("' ?"); 
-
-
+    std::string showText = ITKCommon::PrintfToStdString(
+        "Confirm to remove '%s' ?", 
+        selectedFileInfo->file.name.c_str()
+    );
 
     ImGuiManager::Instance()->dialogs.showInfo_OKCancel(
         showText,
@@ -1536,11 +1261,7 @@ void FolderFileOperations::deleteSelectedFile() {
             EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
                 if (this->lastError.length() == 0)
                     return;
-                this->showErrorAndRetry(
-                    lastError,
-                    [&](){
-                    }
-                );
+                this->showErrorAndRetry(lastError,nullptr);
             });
 
             if (!ITKCommon::Path::isFile(selectedFileInfo->file.full_path.c_str())){
@@ -1548,19 +1269,6 @@ void FolderFileOperations::deleteSelectedFile() {
                 return;
             }
 
-// #if defined(_WIN32)
-//             std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(selectedFileInfo->file.full_path);
-//             if (DeleteFileW(_wstr.c_str()) == FALSE) {
-//                 lastError = ITKPlatformUtil::getLastErrorMessage();
-//                 return;
-//             }
-// #elif defined(__linux__) || defined(__APPLE__)
-
-//             if (remove(selectedFileInfo->file.full_path.c_str()) != 0) {
-//                 lastError = strerror(errno);
-//                 return;
-//             }
-// #endif
             if (!ITKCommon::FileSystem::File::remove(selectedFileInfo->file.full_path.c_str(), &lastError))
                 return;
 
@@ -1600,7 +1308,6 @@ void FolderFileOperations::deleteSelectedFile() {
                     }
                 }
 
-            
                 project.OnListSingleClick(next_select);
                 project.forceFilesSelection(next_select->uid);
                 next_select->scrollToThisItem();
@@ -1610,11 +1317,8 @@ void FolderFileOperations::deleteSelectedFile() {
             } else {
                 project.OnListSelect(nullptr);
                 project.clearListSelection(ProjectClearMethod::ClearNoCallback);
-
                 selectedFileInfo = nullptr;
-
             }
-
         },
         DialogPosition::OpenOnScreenCenter
     );
@@ -1626,7 +1330,7 @@ void FolderFileOperations::deleteSelectedDirectory() {
     if (this->selectedTreeNode == nullptr || this->selectedDirectoryInfo == nullptr )
         return;
     if (this->selectedTreeNode->isRoot){
-        this->showErrorAndRetry("Cannot remove the root directory",[](){});
+        this->showErrorAndRetry("Cannot remove the root directory",nullptr);
         return;
     }
 
@@ -1634,10 +1338,6 @@ void FolderFileOperations::deleteSelectedDirectory() {
         "Confirm to remove '%s' ?", 
         selectedDirectoryInfo->file.name.c_str()
     );
-
-    // std::string("Confirm to remove '")+ 
-    // selectedDirectoryInfo->file.name + 
-    // std::string("' ?"); 
 
     ImGuiManager::Instance()->dialogs.showInfo_OKCancel(
         showText,
@@ -1654,32 +1354,13 @@ void FolderFileOperations::deleteSelectedDirectory() {
             EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
                 if (this->lastError.length() == 0)
                     return;
-                this->showErrorAndRetry(
-                    lastError,
-                    [&](){
-                    }
-                );
+                this->showErrorAndRetry(lastError,nullptr);
             });
 
             if (!ITKCommon::Path::isDirectory(selectedDirectoryInfo->file.full_path.c_str())){
                 lastError = "Directory does not exist";
                 return;
             }
-
-// #if defined(_WIN32)
-//             std::wstring _wstr = ITKCommon::StringUtil::string_to_WString(selectedDirectoryInfo->file.full_path);
-//             if (RemoveDirectoryW(_wstr.c_str()) == FALSE){
-//                 lastError = ITKPlatformUtil::getLastErrorMessage();
-//                 return;
-//             }
-// #elif defined(__linux__) || defined(__APPLE__)
-            
-//             printf("remove: %s\n", selectedDirectoryInfo->file.full_path.c_str());
-//             if ( remove(selectedDirectoryInfo->file.full_path.c_str() ) != 0 ) {
-//                 lastError = strerror(errno);
-//                 return;
-//             }
-// #endif
 
             if (!ITKCommon::FileSystem::Directory::remove(selectedDirectoryInfo->file.full_path.c_str(), &lastError))
                 return;
