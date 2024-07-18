@@ -267,9 +267,16 @@ void FolderFileOperations::init()
                     //ctrl,shift,alt,window,
                     true,false,false,false,
                     KeyCode::O, //AppKit::Window::Devices::KeyCode keyCode,
-                    [](){
+                    [&](){
                         //activate
-                        printf("open \n");
+                        if (selectedFileInfo == nullptr)
+                            return;
+                        
+                        std::shared_ptr<FileListData> fileInfo = selectedFileInfo;
+                        printf("Opening file: '%s'\n", fileInfo->file.name.c_str());
+                        printf("'%s'\n", fileInfo->file.full_path.c_str());
+
+                        tryToOpenFile(selectedFileInfo->file);
                     }
                 ),
                 ShortCut(
