@@ -33,6 +33,14 @@ public:
 
     virtual void tryToOpenFile(const ITKCommon::FileSystem::File &full_path) = 0;
     
+    void showErrorAndRetry(const std::string &error, EventCore::Callback<void()> retry_callback){
+        printf("ERROR: %s\n", error.c_str());
+        ImGuiManager::Instance()->dialogs.showInfo_OK(
+            std::string("Error: ") + error,
+            retry_callback,
+            DialogPosition::OpenOnScreenCenter
+        );
+    }
 
 };
 

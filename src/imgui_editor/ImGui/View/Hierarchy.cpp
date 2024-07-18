@@ -2,13 +2,17 @@
 #include "../ImGuiMenu.h"
 #include "../ImGuiManager.h"
 
+TreeDataType HierarchyTreeData::Type = "HierarchyTreeData";
+
 const ViewType Hierarchy::Type = "Hierarchy";
 
 Hierarchy::Hierarchy() : View(Hierarchy::Type)
 {
-	//texture_transform = NULL;
-	//texture_model = NULL;
-	uid_incrementer = 1;
+    force_tree_selection = 0;
+
+    uid_incrementer = 1;
+
+    clear_tree_selection = HierarchyClearMethod::None;
 }
 
 Hierarchy::~Hierarchy()
@@ -120,7 +124,28 @@ void Hierarchy::RenderAndLogic()
 	auto flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
     //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)*ImGuiManager::Instance()->GlobalScale);
-	if (ImGui::Begin("Hierarchy", NULL, flags))
+
+    bool window_opened = ImGui::Begin("Hierarchy", NULL, flags);
+
+    if (clear_tree_selection != HierarchyClearMethod::None){
+        auto action = clear_tree_selection;
+        clear_tree_selection = HierarchyClearMethod::None;
+
+        ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
+        ImGui::GetStateStorage()->SetInt(id_sel, 0);
+
+        if (action == HierarchyClearMethod::ClearAndCallback)
+            this->OnTreeSelect(nullptr);
+    }
+
+    if (force_tree_selection != 0){
+        ImGuiID id_sel = ImGui::GetID("##hierarchy_sel");
+        ImGui::GetStateStorage()->SetInt(id_sel, force_tree_selection);
+
+        force_tree_selection = 0;
+    }
+
+	if (window_opened)
 	{
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));

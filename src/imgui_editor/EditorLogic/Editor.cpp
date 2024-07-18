@@ -8,7 +8,9 @@
 #pragma warning(disable : 4996)
 #endif
 
-Editor::Editor():OperationsCommon(),FolderFileOperations()
+Editor::Editor() : OperationsCommon(),
+                   FolderFileOperations(),
+                   HierarchyOperations()
 {
 }
 
@@ -16,23 +18,26 @@ void Editor::init()
 {
     OperationsCommon::init();
     FolderFileOperations::init();
+    HierarchyOperations::init();
 }
 
-void Editor::openFolder(const std::string &path) {
+void Editor::openFolder(const std::string &path)
+{
     openFolder_FolderFileOperations(path);
 }
 
-void Editor::tryToOpenFile(const ITKCommon::FileSystem::File &file){
-    if ( !ITKCommon::StringUtil::endsWith(file.name,  ".scene") ){
+void Editor::tryToOpenFile(const ITKCommon::FileSystem::File &file)
+{
+    if (!ITKCommon::StringUtil::endsWith(file.name, ".scene"))
+    {
         ImGuiManager::Instance()->dialogs.showInfo_OK(
             ITKCommon::PrintfToStdString("'%s' file type not supported", file.getExtension().c_str()),
-            [](){},
-            DialogPosition::OpenOnScreenCenter
-        );
+            nullptr,
+            DialogPosition::OpenOnScreenCenter);
         return;
     }
+    openFile_HierarchyOperations(file);
 }
-
 
 Editor *Editor::Instance()
 {

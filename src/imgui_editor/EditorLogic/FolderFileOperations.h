@@ -36,8 +36,6 @@ class FolderFileOperations : virtual public OperationsCommon
 
     void createNewDirectoryOnCurrentDirectory(const std::string &fileName);
 
-    void showErrorAndRetry(const std::string &error, EventCore::Callback<void()> callback);
-
     void refreshCurrentFilesAndSelectPath(const std::string &path_to_select);
 
     void refreshDirectoryStructure(std::shared_ptr<TreeNode> treeNode, bool ignore_tree_select = false);

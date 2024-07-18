@@ -33,7 +33,7 @@ void FolderFileOperations::init()
 
     // empty hierarchy list, directory list and file list
     {
-        imGuiManager->hierarchy.clearTree();
+        // imGuiManager->hierarchy.clearTree();
         imGuiManager->project.clearTree();
         imGuiManager->project.getVisualList().clear();
     }
@@ -473,7 +473,7 @@ void FolderFileOperations::openFolder_FolderFileOperations(const std::string &pa
 
     // clear all lists and trees
     {
-        imGuiManager->hierarchy.clearTree();
+        //imGuiManager->hierarchy.clearTree();
         imGuiManager->project.clearTree();
         imGuiManager->project.getVisualList().clear();
     }
@@ -875,15 +875,6 @@ void FolderFileOperations::createNewDirectoryOnCurrentDirectory(const std::strin
             });
 
         },
-        DialogPosition::OpenOnScreenCenter
-    );
-}
-
-void FolderFileOperations::showErrorAndRetry(const std::string &error, EventCore::Callback<void()> retry_callback) {
-    printf("ERROR: %s\n", error.c_str());
-    ImGuiManager::Instance()->dialogs.showInfo_OK(
-        std::string("Error: ") + error,
-        retry_callback,
         DialogPosition::OpenOnScreenCenter
     );
 }
