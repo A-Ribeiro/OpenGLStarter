@@ -168,8 +168,10 @@ void FolderFileOperations::init()
                         
                         if (this->selectedTreeNode == nullptr || this->selectedDirectoryInfo == nullptr )
                             return;
-                        if (this->selectedTreeNode->isRoot)
+                        if (this->selectedTreeNode->isRoot){
+                            this->showErrorAndRetry("Cannot remove the root directory",[](){});
                             return;
+                        }
                         
                         deleteSelectedDirectory();
                     }
@@ -1623,24 +1625,30 @@ void FolderFileOperations::deleteSelectedDirectory() {
     
     if (this->selectedTreeNode == nullptr || this->selectedDirectoryInfo == nullptr )
         return;
-    if (this->selectedTreeNode->isRoot)
+    if (this->selectedTreeNode->isRoot){
+        this->showErrorAndRetry("Cannot remove the root directory",[](){});
         return;
-    
-    std::string showText = 
-        std::string("Confirm to remove '")+ 
-        selectedDirectoryInfo->file.name + 
-        std::string("' ?"); 
+    }
 
+    std::string showText = ITKCommon::PrintfToStdString(
+        "Confirm to remove '%s' ?", 
+        selectedDirectoryInfo->file.name.c_str()
+    );
 
+    // std::string("Confirm to remove '")+ 
+    // selectedDirectoryInfo->file.name + 
+    // std::string("' ?"); 
 
     ImGuiManager::Instance()->dialogs.showInfo_OKCancel(
         showText,
         [&](){
 
-            if (this->selectedTreeNode == nullptr || this->selectedDirectoryInfo == nullptr )
+            if (this->selectedTreeNode == nullptr || this->selectedDirectoryInfo == nullptr ) {
                 return;
-            if (this->selectedTreeNode->isRoot)
+            }
+            if (this->selectedTreeNode->isRoot){
                 return;
+            }
             
             lastError = "";
             EventCore::ExecuteOnScopeEnd _exec_on_end([&](){
@@ -1677,7 +1685,10 @@ void FolderFileOperations::deleteSelectedDirectory() {
                 return;
 
             // if (!selectedTreeNode->isRoot)
-            refreshDirectoryStructure(selectedTreeNode->parent->self());
+            auto toRefresh = selectedTreeNode->parent->self();
+            refreshDirectoryStructure(toRefresh);
+            imGuiManager->project.forceTreeSelection(toRefresh->uid);
+            toRefresh->scrollToThisItem();
 
         },
         DialogPosition::OpenOnScreenCenter
