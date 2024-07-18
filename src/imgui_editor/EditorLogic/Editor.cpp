@@ -18,6 +18,21 @@ void Editor::init()
     FolderFileOperations::init();
 }
 
+void Editor::openFolder(const std::string &path) {
+    openFolder_FolderFileOperations(path);
+}
+
+void Editor::tryToOpenFile(const ITKCommon::FileSystem::File &file){
+    if ( !ITKCommon::StringUtil::endsWith(file.name,  ".scene") ){
+        ImGuiManager::Instance()->dialogs.showInfo_OK(
+            ITKCommon::PrintfToStdString("'%s' file type not supported", file.getExtension().c_str()),
+            [](){},
+            DialogPosition::OpenOnScreenCenter
+        );
+        return;
+    }
+}
+
 
 Editor *Editor::Instance()
 {

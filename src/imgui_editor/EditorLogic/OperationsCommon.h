@@ -28,5 +28,11 @@ public:
         imGuiMenu = ImGuiMenu::Instance();
     }
 
+    // shared methods that can be called from any subclass
+    virtual void openFolder(const std::string &path) = 0;
+
+    virtual void tryToOpenFile(const ITKCommon::FileSystem::File &full_path) = 0;
+    
+
 };
 

@@ -30,7 +30,7 @@ class FolderFileOperations : virtual public OperationsCommon
 
     std::string removeSpacesBetweenLastDotParts(const std::string &in);
 
-    void openFolder(const std::string &path);
+    void openFolder_FolderFileOperations(const std::string &path);
 
     void createNewSceneOnCurrentDirectory(const std::string &fileName);
 

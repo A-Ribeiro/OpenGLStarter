@@ -11,5 +11,10 @@ public:
 
     void init();
 
+    void openFolder(const std::string &path);
+
+    void tryToOpenFile(const ITKCommon::FileSystem::File &full_path);
+
+
     static Editor *Instance();
 };

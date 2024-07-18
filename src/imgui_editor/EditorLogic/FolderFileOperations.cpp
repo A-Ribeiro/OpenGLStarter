@@ -456,7 +456,7 @@ void FolderFileOperations::init()
 
 }
 
-void FolderFileOperations::openFolder(const std::string &path) {
+void FolderFileOperations::openFolder_FolderFileOperations(const std::string &path) {
     using namespace ITKCommon::FileSystem;
 
     project_directory = Directory(ITKCommon::Path::getAbsolutePath(path));
@@ -610,6 +610,8 @@ void FolderFileOperations::openFolder(const std::string &path) {
             std::shared_ptr<FileListData> fileInfo = std::dynamic_pointer_cast<FileListData>(element->data);
             printf("Clicked in the file: '%s'\n", fileInfo->file.name.c_str());
             printf("'%s'\n", fileInfo->file.full_path.c_str());
+            
+            tryToOpenFile(fileInfo->file);
 
         });
 
