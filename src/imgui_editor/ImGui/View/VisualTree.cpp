@@ -102,6 +102,20 @@ std::shared_ptr<TreeNode> TreeNode::findUID(int32_t uid) {
     return nullptr;
 }
 
+std::shared_ptr<TreeNode> TreeNode::findChildByName(const char* name_param, bool recursive) {
+    for (auto &chld : children)
+    {
+        if ( strcmp(chld->name, name_param) == 0)
+            return chld;
+        else if (recursive) {
+            auto result = chld->findUID(uid);
+            if (result != nullptr)
+                return result;
+        }
+    }
+    return nullptr;
+}
+
 bool TreeNode::isChild(int32_t uid) const
 {
     for (const auto &chld : children)
@@ -468,11 +482,20 @@ void TreeNode::scrollToThisItem() {
     scroll_to_this_item = true;
 }
 
-TreeNode &TreeNode::addChild(std::shared_ptr<TreeNode> treeNode)
+TreeNode &TreeNode::addChild(std::shared_ptr<TreeNode> treeNode, int before_uid)
 {
     treeNode->removeSelf();
     treeNode->parent = this;
-    children.push_back(treeNode);
+
+    if (before_uid != -1){
+        auto it = children.begin();
+        while (it != children.end() && (*it)->uid != before_uid){
+            it++;
+        }
+        children.insert(it,treeNode);
+    } else
+        children.push_back(treeNode);
+
     return children.back()->setIsRoot(false).setPrefixID(this->prefix_id).setDragPayloadID(this->drag_payload_identifier).setDropPayload(this->drop_payload_identifier);
 }
 

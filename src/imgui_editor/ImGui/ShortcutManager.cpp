@@ -206,6 +206,11 @@ View* ShortcutManager::Init(){
                     "Ctrl+N" //shortcutStr
                 ),
                 ShortCut(
+                    "Action/New/Node", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "New/Node", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Ctrl+N" //shortcutStr
+                ),
+                ShortCut(
                     "Action/New/Directory", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
                     "New/Directory", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
                     "Ctrl+N" //shortcutStr

@@ -20,10 +20,12 @@ class HierarchyOperations : virtual public OperationsCommon
 
     void openFile_HierarchyOperations(const ITKCommon::FileSystem::File &file);
 
+    void hierarchyCreateNewChildOnNode(std::shared_ptr<TreeNode> src, const std::string &new_name);
+
     void hierarchyDoFocus(std::shared_ptr<TreeNode> src);
     void hierarchyMakeFirst(std::shared_ptr<TreeNode> src);
     void hierarchyMakeLast(std::shared_ptr<TreeNode> src);
-    void hierarchyRename(std::shared_ptr<TreeNode> src);
+    void hierarchyRename(std::shared_ptr<TreeNode> src, const std::string &new_name);
     void hierarchyRemove(std::shared_ptr<TreeNode> src);
     void hierarchyDuplicate(std::shared_ptr<TreeNode> src);
     void hierarchyPasteFromCopy(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target);

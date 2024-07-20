@@ -26,6 +26,14 @@ void HierarchyOperations::init()
                 ),
 
                 ShortCut(
+                    "Action/New", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "New", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility // MenuBehaviour contextMenuBehaviour,
+                ),
+
+                ShortCut(
                     "Action/Make First", // "mainMenuPath"
                     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
@@ -89,6 +97,26 @@ void HierarchyOperations::init()
                 ),
 
                 ShortCut(
+                    "Action/New/Node", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "New/Node", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+                    
+                    "Ctrl+N",//shortcutStr
+                    
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::N, //AppKit::Window::Devices::KeyCode keyCode,
+                    //EventCore::CallbackWrapper(&FolderFileOperations::createNewSceneOnCurrentDirectory, this)
+                    [&](){
+                        //activate
+                        //printf("New Scene\n");
+                        hierarchyCreateNewChildOnNode( this->selectedTreeNode ,"NewNode");
+                    }
+                ),
+
+                ShortCut(
                     "Action/Focus", // "mainMenuPath"
                     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
@@ -127,7 +155,7 @@ void HierarchyOperations::init()
                     [&](){
                         //activate
                         printf("rename\n");
-                        hierarchyRename(this->selectedTreeNode);
+                        hierarchyRename(this->selectedTreeNode, this->selectedTreeNode->getName());
 
                         
                         // if (this->selectedFileInfo == nullptr)
@@ -342,41 +370,154 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
     }
 }
 
+void HierarchyOperations::hierarchyCreateNewChildOnNode(std::shared_ptr<TreeNode> src, const std::string &new_name) 
+{
+    if (src == nullptr)
+        return;
+
+    imGuiManager->dialogs.showEnterText_OKCancel(
+        new_name,
+        [&, src](const std::string &new_str){
+            //auto treeData = std::dynamic_pointer_cast< HierarchyTreeData >(src->data);
+            if (new_str.length() == 0){
+                this->showErrorAndRetry("Empty node name",[&,src,new_str](){
+                    hierarchyCreateNewChildOnNode(src, new_str);
+                });
+                return;
+            }
+            
+            auto tree_node = imGuiManager->hierarchy.createTreeNode( 
+                new_str, 
+                HierarchyTreeData::CreateShared( nullptr ) 
+            );
+            src->addChild(tree_node);
+            
+        },
+        DialogPosition::OpenOnScreenCenter
+    );
+}
+
 void HierarchyOperations::hierarchyDoFocus(std::shared_ptr<TreeNode> src)
 {
-    
+    if (src == nullptr)
+        return;
 }
 void HierarchyOperations::hierarchyMakeFirst(std::shared_ptr<TreeNode> src)
 {
-    
+    if (src == nullptr)
+        return;
+    src->makeFirst();
 }
 void HierarchyOperations::hierarchyMakeLast(std::shared_ptr<TreeNode> src)
 {
-    
+    if (src == nullptr)
+        return;
+    src->makeLast();
 }
-void HierarchyOperations::hierarchyRename(std::shared_ptr<TreeNode> src)
+void HierarchyOperations::hierarchyRename(std::shared_ptr<TreeNode> src, const std::string &new_name)
 {
+    if (src == nullptr)
+        return;
+
+    if (src->isRoot) {
+        this->showErrorAndRetry("Trying to rename root",nullptr);
+        return;
+    }
     
+    imGuiManager->dialogs.showEnterText_OKCancel(
+        new_name,
+        [&, src](const std::string &new_str){
+            //auto treeData = std::dynamic_pointer_cast< HierarchyTreeData >(src->data);
+            if (new_str.compare( src->getName()) == 0)
+                return;
+            src->setName(new_str.c_str());
+        },
+        DialogPosition::OpenOnScreenCenter
+    );
 }
 void HierarchyOperations::hierarchyRemove(std::shared_ptr<TreeNode> src)
 {
+    if (src == nullptr)
+        return;
+
+    if (src->isRoot) {
+        this->showErrorAndRetry("Trying to remove root",nullptr);
+        return;
+    }
+
+    src->removeSelf();
+
+    imGuiManager->hierarchy.clearTreeSelection(HierarchyClearMethod::ClearNoCallback);
     
 }
 void HierarchyOperations::hierarchyDuplicate(std::shared_ptr<TreeNode> src)
 {
+    if (src == nullptr)
+        return;
+
+    if (src->isRoot) {
+        this->showErrorAndRetry("Trying to duplicate root",nullptr);
+        return;
+    }
+
+    auto parent = src->parent->self();
+
+    std::string new_name;
+    int count = 0;
+    do {
+        new_name = ITKCommon::PrintfToStdString("%s %.3i", src->getName(), count);
+        count++;
+    } while(parent->findChildByName(new_name.c_str(),false));
+
+    // create the new node
+    auto tree_node = imGuiManager->hierarchy.createTreeNode( 
+        new_name, 
+        HierarchyTreeData::CreateShared( nullptr ) 
+    );
+    src->addChild(tree_node, src->uid);
+
 
 }
 void HierarchyOperations::hierarchyPasteFromCopy(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target)
 {
+    clipboardState = nullptr;
+    if (src == nullptr || target == nullptr)
+        return;
     
+    if (src->isChild(target->uid)){
+        this->showErrorAndRetry("Parent/child invalid copy", nullptr);
+        return;
+    }
+
+    auto tree_node = imGuiManager->hierarchy.createTreeNode( 
+        src->getName(), 
+        HierarchyTreeData::CreateShared( nullptr ) 
+    );
+    target->addChild(tree_node, src->uid);
 }
 void HierarchyOperations::hierarchyPasteFromCut(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target)
 {
-    
+    clipboardState = nullptr;
+    if (src == nullptr || target == nullptr)
+        return;
+    if (src->isChild(target->uid)){
+        this->showErrorAndRetry("Parent/child invalid cut", nullptr);
+        return;
+    }
+
+    TreeNode::Reparent(src, target);
 }
 
 void HierarchyOperations::hierarchyDragMove(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target)
 {
+    if (src == nullptr || target == nullptr)
+        return;
 
+    if (src->isChild(target->uid)){
+        this->showErrorAndRetry("Parent/child invalid move", nullptr);
+        return;
+    }
+
+    TreeNode::Reparent(src, target);
 }
 
