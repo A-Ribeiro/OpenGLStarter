@@ -52,3 +52,33 @@ class CutFileOP : public ClipboardOperation {
         return std::make_shared<CutFileOP>(treeNodeSource, fileRef);
     }
 };
+
+class CopyTransformOP : public ClipboardOperation {
+    public:
+
+    static ClipboardOperationType Type;
+    std::shared_ptr<TreeNode> treeNode;
+    CopyTransformOP(std::shared_ptr<TreeNode> v): ClipboardOperation(CopyTransformOP::Type) {
+        this->treeNode = v;
+    }
+
+    static std::shared_ptr<CopyTransformOP> CreateShared(std::shared_ptr<TreeNode> v) {
+        return std::make_shared<CopyTransformOP>(v);
+    }
+};
+
+class CutTransformOP : public ClipboardOperation {
+    public:
+
+    static ClipboardOperationType Type;
+
+    std::shared_ptr <TreeNode> treeNode;
+
+    CutTransformOP(std::shared_ptr <TreeNode> v): ClipboardOperation(CutTransformOP::Type) {
+        this->treeNode = v;
+    }
+
+    static std::shared_ptr<CutTransformOP> CreateShared(std::shared_ptr <TreeNode> v) {
+        return std::make_shared<CutTransformOP>(v);
+    }
+};

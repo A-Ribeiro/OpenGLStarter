@@ -372,6 +372,8 @@ void FolderFileOperations::init()
                         printf("file copy\n");
                         if (this->selectedFileInfo != nullptr)
                             clipboardState = CopyFileOP::CreateShared(this->selectedFileInfo);
+                        else
+                            clipboardState = nullptr;
                     }
                 ),
                 ShortCut(
@@ -391,6 +393,8 @@ void FolderFileOperations::init()
                         printf("file cut\n");
                         if (this->selectedFileInfo != nullptr && this->selectedTreeNode != nullptr)
                             clipboardState = CutFileOP::CreateShared(this->selectedTreeNode, this->selectedFileInfo);
+                        else
+                            clipboardState = nullptr;
                     }
                 ),
                 ShortCut(
@@ -583,6 +587,8 @@ void FolderFileOperations::openFolder_FolderFileOperations(const std::string &pa
 
             visualList.sort();
         });
+        
+        imGuiManager->project.OnTreeSingleClick.clear();
         imGuiManager->project.OnTreeSingleClick.add([&](std::shared_ptr<TreeNode> node){
             
             std::shared_ptr<FileTreeData> directoryInfo = std::dynamic_pointer_cast<FileTreeData>(node->data);

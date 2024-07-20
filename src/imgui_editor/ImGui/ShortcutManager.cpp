@@ -173,6 +173,22 @@ View* ShortcutManager::Init(){
                 ),
 
                 ShortCut(
+                    "Action/Focus", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Focus", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "F" //shortcutStr
+                ),
+                ShortCut(
+                    "Action/Make First", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Make First", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "" //shortcutStr
+                ),
+                ShortCut(
+                    "Action/Make Last", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Make Last", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "" //shortcutStr
+                ),
+
+                ShortCut(
                     "Action/Open", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
                     "Open", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
                     "Ctrl+O" //shortcutStr
