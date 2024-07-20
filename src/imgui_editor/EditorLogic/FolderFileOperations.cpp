@@ -167,10 +167,10 @@ void FolderFileOperations::init()
                 ),
 
                 ShortCut(
-                    "Action/<<>>", // "mainMenuPath"
+                    "Action/<<>>##2", // "mainMenuPath"
                     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
-                    "<<>>", // "contextMenuPath"
+                    "<<>>##2", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
 
                     "",//shortcutStr
@@ -315,10 +315,10 @@ void FolderFileOperations::init()
                     }
                 ),
                 ShortCut(
-                    "Action/<<>>", // "mainMenuPath"
+                    "Action/<<>>##2", // "mainMenuPath"
                     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
-                    "<<>>", // "contextMenuPath"
+                    "<<>>##2", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
 
                     "",//shortcutStr

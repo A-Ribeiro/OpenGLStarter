@@ -12,7 +12,7 @@ void ShortCutCategory::createMenus() {
     for(auto& shortcut : shortCuts) {
         if (shortcut.mainMenuPath.compare("")==0)
             continue;
-        if ( ITKCommon::StringUtil::endsWith(shortcut.mainMenuPath, "<<>>") )
+        if ( ITKCommon::StringUtil::contains(shortcut.mainMenuPath, "<<>>") )
             increment += 10000;
         ImGuiMenu::Instance()->AddMenu(
             increment,
@@ -20,7 +20,7 @@ void ShortCutCategory::createMenus() {
             shortcut.shortcutStr, 
             nullptr
         );
-        if ( ITKCommon::StringUtil::endsWith(shortcut.mainMenuPath, "<<>>") )
+        if ( ITKCommon::StringUtil::contains(shortcut.mainMenuPath, "<<>>") )
             increment += 10000;
     }
     ImGuiMenu::Instance()->UpdateUI();
@@ -31,7 +31,7 @@ void ShortCutCategory::createMenus() {
     for(auto& shortcut : shortCuts) {
         if (shortcut.contextMenuPath.compare("")==0)
             continue;
-        if ( ITKCommon::StringUtil::endsWith(shortcut.contextMenuPath, "<<>>") )
+        if ( ITKCommon::StringUtil::contains(shortcut.contextMenuPath, "<<>>") )
             increment += 10000;
         ctxMenu.AddMenu(
             increment,
@@ -39,7 +39,7 @@ void ShortCutCategory::createMenus() {
             shortcut.shortcutStr, 
             nullptr
         );
-        if ( ITKCommon::StringUtil::endsWith(shortcut.contextMenuPath, "<<>>") )
+        if ( ITKCommon::StringUtil::contains(shortcut.contextMenuPath, "<<>>") )
             increment += 10000;
     }
     ctxMenu.UpdateUI();
@@ -173,11 +173,6 @@ View* ShortcutManager::Init(){
                 ),
 
                 ShortCut(
-                    "Action/Focus", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
-                    "Focus", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
-                    "F" //shortcutStr
-                ),
-                ShortCut(
                     "Action/Make First", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
                     "Make First", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
                     "" //shortcutStr
@@ -186,6 +181,18 @@ View* ShortcutManager::Init(){
                     "Action/Make Last", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
                     "Make Last", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
                     "" //shortcutStr
+                ),
+
+                ShortCut(
+                    "Action/<<>>##1", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "<<>>##1", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "" //shortcutStr
+                ),
+
+                ShortCut(
+                    "Action/Focus", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "Focus", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "F" //shortcutStr
                 ),
 
                 ShortCut(
@@ -220,8 +227,8 @@ View* ShortcutManager::Init(){
                 ),
 
                 ShortCut(
-                    "Action/<<>>", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
-                    "<<>>", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "Action/<<>>##2", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "<<>>##2", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
                     "" //shortcutStr
                 ),
                 ShortCut(

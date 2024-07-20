@@ -19,7 +19,7 @@ void MenuItemController::render(const std::string& parentName, bool isRoot)
     }
 
 	if (IsLeaf()) {
-		if (parentName.compare("<<>>") == 0) {
+		if ( ITKCommon::StringUtil::startsWith(parentName, "<<>>") ) {
 			ImGui::Separator();
 		}
 		else

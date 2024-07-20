@@ -26,30 +26,6 @@ void HierarchyOperations::init()
                 ),
 
                 ShortCut(
-                    "Action/Focus", // "mainMenuPath"
-                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
-
-                    "Focus", // "contextMenuPath"
-                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
-
-                    "F",//shortcutStr
-
-                    //ctrl,shift,alt,window,
-                    false,false,false,false,
-                    KeyCode::F, //AppKit::Window::Devices::KeyCode keyCode,
-                    [&](){
-                        //activate
-                        printf("focus\n");
-                        hierarchyDoFocus(this->selectedTreeNode);
-                        
-                        // if (this->selectedFileInfo == nullptr)
-                        //     return;
-                        
-                        // renameSelectedFile( this->selectedFileInfo->file.name );
-                    }
-                ),
-
-                ShortCut(
                     "Action/Make First", // "mainMenuPath"
                     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
@@ -92,6 +68,43 @@ void HierarchyOperations::init()
                         hierarchyMakeLast(this->selectedTreeNode);
 
 
+                        // if (this->selectedFileInfo == nullptr)
+                        //     return;
+                        
+                        // renameSelectedFile( this->selectedFileInfo->file.name );
+                    }
+                ),
+
+                ShortCut(
+                    "Action/<<>>##1", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "<<>>##1", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "",//shortcutStr
+                    //ctrl,shift,alt,window,
+                    true,false,false,false,
+                    KeyCode::Unknown //AppKit::Window::Devices::KeyCode keyCode,
+                ),
+
+                ShortCut(
+                    "Action/Focus", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "Focus", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+
+                    "F",//shortcutStr
+
+                    //ctrl,shift,alt,window,
+                    false,false,false,false,
+                    KeyCode::F, //AppKit::Window::Devices::KeyCode keyCode,
+                    [&](){
+                        //activate
+                        printf("focus\n");
+                        hierarchyDoFocus(this->selectedTreeNode);
+                        
                         // if (this->selectedFileInfo == nullptr)
                         //     return;
                         
@@ -146,10 +159,10 @@ void HierarchyOperations::init()
                     }
                 ),
                 ShortCut(
-                    "Action/<<>>", // "mainMenuPath"
+                    "Action/<<>>##2", // "mainMenuPath"
                     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
-                    "<<>>", // "contextMenuPath"
+                    "<<>>##2", // "contextMenuPath"
                     MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
 
                     "",//shortcutStr
