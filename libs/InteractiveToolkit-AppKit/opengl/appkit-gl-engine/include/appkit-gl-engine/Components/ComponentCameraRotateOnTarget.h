@@ -6,7 +6,7 @@
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
 
-#include <appkit-gl-engine/SharedPointer/SharedPointer.h>
+// #include <appkit-gl-engine/SharedPointer/SharedPointer.h>
 
 #include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
 
@@ -28,10 +28,10 @@ namespace AppKit
                 MathCore::vec2f lastPosition;
                 bool mouseMoving;
 
-                SharedPointer<Transform> target;
+                std::weak_ptr<Transform> targetRef;
 
-                Transform *getTarget();
-                void setTarget(Transform *_transform);
+                std::shared_ptr<Transform> getTarget();
+                void setTarget(std::shared_ptr<Transform> _transform);
 
             protected:
                 void start();
@@ -42,7 +42,7 @@ namespace AppKit
                 void OnNormalizedMousePosChanged(const MathCore::vec2f &value, const MathCore::vec2f &oldValue);
 
             public:
-                EventCore::VirtualProperty<Transform *> Target;
+                EventCore::VirtualProperty<std::shared_ptr<Transform>> Target;
 
                 float speedAngle;
                 bool enabled;

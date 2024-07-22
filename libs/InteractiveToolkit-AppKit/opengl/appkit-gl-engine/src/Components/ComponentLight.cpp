@@ -22,9 +22,10 @@ namespace AppKit
                 cast_shadow = false;
             }
 
-            MathCore::vec3f ComponentLight::getWorldDirection(bool useVisitedFlag) const
+            MathCore::vec3f ComponentLight::getWorldDirection(bool useVisitedFlag)
             {
-                return transform[0]->getRotation(useVisitedFlag) * MathCore::vec3f(0, 0, 1);
+                auto transform = getTransform();
+                return transform->getRotation(useVisitedFlag) * MathCore::vec3f(0, 0, 1);
             }
 
             void ComponentLight::postProcessing_computeLightParameters()
@@ -47,8 +48,9 @@ namespace AppKit
                 {
                 case LightSun:
                 {
+                    auto transform = getTransform();
 
-                    MathCore::mat4f &final_transform = transform[0]->getMatrix(false);
+                    MathCore::mat4f &final_transform = transform->getMatrix(false);
                     MathCore::vec3f origin = MathCore::CVT<MathCore::vec4f>::toVec3(final_transform[3]);
                     MathCore::quatf rotation = MathCore::GEN<MathCore::quatf>::fromMat4(final_transform);
 
@@ -56,9 +58,9 @@ namespace AppKit
                     MathCore::vec3f up = rotation * MathCore::vec3f(0, 0.25f, 0);
                     MathCore::vec3f right = rotation * MathCore::vec3f(0.25f, 0, 0);
 
-                    ComponentColorLine *lines = (ComponentColorLine *)transform[0]->findComponent(ComponentColorLine::Type);
+                    auto lines = transform->findComponent<ComponentColorLine>();
                     if (lines == NULL)
-                        lines = (ComponentColorLine *)transform[0]->addComponent(new ComponentColorLine());
+                        lines = transform->addNewComponent<ComponentColorLine>();
 
                     lines->vertices.clear();
 

@@ -88,7 +88,7 @@ namespace AppKit
                 }
             }
 
-            void ComponentSkinnedMesh::OnTransformVisited(Transform *t)
+            void ComponentSkinnedMesh::OnTransformVisited(std::shared_ptr<Transform> t)
             {
                 if (t->userData == NULL)
                     return;

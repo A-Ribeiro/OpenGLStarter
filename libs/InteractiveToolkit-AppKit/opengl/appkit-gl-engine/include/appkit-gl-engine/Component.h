@@ -32,8 +32,16 @@ namespace AppKit
             ComponentType type_const_ref;
             Component(ComponentType type);
 
+            std::weak_ptr<Component> mSelf;
+            std::vector<std::weak_ptr<Transform>> mTransform;
         public:
-            std::vector<Transform *> transform;
+            std::shared_ptr<Transform> getTransform(int i = 0){
+                return std::shared_ptr<Transform>(mTransform[i]);
+            }
+            int getTransformCount() const {
+                return (int)mTransform.size();
+            }
+            
             ComponentType getType() const;
             bool compareType(ComponentType t) const;
 
@@ -42,10 +50,44 @@ namespace AppKit
             virtual void start();
             // void callStartOnce();
 
-            virtual void attachToTransform(Transform *t);
-            virtual void detachFromTransform(Transform *t);
+            virtual void attachToTransform(std::shared_ptr<Transform> t);
+            virtual void detachFromTransform(std::shared_ptr<Transform> t);
+
+            inline std::shared_ptr<Component> self() {
+                return std::shared_ptr<Component>(mSelf);
+            }
+
+            template <typename _ComponentType,
+                  typename std::enable_if<
+                      std::is_base_of< Component, _ComponentType >::value,
+                      bool>::type = true>
+            inline std::shared_ptr<_ComponentType> self() {
+                return std::dynamic_pointer_cast<_ComponentType>(self());
+            }
+
+            template <typename _ComponentType,
+                  typename std::enable_if<
+                      std::is_base_of< Component, _ComponentType >::value,
+                      bool>::type = true>
+            static inline std::shared_ptr<_ComponentType> CreateShared()
+            {
+                auto result = std::make_shared<_ComponentType>();
+                result->mSelf = std::weak_ptr<Component>(result);
+                return result;
+            }
+            
+            friend class Transform;
         };
 
+
+        template <typename _ComponentType,
+                typename std::enable_if<
+                    std::is_base_of< Component, _ComponentType >::value ||
+                    std::is_base_of< Transform, _ComponentType >::value,
+                    bool>::type = true>
+        static inline std::shared_ptr<_ComponentType> ToShared( std::weak_ptr<_ComponentType> ref ) {
+            return std::shared_ptr<_ComponentType>(ref);
+        }
     }
 
 }

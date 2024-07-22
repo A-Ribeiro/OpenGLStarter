@@ -70,10 +70,10 @@ namespace AppKit
                 void computeFinalPositions(bool visitedFlag);
 
                 void start();
-                void attachToTransform(Transform *t);
-                void detachFromTransform(Transform *t);
+                void attachToTransform(std::shared_ptr<Transform> t);
+                void detachFromTransform(std::shared_ptr<Transform> t);
 
-                void OnTransformVisited(Transform *t);
+                void OnTransformVisited(std::shared_ptr<Transform> t);
 
                 void updateMeshSphere();
                 void updateMeshAABB();

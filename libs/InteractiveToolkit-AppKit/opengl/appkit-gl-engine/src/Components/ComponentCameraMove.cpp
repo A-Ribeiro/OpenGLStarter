@@ -17,9 +17,12 @@ namespace AppKit
 
             void ComponentCameraMove::start()
             {
-                camera = (ComponentCameraPerspective *)transform[0]->findComponent(ComponentCameraPerspective::Type);
+                auto transform = getTransform();
 
-                renderWindowRegion = transform[0]->renderWindowRegion;
+                auto camera = transform->findComponent<ComponentCameraPerspective>();
+                cameraRef = camera;
+
+                renderWindowRegion = transform->renderWindowRegion;
 
                 renderWindowRegion->MousePos = renderWindowRegion->screenCenterF; // set app state do cursor center
                 renderWindowRegion->moveMouseToScreenCenter();                    // queue update to screen center
@@ -45,7 +48,7 @@ namespace AppKit
                 // OnMousePosChanged(&app->MousePos);
 
                 // convert the transform camera to camera move euler angles...
-                MathCore::vec3f forward = MathCore::CVT<MathCore::vec4f>::toVec3(transform[0]->getMatrix()[2]);
+                MathCore::vec3f forward = MathCore::CVT<MathCore::vec4f>::toVec3(transform->getMatrix()[2]);
                 MathCore::vec3f proj_y = MathCore::vec3f(forward.x, 0, forward.z);
                 float length_proj_y = MathCore::OP<MathCore::vec3f>::length(proj_y);
                 proj_y = MathCore::OP<MathCore::vec3f>::normalize(proj_y);
@@ -60,13 +63,15 @@ namespace AppKit
                 while (euler.x > MathCore::OP<float>::deg_2_rad(90.0f))
                     euler.x -= MathCore::OP<float>::deg_2_rad(360.0f);
 
-                transform[0]->Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(euler.x, euler.y, euler.z);
+                transform->Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(euler.x, euler.y, euler.z);
             }
 
             void ComponentCameraMove::OnLateUpdate(Platform::Time *time)
             {
-
-                if (camera == NULL)
+                auto transform = getTransform();
+                auto camera = ToShared(cameraRef);
+                
+                if (camera == nullptr)
                     return;
 
                 left.setState(Keyboard::isPressed(KeyCode::Left) || Keyboard::isPressed(KeyCode::A));
@@ -77,20 +82,20 @@ namespace AppKit
                 MathCore::vec3f forwardVec;
 
                 if (camera->rightHanded)
-                    forwardVec = transform[0]->Rotation * MathCore::vec3f(0, 0, -1);
+                    forwardVec = transform->Rotation * MathCore::vec3f(0, 0, -1);
                 else
-                    forwardVec = transform[0]->Rotation * MathCore::vec3f(0, 0, 1);
+                    forwardVec = transform->Rotation * MathCore::vec3f(0, 0, 1);
 
-                MathCore::vec3f rightVec = transform[0]->Rotation * MathCore::vec3f(1, 0, 0);
+                MathCore::vec3f rightVec = transform->Rotation * MathCore::vec3f(1, 0, 0);
 
                 if (left.pressed)
-                    transform[0]->Position = transform[0]->Position - rightVec * strafeSpeed * time->deltaTime;
+                    transform->Position = transform->Position - rightVec * strafeSpeed * time->deltaTime;
                 if (right.pressed)
-                    transform[0]->Position = transform[0]->Position + rightVec * strafeSpeed * time->deltaTime;
+                    transform->Position = transform->Position + rightVec * strafeSpeed * time->deltaTime;
                 if (up.pressed)
-                    transform[0]->Position = transform[0]->Position + forwardVec * strafeSpeed * time->deltaTime;
+                    transform->Position = transform->Position + forwardVec * strafeSpeed * time->deltaTime;
                 if (down.pressed)
-                    transform[0]->Position = transform[0]->Position - forwardVec * strafeSpeed * time->deltaTime;
+                    transform->Position = transform->Position - forwardVec * strafeSpeed * time->deltaTime;
             }
 
             void ComponentCameraMove::OnViewportChanged(const iRect &value, const iRect &oldValue)
@@ -105,6 +110,11 @@ namespace AppKit
             void ComponentCameraMove::OnMousePosChanged(const MathCore::vec2f &value, const MathCore::vec2f &oldValue)
             {
                 // AppBase* app = Engine::Instance()->app;
+                auto transform = getTransform();
+                auto camera = ToShared(cameraRef);
+
+                if (camera == nullptr)
+                    return;
 
                 MathCore::vec2f pos = value;
 
@@ -125,7 +135,7 @@ namespace AppKit
 
                     euler.x = MathCore::OP<float>::clamp(euler.x, -MathCore::OP<float>::deg_2_rad(90.0f), MathCore::OP<float>::deg_2_rad(90.0f));
 
-                    transform[0]->Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(euler.x, euler.y, euler.z);
+                    transform->Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(euler.x, euler.y, euler.z);
 
                     renderWindowRegion->moveMouseToScreenCenter();
                 }

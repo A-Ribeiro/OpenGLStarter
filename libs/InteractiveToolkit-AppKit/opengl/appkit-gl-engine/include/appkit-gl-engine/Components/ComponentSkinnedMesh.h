@@ -43,7 +43,7 @@ namespace AppKit
 
                 void computeSkinningInformation();
 
-                void OnTransformVisited(Transform *t);
+                void OnTransformVisited(std::shared_ptr<Transform> t);
 
                 void applySkinning();
 

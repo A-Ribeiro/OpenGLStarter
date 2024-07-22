@@ -28,16 +28,20 @@ namespace AppKit
             ComponentFrustumCulling::~ComponentFrustumCulling()
             {
                 // precisa de evento de attach to transform e detach from transform para lidar com essas situações
-                if (transform.size() > 0)
-                    transform[0]->OnVisited.remove(&ComponentFrustumCulling::OnTransformVisited, this);
+                if (getTransformCount() == 0)
+                    return;
+                auto transform = getTransform();
+                transform->OnVisited.remove(&ComponentFrustumCulling::OnTransformVisited, this);
             }
 
             void ComponentFrustumCulling::computeFinalPositions(bool visitedFlag)
             {
                 if (cullingShape == CullingShapeSphere)
                 {
-                    MathCore::mat4f &m = transform[0]->getMatrix(visitedFlag);
-                    MathCore::vec3f scale = transform[0]->getScale(visitedFlag);
+                    auto transform = getTransform();
+
+                    MathCore::mat4f &m = transform->getMatrix(visitedFlag);
+                    MathCore::vec3f scale = transform->getScale(visitedFlag);
 
                     sphere = CollisionCore::Sphere<MathCore::vec3f> (
                         MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(sphereCenter)),
@@ -45,7 +49,9 @@ namespace AppKit
                 }
                 else if (cullingShape == CullingShapeAABB)
                 {
-                    MathCore::mat4f &m = transform[0]->getMatrix(visitedFlag);
+                    auto transform = getTransform();
+
+                    MathCore::mat4f &m = transform->getMatrix(visitedFlag);
 
                     MathCore::vec3f center = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(aabbCenter));
 
@@ -90,17 +96,17 @@ namespace AppKit
                 computeFinalPositions(false);
             }
 
-            void ComponentFrustumCulling::attachToTransform(Transform *t)
+            void ComponentFrustumCulling::attachToTransform(std::shared_ptr<Transform> t)
             {
                 t->OnVisited.add(&ComponentFrustumCulling::OnTransformVisited, this);
             }
 
-            void ComponentFrustumCulling::detachFromTransform(Transform *t)
+            void ComponentFrustumCulling::detachFromTransform(std::shared_ptr<Transform> t)
             {
                 t->OnVisited.remove(&ComponentFrustumCulling::OnTransformVisited, this);
             }
 
-            void ComponentFrustumCulling::OnTransformVisited(Transform *t)
+            void ComponentFrustumCulling::OnTransformVisited(std::shared_ptr<Transform> t)
             {
                 computeFinalPositions(true);
             }
@@ -184,10 +190,11 @@ namespace AppKit
 
             void ComponentFrustumCulling::createCollisionLines()
             {
+                auto transform = getTransform();
 
-                ComponentColorLine *lines = (ComponentColorLine *)transform[0]->findComponent(ComponentColorLine::Type);
-                if (lines == NULL)
-                    lines = (ComponentColorLine *)transform[0]->addComponent(new ComponentColorLine());
+                auto lines = transform->findComponent<ComponentColorLine>();
+                if (lines == nullptr)
+                    lines = transform->addNewComponent<ComponentColorLine>();
 
                 lines->vertices.clear();
 
@@ -255,7 +262,7 @@ namespace AppKit
                     lines->vertices.push_back(array[4 + 0]);
                 }
 
-                MathCore::mat4f &m = transform[0]->worldToLocalMatrix();
+                MathCore::mat4f &m = transform->worldToLocalMatrix();
                 for (int i = 0; i < lines->vertices.size(); i++)
                 {
                     lines->vertices[i] = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(lines->vertices[i]));

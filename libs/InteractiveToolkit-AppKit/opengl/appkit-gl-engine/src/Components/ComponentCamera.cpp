@@ -18,10 +18,12 @@ namespace AppKit
 
             void ComponentCamera::precomputeViewProjection(bool useVisitedFlag)
             {
-                viewProjection = projection * transform[0]->getMatrixInverse(useVisitedFlag);
+                auto transform = getTransform();
 
-                view = transform[0]->getMatrixInverse(useVisitedFlag);
-                viewInv = transform[0]->getMatrix(useVisitedFlag);
+                viewProjection = projection * transform->getMatrixInverse(useVisitedFlag);
+
+                view = transform->getMatrixInverse(useVisitedFlag);
+                viewInv = transform->getMatrix(useVisitedFlag);
                 viewIT = MathCore::OP<MathCore::mat4f>::transpose(viewInv);
             }
 

@@ -8,7 +8,7 @@
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
 
-#include <appkit-gl-engine/SharedPointer/SharedPointer.h>
+// #include <appkit-gl-engine/SharedPointer/SharedPointer.h>
 
 #include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
 
@@ -23,7 +23,7 @@ namespace AppKit
             class ComponentCameraMove : public Component
             {
 
-                SharedPointer<ComponentCameraPerspective> camera;
+                std::weak_ptr<ComponentCameraPerspective> cameraRef;
                 
                 EventCore::PressReleaseDetector left, right, up, down;
                 MathCore::vec3f euler;

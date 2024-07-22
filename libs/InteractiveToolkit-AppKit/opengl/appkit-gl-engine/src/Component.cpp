@@ -4,7 +4,7 @@
 #include <appkit-gl-engine/StartEventManager.h>
 
 
-#include <appkit-gl-engine/SharedPointer/SharedPointerDatabase.h>
+//#include <appkit-gl-engine/SharedPointer/SharedPointerDatabase.h>
 
 namespace AppKit
 {
@@ -38,7 +38,7 @@ namespace AppKit
 
         Component::~Component()
         {
-            SharedPointerDatabase::Instance()->notifyDeletion(this);
+            // SharedPointerDatabase::Instance()->notifyDeletion(this);
             StartEventManager::Instance()->unregisterComponent(this);
         }
 
@@ -53,11 +53,11 @@ namespace AppKit
         //     start();
         // }
 
-        void Component::attachToTransform(Transform *t)
+        void Component::attachToTransform(std::shared_ptr<Transform> t)
         {
         }
 
-        void Component::detachFromTransform(Transform *t)
+        void Component::detachFromTransform(std::shared_ptr<Transform> t)
         {
         }
 

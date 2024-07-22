@@ -107,10 +107,11 @@ namespace AppKit
 
             void ComponentCameraPerspective::addLinesComponent()
             {
+                auto transform = getTransform();
 
-                ComponentColorLine *lines = (ComponentColorLine *)transform[0]->findComponent(ComponentColorLine::Type);
+                auto lines = transform->findComponent<ComponentColorLine>();
                 if (lines == NULL)
-                    lines = (ComponentColorLine *)transform[0]->addComponent(new ComponentColorLine());
+                    lines = transform->addNewComponent<ComponentColorLine>();
 
                 lines->vertices.clear();
 
@@ -182,20 +183,20 @@ namespace AppKit
                 lines->vertices.push_back(frustum.vertices[3]);
                 lines->vertices.push_back(top);
 
-                MathCore::vec3f lp = transform[0]->LocalPosition;
-                MathCore::quatf lr = transform[0]->LocalRotation;
+                MathCore::vec3f lp = transform->LocalPosition;
+                MathCore::quatf lr = transform->LocalRotation;
 
-                transform[0]->Position = MathCore::vec3f(0);
-                transform[0]->Rotation = MathCore::quatf();
+                transform->Position = MathCore::vec3f(0);
+                transform->Rotation = MathCore::quatf();
 
-                MathCore::mat4f &m = transform[0]->worldToLocalMatrix();
+                MathCore::mat4f &m = transform->worldToLocalMatrix();
                 for (int i = 0; i < lines->vertices.size(); i++)
                 {
                     lines->vertices[i] = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(lines->vertices[i]));
                 }
 
-                transform[0]->LocalPosition = lp;
-                transform[0]->LocalRotation = lr;
+                transform->LocalPosition = lp;
+                transform->LocalRotation = lr;
 
                 lines->syncVBODynamic();
             }

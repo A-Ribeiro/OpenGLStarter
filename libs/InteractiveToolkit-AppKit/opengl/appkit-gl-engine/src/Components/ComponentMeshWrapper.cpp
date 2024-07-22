@@ -28,8 +28,10 @@ namespace AppKit
             ComponentMeshWrapper::~ComponentMeshWrapper()
             {
                 // precisa de evento de attach to transform e detach from transform para lidar com essas situações
-                if (transform.size() > 0)
-                    transform[0]->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
+                if (getTransformCount() > 0){
+                    auto transform = getTransform();
+                    transform->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
+                }
                 if (renderWindowRegion != NULL)
                     renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
@@ -44,7 +46,9 @@ namespace AppKit
             {
                 if (wrapShape == WrapShapeSphere)
                 {
-                    MathCore::mat4f &m = transform[0]->getMatrix(visitedFlag);
+                    auto transform = getTransform();
+
+                    MathCore::mat4f &m = transform->getMatrix(visitedFlag);
 
                     /*
                     MathCore::vec3f center = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(sphereCenter));
@@ -111,7 +115,9 @@ namespace AppKit
                 }
                 else if (wrapShape == WrapShapeAABB)
                 {
-                    MathCore::mat4f &m = transform[0]->getMatrix(visitedFlag);
+                    auto transform = getTransform();
+
+                    MathCore::mat4f &m = transform->getMatrix(visitedFlag);
 
                     MathCore::vec3f center = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(aabbCenter));
 
@@ -149,7 +155,9 @@ namespace AppKit
                 }
                 else if (wrapShape == WrapShapeOBB)
                 {
-                    MathCore::mat4f &m = transform[0]->getMatrix(visitedFlag);
+                    auto transform = getTransform();
+
+                    MathCore::mat4f &m = transform->getMatrix(visitedFlag);
 
                     MathCore::vec3f center = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(aabbCenter));
 
@@ -173,17 +181,17 @@ namespace AppKit
                 // computeFinalPositions(false);
             }
 
-            void ComponentMeshWrapper::attachToTransform(Transform *t)
+            void ComponentMeshWrapper::attachToTransform(std::shared_ptr<Transform> t)
             {
                 t->OnVisited.add(&ComponentMeshWrapper::OnTransformVisited, this);
             }
 
-            void ComponentMeshWrapper::detachFromTransform(Transform *t)
+            void ComponentMeshWrapper::detachFromTransform(std::shared_ptr<Transform> t)
             {
                 t->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
             }
 
-            void ComponentMeshWrapper::OnTransformVisited(Transform *t)
+            void ComponentMeshWrapper::OnTransformVisited(std::shared_ptr<Transform> t)
             {
                 computeFinalPositions(true);
             }
@@ -196,7 +204,9 @@ namespace AppKit
 
                 // computeFinalPositions(false);
                 // AppKit::GLEngine::Engine::Instance()->app->OnAfterGraphPrecompute.remove(this, &ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty);
-                renderWindowRegion = transform[0]->renderWindowRegion;
+                auto transform = getTransform();
+
+                renderWindowRegion = transform->renderWindowRegion;
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
@@ -209,7 +219,8 @@ namespace AppKit
                 // computeFinalPositions(false);
 
                 // AppKit::GLEngine::Engine::Instance()->app->OnAfterGraphPrecompute.remove(this, &ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty);
-                renderWindowRegion = transform[0]->renderWindowRegion;
+                auto transform = getTransform();
+                renderWindowRegion = transform->renderWindowRegion;
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
@@ -223,23 +234,25 @@ namespace AppKit
                 // computeFinalPositions(false);
 
                 // AppKit::GLEngine::Engine::Instance()->app->OnAfterGraphPrecompute.remove(this, &ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty);
-                renderWindowRegion = transform[0]->renderWindowRegion;
+                auto transform = getTransform();
+                renderWindowRegion = transform->renderWindowRegion;
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
             void ComponentMeshWrapper::updateMeshSphere()
             {
+                auto transform = getTransform();
 
                 CollisionCore::AABB<MathCore::vec3f> _aabb;
 
                 int count = 0;
 
-                for (int i = 0; i < transform[0]->getComponentCount(); i++)
+                for (int i = 0; i < transform->getComponentCount(); i++)
                 {
-                    Component *component = transform[0]->getComponentAt(i);
+                    auto component = transform->getComponentAt(i);
                     if (component->compareType(ComponentMesh::Type))
                     {
-                        ComponentMesh *mesh = (ComponentMesh *)component;
+                        auto mesh = std::dynamic_pointer_cast<ComponentMesh>(component);
                         for (size_t j = 0; j < mesh->pos.size(); j++)
                         {
                             if (count == 0)
@@ -261,12 +274,12 @@ namespace AppKit
                     MathCore::vec3f center = (_aabb.min_box + _aabb.max_box) * 0.5f;
                     float radius = 0.0f;
 
-                    for (int i = 0; i < transform[0]->getComponentCount(); i++)
+                    for (int i = 0; i < transform->getComponentCount(); i++)
                     {
-                        Component *component = transform[0]->getComponentAt(i);
+                        auto component = transform->getComponentAt(i);
                         if (component->compareType(ComponentMesh::Type))
                         {
-                            ComponentMesh *mesh = (ComponentMesh *)component;
+                            auto mesh = std::dynamic_pointer_cast<ComponentMesh>(component);
                             for (size_t j = 0; j < mesh->pos.size(); j++)
                             {
                                 float sqr_dst = MathCore::OP<MathCore::vec3f>::sqrDistance(center, mesh->pos[j]);
@@ -285,17 +298,18 @@ namespace AppKit
 
             void ComponentMeshWrapper::updateMeshAABB()
             {
+                auto transform = getTransform();
 
                 CollisionCore::AABB<MathCore::vec3f> _aabb;
 
                 int count = 0;
 
-                for (int i = 0; i < transform[0]->getComponentCount(); i++)
+                for (int i = 0; i < transform->getComponentCount(); i++)
                 {
-                    Component *component = transform[0]->getComponentAt(i);
+                    auto component = transform->getComponentAt(i);
                     if (component->compareType(ComponentMesh::Type))
                     {
-                        ComponentMesh *mesh = (ComponentMesh *)component;
+                        auto mesh = std::dynamic_pointer_cast<ComponentMesh>(component);
                         for (size_t j = 0; j < mesh->pos.size(); j++)
                         {
                             if (count == 0)
@@ -320,16 +334,18 @@ namespace AppKit
 
             void ComponentMeshWrapper::updateMeshOBB()
             {
+                auto transform = getTransform();
+
                 CollisionCore::AABB<MathCore::vec3f> _aabb;
 
                 int count = 0;
 
-                for (int i = 0; i < transform[0]->getComponentCount(); i++)
+                for (int i = 0; i < transform->getComponentCount(); i++)
                 {
-                    Component *component = transform[0]->getComponentAt(i);
+                    auto component = transform->getComponentAt(i);
                     if (component->compareType(ComponentMesh::Type))
                     {
-                        ComponentMesh *mesh = (ComponentMesh *)component;
+                        auto mesh = std::dynamic_pointer_cast<ComponentMesh>(component);
                         for (size_t j = 0; j < mesh->pos.size(); j++)
                         {
                             if (count == 0)
@@ -540,10 +556,11 @@ namespace AppKit
 
             void ComponentMeshWrapper::createCollisionLines()
             {
+                auto transform = getTransform();
 
-                ComponentColorLine *lines = (ComponentColorLine *)transform[0]->findComponent(ComponentColorLine::Type);
+                auto lines = transform->findComponent<ComponentColorLine>();
                 if (lines == NULL)
-                    lines = (ComponentColorLine *)transform[0]->addComponent(new ComponentColorLine());
+                    lines = transform->addNewComponent<ComponentColorLine>();
 
                 lines->vertices.clear();
 

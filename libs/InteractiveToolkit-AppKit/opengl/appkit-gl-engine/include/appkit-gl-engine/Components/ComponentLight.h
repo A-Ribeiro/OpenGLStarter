@@ -107,7 +107,7 @@ namespace AppKit
 
                 ComponentLight();
 
-                MathCore::vec3f getWorldDirection(bool useVisitedFlag = true) const;
+                MathCore::vec3f getWorldDirection(bool useVisitedFlag = true);
 
                 void postProcessing_computeLightParameters();
                 void createDebugLines();

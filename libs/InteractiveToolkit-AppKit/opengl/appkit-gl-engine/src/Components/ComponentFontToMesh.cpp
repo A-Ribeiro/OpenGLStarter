@@ -14,7 +14,10 @@ namespace AppKit
 
             void ComponentFontToMesh::toMesh(AppKit::OpenGL::GLFont2Builder &builder, bool dynamic)
             {
-                ITK_ABORT(transform.size() == 0, "Transform cannot be 0.\n");
+                ITK_ABORT(getTransformCount() == 0, "Transform cannot be 0.\n");
+                
+                auto transform = getTransform();
+
                 start();
 
                 mesh->pos.clear();
@@ -52,14 +55,11 @@ namespace AppKit
                     mesh->syncVBOStatic();
 
                 // mesh wrapper logic...
-                Components::ComponentMeshWrapper *meshWrapper = (Components::ComponentMeshWrapper *)
-                                                                    transform[0]
-                                                                        ->findComponent(Components::ComponentMeshWrapper::Type);
-
+                auto meshWrapper = transform->findComponent<Components::ComponentMeshWrapper>();
                 if (meshWrapper == NULL)
                 {
-                    meshWrapper = (Components::ComponentMeshWrapper *)transform[0]->addComponent(new Components::ComponentMeshWrapper());
-                    transform[0]->makeFirstComponent(meshWrapper);
+                    meshWrapper = transform->addNewComponent<Components::ComponentMeshWrapper>();
+                    transform->makeFirstComponent(meshWrapper);
                 }
                 // meshWrapper->updateMeshOBB();
                 meshWrapper->updateMeshAABB();
@@ -78,21 +78,22 @@ namespace AppKit
 
             void ComponentFontToMesh::createAuxiliaryComponents()
             {
-                if (material == NULL)
+                auto transform = getTransform();
+                if (material == nullptr)
                 {
-                    material = (ComponentMaterial *)transform[0]->addComponent(new ComponentMaterial());
+                    material = transform->addNewComponent<ComponentMaterial>();
                     // material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
                     material->type = AppKit::GLEngine::Components::MaterialNone;
                     material->unlit.color = MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f);
                     material->unlit.blendMode = AppKit::GLEngine::BlendModeAlpha;
                 }
-                if (mesh == NULL)
+                if (mesh == nullptr)
                 {
-                    mesh = (ComponentMesh *)transform[0]->addComponent(new ComponentMesh());
+                    mesh = transform->addNewComponent<ComponentMesh>();
                 }
             }
 
-            void ComponentFontToMesh::attachToTransform(Transform *t)
+            void ComponentFontToMesh::attachToTransform(std::shared_ptr<Transform> t)
             {
                 createAuxiliaryComponents();
             }

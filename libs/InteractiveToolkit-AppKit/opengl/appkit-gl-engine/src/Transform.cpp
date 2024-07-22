@@ -794,10 +794,10 @@ namespace AppKit
             // ITK_ABORT(c->transform!=NULL,"cannot add same component to two or more transforms\n.");
             components.push_back(c);
 
-            c->transform.push_back(this);
+            c->mTransform.push_back(this);
             // c->transform = this;
 
-            c->attachToTransform(this);
+            c->attachToTransform(this->self());
             return c;
         }
 
@@ -809,12 +809,12 @@ namespace AppKit
                 {
                     components.erase(components.begin() + i);
 
-                    for (size_t j = c->transform.size() - 1; j >= 0; j--)
+                    for (size_t j = c->mTransform.size() - 1; j >= 0; j--)
                     {
-                        if (c->transform[j] == this)
+                        if (c->mTransform[j] == this)
                         {
-                            c->transform.erase(c->transform.begin() + j);
-                            c->detachFromTransform(this);
+                            c->mTransform.erase(c->mTransform.begin() + j);
+                            c->detachFromTransform(this->self());
                             break;
                         }
                     }
@@ -842,7 +842,7 @@ namespace AppKit
                     if (result->transform[j] == this)
                     {
                         result->transform.erase(result->transform.begin() + j);
-                        result->detachFromTransform(this);
+                        result->detachFromTransform(this->self());
                         break;
                     }
                 }
@@ -856,26 +856,26 @@ namespace AppKit
             return nullptr;
         }
 
-        std::shared_ptr<Component> Transform::findComponent(ComponentType t) const
-        {
-            for (int i = 0; i < components.size(); i++)
-            {
-                if (components[i]->compareType(t))
-                    return components[i];
-            }
-            return nullptr;
-        }
+        // std::shared_ptr<Component> Transform::findComponent(ComponentType t)
+        // {
+        //     for (int i = 0; i < components.size(); i++)
+        //     {
+        //         if (components[i]->compareType(t))
+        //             return components[i];
+        //     }
+        //     return nullptr;
+        // }
 
-        std::vector<std::shared_ptr<Component>> Transform::findComponents(ComponentType t) const
-        {
-            std::vector<std::shared_ptr<Component>> result;
-            for (int i = 0; i < components.size(); i++)
-            {
-                if (components[i]->compareType(t))
-                    result.push_back(components[i]);
-            }
-            return result;
-        }
+        // std::vector<std::shared_ptr<Component>> Transform::findComponents(ComponentType t)
+        // {
+        //     std::vector<std::shared_ptr<Component>> result;
+        //     for (int i = 0; i < components.size(); i++)
+        //     {
+        //         if (components[i]->compareType(t))
+        //             result.push_back(components[i]);
+        //     }
+        //     return result;
+        // }
 
         int Transform::getComponentCount() const
         {
@@ -888,36 +888,36 @@ namespace AppKit
             return nullptr;
         }
 
-        std::shared_ptr<Component> Transform::findComponentInChildren(ComponentType t) const
-        {
-            std::shared_ptr<Component> result;
-            for (int i = 0; i < children.size(); i++)
-            {
-                result = children[i]->findComponent(t);
-                if (result != nullptr)
-                    return result;
-                result = children[i]->findComponentInChildren(t);
-                if (result != nullptr)
-                    return result;
-            }
-            return result;
-        }
+        // std::shared_ptr<Component> Transform::findComponentInChildren(ComponentType t)
+        // {
+        //     std::shared_ptr<Component> result;
+        //     for (int i = 0; i < children.size(); i++)
+        //     {
+        //         result = children[i]->findComponent(t);
+        //         if (result != nullptr)
+        //             return result;
+        //         result = children[i]->findComponentInChildren(t);
+        //         if (result != nullptr)
+        //             return result;
+        //     }
+        //     return result;
+        // }
 
-        std::vector<std::shared_ptr<Component>> Transform::findComponentsInChildren(ComponentType t) const
-        {
-            std::vector<std::shared_ptr<Component>> result;
-            std::vector<std::shared_ptr<Component>> parcialResult;
-            for (int i = 0; i < children.size(); i++)
-            {
-                parcialResult = children[i]->findComponents(t);
-                if (parcialResult.size() > 0)
-                    result.insert(result.end(), parcialResult.begin(), parcialResult.end());
-                parcialResult = children[i]->findComponentsInChildren(t);
-                if (parcialResult.size() > 0)
-                    result.insert(result.end(), parcialResult.begin(), parcialResult.end());
-            }
-            return result;
-        }
+        // std::vector<std::shared_ptr<Component>> Transform::findComponentsInChildren(ComponentType t)
+        // {
+        //     std::vector<std::shared_ptr<Component>> result;
+        //     std::vector<std::shared_ptr<Component>> parcialResult;
+        //     for (int i = 0; i < children.size(); i++)
+        //     {
+        //         parcialResult = children[i]->findComponents(t);
+        //         if (parcialResult.size() > 0)
+        //             result.insert(result.end(), parcialResult.begin(), parcialResult.end());
+        //         parcialResult = children[i]->findComponentsInChildren(t);
+        //         if (parcialResult.size() > 0)
+        //             result.insert(result.end(), parcialResult.begin(), parcialResult.end());
+        //     }
+        //     return result;
+        // }
 
         void Transform::setName(const std::string &p)
         {

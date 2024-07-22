@@ -9,7 +9,7 @@
 #include <appkit-gl-engine/Components/ComponentSkinnedMesh.h>
 
 #include <appkit-gl-engine/util/Animation.h>
-#include <appkit-gl-engine/SharedPointer/SharedPointer.h>
+//#include <appkit-gl-engine/SharedPointer/SharedPointer.h>
 
 namespace AppKit
 {
@@ -134,12 +134,16 @@ namespace AppKit
                             }
                         }
 
+                        auto _transform = getTransform();
+                        auto skinnedMesh = ToShared(skinnedMeshRef);
+                        auto skinnedMesh_Transform = skinnedMesh->getTransform();
+
                         MathCore::vec3f local_delta = MathCore::CVT<MathCore::vec4f>::toVec3(
-                            transform[0]->worldToLocalMatrix() *
-                            (skinnedMesh->transform[0]->localToWorldMatrix() *
+                            _transform->worldToLocalMatrix() *
+                            (skinnedMesh_Transform->localToWorldMatrix() *
                              MathCore::CVT<MathCore::vec3f>::toVec4(move_external_delta)));
 
-                        MathCore::vec3f local_final = transform[0]->getLocalPosition() + local_delta;
+                        MathCore::vec3f local_final = _transform->getLocalPosition() + local_delta;
 
                         // local_final = MathCore::CVT<MathCore::vec4f>::toVec3(transform[0]->localToWorldMatrix() * MathCore::CVT<MathCore::vec3f>::toPtn4(local_final));
 
@@ -149,7 +153,7 @@ namespace AppKit
                         }
                         else
                         {
-                            transform[0]->setLocalPosition(local_final);
+                            _transform->setLocalPosition(local_final);
                         }
                     }
                 }
@@ -158,7 +162,7 @@ namespace AppKit
                 static const ComponentType Type;
 
                 std::vector<ClipMotionInfluence> motionInfluence;
-                SharedPointer<ComponentSkinnedMesh> skinnedMesh; // becomes null when skinned mesh is deleted
+                std::weak_ptr<ComponentSkinnedMesh> skinnedMeshRef; // becomes null when skinned mesh is deleted
 
                 EventCore::Event<void(float right, float up, float forward, const MathCore::vec3f &localPosition)> OnMove;
 
@@ -168,10 +172,16 @@ namespace AppKit
 
                 void start()
                 {
-                    skinnedMesh = (ComponentSkinnedMesh *)transform[0]->findComponent(ComponentSkinnedMesh::Type);
-                    if (skinnedMesh == NULL)
-                        skinnedMesh = (ComponentSkinnedMesh *)transform[0]->findComponentInChildren(ComponentSkinnedMesh::Type);
+                    auto _transform = getTransform();
+
+                    auto skinnedMeshComponent = _transform->findComponent<ComponentSkinnedMesh>();
+
+                    auto skinnedMesh = _transform->findComponent<ComponentSkinnedMesh>();
+                    if (skinnedMesh == nullptr)
+                        skinnedMesh = _transform->findComponentInChildren<ComponentSkinnedMesh>();
+
                     ITK_ABORT(skinnedMesh == NULL, "Failed to query skinned mesh\n.");
+                    skinnedMeshRef = skinnedMesh;
 
                     skinnedMesh->mixer.setRootMotionAnalyserCallback(EventCore::CallbackWrapper(&ComponentAnimationMotion::OnRootMotionAnalyser, this));
                 }
@@ -188,15 +198,19 @@ namespace AppKit
 
                 void TriggerClip(const std::string &name)
                 {
+                    //auto skinnedMesh = std::shared_ptr<ComponentSkinnedMesh>(skinnedMeshRef);
+                    auto skinnedMesh = ToShared(skinnedMeshRef);
                     skinnedMesh->mixer.play(name);
                 }
 
                 ~ComponentAnimationMotion()
                 {
+                    auto skinnedMesh = ToShared(skinnedMeshRef);
                     if (skinnedMesh != NULL)
                     {
                         skinnedMesh->mixer.setRootMotionAnalyserCallback(NULL);
-                        skinnedMesh = NULL;
+                        // skinnedMesh = nullptr;
+                        skinnedMeshRef.reset();
                     }
                 }
             };

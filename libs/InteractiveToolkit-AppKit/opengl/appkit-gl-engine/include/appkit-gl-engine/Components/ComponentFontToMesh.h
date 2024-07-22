@@ -8,7 +8,7 @@
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
 
-#include <appkit-gl-engine/SharedPointer/SharedPointer.h>
+// #include <appkit-gl-engine/SharedPointer/SharedPointer.h>
 
 #include <appkit-gl-engine/Components/deprecated/ComponentColorMesh.h>
 #include <appkit-gl-engine/Components/ComponentMesh.h>
@@ -28,8 +28,8 @@ namespace AppKit
             public:
                 static const ComponentType Type;
 
-                SharedPointer<ComponentMaterial> material;
-                SharedPointer<ComponentMesh> mesh;
+                std::shared_ptr<ComponentMaterial> material;
+                std::shared_ptr<ComponentMesh> mesh;
 
                 void toMesh(AppKit::OpenGL::GLFont2Builder &builder, bool dynamic);
 
@@ -38,7 +38,7 @@ namespace AppKit
 
                 void createAuxiliaryComponents();
 
-                void attachToTransform(Transform *t);
+                void attachToTransform(std::shared_ptr<Transform> t);
                 void start();
             };
 

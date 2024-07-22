@@ -70,7 +70,7 @@ namespace AppKit
 
                 // MathCore::vec3f App2MousePosition();
 
-                void attachToTransform(Transform *t){
+                void attachToTransform(std::shared_ptr<Transform> t){
                     renderWindowRegion = t->renderWindowRegion;
                 }
             };

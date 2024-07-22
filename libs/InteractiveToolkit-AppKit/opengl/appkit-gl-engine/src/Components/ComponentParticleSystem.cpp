@@ -212,8 +212,9 @@ namespace AppKit
             void ComponentParticleSystem::emmitStart()
             {
                 // AppBase* app = Engine::Instance()->app;
+                auto transform = getTransform();
 
-                renderWindowRegion = transform[0]->renderWindowRegion;
+                renderWindowRegion = transform->renderWindowRegion;
                 renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
 
@@ -233,6 +234,7 @@ namespace AppKit
 
             void ComponentParticleSystem::prewarmStart()
             {
+                auto transform = getTransform();
 
                 if (boxEmmiter != NULL)
                 {
@@ -241,7 +243,7 @@ namespace AppKit
                 }
 
                 // AppBase* app = Engine::Instance()->app;
-                renderWindowRegion = transform[0]->renderWindowRegion;
+                renderWindowRegion = transform->renderWindowRegion;
                 renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
 

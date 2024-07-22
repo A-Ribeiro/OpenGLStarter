@@ -46,11 +46,11 @@ namespace AppKit
             void ComponentMesh::uploadVBO(uint32_t model_dynamic_upload, uint32_t model_static_upload)
             {
 
-                for (size_t i = 0; i < transform.size(); i++)
+                for (int i = 0; i < getTransformCount(); i++)
                 {
-                    Transform *transform = this->transform[i];
-                    Components::ComponentMeshWrapper *meshWrapper =
-                        (Components::ComponentMeshWrapper *)transform->findComponent(Components::ComponentMeshWrapper::Type);
+                    auto transform = getTransform(i);
+
+                    auto meshWrapper = transform->findComponent<Components::ComponentMeshWrapper>();
                     if (meshWrapper != NULL)
                     {
                         if (meshWrapper->wrapShape == WrapShapeAABB)

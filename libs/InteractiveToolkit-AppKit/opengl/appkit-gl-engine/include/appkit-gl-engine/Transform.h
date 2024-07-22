@@ -1,6 +1,6 @@
 #pragma once
 
-//#include <aRibeiroCore/aRibeiroCore.h>
+// #include <aRibeiroCore/aRibeiroCore.h>
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <InteractiveToolkit/EventCore/Event.h>
 #include <InteractiveToolkit/EventCore/Callback.h>
@@ -20,7 +20,7 @@ namespace AppKit
         // DefineMethodPointer(EventCore::CallbackWrapper, bool, Transform *t, void *userData) ReturnMethodCall(t, userData);
         // DefineMethodPointer(EventCore::CallbackWrapper_const, bool, Transform *t, const void *userData) ReturnMethodCall(t, userData);
 
-        class Transform: public EventCore::HandleCallback
+        class Transform : public EventCore::HandleCallback
         {
             Transform(const Transform &v);
             void operator=(const Transform &v);
@@ -38,8 +38,8 @@ namespace AppKit
             std::vector<std::shared_ptr<Transform>> children;
             std::weak_ptr<Transform> mParent;
             std::weak_ptr<Transform> mSelf;
-        public:
 
+        public:
             static inline std::shared_ptr<Transform> CreateShared()
             {
                 auto result = std::make_shared<Transform>();
@@ -63,7 +63,7 @@ namespace AppKit
 
             std::shared_ptr<Transform> getParent();
             void setParent(std::shared_ptr<Transform> new_parent);
-            
+
             // EventCore::VirtualProperty<Transform *> Parent;
             ///////////////////////////////////////////////////////
             //
@@ -76,7 +76,7 @@ namespace AppKit
             ///////////////////////////////////////////////////////
         private:
             MathCore::vec3f localPosition;
-            //MathCore::vec3f localEuler;
+            // MathCore::vec3f localEuler;
             MathCore::quatf localRotation;
             MathCore::vec3f localScale;
 
@@ -94,12 +94,12 @@ namespace AppKit
 
         public:
             MathCore::vec3f getLocalPosition() const;
-            //MathCore::vec3f getLocalEuler() const;
+            // MathCore::vec3f getLocalEuler() const;
             MathCore::quatf getLocalRotation() const;
             MathCore::vec3f getLocalScale() const;
 
             void setLocalPosition(const MathCore::vec3f &p);
-            //void setLocalEuler(const MathCore::vec3f &e);
+            // void setLocalEuler(const MathCore::vec3f &e);
             void setLocalRotation(const MathCore::quatf &q);
             void setLocalScale(const MathCore::vec3f &s);
 
@@ -187,12 +187,12 @@ namespace AppKit
         private:
         public:
             EventCore::VirtualProperty<MathCore::vec3f> LocalPosition;
-            //EventCore::VirtualProperty<MathCore::vec3f> LocalEuler;
+            // EventCore::VirtualProperty<MathCore::vec3f> LocalEuler;
             EventCore::VirtualProperty<MathCore::quatf> LocalRotation;
             EventCore::VirtualProperty<MathCore::vec3f> LocalScale;
 
             EventCore::VirtualProperty<MathCore::vec3f> Position;
-            //EventCore::VirtualProperty<MathCore::vec3f> Euler;
+            // EventCore::VirtualProperty<MathCore::vec3f> Euler;
             EventCore::VirtualProperty<MathCore::quatf> Rotation;
             EventCore::VirtualProperty<MathCore::vec3f> Scale;
 
@@ -219,16 +219,94 @@ namespace AppKit
             void makeFirstComponent(std::shared_ptr<Component>);
             void makeLastComponent(std::shared_ptr<Component>);
 
-            std::shared_ptr<Component>addComponent(std::shared_ptr<Component>);
-            std::shared_ptr<Component>removeComponent(std::shared_ptr<Component>);
-            std::shared_ptr<Component>removeComponentAt(int);
-            std::shared_ptr<Component>findComponent(ComponentType) const;
-            std::vector<std::shared_ptr<Component>> findComponents(ComponentType) const;
+            template <typename _ComponentType,
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value,
+                          bool>::type = true>
+            inline std::shared_ptr<_ComponentType> addNewComponent()
+            {
+                std::shared_ptr<_ComponentType> result;
+                result = Component::CreateShared<_ComponentType>();
+                addComponent(result);
+                return result;
+            }
+
+            std::shared_ptr<Component> addComponent(std::shared_ptr<Component>);
+            std::shared_ptr<Component> removeComponent(std::shared_ptr<Component>);
+            std::shared_ptr<Component> removeComponentAt(int);
+
+            template <typename _ComponentType,
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value,
+                          bool>::type = true>
+            inline std::shared_ptr<_ComponentType> findComponent()
+            {
+                for (int i = 0; i < components.size(); i++)
+                    if (components[i]->compareType(_ComponentType::Type))
+                        return std::dynamic_pointer_cast<_ComponentType>(components[i]);
+                return nullptr;
+            }
+
+            template <typename _ComponentType,
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value,
+                          bool>::type = true>
+            inline std::vector<std::shared_ptr<_ComponentType>> findComponents()
+            {
+                std::vector<std::shared_ptr<_ComponentType>> result;
+                for (int i = 0; i < components.size(); i++)
+                    if (components[i]->compareType(_ComponentType::Type))
+                        result.push_back(std::dynamic_pointer_cast<_ComponentType>(components[i]));
+                return result;
+            }
+
+            // std::shared_ptr<Component> findComponent(ComponentType);
+            // std::vector<std::shared_ptr<Component>> findComponents(ComponentType);
+
             int getComponentCount() const;
             std::shared_ptr<Component> getComponentAt(int);
 
-            std::shared_ptr<Component> findComponentInChildren(ComponentType) const;
-            std::vector<std::shared_ptr<Component>> findComponentsInChildren(ComponentType) const;
+            template <typename _ComponentType,
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value,
+                          bool>::type = true>
+            inline std::shared_ptr<_ComponentType> findComponentInChildren()
+            {
+                std::shared_ptr<_ComponentType> result;
+                for (int i = 0; i < children.size(); i++)
+                {
+                    result = children[i]->findComponent<_ComponentType>();
+                    if (result != nullptr)
+                        return result;
+                    result = children[i]->findComponentInChildren<_ComponentType>();
+                    if (result != nullptr)
+                        return result;
+                }
+                return result;
+            }
+
+            template <typename _ComponentType,
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value,
+                          bool>::type = true>
+            inline std::vector<std::shared_ptr<_ComponentType>> findComponentsInChildren()
+            {
+                std::vector<std::shared_ptr<_ComponentType>> result;
+                std::vector<std::shared_ptr<_ComponentType>> parcialResult;
+                for (int i = 0; i < children.size(); i++)
+                {
+                    parcialResult = children[i]->findComponents<_ComponentType>();
+                    if (parcialResult.size() > 0)
+                        result.insert(result.end(), parcialResult.begin(), parcialResult.end());
+                    parcialResult = children[i]->findComponentsInChildren<_ComponentType>();
+                    if (parcialResult.size() > 0)
+                        result.insert(result.end(), parcialResult.begin(), parcialResult.end());
+                }
+                return result;
+            }
+
+            // std::shared_ptr<Component> findComponentInChildren(ComponentType);
+            // std::vector<std::shared_ptr<Component>> findComponentsInChildren(ComponentType);
 
             void setName(const std::string &p);
             const std::string &getName() const;
@@ -264,17 +342,17 @@ namespace AppKit
             ///////////////////////////////////////////////////////
 
             bool traversePreOrder_DepthFirst(
-                const EventCore::Callback<bool(std::shared_ptr<Transform>t, void *userData)> &OnNode, 
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
                 void *userData = NULL, int maxLevel = INT_MAX);
             bool traversePostOrder_DepthFirst(
-                const EventCore::Callback<bool(std::shared_ptr<Transform>t, void *userData)> &OnNode, 
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
                 void *userData = NULL, int maxLevel = INT_MAX);
 
             bool traversePreOrder_DepthFirst(
-                const EventCore::Callback<bool(std::shared_ptr<Transform>t, const void *userData)> &OnNode, 
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
                 const void *userData = NULL, int maxLevel = INT_MAX);
             bool traversePostOrder_DepthFirst(
-                const EventCore::Callback<bool(std::shared_ptr<Transform>t, const void *userData)> &OnNode,
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
                 const void *userData = NULL, int maxLevel = INT_MAX);
 
             ///////////////////////////////////////////////////////
