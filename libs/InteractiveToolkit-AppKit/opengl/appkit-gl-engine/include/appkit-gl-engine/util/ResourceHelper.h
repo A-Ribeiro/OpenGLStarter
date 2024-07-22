@@ -17,17 +17,17 @@ namespace AppKit
     namespace GLEngine
     {
 
-        class ResourceHelper: public EventCore::HandleCallback
+        class ResourceHelper : public EventCore::HandleCallback
         {
 
         private:
             CubeMapHelper *cubeMapHelper;
 
         public:
-            AppKit::OpenGL::GLTexture *defaultAlbedoTexture;
-            AppKit::OpenGL::GLTexture *defaultNormalTexture;
+            std::shared_ptr<AppKit::OpenGL::GLTexture> defaultAlbedoTexture;
+            std::shared_ptr<AppKit::OpenGL::GLTexture> defaultNormalTexture;
 
-            Components::ComponentMaterial *defaultPBRMaterial;
+            std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial;
 
             ResourceHelper();
 
@@ -42,32 +42,39 @@ namespace AppKit
                 bool sRGB,
                 int targetResolution) ;*/
 
-            void copyCubeMapEnhanced(AppKit::OpenGL::GLCubeMap *inputcubemap, int inputMip, AppKit::OpenGL::GLCubeMap *targetcubemap, int outputMip);
-            void render1x1CubeIntoSphereTexture(AppKit::OpenGL::GLCubeMap *inputcubemap, AppKit::OpenGL::GLTexture *targetTexture, int width, int height);
+            void copyCubeMapEnhanced(
+                std::shared_ptr<AppKit::OpenGL::GLCubeMap> inputcubemap,
+                int inputMip,
+                std::shared_ptr<AppKit::OpenGL::GLCubeMap> targetcubemap,
+                int outputMip);
+            void render1x1CubeIntoSphereTexture(
+                std::shared_ptr<AppKit::OpenGL::GLCubeMap> inputcubemap,
+                std::shared_ptr<AppKit::OpenGL::GLTexture> targetTexture,
+                int width, int height);
 
             // Load skybox from the folder: resources/Skyboxes/
-            AppKit::GLEngine::GLCubeMapSkyBox *createSkybox(const std::string &name, bool sRGB, int maxResolution = 1024);
+            std::shared_ptr<AppKit::GLEngine::GLCubeMapSkyBox> createSkybox(const std::string &name, bool sRGB, int maxResolution = 1024);
 
             // Load cubemap from the folder: resources/Skyboxes/
-            AppKit::OpenGL::GLCubeMap *createCubeMap(const std::string &name, bool sRGB, int maxResolution = 1024);
+            std::shared_ptr<AppKit::OpenGL::GLCubeMap> createCubeMap(const std::string &name, bool sRGB, int maxResolution = 1024);
 
-            AppKit::OpenGL::GLTexture *createTextureFromFile(const std::string &path, bool sRGB);
+            std::shared_ptr<AppKit::OpenGL::GLTexture> createTextureFromFile(const std::string &path, bool sRGB);
 
-            Transform *createTransformFromModel(const std::string &path, uint32_t model_dynamic_upload = 0, uint32_t model_static_upload = 0xffffffff);
-
-        private:
-            static bool traverse_delete(Transform *element, void *userData);
-
-        public:
-            static void releaseTransformRecursive(Transform **root);
+            std::shared_ptr<Transform> createTransformFromModel(const std::string &path, uint32_t model_dynamic_upload = 0, uint32_t model_static_upload = 0xffffffff);
 
         private:
-            static Transform *traverse_copy(Transform *element);
-            static bool traverse_remove_empty(Transform *root);
+            // static bool traverse_delete(Transform *element, void *userData);
 
         public:
-            static Transform *cloneTransformRecursive(Transform *root);
-            static Transform *removeEmptyTransforms(Transform *root);
+            // static void releaseTransformRecursive(Transform **root);
+
+        private:
+            static std::shared_ptr<Transform> traverse_copy(std::shared_ptr<Transform> element);
+            static bool traverse_remove_empty(std::shared_ptr<Transform> root);
+
+        public:
+            static std::shared_ptr<Transform> cloneTransformRecursive(std::shared_ptr<Transform> root);
+            static std::shared_ptr<Transform> removeEmptyTransforms(std::shared_ptr<Transform> root);
 
         public:
             static MathCore::vec4f vec4ColorGammaToLinear(const MathCore::vec4f &v);
@@ -76,13 +83,13 @@ namespace AppKit
             static MathCore::vec3f vec3ColorGammaToLinear(const MathCore::vec3f &v);
             static MathCore::vec3f vec3ColorLinearToGamma(const MathCore::vec3f &v);
 
-            static void setTexture(AppKit::OpenGL::GLTexture **dst, AppKit::OpenGL::GLTexture *src);
+            // static void setTexture(AppKit::OpenGL::GLTexture **dst, AppKit::OpenGL::GLTexture *src);
 
         private:
-            bool addAABBMesh_traverser(Transform *element, void *userData);
+            bool addAABBMesh_traverser(std::shared_ptr<Transform> element, void *userData);
 
         public:
-            void addAABBMesh(Transform *element);
+            void addAABBMesh(std::shared_ptr<Transform> element);
         };
 
     }

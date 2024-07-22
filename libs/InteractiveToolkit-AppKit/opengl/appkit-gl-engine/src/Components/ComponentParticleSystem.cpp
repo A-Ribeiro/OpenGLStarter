@@ -162,9 +162,11 @@ namespace AppKit
                     renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
                 }
 
-                ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCounter = &Engine::Instance()->textureReferenceCounter;
+                // ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCounter = &Engine::Instance()->textureReferenceCounter;
 
-                texRefCounter->remove(texture);
+                // texRefCounter->remove(texture);
+
+                texture = nullptr;
             }
 
             void ComponentParticleSystem::setLifetime(float v_sec)

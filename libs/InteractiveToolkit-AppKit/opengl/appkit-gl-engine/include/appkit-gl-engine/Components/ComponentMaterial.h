@@ -10,7 +10,7 @@
 
 #include <appkit-gl-engine/Components/deprecated/ComponentColorMesh.h>
 #include <appkit-gl-engine/GL/GLRenderState.h>
-#include <appkit-gl-engine/util/ReferenceCounter.h>
+// #include <appkit-gl-engine/util/ReferenceCounter.h>
 //#include <aRibeiroData/aRibeiroData.h>
 
 // #include <appkit-gl-engine/DefaultEngineShader.h>
@@ -39,22 +39,23 @@ namespace AppKit
             {
             public:
                 MathCore::vec4f color;
-                AppKit::OpenGL::GLTexture *tex;
+                std::shared_ptr<AppKit::OpenGL::GLTexture> tex;
 
                 AppKit::GLEngine::BlendModeType blendMode;
 
                 UnlitSetup()
                 {
-                    tex = NULL;
+                    //tex = nullptr;
                     blendMode = AppKit::GLEngine::BlendModeDisabled;
                     color = MathCore::vec4f(1.0f);
                 }
 
                 void releaseTextureReferences()
                 {
-                    ReferenceCounter<AppKit::OpenGL::GLTexture *> *refCounter = &Engine::Instance()->textureReferenceCounter;
-                    if (tex)
-                        refCounter->remove(tex);
+                    tex = nullptr;
+                    // ReferenceCounter<AppKit::OpenGL::GLTexture *> *refCounter = &Engine::Instance()->textureReferenceCounter;
+                    // if (tex)
+                    //     refCounter->remove(tex);
                 }
             };
 
@@ -64,12 +65,12 @@ namespace AppKit
                 MathCore::vec3f albedoColor;
                 MathCore::vec3f emissionColor;
 
-                AppKit::OpenGL::GLTexture *texAlbedo;
-                AppKit::OpenGL::GLTexture *texNormal;
-                AppKit::OpenGL::GLTexture *texSpecular;
+                std::shared_ptr<AppKit::OpenGL::GLTexture> texAlbedo;
+                std::shared_ptr<AppKit::OpenGL::GLTexture> texNormal;
+                std::shared_ptr<AppKit::OpenGL::GLTexture> texSpecular;
 
                 // AppKit::OpenGL::GLTexture *texCube;
-                AppKit::OpenGL::GLTexture *texEmission;
+                std::shared_ptr<AppKit::OpenGL::GLTexture> texEmission;
 
                 float roughness;
                 float metallic;
@@ -86,30 +87,35 @@ namespace AppKit
                     roughness = 1.0f;
                     metallic = 0.0f;
 
-                    texAlbedo = NULL;
-                    texNormal = NULL;
-                    texSpecular = NULL;
+                    //texAlbedo = nullptr;
+                    //texNormal = nullptr;
+                    //texSpecular = nullptr;
 
                     // texCube = NULL;
-                    texEmission = NULL;
+                    //texEmission = nullptr;
 
                     // blendMode = AppKit::GLEngine::BlendModeDisabled;
                 }
 
                 void releaseTextureReferences()
                 {
-                    ReferenceCounter<AppKit::OpenGL::GLTexture *> *refCounter = &Engine::Instance()->textureReferenceCounter;
+                    // ReferenceCounter<AppKit::OpenGL::GLTexture *> *refCounter = &Engine::Instance()->textureReferenceCounter;
 
-                    if (texAlbedo)
-                        refCounter->remove(texAlbedo);
-                    if (texNormal)
-                        refCounter->remove(texNormal);
-                    if (texSpecular)
-                        refCounter->remove(texSpecular);
-                    if (texEmission)
-                        refCounter->remove(texEmission);
+                    // if (texAlbedo)
+                    //     refCounter->remove(texAlbedo);
+                    // if (texNormal)
+                    //     refCounter->remove(texNormal);
+                    // if (texSpecular)
+                    //     refCounter->remove(texSpecular);
+                    // if (texEmission)
+                    //     refCounter->remove(texEmission);
 
                     // refCounter->remove(texCube);
+
+                    texAlbedo = nullptr;
+                    texNormal = nullptr;
+                    texSpecular = nullptr;
+                    texEmission = nullptr;
                 }
             };
 

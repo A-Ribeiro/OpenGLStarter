@@ -31,7 +31,7 @@
 
 #include <appkit-gl-engine/AppBase/AppBase.h>
 #include <appkit-gl-engine/Component.h>
-#include <appkit-gl-engine/util/ReferenceCounter.h>
+// #include <appkit-gl-engine/util/ReferenceCounter.h>
 
 #include <appkit-gl-base/GLTexture.h>
 
@@ -65,8 +65,8 @@ namespace AppKit
             AppBase *app;
             AppKit::Window::GLWindow *window;
 
-            ReferenceCounter<AppKit::OpenGL::GLTexture *> textureReferenceCounter;
-            ReferenceCounter<AppKit::GLEngine::Component *> componentReferenceCounter;
+            // ReferenceCounter<AppKit::OpenGL::GLTexture *> textureReferenceCounter;
+            // ReferenceCounter<AppKit::GLEngine::Component *> componentReferenceCounter;
 
             // after initialization this variable will hold the sRGB information about the buffer
             bool sRGBCapable;

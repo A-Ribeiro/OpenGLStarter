@@ -114,7 +114,7 @@ namespace AppKit
                             clipInfo_b.start + influence_b,
                             clipInfo_b.weight);
 
-                        Transform *node = clipInfo_a.clip->root_node;
+                        auto node = clipInfo_a.clip->root_node;
                         node->setPosition(final_position);
                     }
 

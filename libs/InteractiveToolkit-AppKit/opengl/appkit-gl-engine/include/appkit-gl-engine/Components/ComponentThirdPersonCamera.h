@@ -9,7 +9,7 @@
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
 
-#include <appkit-gl-engine/SharedPointer/SharedPointer.h>
+// #include <appkit-gl-engine/SharedPointer/SharedPointer.h>
 
 #include <appkit-gl-engine/Components/ComponentMaterial.h>
 #include <appkit-gl-engine/Components/ComponentMesh.h>
@@ -34,10 +34,10 @@ namespace AppKit
                 float rotacional_speed_y;
                 float rotacional_speed_x;
 
-                SharedPointer<Transform> Target;
+                std::weak_ptr<Transform> TargetRef;
                 MathCore::vec3f transform_position_target;
 
-                SharedPointer<Transform> Player_Forward;
+                std::weak_ptr<Transform> Player_ForwardRef;
 
                 RenderWindowRegion *renderWindowRegion;
 
@@ -57,17 +57,21 @@ namespace AppKit
 
                 void start()
                 {
+                    auto transform = getTransform();
+
                     // AppBase* app = Engine::Instance()->app;
-                    renderWindowRegion = transform[0]->renderWindowRegion;
+                    renderWindowRegion = transform->renderWindowRegion;
                     renderWindowRegion->OnLateUpdate.add(&ComponentThirdPersonCamera::OnLateUpdate, this);
 
-                    transform_position_target = transform[0]->Position;
+                    transform_position_target = transform->Position;
+                    
+                    auto Target = ToShared(TargetRef);
 
-                    if (Target == NULL)
+                    if (Target == nullptr)
                         return;
 
                     if (distance <= 0)
-                        distance = MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform[0]->Position);
+                        distance = MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform->Position);
 
                     if (current_x_angle < 0)
                     {
@@ -126,19 +130,26 @@ namespace AppKit
                         renderWindowRegion->OnLateUpdate.remove(&ComponentThirdPersonCamera::OnLateUpdate, this);
                     }
 
-                    if (Target != NULL)
+                    auto Target = ToShared(TargetRef);
+                    
+                    if (Target != nullptr)
                     {
-                        Target = NULL;
+                        //Target = NULL;
+                        TargetRef.reset();
                     }
 
-                    if (Player_Forward != NULL)
+                    auto Player_Forward = ToShared(Player_ForwardRef);
+                    if (Player_Forward != nullptr)
                     {
-                        Player_Forward = NULL;
+                        //Player_Forward = NULL;
+                        Player_ForwardRef.reset();
                     }
                 }
 
                 void OnLateUpdate(Platform::Time *time)
                 {
+                    auto Target = ToShared(TargetRef);
+
                     if (Target == NULL)
                         return;
 
@@ -151,6 +162,8 @@ namespace AppKit
 
                 void Position_1st_Quadratic_Clamp(Platform::Time *time)
                 {
+                    auto Target = ToShared(TargetRef);
+
                     // quadratic clamp
                     float new_distance = MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform_position_target);
                     if (new_distance > distance)
@@ -159,40 +172,47 @@ namespace AppKit
                         transform_position_target = Target->Position - cam2target * distance;
                     }
 
+                    auto transform = getTransform();
                     // move towards
-                    transform[0]->Position = MathCore::OP<MathCore::vec3f>::move(transform[0]->Position, transform_position_target, pos_speed * time->deltaTime);
+                    transform->Position = MathCore::OP<MathCore::vec3f>::move(transform->Position, transform_position_target, pos_speed * time->deltaTime);
                 }
 
                 void Position_2nd_Quadratic_Clamp(Platform::Time *time)
                 {
-                    MathCore::vec3f cam2target = MathCore::OP<MathCore::vec3f>::normalize(Target->Position - transform[0]->Position);
-                    float new_distance = MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform[0]->Position);
+                    auto Target = ToShared(TargetRef);
+                    auto transform = getTransform();
+
+                    MathCore::vec3f cam2target = MathCore::OP<MathCore::vec3f>::normalize(Target->Position - transform->Position);
+                    float new_distance = MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform->Position);
 
                     // quadratic clamp
                     if (new_distance > distance + distance_offset)
                     {
                         // force set without interpolation...
                         transform_position_target = Target->Position - cam2target * (distance + distance_offset);
-                        transform[0]->Position = transform_position_target;
+                        transform->Position = transform_position_target;
                     }
 
-                    transform[0]->Rotation = MathCore::GEN<MathCore::quatf>::lookAtRotationLH(cam2target, MathCore::vec3f(0, 1, 0));
+                    transform->Rotation = MathCore::GEN<MathCore::quatf>::lookAtRotationLH(cam2target, MathCore::vec3f(0, 1, 0));
                 }
 
                 void X_Rotate_Smooth(Platform::Time *time)
                 {
-                    MathCore::vec3f cam2target = Target->Position - transform[0]->Position;
+                    auto Target = ToShared(TargetRef);
+                    auto transform = getTransform();
+
+                    MathCore::vec3f cam2target = Target->Position - transform->Position;
                     if (MathCore::OP<MathCore::vec3f>::sqrLength(cam2target) <= 0.0002f)
                         return;
                     cam2target = MathCore::OP<MathCore::vec3f>::normalize(cam2target);
-                    float new_distance = MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform[0]->Position);
+                    float new_distance = MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform->Position);
 
-                    MathCore::vec3f camera_forward = transform[0]->Rotation * MathCore::vec3f(0, 0, 1);
+                    MathCore::vec3f camera_forward = transform->Rotation * MathCore::vec3f(0, 0, 1);
                     MathCore::vec3f camera_projected_on_y = (MathCore::vec3f(camera_forward.x, 0, camera_forward.z));
                     if (MathCore::OP<MathCore::vec3f>::sqrLength(camera_projected_on_y) > 0.0002f)
                     {
                         camera_projected_on_y = MathCore::OP<MathCore::vec3f>::normalize(camera_projected_on_y);
-                        MathCore::vec3f camera_left = transform[0]->Rotation * MathCore::vec3f(-1, 0, 0);
+                        MathCore::vec3f camera_left = transform->Rotation * MathCore::vec3f(-1, 0, 0);
 
                         MathCore::vec3f target_rotation_back = MathCore::GEN<MathCore::quatf>::fromAxisAngle(camera_left, MathCore::OP<float>::deg_2_rad(-current_x_angle)) * camera_projected_on_y;
                         target_rotation_back = MathCore::OP<MathCore::vec3f>::normalize(target_rotation_back);
@@ -204,22 +224,26 @@ namespace AppKit
                                                MathCore::vec3f(0, 0, 1);
                         target_rotation_back = MathCore::OP<MathCore::vec3f>::normalize(target_rotation_back);
 
-                        transform[0]->Position = Target->Position - target_rotation_back * new_distance;
+                        transform->Position = Target->Position - target_rotation_back * new_distance;
                         // the target just need to be rotated as the main position... but the distance keeps the same
                         transform_position_target = Target->Position - target_rotation_back * MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform_position_target);
 
-                        transform[0]->Rotation = MathCore::GEN<MathCore::quatf>::lookAtRotationLH(target_rotation_back, MathCore::vec3f(0, 1, 0));
+                        transform->Rotation = MathCore::GEN<MathCore::quatf>::lookAtRotationLH(target_rotation_back, MathCore::vec3f(0, 1, 0));
                     }
                 }
 
                 void Y_Rotate_Smooth(Platform::Time *time)
                 // rotate to be in the back
                 {
-                    MathCore::vec3f cam2target = Target->Position - transform[0]->Position;
+                    auto Target = ToShared(TargetRef);
+                    auto Player_Forward = ToShared(Player_ForwardRef);
+                    auto transform = getTransform();
+
+                    MathCore::vec3f cam2target = Target->Position - transform->Position;
                     if (MathCore::OP<MathCore::vec3f>::sqrLength(cam2target) <= 0.0002f)
                         return;
                     cam2target = MathCore::OP<MathCore::vec3f>::normalize(cam2target);
-                    float new_distance = MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform[0]->Position);
+                    float new_distance = MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform->Position);
                     MathCore::vec2f angle_x_aux = MathCore::vec2f(sqrtf(cam2target.x * cam2target.x + cam2target.z * cam2target.z), cam2target.y);
                     float current_x_angle = MathCore::OP<float>::rad_2_deg(-atan2(angle_x_aux.y, angle_x_aux.x));
 
@@ -261,22 +285,26 @@ namespace AppKit
                                                MathCore::vec3f(0, 0, 1);
                         target_rotation_back = MathCore::OP<MathCore::vec3f>::normalize(target_rotation_back);
 
-                        transform[0]->Position = Target->Position - target_rotation_back * new_distance;
+                        transform->Position = Target->Position - target_rotation_back * new_distance;
                         // the target just need to be rotated as the main position... but the distance keeps the same
                         transform_position_target = Target->Position - target_rotation_back * MathCore::OP<MathCore::vec3f>::distance(Target->Position, transform_position_target);
 
-                        transform[0]->Rotation = MathCore::GEN<MathCore::quatf>::lookAtRotationLH(target_rotation_back, MathCore::vec3f(0, 1, 0));
+                        transform->Rotation = MathCore::GEN<MathCore::quatf>::lookAtRotationLH(target_rotation_back, MathCore::vec3f(0, 1, 0));
                     }
                 }
 
                 void RaycastPlayerToScene(Platform::Time *time)
                 {
-                    MathCore::vec3f target2cam = transform[0]->Position - Target->Position;
+                    auto Target = ToShared(TargetRef);
+                    //auto Player_Forward = ToShared(Player_ForwardRef);
+                    auto transform = getTransform();
+
+                    MathCore::vec3f target2cam = transform->Position - Target->Position;
                     if (MathCore::OP<MathCore::vec3f>::sqrLength(target2cam) <= 0.0002f)
                         return;
                     target2cam = MathCore::OP<MathCore::vec3f>::normalize(target2cam);
 
-                    float distance = MathCore::OP<MathCore::vec3f>::distance(transform[0]->Position, Target->Position);
+                    float distance = MathCore::OP<MathCore::vec3f>::distance(transform->Position, Target->Position);
 
                     CollisionCore::Ray<MathCore::vec3f> ray = CollisionCore::Ray<MathCore::vec3f>(Target->Position, target2cam);
                     /*

@@ -5,7 +5,7 @@ namespace AppKit
     namespace GLEngine
     {
 
-        bool AnimationClip::findRootNode(Transform *t, const void *userData)
+        bool AnimationClip::findRootNode(std::shared_ptr<Transform> t, const void *userData)
         {
             if (root_node != NULL)
                 return false;
@@ -25,7 +25,7 @@ namespace AppKit
             return true;
         }
 
-        AnimationClip::AnimationClip(const std::string &clip_name, Transform *root, const ITKExtension::Model::Animation &animation)
+        AnimationClip::AnimationClip(const std::string &clip_name, std::shared_ptr<Transform> root, const ITKExtension::Model::Animation &animation)
         {
 
             base_model = root;
@@ -49,8 +49,8 @@ namespace AppKit
             {
                 const ITKExtension::Model::NodeAnimation &node_anim = animation.channels[i];
 
-                Transform *t_node = root->findTransformByName(node_anim.nodeName);
-                if (t_node != NULL)
+                auto t_node = root->findTransformByName(node_anim.nodeName);
+                if (t_node != nullptr)
                 {
 
                     printf("   --channel %i (node: %s)\n", i, node_anim.nodeName.c_str());
@@ -206,7 +206,7 @@ namespace AppKit
 
             // normalize the scale of all clips
 
-            Transform *model_from_file = clips_array[0]->base_model->getChildAt(0);
+            auto model_from_file = clips_array[0]->base_model->getChildAt(0);
             MathCore::vec3f scale = model_from_file->getScale();
             printf("[AnimationMixer] Model scale: %f %f %f.\n", scale.x, scale.y, scale.z);
 
@@ -245,14 +245,14 @@ namespace AppKit
 
                     for (int i = 0; i < clip_a->channels.size(); i++)
                     {
-                        Transform *aNode = clip_a->channels[i].node;
+                        auto aNode = clip_a->channels[i].node;
 
                         NodeAnimation *channel_b = NULL;
 
                         bool found = false;
                         for (int j = 0; j < clip_b->channels.size(); j++)
                         {
-                            Transform *bNode = clip_b->channels[j].node;
+                            auto bNode = clip_b->channels[j].node;
                             if (aNode == bNode)
                             {
                                 found = true;
@@ -275,12 +275,12 @@ namespace AppKit
 
                     for (int i = 0; i < clip_b->channels.size(); i++)
                     {
-                        Transform *bNode = clip_b->channels[i].node;
+                        auto bNode = clip_b->channels[i].node;
 
                         bool found = false;
                         for (int j = 0; j < clip_a->channels.size(); j++)
                         {
-                            Transform *aNode = clip_a->channels[j].node;
+                            auto aNode = clip_a->channels[j].node;
                             if (aNode == bNode)
                             {
                                 found = true;
@@ -458,7 +458,7 @@ namespace AppKit
                 request_queue.push_back(AnimationMixerLerpTarget(clips_array[index], index, blend_time));
         }
 
-        Transform *AnimationMixer::rootNode()
+        std::shared_ptr<Transform> AnimationMixer::rootNode()
         {
 
             return current_clip->root_node;
@@ -500,7 +500,7 @@ namespace AppKit
 
             dirty = true;
 
-            Transform *node = node_animation->node;
+            auto node = node_animation->node;
             ClipInfo *_clipInfo = &clipInfo[clip_to_process];
 
             MathCore::vec3f target_local_position = node_animation->samplePos(time, &_clipInfo->position_delta_interframe);
@@ -536,7 +536,7 @@ namespace AppKit
             ClipInfo *clipInfo_a = &clipInfo[0];
             ClipInfo *clipInfo_b = &clipInfo[1];
 
-            Transform *node = node_animation_a->node;
+            auto node = node_animation_a->node;
 
             MathCore::vec3f target_local_position_a = node_animation_a->samplePos(time_a, &clipInfo_a->position_delta_interframe);
             MathCore::vec3f target_local_position_b = node_animation_b->samplePos(time_b, &clipInfo_b->position_delta_interframe);
@@ -604,7 +604,7 @@ namespace AppKit
                 ClipInfo &clipInfo_a = clipInfo[0];
                 ClipInfo &clipInfo_b = clipInfo[1];
 
-                Transform *node = clipInfo_a.clip->root_node;
+                auto node = clipInfo_a.clip->root_node;
 
                 node->setLocalPosition(MathCore::OP<MathCore::vec3f>::lerp(
                     clipInfo_a.local_position,
@@ -632,7 +632,7 @@ namespace AppKit
                 ClipInfo &clipInfo_a = clipInfo[0];
                 ClipInfo &clipInfo_b = clipInfo[1];
 
-                Transform *node = clipInfo_a.clip->root_node;
+                auto node = clipInfo_a.clip->root_node;
 
                 node->setPosition(MathCore::OP<MathCore::vec3f>::lerp(
                     clipInfo_a.position,

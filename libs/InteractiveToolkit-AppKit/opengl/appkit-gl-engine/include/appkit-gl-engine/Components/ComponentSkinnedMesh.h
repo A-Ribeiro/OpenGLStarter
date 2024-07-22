@@ -39,7 +39,7 @@ namespace AppKit
 
                 bool skinning_dirty;
 
-                bool countBonesLinkedToTransforms(Transform *element, void *userData);
+                bool countBonesLinkedToTransforms(std::shared_ptr<Transform> element, void *userData);
 
                 void computeSkinningInformation();
 
@@ -51,11 +51,13 @@ namespace AppKit
                 static const ComponentType Type;
 
                 AnimationMixer mixer;
-                Transform *model_base;
+                
+                std::shared_ptr<Transform> model_base;
+
                 ResourceHelper *resourceHelper;
 
-                ComponentMesh *componentMesh;
-                ComponentMaterial *componentMaterial;
+                std::shared_ptr<ComponentMesh> componentMesh;
+                std::shared_ptr<ComponentMaterial> componentMaterial;
 
                 //
                 // bone processing aux structure
@@ -74,7 +76,7 @@ namespace AppKit
                 std::vector<MathCore::vec4f> src_binormal;
 
                 std::vector<int> transform_to_bone;
-                std::vector<Transform *> transform_list;
+                std::vector<std::weak_ptr<Transform>> transform_list;
                 std::vector<ITKExtension::Model::Bone *> model_bone_list;
 
                 //

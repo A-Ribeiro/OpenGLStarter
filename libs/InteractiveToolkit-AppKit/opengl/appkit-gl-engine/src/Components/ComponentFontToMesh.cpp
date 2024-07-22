@@ -25,11 +25,11 @@ namespace AppKit
                 mesh->color[0].clear();
                 mesh->indices.clear();
 
-                ReferenceCounter<AppKit::OpenGL::GLTexture *> *refCounter = &Engine::Instance()->textureReferenceCounter;
+                //ReferenceCounter<AppKit::OpenGL::GLTexture *> *refCounter = &Engine::Instance()->textureReferenceCounter;
 
                 material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
-                refCounter->remove(material->unlit.tex);
-                material->unlit.tex = refCounter->add(&builder.glFont2.texture);
+                //refCounter->remove(material->unlit.tex);
+                material->unlit.tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&builder.glFont2.texture, [](AppKit::OpenGL::GLTexture *v) { } );
 
                 for (size_t i = 0; i < builder.vertexAttrib.size(); i++)
                 {

@@ -28,52 +28,57 @@ namespace AppKit
             defaultAlbedoTexture = createTextureFromFile("DEFAULT_ALBEDO", true && engine->sRGBCapable);
             defaultNormalTexture = createTextureFromFile("DEFAULT_NORMAL", false);
 
-            defaultPBRMaterial = new Components::ComponentMaterial();
+            defaultPBRMaterial = Component::CreateShared<Components::ComponentMaterial>();
 
             defaultPBRMaterial->type = Components::MaterialPBR;
             defaultPBRMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
             defaultPBRMaterial->pbr.metallic = 0.0f;
             defaultPBRMaterial->pbr.roughness = 1.0f;
 
-            ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+            // ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-            texRefCount->add(defaultAlbedoTexture);
-            texRefCount->add(defaultNormalTexture);
+            // texRefCount->add(defaultAlbedoTexture);
+            // texRefCount->add(defaultNormalTexture);
 
-            defaultPBRMaterial->pbr.texAlbedo = texRefCount->add(defaultAlbedoTexture);
-            defaultPBRMaterial->pbr.texNormal = texRefCount->add(defaultNormalTexture);
+            defaultPBRMaterial->pbr.texAlbedo = defaultAlbedoTexture;
+            defaultPBRMaterial->pbr.texNormal = defaultNormalTexture;
 
-            ReferenceCounter<Component *> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
-            compRefCount->add(defaultPBRMaterial);
+            // ReferenceCounter<Component *> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
+            // compRefCount->add(defaultPBRMaterial);
         }
 
         void ResourceHelper::finalize()
         {
-            ReferenceCounter<Component *> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
+            // ReferenceCounter<Component *> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
 
-            compRefCount->removeNoDelete(defaultPBRMaterial);
+            // compRefCount->removeNoDelete(defaultPBRMaterial);
 
-            if (defaultPBRMaterial != NULL)
-            {
-                delete defaultPBRMaterial;
-                defaultPBRMaterial = NULL;
-            }
+            // if (defaultPBRMaterial != NULL)
+            // {
+            //     delete defaultPBRMaterial;
+            //     defaultPBRMaterial = NULL;
+            // }
+            defaultPBRMaterial = nullptr;
 
-            ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+            // ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-            texRefCount->removeNoDelete(defaultAlbedoTexture);
-            texRefCount->removeNoDelete(defaultNormalTexture);
+            // texRefCount->removeNoDelete(defaultAlbedoTexture);
+            // texRefCount->removeNoDelete(defaultNormalTexture);
 
-            if (defaultAlbedoTexture != NULL)
-            {
-                delete defaultAlbedoTexture;
-                defaultAlbedoTexture = NULL;
-            }
-            if (defaultNormalTexture != NULL)
-            {
-                delete defaultNormalTexture;
-                defaultNormalTexture = NULL;
-            }
+            // if (defaultAlbedoTexture != NULL)
+            // {
+            //     delete defaultAlbedoTexture;
+            //     defaultAlbedoTexture = NULL;
+            // }
+            // if (defaultNormalTexture != NULL)
+            // {
+            //     delete defaultNormalTexture;
+            //     defaultNormalTexture = NULL;
+            // }
+
+            defaultAlbedoTexture = nullptr;
+            defaultNormalTexture = nullptr;
+
             if (cubeMapHelper != NULL)
             {
                 delete cubeMapHelper;
@@ -104,21 +109,21 @@ namespace AppKit
             }
             */
 
-        void ResourceHelper::copyCubeMapEnhanced(AppKit::OpenGL::GLCubeMap *inputcubemap, int inputMip, AppKit::OpenGL::GLCubeMap *targetcubemap, int outputMip)
+        void ResourceHelper::copyCubeMapEnhanced(std::shared_ptr<AppKit::OpenGL::GLCubeMap> inputcubemap, int inputMip, std::shared_ptr<AppKit::OpenGL::GLCubeMap> targetcubemap, int outputMip)
         {
-            cubeMapHelper->copyCubeMapEnhanced(inputcubemap, inputMip, targetcubemap, outputMip);
+            cubeMapHelper->copyCubeMapEnhanced(inputcubemap.get(), inputMip, targetcubemap.get(), outputMip);
         }
 
-        void ResourceHelper::render1x1CubeIntoSphereTexture(AppKit::OpenGL::GLCubeMap *inputcubemap, AppKit::OpenGL::GLTexture *targetTexture, int width, int height)
+        void ResourceHelper::render1x1CubeIntoSphereTexture(std::shared_ptr<AppKit::OpenGL::GLCubeMap> inputcubemap, std::shared_ptr<AppKit::OpenGL::GLTexture> targetTexture, int width, int height)
         {
-            cubeMapHelper->render1x1CubeIntoSphereTexture(inputcubemap, targetTexture, width, height);
+            cubeMapHelper->render1x1CubeIntoSphereTexture(inputcubemap.get(), targetTexture.get(), width, height);
         }
 
-        AppKit::GLEngine::GLCubeMapSkyBox *ResourceHelper::createSkybox(const std::string &name, bool sRGB, int maxResolution)
+        std::shared_ptr<AppKit::GLEngine::GLCubeMapSkyBox> ResourceHelper::createSkybox(const std::string &name, bool sRGB, int maxResolution)
         {
             std::string basePath = std::string("resources/Skyboxes/");
             std::string separator = std::string("/");
-            return new GLCubeMapSkyBox(sRGB,
+            return std::make_shared<GLCubeMapSkyBox>( sRGB,
                                        basePath + name + separator + std::string("negz.jpg"),
                                        basePath + name + separator + std::string("posz.jpg"),
                                        basePath + name + separator + std::string("negx.jpg"),
@@ -130,9 +135,9 @@ namespace AppKit
             );
         }
 
-        AppKit::OpenGL::GLCubeMap *ResourceHelper::createCubeMap(const std::string &name, bool sRGB, int maxResolution)
+        std::shared_ptr<AppKit::OpenGL::GLCubeMap> ResourceHelper::createCubeMap(const std::string &name, bool sRGB, int maxResolution)
         {
-            AppKit::OpenGL::GLCubeMap *cubeMap = new AppKit::OpenGL::GLCubeMap(0, 0, 0xffffffff, maxResolution);
+            auto cubeMap = std::make_shared<AppKit::OpenGL::GLCubeMap>(0, 0, 0xffffffff, maxResolution);
 
             std::string basePath = std::string("resources/Skyboxes/");
             std::string separator = std::string("/");
@@ -155,11 +160,11 @@ namespace AppKit
             return cubeMap;
         }
 
-        AppKit::OpenGL::GLTexture *ResourceHelper::createTextureFromFile(const std::string &path, bool sRGB)
+        std::shared_ptr<AppKit::OpenGL::GLTexture> ResourceHelper::createTextureFromFile(const std::string &path, bool sRGB)
         {
             if (path.compare("DEFAULT_ALBEDO") == 0)
             {
-                AppKit::OpenGL::GLTexture *result = new AppKit::OpenGL::GLTexture();
+                auto result =  std::make_shared<AppKit::OpenGL::GLTexture>();
                 {
                     uint32_t tex[16 * 16];
                     for (int i = 0; i < 16 * 16; i++)
@@ -174,7 +179,7 @@ namespace AppKit
             }
             else if (path.compare("DEFAULT_NORMAL") == 0)
             {
-                AppKit::OpenGL::GLTexture *result = new AppKit::OpenGL::GLTexture();
+                auto result =  std::make_shared<AppKit::OpenGL::GLTexture>();
                 {
                     uint32_t tex[16 * 16];
                     for (int i = 0; i < 16 * 16; i++)
@@ -189,63 +194,64 @@ namespace AppKit
             }
             else
             {
-
-                AppKit::OpenGL::GLTexture *result = AppKit::OpenGL::GLTexture::loadFromFile(path.c_str(), false, sRGB);
+                AppKit::OpenGL::GLTexture *result1 = AppKit::OpenGL::GLTexture::loadFromFile(path.c_str(), false, sRGB);
+                auto result = std::shared_ptr<AppKit::OpenGL::GLTexture>(result1);
                 result->generateMipMap();
                 result->setAnisioLevel(16.0f);
                 return result;
             }
-            return NULL;
+            return nullptr;
         }
 
-        Transform *ResourceHelper::createTransformFromModel(const std::string &path, uint32_t model_dynamic_upload, uint32_t model_static_upload)
+        std::shared_ptr<Transform> ResourceHelper::createTransformFromModel(const std::string &path, uint32_t model_dynamic_upload, uint32_t model_static_upload)
         {
             return Basof2ToResource::loadAndConvert(path.c_str(), defaultPBRMaterial, NULL, model_dynamic_upload, model_static_upload);
         }
 
-        bool ResourceHelper::traverse_delete(Transform *element, void *userData)
+        // bool ResourceHelper::traverse_delete(Transform *element, void *userData)
+        // {
+        //     Transform *rootNode = (Transform *)userData;
+
+        //     ReferenceCounter<AppKit::GLEngine::Component *> *refCounter = &Engine::Instance()->componentReferenceCounter;
+
+        //     Transform *parent = element->Parent;
+        //     if (parent != NULL)
+        //     {
+        //         ITK_ABORT(parent->getChildAt(parent->getChildCount() - 1) != element, "Wrong traverse setup...");
+        //         parent->removeChild(parent->getChildCount() - 1);
+        //     }
+
+        //     for (int i = element->getComponentCount() - 1; i >= 0; i--)
+        //     {
+        //         Component *component = element->removeComponentAt(i);
+        //         refCounter->remove(component);
+        //     }
+
+        //     // avoid delete the caller object (the root)...
+        //     if (rootNode != element)
+        //         delete element;
+
+        //     return true;
+        // }
+
+        // void ResourceHelper::releaseTransformRecursive(Transform **root)
+        // {
+        //     if (root == NULL || *root == NULL)
+        //         return;
+
+        //     Transform *node = *root;
+        //     *root = NULL;
+
+        //     // traverse will delete all children, but the root remains allocated...
+        //     node->traversePostOrder_DepthFirst(&ResourceHelper::traverse_delete, node);
+
+        //     delete node;
+        // }
+
+        std::shared_ptr<Transform> ResourceHelper::traverse_copy(std::shared_ptr<Transform> element)
         {
-            Transform *rootNode = (Transform *)userData;
+            auto result = Transform::CreateShared();
 
-            ReferenceCounter<AppKit::GLEngine::Component *> *refCounter = &Engine::Instance()->componentReferenceCounter;
-
-            Transform *parent = element->Parent;
-            if (parent != NULL)
-            {
-                ITK_ABORT(parent->getChildAt(parent->getChildCount() - 1) != element, "Wrong traverse setup...");
-                parent->removeChild(parent->getChildCount() - 1);
-            }
-
-            for (int i = element->getComponentCount() - 1; i >= 0; i--)
-            {
-                Component *component = element->removeComponentAt(i);
-                refCounter->remove(component);
-            }
-
-            // avoid delete the caller object (the root)...
-            if (rootNode != element)
-                delete element;
-
-            return true;
-        }
-
-        void ResourceHelper::releaseTransformRecursive(Transform **root)
-        {
-            if (root == NULL || *root == NULL)
-                return;
-
-            Transform *node = *root;
-            *root = NULL;
-
-            // traverse will delete all children, but the root remains allocated...
-            node->traversePostOrder_DepthFirst(&ResourceHelper::traverse_delete, node);
-
-            delete node;
-        }
-
-        Transform *ResourceHelper::traverse_copy(Transform *element)
-        {
-            Transform *result = new Transform();
             result->setName(element->getName());
             result->setLocalPosition(element->getLocalPosition());
             result->setLocalRotation(element->getLocalRotation());
@@ -253,12 +259,12 @@ namespace AppKit
 
             // copy components by reference (just material and mesh)
             //   all external refs need to be done after clone manually...
-            ReferenceCounter<Component *> *refComponent = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
+            //ReferenceCounter<Component *> *refComponent = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
             for (int i = 0; i < element->getComponentCount(); i++)
             {
                 if (element->getComponentAt(i)->compareType(Components::ComponentMaterial::Type) ||
                     element->getComponentAt(i)->compareType(Components::ComponentMesh::Type))
-                    result->addComponent(refComponent->add(element->getComponentAt(i)));
+                    result->addComponent(element->getComponentAt(i));
             }
 
             for (int i = 0; i < element->getChildCount(); i++)
@@ -269,12 +275,12 @@ namespace AppKit
             return result;
         }
 
-        Transform *ResourceHelper::cloneTransformRecursive(Transform *root)
+        std::shared_ptr<Transform> ResourceHelper::cloneTransformRecursive(std::shared_ptr<Transform>root)
         {
             return traverse_copy(root);
         }
 
-        bool ResourceHelper::traverse_remove_empty(Transform *element)
+        bool ResourceHelper::traverse_remove_empty(std::shared_ptr<Transform> element)
         {
 
             if (element->getComponentCount() > 0)
@@ -285,14 +291,15 @@ namespace AppKit
                 if (traverse_remove_empty(element->getChildAt(i)))
                 {
                     printf("Removing children : %s\n", element->getChildAt(i)->getName().c_str());
-                    delete element->removeChild(i);
+                    //delete element->removeChild(i);
+                    element->removeChild(i);
                 }
             }
 
             return element->getComponentCount() == 0 && element->getChildCount() == 0;
         }
 
-        Transform *ResourceHelper::removeEmptyTransforms(Transform *root)
+        std::shared_ptr<Transform> ResourceHelper::removeEmptyTransforms(std::shared_ptr<Transform> root)
         {
             traverse_remove_empty(root);
             return root;
@@ -336,24 +343,24 @@ namespace AppKit
             return result;
         }
 
-        void ResourceHelper::setTexture(AppKit::OpenGL::GLTexture **dst, AppKit::OpenGL::GLTexture *src)
+        // void ResourceHelper::setTexture(AppKit::OpenGL::GLTexture **dst, AppKit::OpenGL::GLTexture *src)
+        // {
+        //     ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+
+        //     texRefCount->remove(*dst);
+        //     *dst = texRefCount->add(src);
+        // }
+
+        bool ResourceHelper::addAABBMesh_traverser(std::shared_ptr<Transform> element, void *userData)
         {
-            ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-            texRefCount->remove(*dst);
-            *dst = texRefCount->add(src);
-        }
+            auto material = element->findComponent<Components::ComponentMaterial>();
+            auto mesh = element->findComponent<Components::ComponentMesh>();
 
-        bool ResourceHelper::addAABBMesh_traverser(Transform *element, void *userData)
-        {
-
-            Components::ComponentMaterial *material = (Components::ComponentMaterial *)element->findComponent(Components::ComponentMaterial::Type);
-            Components::ComponentMesh *mesh = (Components::ComponentMesh *)element->findComponent(Components::ComponentMesh::Type);
-
-            if (material != NULL && mesh != NULL)
+            if (material != nullptr && mesh != nullptr)
             {
 
-                Components::ComponentMeshWrapper *meshWrapper = (Components::ComponentMeshWrapper *)element->addComponent(new Components::ComponentMeshWrapper());
+                auto meshWrapper = element->addNewComponent<Components::ComponentMeshWrapper>();
                 // meshWrapper->updateMeshOBB();
                 meshWrapper->updateMeshAABB();
                 // meshWrapper->updateMeshSphere();
@@ -366,7 +373,7 @@ namespace AppKit
             return true;
         }
 
-        void ResourceHelper::addAABBMesh(Transform *element)
+        void ResourceHelper::addAABBMesh(std::shared_ptr<Transform> element)
         {
             element->traversePreOrder_DepthFirst(
                 EventCore::CallbackWrapper(&ResourceHelper::addAABBMesh_traverser, this)

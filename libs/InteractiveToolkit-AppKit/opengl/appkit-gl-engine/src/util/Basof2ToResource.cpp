@@ -11,22 +11,22 @@ namespace AppKit
     namespace GLEngine
     {
 
-        Transform *Basof2ToResource::nodeTraverse(const std::string &spaces,
+        std::shared_ptr<Transform> Basof2ToResource::nodeTraverse(const std::string &spaces,
                                                   int currentIndex,
                                                   const ITKExtension::Model::Node &node,
                                                   const ITKExtension::Model::ModelContainer *container,
-                                                  std::map<int, Components::ComponentMesh *> &geometryCache,
-                                                  std::map<int, Components::ComponentMaterial *> &materialCache,
-                                                  Transform *root,
-                                                  Components::ComponentMaterial *defaultMaterial,
+                                                  std::map<int, std::shared_ptr<Components::ComponentMesh> > &geometryCache,
+                                                  std::map<int, std::shared_ptr<Components::ComponentMaterial> > &materialCache,
+                                                  std::shared_ptr<Transform> root,
+                                                  std::shared_ptr<Components::ComponentMaterial> defaultMaterial,
                                                   uint32_t model_dynamic_upload, uint32_t model_static_upload)
         {
 
-            Transform *result = root;
+            auto result = root;
 
             if (result == NULL)
             {
-                result = new Transform();
+                result = Transform::CreateShared();
 
                 // mat4 m = inv(transpose(node.transform));
                 // mat4 m = transpose(node.transform);
@@ -81,7 +81,7 @@ namespace AppKit
 
             if (node.geometries.size() > 0)
             {
-                ReferenceCounter<AppKit::GLEngine::Component *> *refCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
+                // ReferenceCounter<AppKit::GLEngine::Component *> *refCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
 
                 /*
                 Components::ComponentMaterial *material = NULL;
@@ -111,8 +111,8 @@ namespace AppKit
 
                                 printf("Processing Material: %s\n", mat->name.c_str());
 
-                                Components::ComponentMaterial *material;
-                                result->addComponent(refCount->add(material = new Components::ComponentMaterial()));
+                                //Components::ComponentMaterial *material;
+                                auto material = result->addNewComponent<Components::ComponentMaterial>();
 
                                 material->type = Components::MaterialPBR;
 
@@ -130,7 +130,7 @@ namespace AppKit
                             }
                             else
                             {
-                                result->addComponent(refCount->add(materialCache[geom->materialIndex]));
+                                result->addComponent(materialCache[geom->materialIndex]);
                             }
                         }
                     }
@@ -138,8 +138,8 @@ namespace AppKit
                     uint32_t gidx = node.geometries[i];
                     if (geometryCache.find(gidx) == geometryCache.end())
                     {
-                        Components::ComponentMesh *mesh;
-                        result->addComponent(refCount->add(mesh = new Components::ComponentMesh()));
+                        //Components::ComponentMesh *mesh;
+                        auto mesh = result->addNewComponent<Components::ComponentMesh>();
 
                         const ITKExtension::Model::Geometry *geom = &container->geometries[gidx];
 
@@ -171,7 +171,7 @@ namespace AppKit
                     }
                     else
                     {
-                        result->addComponent(refCount->add(geometryCache[gidx]));
+                        result->addComponent(geometryCache[gidx]);
                     }
                 }
             }
@@ -193,20 +193,20 @@ namespace AppKit
             return result;
         }
 
-        Transform *Basof2ToResource::loadAndConvert(
+        std::shared_ptr<Transform> Basof2ToResource::loadAndConvert(
             const std::string &filename,
-            Components::ComponentMaterial *defaultMaterial,
-            Transform *rootNode,
+            std::shared_ptr<Components::ComponentMaterial> defaultMaterial,
+            std::shared_ptr<Transform> rootNode,
             uint32_t model_dynamic_upload, uint32_t model_static_upload)
         {
 
-            std::map<int, Components::ComponentMesh *> geometryCache;
-            std::map<int, Components::ComponentMaterial *> materialCache;
+            std::map<int, std::shared_ptr<Components::ComponentMesh>> geometryCache;
+            std::map<int, std::shared_ptr<Components::ComponentMaterial>> materialCache;
 
             ITKExtension::Model::ModelContainer *container = new ITKExtension::Model::ModelContainer();
             container->read(filename.c_str());
 
-            Transform *result = nodeTraverse(".",
+            auto result = nodeTraverse(".",
                                              0,
                                              container->nodes[0],
                                              container,

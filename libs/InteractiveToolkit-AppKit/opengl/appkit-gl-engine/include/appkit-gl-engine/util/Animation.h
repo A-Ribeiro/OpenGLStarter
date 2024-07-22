@@ -89,7 +89,7 @@ namespace AppKit
             LinearInterpolator<MathCore::vec3f> scale;
             SlerpInterpolator rotation;
 
-            Transform *node;
+            std::shared_ptr<Transform> node;
 
             MathCore::vec3f start_position;
             MathCore::vec3f start_scale;
@@ -178,7 +178,7 @@ namespace AppKit
                 rotation.getValue_ForwardLoop(0);
             }
 
-            void setTransform(Transform *t, bool rootNode)
+            void setTransform(std::shared_ptr<Transform> t, bool rootNode)
             {
                 node = t;
 
@@ -333,7 +333,7 @@ namespace AppKit
         {
             float last_sampled_time;
 
-            bool findRootNode(Transform *t, const void *userData);
+            bool findRootNode(std::shared_ptr<Transform> t, const void *userData);
 
         public:
             std::string name;
@@ -344,11 +344,11 @@ namespace AppKit
             bool loop;
             bool wait_end_to_transition;
 
-            Transform *base_model;
-            Transform *root_node;
+            std::shared_ptr<Transform> base_model;
+            std::shared_ptr<Transform> root_node;
             NodeAnimation *root_node_animation;
 
-            AnimationClip(const std::string &clip_name, Transform *root, const ITKExtension::Model::Animation &animation);
+            AnimationClip(const std::string &clip_name, std::shared_ptr<Transform> root, const ITKExtension::Model::Animation &animation);
 
             void update(float elapsed_secs);
             void reset();
@@ -449,7 +449,7 @@ namespace AppKit
 
             void play(const std::string &clipname, float blend_time = 0.5f);
 
-            Transform *rootNode();
+            std::shared_ptr<Transform> rootNode();
 
             void setRootMotionAnalyserCallback(const EventCore::Callback<void(RootMotionAnalyserData *data)> &callback)
             {

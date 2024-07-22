@@ -13,7 +13,7 @@ namespace AppKit
 
             const ComponentType ComponentSkinnedMesh::Type = "ComponentSkinnedMesh";
 
-            bool ComponentSkinnedMesh::countBonesLinkedToTransforms(Transform *element, void *userData)
+            bool ComponentSkinnedMesh::countBonesLinkedToTransforms(std::shared_ptr<Transform> element, void *userData)
             {
                 for (int i = 0; i < componentMesh->bones.size(); i++)
                 {
@@ -50,8 +50,10 @@ namespace AppKit
                 for (int i = 0; i < bone_processed.size(); i++)
                     bone_processed[i] = false;
 
-                for (int i = 0; i < transform_list.size(); i++)
-                    transform_list[i]->userData = &transform_to_bone[i];
+                for (int i = 0; i < transform_list.size(); i++){
+                    auto transform = ToShared(transform_list[i]);
+                    transform->userData = &transform_to_bone[i];
+                }
 
                 ITK_ABORT(transform_list.size() != componentMesh->bones.size(), "The number of transforms is not equal to the number of bones.\n");
                 ITK_ABORT(model_bone_list.size() != componentMesh->bones.size(), "The number of bones in sequence is not equal to the number of bones from model.\n");
@@ -80,11 +82,13 @@ namespace AppKit
                     }
 
                     // compute inverse matrix
-                    bone_inverse[i] = transform_list[i]->getMatrixInverse(true);
+                    auto transform = ToShared(transform_list[i]);
+
+                    bone_inverse[i] = transform->getMatrixInverse(true);
                     // bone_target[i] = transform_list[i]->getMatrix(true);
                     bone_gradient[i] = MathCore::mat4f(); // identity
 
-                    transform_list[i]->OnVisited.add(&ComponentSkinnedMesh::OnTransformVisited, this);
+                    transform->OnVisited.add(&ComponentSkinnedMesh::OnTransformVisited, this);
                 }
             }
 
@@ -208,8 +212,8 @@ namespace AppKit
 
                 printf("[ComponentSkinnedMesh] loadModelBase %s\n", filename.c_str());
 
-                ITK_ABORT(model_base != NULL, "trying to load base model twice");
-                model_base = new Transform();
+                ITK_ABORT(model_base != nullptr, "trying to load base model twice");
+                model_base = Transform::CreateShared();
                 model_base->setName("__root__");
                 model_base->addChild(resourceHelper->createTransformFromModel(
                     filename,
@@ -218,12 +222,12 @@ namespace AppKit
                     ));
 
                 // check amount of meshs
-                std::vector<Component *> all_meshs = model_base->findComponentsInChildren(ComponentMesh::Type);
+                auto all_meshs = model_base->findComponentsInChildren<ComponentMesh>();
                 ITK_ABORT(all_meshs.size() != 1, "Trying to load a skinned model with more than 1 mesh data.\n");
-                componentMesh = (ComponentMesh *)all_meshs[0];
+                componentMesh = all_meshs[0];
 
                 // bake vertex data
-                Transform *component_transform = componentMesh->transform[0];
+                auto component_transform = componentMesh->getTransform();
 
                 MathCore::mat4f &modelToWorld = component_transform->getMatrix();
                 MathCore::mat4f &modelToWorld_IT = component_transform->getMatrixInverseTranspose();
@@ -265,9 +269,11 @@ namespace AppKit
 
                 // the model was loaded without any material... we need to create a dummy that will be replaced later
                 {
-                    Components::ComponentMaterial *material;
-                    ReferenceCounter<AppKit::GLEngine::Component *> *refCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
-                    componentMesh->transform[0]->addComponent(refCount->add(material = new Components::ComponentMaterial()));
+                    auto transform = componentMesh->getTransform();
+
+                    // Components::ComponentMaterial *material;
+                    // ReferenceCounter<AppKit::GLEngine::Component *> *refCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
+                    auto material = transform->addNewComponent<Components::ComponentMaterial>();
                     material->type = Components::MaterialPBR;
                 }
 
@@ -375,9 +381,9 @@ namespace AppKit
             void ComponentSkinnedMesh::moveMeshToTransform()
             {
 
-                std::vector<Component *> all_materials = model_base->findComponentsInChildren(ComponentMaterial::Type);
+                auto all_materials = model_base->findComponentsInChildren<ComponentMaterial>();
                 ITK_ABORT(all_materials.size() != 1, "Trying to load a skinned model with %u material data (it must be 1).\n", (uint32_t)all_materials.size());
-                componentMaterial = (ComponentMaterial *)all_materials[0];
+                componentMaterial = all_materials[0];
 
                 if (isGPUSkinning)
                 {
@@ -404,17 +410,19 @@ namespace AppKit
                 }
 
                 printf("[ComponentSkinnedMesh] moveMeshToTransform\n");
-                ITK_ABORT(transform.size() <= 0, "You need to add this class to a scene node before call loadModelBase.\n");
-                ITK_ABORT(transform.size() > 1, "You can attach this component to one node only.\n");
-                ITK_ABORT(componentMesh == NULL || componentMaterial == NULL, "You need to call loadModelBase before moveMeshToTransform.\n");
+                ITK_ABORT(getTransformCount() <= 0, "You need to add this class to a scene node before call loadModelBase.\n");
+                ITK_ABORT(getTransformCount() > 1, "You can attach this component to one node only.\n");
+                ITK_ABORT(componentMesh == nullptr || componentMaterial == nullptr, "You need to call loadModelBase before moveMeshToTransform.\n");
 
-                Transform *component_transform = componentMaterial->transform[0];
+                auto transform = getTransform();
+
+                auto component_transform = componentMaterial->getTransform();
                 component_transform->removeComponent(componentMaterial);
-                transform[0]->addComponent(componentMaterial);
+                transform->addComponent(componentMaterial);
 
-                component_transform = componentMesh->transform[0];
+                component_transform = componentMesh->getTransform();
                 component_transform->removeComponent(componentMesh);
-                transform[0]->addComponent(componentMesh);
+                transform->addComponent(componentMesh);
 
                 // transform[0]->addChild(model_base);
                 // model_base = NULL;
@@ -459,8 +467,9 @@ namespace AppKit
             void ComponentSkinnedMesh::start()
             {
                 // AppBase* app = Engine::Instance()->app;
+                auto transform = getTransform();
 
-                renderWindowRegion = transform[0]->renderWindowRegion;
+                renderWindowRegion = transform->renderWindowRegion;
                 renderWindowRegion->OnPreUpdate.add(&ComponentSkinnedMesh::OnPreUpdate, this);
             }
 
@@ -483,7 +492,9 @@ namespace AppKit
                     renderWindowRegion->OnPreUpdate.remove(&ComponentSkinnedMesh::OnPreUpdate, this);
                 }
 
-                ResourceHelper::releaseTransformRecursive(&model_base);
+                // release model_base
+                model_base = nullptr;
+                //ResourceHelper::releaseTransformRecursive(&model_base);
                 // AppBase* app = Engine::Instance()->app;
             }
 
