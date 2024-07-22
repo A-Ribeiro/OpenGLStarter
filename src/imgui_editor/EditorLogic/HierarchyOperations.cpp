@@ -34,6 +34,13 @@ void HierarchyOperations::init()
                 ),
 
                 ShortCut(
+                    "Action/<<>>##0", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "<<>>##0", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "" //shortcutStr
+                ),
+
+
+                ShortCut(
                     "Action/Make First", // "mainMenuPath"
                     MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
 
@@ -335,6 +342,9 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
     // clear all lists and trees
     {
         imGuiManager->hierarchy.clearTree();
+        auto root = imGuiManager->hierarchy.getTreeRoot();
+
+
     }
 
     // load file hierarchy from scene file
@@ -386,9 +396,11 @@ void HierarchyOperations::hierarchyCreateNewChildOnNode(std::shared_ptr<TreeNode
                 return;
             }
             
+            using namespace AppKit::GLEngine;
+
             auto tree_node = imGuiManager->hierarchy.createTreeNode( 
                 new_str, 
-                HierarchyTreeData::CreateShared( nullptr ) 
+                HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
             );
             src->addChild(tree_node);
             
@@ -469,10 +481,12 @@ void HierarchyOperations::hierarchyDuplicate(std::shared_ptr<TreeNode> src)
         count++;
     } while(parent->findChildByName(new_name.c_str(),false));
 
+    using namespace AppKit::GLEngine;
+
     // create the new node
     auto tree_node = imGuiManager->hierarchy.createTreeNode( 
         new_name, 
-        HierarchyTreeData::CreateShared( nullptr ) 
+        HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
     );
     src->addChild(tree_node, src->uid);
 
@@ -489,9 +503,11 @@ void HierarchyOperations::hierarchyPasteFromCopy(std::shared_ptr<TreeNode> src, 
         return;
     }
 
+    using namespace AppKit::GLEngine;
+
     auto tree_node = imGuiManager->hierarchy.createTreeNode( 
         src->getName(), 
-        HierarchyTreeData::CreateShared( nullptr ) 
+        HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
     );
     target->addChild(tree_node, src->uid);
 }

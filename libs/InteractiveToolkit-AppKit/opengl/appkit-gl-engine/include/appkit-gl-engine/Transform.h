@@ -35,23 +35,36 @@ namespace AppKit
             //
             ///////////////////////////////////////////////////////
         private:
-            std::vector<Transform *> children;
-            Transform *parent;
-
+            std::vector<std::shared_ptr<Transform>> children;
+            std::weak_ptr<Transform> mParent;
+            std::weak_ptr<Transform> mSelf;
         public:
-            Transform *removeChild(int index);
-            Transform *removeChild(Transform *transform);
-            Transform *addChild(Transform *transform);
+
+            static inline std::shared_ptr<Transform> CreateShared()
+            {
+                auto result = std::make_shared<Transform>();
+                result->mSelf = std::weak_ptr<Transform>(result);
+                return result;
+            }
+
+            std::shared_ptr<Transform> removeChild(int index);
+            std::shared_ptr<Transform> removeChild(std::shared_ptr<Transform> transform);
+            std::shared_ptr<Transform> addChild(std::shared_ptr<Transform> transform);
             // std::vector<Transform*> &getChildren();
             int getChildCount();
-            Transform *getChildAt(int);
+            std::shared_ptr<Transform> getChildAt(int);
 
-            Transform *getParent();
-            void setParent(Transform * const &prnt);
             bool isRoot();
 
+            inline std::shared_ptr<Transform> self()
+            {
+                return std::shared_ptr<Transform>(mSelf);
+            }
+
+            std::shared_ptr<Transform> getParent();
+            void setParent(std::shared_ptr<Transform> new_parent);
             
-            EventCore::VirtualProperty<Transform *> Parent;
+            // EventCore::VirtualProperty<Transform *> Parent;
             ///////////////////////////////////////////////////////
             //
             //
@@ -129,8 +142,8 @@ namespace AppKit
             MathCore::vec3f getScale();
             MathCore::vec3f getScale(bool useVisitedFlag);
 
-            void lookAtRightHanded(const Transform *to, const MathCore::vec3f &worldUp = MathCore::vec3f(0, 1, 0));
-            void lookAtLeftHanded(const Transform *to, const MathCore::vec3f &worldUp = MathCore::vec3f(0, 1, 0));
+            void lookAtRightHanded(std::shared_ptr<Transform> to, const MathCore::vec3f &worldUp = MathCore::vec3f(0, 1, 0));
+            void lookAtLeftHanded(std::shared_ptr<Transform> to, const MathCore::vec3f &worldUp = MathCore::vec3f(0, 1, 0));
 
             ///////////////////////////////////////////////////////
             //
@@ -149,7 +162,7 @@ namespace AppKit
             bool visited;
 
             void resetVisited(bool forceMarkFalse = false);
-            void preComputeTransforms();
+            void preComputeTransforms(std::shared_ptr<Transform> self);
             void computeRenderMatrix(
                 const MathCore::mat4f &viewProjection,
                 const MathCore::mat4f &view,
@@ -160,7 +173,7 @@ namespace AppKit
                 MathCore::mat4f **mvIT,
                 MathCore::mat4f **mvInv);
 
-            EventCore::Event<void(Transform*)> OnVisited;
+            EventCore::Event<void(std::shared_ptr<Transform>)> OnVisited;
 
             ///////////////////////////////////////////////////////
             //
@@ -196,33 +209,33 @@ namespace AppKit
             //
             ///////////////////////////////////////////////////////
         private:
-            std::vector<Component *> components;
+            std::vector<std::shared_ptr<Component>> components;
             std::string name;
             // std::map< std::string, std::vector<Transform*> > name2children;
 
             // void insertMapName(Transform *t);
             // void removeMapName(Transform *t);
         public:
-            void makeFirstComponent(Component *);
-            void makeLastComponent(Component *);
+            void makeFirstComponent(std::shared_ptr<Component>);
+            void makeLastComponent(std::shared_ptr<Component>);
 
-            Component *addComponent(Component *);
-            Component *removeComponent(Component *);
-            Component *removeComponentAt(int);
-            Component *findComponent(ComponentType) const;
-            std::vector<Component *> findComponents(ComponentType) const;
+            std::shared_ptr<Component>addComponent(std::shared_ptr<Component>);
+            std::shared_ptr<Component>removeComponent(std::shared_ptr<Component>);
+            std::shared_ptr<Component>removeComponentAt(int);
+            std::shared_ptr<Component>findComponent(ComponentType) const;
+            std::vector<std::shared_ptr<Component>> findComponents(ComponentType) const;
             int getComponentCount() const;
-            Component *getComponentAt(int);
+            std::shared_ptr<Component> getComponentAt(int);
 
-            Component *findComponentInChildren(ComponentType) const;
-            std::vector<Component *> findComponentsInChildren(ComponentType) const;
+            std::shared_ptr<Component> findComponentInChildren(ComponentType) const;
+            std::vector<std::shared_ptr<Component>> findComponentsInChildren(ComponentType) const;
 
             void setName(const std::string &p);
             const std::string &getName() const;
             EventCore::VirtualProperty<std::string> Name;
 
-            Transform *findTransformByName(const std::string &name, int maxLevel = INT_MAX);
-            std::vector<Transform *> findTransformsByName(const std::string &name, int maxLevel = INT_MAX);
+            std::shared_ptr<Transform> findTransformByName(const std::string &name, int maxLevel = INT_MAX);
+            std::vector<std::shared_ptr<Transform>> findTransformsByName(const std::string &name, int maxLevel = INT_MAX);
 
             Transform();
             ~Transform();
@@ -238,7 +251,7 @@ namespace AppKit
             ///////////////////////////////////////////////////////
 
             RenderWindowRegion *renderWindowRegion;
-            Transform *setRenderWindowRegion(RenderWindowRegion *renderWindowRegion);
+            std::shared_ptr<Transform> setRenderWindowRegion(RenderWindowRegion *renderWindowRegion);
 
             ///////////////////////////////////////////////////////
             //
@@ -251,17 +264,17 @@ namespace AppKit
             ///////////////////////////////////////////////////////
 
             bool traversePreOrder_DepthFirst(
-                const EventCore::Callback<bool(Transform *t, void *userData)> &OnNode, 
+                const EventCore::Callback<bool(std::shared_ptr<Transform>t, void *userData)> &OnNode, 
                 void *userData = NULL, int maxLevel = INT_MAX);
             bool traversePostOrder_DepthFirst(
-                const EventCore::Callback<bool(Transform *t, void *userData)> &OnNode, 
+                const EventCore::Callback<bool(std::shared_ptr<Transform>t, void *userData)> &OnNode, 
                 void *userData = NULL, int maxLevel = INT_MAX);
 
             bool traversePreOrder_DepthFirst(
-                const EventCore::Callback<bool(Transform *t, const void *userData)> &OnNode, 
+                const EventCore::Callback<bool(std::shared_ptr<Transform>t, const void *userData)> &OnNode, 
                 const void *userData = NULL, int maxLevel = INT_MAX);
             bool traversePostOrder_DepthFirst(
-                const EventCore::Callback<bool(Transform *t, const void *userData)> &OnNode,
+                const EventCore::Callback<bool(std::shared_ptr<Transform>t, const void *userData)> &OnNode,
                 const void *userData = NULL, int maxLevel = INT_MAX);
 
             ///////////////////////////////////////////////////////

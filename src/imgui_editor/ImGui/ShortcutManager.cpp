@@ -167,9 +167,16 @@ View* ShortcutManager::Init(){
                 ShortCut(
                     "Action", MenuBehaviour::SetItemVisibility // "mainMenuPath"
                 ),
+
                 ShortCut(
                     "Action/New", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
                     "New", MenuBehaviour::SetItemVisibility // "contextMenuPath"
+                ),
+
+                ShortCut(
+                    "Action/<<>>##0", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
+                    "<<>>##0", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
+                    "" //shortcutStr
                 ),
 
                 ShortCut(
@@ -200,6 +207,7 @@ View* ShortcutManager::Init(){
                     "Open", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
                     "Ctrl+O" //shortcutStr
                 ),
+
                 ShortCut(
                     "Action/New/Scene", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
                     "New/Scene", MenuBehaviour::SetItemVisibility, // "contextMenuPath"

@@ -14,9 +14,11 @@ namespace AppKit
     namespace GLEngine
     {
 
-        Transform::Transform(const Transform &v) : Parent(
-                                                       EventCore::CallbackWrapper(&Transform::getParent, this),
-                                                       EventCore::CallbackWrapper(&Transform::setParent, this)),
+        Transform::Transform(const Transform &v) : 
+        
+                                                    // Parent(
+                                                    //    EventCore::CallbackWrapper(&Transform::getParent, this),
+                                                    //    EventCore::CallbackWrapper(&Transform::setParent, this)),
 
                                                    LocalPosition(
                                                        EventCore::CallbackWrapper(&Transform::getLocalPosition, this),
@@ -30,16 +32,16 @@ namespace AppKit
                                                        EventCore::CallbackWrapper(&Transform::setLocalScale, this)),
 
                                                    Position(
-                                                       //EventCore::CallbackWrapper(&Transform::getPosition, this),
+                                                       // EventCore::CallbackWrapper(&Transform::getPosition, this),
                                                        EventCore::Callback<MathCore::vec3f()>(&Transform::getPosition, this),
                                                        EventCore::CallbackWrapper(&Transform::setPosition, this)),
                                                    // Euler(this, &Transform::getEuler, &Transform::setEuler),
                                                    Rotation(
-                                                       //EventCore::CallbackWrapper(&Transform::getRotation, this),
+                                                       // EventCore::CallbackWrapper(&Transform::getRotation, this),
                                                        EventCore::Callback<MathCore::quatf()>(&Transform::getRotation, this),
                                                        EventCore::CallbackWrapper(&Transform::setRotation, this)),
                                                    Scale(
-                                                       //EventCore::CallbackWrapper(&Transform::getScale, this),
+                                                       // EventCore::CallbackWrapper(&Transform::getScale, this),
                                                        EventCore::Callback<MathCore::vec3f()>(&Transform::getScale, this),
                                                        EventCore::CallbackWrapper(&Transform::setScale, this)),
 
@@ -62,10 +64,10 @@ namespace AppKit
         //
         ///////////////////////////////////////////////////////
 
-        Transform *Transform::removeChild(int index)
+        std::shared_ptr<Transform> Transform::removeChild(int index)
         {
 
-            ITK_ABORT((index >= children.size() || index < 0), "Trying to remove a child that is not in the list...\n");
+            // ITK_ABORT((index >= children.size() || index < 0), "Trying to remove a child that is not in the list...\n");
             // if (index >= children.size() || index < 0)
             //{
             //     fprintf(stderr, "Trying to remove a child that is not in the list...\n");
@@ -73,39 +75,48 @@ namespace AppKit
             //     return NULL;
             // }
 
-            Transform *node = children[index];
+            auto node = children[index];
             children.erase(children.begin() + index);
 
             // removeMapName(node);
 
             return node;
         }
-        Transform *Transform::removeChild(Transform *transform)
+        std::shared_ptr<Transform> Transform::removeChild(std::shared_ptr<Transform> transform)
         {
             for (int i = 0; i < children.size(); i++)
+            {
                 if (children[i] == transform)
                 {
                     children.erase(children.begin() + i);
-                    transform->parent = NULL;
+                    
+                    transform->setParent(nullptr);
+
                     transform->visited = false;
 
                     // removeMapName(transform);
 
                     return transform;
                 }
+            }
 
-            ITK_ABORT(true, "Trying to remove a child that is not in the scene...\n");
+            // ITK_ABORT(true, "Trying to remove a child that is not in the scene...\n");
 
             // fprintf(stderr,"Trying to remove a child that is not in the scene...\n");
             // exit(-1);
-            return NULL;
+            return nullptr;
         }
 
-        Transform *Transform::addChild(Transform *transform)
+        std::shared_ptr<Transform> Transform::addChild(std::shared_ptr<Transform> transform)
         {
-            if (transform->parent != NULL)
-                transform->parent->removeChild(transform);
-            transform->parent = this;
+            
+            auto _currentParent = transform->getParent();
+            if (_currentParent != nullptr)
+                _currentParent->removeChild(transform);
+            
+            auto _self = this->self();
+            transform->setParent(_self);
+
             transform->visited = false;
             children.push_back(transform);
 
@@ -125,37 +136,34 @@ namespace AppKit
             return children.size();
         }
 
-        Transform *Transform::getChildAt(int i)
+        std::shared_ptr<Transform> Transform::getChildAt(int i)
         {
             if (i >= 0 && i < children.size())
                 return children[i];
-            return NULL;
+            return nullptr;
         }
 
-        Transform *Transform::getParent()
+        std::shared_ptr<Transform> Transform::getParent()
         {
-            return parent;
+            return std::shared_ptr<Transform>(mParent);
         }
 
-        void Transform::setParent(Transform *const &prnt)
+        //void Transform::setParent(Transform *const &prnt)
+        void Transform::setParent(std::shared_ptr<Transform> new_parent)
         {
-
-            // ITK_ABORT(prnt == NULL, "Trying to set parent to NULL...\n");
-            // if (prnt == NULL) {
-            //     fprintf(stderr,"Trying to set parent to NULL...\n");
-            //     exit(-1);
-            // }
-            if (parent != NULL)
-                parent->removeChild(this);
-            // parent = prnt;
-            if (prnt != NULL)
-                prnt->addChild(this);
+            auto self = this->self();
+            auto currentParent = this->getParent();
+            if (currentParent != nullptr)
+                currentParent->removeChild(self);
+            if (new_parent != nullptr)
+                new_parent->addChild(self);
         }
 
         bool Transform::isRoot()
         {
-            return parent == NULL;
+            return this->getParent() == nullptr;
         }
+
         ///////////////////////////////////////////////////////
         //
         //
@@ -253,7 +261,7 @@ namespace AppKit
 
             localRotation = q;
 
-            //MathCore::OP<MathCore::mat4f>::extractEuler(localRotation, &localEuler.x, &localEuler.y, &localEuler.z);
+            // MathCore::OP<MathCore::mat4f>::extractEuler(localRotation, &localEuler.x, &localEuler.y, &localEuler.z);
 
             if (!localRotationBaseDirty)
                 localRotationBaseDirty = true;
@@ -404,8 +412,8 @@ namespace AppKit
             // stat_num_recalculated++;
 
             MathCore::mat4f &localM = getLocalMatrix();
-            Transform *parent = getParent();
-            if (parent != NULL && !parent->isRoot())
+            auto parent = getParent();
+            if (parent != nullptr && !parent->isRoot())
             {
                 MathCore::mat4f &aux = parent->getMatrix(useVisitedFlag);
                 if (matrixParent != aux)
@@ -482,8 +490,8 @@ namespace AppKit
                 return matrixInverse;
 
             MathCore::mat4f &localM = getLocalMatrixInverse();
-            Transform *parent = getParent();
-            if (parent != NULL && !parent->isRoot())
+            auto parent = getParent();
+            if (parent != nullptr && !parent->isRoot())
             {
                 MathCore::mat4f &aux = parent->getMatrixInverse(useVisitedFlag);
                 if (matrixInverseParent != aux)
@@ -517,12 +525,11 @@ namespace AppKit
 
         void Transform::setPosition(const MathCore::vec3f &pos)
         {
-            if (parent != NULL && !parent->isRoot())
+            auto parent = getParent();
+            if (parent != nullptr && !parent->isRoot())
                 setLocalPosition(
                     MathCore::CVT<MathCore::vec4f>::toVec3(
-                        parent->getMatrixInverse() * MathCore::CVT<MathCore::vec3f>::toPtn4(pos)
-                        )
-                    );
+                        parent->getMatrixInverse() * MathCore::CVT<MathCore::vec3f>::toPtn4(pos)));
             else
                 setLocalPosition(pos);
         }
@@ -563,7 +570,8 @@ namespace AppKit
 
         void Transform::setRotation(const MathCore::quatf &rot)
         {
-            if (parent != NULL && parent->isRoot())
+            auto parent = getParent();
+            if (parent != nullptr && parent->isRoot())
                 setLocalRotation(rot);
 
             MathCore::quatf q = MathCore::GEN<MathCore::quatf>::fromMat4(parent->getMatrixInverse());
@@ -577,7 +585,9 @@ namespace AppKit
 
         MathCore::quatf Transform::getRotation(bool useVisitedFlag)
         {
-            if (parent != NULL && parent->isRoot())
+            auto parent = getParent();
+
+            if (parent != nullptr && parent->isRoot())
                 return localRotation;
 
             MathCore::quatf q = MathCore::GEN<MathCore::quatf>::fromMat4(getMatrix(useVisitedFlag));
@@ -586,13 +596,15 @@ namespace AppKit
 
         void Transform::setScale(const MathCore::vec3f &s)
         {
-            if (parent != NULL && parent->isRoot())
+            auto parent = getParent();
+
+            if (parent != nullptr && parent->isRoot())
                 setLocalScale(s);
 
             MathCore::mat4f &m = parent->getMatrixInverse();
             setLocalScale(MathCore::vec3f(
-                MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(m[0])) * s.x, 
-                MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(m[1])) * s.y, 
+                MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(m[0])) * s.x,
+                MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(m[1])) * s.y,
                 MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(m[2])) * s.z));
         }
 
@@ -603,24 +615,25 @@ namespace AppKit
 
         MathCore::vec3f Transform::getScale(bool useVisitedFlag)
         {
-            if (parent != NULL && parent->isRoot())
+            auto parent = getParent();
+
+            if (parent != nullptr && parent->isRoot())
                 return localScale;
 
             MathCore::mat4f &m = getMatrix(useVisitedFlag);
             return MathCore::vec3f(
                 MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(m[0])),
                 MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(m[1])),
-                MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(m[2]))
-            );
+                MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(m[2])));
         }
 
-        void Transform::lookAtRightHanded(const Transform *to, const MathCore::vec3f &worldUp)
+        void Transform::lookAtRightHanded(std::shared_ptr<Transform> to, const MathCore::vec3f &worldUp)
         {
             MathCore::vec3f lookVector = to->Position - Position;
             Rotation = MathCore::GEN<MathCore::quatf>::lookAtRotationRH(lookVector, worldUp);
         }
 
-        void Transform::lookAtLeftHanded(const Transform *to, const MathCore::vec3f &worldUp)
+        void Transform::lookAtLeftHanded(std::shared_ptr<Transform> to, const MathCore::vec3f &worldUp)
         {
             MathCore::vec3f lookVector = to->Position - Position;
             Rotation = MathCore::GEN<MathCore::quatf>::lookAtRotationLH(lookVector, worldUp);
@@ -655,7 +668,7 @@ namespace AppKit
             }
         }
 
-        void Transform::preComputeTransforms()
+        void Transform::preComputeTransforms(std::shared_ptr<Transform> self)
         {
             if (!visited)
             {
@@ -668,12 +681,10 @@ namespace AppKit
                 visited = true;
                 // stat_num_visited++;
 
-                OnVisited(this);
+                OnVisited(self);
             }
             for (int i = 0; i < children.size(); i++)
-            {
-                children[i]->preComputeTransforms();
-            }
+                children[i]->preComputeTransforms(children[i]);
         }
 
         void Transform::computeRenderMatrix(const MathCore::mat4f &viewProjection,
@@ -749,7 +760,7 @@ namespace AppKit
         }
         */
 
-        void Transform::makeFirstComponent(Component *c)
+        void Transform::makeFirstComponent(std::shared_ptr<Component>c)
         {
             for (int i = 0; i < components.size(); i++)
             {
@@ -763,7 +774,7 @@ namespace AppKit
             }
         }
 
-        void Transform::makeLastComponent(Component *c)
+        void Transform::makeLastComponent(std::shared_ptr<Component>c)
         {
             for (int i = 0; i < components.size(); i++)
             {
@@ -778,7 +789,7 @@ namespace AppKit
             }
         }
 
-        Component *Transform::addComponent(Component *c)
+        std::shared_ptr<Component> Transform::addComponent(std::shared_ptr<Component>c)
         {
             // ITK_ABORT(c->transform!=NULL,"cannot add same component to two or more transforms\n.");
             components.push_back(c);
@@ -790,7 +801,7 @@ namespace AppKit
             return c;
         }
 
-        Component *Transform::removeComponent(Component *c)
+        std::shared_ptr<Component> Transform::removeComponent(std::shared_ptr<Component>c)
         {
             for (int i = 0; i < components.size(); i++)
             {
@@ -816,14 +827,14 @@ namespace AppKit
                     return c;
                 }
             }
-            return NULL;
+            return nullptr;
         }
 
-        Component *Transform::removeComponentAt(int i)
+        std::shared_ptr<Component> Transform::removeComponentAt(int i)
         {
             if (i >= 0 && i < components.size())
             {
-                Component *result = components[i];
+                std::shared_ptr<Component> &result = components[i];
                 components.erase(components.begin() + i);
 
                 for (size_t j = result->transform.size() - 1; j >= 0; j--)
@@ -842,30 +853,26 @@ namespace AppKit
                 // result->detachFromTransform(t);
                 return result;
             }
-            return NULL;
+            return nullptr;
         }
 
-        Component *Transform::findComponent(ComponentType t) const
+        std::shared_ptr<Component> Transform::findComponent(ComponentType t) const
         {
             for (int i = 0; i < components.size(); i++)
             {
                 if (components[i]->compareType(t))
-                {
                     return components[i];
-                }
             }
-            return NULL;
+            return nullptr;
         }
 
-        std::vector<Component *> Transform::findComponents(ComponentType t) const
+        std::vector<std::shared_ptr<Component>> Transform::findComponents(ComponentType t) const
         {
-            std::vector<Component *> result;
+            std::vector<std::shared_ptr<Component>> result;
             for (int i = 0; i < components.size(); i++)
             {
                 if (components[i]->compareType(t))
-                {
                     result.push_back(components[i]);
-                }
             }
             return result;
         }
@@ -874,32 +881,32 @@ namespace AppKit
         {
             return components.size();
         }
-        Component *Transform::getComponentAt(int i)
+        std::shared_ptr<Component> Transform::getComponentAt(int i)
         {
             if (i >= 0 && i < components.size())
                 return components[i];
-            return NULL;
+            return nullptr;
         }
 
-        Component *Transform::findComponentInChildren(ComponentType t) const
+        std::shared_ptr<Component> Transform::findComponentInChildren(ComponentType t) const
         {
-            Component *result = NULL;
+            std::shared_ptr<Component> result;
             for (int i = 0; i < children.size(); i++)
             {
                 result = children[i]->findComponent(t);
-                if (result != NULL)
+                if (result != nullptr)
                     return result;
                 result = children[i]->findComponentInChildren(t);
-                if (result != NULL)
+                if (result != nullptr)
                     return result;
             }
             return result;
         }
 
-        std::vector<Component *> Transform::findComponentsInChildren(ComponentType t) const
+        std::vector<std::shared_ptr<Component>> Transform::findComponentsInChildren(ComponentType t) const
         {
-            std::vector<Component *> result;
-            std::vector<Component *> parcialResult;
+            std::vector<std::shared_ptr<Component>> result;
+            std::vector<std::shared_ptr<Component>> parcialResult;
             for (int i = 0; i < children.size(); i++)
             {
                 parcialResult = children[i]->findComponents(t);
@@ -930,30 +937,30 @@ namespace AppKit
 
         // VirtualProperty<std::string> Name;
 
-        Transform *Transform::findTransformByName(const std::string &name, int maxLevel)
+        std::shared_ptr<Transform> Transform::findTransformByName(const std::string &name, int maxLevel)
         {
             if (this->name == name)
-                return this;
+                return this->self();
             if (maxLevel > 0)
             {
-                Transform *result;
+                std::shared_ptr<Transform> result;
                 for (int i = 0; i < children.size(); i++)
                 {
                     result = children[i]->findTransformByName(name, maxLevel - 1);
-                    if (result != NULL)
+                    if (result != nullptr)
                         return result;
                 }
             }
-            return NULL;
+            return nullptr;
         }
 
-        std::vector<Transform *> Transform::findTransformsByName(const std::string &name, int maxLevel)
+        std::vector<std::shared_ptr<Transform>> Transform::findTransformsByName(const std::string &name, int maxLevel)
         {
-            std::vector<Transform *> result;
-            std::vector<Transform *> parcialResult;
+            std::vector<std::shared_ptr<Transform>> result;
+            std::vector<std::shared_ptr<Transform>> parcialResult;
 
             if (this->name == name)
-                result.push_back(this);
+                result.push_back(this->self());
 
             if (maxLevel > 0)
             {
@@ -978,44 +985,45 @@ namespace AppKit
         //
         ///////////////////////////////////////////////////////
 
-        Transform::Transform() : Parent(
-                                                       EventCore::CallbackWrapper(&Transform::getParent, this),
-                                                       EventCore::CallbackWrapper(&Transform::setParent, this)),
+        Transform::Transform() : 
+                                // Parent(
+                                //      EventCore::CallbackWrapper(&Transform::getParent, this),
+                                //      EventCore::CallbackWrapper(&Transform::setParent, this)),
 
-                                                   LocalPosition(
-                                                       EventCore::CallbackWrapper(&Transform::getLocalPosition, this),
-                                                       EventCore::CallbackWrapper(&Transform::setLocalPosition, this)),
-                                                   // LocalEuler(this, &Transform::getLocalEuler, &Transform::setLocalEuler),
-                                                   LocalRotation(
-                                                       EventCore::CallbackWrapper(&Transform::getLocalRotation, this),
-                                                       EventCore::CallbackWrapper(&Transform::setLocalRotation, this)),
-                                                   LocalScale(
-                                                       EventCore::CallbackWrapper(&Transform::getLocalScale, this),
-                                                       EventCore::CallbackWrapper(&Transform::setLocalScale, this)),
+                                 LocalPosition(
+                                     EventCore::CallbackWrapper(&Transform::getLocalPosition, this),
+                                     EventCore::CallbackWrapper(&Transform::setLocalPosition, this)),
+                                 // LocalEuler(this, &Transform::getLocalEuler, &Transform::setLocalEuler),
+                                 LocalRotation(
+                                     EventCore::CallbackWrapper(&Transform::getLocalRotation, this),
+                                     EventCore::CallbackWrapper(&Transform::setLocalRotation, this)),
+                                 LocalScale(
+                                     EventCore::CallbackWrapper(&Transform::getLocalScale, this),
+                                     EventCore::CallbackWrapper(&Transform::setLocalScale, this)),
 
-                                                   Position(
-                                                       //EventCore::CallbackWrapper(&Transform::getPosition, this),
-                                                       EventCore::Callback<MathCore::vec3f()>(&Transform::getPosition, this),
-                                                       EventCore::CallbackWrapper(&Transform::setPosition, this)),
-                                                   // Euler(this, &Transform::getEuler, &Transform::setEuler),
-                                                   Rotation(
-                                                       //EventCore::CallbackWrapper(&Transform::getRotation, this),
-                                                       EventCore::Callback<MathCore::quatf()>(&Transform::getRotation, this),
-                                                       EventCore::CallbackWrapper(&Transform::setRotation, this)),
-                                                   Scale(
-                                                       //EventCore::CallbackWrapper(&Transform::getScale, this),
-                                                       EventCore::Callback<MathCore::vec3f()>(&Transform::getScale, this),
-                                                       EventCore::CallbackWrapper(&Transform::setScale, this)),
+                                 Position(
+                                     // EventCore::CallbackWrapper(&Transform::getPosition, this),
+                                     EventCore::Callback<MathCore::vec3f()>(&Transform::getPosition, this),
+                                     EventCore::CallbackWrapper(&Transform::setPosition, this)),
+                                 // Euler(this, &Transform::getEuler, &Transform::setEuler),
+                                 Rotation(
+                                     // EventCore::CallbackWrapper(&Transform::getRotation, this),
+                                     EventCore::Callback<MathCore::quatf()>(&Transform::getRotation, this),
+                                     EventCore::CallbackWrapper(&Transform::setRotation, this)),
+                                 Scale(
+                                     // EventCore::CallbackWrapper(&Transform::getScale, this),
+                                     EventCore::Callback<MathCore::vec3f()>(&Transform::getScale, this),
+                                     EventCore::CallbackWrapper(&Transform::setScale, this)),
 
-                                                   Name(
-                                                       EventCore::CallbackWrapper(&Transform::getName, this),
-                                                       EventCore::CallbackWrapper(&Transform::setName, this))
+                                 Name(
+                                     EventCore::CallbackWrapper(&Transform::getName, this),
+                                     EventCore::CallbackWrapper(&Transform::setName, this))
         {
             // hierarchy ops
-            parent = NULL;
+            // parent = NULL;
             // transform
             localPosition = MathCore::vec3f(0);
-            //localEuler = MathCore::vec3f(0);
+            // localEuler = MathCore::vec3f(0);
             localRotation = MathCore::quatf();
             localScale = MathCore::vec3f(1.0f);
 
@@ -1060,17 +1068,17 @@ namespace AppKit
             renderWindowRegion = NULL;
         }
 
-        Transform *Transform::setRenderWindowRegion(RenderWindowRegion *renderWindowRegion)
+        std::shared_ptr<Transform> Transform::setRenderWindowRegion(RenderWindowRegion *renderWindowRegion)
         {
             this->renderWindowRegion = renderWindowRegion;
-            return this;
+            return this->self();
         }
 
         bool Transform::traversePreOrder_DepthFirst(
-            const EventCore::Callback<bool(Transform *t, void *userData)> &OnNode, 
+            const EventCore::Callback<bool(std::shared_ptr<Transform>t, void *userData)> &OnNode,
             void *userData, int maxLevel)
         {
-            if (!OnNode(this, userData))
+            if (!OnNode(this->self(), userData))
                 return false;
             maxLevel--;
             if (maxLevel > 0)
@@ -1086,7 +1094,7 @@ namespace AppKit
         }
 
         bool Transform::traversePostOrder_DepthFirst(
-            const EventCore::Callback<bool(Transform *t, void *userData)> &OnNode,
+            const EventCore::Callback<bool(std::shared_ptr<Transform>t, void *userData)> &OnNode,
             void *userData, int maxLevel)
         {
             maxLevel--;
@@ -1099,14 +1107,14 @@ namespace AppKit
                         return false;
                 }
             }
-            return OnNode(this, userData);
+            return OnNode(this->self(), userData);
         }
 
         bool Transform::traversePreOrder_DepthFirst(
-            const EventCore::Callback<bool(Transform *t, const void *userData)> &OnNode, 
+            const EventCore::Callback<bool(std::shared_ptr<Transform>t, const void *userData)> &OnNode,
             const void *userData, int maxLevel)
         {
-            if (!OnNode(this, userData))
+            if (!OnNode(this->self(), userData))
                 return false;
             maxLevel--;
             if (maxLevel > 0)
@@ -1122,7 +1130,7 @@ namespace AppKit
         }
 
         bool Transform::traversePostOrder_DepthFirst(
-            const EventCore::Callback<bool(Transform *t, const void *userData)> &OnNode,
+            const EventCore::Callback<bool(std::shared_ptr<Transform>t, const void *userData)> &OnNode,
             const void *userData, int maxLevel)
         {
             maxLevel--;
@@ -1135,7 +1143,7 @@ namespace AppKit
                         return false;
                 }
             }
-            return OnNode(this, userData);
+            return OnNode(this->self(), userData);
         }
 
     }
