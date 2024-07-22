@@ -21,7 +21,7 @@ TreeNode::TreeNode()
     snprintf(this->prefix_id, 64, "-not-set-");
     snprintf(this->drag_payload_identifier, 32, "-not-set-");
 
-    this->parent = nullptr;
+    // this->parent = nullptr;
     scroll_to_this_item = false;
 }
 
@@ -41,7 +41,7 @@ TreeNode::TreeNode(int32_t uid, std::shared_ptr<TreeData> data, const char *name
     snprintf(this->prefix_id, 64, "-not-set-");
     snprintf(this->drag_payload_identifier, 32, "-not-set-");
 
-    this->parent = nullptr;
+    // this->parent = nullptr;
 
     scroll_to_this_item = false;
 }
@@ -338,9 +338,8 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
 
 void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder)
 {
-    if (!isRoot || this->parent->children.size() != 1)
+    if (!isRoot)// || getParent()->children.size() != 1)
         return;
-
 
     auto window = ImGui::GetCurrentWindow();
     ImRect window_frame = window->ClipRect;
@@ -385,7 +384,10 @@ void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder
     int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
 
     bool any_click_occured = false;
-    std::shared_ptr<TreeNode> &self_root = this->parent->children[0];
+    //std::shared_ptr<TreeNode> &self_root = this->parent->children[0];
+    
+    std::shared_ptr<TreeNode> self_root = this->self();
+    
     this->renderRecursive(treeHolder, self_root, id_sel, selected_UID, &any_click_occured); // , & time);
     if (any_click_occured)
         deselect_all = false;
@@ -444,37 +446,53 @@ TreeNode &TreeNode::setName(const char *value) {
 }
 
 std::shared_ptr<TreeNode> TreeNode::self() {
-    if (this->parent != nullptr)
-        return this->parent->findUID(this->uid);
-    return nullptr;
+    // if (this->parent != nullptr)
+    //     return this->parent->findUID(this->uid);
+    // return nullptr;
+    return std::shared_ptr<TreeNode>(this->mSelf);
 }
 
 std::shared_ptr<TreeNode> TreeNode::removeSelf(){
-    std::shared_ptr<TreeNode> result = nullptr;
-    if (this->parent != nullptr){
-        result = this->parent->findUID(this->uid);
-        if (result != nullptr)
-            this->parent->removeUID(this->uid);
+
+    auto parent = getParent();
+    auto result = this->self();
+
+    if (parent != nullptr){
+        parent->removeUID(this->uid);
+
+        // result = this->parent->findUID(this->uid);
+        // if (result != nullptr)
+        //     this->parent->removeUID(this->uid);
     }
+
     return result;
 }
 
 void TreeNode::makeFirst(){
-    if (this->parent != nullptr){
-        auto self = this->parent->findUID(this->uid);
-        if (self == nullptr)
-            return;
-        this->parent->removeUID(this->uid);
-        this->parent->children.insert(this->parent->children.begin(), self);
+    auto parent = getParent();
+
+    if (parent != nullptr){
+
+        // auto self = this->parent->findUID(this->uid);
+        // if (self == nullptr)
+        //     return;
+        auto self = this->self();
+
+        parent->removeUID(this->uid);
+        parent->children.insert(parent->children.begin(), self);
     }
 }
 void TreeNode::makeLast(){
-    if (this->parent != nullptr){
-        auto self = this->parent->findUID(this->uid);
-        if (self == nullptr)
-            return;
-        this->parent->removeUID(this->uid);
-        this->parent->children.push_back(self);
+    auto parent = getParent();
+
+    if (parent != nullptr){
+        // auto self = this->parent->findUID(this->uid);
+        // if (self == nullptr)
+        //     return;
+        auto self = this->self();
+
+        parent->removeUID(this->uid);
+        parent->children.push_back(self);
     }
 }
 
@@ -485,7 +503,7 @@ void TreeNode::scrollToThisItem() {
 TreeNode &TreeNode::addChild(std::shared_ptr<TreeNode> treeNode, int before_uid)
 {
     treeNode->removeSelf();
-    treeNode->parent = this;
+    treeNode->setParent(this->self());
 
     if (before_uid != -1){
         auto it = children.begin();

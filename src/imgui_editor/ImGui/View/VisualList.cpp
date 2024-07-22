@@ -242,33 +242,39 @@ ListElement &ListElement::setName(const char *value)
 
 std::shared_ptr<ListElement> ListElement::self()
 {
-    return visualList->findUID(uid);
+    //return visualList->findUID(uid);
+    return std::shared_ptr<ListElement>(this->mSelf);
 }
 
 std::shared_ptr<ListElement> ListElement::removeSelf()
 {
-    std::shared_ptr<ListElement> result = visualList->findUID(uid);
-    if (result != nullptr)
-        visualList->removeUID(uid);
+    //std::shared_ptr<ListElement> result = visualList->findUID(uid);
+//    if (result != nullptr)
+    auto result = this->self();
+    visualList->removeUID(uid);
     return result;
 }
 
 void ListElement::makeFirst()
 {
-    auto self = this->visualList->findUID(this->uid);
-    if (self == nullptr)
-        return;
+    auto result = this->self();
+
+    //auto self = this->visualList->findUID(this->uid);
+    //if (self == nullptr)
+    //    return;
     this->visualList->removeUID(this->uid);
-    this->visualList->items.insert(this->visualList->items.begin(), self);
+    this->visualList->items.insert(this->visualList->items.begin(), result);
 }
 
 void ListElement::makeLast()
 {
-    auto self = this->visualList->findUID(this->uid);
-    if (self == nullptr)
-        return;
+    auto result = this->self();
+
+    // auto self = this->visualList->findUID(this->uid);
+    // if (self == nullptr)
+    //     return;
     this->visualList->removeUID(this->uid);
-    this->visualList->items.push_back(self);
+    this->visualList->items.push_back(result);
 }
 
 void ListElement::scrollToThisItem() {

@@ -66,6 +66,8 @@ class ListElement
 
 protected:
 
+    std::weak_ptr<ListElement> mSelf;
+
     char name[64];
     char name_tolower_no_accent[64];
 
@@ -105,7 +107,9 @@ public:
 
     static inline std::shared_ptr<ListElement> CreateShared(int32_t uid, VisualList *visualList, const char *name, std::shared_ptr<ListData> data)
     {
-        return std::make_shared<ListElement>(uid, visualList, name, data);
+        auto result = std::make_shared<ListElement>(uid, visualList, name, data);
+        result->mSelf = std::weak_ptr<ListElement>(result);
+        return result;
     }
 
     friend class VisualList;

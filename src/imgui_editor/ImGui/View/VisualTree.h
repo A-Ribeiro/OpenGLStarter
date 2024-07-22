@@ -66,6 +66,11 @@ class TreeNode
     TreeNode();
 
 protected:
+
+    std::weak_ptr<TreeNode> mParent;
+
+    std::weak_ptr<TreeNode> mSelf;
+
     bool scroll_to_this_item;
 
     char name[64];
@@ -91,9 +96,17 @@ public:
     inline const char *getName() const { return name; }
     inline const char *getNameToLowerNoAccents() const { return name_tolower_no_accent; }
 
+    std::shared_ptr<TreeNode> getParent() {
+        return std::shared_ptr<TreeNode>(mParent);
+    }
+
+    void setParent(std::shared_ptr<TreeNode> _new_parent) {
+        mParent = std::weak_ptr<TreeNode>(_new_parent);
+    }
+
+
     std::shared_ptr<TreeData> data;
 
-    TreeNode *parent;
     int32_t uid;
     std::vector<std::shared_ptr<TreeNode>> children;
 
@@ -151,6 +164,9 @@ public:
 
     static inline std::shared_ptr<TreeNode> CreateShared(int32_t uid, std::shared_ptr<TreeData> data, const char *name)
     {
-        return std::make_shared<TreeNode>(uid, data, name);
+        auto result = std::make_shared<TreeNode>(uid, data, name);
+        result->mSelf = std::weak_ptr<TreeNode>(result);
+
+        return result;
     }
 };
