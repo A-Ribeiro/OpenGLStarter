@@ -162,7 +162,7 @@ namespace AppKit
             bool visited;
 
             void resetVisited(bool forceMarkFalse = false);
-            void preComputeTransforms(std::shared_ptr<Transform> self);
+            void preComputeTransforms();
             void computeRenderMatrix(
                 const MathCore::mat4f &viewProjection,
                 const MathCore::mat4f &view,

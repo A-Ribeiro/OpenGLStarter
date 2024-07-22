@@ -668,7 +668,7 @@ namespace AppKit
             }
         }
 
-        void Transform::preComputeTransforms(std::shared_ptr<Transform> self)
+        void Transform::preComputeTransforms()
         {
             if (!visited)
             {
@@ -681,10 +681,10 @@ namespace AppKit
                 visited = true;
                 // stat_num_visited++;
 
-                OnVisited(self);
+                OnVisited(this->self());
             }
             for (int i = 0; i < children.size(); i++)
-                children[i]->preComputeTransforms(children[i]);
+                children[i]->preComputeTransforms();
         }
 
         void Transform::computeRenderMatrix(const MathCore::mat4f &viewProjection,

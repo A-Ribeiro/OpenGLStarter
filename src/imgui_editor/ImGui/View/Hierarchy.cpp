@@ -31,9 +31,9 @@ View* Hierarchy::Init()
 	//texture_alias[Icon_Model] = texture_model;
 
 	// creating testing node
-    self_root = TreeNode::CreateShared(uid_incrementer++, nullptr, "-empty-");
+    //self_root = TreeNode::CreateShared(uid_incrementer++, nullptr, "-empty-");
 	root = TreeNode::CreateShared(uid_incrementer++, nullptr, "root");
-    self_root->addChild(root);
+    //self_root->addChild(root);
 
     root->setIsRoot(true).
         setPrefixID("HierarchyTree").

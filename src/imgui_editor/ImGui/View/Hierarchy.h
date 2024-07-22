@@ -43,7 +43,7 @@ class Hierarchy : public View, public TreeHolder
 {
 
     // trick to make root have a self() valid method call
-    std::shared_ptr<TreeNode> self_root;
+    // std::shared_ptr<TreeNode> self_root;
     std::shared_ptr<TreeNode> root;
     int32_t uid_incrementer;
 
