@@ -9,6 +9,8 @@
 
 #include <appkit-gl-base/GLTexture.h>
 
+#include <appkit-gl-engine/ToShared.h>
+
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>

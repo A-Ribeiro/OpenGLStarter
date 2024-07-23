@@ -6,6 +6,7 @@
 #include <InteractiveToolkit/EventCore/Callback.h>
 #include <InteractiveToolkit/EventCore/VirtualProperty.h>
 #include "Component.h"
+#include "ToShared.h"
 
 namespace AppKit
 {

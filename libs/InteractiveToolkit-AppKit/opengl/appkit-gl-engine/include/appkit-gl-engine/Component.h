@@ -5,6 +5,7 @@
 // #include "StartEventManager.h"
 #include <vector>
 #include <InteractiveToolkit/EventCore/HandleCallback.h>
+#include "ToShared.h"
 
 namespace AppKit
 {
@@ -36,7 +37,7 @@ namespace AppKit
             std::vector<std::weak_ptr<Transform>> mTransform;
         public:
             std::shared_ptr<Transform> getTransform(int i = 0){
-                return std::shared_ptr<Transform>(mTransform[i]);
+                return ToShared(mTransform[i]);
             }
             int getTransformCount() const {
                 return (int)mTransform.size();
@@ -79,15 +80,6 @@ namespace AppKit
             friend class Transform;
         };
 
-
-        template <typename _ComponentType,
-                typename std::enable_if<
-                    std::is_base_of< Component, _ComponentType >::value ||
-                    std::is_base_of< Transform, _ComponentType >::value,
-                    bool>::type = true>
-        static inline std::shared_ptr<_ComponentType> ToShared( std::weak_ptr<_ComponentType> ref ) {
-            return std::shared_ptr<_ComponentType>(ref);
-        }
     }
 
 }

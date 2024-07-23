@@ -97,11 +97,12 @@ public:
     inline const char *getNameToLowerNoAccents() const { return name_tolower_no_accent; }
 
     std::shared_ptr<TreeNode> getParent() {
-        return std::shared_ptr<TreeNode>(mParent);
+        return AppKit::GLEngine::ToShared(mParent);
     }
 
     void setParent(std::shared_ptr<TreeNode> _new_parent) {
-        mParent = std::weak_ptr<TreeNode>(_new_parent);
+        //mParent = std::weak_ptr<TreeNode>(_new_parent);
+        mParent = _new_parent;
     }
 
 

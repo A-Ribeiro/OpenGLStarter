@@ -115,7 +115,8 @@ namespace AppKit
                 _currentParent->removeChild(transform);
             
             auto _self = this->self();
-            transform->setParent(_self);
+            //transform->setParent(_self);
+            transform->mParent = _self;
 
             transform->visited = false;
             children.push_back(transform);
@@ -145,7 +146,7 @@ namespace AppKit
 
         std::shared_ptr<Transform> Transform::getParent()
         {
-            return std::shared_ptr<Transform>(mParent);
+            return ToShared(mParent);
         }
 
         //void Transform::setParent(Transform *const &prnt)
