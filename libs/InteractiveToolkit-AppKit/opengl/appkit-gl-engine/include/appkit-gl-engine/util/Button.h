@@ -17,9 +17,9 @@ namespace AppKit
         public:
             std::string id;
             std::string rendered_text;
-            Transform *root;
-            Components::ComponentFontToMesh *componentFontToMesh;
-            Components::ComponentMaterial *materialBackground;
+            std::shared_ptr<Transform> root;
+            std::shared_ptr<Components::ComponentFontToMesh> componentFontToMesh;
+            std::shared_ptr<Components::ComponentMaterial> materialBackground;
             AppKit::OpenGL::GLFont2Builder *fontBuilder;
 
             CollisionCore::AABB<MathCore::vec3f> aabb;
@@ -41,7 +41,7 @@ namespace AppKit
 
             void resize(const MathCore::vec2i &size);
 
-            Transform *getTransform();
+            std::shared_ptr<Transform> getTransform();
 
             // static MathCore::vec3f App2MousePosition(bool normalized = false) {
             //     AppKit::GLEngine::AppBase * app = AppKit::GLEngine::Engine::Instance()->app;

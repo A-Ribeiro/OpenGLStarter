@@ -20,22 +20,22 @@ void SceneGUI::loadResources(){
 }
 //to load the scene graph
 void SceneGUI::loadGraph(){
-    root = new Transform();
+    root = Transform::CreateShared();
     root->setRenderWindowRegion(this->renderWindow);
 
-    Transform *t = root->addChild( new Transform() );
+    auto t = root->addChild( Transform::CreateShared() );
     t->Name = "Main Camera";
 
     //text transform
     {
-        Transform *textNode = root->addChild(new Transform());
+        auto textNode = root->addChild(Transform::CreateShared());
         textNode->Name = "fps";
-        fps = (AppKit::GLEngine::Components::ComponentFontToMesh*)textNode->addComponent(new Components::ComponentFontToMesh());
+        fps = textNode->addNewComponent<AppKit::GLEngine::Components::ComponentFontToMesh>();
         f_fps = 0.0f;
     }
 
     {
-        cursorTransform = root->addChild(new Transform());
+        cursorTransform = root->addChild(Transform::CreateShared());
     }
     
 }
@@ -47,25 +47,24 @@ void SceneGUI::bindResourcesToGraph(){
 
     //setup renderstate
 
-    Transform *mainCamera = root->findTransformByName("Main Camera");
-    ComponentCameraOrthographic* componentCameraOrthographic;
-    mainCamera->addComponent(camera = componentCameraOrthographic = new ComponentCameraOrthographic());
+    auto mainCamera = root->findTransformByName("Main Camera");
+    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+    camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
     {
-        ComponentMaterial *cursorMaterial;
-        cursorTransform->addComponent(cursorMaterial = new ComponentMaterial());
+        auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
         cursorTransform->addComponent(ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height));
 
         cursorMaterial->type = MaterialUnlitTexture;
         cursorMaterial->unlit.blendMode = BlendModeAlpha;
-        cursorMaterial->unlit.tex = texRefCount->add(cursorTexture);
+        cursorMaterial->unlit.tex = cursorTexture;
     }
 
-    texRefCount->add(&fontBuilder.glFont2.texture);
+    //texRefCount->add(&fontBuilder.glFont2.texture);
 
-    texRefCount->add(cursorTexture);
+    //texRefCount->add(cursorTexture);
 
     // call resize
     //AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
@@ -85,14 +84,16 @@ void SceneGUI::bindResourcesToGraph(){
 void SceneGUI::unloadAll(){
     this->renderWindow->CameraViewport.OnChange.remove(&SceneGUI::OnViewportChange, this);
 
-    ResourceHelper::releaseTransformRecursive(&root);
+    root = nullptr;
+    //ResourceHelper::releaseTransformRecursive(&root);
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     
-    texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
-    if (cursorTexture != NULL) {
-        texRefCount->remove(cursorTexture);
-        cursorTexture = NULL;
+    //texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
+
+    if (cursorTexture != nullptr) {
+        //texRefCount->remove(cursorTexture);
+        cursorTexture = nullptr;
     }
 }
 
@@ -121,7 +122,7 @@ void SceneGUI::OnViewportChange(const AppKit::GLEngine::iRect &value, const AppK
     int margin = 32 - 9;
 
 
-    Transform *textNode = fps->transform[0];
+    auto textNode = fps->getTransform();
     textNode->setLocalPosition(MathCore::vec3f(-center_x + margin, -center_y + margin, 0));
 
 }
@@ -160,7 +161,9 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
     sprintf(txt, "%i fps", (int)(f_fps + 0.5f));
     fontBuilder.build(txt);
     fps->toMesh(fontBuilder, true);
-    fps->transform[0]->setLocalScale(MathCore::vec3f(28.0f / fontBuilder.glFont2.size));
+    
+    auto fps_transform = fps->getTransform();
+    fps_transform->setLocalScale(MathCore::vec3f(28.0f / fontBuilder.glFont2.size));
 
 
     MathCore::vec3f pos3D = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenter * this->renderWindow->windowToCameraScale, 0.0f);

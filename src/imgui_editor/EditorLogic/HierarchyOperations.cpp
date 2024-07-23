@@ -472,7 +472,7 @@ void HierarchyOperations::hierarchyDuplicate(std::shared_ptr<TreeNode> src)
         return;
     }
 
-    auto parent = src->parent->self();
+    auto parent = src->getParent();
 
     std::string new_name;
     int count = 0;

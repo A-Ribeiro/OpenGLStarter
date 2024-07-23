@@ -919,7 +919,7 @@ void FolderFileOperations::refreshDirectoryStructure(std::shared_ptr<TreeNode> t
         auto &last_inserted_struct = _to_insert.back();
         if (!last_inserted_struct.dir_info.isValid()){
             if (!treeNode->isRoot) {
-                auto _parent = treeNode->parent->self();
+                auto _parent = treeNode->getParent();
                 // remove in case this folder was removed
                 treeNode->removeSelf();
                 project.OnTreeSelect(_parent);
@@ -1131,7 +1131,7 @@ void FolderFileOperations::renameSelectedDirectory(const std::string &newdirname
             {
                 selectedDirectoryInfo->file = ITKCommon::FileSystem::File::FromPath(new_dirname);
                 selectedTreeNode->setName(selectedDirectoryInfo->file.name.c_str());
-                selectedTreeNode->parent->sort();
+                selectedTreeNode->getParent()->sort();
                 selectedTreeNode->scrollToThisItem();
 
                 imGuiManager->PostAction.add([&](){
@@ -1363,7 +1363,7 @@ void FolderFileOperations::deleteSelectedDirectory() {
                 return;
 
             // if (!selectedTreeNode->isRoot)
-            auto toRefresh = selectedTreeNode->parent->self();
+            auto toRefresh = selectedTreeNode->getParent();
             refreshDirectoryStructure(toRefresh);
             imGuiManager->project.forceTreeSelection(toRefresh->uid);
             toRefresh->scrollToThisItem();

@@ -60,7 +60,7 @@ namespace AppKit
         {
             if (frankenShader->u_cameraPosWorld >= 0)
             {
-                MathCore::vec3f aux = camera->transform[0]->getPosition(true);
+                MathCore::vec3f aux = camera->getTransform()->getPosition(true);
                 if (aux != camera_PosWorld)
                 {
                     camera_PosWorld = aux;
@@ -109,10 +109,10 @@ namespace AppKit
             // tex_unit[FrankenUniformTextureSlot_Albedo] = material->pbr.texAlbedo;
             // tex_unit[FrankenUniformTextureSlot_Specular] = material->pbr.texSpecular;
             // tex_unit[FrankenUniformTextureSlot_Emission] = material->pbr.texEmission;
-            setNormalTexture(material->pbr.texNormal);
-            setAlbedoTexture(material->pbr.texAlbedo);
-            setSpecularTexture(material->pbr.texSpecular);
-            setEmissionTexture(material->pbr.texEmission);
+            setNormalTexture(material->pbr.texNormal.get());
+            setAlbedoTexture(material->pbr.texAlbedo.get());
+            setSpecularTexture(material->pbr.texSpecular.get());
+            setEmissionTexture(material->pbr.texEmission.get());
 
             if (material->pbr.texAlbedo != material_PBRSetup.texAlbedo ||
                 material->pbr.texNormal != material_PBRSetup.texNormal ||

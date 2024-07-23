@@ -85,15 +85,15 @@ namespace AppKit
                 //
                 // Another constructor
                 //
-                static ComponentMesh *createTriangle();
+                static std::shared_ptr<ComponentMesh> createTriangle();
 
-                static ComponentMesh *createPlaneXZ(float _width, float _height);
+                static std::shared_ptr<ComponentMesh> createPlaneXZ(float _width, float _height);
 
-                static ComponentMesh *createPlaneXY(float _width, float _height);
+                static std::shared_ptr<ComponentMesh> createPlaneXY(float _width, float _height);
 
-                static ComponentMesh *createBox(const MathCore::vec3f &dimension);
+                static std::shared_ptr<ComponentMesh> createBox(const MathCore::vec3f &dimension);
 
-                static ComponentMesh *createSphere(float radius, int sectorCount, int stackCount);
+                static std::shared_ptr<ComponentMesh> createSphere(float radius, int sectorCount, int stackCount);
             };
 
         }

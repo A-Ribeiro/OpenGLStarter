@@ -407,9 +407,9 @@ namespace AppKit
             //
             // Another constructor
             //
-            ComponentMesh *ComponentMesh::createTriangle()
+            std::shared_ptr<ComponentMesh> ComponentMesh::createTriangle()
             {
-                ComponentMesh *result = new ComponentMesh();
+                auto result = Component::CreateShared<ComponentMesh>();
                 setTriangle(
                     &result->indices,
                     &result->pos,
@@ -420,9 +420,9 @@ namespace AppKit
                 return result;
             }
 
-            ComponentMesh *ComponentMesh::createPlaneXZ(float _width, float _height)
+            std::shared_ptr<ComponentMesh> ComponentMesh::createPlaneXZ(float _width, float _height)
             {
-                ComponentMesh *result = new ComponentMesh();
+                auto result = Component::CreateShared<ComponentMesh>();
                 setPlane(false, true,
                          _width, _height,
                          &result->indices,
@@ -434,9 +434,9 @@ namespace AppKit
                 return result;
             }
 
-            ComponentMesh *ComponentMesh::createPlaneXY(float _width, float _height)
+            std::shared_ptr<ComponentMesh> ComponentMesh::createPlaneXY(float _width, float _height)
             {
-                ComponentMesh *result = new ComponentMesh();
+                auto result = Component::CreateShared<ComponentMesh>();
                 setPlane(true, false,
                          _width, _height,
                          &result->indices,
@@ -448,9 +448,9 @@ namespace AppKit
                 return result;
             }
 
-            ComponentMesh *ComponentMesh::createBox(const MathCore::vec3f &dimension)
+            std::shared_ptr<ComponentMesh> ComponentMesh::createBox(const MathCore::vec3f &dimension)
             {
-                ComponentMesh *result = new ComponentMesh();
+                auto result = Component::CreateShared<ComponentMesh>();
                 setBox(dimension,
                        &result->indices,
                        &result->pos,
@@ -461,9 +461,9 @@ namespace AppKit
                 return result;
             }
 
-            ComponentMesh *ComponentMesh::createSphere(float radius, int sectorCount, int stackCount)
+            std::shared_ptr<ComponentMesh> ComponentMesh::createSphere(float radius, int sectorCount, int stackCount)
             {
-                ComponentMesh *result = new ComponentMesh();
+                auto result = Component::CreateShared<ComponentMesh>();
                 setSphere(radius, sectorCount, stackCount,
                           &result->indices,
                           &result->pos,

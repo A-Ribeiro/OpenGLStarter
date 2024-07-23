@@ -20,7 +20,7 @@ namespace AppKit
             // rendered_text = GlobalButtonState.StateToString(text);
             rendered_text = _text;
 
-            root = new Transform();
+            root = Transform::CreateShared();
 
             materialBackground = NULL;
             componentFontToMesh = NULL;
@@ -111,8 +111,8 @@ namespace AppKit
                 // back square
                 if (materialBackground == NULL)
                 {
-                    Transform *cursorNode = root->addChild(new Transform());
-                    cursorNode->addComponent(materialBackground = new Components::ComponentMaterial());
+                    auto cursorNode = root->addChild(Transform::CreateShared());
+                    materialBackground = cursorNode->addNewComponent<Components::ComponentMaterial>();
                     cursorNode->addComponent(Components::ComponentMesh::createPlaneXY(xmax - xmin, ymax - ymin));
                     // cursorNode->LocalRotation = MathCore::GEN<MathCore::quatf>::fromEuler(MathCore::OP<float>::deg_2_rad(-90.0f), 0, 0);
                     cursorNode->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 0);
@@ -123,13 +123,13 @@ namespace AppKit
                 }
                 else
                 {
-                    ReferenceCounter<AppKit::GLEngine::Component *> *refCounter = &Engine::Instance()->componentReferenceCounter;
+                    //ReferenceCounter<AppKit::GLEngine::Component *> *refCounter = &Engine::Instance()->componentReferenceCounter;
 
-                    Transform *cursorNode = materialBackground->transform[0];
+                    auto cursorNode = materialBackground->getTransform();
 
-                    Component *_mesh = cursorNode->removeComponent(cursorNode->findComponent(Components::ComponentMesh::Type));
+                    auto _mesh = cursorNode->removeComponent(cursorNode->findComponent<Components::ComponentMesh>());
 
-                    refCounter->remove(_mesh);
+                    // refCounter->remove(_mesh);
 
                     cursorNode->addComponent(Components::ComponentMesh::createPlaneXY(xmax - xmin, ymax - ymin));
                     // cursorNode->LocalRotation = MathCore::GEN<MathCore::quatf>::fromEuler(MathCore::OP<float>::deg_2_rad(-90.0f), 0, 0);
@@ -138,15 +138,15 @@ namespace AppKit
                 // font
                 if (componentFontToMesh == NULL)
                 {
-                    Transform *textTransform = root->addChild(new Transform());
-                    componentFontToMesh = (Components::ComponentFontToMesh *)textTransform->addComponent(new Components::ComponentFontToMesh());
+                    auto textTransform = root->addChild(Transform::CreateShared());
+                    componentFontToMesh = textTransform->addNewComponent<Components::ComponentFontToMesh>();
                 }
                 fontBuilder->build(rendered_text.c_str());
                 componentFontToMesh->toMesh(*fontBuilder, true);
             }
         }
 
-        Transform *Button::getTransform()
+        std::shared_ptr<Transform> Button::getTransform()
         {
             return root;
         }

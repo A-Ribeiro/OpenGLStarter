@@ -17,15 +17,15 @@ protected:
     //clear all loaded scene
     virtual void unloadAll();
     
-    AppKit::OpenGL::GLTexture *cursorTexture;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> cursorTexture;
     AppKit::OpenGL::GLFont2Builder fontBuilder;
 
 public:
 
-    AppKit::GLEngine::Components::ComponentFontToMesh* fps;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentFontToMesh> fps;
     float f_fps;
 
-    AppKit::GLEngine::Transform* cursorTransform;
+    std::shared_ptr<AppKit::GLEngine::Transform> cursorTransform;
 
     App *app;
     AppKit::GLEngine::RenderWindowRegion *renderWindow;
