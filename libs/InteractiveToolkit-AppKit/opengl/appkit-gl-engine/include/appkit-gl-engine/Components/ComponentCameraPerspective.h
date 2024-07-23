@@ -58,10 +58,8 @@ namespace AppKit
 
                 void addLinesComponent();
 
-                void attachToTransform(std::shared_ptr<Transform> t){
-                    renderWindowRegionRef = t->renderWindowRegion;
-                }
-                
+                void attachToTransform(std::shared_ptr<Transform> t);
+                void detachFromTransform(std::shared_ptr<Transform> t);
             };
 
         }

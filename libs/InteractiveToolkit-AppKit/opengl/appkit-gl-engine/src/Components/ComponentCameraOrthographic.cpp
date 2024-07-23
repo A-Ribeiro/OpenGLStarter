@@ -269,6 +269,18 @@ namespace AppKit
             //     MathCore::vec3f mousePosition = MathCore::vec3f(app->MousePos - windowSize_2,0.0f);
             //     return mousePosition;
             // }
+
+            void ComponentCameraOrthographic::attachToTransform(std::shared_ptr<Transform> t)
+            {
+                renderWindowRegionRef = t->renderWindowRegion;
+            }
+            void ComponentCameraOrthographic::detachFromTransform(std::shared_ptr<Transform> t)
+            {
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                if (renderWindowRegion != nullptr)
+                    renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
+                renderWindowRegionRef.reset();
+            }
         }
     }
 

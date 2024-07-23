@@ -817,7 +817,7 @@ namespace AppKit
                 {
                     components.erase(components.begin() + i);
 
-                    for (size_t j = c->mTransform.size() - 1; j >= 0; j--)
+                    for (int j = (int)c->mTransform.size() - 1; j >= 0; j--)
                     {
                         if (ToShared(c->mTransform[j]).get() == this)
                         {

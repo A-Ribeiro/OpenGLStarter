@@ -206,6 +206,18 @@ namespace AppKit
 
                 lines->syncVBODynamic();
             }
+
+            void ComponentCameraPerspective::attachToTransform(std::shared_ptr<Transform> t)
+            {
+                renderWindowRegionRef = t->renderWindowRegion;
+            }
+            void ComponentCameraPerspective::detachFromTransform(std::shared_ptr<Transform> t)
+            {
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                if (renderWindowRegion != nullptr)
+                    renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraPerspective::OnViewportChanged, this);
+                renderWindowRegionRef.reset();
+            }
         }
     }
 

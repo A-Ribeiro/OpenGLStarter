@@ -98,6 +98,10 @@ namespace AppKit
                 createAuxiliaryComponents();
             }
 
+            void ComponentFontToMesh::detachFromTransform(std::shared_ptr<Transform> t) {
+
+            }
+
             void ComponentFontToMesh::start()
             {
                 createAuxiliaryComponents();

@@ -193,6 +193,12 @@ namespace AppKit
             void ComponentMeshWrapper::detachFromTransform(std::shared_ptr<Transform> t)
             {
                 t->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                if (renderWindowRegion != nullptr)
+                    renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                renderWindowRegionRef.reset();
+
             }
 
             void ComponentMeshWrapper::OnTransformVisited(std::shared_ptr<Transform> t)

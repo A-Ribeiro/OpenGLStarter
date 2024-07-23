@@ -39,6 +39,8 @@ namespace AppKit
                 void createAuxiliaryComponents();
 
                 void attachToTransform(std::shared_ptr<Transform> t);
+                void detachFromTransform(std::shared_ptr<Transform> t);
+                
                 void start();
             };
 
