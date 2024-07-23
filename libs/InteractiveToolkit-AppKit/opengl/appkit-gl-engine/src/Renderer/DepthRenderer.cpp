@@ -62,10 +62,10 @@ namespace AppKit
         }
         */
 
-        bool DepthRenderer::traverse_singlepass_render(Transform *element, void *userData)
+        bool DepthRenderer::traverse_singlepass_render(std::shared_ptr<Transform> element, void *userData)
         {
-            Components::ComponentMaterial *material = (Components::ComponentMaterial *)element->findComponent(Components::ComponentMaterial::Type);
-            if (material == NULL)
+            auto material = element->findComponent<Components::ComponentMaterial>();
+            if (material == nullptr)
                 return true;
 
             Components::ComponentCamera *camera = (Components::ComponentCamera *)userData;
@@ -88,10 +88,10 @@ namespace AppKit
             // allMeshRender(element, frankenShader);
             for (int i = 0; i < element->getComponentCount(); i++)
             {
-                Component *component = element->getComponentAt(i);
+                auto component = element->getComponentAt(i);
                 if (component->compareType(Components::ComponentMesh::Type))
                 {
-                    Components::ComponentMesh *mesh = (Components::ComponentMesh *)component;
+                    auto mesh = std::dynamic_pointer_cast<Components::ComponentMesh>(component);
                     mesh->setLayoutPointers(&depthShader);
                     mesh->draw();
                     mesh->unsetLayoutPointers(&depthShader);

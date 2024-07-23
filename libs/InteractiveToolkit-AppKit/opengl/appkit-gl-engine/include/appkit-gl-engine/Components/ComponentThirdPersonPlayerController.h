@@ -35,7 +35,7 @@ namespace AppKit
             public:
                 static const ComponentType Type;
 
-                SharedPointer<ComponentAnimationMotion> animationMotion;
+                std::shared_ptr<ComponentAnimationMotion> animationMotion;
 
                 EventCore::PressReleaseDetector walk;
                 EventCore::PressReleaseDetector run;
@@ -43,10 +43,10 @@ namespace AppKit
                 EventCore::PressReleaseDetector right;
                 EventCore::PressReleaseDetector left;
 
-                SharedPointer<Transform> cameraLook;
+                std::weak_ptr<Transform> cameraLookRef;
                 MathCore::vec4f cameraLook_bkp_relative_skinnerMesh;
                 ThirdPersonRotateType rotateTargetNode;
-                SharedPointer<ComponentSkinnedMesh> skinnedMesh; // becomes null when skinned mesh is deleted
+                std::shared_ptr<ComponentSkinnedMesh> skinnedMesh; // becomes null when skinned mesh is deleted
 
                 float turn_speed;
 
@@ -67,35 +67,40 @@ namespace AppKit
                     renderWindowRegion = NULL;
                 }
 
-                void setCameraLook(Transform *camera_look)
+                void setCameraLook(std::shared_ptr<Transform> camera_look)
                 {
-                    if (skinnedMesh == NULL)
+                    auto transform = getTransform();
+                    if (skinnedMesh == nullptr)
                     {
-                        skinnedMesh = (ComponentSkinnedMesh *)transform[0]->findComponent(ComponentSkinnedMesh::Type);
-                        if (skinnedMesh == NULL)
-                            skinnedMesh = (ComponentSkinnedMesh *)transform[0]->findComponentInChildren(ComponentSkinnedMesh::Type);
-                        ITK_ABORT(skinnedMesh == NULL, "Failed to query skinned mesh\n.");
+                        skinnedMesh = transform->findComponent<ComponentSkinnedMesh>();
+                        if (skinnedMesh == nullptr)
+                            skinnedMesh = transform->findComponentInChildren<ComponentSkinnedMesh>();
+                        ITK_ABORT(skinnedMesh == nullptr, "Failed to query skinned mesh\n.");
                     }
-                    cameraLook = camera_look;
-                    if (skinnedMesh != NULL && cameraLook != NULL)
+                    cameraLookRef = camera_look;
+                    if (skinnedMesh != nullptr && camera_look != nullptr)
                     {
-                        cameraLook_bkp_relative_skinnerMesh = skinnedMesh->transform[0]->worldToLocalMatrix() * MathCore::CVT<MathCore::vec3f>::toPtn4(cameraLook->getPosition());
+                        auto skinnedMesh_transform = skinnedMesh->getTransform();
+                        cameraLook_bkp_relative_skinnerMesh = skinnedMesh_transform->worldToLocalMatrix() * 
+                            MathCore::CVT<MathCore::vec3f>::toPtn4(camera_look->getPosition());
                         cameraLook_bkp_relative_skinnerMesh.w = 1.0f; // point
                     }
                 }
 
                 void start()
                 {
+                    auto transform = getTransform();
+
                     // AppBase* app = Engine::Instance()->app;
-                    renderWindowRegion = transform[0]->renderWindowRegion;
+                    renderWindowRegion = transform->renderWindowRegion;
                     renderWindowRegion->OnUpdate.add(&ComponentThirdPersonPlayerController::OnUpdate, this);
 
-                    animationMotion = (ComponentAnimationMotion *)transform[0]->findComponent(ComponentAnimationMotion::Type);
-                    ITK_ABORT(animationMotion == NULL, "Failed to query animationMotion\n.");
+                    animationMotion = transform->findComponent<ComponentAnimationMotion>();
+                    ITK_ABORT(animationMotion == nullptr, "Failed to query animationMotion\n.");
 
                     // animationMotion->OnMove.add(this, &ComponentThirdPersonPlayerController::OnMoveAnimation);
 
-                    setCameraLook(cameraLook);
+                    setCameraLook(ToShared(cameraLookRef));
                 }
 
                 ~ComponentThirdPersonPlayerController()
@@ -106,21 +111,18 @@ namespace AppKit
                         renderWindowRegion->OnUpdate.remove(&ComponentThirdPersonPlayerController::OnUpdate, this);
                     }
 
-                    if (animationMotion != NULL)
-                    {
-                        animationMotion = NULL;
-                    }
+                    if (animationMotion != nullptr)
+                        animationMotion = nullptr;
 
-                    if (skinnedMesh != NULL)
-                    {
-                        skinnedMesh = NULL;
-                    }
+                    if (skinnedMesh != nullptr)
+                        skinnedMesh = nullptr;
                 }
 
                 void OnMoveAnimation(float right, float up, float forward, const MathCore::vec3f &final_local_position)
                 {
+                    auto transform = getTransform();
 
-                    transform[0]->LocalPosition = final_local_position;
+                    transform->LocalPosition = final_local_position;
 
                     /*
                     switch (rotateTargetNode)
@@ -160,20 +162,26 @@ namespace AppKit
 
                     if (right.pressed ^ left.pressed)
                     {
+                        auto transform = getTransform();
+                        auto skinnedMesh_transform = skinnedMesh->getTransform();
+                        auto cameraLook = ToShared(cameraLookRef); 
+
                         switch (rotateTargetNode)
                         {
                         case ThirdPersonRotateSkinnedMesh:
                             if (right.pressed)
-                                skinnedMesh->transform[0]->LocalRotation = skinnedMesh->transform[0]->LocalRotation * MathCore::GEN<MathCore::quatf>::fromEuler(0, -MathCore::OP<float>::deg_2_rad(turn_speed) * time->deltaTime, 0);
+                                skinnedMesh_transform->LocalRotation = skinnedMesh_transform->LocalRotation * MathCore::GEN<MathCore::quatf>::fromEuler(0, -MathCore::OP<float>::deg_2_rad(turn_speed) * time->deltaTime, 0);
                             else if (left.pressed)
-                                skinnedMesh->transform[0]->LocalRotation = skinnedMesh->transform[0]->LocalRotation * MathCore::GEN<MathCore::quatf>::fromEuler(0, MathCore::OP<float>::deg_2_rad(turn_speed) * time->deltaTime, 0);
+                                skinnedMesh_transform->LocalRotation = skinnedMesh_transform->LocalRotation * MathCore::GEN<MathCore::quatf>::fromEuler(0, MathCore::OP<float>::deg_2_rad(turn_speed) * time->deltaTime, 0);
 
                             // transform cameraLook node
-                            if (cameraLook != NULL)
+                            if (cameraLook != nullptr)
                             {
                                 cameraLook->Position =
                                     MathCore::CVT<MathCore::vec4f>::toVec3(
-                                        skinnedMesh->transform[0]->localToWorldMatrix() * cameraLook_bkp_relative_skinnerMesh);
+                                        skinnedMesh_transform->localToWorldMatrix() * 
+                                        cameraLook_bkp_relative_skinnerMesh
+                                    );
 
                                 /*
                                 animator.transform.localToWorldMatrix.MultiplyPoint(
@@ -186,9 +194,9 @@ namespace AppKit
                             break;
                         case ThirdPersonRotateSelf:
                             if (right.pressed)
-                                transform[0]->LocalRotation = transform[0]->LocalRotation * MathCore::GEN<MathCore::quatf>::fromEuler(0, -MathCore::OP<float>::deg_2_rad(turn_speed) * time->deltaTime, 0);
+                                transform->LocalRotation = transform->LocalRotation * MathCore::GEN<MathCore::quatf>::fromEuler(0, -MathCore::OP<float>::deg_2_rad(turn_speed) * time->deltaTime, 0);
                             else if (left.pressed)
-                                transform[0]->LocalRotation = transform[0]->LocalRotation * MathCore::GEN<MathCore::quatf>::fromEuler(0, MathCore::OP<float>::deg_2_rad(turn_speed) * time->deltaTime, 0);
+                                transform->LocalRotation = transform->LocalRotation * MathCore::GEN<MathCore::quatf>::fromEuler(0, MathCore::OP<float>::deg_2_rad(turn_speed) * time->deltaTime, 0);
                             break;
                         }
                     }

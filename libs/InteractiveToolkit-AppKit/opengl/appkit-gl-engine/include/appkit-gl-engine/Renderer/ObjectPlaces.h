@@ -13,25 +13,25 @@ namespace AppKit
     namespace GLEngine
     {
 
-        class ObjectPlaces: public EventCore::HandleCallback
+        class ObjectPlaces : public EventCore::HandleCallback
         {
 
-            bool traverse_search_elements(Transform *element, void *userData);
+            bool traverse_search_elements(std::shared_ptr<Transform> element, void *userData);
 
         public:
-            std::vector<Components::ComponentLight *> pointLights;
-            std::vector<Components::ComponentLight *> sunLights;
-            std::vector<Components::ComponentLight *> spotLights;
+            std::vector<std::shared_ptr<Components::ComponentLight>> pointLights;
+            std::vector<std::shared_ptr<Components::ComponentLight>> sunLights;
+            std::vector<std::shared_ptr<Components::ComponentLight>> spotLights;
             // std::vector<Components::ComponentMeshWrapper *> meshWrappers;
-            std::vector<Components::ComponentParticleSystem *> sceneParticleSystem;
-            std::vector<Components::ComponentColorLine *> debugLines;
+            std::vector<std::shared_ptr<Components::ComponentParticleSystem>> sceneParticleSystem;
+            std::vector<std::shared_ptr<Components::ComponentColorLine>> debugLines;
 
-            void searchObjects(Transform *root);
+            void searchObjects(std::shared_ptr<Transform> root);
 
-            std::vector<Components::ComponentMeshWrapper *> filteredMeshWrappers;
-            void filterObjectsAABB(Transform *root, const CollisionCore::AABB<MathCore::vec3f> &aabb);
-            void filterObjectsOBB(Transform *root, const CollisionCore::OBB<MathCore::vec3f> &obb);
-            void filterObjectsFrustum(Transform *root, const CollisionCore::Frustum<MathCore::vec3f> &frustum);
+            std::vector<std::shared_ptr<Components::ComponentMeshWrapper>> filteredMeshWrappers;
+            void filterObjectsAABB(std::shared_ptr<Transform> root, const CollisionCore::AABB<MathCore::vec3f> &aabb);
+            void filterObjectsOBB(std::shared_ptr<Transform> root, const CollisionCore::OBB<MathCore::vec3f> &obb);
+            void filterObjectsFrustum(std::shared_ptr<Transform> root, const CollisionCore::Frustum<MathCore::vec3f> &frustum);
         };
 
     }

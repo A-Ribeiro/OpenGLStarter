@@ -17,14 +17,16 @@ namespace AppKit
 
             void ComponentCameraLookToNode::start()
             {
-                camera = (ComponentCameraPerspective *)transform[0]->findComponent(ComponentCameraPerspective::Type);
+                auto transform = getTransform();
+
+                camera = transform->findComponent<ComponentCameraPerspective>();
 
                 AppBase *app = Engine::Instance()->app;
                 /*
                 app->MousePos = app->MousePosCenter;//set app state do cursor center
                 app->moveMouseToScreenCenter();//queue update to screen center
                 */
-                renderWindowRegion = transform[0]->renderWindowRegion;
+                renderWindowRegion = transform->renderWindowRegion;
                 renderWindowRegion->OnLateUpdate.add(&ComponentCameraLookToNode::OnLateUpdate, this);
                 renderWindowRegion->MousePos.OnChange.add(&ComponentCameraLookToNode::OnMousePosChanged, this);
                 renderWindowRegion->WindowViewport.OnChange.add(&ComponentCameraLookToNode::OnViewportChanged, this);
@@ -37,8 +39,9 @@ namespace AppKit
 
             void ComponentCameraLookToNode::OnLateUpdate(Platform::Time *time)
             {
+                auto target = ToShared(targetRef);
 
-                if (target == NULL || camera == NULL)
+                if (target == nullptr || camera == nullptr)
                     return;
                 
                 using namespace AppKit::Window::Devices;
@@ -54,15 +57,18 @@ namespace AppKit
 
                 if (newDistance != distance_to_target)
                 {
+                    auto transform = getTransform();
+
                     distance_to_target = newDistance;
-                    MathCore::vec3f backward = transform[0]->Rotation * MathCore::vec3f(0, 0, -1);
-                    transform[0]->Position = target->Position + backward * distance_to_target;
+                    MathCore::vec3f backward = transform->Rotation * MathCore::vec3f(0, 0, -1);
+                    transform->Position = target->Position + backward * distance_to_target;
                 }
             }
 
             void ComponentCameraLookToNode::OnViewportChanged(const iRect &value, const iRect &oldValue)
             {
-                if (target != NULL && camera != NULL)
+                auto target = ToShared(targetRef);
+                if (target != nullptr && camera != nullptr)
                 {
                     // AppBase* app = Engine::Instance()->app;
                     renderWindowRegion->moveMouseToScreenCenter();
@@ -71,8 +77,8 @@ namespace AppKit
 
             void ComponentCameraLookToNode::OnMousePosChanged(const MathCore::vec2f &value, const MathCore::vec2f &oldValue)
             {
-
-                if (target == NULL || camera == NULL)
+                auto target = ToShared(targetRef);
+                if (target == nullptr || camera == nullptr)
                     return;
 
                 // AppBase* app = Engine::Instance()->app;
@@ -96,24 +102,26 @@ namespace AppKit
 
                     euler.x = MathCore::OP<float>::clamp(euler.x, -MathCore::OP<float>::deg_2_rad(90.0f), MathCore::OP<float>::deg_2_rad(90.0f));
 
-                    transform[0]->Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(euler.x, euler.y, euler.z);
+                    auto transform = getTransform();
 
-                    MathCore::vec3f backward = transform[0]->Rotation * MathCore::vec3f(0, 0, -1);
-                    transform[0]->Position = target->Position + backward * distance_to_target;
+                    transform->Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(euler.x, euler.y, euler.z);
+
+                    MathCore::vec3f backward = transform->Rotation * MathCore::vec3f(0, 0, -1);
+                    transform->Position = target->Position + backward * distance_to_target;
 
                     renderWindowRegion->moveMouseToScreenCenter();
                 }
             }
 
-            Transform *ComponentCameraLookToNode::getTarget()
+            std::shared_ptr<Transform> ComponentCameraLookToNode::getTarget()
             {
-                return target;
+                return ToShared(targetRef);
             }
 
-            void ComponentCameraLookToNode::setTarget(Transform *_transform)
+            void ComponentCameraLookToNode::setTarget(std::shared_ptr<Transform> _target)
             {
-                target = _transform;
-                if (_transform != NULL)
+                targetRef = _target;
+                if (_target != NULL)
                 {
 
                     // AppBase* app = Engine::Instance()->app;
@@ -121,12 +129,14 @@ namespace AppKit
                     renderWindowRegion->MousePos = renderWindowRegion->screenCenterF; // set app state do cursor center
                     renderWindowRegion->moveMouseToScreenCenter();                    // queue update to screen center
 
-                    transform[0]->lookAtLeftHanded(_transform);
+                    auto transform = getTransform();
 
-                    distance_to_target = MathCore::OP<MathCore::vec3f>::distance(transform[0]->Position, target->Position);
+                    transform->lookAtLeftHanded(_target);
+
+                    distance_to_target = MathCore::OP<MathCore::vec3f>::distance(transform->Position, _target->Position);
 
                     // convert the transform camera to camera move euler angles...
-                    MathCore::vec3f forward = MathCore::CVT<MathCore::vec4f>::toVec3(transform[0]->getMatrix()[2]);
+                    MathCore::vec3f forward = MathCore::CVT<MathCore::vec4f>::toVec3(transform->getMatrix()[2]);
                     MathCore::vec3f proj_y = MathCore::vec3f(forward.x, 0, forward.z);
                     float length_proj_y = MathCore::OP<MathCore::vec3f>::length(proj_y);
                     proj_y = MathCore::OP<MathCore::vec3f>::normalize(proj_y);
@@ -141,10 +151,10 @@ namespace AppKit
                     while (euler.x > MathCore::OP<float>::deg_2_rad(90.0f))
                         euler.x -= MathCore::OP<float>::deg_2_rad(360.0f);
 
-                    transform[0]->Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(euler.x, euler.y, euler.z);
+                    transform->Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(euler.x, euler.y, euler.z);
 
-                    MathCore::vec3f backward = transform[0]->Rotation * MathCore::vec3f(0, 0, -1);
-                    transform[0]->Position = target->Position + backward * distance_to_target;
+                    MathCore::vec3f backward = transform->Rotation * MathCore::vec3f(0, 0, -1);
+                    transform->Position = _target->Position + backward * distance_to_target;
                 }
             }
 

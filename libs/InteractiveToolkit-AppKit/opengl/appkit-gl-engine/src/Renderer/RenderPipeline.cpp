@@ -50,10 +50,10 @@ namespace AppKit
         {
             for (int i = 0; i < element->getComponentCount(); i++)
             {
-                Component *component = element->getComponentAt(i);
+                auto component = element->getComponentAt(i);
                 if (component->compareType(Components::ComponentMesh::Type))
                 {
-                    Components::ComponentMesh *mesh = (Components::ComponentMesh *)component;
+                    auto mesh = std::dynamic_pointer_cast<Components::ComponentMesh>(component);
                     mesh->setLayoutPointers(shader);
                     mesh->draw();
                     mesh->unsetLayoutPointers(shader);
@@ -65,10 +65,10 @@ namespace AppKit
         {
             for (int i = start_index; i < end_index; i++)
             {
-                Component *component = element->getComponentAt(i);
+                auto component = element->getComponentAt(i);
                 if (component->compareType(Components::ComponentMesh::Type))
                 {
-                    Components::ComponentMesh *mesh = (Components::ComponentMesh *)component;
+                    auto mesh = std::dynamic_pointer_cast<Components::ComponentMesh>(component);
                     mesh->setLayoutPointers(shader);
                     mesh->draw();
                     mesh->unsetLayoutPointers(shader);
@@ -193,7 +193,7 @@ namespace AppKit
                 // no shadow processing
                 for (size_t i = 0; i < lightAndShadowManager.noShadowlightList.size(); i++)
                 {
-                    Components::ComponentLight *light = lightAndShadowManager.noShadowlightList[i];
+                    auto light = lightAndShadowManager.noShadowlightList[i];
                     switch (light->type)
                     {
                     case Components::LightSun:
@@ -247,7 +247,7 @@ namespace AppKit
                 // no shadow processing
                 for (size_t i = 0; i < lightAndShadowManager.noShadowlightList.size(); i++)
                 {
-                    Components::ComponentLight *light = lightAndShadowManager.noShadowlightList[i];
+                    auto light = lightAndShadowManager.noShadowlightList[i];
                     switch (light->type)
                     {
                     case Components::LightSun:
@@ -339,158 +339,158 @@ namespace AppKit
             }
         }
 
-        bool RenderPipeline::traverse_multipass_render(Transform *element, void *userData)
+        // bool RenderPipeline::traverse_multipass_render(Transform *element, void *userData)
+        // {
+        //     Components::ComponentMaterial *material = (Components::ComponentMaterial *)element->findComponent(Components::ComponentMaterial::Type);
+        //     if (material == NULL)
+        //         return true;
+
+        //     GLRenderState *state = GLRenderState::Instance();
+        //     Components::ComponentCamera *camera = (Components::ComponentCamera *)userData;
+
+        //     MathCore::mat4f *mvp;
+        //     MathCore::mat4f *mv;
+        //     MathCore::mat4f *mvIT;
+        //     MathCore::mat4f *mvInv;
+        //     element->computeRenderMatrix(camera->viewProjection,
+        //                                  camera->view,
+        //                                  camera->viewIT,
+        //                                  camera->viewInv,
+        //                                  &mvp,
+        //                                  &mv,
+        //                                  &mvIT,
+        //                                  &mvInv);
+
+        //     switch (material->type)
+        //     {
+        //     case Components::MaterialUnlit:
+        //         state->BlendMode = material->unlit.blendMode;
+        //         state->CurrentShader = &unlitShader;
+
+        //         unlitShader.setColor(material->unlit.color);
+        //         unlitShader.setMVP(*mvp);
+
+        //         allMeshRender(element, &unlitShader);
+        //         break;
+
+        //     case Components::MaterialUnlitTexture:
+        //         state->BlendMode = material->unlit.blendMode;
+        //         state->CurrentShader = &unlit_tex_Shader;
+
+        //         unlit_tex_Shader.setColor(material->unlit.color);
+        //         unlit_tex_Shader.setTexture(0);
+        //         unlit_tex_Shader.setMVP(*mvp);
+
+        //         material->unlit.tex->active(0);
+        //         allMeshRender(element, &unlit_tex_Shader);
+        //         material->unlit.tex->deactive(0);
+
+        //         break;
+
+        //     case Components::MaterialUnlitTextureVertexColorFont:
+
+        //         state->BlendMode = material->unlit.blendMode;
+        //         state->CurrentShader = &unlit_tex_vertcolor_font_Shader;
+
+        //         unlit_tex_vertcolor_font_Shader.setColor(material->unlit.color);
+        //         unlit_tex_vertcolor_font_Shader.setTexture(0);
+        //         unlit_tex_vertcolor_font_Shader.setMVP(*mvp);
+
+        //         material->unlit.tex->active(0);
+        //         allMeshRender(element, &unlit_tex_vertcolor_font_Shader);
+        //         material->unlit.tex->deactive(0);
+
+        //         break;
+
+        //         // PBR setup
+        //     case Components::MaterialPBR:
+
+        //         state->BlendMode = BlendModeDisabled; // material->pbr.blendMode;
+        //         state->DepthTest = DepthTestLessEqual;
+
+        //         material->pbr.texAlbedo->active(0);
+        //         material->pbr.texNormal->active(1);
+
+        //         // 1st pass: ambient light
+        //         if (ambientLight.lightMode == AmbientLightMode_SkyBoxSolidColor ||
+        //             ambientLight.lightMode == AmbientLightMode_Color)
+        //         {
+        //             state->CurrentShader = &unlit_tex_Shader;
+
+        //             unlit_tex_Shader.setColor(MathCore::vec4f(material->pbr.albedoColor * ambientLightColorVec3, 1.0f));
+        //             unlit_tex_Shader.setTexture(0);
+        //             unlit_tex_Shader.setMVP(*mvp);
+
+        //             allMeshRender(element, &unlit_tex_Shader);
+        //         }
+        //         else if (ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
+        //         {
+
+        //             cubeAmbientLight_1x1->active(2);
+
+        //             state->CurrentShader = &ambientLight_tex_cube_PassShader;
+
+        //             ambientLight_tex_cube_PassShader.setColor(MathCore::vec4f(material->pbr.albedoColor, 1.0f));
+
+        //             // texture setup...
+        //             ambientLight_tex_cube_PassShader.setTexture(0);
+        //             ambientLight_tex_cube_PassShader.setTextureNormal(1);
+        //             ambientLight_tex_cube_PassShader.setTextureCubeEnvironment(2);
+
+        //             ambientLight_tex_cube_PassShader.setMVP(*mvp);
+        //             ambientLight_tex_cube_PassShader.setLocalToWorld(element->getMatrix(true));
+        //             ambientLight_tex_cube_PassShader.setLocalToWorld_it(element->getMatrixInverseTranspose(true));
+
+        //             allMeshRender(element, &ambientLight_tex_cube_PassShader);
+
+        //             cubeAmbientLight_1x1->deactive(2);
+        //         }
+
+        //         // 2nd pass: sun light
+        //         state->BlendMode = BlendModeAdd; // material->pbr.blendMode;
+        //         state->DepthWrite = false;
+        //         state->CurrentShader = &directionalLightPassShader;
+
+        //         directionalLightPassShader.setTexture(0);
+        //         directionalLightPassShader.setTextureNormal(1);
+
+        //         directionalLightPassShader.setMVP(*mvp);
+        //         directionalLightPassShader.setLocalToWorld(element->getMatrix(true));
+        //         directionalLightPassShader.setLocalToWorld_it(element->getMatrixInverseTranspose(true));
+
+        //         directionalLightPassShader.setMaterialAlbedoColor(material->pbr.albedoColor);
+        //         directionalLightPassShader.setMaterialRoughness(material->pbr.roughness);
+        //         directionalLightPassShader.setMaterialMetallic(material->pbr.metallic);
+
+        //         directionalLightPassShader.setCameraPosWorld(camera->transform[0]->getPosition(true));
+
+        //         for (size_t i = 0; i < objectPlaces.sunLights.size(); i++)
+        //         {
+        //             Components::ComponentLight *sunLight = objectPlaces.sunLights[i];
+
+        //             directionalLightPassShader.setLightDirWorld(sunLight->sun.worldDirection);
+        //             directionalLightPassShader.setLightRadiance(sunLight->sun.finalIntensity);
+
+        //             allMeshRender(element, &directionalLightPassShader);
+        //         }
+
+        //         material->pbr.texNormal->deactive(1);
+        //         material->pbr.texAlbedo->deactive(0);
+
+        //         state->DepthWrite = true;
+
+        //         break;
+        //     default:
+        //         break;
+        //     }
+
+        //     return true;
+        // }
+
+        bool RenderPipeline::traverse_singlepass_render(std::shared_ptr<Transform> element, void *userData)
         {
-            Components::ComponentMaterial *material = (Components::ComponentMaterial *)element->findComponent(Components::ComponentMaterial::Type);
-            if (material == NULL)
-                return true;
 
-            GLRenderState *state = GLRenderState::Instance();
-            Components::ComponentCamera *camera = (Components::ComponentCamera *)userData;
-
-            MathCore::mat4f *mvp;
-            MathCore::mat4f *mv;
-            MathCore::mat4f *mvIT;
-            MathCore::mat4f *mvInv;
-            element->computeRenderMatrix(camera->viewProjection,
-                                         camera->view,
-                                         camera->viewIT,
-                                         camera->viewInv,
-                                         &mvp,
-                                         &mv,
-                                         &mvIT,
-                                         &mvInv);
-
-            switch (material->type)
-            {
-            case Components::MaterialUnlit:
-                state->BlendMode = material->unlit.blendMode;
-                state->CurrentShader = &unlitShader;
-
-                unlitShader.setColor(material->unlit.color);
-                unlitShader.setMVP(*mvp);
-
-                allMeshRender(element, &unlitShader);
-                break;
-
-            case Components::MaterialUnlitTexture:
-                state->BlendMode = material->unlit.blendMode;
-                state->CurrentShader = &unlit_tex_Shader;
-
-                unlit_tex_Shader.setColor(material->unlit.color);
-                unlit_tex_Shader.setTexture(0);
-                unlit_tex_Shader.setMVP(*mvp);
-
-                material->unlit.tex->active(0);
-                allMeshRender(element, &unlit_tex_Shader);
-                material->unlit.tex->deactive(0);
-
-                break;
-
-            case Components::MaterialUnlitTextureVertexColorFont:
-
-                state->BlendMode = material->unlit.blendMode;
-                state->CurrentShader = &unlit_tex_vertcolor_font_Shader;
-
-                unlit_tex_vertcolor_font_Shader.setColor(material->unlit.color);
-                unlit_tex_vertcolor_font_Shader.setTexture(0);
-                unlit_tex_vertcolor_font_Shader.setMVP(*mvp);
-
-                material->unlit.tex->active(0);
-                allMeshRender(element, &unlit_tex_vertcolor_font_Shader);
-                material->unlit.tex->deactive(0);
-
-                break;
-
-                // PBR setup
-            case Components::MaterialPBR:
-
-                state->BlendMode = BlendModeDisabled; // material->pbr.blendMode;
-                state->DepthTest = DepthTestLessEqual;
-
-                material->pbr.texAlbedo->active(0);
-                material->pbr.texNormal->active(1);
-
-                // 1st pass: ambient light
-                if (ambientLight.lightMode == AmbientLightMode_SkyBoxSolidColor ||
-                    ambientLight.lightMode == AmbientLightMode_Color)
-                {
-                    state->CurrentShader = &unlit_tex_Shader;
-
-                    unlit_tex_Shader.setColor(MathCore::vec4f(material->pbr.albedoColor * ambientLightColorVec3, 1.0f));
-                    unlit_tex_Shader.setTexture(0);
-                    unlit_tex_Shader.setMVP(*mvp);
-
-                    allMeshRender(element, &unlit_tex_Shader);
-                }
-                else if (ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
-                {
-
-                    cubeAmbientLight_1x1->active(2);
-
-                    state->CurrentShader = &ambientLight_tex_cube_PassShader;
-
-                    ambientLight_tex_cube_PassShader.setColor(MathCore::vec4f(material->pbr.albedoColor, 1.0f));
-
-                    // texture setup...
-                    ambientLight_tex_cube_PassShader.setTexture(0);
-                    ambientLight_tex_cube_PassShader.setTextureNormal(1);
-                    ambientLight_tex_cube_PassShader.setTextureCubeEnvironment(2);
-
-                    ambientLight_tex_cube_PassShader.setMVP(*mvp);
-                    ambientLight_tex_cube_PassShader.setLocalToWorld(element->getMatrix(true));
-                    ambientLight_tex_cube_PassShader.setLocalToWorld_it(element->getMatrixInverseTranspose(true));
-
-                    allMeshRender(element, &ambientLight_tex_cube_PassShader);
-
-                    cubeAmbientLight_1x1->deactive(2);
-                }
-
-                // 2nd pass: sun light
-                state->BlendMode = BlendModeAdd; // material->pbr.blendMode;
-                state->DepthWrite = false;
-                state->CurrentShader = &directionalLightPassShader;
-
-                directionalLightPassShader.setTexture(0);
-                directionalLightPassShader.setTextureNormal(1);
-
-                directionalLightPassShader.setMVP(*mvp);
-                directionalLightPassShader.setLocalToWorld(element->getMatrix(true));
-                directionalLightPassShader.setLocalToWorld_it(element->getMatrixInverseTranspose(true));
-
-                directionalLightPassShader.setMaterialAlbedoColor(material->pbr.albedoColor);
-                directionalLightPassShader.setMaterialRoughness(material->pbr.roughness);
-                directionalLightPassShader.setMaterialMetallic(material->pbr.metallic);
-
-                directionalLightPassShader.setCameraPosWorld(camera->transform[0]->getPosition(true));
-
-                for (size_t i = 0; i < objectPlaces.sunLights.size(); i++)
-                {
-                    Components::ComponentLight *sunLight = objectPlaces.sunLights[i];
-
-                    directionalLightPassShader.setLightDirWorld(sunLight->sun.worldDirection);
-                    directionalLightPassShader.setLightRadiance(sunLight->sun.finalIntensity);
-
-                    allMeshRender(element, &directionalLightPassShader);
-                }
-
-                material->pbr.texNormal->deactive(1);
-                material->pbr.texAlbedo->deactive(0);
-
-                state->DepthWrite = true;
-
-                break;
-            default:
-                break;
-            }
-
-            return true;
-        }
-
-        bool RenderPipeline::traverse_singlepass_render(Transform *element, void *userData)
-        {
-
-            Components::ComponentMaterial *material = NULL;
+            Components::ComponentMaterial *material = nullptr;
             int start_index = 0;
             int end_index = 0;
             bool camera_set = false;
@@ -504,7 +504,7 @@ namespace AppKit
 
             for (int i = 0; i < element->getComponentCount(); i++)
             {
-                Component *component = element->getComponentAt(i);
+                auto component = element->getComponentAt(i);
                 if (component->compareType(Components::ComponentMaterial::Type))
                 {
                     end_index = i;
@@ -526,7 +526,7 @@ namespace AppKit
                         // setup material and render
                         materialSetupAndRender(
                             material,
-                            element,
+                            element.get(),
                             camera,
                             start_index, end_index,
                             mvp,
@@ -534,7 +534,7 @@ namespace AppKit
                             mvIT,
                             mvInv);
                     }
-                    material = (Components::ComponentMaterial *)component;
+                    material = (Components::ComponentMaterial *)component.get();
                     start_index = i + 1;
                 }
             }
@@ -558,7 +558,7 @@ namespace AppKit
                 // setup material and render
                 materialSetupAndRender(
                     material,
-                    element,
+                    element.get(),
                     camera,
                     start_index, end_index,
                     mvp,
@@ -741,65 +741,65 @@ namespace AppKit
                 delete depthRenderer;
         }
 
-        void RenderPipeline::runMultiPassPipeline(Transform *root, Components::ComponentCamera *camera, bool clear)
-        {
+        // void RenderPipeline::runMultiPassPipeline(Transform *root, Components::ComponentCamera *camera, bool clear)
+        // {
 
-            ITK_ABORT(!AppKit::GLEngine::Engine::Instance()->sRGBCapable, "Error: Cannot run this pipeline on non-sRGB capable device.\n");
+        //     ITK_ABORT(!AppKit::GLEngine::Engine::Instance()->sRGBCapable, "Error: Cannot run this pipeline on non-sRGB capable device.\n");
 
-            root->resetVisited();
-            root->preComputeTransforms();
+        //     root->resetVisited();
+        //     root->preComputeTransforms();
 
-            camera->precomputeViewProjection(true);
+        //     camera->precomputeViewProjection(true);
 
-            if (clear)
-            {
-                if (cubeSkyBox == NULL)
-                {
-                    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-                }
-                else
-                {
-                    glClear(GL_DEPTH_BUFFER_BIT);
-                    cubeSkyBox->draw(camera->view, camera->projection);
-                    // cubeSkyBox->drawAnotherCube(camera->view, camera->projection, cubeAmbientLight_1x1);
-                }
-            }
-            // light setup
-            if (
-                (ambientLight.lightMode == AmbientLightMode_SkyBoxSolidColor ||
-                 ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture) &&
-                cubeSkyBox != NULL)
-            {
-                // ambientLightColor = MathCore::vec4f(cubeSkyBox->cubeMap.colorEstimation,1.0f);
-                ambientLightColorVec3 = cubeSkyBox->cubeMap.colorEstimation;
-                ambientLightColorVec3 = ResourceHelper::vec3ColorGammaToLinear(ambientLightColorVec3);
-            }
-            else
-                ambientLightColorVec3 = ambientLight.color;
-            // ambientLightColor = MathCore::vec4f(ambientLight.color, 1.0f);
+        //     if (clear)
+        //     {
+        //         if (cubeSkyBox == NULL)
+        //         {
+        //             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        //         }
+        //         else
+        //         {
+        //             glClear(GL_DEPTH_BUFFER_BIT);
+        //             cubeSkyBox->draw(camera->view, camera->projection);
+        //             // cubeSkyBox->drawAnotherCube(camera->view, camera->projection, cubeAmbientLight_1x1);
+        //         }
+        //     }
+        //     // light setup
+        //     if (
+        //         (ambientLight.lightMode == AmbientLightMode_SkyBoxSolidColor ||
+        //          ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture) &&
+        //         cubeSkyBox != NULL)
+        //     {
+        //         // ambientLightColor = MathCore::vec4f(cubeSkyBox->cubeMap.colorEstimation,1.0f);
+        //         ambientLightColorVec3 = cubeSkyBox->cubeMap.colorEstimation;
+        //         ambientLightColorVec3 = ResourceHelper::vec3ColorGammaToLinear(ambientLightColorVec3);
+        //     }
+        //     else
+        //         ambientLightColorVec3 = ambientLight.color;
+        //     // ambientLightColor = MathCore::vec4f(ambientLight.color, 1.0f);
 
-            // ambientLightColorVec3 = MathCore::CVT<MathCore::vec4f>::toVec3(ambientLightColor);
+        //     // ambientLightColorVec3 = MathCore::CVT<MathCore::vec4f>::toVec3(ambientLightColor);
 
-            // ambientLightColorVec3 =
+        //     // ambientLightColorVec3 =
 
-            objectPlaces.searchObjects(root);
+        //     objectPlaces.searchObjects(root);
 
-            // SearchSpecialObjects(root);
+        //     // SearchSpecialObjects(root);
 
-            for (size_t i = 0; i < objectPlaces.sunLights.size(); i++)
-                objectPlaces.sunLights[i]->postProcessing_computeLightParameters();
+        //     for (size_t i = 0; i < objectPlaces.sunLights.size(); i++)
+        //         objectPlaces.sunLights[i]->postProcessing_computeLightParameters();
 
-            root->traversePreOrder_DepthFirst(
-                EventCore::CallbackWrapper(&RenderPipeline::traverse_multipass_render, this),
-                camera);
-        }
+        //     root->traversePreOrder_DepthFirst(
+        //         EventCore::CallbackWrapper(&RenderPipeline::traverse_multipass_render, this),
+        //         camera);
+        // }
 
-        bool __compare__particle__system__reverse__(const Components::ComponentParticleSystem *a, const Components::ComponentParticleSystem *b)
+        bool __compare__particle__system__reverse__(const std::shared_ptr<Components::ComponentParticleSystem> a, const std::shared_ptr<Components::ComponentParticleSystem> b)
         {
             return (a->distance_to_camera > b->distance_to_camera);
         }
 
-        void RenderPipeline::runSinglePassPipeline(Transform *root, Components::ComponentCamera *camera, bool clear)
+        void RenderPipeline::runSinglePassPipeline(std::shared_ptr<Transform> root, std::shared_ptr<Components::ComponentCamera> camera, bool clear)
         {
 
             // bool srgb = AppKit::GLEngine::Engine::Instance()->sRGBCapable;
@@ -854,7 +854,7 @@ namespace AppKit
                 CollisionCore::AABB<MathCore::vec3f> scene_aabb;
                 for (int i = 0; i < objectPlaces.filteredMeshWrappers.size(); i++)
                 {
-                    Components::ComponentMeshWrapper *meshWrapper = objectPlaces.filteredMeshWrappers[i];
+                    auto meshWrapper = objectPlaces.filteredMeshWrappers[i];
                     if (i == 0)
                         scene_aabb = meshWrapper->getAABB();
                     else
@@ -876,7 +876,7 @@ namespace AppKit
             }
             else if (camera->compareType(Components::ComponentCameraOrthographic::Type))
             {
-                Components::ComponentCameraOrthographic *ortho = (Components::ComponentCameraOrthographic *)camera;
+                auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(camera);
 
                 MathCore::vec3f translation = MathCore::CVT<MathCore::vec4f>::toVec3(ortho->projection[3]);
                 MathCore::vec3f size = 1.0f / MathCore::vec3f(ortho->projection.a1, ortho->projection.b2, ortho->projection.c3);
@@ -928,7 +928,7 @@ namespace AppKit
                 OPENGL_CMD(glEnableVertexAttribArray(posAttribLocation));
                 OPENGL_CMD(glVertexAttribPointer(posAttribLocation, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &sunVertex[0]));
 
-                Components::ComponentCameraPerspective *perspCamera = (Components::ComponentCameraPerspective *)camera;
+                auto perspCamera = std::dynamic_pointer_cast<Components::ComponentCameraPerspective>(camera);
 
                 MathCore::mat4f projection = MathCore::GEN<MathCore::mat4f>::projection_perspective_lh_negative_one(
                     perspCamera->fovDegrees,                                         // fov
@@ -940,11 +940,13 @@ namespace AppKit
                 MathCore::mat4f VP = projection * perspCamera->view;
                 for (size_t j = 0; j < objectPlaces.sunLights.size(); j++)
                 {
-                    Components::ComponentLight *sunLight = objectPlaces.sunLights[j];
+                    auto sunLight = objectPlaces.sunLights[j];
 
                     if (!sunLight->sun.render_after_skybox)
                         continue;
-                    MathCore::vec3f dir = sunLight->transform[0]->getRotation(true) * MathCore::vec3f(0, 0, -1);
+                    auto sunLight_transform = sunLight->getTransform();
+
+                    MathCore::vec3f dir = sunLight_transform->getRotation(true) * MathCore::vec3f(0, 0, -1);
                     MathCore::vec3f sunPos = dir * sunLight->sun.distance;
                     MathCore::mat4f model =
                         MathCore::GEN<MathCore::mat4f>::translateHomogeneous(sunPos) *
@@ -968,14 +970,14 @@ namespace AppKit
 
             for (int i = 0; i < objectPlaces.filteredMeshWrappers.size(); i++)
             {
-                Components::ComponentMeshWrapper *meshWrapper = objectPlaces.filteredMeshWrappers[i];
+                auto meshWrapper = objectPlaces.filteredMeshWrappers[i];
 
                 if (perspective)
                 {
                     lightAndShadowManager.computeShadowParametersForMesh(meshWrapper, shaderShadowAlgorithm != ShaderShadowAlgorithm_None, shaderShadowAlgorithm);
                 }
 
-                traverse_singlepass_render(meshWrapper->transform[0], camera);
+                traverse_singlepass_render(meshWrapper->getTransform(), camera.get());
             }
 
             /*
@@ -1006,7 +1008,7 @@ namespace AppKit
                 for (size_t i = 0; i < objectPlaces.debugLines.size(); i++)
                 {
 
-                    Components::ComponentColorLine *colorLine = objectPlaces.debugLines[i];
+                    auto colorLine = objectPlaces.debugLines[i];
 
                     /*
                     debugLines[i]->transform[0]->computeRenderMatrix(camera->viewProjection,
@@ -1040,13 +1042,15 @@ namespace AppKit
                 depthRenderer->method1_copy_from_current_framebuffer();
                 // depthRenderer->method2_render_just_depth( root, camera );
 
+                auto camera_transform = camera->getTransform();
+
                 // sort and render all particle system
-                MathCore::vec3f cameraPosition = camera->transform[0]->getPosition(true);
-                MathCore::vec3f cameraDirection = camera->transform[0]->getRotation(true) * MathCore::vec3f(0, 0, 1);
+                MathCore::vec3f cameraPosition = camera_transform->getPosition(true);
+                MathCore::vec3f cameraDirection = camera_transform->getRotation(true) * MathCore::vec3f(0, 0, 1);
 
                 for (int i = 0; i < objectPlaces.sceneParticleSystem.size(); i++)
                 {
-                    Components::ComponentParticleSystem *particleSystem = objectPlaces.sceneParticleSystem[i];
+                    auto particleSystem = objectPlaces.sceneParticleSystem[i];
                     particleSystem->distance_to_camera = MathCore::OP<MathCore::vec3f>::sqrDistance(particleSystem->aabb_center, cameraPosition);
                 }
 
@@ -1054,7 +1058,7 @@ namespace AppKit
 
                 for (int i = 0; i < objectPlaces.sceneParticleSystem.size(); i++)
                 {
-                    Components::ComponentParticleSystem *particleSystem = objectPlaces.sceneParticleSystem[i];
+                    auto particleSystem = objectPlaces.sceneParticleSystem[i];
                     particleSystem->sortPositions(cameraPosition, cameraDirection);
                 }
 
@@ -1065,7 +1069,7 @@ namespace AppKit
                 // draw particles...
                 for (int i = 0; i < objectPlaces.sceneParticleSystem.size(); i++)
                 {
-                    Components::ComponentParticleSystem *particleSystem = objectPlaces.sceneParticleSystem[i];
+                    auto particleSystem = objectPlaces.sceneParticleSystem[i];
 
                     if (particleSystem->soft)
                         particleSystemRenderer.drawSoftDepthComponent24(
@@ -1079,7 +1083,7 @@ namespace AppKit
             }
         }
 
-        bool RenderPipeline::traverse_depth_render(Transform *element, void *userData)
+        bool RenderPipeline::traverse_depth_render(std::shared_ptr<Transform> element, void *userData)
         {
 
             Components::ComponentMaterial *material = NULL;
@@ -1096,7 +1100,7 @@ namespace AppKit
 
             for (int i = 0; i < element->getComponentCount(); i++)
             {
-                Component *component = element->getComponentAt(i);
+                auto component = element->getComponentAt(i);
                 if (component->compareType(Components::ComponentMaterial::Type))
                 {
                     end_index = i;
@@ -1120,7 +1124,7 @@ namespace AppKit
                         // setup material and render
                         materialSetupAndRender_depth(
                             material,
-                            element,
+                            element.get(),
                             camera,
                             start_index, end_index,
                             mvp,
@@ -1128,7 +1132,7 @@ namespace AppKit
                             mvIT,
                             mvInv);
                     }
-                    material = (Components::ComponentMaterial *)component;
+                    material = (Components::ComponentMaterial *)component.get();
                     start_index = i + 1;
                 }
             }
@@ -1154,7 +1158,7 @@ namespace AppKit
                 // setup material and render
                 materialSetupAndRender_depth(
                     material,
-                    element,
+                    element.get(),
                     camera,
                     start_index, end_index,
                     mvp,
@@ -1166,7 +1170,7 @@ namespace AppKit
             return true;
         }
 
-        void RenderPipeline::renderDepth(Transform *root, Components::ComponentCamera *camera)
+        void RenderPipeline::renderDepth(std::shared_ptr<Transform> root, std::shared_ptr<Components::ComponentCamera> camera)
         {
 
             GLRenderState *state = GLRenderState::Instance();
@@ -1177,7 +1181,7 @@ namespace AppKit
 
             root->traversePreOrder_DepthFirst(
                 EventCore::CallbackWrapper(&RenderPipeline::traverse_depth_render, this),
-                camera);
+                camera.get());
         }
 
         void RenderPipeline::materialSetupAndRender_depth(

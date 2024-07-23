@@ -3,7 +3,7 @@
 #include <appkit-gl-engine/Engine.h>
 #include <appkit-gl-engine/AppBase/RenderWindowRegion.h>
 
-#include <appkit-gl-engine/SharedPointer/SharedPointerDatabase.h>
+// #include <appkit-gl-engine/SharedPointer/SharedPointerDatabase.h>
 
 // int stat_num_visited;
 // int stat_num_recalculated;
@@ -794,10 +794,12 @@ namespace AppKit
             // ITK_ABORT(c->transform!=NULL,"cannot add same component to two or more transforms\n.");
             components.push_back(c);
 
-            c->mTransform.push_back(this);
+            auto this_self = this->self();
+
+            c->mTransform.push_back(this_self);
             // c->transform = this;
 
-            c->attachToTransform(this->self());
+            c->attachToTransform(this_self);
             return c;
         }
 
@@ -811,7 +813,7 @@ namespace AppKit
 
                     for (size_t j = c->mTransform.size() - 1; j >= 0; j--)
                     {
-                        if (c->mTransform[j] == this)
+                        if (ToShared(c->mTransform[j]).get() == this)
                         {
                             c->mTransform.erase(c->mTransform.begin() + j);
                             c->detachFromTransform(this->self());
@@ -837,11 +839,11 @@ namespace AppKit
                 std::shared_ptr<Component> &result = components[i];
                 components.erase(components.begin() + i);
 
-                for (size_t j = result->transform.size() - 1; j >= 0; j--)
+                for (size_t j = result->getTransformCount() - 1; j >= 0; j--)
                 {
-                    if (result->transform[j] == this)
+                    if (result->getTransform(j).get() == this)
                     {
-                        result->transform.erase(result->transform.begin() + j);
+                        result->mTransform.erase(result->mTransform.begin() + j);
                         result->detachFromTransform(this->self());
                         break;
                     }
@@ -1064,7 +1066,7 @@ namespace AppKit
 
         Transform::~Transform()
         {
-            SharedPointerDatabase::Instance()->notifyDeletion(this);
+            // SharedPointerDatabase::Instance()->notifyDeletion(this);
             renderWindowRegion = NULL;
         }
 

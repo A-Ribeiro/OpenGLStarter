@@ -21,8 +21,8 @@ namespace AppKit
             renderPipeline = _renderPipeline;
             resourceHelper = _resourceHelper;
 
-            camera = NULL;
-            root = NULL;
+            // camera = nullptr;
+            // root = nullptr;
         }
 
         void SceneBase::load()

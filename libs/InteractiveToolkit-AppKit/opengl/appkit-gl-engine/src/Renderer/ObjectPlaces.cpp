@@ -37,7 +37,7 @@ namespace AppKit
             }
         };
 
-        bool ObjectPlaces::traverse_search_elements(Transform *element, void *userData)
+        bool ObjectPlaces::traverse_search_elements(std::shared_ptr<Transform> element, void *userData)
         {
 
             ObjectPlaces_FilterOptions *filter = (ObjectPlaces_FilterOptions *)userData;
@@ -49,17 +49,17 @@ namespace AppKit
 
             for (int i = 0; i < element->getComponentCount(); i++)
             {
-                Component *component = element->getComponentAt(i);
+                auto component = element->getComponentAt(i);
                 if (addLight && component->compareType(Components::ComponentLight::Type))
                 {
-                    Components::ComponentLight *light = (Components::ComponentLight *)component;
+                    auto light = std::dynamic_pointer_cast<Components::ComponentLight>(component);
                     if (light->type == Components::LightSun)
                         sunLights.push_back(light);
                 }
                 else if (addParticleSystem && component->compareType(Components::ComponentParticleSystem::Type))
                 {
 
-                    Components::ComponentParticleSystem *particleSystem = (Components::ComponentParticleSystem *)component;
+                    auto particleSystem = std::dynamic_pointer_cast<Components::ComponentParticleSystem>(component);
 
                     bool add = true;
                     if (filter->filter_opt == ObjectPlacesFilterOpt_AABB)
@@ -81,7 +81,7 @@ namespace AppKit
                 else if (addMeshWrapper && component->compareType(Components::ComponentMeshWrapper::Type))
                 {
 
-                    Components::ComponentMeshWrapper *meshWrapper = (Components::ComponentMeshWrapper *)component;
+                    auto meshWrapper = std::dynamic_pointer_cast<Components::ComponentMeshWrapper>(component);
 
                     bool add = true;
                     if (filter->filter_opt == ObjectPlacesFilterOpt_AABB)
@@ -102,14 +102,14 @@ namespace AppKit
                 }
                 else if (addDebugLines && component->compareType(Components::ComponentColorLine::Type))
                 {
-                    debugLines.push_back((Components::ComponentColorLine *)component);
+                    debugLines.push_back(std::dynamic_pointer_cast<Components::ComponentColorLine>(component));
                 }
             }
 
             return true;
         }
 
-        void ObjectPlaces::searchObjects(Transform *root)
+        void ObjectPlaces::searchObjects(std::shared_ptr<Transform> root)
         {
             pointLights.clear();
             sunLights.clear();
@@ -128,7 +128,7 @@ namespace AppKit
                 &opt);
         }
 
-        void ObjectPlaces::filterObjectsAABB(Transform *root, const CollisionCore::AABB<MathCore::vec3f> &aabb)
+        void ObjectPlaces::filterObjectsAABB(std::shared_ptr<Transform> root, const CollisionCore::AABB<MathCore::vec3f> &aabb)
         {
             // lights.clear();
             // debugLines.clear();
@@ -147,7 +147,7 @@ namespace AppKit
                 &opt);
         }
 
-        void ObjectPlaces::filterObjectsOBB(Transform *root, const CollisionCore::OBB<MathCore::vec3f> &obb)
+        void ObjectPlaces::filterObjectsOBB(std::shared_ptr<Transform> root, const CollisionCore::OBB<MathCore::vec3f> &obb)
         {
             // lights.clear();
             // debugLines.clear();
@@ -166,7 +166,7 @@ namespace AppKit
                 &opt);
         }
 
-        void ObjectPlaces::filterObjectsFrustum(Transform *root, const CollisionCore::Frustum<MathCore::vec3f> &frustum)
+        void ObjectPlaces::filterObjectsFrustum(std::shared_ptr<Transform> root, const CollisionCore::Frustum<MathCore::vec3f> &frustum)
         {
             // lights.clear();
             // debugLines.clear();

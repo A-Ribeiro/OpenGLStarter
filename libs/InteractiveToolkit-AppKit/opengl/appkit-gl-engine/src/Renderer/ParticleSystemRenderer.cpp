@@ -26,8 +26,8 @@ namespace AppKit
         }
 
         void ParticleSystemRenderer::drawDebugPoints(
-            const Components::ComponentCamera *camera,
-            const Components::ComponentParticleSystem *particleSystem,
+            std::shared_ptr<Components::ComponentCamera> camera,
+            std::shared_ptr<Components::ComponentParticleSystem> particleSystem,
             float size)
         {
 
@@ -72,8 +72,8 @@ namespace AppKit
             OPENGL_CMD(glDisableVertexAttribArray(debugLinesShader_AttribLocation_Pos));
         }
 
-        void ParticleSystemRenderer::draw(const Components::ComponentCamera *camera,
-                                          const Components::ComponentParticleSystem *particleSystem)
+        void ParticleSystemRenderer::draw(std::shared_ptr<Components::ComponentCamera> camera,
+                                          std::shared_ptr<Components::ComponentParticleSystem> particleSystem)
         {
 
             if (particleSystem->texture == NULL)
@@ -155,9 +155,9 @@ namespace AppKit
             state->DepthWrite = true;
         }
 
-        void ParticleSystemRenderer::drawSoftDepthComponent24(const Components::ComponentCamera *camera,
-                                                              const Components::ComponentParticleSystem *particleSystem,
-                                                              const AppKit::OpenGL::GLTexture *depthComponent24)
+        void ParticleSystemRenderer::drawSoftDepthComponent24(std::shared_ptr<Components::ComponentCamera> camera,
+                                                              std::shared_ptr<Components::ComponentParticleSystem> particleSystem,
+                                                              AppKit::OpenGL::GLTexture *depthComponent24)
         {
 
             if (particleSystem->texture == NULL)
@@ -205,7 +205,9 @@ namespace AppKit
             softShader.setDepthTextureComponent24(1);
             softShader.setColor(particleSystem->textureColor);
 
-            iRect s = particleSystem->transform[0]->renderWindowRegion->CameraViewport;
+            auto particleSystem_transform = particleSystem->getTransform();
+
+            iRect s = particleSystem_transform->renderWindowRegion->CameraViewport;
             MathCore::vec2f ss = MathCore::vec2f(s.w, s.h);
             softShader.setScreenSize(ss);
 
@@ -219,7 +221,7 @@ namespace AppKit
 
             if (camera->compareType(Components::ComponentCameraPerspective::Type))
             {
-                Components::ComponentCameraPerspective *perspect = (Components::ComponentCameraPerspective *)camera;
+                auto perspect = std::dynamic_pointer_cast<Components::ComponentCameraPerspective>(camera);
                 softShader.setCamera_FMinusN_FPlusN_FTimesNTimes2_N(MathCore::vec4f(
                     perspect->farPlane - perspect->nearPlane,
                     perspect->farPlane + perspect->nearPlane,
@@ -228,7 +230,7 @@ namespace AppKit
             }
             else if (camera->compareType(Components::ComponentCameraOrthographic::Type))
             {
-                Components::ComponentCameraOrthographic *ortho = (Components::ComponentCameraOrthographic *)camera;
+                auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(camera);
                 softShader.setCamera_FMinusN_FPlusN_FTimesNTimes2_N(MathCore::vec4f(
                     ortho->farPlane - ortho->nearPlane,
                     ortho->farPlane + ortho->nearPlane,

@@ -21,7 +21,7 @@ namespace AppKit
         }
 
         void ShadowCache::setFromLight(
-            Components::ComponentLight *_light,
+            std::shared_ptr<Components::ComponentLight> _light,
             const CollisionCore::Sphere<MathCore::vec3f> &scene_sphere,
             const CollisionCore::Sphere<MathCore::vec3f> &camera_sphere)
         {
@@ -34,7 +34,10 @@ namespace AppKit
             {
                 // sun light case
                 shadowCacheShape = ShadowCacheOBB;
-                MathCore::quatf sunDirection = light->transform[0]->getRotation(true);
+
+                auto light_transform = light->getTransform();
+
+                MathCore::quatf sunDirection = light_transform->getRotation(true);
                 MathCore::vec3f front = sunDirection * MathCore::vec3f(0, 0, 1);
 
                 float scene_center_projected = MathCore::OP<MathCore::vec3f>::dot(scene_sphere.center, front);
@@ -99,7 +102,7 @@ namespace AppKit
             camera_sphere = CollisionCore::Sphere<MathCore::vec3f>::fromOBB(camera_frustum.obb);
         }
 
-        void LightAndShadowManager::setSceneRoot(Transform *root)
+        void LightAndShadowManager::setSceneRoot(std::shared_ptr<Transform> root)
         {
             scene_root = root;
         }
@@ -126,7 +129,7 @@ namespace AppKit
         }
 
         void LightAndShadowManager::createLightAssociations(
-            Transform *root,
+            std::shared_ptr<Transform> root,
             ObjectPlaces *visibleObjects,
             int maxLightPerObject)
         {
@@ -140,12 +143,12 @@ namespace AppKit
             MathCore::vec3f center;
             for (size_t i = 0; i < visibleObjects->filteredMeshWrappers.size(); i++)
             {
-                Components::ComponentMeshWrapper *meshWrapper = visibleObjects->filteredMeshWrappers[i];
+                auto meshWrapper = visibleObjects->filteredMeshWrappers[i];
                 //...
             }
         }
 
-        void LightAndShadowManager::computeShadowParametersForMesh(Components::ComponentMeshWrapper *meshWrapper,
+        void LightAndShadowManager::computeShadowParametersForMesh(std::shared_ptr<Components::ComponentMeshWrapper> meshWrapper,
                                                                    bool use_shadow,
                                                                    ShaderShadowAlgorithmEnum shaderShadowAlgorithm)
         {
@@ -160,7 +163,7 @@ namespace AppKit
             // add all sun lights
             for (size_t j = 0; j < visibleObjects->sunLights.size(); j++)
             {
-                Components::ComponentLight *sunLight = visibleObjects->sunLights[j];
+                auto sunLight = visibleObjects->sunLights[j];
 
                 if (!sunLight->cast_shadow || !use_shadow)
                 {
@@ -168,7 +171,7 @@ namespace AppKit
                     continue;
                 }
 
-                it = shadowCacheDic.find(sunLight);
+                it = shadowCacheDic.find(sunLight.get());
 
                 if (it != shadowCacheDic.end())
                 {
@@ -177,7 +180,7 @@ namespace AppKit
                 }
 
                 ShadowCache *shadowCache = shadowCachePool.create(true);
-                shadowCacheDic[sunLight] = shadowCache;
+                shadowCacheDic[sunLight.get()] = shadowCache;
                 shadowCache->setFromLight(sunLight, scene_sphere, camera_sphere);
 
                 // render the depth map...
@@ -240,8 +243,8 @@ namespace AppKit
                 // render the depth buffer
                 for (size_t k = 0; k < auxObjPlaces.filteredMeshWrappers.size(); k++)
                 {
-                    Components::ComponentMeshWrapper *meshWrapper = auxObjPlaces.filteredMeshWrappers[k];
-                    renderPipeline->traverse_depth_render(meshWrapper->transform[0], shadowCache);
+                    auto meshWrapper = auxObjPlaces.filteredMeshWrappers[k];
+                    renderPipeline->traverse_depth_render(meshWrapper->getTransform(), shadowCache);
                 }
 
                 state->ColorWrite = ColorWriteAll;

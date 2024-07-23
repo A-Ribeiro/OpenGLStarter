@@ -19,8 +19,8 @@ namespace AppKit
         {
 
         protected:
-            Components::ComponentCamera *camera;
-            AppKit::GLEngine::Transform *root;
+            std::shared_ptr<Components::ComponentCamera> camera;
+            std::shared_ptr<AppKit::GLEngine::Transform> root;
 
             // to load skybox, textures, cubemaps, 3DModels and setup materials
             virtual void loadResources() = 0;

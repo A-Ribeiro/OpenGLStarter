@@ -29,7 +29,7 @@ namespace AppKit
 
             // void OnWindowSizeChange(EventCore::Property<MathCore::vec2i> *prop);
 
-            bool traverse_singlepass_render(Transform *element, void *userData);
+            bool traverse_singlepass_render(std::shared_ptr<Transform> element, void *userData);
 
         public:
             // Debug info

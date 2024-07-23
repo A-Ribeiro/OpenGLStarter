@@ -33,7 +33,7 @@ namespace AppKit
         {
             for (int i = componentList.size() - 1; i >= 0; i--)
             {
-                if (componentList[i]->transform.size() > 0)
+                if (componentList[i]->getTransformCount() > 0)
                 {
                     componentList[i]->start();
                     componentList.erase(componentList.begin() + i);

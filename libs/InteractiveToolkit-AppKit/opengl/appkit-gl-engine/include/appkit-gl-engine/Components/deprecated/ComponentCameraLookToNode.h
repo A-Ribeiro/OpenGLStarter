@@ -8,7 +8,7 @@
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
 
-#include <appkit-gl-engine/SharedPointer/SharedPointer.h>
+// #include <appkit-gl-engine/SharedPointer/SharedPointer.h>
 
 #include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
 
@@ -25,15 +25,15 @@ namespace AppKit
 
                 RenderWindowRegion *renderWindowRegion;
 
-                SharedPointer<ComponentCameraPerspective> camera;
+                std::shared_ptr<ComponentCameraPerspective> camera;
                 EventCore::PressReleaseDetector up, down;
                 MathCore::vec3f euler;
                 float distance_to_target;
 
-                SharedPointer<Transform> target;
+                std::weak_ptr<Transform> targetRef;
 
-                Transform *getTarget();
-                void setTarget(Transform *transform);
+                std::shared_ptr<Transform> getTarget();
+                void setTarget(std::shared_ptr<Transform> transform);
 
             protected:
                 void start();
@@ -42,7 +42,7 @@ namespace AppKit
                 void OnMousePosChanged(const MathCore::vec2f &value, const MathCore::vec2f &oldValue);
 
             public:
-                EventCore::VirtualProperty<Transform *> Target;
+                EventCore::VirtualProperty<std::shared_ptr<Transform>> Target;
 
                 float zoomSpeed;
                 float angleSpeed;

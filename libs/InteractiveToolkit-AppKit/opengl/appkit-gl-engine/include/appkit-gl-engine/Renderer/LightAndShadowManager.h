@@ -38,7 +38,7 @@ namespace AppKit
         public:
             static ComponentType Type;
 
-            Components::ComponentLight *light;
+            std::shared_ptr<Components::ComponentLight> light;
             AppKit::OpenGL::GLTexture depthTexture;
 
             // mat4 mvp;
@@ -54,7 +54,7 @@ namespace AppKit
             ~ShadowCache();
 
             void setFromLight(
-                Components::ComponentLight *_light,
+                std::shared_ptr<Components::ComponentLight> _light,
                 const CollisionCore::Sphere<MathCore::vec3f> &scene_sphere,
                 const CollisionCore::Sphere<MathCore::vec3f> &camera_sphere);
         };
@@ -79,7 +79,8 @@ namespace AppKit
             CollisionCore::Sphere<MathCore::vec3f> scene_sphere;
             CollisionCore::Frustum<MathCore::vec3f> camera_frustum;
             CollisionCore::Sphere<MathCore::vec3f> camera_sphere;
-            Transform *scene_root;
+            
+            std::shared_ptr<Transform> scene_root;
 
             ObjectPlaces *visibleObjects;
 
@@ -91,21 +92,21 @@ namespace AppKit
 
             void setSceneAABB(const CollisionCore::AABB<MathCore::vec3f> &_aabb);
             void setMainCameraFrustum(const CollisionCore::Frustum<MathCore::vec3f> &_frustum);
-            void setSceneRoot(Transform *root);
+            void setSceneRoot(std::shared_ptr<Transform> root);
             void setVisibleObjects(ObjectPlaces *_visibleObjects);
             void setRenderPipeline(RenderPipeline *_renderPipeline);
 
             void clearCache();
 
             void createLightAssociations(
-                Transform *root,
+                std::shared_ptr<Transform> root,
                 ObjectPlaces *visibleObjects,
                 int maxLightPerObject);
 
             // output light information after processing...
-            std::vector<Components::ComponentLight *> noShadowlightList; // filled with all near lights
+            std::vector<std::shared_ptr<Components::ComponentLight> > noShadowlightList; // filled with all near lights
             std::vector<ShadowCache *> shadowLightList;                  // can be null...
-            void computeShadowParametersForMesh(Components::ComponentMeshWrapper *meshWrapper,
+            void computeShadowParametersForMesh(std::shared_ptr<Components::ComponentMeshWrapper> meshWrapper,
                                                 bool use_shadow,
                                                 ShaderShadowAlgorithmEnum shaderShadowAlgorithm);
         };

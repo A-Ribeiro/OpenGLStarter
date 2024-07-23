@@ -119,12 +119,12 @@ namespace AppKit
                 const MathCore::mat4f *mvIT,
                 const MathCore::mat4f *mvInv);
 
-            bool traverse_multipass_render(Transform *element, void *userData);
+            // bool traverse_multipass_render(Transform *element, void *userData);
 
-            bool traverse_singlepass_render(Transform *element, void *userData);
+            bool traverse_singlepass_render(std::shared_ptr<Transform> element, void *userData);
 
         public:
-            bool traverse_depth_render(Transform *element, void *userData);
+            bool traverse_depth_render(std::shared_ptr<Transform> element, void *userData);
 
         public:
             // public skybox setup variables...
@@ -150,11 +150,11 @@ namespace AppKit
 
             ~RenderPipeline();
 
-            void runMultiPassPipeline(Transform *root, Components::ComponentCamera *camera, bool clear = true);
+            // void runMultiPassPipeline(Transform *root, Components::ComponentCamera *camera, bool clear = true);
 
-            void runSinglePassPipeline(Transform *root, Components::ComponentCamera *camera, bool clear = true);
+            void runSinglePassPipeline(std::shared_ptr<Transform> root, std::shared_ptr<Components::ComponentCamera> camera, bool clear = true);
 
-            void renderDepth(Transform *root, Components::ComponentCamera *camera);
+            void renderDepth(std::shared_ptr<Transform> root, std::shared_ptr<Components::ComponentCamera> camera);
         };
 
     }
