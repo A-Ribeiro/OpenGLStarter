@@ -187,7 +187,7 @@ namespace AppKit
 
                 AppKit::Window::InputManager *inputManager = nullptr;
                 if (app != nullptr)
-                    inputManager = &app->screenRenderWindow.inputManager;
+                    inputManager = &app->screenRenderWindow->inputManager;
                 window->forwardWindowEventsToInputManager(alwaysDraw, inputManager);
 
                 if (app != nullptr && app->canExitApplication)

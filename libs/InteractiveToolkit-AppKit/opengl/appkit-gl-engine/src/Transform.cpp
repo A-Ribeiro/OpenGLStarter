@@ -78,6 +78,10 @@ namespace AppKit
             auto node = children[index];
             children.erase(children.begin() + index);
 
+            //node->setParent(nullptr);
+            node->mParent.reset();// = std::shared_ptr<Transform>(nullptr);
+            node->visited = false;
+
             // removeMapName(node);
 
             return node;
@@ -837,10 +841,10 @@ namespace AppKit
         {
             if (i >= 0 && i < components.size())
             {
-                std::shared_ptr<Component> &result = components[i];
+                std::shared_ptr<Component> result = components[i];
                 components.erase(components.begin() + i);
 
-                for (size_t j = result->getTransformCount() - 1; j >= 0; j--)
+                for (int j = result->getTransformCount() - 1; j >= 0; j--)
                 {
                     if (result->getTransform(j).get() == this)
                     {
@@ -1062,16 +1066,21 @@ namespace AppKit
 
             renderDirty = true;
 
-            renderWindowRegion = &AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+            renderWindowRegion = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
         }
 
         Transform::~Transform()
         {
             // SharedPointerDatabase::Instance()->notifyDeletion(this);
-            renderWindowRegion = nullptr;
+            for(int i= getChildCount()-1;i>=0;i--)
+                removeChild(i);
+            for(int i= getComponentCount()-1;i>=0;i--)
+                removeComponentAt(i);
+
+            renderWindowRegion.reset();// = nullptr;
         }
 
-        std::shared_ptr<Transform> Transform::setRenderWindowRegion(RenderWindowRegion *renderWindowRegion)
+        std::shared_ptr<Transform> Transform::setRenderWindowRegion(std::shared_ptr<RenderWindowRegion> renderWindowRegion)
         {
             this->renderWindowRegion = renderWindowRegion;
             return this->self();

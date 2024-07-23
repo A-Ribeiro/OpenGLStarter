@@ -17,7 +17,11 @@ namespace AppKit
             if (completeOnNextFrame)
             {
                 AppBase *app = Engine::Instance()->app;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
                 renderWindowRegion->OnUpdate.remove(&Fade::setColor, this);
+
                 if (reset_draw_visible)
                     draw_visible = false;
                 isFading = false;
@@ -51,11 +55,11 @@ namespace AppKit
             vertex.push_back(MathCore::vec3f(1, 1, 0));
         }
 
-        Fade::Fade(Platform::Time *_time, AppKit::GLEngine::RenderWindowRegion *renderWindowRegion)
+        Fade::Fade(Platform::Time *_time, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindowRegion)
         {
-            this->renderWindowRegion = renderWindowRegion;
+            this->renderWindowRegionRef = renderWindowRegion;
             if (renderWindowRegion == nullptr)
-                this->renderWindowRegion = &AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+                this->renderWindowRegionRef = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
 
             time = _time;
             createScreenVertex();
@@ -67,11 +71,14 @@ namespace AppKit
         Fade::~Fade()
         {
             // AppBase *app = Engine::Instance()->app;
+            auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
             renderWindowRegion->OnUpdate.remove(&Fade::setColor, this);
         }
 
         void Fade::fadeIn(float _sec, const EventCore::Callback<void()> &_OnEndCall)
         {
+            auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
             if (!isFading)
                 oldTimeScale = time->timeScale;
@@ -95,6 +102,7 @@ namespace AppKit
 
         void Fade::fadeOut(float _sec, const EventCore::Callback<void()> &_OnEndCall)
         {
+            auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
             if (!isFading)
                 oldTimeScale = time->timeScale;

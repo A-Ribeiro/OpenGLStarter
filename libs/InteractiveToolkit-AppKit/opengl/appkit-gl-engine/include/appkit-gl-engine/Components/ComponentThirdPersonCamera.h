@@ -39,7 +39,7 @@ namespace AppKit
 
                 std::weak_ptr<Transform> Player_ForwardRef;
 
-                RenderWindowRegion *renderWindowRegion;
+                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
                 // Transform *debugSphere;
                 // Transform *debugSphere2;
@@ -52,7 +52,7 @@ namespace AppKit
                     pos_speed = 2.0f;
                     rotacional_speed_y = 50.0f;
                     rotacional_speed_x = 10.0f;
-                    renderWindowRegion = nullptr;
+                    renderWindowRegionRef.reset();
                 }
 
                 void start()
@@ -60,7 +60,8 @@ namespace AppKit
                     auto transform = getTransform();
 
                     // AppBase* app = Engine::Instance()->app;
-                    renderWindowRegion = transform->renderWindowRegion;
+                    renderWindowRegionRef = transform->renderWindowRegion;
+                    auto renderWindowRegion = ToShared(renderWindowRegionRef);
                     renderWindowRegion->OnLateUpdate.add(&ComponentThirdPersonCamera::OnLateUpdate, this);
 
                     transform_position_target = transform->Position;
@@ -125,6 +126,8 @@ namespace AppKit
                 ~ComponentThirdPersonCamera()
                 {
                     // AppBase* app = Engine::Instance()->app;
+                    auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
                     if (renderWindowRegion != nullptr)
                     {
                         renderWindowRegion->OnLateUpdate.remove(&ComponentThirdPersonCamera::OnLateUpdate, this);

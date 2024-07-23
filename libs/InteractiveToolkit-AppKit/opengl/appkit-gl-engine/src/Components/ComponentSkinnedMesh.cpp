@@ -469,7 +469,8 @@ namespace AppKit
                 // AppBase* app = Engine::Instance()->app;
                 auto transform = getTransform();
 
-                renderWindowRegion = transform->renderWindowRegion;
+                renderWindowRegionRef = transform->renderWindowRegion;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
                 renderWindowRegion->OnPreUpdate.add(&ComponentSkinnedMesh::OnPreUpdate, this);
             }
 
@@ -487,6 +488,8 @@ namespace AppKit
             ComponentSkinnedMesh::~ComponentSkinnedMesh()
             {
                 // AppBase* app = Engine::Instance()->app;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
                 if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->OnPreUpdate.remove(&ComponentSkinnedMesh::OnPreUpdate, this);

@@ -19,7 +19,7 @@ namespace AppKit
             class ComponentCameraPerspective : public ComponentCamera
             {
 
-                RenderWindowRegion *renderWindowRegion;
+                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
                 void OnUpdateCameraFloatParameter(const float &value, const float &oldValue);
                 void OnViewportChanged(const iRect &value, const iRect &oldValue);
@@ -59,7 +59,7 @@ namespace AppKit
                 void addLinesComponent();
 
                 void attachToTransform(Transform *t){
-                    renderWindowRegion = t->renderWindowRegion;
+                    renderWindowRegionRef = t->renderWindowRegion;
                 }
                 
             };

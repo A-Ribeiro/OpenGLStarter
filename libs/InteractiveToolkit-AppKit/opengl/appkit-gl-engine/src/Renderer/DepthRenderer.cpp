@@ -169,7 +169,7 @@ namespace AppKit
         void DepthRenderer::method1_copy_from_current_framebuffer(RenderWindowRegion *renderWindowRegion)
         {
             if (renderWindowRegion == nullptr)
-                renderWindowRegion = &AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+                renderWindowRegion = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow.get();
             // screen or FBO?
             if (renderWindowRegion->fbo == nullptr)
             {
@@ -200,7 +200,9 @@ namespace AppKit
 
         void DepthRenderer::method2_render_just_depth(Transform *root, Components::ComponentCamera *camera)
         {
-            fbo.setSize(root->renderWindowRegion->CameraViewport.c_ptr()->w, root->renderWindowRegion->CameraViewport.c_ptr()->h);
+            auto renderWindowRegion = ToShared(root->renderWindowRegion);
+
+            fbo.setSize(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
             fbo.enable();
 
             GLRenderState *state = GLRenderState::Instance();

@@ -26,8 +26,8 @@ namespace AppKit
             componentFontToMesh = nullptr;
 
             // resize(AppKit::GLEngine::Engine::Instance()->app->WindowSize);
-
-            resize(MathCore::vec2i(root->renderWindowRegion->CameraViewport.c_ptr()->w, root->renderWindowRegion->CameraViewport.c_ptr()->h));
+            auto renderWindowRegion = ToShared(root->renderWindowRegion);
+            resize(MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h));
 
             selected = false;
         }
@@ -49,7 +49,8 @@ namespace AppKit
         void Button::updateText(const std::string &newText)
         {
             rendered_text = newText;
-            resize(MathCore::vec2i(root->renderWindowRegion->CameraViewport.c_ptr()->w, root->renderWindowRegion->CameraViewport.c_ptr()->h));
+            auto renderWindowRegion = ToShared(root->renderWindowRegion);
+            resize(MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h));
             // resize(AppKit::GLEngine::Engine::Instance()->app->WindowSize);
         }
 

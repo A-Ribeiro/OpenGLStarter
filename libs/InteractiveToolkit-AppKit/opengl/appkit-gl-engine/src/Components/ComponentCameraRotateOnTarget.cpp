@@ -60,7 +60,9 @@ namespace AppKit
                 // AppBase* app = Engine::Instance()->app;
                 auto transform = getTransform();
 
-                renderWindowRegion = transform->renderWindowRegion;
+                renderWindowRegionRef = transform->renderWindowRegion;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 renderWindowRegion->MousePosRelatedToCenterNormalized.OnChange.add(&ComponentCameraRotateOnTarget::OnNormalizedMousePosChanged, this);
 
@@ -101,6 +103,8 @@ namespace AppKit
                         return;
                     // AppBase* app = Engine::Instance()->app;
 
+                    auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
                     lastPosition = renderWindowRegion->localCoordToNormalizedAppCoordRelativeToCenter(mouseEvent.position);
                     // time->timeScale = 0.0f;
                     mouseMoving = true;
@@ -123,6 +127,8 @@ namespace AppKit
                     return;
 
                 // AppBase* app = Engine::Instance()->app;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 if (!enabled)
                 {
@@ -167,12 +173,14 @@ namespace AppKit
                 rotation_x_deg_min = -22.0f;
                 rotation_x_deg_max = 47.0f;
 
-                renderWindowRegion = nullptr;
+                renderWindowRegionRef.reset();
             }
 
             ComponentCameraRotateOnTarget::~ComponentCameraRotateOnTarget()
             {
                 // AppBase* app = Engine::Instance()->app;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 if (renderWindowRegion != nullptr)
                 {

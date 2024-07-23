@@ -14,7 +14,7 @@ class InnerViewport: public EventCore::HandleCallback
 
 public:
     App *app;
-    RenderWindowRegion renderWindow;
+    std::shared_ptr<RenderWindowRegion> renderWindow;
     Fade *fade;
 
     SceneGUI *sceneGUI;

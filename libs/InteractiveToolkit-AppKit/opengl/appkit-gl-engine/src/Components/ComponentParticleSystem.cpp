@@ -92,6 +92,8 @@ namespace AppKit
                     {
                         // AppBase* app = Engine::Instance()->app;
 
+                        auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
                         if (renderWindowRegion != nullptr)
                         {
                             renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
@@ -150,12 +152,14 @@ namespace AppKit
 
                 soft = true;
 
-                renderWindowRegion = nullptr;
+                renderWindowRegionRef.reset();
             }
 
             ComponentParticleSystem::~ComponentParticleSystem()
             {
                 // AppBase* app = Engine::Instance()->app;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 if (renderWindowRegion != nullptr)
                 {
@@ -216,7 +220,8 @@ namespace AppKit
                 // AppBase* app = Engine::Instance()->app;
                 auto transform = getTransform();
 
-                renderWindowRegion = transform->renderWindowRegion;
+                renderWindowRegionRef = transform->renderWindowRegion;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
                 renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
 
@@ -245,7 +250,8 @@ namespace AppKit
                 }
 
                 // AppBase* app = Engine::Instance()->app;
-                renderWindowRegion = transform->renderWindowRegion;
+                renderWindowRegionRef = transform->renderWindowRegion;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
                 renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
 

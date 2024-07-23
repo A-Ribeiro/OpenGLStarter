@@ -132,7 +132,7 @@ namespace AppKit
             z_render_buffer = nullptr;
             screenCenterI = MathCore::vec2i(0, 0);
 
-            parent = nullptr;
+            parentRef.reset();// = nullptr;
 
             inputManager.onMouseEvent.add(&RenderWindowRegion::onMouseEvent, this);
             inputManager.onWindowEvent.add(&RenderWindowRegion::onWindowEvent, this);
@@ -215,19 +215,19 @@ namespace AppKit
         // {
         //     setViewport(viewport);
         // }
-        RenderWindowRegion *RenderWindowRegion::setWindowViewport(const AppKit::GLEngine::iRect &viewport)
+        std::shared_ptr<RenderWindowRegion>RenderWindowRegion::setWindowViewport(const AppKit::GLEngine::iRect &viewport)
         {
             // this->viewport = viewport;
 
             WindowViewport = viewport;
 
-            return this;
+            return this->self();
         }
 
-        RenderWindowRegion *RenderWindowRegion::createFBO()
+        std::shared_ptr<RenderWindowRegion>RenderWindowRegion::createFBO()
         {
             if (fbo != nullptr)
-                return this;
+                return this->self();
             
             int w = CameraViewport.c_ptr()->w;
             int h = CameraViewport.c_ptr()->h;
@@ -249,9 +249,9 @@ namespace AppKit
 
             fbo->disable();
 
-            return this;
+            return this->self();
         }
-        RenderWindowRegion *RenderWindowRegion::setEventForwardingEnabled(bool v)
+        std::shared_ptr<RenderWindowRegion>RenderWindowRegion::setEventForwardingEnabled(bool v)
         {
             forward_events = v;
             // this->handle_window_close = handle_window_close;
@@ -277,21 +277,21 @@ namespace AppKit
             // if (force_viewport_from_real_window_size)
             //     forceViewportFromRealWindowSize();
 
-            return this;
+            return this->self();
         }
 
-        RenderWindowRegion *RenderWindowRegion::setHandleWindowCloseButtonEnabled(bool v)
+        std::shared_ptr<RenderWindowRegion>RenderWindowRegion::setHandleWindowCloseButtonEnabled(bool v)
         {
             this->handle_window_close = v;
-            return this;
+            return this->self();
         }
 
-        RenderWindowRegion *RenderWindowRegion::setViewportFromRealWindowSizeEnabled(bool v)
+        std::shared_ptr<RenderWindowRegion>RenderWindowRegion::setViewportFromRealWindowSizeEnabled(bool v)
         {
             this->force_viewport_from_real_window_size = v;
             if (force_viewport_from_real_window_size)
                 forceViewportFromRealWindowSize();
-            return this;
+            return this->self();
         }
 
         void RenderWindowRegion::forceViewportFromRealWindowSize()
@@ -306,6 +306,7 @@ namespace AppKit
 
         void RenderWindowRegion::forceMouseToCoord(const MathCore::vec2i &iPos) const
         {
+            auto parent = ToShared(parentRef);
 
             if (parent == nullptr && force_viewport_from_real_window_size)
             {
@@ -331,23 +332,25 @@ namespace AppKit
         {
             return (int)innerWindowList.size();
         }
-        RenderWindowRegion *RenderWindowRegion::getChild(int at) const
+        std::shared_ptr<RenderWindowRegion>RenderWindowRegion::getChild(int at) const
         {
             return innerWindowList[at];
         }
-        void RenderWindowRegion::addChild(RenderWindowRegion *child)
+        void RenderWindowRegion::addChild(std::shared_ptr<RenderWindowRegion>child)
         {
-            ITK_ABORT(child->parent != nullptr, "This child has been added as child of another render window");
+            auto child_parent = ToShared(child->parentRef);
+            ITK_ABORT(child_parent != nullptr, "This child has been added as child of another render window");
+
             innerWindowList.push_back(child);
-            child->parent = this;
+            child->parentRef = this->self();
         }
-        void RenderWindowRegion::removeChild(RenderWindowRegion *child)
+        void RenderWindowRegion::removeChild(std::shared_ptr<RenderWindowRegion>child)
         {
             for (size_t i = 0; i < innerWindowList.size(); i++)
             {
                 if (innerWindowList[i] == child)
                 {
-                    child->parent = nullptr;
+                    child->parentRef.reset();// = nullptr;
                     innerWindowList.erase(innerWindowList.begin() + i);
                     return;
                 }
@@ -356,7 +359,7 @@ namespace AppKit
         void RenderWindowRegion::clearChildren()
         {
             for (size_t i = 0; i < innerWindowList.size(); i++)
-                innerWindowList[i]->parent = nullptr;
+                innerWindowList[i]->parentRef.reset();// = nullptr;
             innerWindowList.clear();
         }
 
@@ -371,14 +374,14 @@ namespace AppKit
             int offset_x = 0;
             int offset_y = 0;
 
-            RenderWindowRegion *parent_walker = parent;
+            std::shared_ptr<RenderWindowRegion> parent_walker = ToShared(parentRef);
             while (parent_walker != nullptr)
             {
 
                 offset_x += parent_walker->WindowViewport.c_ptr()->x;
                 offset_y += parent_walker->WindowViewport.c_ptr()->y;
 
-                parent_walker = parent_walker->parent;
+                parent_walker = ToShared(parent_walker->parentRef);
             }
 
             MathCore::vec2i result;

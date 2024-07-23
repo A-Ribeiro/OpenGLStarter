@@ -22,7 +22,9 @@ namespace AppKit
                 auto camera = transform->findComponent<ComponentCameraPerspective>();
                 cameraRef = camera;
 
-                renderWindowRegion = transform->renderWindowRegion;
+                renderWindowRegionRef = transform->renderWindowRegion;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 renderWindowRegion->MousePos = renderWindowRegion->screenCenterF; // set app state do cursor center
                 renderWindowRegion->moveMouseToScreenCenter();                    // queue update to screen center
@@ -104,6 +106,8 @@ namespace AppKit
                 // AppBase* app = Engine::Instance()->app;
                 // app->moveMouseToScreenCenter();
 
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
                 renderWindowRegion->moveMouseToScreenCenter();
             }
 
@@ -115,6 +119,8 @@ namespace AppKit
 
                 if (camera == nullptr)
                     return;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 MathCore::vec2f pos = value;
 
@@ -146,12 +152,13 @@ namespace AppKit
                 forwardSpeed = 1.0f;
                 strafeSpeed = 1.0f;
                 angleSpeed = MathCore::OP<float>::deg_2_rad(0.10f);
-                renderWindowRegion = nullptr;
+                renderWindowRegionRef.reset();
             }
 
             ComponentCameraMove::~ComponentCameraMove()
             {
                 // AppBase* app = Engine::Instance()->app;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 if (renderWindowRegion != nullptr)
                 {

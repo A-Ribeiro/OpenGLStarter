@@ -21,7 +21,7 @@ namespace AppKit
             class ComponentCameraRotateOnTarget : public Component
             {
 
-                RenderWindowRegion *renderWindowRegion;
+                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
                 float distanceRotation;
                 MathCore::vec3f euler;

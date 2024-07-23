@@ -54,9 +54,9 @@ App::App()
 
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
 
-    screenRenderWindow.setHandleWindowCloseButtonEnabled(true);
-    screenRenderWindow.setViewportFromRealWindowSizeEnabled(true);
-    screenRenderWindow.setEventForwardingEnabled(true);
+    screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
+    screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
+    screenRenderWindow->setEventForwardingEnabled(true);
 }
 
 void App::load()
@@ -80,7 +80,7 @@ void App::load()
 
     ImGuiManager::Instance()->Initialize(
         window,
-        &this->screenRenderWindow.inputManager,
+        &this->screenRenderWindow->inputManager,
         ITKCommon::Path::getDocumentsPath("Milky Way Studio", "imgui_editor"));
     
 
@@ -110,9 +110,9 @@ void App::draw()
 
     StartEventManager::Instance()->processAllComponentsWithTransform();
 
-    screenRenderWindow.OnPreUpdate(&time);
-    screenRenderWindow.OnUpdate(&time);
-    screenRenderWindow.OnLateUpdate(&time);
+    screenRenderWindow->OnPreUpdate(&time);
+    screenRenderWindow->OnUpdate(&time);
+    screenRenderWindow->OnLateUpdate(&time);
 
     // pre process all scene graphs
     /*if (sceneJesusCross != nullptr)
@@ -120,7 +120,7 @@ void App::draw()
     if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();*/
 
-    screenRenderWindow.OnAfterGraphPrecompute(&time);
+    screenRenderWindow->OnAfterGraphPrecompute(&time);
 
     /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();
@@ -130,14 +130,14 @@ void App::draw()
     GLRenderState *renderState = GLRenderState::Instance();
     
     renderState->ClearColor = vec4f(0.0f, 0.0f, 0.0f, 1.0f);
-    renderState->Viewport = AppKit::GLEngine::iRect(screenRenderWindow.CameraViewport.c_ptr()->w,screenRenderWindow.CameraViewport.c_ptr()->h);
+    renderState->Viewport = AppKit::GLEngine::iRect(screenRenderWindow->CameraViewport.c_ptr()->w,screenRenderWindow->CameraViewport.c_ptr()->h);
 
     renderState->FrontFace = FrontFaceCCW;
     renderState->DepthTest = DepthTestDisabled;
 
     ImGuiManager::Instance()->RenderAndLogic(window, &time);
 
-    screenRenderWindow.OnAfterOverlayDraw(&time);
+    screenRenderWindow->OnAfterOverlayDraw(&time);
 
     fade->draw();
     bool ctrl_pressed = Keyboard::isPressed(KeyCode::LControl) || Keyboard::isPressed(KeyCode::RControl);

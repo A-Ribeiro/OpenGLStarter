@@ -32,6 +32,8 @@ namespace AppKit
             // screenRenderWindow.setHandleWindowCloseButtonEnabled(true);
             // screenRenderWindow.setViewportFromRealWindowSizeEnabled(true);
             // //screenRenderWindow.setEventForwardingEnabled(true);
+
+            screenRenderWindow = RenderWindowRegion::CreateShared();
         }
 
         AppBase::~AppBase()

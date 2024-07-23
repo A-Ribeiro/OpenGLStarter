@@ -1,6 +1,5 @@
 #pragma once
 
-
 // #include <aRibeiroCore/aRibeiroCore.h>
 // #include <aRibeiroPlatform/aRibeiroPlatform.h>
 // #include <appkit-gl-base/opengl-wrapper.h>
@@ -31,7 +30,7 @@ namespace AppKit
 
         // could be an FBO, or a Screen
 
-        class RenderWindowRegion: public EventCore::HandleCallback
+        class RenderWindowRegion : public EventCore::HandleCallback
         {
             bool forward_events;
             bool handle_window_close;
@@ -40,10 +39,13 @@ namespace AppKit
             float normalization_factor;
 
             // translate the events to the inner viewports...
-            std::vector<RenderWindowRegion *> innerWindowList;
-            RenderWindowRegion *parent;
+            std::vector<std::shared_ptr<RenderWindowRegion>> innerWindowList;
 
-            void OnWindowViewportChanged(const AppKit::GLEngine::iRect &value,const AppKit::GLEngine::iRect &oldValue);
+            std::weak_ptr<RenderWindowRegion> parentRef;
+
+            std::weak_ptr<RenderWindowRegion> mSelf;
+
+            void OnWindowViewportChanged(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue);
 
             // void viewport_set_internal(const AppKit::GLEngine::iRect &viewport);
 
@@ -61,7 +63,6 @@ namespace AppKit
             void onSensorEvent(const AppKit::Window::SensorEvent &evt);
 
         public:
-        
             AppKit::OpenGL::GLTexture *color_buffer;
             // AppKit::OpenGL::GLTexture *z_buffer;
             AppKit::OpenGL::GLRenderBuffer *z_render_buffer;
@@ -71,7 +72,7 @@ namespace AppKit
             // Variables
             //
 
-            MathCore::vec2f screenCenterF;        // Mouse FPS controller helper
+            MathCore::vec2f screenCenterF; // Mouse FPS controller helper
             MathCore::vec2i screenCenterI; // used for FPS like mouse move
 
             float viewportScaleFactor;
@@ -83,8 +84,8 @@ namespace AppKit
             //
             // EventCore::Property<MathCore::vec2i> WindowSize;
 
-            EventCore::Property<AppKit::GLEngine::iRect> WindowViewport;// before apply viewportScaleFactor
-            EventCore::Property<AppKit::GLEngine::iRect> CameraViewport;// after apply viewportScaleFactor 
+            EventCore::Property<AppKit::GLEngine::iRect> WindowViewport; // before apply viewportScaleFactor
+            EventCore::Property<AppKit::GLEngine::iRect> CameraViewport; // after apply viewportScaleFactor
             EventCore::Property<MathCore::vec2f> MousePos;
             EventCore::Property<MathCore::vec2f> MousePosRelatedToCenter;
             EventCore::Property<MathCore::vec2f> MousePosRelatedToCenterNormalized;
@@ -97,32 +98,32 @@ namespace AppKit
 
             AppKit::Window::InputManager inputManager;
 
-            EventCore::Event<void(Platform::Time*)> OnPreUpdate;
-            EventCore::Event<void(Platform::Time*)> OnUpdate;
-            EventCore::Event<void(Platform::Time*)> OnLateUpdate;
+            EventCore::Event<void(Platform::Time *)> OnPreUpdate;
+            EventCore::Event<void(Platform::Time *)> OnUpdate;
+            EventCore::Event<void(Platform::Time *)> OnLateUpdate;
 
-            EventCore::Event<void(Platform::Time*)> OnAfterGraphPrecompute;
+            EventCore::Event<void(Platform::Time *)> OnAfterGraphPrecompute;
 
-            EventCore::Event<void(Platform::Time*)> OnAfterOverlayDraw;
+            EventCore::Event<void(Platform::Time *)> OnAfterOverlayDraw;
 
             RenderWindowRegion();
             ~RenderWindowRegion();
 
             AppKit::GLEngine::iRect getWindowViewport() const;
 
-            RenderWindowRegion *setWindowViewport(const AppKit::GLEngine::iRect &viewport);
-            RenderWindowRegion *createFBO();
-            RenderWindowRegion *setEventForwardingEnabled(bool v);
-            RenderWindowRegion *setHandleWindowCloseButtonEnabled(bool v);
-            RenderWindowRegion *setViewportFromRealWindowSizeEnabled(bool v);
+            std::shared_ptr<RenderWindowRegion> setWindowViewport(const AppKit::GLEngine::iRect &viewport);
+            std::shared_ptr<RenderWindowRegion> createFBO();
+            std::shared_ptr<RenderWindowRegion> setEventForwardingEnabled(bool v);
+            std::shared_ptr<RenderWindowRegion> setHandleWindowCloseButtonEnabled(bool v);
+            std::shared_ptr<RenderWindowRegion> setViewportFromRealWindowSizeEnabled(bool v);
 
             void forceViewportFromRealWindowSize();
             void forceMouseToCoord(const MathCore::vec2i &iPos) const;
 
             int getChildCount() const;
-            RenderWindowRegion *getChild(int at) const;
-            void addChild(RenderWindowRegion *child);
-            void removeChild(RenderWindowRegion *child);
+            std::shared_ptr<RenderWindowRegion> getChild(int at) const;
+            void addChild(std::shared_ptr<RenderWindowRegion> child);
+            void removeChild(std::shared_ptr<RenderWindowRegion> child);
             void clearChildren();
 
             void moveMouseToScreenCenter() const;
@@ -139,6 +140,17 @@ namespace AppKit
 
             bool isLocalInsideViewport(const MathCore::vec2i &input) const;
 
+            inline std::shared_ptr<RenderWindowRegion> self()
+            {
+                return std::shared_ptr<RenderWindowRegion>(mSelf);
+            }
+
+            static inline std::shared_ptr<RenderWindowRegion> CreateShared()
+            {
+                auto result = std::make_shared<RenderWindowRegion>();
+                result->mSelf = std::weak_ptr<RenderWindowRegion>(result);
+                return result;
+            }
         };
 
     }

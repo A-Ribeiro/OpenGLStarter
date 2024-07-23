@@ -207,7 +207,9 @@ namespace AppKit
 
             auto particleSystem_transform = particleSystem->getTransform();
 
-            iRect s = particleSystem_transform->renderWindowRegion->CameraViewport;
+            auto renderWindowRegion = ToShared(particleSystem_transform->renderWindowRegion);
+
+            iRect s = renderWindowRegion->CameraViewport;
             MathCore::vec2f ss = MathCore::vec2f(s.w, s.h);
             softShader.setScreenSize(ss);
 

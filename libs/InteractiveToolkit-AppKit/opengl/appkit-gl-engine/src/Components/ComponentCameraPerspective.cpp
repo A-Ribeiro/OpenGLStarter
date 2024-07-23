@@ -25,7 +25,7 @@ namespace AppKit
                 leftHanded = true;
                 rightHanded = false;
 
-                renderWindowRegion = nullptr;
+                renderWindowRegionRef.reset();
 
                 fovDegrees.OnChange.add(&ComponentCameraPerspective::OnUpdateCameraFloatParameter, this);
                 nearPlane.OnChange.add(&ComponentCameraPerspective::OnUpdateCameraFloatParameter, this);
@@ -38,6 +38,8 @@ namespace AppKit
             ComponentCameraPerspective::~ComponentCameraPerspective()
             {
                 // AppBase* appBase = Engine::Instance()->app;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
                 if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraPerspective::OnViewportChanged, this);
@@ -49,6 +51,8 @@ namespace AppKit
                 // renderWindowRegion = transform[0]->renderWindowRegion;
 
                 // AppBase* appBase = Engine::Instance()->app;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 renderWindowRegion->CameraViewport.OnChange.add(&ComponentCameraPerspective::OnViewportChanged, this);
 
@@ -82,6 +86,8 @@ namespace AppKit
             {
                 // AppBase* appBase = Engine::Instance()->app;
                 MathCore::vec2i size;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 if (renderWindowRegion != nullptr)
                     size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);

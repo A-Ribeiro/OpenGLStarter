@@ -7,23 +7,25 @@
 InnerViewport::InnerViewport(App *app, bool createFBO){
     sceneGUI = nullptr;
 
+    renderWindow = RenderWindowRegion::CreateShared();
+
     this->visible = true;
     this->app = app;
-    this->fade = new Fade(&app->time, &this->renderWindow);
+    this->fade = new Fade(&app->time, this->renderWindow);
 
-    renderWindow.WindowViewport = iRect(100,100,300,200);
-    renderWindow.viewportScaleFactor = ImGuiManager::Instance()->GlobalScale;
-    app->screenRenderWindow.addChild(&renderWindow);
+    renderWindow->WindowViewport = iRect(100,100,300,200);
+    renderWindow->viewportScaleFactor = ImGuiManager::Instance()->GlobalScale;
+    app->screenRenderWindow->addChild(renderWindow);
 
     if (createFBO) {
-        app->screenRenderWindow.OnUpdate.add(&InnerViewport::OnUpdate, this);
-        renderWindow.createFBO();
+        app->screenRenderWindow->OnUpdate.add(&InnerViewport::OnUpdate, this);
+        renderWindow->createFBO();
     }
     else {
-        app->screenRenderWindow.OnAfterOverlayDraw.add(&InnerViewport::OnUpdate, this);
+        app->screenRenderWindow->OnAfterOverlayDraw.add(&InnerViewport::OnUpdate, this);
     }
 
-    sceneGUI = new SceneGUI(app, &renderWindow);
+    sceneGUI = new SceneGUI(app, renderWindow);
     sceneGUI->load();
 }
 
@@ -35,9 +37,9 @@ InnerViewport::~InnerViewport(){
         sceneGUI = nullptr;
     }
 
-    app->screenRenderWindow.removeChild(&renderWindow);
-    app->screenRenderWindow.OnUpdate.remove(&InnerViewport::OnUpdate, this);
-    app->screenRenderWindow.OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
+    app->screenRenderWindow->removeChild(renderWindow);
+    app->screenRenderWindow->OnUpdate.remove(&InnerViewport::OnUpdate, this);
+    app->screenRenderWindow->OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
 
     if (fade != nullptr){
         delete fade;
@@ -51,20 +53,20 @@ void InnerViewport::setVisible(bool v){
         visible = v;
 
 
-        app->screenRenderWindow.OnUpdate.remove(&InnerViewport::OnUpdate, this);
-        app->screenRenderWindow.OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
+        app->screenRenderWindow->OnUpdate.remove(&InnerViewport::OnUpdate, this);
+        app->screenRenderWindow->OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
 
         if (visible){
             //attach from onUpdate event
-            if (renderWindow.fbo!=nullptr) {
-                app->screenRenderWindow.OnUpdate.add(&InnerViewport::OnUpdate, this);
+            if (renderWindow->fbo!=nullptr) {
+                app->screenRenderWindow->OnUpdate.add(&InnerViewport::OnUpdate, this);
 
                 //printf("Re-Render Update\n");
                 Platform::Time time_aux;
                 this->OnUpdate(&time_aux);
             }
             else {
-                app->screenRenderWindow.OnAfterOverlayDraw.add(&InnerViewport::OnUpdate, this);
+                app->screenRenderWindow->OnAfterOverlayDraw.add(&InnerViewport::OnUpdate, this);
             }
         }
 
@@ -73,9 +75,9 @@ void InnerViewport::setVisible(bool v){
 
 void InnerViewport::OnUpdate(Platform::Time *time){
 
-    renderWindow.OnPreUpdate(time);
-    renderWindow.OnUpdate(time);
-    renderWindow.OnLateUpdate(time);
+    renderWindow->OnPreUpdate(time);
+    renderWindow->OnUpdate(time);
+    renderWindow->OnLateUpdate(time);
 
     // pre process all scene graphs
     /*if (sceneJesusCross != nullptr)
@@ -83,9 +85,9 @@ void InnerViewport::OnUpdate(Platform::Time *time){
     if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();
 
-    renderWindow.OnAfterGraphPrecompute(time);
+    renderWindow->OnAfterGraphPrecompute(time);
 
-    bool isFBO = renderWindow.fbo != nullptr;
+    bool isFBO = renderWindow->fbo != nullptr;
 
 
     GLRenderState *renderState = GLRenderState::Instance();
@@ -106,15 +108,15 @@ void InnerViewport::OnUpdate(Platform::Time *time){
     renderState->DepthTest = DepthTestLess;
 
     if (isFBO) {
-        renderState->Viewport = AppKit::GLEngine::iRect(renderWindow.fbo->width, renderWindow.fbo->height);
-        renderWindow.fbo->enable();
+        renderState->Viewport = AppKit::GLEngine::iRect(renderWindow->fbo->width, renderWindow->fbo->height);
+        renderWindow->fbo->enable();
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
     else {
-        auto wViewport = renderWindow.WindowViewport.c_ptr();
+        auto wViewport = renderWindow->WindowViewport.c_ptr();
         renderState->Viewport = AppKit::GLEngine::iRect(
             wViewport->x,
-            app->screenRenderWindow.WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
+            app->screenRenderWindow->WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
             wViewport->w,
             wViewport->h
         );
@@ -156,7 +158,7 @@ void InnerViewport::OnUpdate(Platform::Time *time){
         // glClear(GL_COLOR_BUFFER_BIT);
         // renderState->ColorWrite = ColorWriteAll;
 
-        renderWindow.fbo->disable();
+        renderWindow->fbo->disable();
     }
 
     renderState->Viewport = old_viewport;

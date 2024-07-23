@@ -35,7 +35,7 @@ namespace AppKit
             class ComponentSkinnedMesh : public Component
             {
 
-                RenderWindowRegion *renderWindowRegion;
+                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
                 bool skinning_dirty;
 

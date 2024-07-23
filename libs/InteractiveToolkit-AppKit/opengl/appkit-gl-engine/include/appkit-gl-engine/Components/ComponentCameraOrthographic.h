@@ -21,7 +21,7 @@ namespace AppKit
             class ComponentCameraOrthographic : public ComponentCamera
             {
 
-                RenderWindowRegion *renderWindowRegion;
+                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
                 void OnUpdateCameraFloatParameter(const float &value, const float &oldValue);
                 void OnUpdateCameraBoolParameter(const bool &value, const bool &oldValue);
@@ -71,7 +71,7 @@ namespace AppKit
                 // MathCore::vec3f App2MousePosition();
 
                 void attachToTransform(std::shared_ptr<Transform> t){
-                    renderWindowRegion = t->renderWindowRegion;
+                    renderWindowRegionRef = t->renderWindowRegion;
                 }
             };
 

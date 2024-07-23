@@ -23,7 +23,7 @@ namespace AppKit
             class ComponentCameraLookToNode : public Component
             {
 
-                RenderWindowRegion *renderWindowRegion;
+                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
                 std::shared_ptr<ComponentCameraPerspective> camera;
                 EventCore::PressReleaseDetector up, down;

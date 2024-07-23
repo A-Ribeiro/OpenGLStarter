@@ -28,9 +28,9 @@ public:
     std::shared_ptr<AppKit::GLEngine::Transform> cursorTransform;
 
     App *app;
-    AppKit::GLEngine::RenderWindowRegion *renderWindow;
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow;
 
-    SceneGUI(App *app, AppKit::GLEngine::RenderWindowRegion *renderWindow);
+    SceneGUI(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
     ~SceneGUI();
 
     virtual void draw();

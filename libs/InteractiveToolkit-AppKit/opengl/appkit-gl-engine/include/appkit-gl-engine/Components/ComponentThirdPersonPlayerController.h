@@ -30,7 +30,7 @@ namespace AppKit
             class ComponentThirdPersonPlayerController : public Component
             {
 
-                RenderWindowRegion *renderWindowRegion;
+                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
             public:
                 static const ComponentType Type;
@@ -64,7 +64,7 @@ namespace AppKit
                     animation_str_walk = "walk";
                     animation_str_run = "run";
 
-                    renderWindowRegion = nullptr;
+                    renderWindowRegionRef.reset();// = nullptr;
                 }
 
                 void setCameraLook(std::shared_ptr<Transform> camera_look)
@@ -92,7 +92,8 @@ namespace AppKit
                     auto transform = getTransform();
 
                     // AppBase* app = Engine::Instance()->app;
-                    renderWindowRegion = transform->renderWindowRegion;
+                    renderWindowRegionRef = transform->renderWindowRegion;
+                    auto renderWindowRegion = ToShared(renderWindowRegionRef);
                     renderWindowRegion->OnUpdate.add(&ComponentThirdPersonPlayerController::OnUpdate, this);
 
                     animationMotion = transform->findComponent<ComponentAnimationMotion>();
@@ -106,6 +107,7 @@ namespace AppKit
                 ~ComponentThirdPersonPlayerController()
                 {
                     // AppBase* app = Engine::Instance()->app;
+                    auto renderWindowRegion = ToShared(renderWindowRegionRef);
                     if (renderWindowRegion != nullptr)
                     {
                         renderWindowRegion->OnUpdate.remove(&ComponentThirdPersonPlayerController::OnUpdate, this);

@@ -37,6 +37,8 @@ namespace AppKit
             std::vector<std::weak_ptr<Transform>> mTransform;
         public:
             std::shared_ptr<Transform> getTransform(int i = 0){
+                if (i >= (int)mTransform.size())
+                    return nullptr;
                 return ToShared(mTransform[i]);
             }
             int getTransformCount() const {

@@ -131,7 +131,7 @@ void SceneGUI::OnViewportChange(const AppKit::GLEngine::iRect &value, const AppK
 
 }
 
-SceneGUI::SceneGUI(App *app, RenderWindowRegion *renderWindow): 
+SceneGUI::SceneGUI(App *app, std::shared_ptr<RenderWindowRegion> renderWindow): 
 AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelper) {
     
     this->app = app;

@@ -22,7 +22,7 @@ namespace AppKit
             {
                 wrapShape = WrapShapeNone;
                 debugCollisionShapes = false;
-                renderWindowRegion = nullptr;
+                renderWindowRegionRef.reset();
             }
 
             ComponentMeshWrapper::~ComponentMeshWrapper()
@@ -32,14 +32,16 @@ namespace AppKit
                     auto transform = getTransform();
                     if (transform != nullptr) {
                         transform->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
-                        if (renderWindowRegion != nullptr)
-                            renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
                     }
                 }
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                if (renderWindowRegion != nullptr)
+                    renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
             void ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty(Platform::Time *time)
             {
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
                 renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
                 computeFinalPositions(true);
             }
@@ -208,7 +210,8 @@ namespace AppKit
                 // AppKit::GLEngine::Engine::Instance()->app->OnAfterGraphPrecompute.remove(this, &ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty);
                 auto transform = getTransform();
 
-                renderWindowRegion = transform->renderWindowRegion;
+                renderWindowRegionRef = transform->renderWindowRegion;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
@@ -222,7 +225,8 @@ namespace AppKit
 
                 // AppKit::GLEngine::Engine::Instance()->app->OnAfterGraphPrecompute.remove(this, &ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty);
                 auto transform = getTransform();
-                renderWindowRegion = transform->renderWindowRegion;
+                renderWindowRegionRef = transform->renderWindowRegion;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
@@ -237,7 +241,8 @@ namespace AppKit
 
                 // AppKit::GLEngine::Engine::Instance()->app->OnAfterGraphPrecompute.remove(this, &ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty);
                 auto transform = getTransform();
-                renderWindowRegion = transform->renderWindowRegion;
+                renderWindowRegionRef = transform->renderWindowRegion;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 

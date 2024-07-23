@@ -38,12 +38,12 @@ namespace AppKit
 
             void createScreenVertex();
 
-            RenderWindowRegion *renderWindowRegion;
+            std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
         public:
             bool isFading;
 
-            Fade(Platform::Time *_time, AppKit::GLEngine::RenderWindowRegion *renderWindowRegion = nullptr);
+            Fade(Platform::Time *_time, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindowRegion = nullptr);
             ~Fade();
 
             void fadeIn(float _sec, const EventCore::Callback<void()> &_OnEndCall);

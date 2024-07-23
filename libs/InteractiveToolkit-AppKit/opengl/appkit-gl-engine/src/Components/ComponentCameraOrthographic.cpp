@@ -29,7 +29,7 @@ namespace AppKit
                 useSizeX = false;
                 sizeX = 1.0f;
 
-                renderWindowRegion = nullptr;
+                renderWindowRegionRef.reset();// = nullptr;
 
                 // renderWindowRegion = transform[0]->renderWindowRegion;
 
@@ -61,6 +61,8 @@ namespace AppKit
             ComponentCameraOrthographic::~ComponentCameraOrthographic()
             {
                 // AppBase* appBase = Engine::Instance()->app;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
                 if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
@@ -69,6 +71,8 @@ namespace AppKit
 
             void ComponentCameraOrthographic::start()
             {
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
                 //renderWindowRegion = transform[0]->renderWindowRegion;
                 renderWindowRegion->CameraViewport.OnChange.add(&ComponentCameraOrthographic::OnViewportChanged, this);
                 // call the first setup
@@ -106,6 +110,8 @@ namespace AppKit
             {
                 // AppBase* appBase = Engine::Instance()->app;
                 MathCore::vec2i size;
+
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 if (renderWindowRegion != nullptr)
                     size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);

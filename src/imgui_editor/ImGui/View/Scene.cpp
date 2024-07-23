@@ -56,7 +56,7 @@ void Scene::RenderAndLogic()
         if (size.x > 0 && size.y > 0)
         {
             ImGuiManager::Instance()->innerViewport->setVisible(true);
-            RenderWindowRegion *RenderWindowRegion = &ImGuiManager::Instance()->innerViewport->renderWindow;
+            auto RenderWindowRegion = ImGuiManager::Instance()->innerViewport->renderWindow;
             // resize viewport
             iRect newViewport = iRect(pos.x, pos.y, size.x, size.y);
             bool viewportChanged = RenderWindowRegion->WindowViewport.c_val() != newViewport;

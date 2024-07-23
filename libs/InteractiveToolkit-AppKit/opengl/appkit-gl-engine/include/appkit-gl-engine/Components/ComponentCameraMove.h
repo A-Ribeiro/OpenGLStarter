@@ -28,7 +28,7 @@ namespace AppKit
                 EventCore::PressReleaseDetector left, right, up, down;
                 MathCore::vec3f euler;
 
-                RenderWindowRegion *renderWindowRegion;
+                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
             protected:
                 void start();

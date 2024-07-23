@@ -329,8 +329,8 @@ namespace AppKit
             //
             ///////////////////////////////////////////////////////
 
-            RenderWindowRegion *renderWindowRegion;
-            std::shared_ptr<Transform> setRenderWindowRegion(RenderWindowRegion *renderWindowRegion);
+            std::weak_ptr<RenderWindowRegion> renderWindowRegion;
+            std::shared_ptr<Transform> setRenderWindowRegion(std::shared_ptr<RenderWindowRegion> renderWindowRegion);
 
             ///////////////////////////////////////////////////////
             //
