@@ -18,21 +18,21 @@ protected:
     virtual void unloadAll();
     
     
-    AppKit::GLEngine::Transform* Jesus3DModel;
-    AppKit::OpenGL::GLTexture *JesusTextures[2];//diffuse
+    std::shared_ptr<AppKit::GLEngine::Transform> Jesus3DModel;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> JesusTextures[2];//diffuse
     
-    AppKit::GLEngine::Transform* Rocks02_3DModel;
-    AppKit::OpenGL::GLTexture *Rock02Textures[2];//diffuse + normal
+    std::shared_ptr<AppKit::GLEngine::Transform> Rocks02_3DModel;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> Rock02Textures[2];//diffuse + normal
     
-    AppKit::GLEngine::Transform* Rocks03_3DModel;
-    AppKit::OpenGL::GLTexture *Rock03Textures[2];//diffuse + normal
+    std::shared_ptr<AppKit::GLEngine::Transform> Rocks03_3DModel;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> Rock03Textures[2];//diffuse + normal
 
-    AppKit::OpenGL::GLTexture *particleTexture;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> particleTexture;
     
     EventCore::PressReleaseDetector keyP;
     EventCore::PressReleaseDetector mouseBtn1;
 
-    AppKit::GLEngine::Components::ComponentCameraRotateOnTarget *componentCameraRotateOnTarget;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentCameraRotateOnTarget> componentCameraRotateOnTarget;
 
     /*
     float distanceRotation;

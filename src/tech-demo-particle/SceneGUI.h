@@ -17,14 +17,14 @@ protected:
     
     //AppKit::OpenGL::GLTexture *Milky_512_512;
 
-    AppKit::OpenGL::GLTexture* cursorTexture;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> cursorTexture;
 
     AppKit::OpenGL::GLFont2Builder fontBuilder;
 
 public:
     AppKit::GLEngine::Button* button_SoftParticles;
 
-    AppKit::GLEngine::Transform* cursorTransform;
+    std::shared_ptr<AppKit::GLEngine::Transform> cursorTransform;
 
     SceneGUI(
         Platform::Time *_time,

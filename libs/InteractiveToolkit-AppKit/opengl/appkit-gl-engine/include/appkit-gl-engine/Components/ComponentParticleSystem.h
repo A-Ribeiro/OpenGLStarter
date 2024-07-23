@@ -93,7 +93,7 @@ namespace AppKit
                 float distance_to_camera;
 
                 MathCore::vec4f textureColor;
-                AppKit::OpenGL::GLTexture *texture;
+                std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
 
                 bool soft;
 
