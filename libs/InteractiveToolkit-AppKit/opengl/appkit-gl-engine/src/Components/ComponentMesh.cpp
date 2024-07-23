@@ -18,7 +18,7 @@ namespace AppKit
 
             void ComponentMesh::allocateVBO()
             {
-                if (vbo_index != NULL)
+                if (vbo_index != nullptr)
                     return;
                 if (format & ITKExtension::Model::CONTAINS_POS)
                     vbo_pos = new AppKit::OpenGL::GLVertexBufferObject();
@@ -51,7 +51,7 @@ namespace AppKit
                     auto transform = getTransform(i);
 
                     auto meshWrapper = transform->findComponent<Components::ComponentMeshWrapper>();
-                    if (meshWrapper != NULL)
+                    if (meshWrapper != nullptr)
                     {
                         if (meshWrapper->wrapShape == WrapShapeAABB)
                             meshWrapper->updateMeshAABB();
@@ -156,48 +156,48 @@ namespace AppKit
             {
                 vbo_indexCount = 0;
 
-                vbo_pos = NULL;
-                vbo_normals = NULL;
-                vbo_tangent = NULL;
-                vbo_binormal = NULL;
+                vbo_pos = nullptr;
+                vbo_normals = nullptr;
+                vbo_tangent = nullptr;
+                vbo_binormal = nullptr;
                 for (int i = 0; i < 8; i++)
                 {
-                    vbo_uv[i] = NULL;
-                    vbo_color[i] = NULL;
+                    vbo_uv[i] = nullptr;
+                    vbo_color[i] = nullptr;
                 }
 
-                vbo_skin_index = NULL;
-                vbo_skin_weights = NULL;
+                vbo_skin_index = nullptr;
+                vbo_skin_weights = nullptr;
 
-                vbo_index = NULL;
+                vbo_index = nullptr;
 
                 format = 0;
             }
 
             ComponentMesh::~ComponentMesh()
             {
-                if (vbo_pos != NULL)
+                if (vbo_pos != nullptr)
                     delete vbo_pos;
-                if (vbo_normals != NULL)
+                if (vbo_normals != nullptr)
                     delete vbo_normals;
-                if (vbo_tangent != NULL)
+                if (vbo_tangent != nullptr)
                     delete vbo_tangent;
-                if (vbo_binormal != NULL)
+                if (vbo_binormal != nullptr)
                     delete vbo_binormal;
                 for (int i = 0; i < 8; i++)
                 {
-                    if (vbo_uv[i] != NULL)
+                    if (vbo_uv[i] != nullptr)
                         delete vbo_uv[i];
-                    if (vbo_color[i] != NULL)
+                    if (vbo_color[i] != nullptr)
                         delete vbo_color[i];
                 }
 
-                if (vbo_skin_index != NULL)
+                if (vbo_skin_index != nullptr)
                     delete vbo_skin_index;
-                if (vbo_skin_weights != NULL)
+                if (vbo_skin_weights != nullptr)
                     delete vbo_skin_weights;
 
-                if (vbo_index != NULL)
+                if (vbo_index != nullptr)
                     delete vbo_index;
             }
 

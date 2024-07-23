@@ -28,7 +28,7 @@ Example:
 ```cpp
 fade = new Fade(&time);
 
-fade->fadeOut(2.0f, NULL);
+fade->fadeOut(2.0f, nullptr);
 time.update();
 
 //main loop

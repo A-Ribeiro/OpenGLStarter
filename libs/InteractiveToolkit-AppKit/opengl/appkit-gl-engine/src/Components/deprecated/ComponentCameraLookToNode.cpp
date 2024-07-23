@@ -121,7 +121,7 @@ namespace AppKit
             void ComponentCameraLookToNode::setTarget(std::shared_ptr<Transform> _target)
             {
                 targetRef = _target;
-                if (_target != NULL)
+                if (_target != nullptr)
                 {
 
                     // AppBase* app = Engine::Instance()->app;
@@ -167,14 +167,14 @@ namespace AppKit
 
                 zoomSpeed = 1.0f;
                 angleSpeed = MathCore::OP<float>::deg_2_rad(0.10f);
-                renderWindowRegion = NULL;
+                renderWindowRegion = nullptr;
             }
 
             ComponentCameraLookToNode::~ComponentCameraLookToNode()
             {
                 // AppBase* app = Engine::Instance()->app;
 
-                if (renderWindowRegion != NULL)
+                if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->OnLateUpdate.remove(&ComponentCameraLookToNode::OnLateUpdate, this);
                     renderWindowRegion->MousePos.OnChange.remove(&ComponentCameraLookToNode::OnMousePosChanged, this);

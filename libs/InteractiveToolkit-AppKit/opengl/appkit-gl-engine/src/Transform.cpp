@@ -50,7 +50,7 @@ namespace AppKit
                                                        EventCore::CallbackWrapper(&Transform::setName, this))
         {
 
-            userData = NULL;
+            userData = nullptr;
         }
         void Transform::operator=(const Transform &v) {}
 
@@ -72,7 +72,7 @@ namespace AppKit
             //{
             //     fprintf(stderr, "Trying to remove a child that is not in the list...\n");
             //     exit(-1);
-            //     return NULL;
+            //     return nullptr;
             // }
 
             auto node = children[index];
@@ -460,7 +460,7 @@ namespace AppKit
             /*
             MathCore::mat4f &localM = getLocalMatrixInverseTranspose();
             Transform* parent = getParent();
-            if (parent != NULL && !parent->isRoot()) {
+            if (parent != nullptr && !parent->isRoot()) {
 
                 MathCore::mat4f &aux = parent->getMatrixInverseTranspose(useVisitedFlag);
                 if (matrixInverseTransposeParent != aux) {
@@ -547,7 +547,7 @@ namespace AppKit
 
         // void Transform::setEuler(const MathCore::vec3f &rot)
         // {
-        //     if (parent != NULL && parent->isRoot())
+        //     if (parent != nullptr && parent->isRoot())
         //         setLocalEuler(rot);
 
         //     MathCore::quatf q = extractQuat(parent->getMatrixInverse());
@@ -561,7 +561,7 @@ namespace AppKit
 
         // MathCore::vec3f Transform::getEuler(bool useVisitedFlag = false)
         // {
-        //     if (parent != NULL && parent->isRoot())
+        //     if (parent != nullptr && parent->isRoot())
         //         return localEuler;
 
         //     MathCore::vec3f euler;
@@ -792,7 +792,7 @@ namespace AppKit
 
         std::shared_ptr<Component> Transform::addComponent(std::shared_ptr<Component>c)
         {
-            // ITK_ABORT(c->transform!=NULL,"cannot add same component to two or more transforms\n.");
+            // ITK_ABORT(c->transform!=nullptr,"cannot add same component to two or more transforms\n.");
             components.push_back(c);
 
             auto this_self = this->self();
@@ -823,8 +823,8 @@ namespace AppKit
                     }
 
                     // Transform *t = c->transform;
-                    // c->transform = NULL;
-                    // if (t != NULL)
+                    // c->transform = nullptr;
+                    // if (t != nullptr)
                     // c->detachFromTransform(t);
 
                     return c;
@@ -851,8 +851,8 @@ namespace AppKit
                 }
 
                 // Transform *t = result->transform;
-                // result->transform = NULL;
-                // if (t != NULL)
+                // result->transform = nullptr;
+                // if (t != nullptr)
                 // result->detachFromTransform(t);
                 return result;
             }
@@ -927,10 +927,10 @@ namespace AppKit
             if (name == p)
                 return;
 
-            // if (this->parent != NULL)
+            // if (this->parent != nullptr)
             // this->parent->removeMapName(this);
             name = p;
-            // if (this->parent != NULL)
+            // if (this->parent != nullptr)
             // this->parent->insertMapName(this);
         }
         const std::string &Transform::getName() const
@@ -1023,7 +1023,7 @@ namespace AppKit
                                      EventCore::CallbackWrapper(&Transform::setName, this))
         {
             // hierarchy ops
-            // parent = NULL;
+            // parent = nullptr;
             // transform
             localPosition = MathCore::vec3f(0);
             // localEuler = MathCore::vec3f(0);
@@ -1050,7 +1050,7 @@ namespace AppKit
             matrixInverse = MathCore::CONSTANT<MathCore::mat4f>::Identity();
             matrixInverseParent = MathCore::CONSTANT<MathCore::mat4f>::Identity();
 
-            // model = NULL;
+            // model = nullptr;
 
             visited = true;
 
@@ -1068,7 +1068,7 @@ namespace AppKit
         Transform::~Transform()
         {
             // SharedPointerDatabase::Instance()->notifyDeletion(this);
-            renderWindowRegion = NULL;
+            renderWindowRegion = nullptr;
         }
 
         std::shared_ptr<Transform> Transform::setRenderWindowRegion(RenderWindowRegion *renderWindowRegion)

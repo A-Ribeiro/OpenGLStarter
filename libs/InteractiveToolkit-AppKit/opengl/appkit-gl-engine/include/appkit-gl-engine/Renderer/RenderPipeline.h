@@ -128,9 +128,9 @@ namespace AppKit
 
         public:
             // public skybox setup variables...
-            AppKit::GLEngine::GLCubeMapSkyBox *cubeSkyBox;
-            AppKit::OpenGL::GLCubeMap *cubeAmbientLight_1x1;
-            AppKit::OpenGL::GLTexture *sphereAmbientLight;
+            std::shared_ptr<AppKit::GLEngine::GLCubeMapSkyBox> cubeSkyBox;
+            std::shared_ptr<AppKit::OpenGL::GLCubeMap> cubeAmbientLight_1x1;
+            std::shared_ptr<AppKit::OpenGL::GLTexture> sphereAmbientLight;
 
             // public parameters
             // light setup

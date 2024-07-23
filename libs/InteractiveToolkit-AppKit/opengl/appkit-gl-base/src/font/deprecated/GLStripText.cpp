@@ -43,7 +43,7 @@ namespace AppKit
         GLStripText::~GLStripText()
         {
             delete[] mStripInfo;
-            mStripInfo = NULL;
+            mStripInfo = nullptr;
             mSize = 0;
             // TextureManager::getSingleton()->releaseTexture(mTextureID);
         }
@@ -62,7 +62,7 @@ namespace AppKit
         void GLStripText::draw()
         {
 
-            if (mSize == 0 || mStripInfo == NULL)
+            if (mSize == 0 || mStripInfo == nullptr)
                 return;
 
             texture->active(0);

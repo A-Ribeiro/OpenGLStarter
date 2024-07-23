@@ -210,7 +210,7 @@ namespace AppKit
 
         void GLRenderState::OnCurrentShaderChange(AppKit::OpenGL::GLShader * const &value, AppKit::OpenGL::GLShader * const &oldValue)
         {
-            if (value == NULL)
+            if (value == nullptr)
                 AppKit::OpenGL::GLShader::disable();
             else
                 value->enable();
@@ -221,7 +221,7 @@ namespace AppKit
         }
         void GLRenderState::OnCurrentFramebufferObjectChange(AppKit::OpenGL::GLFramebufferObject * const &value, AppKit::OpenGL::GLFramebufferObject * const &oldValue)
         {
-            if (value == NULL)
+            if (value == nullptr)
                 AppKit::OpenGL::GLFramebufferObject::disable();
             else
                 value->enable();
@@ -287,9 +287,9 @@ namespace AppKit
             Wireframe = WireframeDisabled;
 #endif
             LineWidth = 1.0f;
-            CurrentShader = NULL;
+            CurrentShader = nullptr;
             Viewport = iRect(w, h);
-            CurrentFramebufferObject = NULL;
+            CurrentFramebufferObject = nullptr;
             ColorWrite = ColorWriteAll;
 
             //
@@ -348,8 +348,8 @@ namespace AppKit
 
         void GLRenderState::releaseResources()
         {
-            CurrentShader = NULL;
-            CurrentFramebufferObject = NULL;
+            CurrentShader = nullptr;
+            CurrentFramebufferObject = nullptr;
         }
 
         GLRenderState::GLRenderState()

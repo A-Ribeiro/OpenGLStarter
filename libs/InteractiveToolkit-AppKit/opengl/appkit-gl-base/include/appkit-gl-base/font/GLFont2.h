@@ -91,11 +91,11 @@ namespace AppKit
 
             /// \brief Query for a glyph inside this font character set
             ///
-            /// This method will return NULL if the char code is not found in this set.
+            /// This method will return nullptr if the char code is not found in this set.
             ///
             /// \author Alessandro Ribeiro
             /// \param charcode UTF32 char code
-            /// \return the #GLFont2Glyph of the char code or NULL.
+            /// \return the #GLFont2Glyph of the char code or nullptr.
             ///
             const GLFont2Glyph *getGlyph(uint32_t charcode) const;
 

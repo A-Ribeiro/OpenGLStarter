@@ -33,7 +33,7 @@ namespace AppKit
         /// class FX: public iPostProcess {
         /// public:
         ///     virtual void render(GLPostProcess *postProcess, GLTexture *colorSrc, GLTexture *depthSrc, GLFramebufferObject *dst) {
-        ///         if (dst == NULL){
+        ///         if (dst == nullptr){
         ///             GLFramebufferObject::disable();
         ///             glViewport(0,0,postProcess->width,postProcess->height);
         ///         } else {
@@ -69,7 +69,7 @@ namespace AppKit
         /// class FX: public iPostProcess {
         /// public:
         ///     virtual void render(GLPostProcess *postProcess, GLTexture *colorSrc, GLTexture *depthSrc, GLFramebufferObject *dst) {
-        ///         if (dst == NULL){
+        ///         if (dst == nullptr){
         ///             GLFramebufferObject::disable();
         ///             glViewport(0,0,postProcess->width,postProcess->height);
         ///         } else {

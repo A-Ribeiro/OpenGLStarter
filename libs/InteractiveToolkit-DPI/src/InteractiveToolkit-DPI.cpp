@@ -25,7 +25,7 @@ namespace DPI
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
     static XRRModeInfo *getModeFromIDX(::Display *dpy, XRRScreenResources *res, const RRMode &mode_idx)
@@ -37,7 +37,7 @@ namespace DPI
                 return &res->modes[k];
             }
         }
-        return NULL;
+        return nullptr;
     }
 
     static XRRCrtcInfo *getCrtcFromIDX(::Display *dpy, XRRScreenResources *res, const RRCrtc &crtc_idx)
@@ -51,7 +51,7 @@ namespace DPI
                 // XRRFreeCrtcInfo(crtc_info);
             }
         }
-        return NULL;
+        return nullptr;
     }
 
     static float getRefreshRateFromMode(const XRRModeInfo *mode_info)
@@ -79,7 +79,7 @@ namespace DPI
 
         std::vector<Monitor> result;
 
-        auto dpy = XOpenDisplay(NULL);
+        auto dpy = XOpenDisplay(nullptr);
         ITK_ABORT(!dpy, "Failed to open default display.\n");
 
         auto rootWindowID = XDefaultRootWindow(dpy);
@@ -267,7 +267,7 @@ namespace DPI
                 Atom real_type;
                 int real_format;
                 unsigned long items_read, items_left;
-                int *data = NULL;
+                int *data = nullptr;
                 if (XGetWindowProperty(dpy, nativeWindow,
                                        netWmUserTime,
                                        0L, 2L, False,
@@ -393,7 +393,7 @@ namespace DPI
     void Display::setFullscreenAttribute(const NativeWindowHandleType &nativeWindow, const Monitor *monitor )
     {
 
-        auto dpy = XOpenDisplay(NULL);
+        auto dpy = XOpenDisplay(nullptr);
         ITK_ABORT(!dpy, "Failed to open default display.\n");
 
         // {
@@ -439,9 +439,9 @@ namespace DPI
 
     // int Display::MonitorCount()
     // {
-    //     ::Display *pdsp = NULL;
+    //     ::Display *pdsp = nullptr;
 
-    //     pdsp = XOpenDisplay(NULL);
+    //     pdsp = XOpenDisplay(nullptr);
     //     ITK_ABORT(!pdsp, "Failed to open default display.\n");
 
     //     int result = ScreenCount(pdsp);
@@ -452,9 +452,9 @@ namespace DPI
 
     // int Display::MonitorDefault()
     // {
-    //     ::Display *pdsp = NULL;
+    //     ::Display *pdsp = nullptr;
 
-    //     pdsp = XOpenDisplay(NULL);
+    //     pdsp = XOpenDisplay(nullptr);
     //     ITK_ABORT(!pdsp, "Failed to open default display.\n");
 
     //     int result = DefaultScreen(pdsp);
@@ -468,11 +468,11 @@ namespace DPI
     //     if (monitor_num == -1)
     //         monitor_num = MonitorDefault();
 
-    //     // ::Display *pdsp = NULL;
+    //     // ::Display *pdsp = nullptr;
     //     // ::Window pRootWindow;
     //     // ::XWindowAttributes xwa;
 
-    //     // pdsp = XOpenDisplay(NULL);
+    //     // pdsp = XOpenDisplay(nullptr);
     //     // ITK_ABORT(!pdsp, "Failed to open default display.\n");
 
     //     // pRootWindow = RootWindow(pdsp, monitor_num);
@@ -483,7 +483,7 @@ namespace DPI
 
     //     // XCloseDisplay(pdsp);
 
-    //     auto dpy = XOpenDisplay(NULL);
+    //     auto dpy = XOpenDisplay(nullptr);
     //     ITK_ABORT(!dpy, "Failed to open default display.\n");
 
     //     auto rootWindowID = RootWindow(dpy, monitor_num);
@@ -509,10 +509,10 @@ namespace DPI
     //     if (monitor_num == -1)
     //         monitor_num = MonitorDefault();
 
-    //     // ::Display *pdsp = NULL;
-    //     // ::Screen *pscr = NULL;
+    //     // ::Display *pdsp = nullptr;
+    //     // ::Screen *pscr = nullptr;
 
-    //     // pdsp = XOpenDisplay(NULL);
+    //     // pdsp = XOpenDisplay(nullptr);
     //     // ITK_ABORT(!pdsp, "Failed to open default display.\n");
 
     //     // pscr = ScreenOfDisplay(pdsp, monitor_num);
@@ -522,7 +522,7 @@ namespace DPI
 
     //     // XCloseDisplay(pdsp);
 
-    //     auto dpy = XOpenDisplay(NULL);
+    //     auto dpy = XOpenDisplay(nullptr);
     //     ITK_ABORT(!dpy, "Failed to open default display.\n");
 
     //     auto rootWindowID = RootWindow(dpy, monitor_num);
@@ -575,7 +575,7 @@ namespace DPI
     //     if (monitor_num == -1)
     //         monitor_num = MonitorDefault();
 
-    //     auto dpy = XOpenDisplay(NULL);
+    //     auto dpy = XOpenDisplay(nullptr);
     //     ITK_ABORT(!dpy, "Failed to open default display.\n");
 
     //     // auto pscr = ScreenOfDisplay(dpy, monitor_num);
@@ -720,7 +720,7 @@ namespace DPI
             // this_monitor.hdcMonitor = hdcMonitor;
             // this_monitor.monitorInfoEx = miex;
 
-            HDC dc = CreateDC(("DISPLAY"), miex.szDevice, NULL, NULL);
+            HDC dc = CreateDC(("DISPLAY"), miex.szDevice, nullptr, nullptr);
             if (dc)
             {
 
@@ -831,7 +831,7 @@ namespace DPI
 
                 allMonitors.push_back(this_monitor);
 
-                ReleaseDC(NULL, dc);
+                ReleaseDC(nullptr, dc);
             }
             else
                 return FALSE;
@@ -856,7 +856,7 @@ namespace DPI
         //    // this_monitor.hdcMonitor = hdcMonitor;
         //    // this_monitor.monitorInfoEx = miex;
 
-        //    HDC dc = CreateDC(("DISPLAY"), miex.szDevice, NULL, NULL);
+        //    HDC dc = CreateDC(("DISPLAY"), miex.szDevice, nullptr, nullptr);
         //    if (dc)
         //    {
 
@@ -887,7 +887,7 @@ namespace DPI
         //        this_monitor.scale_factor = (float)this_monitor.width_pixels / (float)(this_monitor.width_virtual_pixels);
         //        // printf("%f\n", this_monitor.scale_factor);
 
-        //        ReleaseDC(NULL, dc);
+        //        ReleaseDC(nullptr, dc);
         //    }
         //    else
         //        return FALSE;
@@ -918,7 +918,7 @@ namespace DPI
 
     std::vector<Monitor> Display::QueryMonitors(int* monitorDefaultIndex) {
         std::vector<Monitor> allMonitors;
-        EnumDisplayMonitors(NULL, NULL, _FillMonitorVector, (LPARAM)&allMonitors);
+        EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
         *monitorDefaultIndex = 0;
         for (int i = 0; i < (int)allMonitors.size(); i++) {
             if (allMonitors[i].primary) {
@@ -941,14 +941,14 @@ namespace DPI
     //int Display::MonitorCount()
     //{
     //    std::vector<_MonitorInfo> allMonitors;
-    //    EnumDisplayMonitors(NULL, NULL, _FillMonitorVector, (LPARAM)&allMonitors);
+    //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
     //    return (int)allMonitors.size();
     //}
 
     //int Display::MonitorDefault()
     //{
     //    std::vector<_MonitorInfo> allMonitors;
-    //    EnumDisplayMonitors(NULL, NULL, _FillMonitorVector, (LPARAM)&allMonitors);
+    //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
 
     //    for (size_t i = 0; i < allMonitors.size(); i++)
     //    {
@@ -965,7 +965,7 @@ namespace DPI
     //        monitor_num = MonitorDefault();
 
     //    std::vector<_MonitorInfo> allMonitors;
-    //    EnumDisplayMonitors(NULL, NULL, _FillMonitorVector, (LPARAM)&allMonitors);
+    //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
 
     //    _MonitorInfo &selectedMonitor = allMonitors[monitor_num];
 
@@ -982,7 +982,7 @@ namespace DPI
     //        monitor_num = MonitorDefault();
 
     //    std::vector<_MonitorInfo> allMonitors;
-    //    EnumDisplayMonitors(NULL, NULL, _FillMonitorVector, (LPARAM)&allMonitors);
+    //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
 
     //    _MonitorInfo &selectedMonitor = allMonitors[monitor_num];
 
@@ -999,7 +999,7 @@ namespace DPI
     //        monitor_num = MonitorDefault();
 
     //    std::vector<_MonitorInfo> allMonitors;
-    //    EnumDisplayMonitors(NULL, NULL, _FillMonitorVector, (LPARAM)&allMonitors);
+    //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
 
     //    _MonitorInfo &selectedMonitor = allMonitors[monitor_num];
 

@@ -36,10 +36,10 @@ App::App()
 
     fade = new Fade(&time);
 
-    fade->fadeOut(5.0f, NULL);
+    fade->fadeOut(5.0f, nullptr);
     time.update();
 
-    mainScene = NULL;
+    mainScene = nullptr;
 
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
 
@@ -69,14 +69,14 @@ void App::load() {
 }
 
 App::~App(){
-    if (mainScene != NULL){
+    if (mainScene != nullptr){
         mainScene->unload();
         delete mainScene;
-        mainScene = NULL;
+        mainScene = nullptr;
     }
-    if (fade != NULL){
+    if (fade != nullptr){
         delete fade;
-        fade = NULL;
+        fade = nullptr;
     }
     resourceHelper.finalize();
 }
@@ -94,12 +94,12 @@ void App::draw() {
     screenRenderWindow.OnLateUpdate(&time);
 
     // pre process all scene graphs
-    if (mainScene != NULL)
+    if (mainScene != nullptr)
         mainScene->precomputeSceneGraphAndCamera();
 
     screenRenderWindow.OnAfterGraphPrecompute(&time);
 
-    if (mainScene != NULL)
+    if (mainScene != nullptr)
         mainScene->draw();
 
     fade->draw();
@@ -118,6 +118,6 @@ void App::onGainFocus() {
 void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue) {
     GLRenderState *renderState = GLRenderState::Instance();
     renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
-    if (mainScene != NULL)
+    if (mainScene != nullptr)
         mainScene->resize(vec2i(value.w, value.h));
 }

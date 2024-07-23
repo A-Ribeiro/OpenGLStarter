@@ -76,7 +76,7 @@ namespace AppKit
                                           std::shared_ptr<Components::ComponentParticleSystem> particleSystem)
         {
 
-            if (particleSystem->texture == NULL)
+            if (particleSystem->texture == nullptr)
                 return;
 
             NormalAttributes aux;
@@ -160,7 +160,7 @@ namespace AppKit
                                                               AppKit::OpenGL::GLTexture *depthComponent24)
         {
 
-            if (particleSystem->texture == NULL)
+            if (particleSystem->texture == nullptr)
                 return;
 
             NormalAttributes aux;

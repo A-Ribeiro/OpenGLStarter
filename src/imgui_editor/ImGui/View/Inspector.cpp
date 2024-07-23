@@ -30,7 +30,7 @@ void Inspector::removeComponent(InspectorImGuiComponent *v)
 void Inspector::clearComponents()
 {
     for (auto &v : components)
-        if (v != NULL)
+        if (v != nullptr)
             delete v;
     components.clear();
 }
@@ -54,7 +54,7 @@ void Inspector::RenderAndLogic()
         return;
     auto flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNavInputs; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    if (ImGui::Begin("Inspector", NULL, flags))
+    if (ImGui::Begin("Inspector", nullptr, flags))
     {
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));

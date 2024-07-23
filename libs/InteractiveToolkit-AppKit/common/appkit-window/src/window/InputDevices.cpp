@@ -190,7 +190,7 @@ namespace AppKit
             MathCore::vec2i Mouse::getPosition(Window *relativeToWindow)
             {
                 sf::Vector2i mouse_pos;
-                if (relativeToWindow != NULL)
+                if (relativeToWindow != nullptr)
                     mouse_pos = sf::Mouse::getPosition(*(sf::Window *)relativeToWindow->getLibraryHandle());
                 else
                     mouse_pos = sf::Mouse::getPosition();
@@ -199,7 +199,7 @@ namespace AppKit
             void Mouse::setPosition(const MathCore::vec2i &position, Window *relativeToWindow)
             {
                 sf::Vector2i mouse_pos(position.x, position.y);
-                if (relativeToWindow != NULL)
+                if (relativeToWindow != nullptr)
                     sf::Mouse::setPosition(mouse_pos, *(sf::Window *)relativeToWindow->getLibraryHandle());
                 else
                     sf::Mouse::setPosition(mouse_pos);
@@ -243,7 +243,7 @@ namespace AppKit
             MathCore::vec2i Touch::getPosition(uint32_t finger_id, Window *relativeToWindow)
             {
                 sf::Vector2i pos;
-                if (relativeToWindow != NULL)
+                if (relativeToWindow != nullptr)
                     pos = sf::Touch::getPosition(finger_id, *(sf::Window *)relativeToWindow->getLibraryHandle());
                 else
                     pos = sf::Touch::getPosition(finger_id);
@@ -1055,7 +1055,7 @@ namespace windowGLWrapper
             fd_set rdfs;
             FD_ZERO(&rdfs);
             FD_SET(STDIN_FILENO, &rdfs);
-            int sel = select(STDIN_FILENO + 1, &rdfs, NULL, NULL, &tv);
+            int sel = select(STDIN_FILENO + 1, &rdfs, nullptr, nullptr, &tv);
 
             if (sel > 0 && FD_ISSET(STDIN_FILENO, &rdfs))
                 read(STDIN_FILENO, &c, 1);
@@ -1068,7 +1068,7 @@ namespace windowGLWrapper
                 //
                 FD_ZERO(&rdfs);
                 FD_SET(STDIN_FILENO, &rdfs);
-                sel = select(STDIN_FILENO + 1, &rdfs, NULL, NULL, &tv);
+                sel = select(STDIN_FILENO + 1, &rdfs, nullptr, nullptr, &tv);
                 if (sel > 0 && FD_ISSET(STDIN_FILENO, &rdfs))
                 {
                     unsigned char buff[16];
@@ -1096,7 +1096,7 @@ namespace windowGLWrapper
 
     void _release_at_exit()
     {
-        if (linux_fd_monitoring != NULL)
+        if (linux_fd_monitoring != nullptr)
         {
             delete linux_fd_monitoring);
         }

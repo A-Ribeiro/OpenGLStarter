@@ -25,7 +25,7 @@ namespace AppKit
                 leftHanded = true;
                 rightHanded = false;
 
-                renderWindowRegion = NULL;
+                renderWindowRegion = nullptr;
 
                 fovDegrees.OnChange.add(&ComponentCameraPerspective::OnUpdateCameraFloatParameter, this);
                 nearPlane.OnChange.add(&ComponentCameraPerspective::OnUpdateCameraFloatParameter, this);
@@ -38,7 +38,7 @@ namespace AppKit
             ComponentCameraPerspective::~ComponentCameraPerspective()
             {
                 // AppBase* appBase = Engine::Instance()->app;
-                if (renderWindowRegion != NULL)
+                if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraPerspective::OnViewportChanged, this);
                 }
@@ -83,7 +83,7 @@ namespace AppKit
                 // AppBase* appBase = Engine::Instance()->app;
                 MathCore::vec2i size;
 
-                if (renderWindowRegion != NULL)
+                if (renderWindowRegion != nullptr)
                     size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
                 else
                     size = Engine::Instance()->app->window->getSize();
@@ -110,7 +110,7 @@ namespace AppKit
                 auto transform = getTransform();
 
                 auto lines = transform->findComponent<ComponentColorLine>();
-                if (lines == NULL)
+                if (lines == nullptr)
                     lines = transform->addNewComponent<ComponentColorLine>();
 
                 lines->vertices.clear();

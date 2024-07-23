@@ -1,6 +1,6 @@
 #include <appkit-gl-base/GLPostProcess.h>
 // #include <aRibeiroCore/common.h>
-// #include <aRibeiroCore/SetNullAndDelete.h>
+// #include <aRibeiroCore/SetnullptrAndDelete.h>
 #include <appkit-gl-base/platform/PlatformGL.h>
 
 //using namespace aRibeiro;
@@ -45,17 +45,17 @@ namespace AppKit
         GLPostProcess::~GLPostProcess()
         {
 
-            // setNullAndDelete( firstRender->depth );
+            // setnullptrAndDelete( firstRender->depth );
             delete firstRender->color[0];
             delete firstRender;
 
-            firstRender = NULL;
+            firstRender = nullptr;
 
             for (int i = 0; i < 2; i++)
             {
                 delete fbo[i]->color[0];
                 delete fbo[i];
-                fbo[i] = NULL;
+                fbo[i] = nullptr;
             }
         }
 
@@ -104,7 +104,7 @@ namespace AppKit
             {
                 if (i == pipeline.size() - 1)
                 {
-                    pipeline[i]->render(this, src->color[0], firstRender->depth, NULL);
+                    pipeline[i]->render(this, src->color[0], firstRender->depth, nullptr);
                 }
                 else
                 {

@@ -26,11 +26,11 @@ namespace AppKit
         //--------------------------------------------------------------------------
         void Font::release()
         {
-            if (luminancePointer != NULL)
+            if (luminancePointer != nullptr)
             {
                 delete[] luminancePointer;
             }
-            luminancePointer = NULL;
+            luminancePointer = nullptr;
             mGlyphs.clear();
             memset(&mHeader, 0, sizeof(FontHeader));
         }
@@ -40,7 +40,7 @@ namespace AppKit
             release();
             mHeader = v.mHeader;
             mGlyphs = v.mGlyphs;
-            if (v.luminancePointer != NULL)
+            if (v.luminancePointer != nullptr)
             {
                 luminancePointer = new char[mHeader.mTexW * mHeader.mTexH];
                 memcpy(luminancePointer, v.luminancePointer, mHeader.mTexW * mHeader.mTexH * sizeof(char));
@@ -49,13 +49,13 @@ namespace AppKit
         //--------------------------------------------------------------------------
         Font::Font(const Font &font)
         {
-            luminancePointer = NULL;
+            luminancePointer = nullptr;
             (*this) = font;
         }
         //--------------------------------------------------------------------------
         Font::Font()
         {
-            luminancePointer = NULL;
+            luminancePointer = nullptr;
         }
         //--------------------------------------------------------------------------
         Font::~Font()
@@ -67,7 +67,7 @@ namespace AppKit
         {
             FILE *in = ITKCommon::FileSystem::File::fopen(basofFile, "rb", errorStr);
             if (!in)
-                return NULL;
+                return nullptr;
             
             Font *result = new Font();
 
@@ -79,9 +79,9 @@ namespace AppKit
             FontFileBinHeader binHeader;
             size_t readed_size;
             readed_size = fread(&binHeader, sizeof(FontFileBinHeader), 1, in);
-            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
 
-            ON_COND_SET_ERRORSTR_RETURN(memcmp(&binHeader, ".asilva.lum.font", 16) != 0, NULL, "Invalid format string reading basof file.\n");
+            ON_COND_SET_ERRORSTR_RETURN(memcmp(&binHeader, ".asilva.lum.font", 16) != 0, nullptr, "Invalid format string reading basof file.\n");
 
             //if (memcmp(&binHeader, ".asilva.lum.font", 16) == 0)
             //{
@@ -90,24 +90,24 @@ namespace AppKit
             // byte order -- the default pack for structs is 4bytes align ... there are 5 shorts... in the structure (unaligned...)
             //    to read correctly -- need short by short reading.
             readed_size = fread(&result->mHeader.mTexW, sizeof(short), 1, in); // texW
-            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
             readed_size = fread(&result->mHeader.mTexH, sizeof(short), 1, in); // texH
-            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
             readed_size = fread(&result->mHeader.nSpaceWidth, sizeof(short), 1, in);
-            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
             readed_size = fread(&result->mHeader.mGlyphHeight, sizeof(short), 1, in); // new line height
-            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
             readed_size = fread(&result->mHeader.mGlyphCount, sizeof(unsigned short), 1, in); // numberOfGlyphs
-            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+            ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
 
             for (int i = 0; i < result->mHeader.mGlyphCount; i++)
             {
                 uint32_t c;
                 FontGlyphInfo glyphInfo;
                 readed_size = fread(&c, sizeof(uint32_t), 1, in);
-                ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+                ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
                 readed_size = fread(&glyphInfo, sizeof(glyphInfo), 1, in);
-                ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+                ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
                 result->mGlyphs[c] = glyphInfo;
             }
 
@@ -121,12 +121,12 @@ namespace AppKit
             {
                 char c;
                 readed_size = fread(&c, sizeof(char), 1, in);
-                ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+                ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
                 if (c == '\x00' || c == '\xff')
                 {
                     // rle decompress
                     readed_size = fread(&rle_count, sizeof(char), 1, in);
-                    ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, NULL, "Error to read basof file.\n");
+                    ON_COND_SET_ERRORSTR_RETURN(readed_size != 1, nullptr, "Error to read basof file.\n");
                     memset(&result->luminancePointer[bufferInsertPos], (unsigned char)c, rle_count);
                     bufferInsertPos += rle_count;
                 }

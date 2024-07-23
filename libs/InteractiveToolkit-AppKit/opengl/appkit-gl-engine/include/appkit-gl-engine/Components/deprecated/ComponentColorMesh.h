@@ -18,36 +18,36 @@ namespace AppKit
 
             void setTriangle(std::vector<uint32_t> *indices,
                              std::vector<MathCore::vec3f> *vertices,
-                             std::vector<MathCore::vec3f> *uv = NULL,
-                             std::vector<MathCore::vec3f> *normals = NULL,
-                             std::vector<MathCore::vec3f> *tangents = NULL,
-                             std::vector<MathCore::vec3f> *binormals = NULL);
+                             std::vector<MathCore::vec3f> *uv = nullptr,
+                             std::vector<MathCore::vec3f> *normals = nullptr,
+                             std::vector<MathCore::vec3f> *tangents = nullptr,
+                             std::vector<MathCore::vec3f> *binormals = nullptr);
 
             void setPlane(bool _xy,
                           bool _xz,
                           float _width, float _height,
                           std::vector<uint32_t> *indices,
                           std::vector<MathCore::vec3f> *vertices,
-                          std::vector<MathCore::vec3f> *uv = NULL,
-                          std::vector<MathCore::vec3f> *normals = NULL,
-                          std::vector<MathCore::vec3f> *tangents = NULL,
-                          std::vector<MathCore::vec3f> *binormals = NULL);
+                          std::vector<MathCore::vec3f> *uv = nullptr,
+                          std::vector<MathCore::vec3f> *normals = nullptr,
+                          std::vector<MathCore::vec3f> *tangents = nullptr,
+                          std::vector<MathCore::vec3f> *binormals = nullptr);
 
             void setBox(const MathCore::vec3f &dimension,
                         std::vector<uint32_t> *indices,
                         std::vector<MathCore::vec3f> *vertices,
-                        std::vector<MathCore::vec3f> *uv = NULL,
-                        std::vector<MathCore::vec3f> *normals = NULL,
-                        std::vector<MathCore::vec3f> *tangents = NULL,
-                        std::vector<MathCore::vec3f> *binormals = NULL);
+                        std::vector<MathCore::vec3f> *uv = nullptr,
+                        std::vector<MathCore::vec3f> *normals = nullptr,
+                        std::vector<MathCore::vec3f> *tangents = nullptr,
+                        std::vector<MathCore::vec3f> *binormals = nullptr);
 
             void setSphere(float radius, int sectorCount, int stackCount,
                            std::vector<uint32_t> *indices,
                            std::vector<MathCore::vec3f> *vertices,
-                           std::vector<MathCore::vec3f> *uv = NULL,
-                           std::vector<MathCore::vec3f> *normals = NULL,
-                           std::vector<MathCore::vec3f> *tangents = NULL,
-                           std::vector<MathCore::vec3f> *binormals = NULL);
+                           std::vector<MathCore::vec3f> *uv = nullptr,
+                           std::vector<MathCore::vec3f> *normals = nullptr,
+                           std::vector<MathCore::vec3f> *tangents = nullptr,
+                           std::vector<MathCore::vec3f> *binormals = nullptr);
 
             class ComponentColorMesh : public Component
             {
@@ -67,8 +67,8 @@ namespace AppKit
                 ComponentColorMesh() : Component(ComponentColorMesh::Type)
                 {
                     vbo_indexCount = 0;
-                    vbo_data = NULL;
-                    vbo_index = NULL;
+                    vbo_data = nullptr;
+                    vbo_index = nullptr;
                 }
 
                 ComponentColorMesh(std::vector<MathCore::vec3f> &vertices,
@@ -82,14 +82,14 @@ namespace AppKit
                     this->color = color;
 
                     vbo_indexCount = 0;
-                    vbo_data = NULL;
-                    vbo_index = NULL;
+                    vbo_data = nullptr;
+                    vbo_index = nullptr;
                 }
 
                 void syncVBOStatic()
                 {
 
-                    if (vbo_data == NULL)
+                    if (vbo_data == nullptr)
                     {
                         vbo_data = new AppKit::OpenGL::GLVertexBufferObject();
                         vbo_index = new AppKit::OpenGL::GLVertexBufferObject();
@@ -103,7 +103,7 @@ namespace AppKit
                 void syncVBODynamic()
                 {
 
-                    if (vbo_data == NULL)
+                    if (vbo_data == nullptr)
                     {
                         vbo_data = new AppKit::OpenGL::GLVertexBufferObject();
                         vbo_index = new AppKit::OpenGL::GLVertexBufferObject();
@@ -116,9 +116,9 @@ namespace AppKit
 
                 ~ComponentColorMesh()
                 {
-                    if (vbo_data != NULL)
+                    if (vbo_data != nullptr)
                         delete vbo_data;
-                    if (vbo_index != NULL)
+                    if (vbo_index != nullptr)
                         delete vbo_index;
                 }
 

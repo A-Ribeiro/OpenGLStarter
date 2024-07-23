@@ -22,8 +22,8 @@ namespace AppKit
 
             root = Transform::CreateShared();
 
-            materialBackground = NULL;
-            componentFontToMesh = NULL;
+            materialBackground = nullptr;
+            componentFontToMesh = nullptr;
 
             // resize(AppKit::GLEngine::Engine::Instance()->app->WindowSize);
 
@@ -72,7 +72,7 @@ namespace AppKit
                 root->setLocalPosition(MathCore::vec3f(centerx - margin, -centery - (margin + spacingIndex), 0));
             }
 
-            // if (materialBackground == NULL || componentFontToMesh == NULL)
+            // if (materialBackground == nullptr || componentFontToMesh == nullptr)
             {
                 float xmin, xmax, ymin, ymax;
 
@@ -109,7 +109,7 @@ namespace AppKit
                 aabb.max_box += root->getLocalPosition();
 
                 // back square
-                if (materialBackground == NULL)
+                if (materialBackground == nullptr)
                 {
                     auto cursorNode = root->addChild(Transform::CreateShared());
                     materialBackground = cursorNode->addNewComponent<Components::ComponentMaterial>();
@@ -136,7 +136,7 @@ namespace AppKit
                     cursorNode->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 0);
                 }
                 // font
-                if (componentFontToMesh == NULL)
+                if (componentFontToMesh == nullptr)
                 {
                     auto textTransform = root->addChild(Transform::CreateShared());
                     componentFontToMesh = textTransform->addNewComponent<Components::ComponentFontToMesh>();

@@ -36,7 +36,7 @@ void SceneGUI::loadGraph(){
     t = root->addChild( button_SoftParticles->getTransform() );
 
     {
-        cursorTransform = root->addChild(new Transform());
+        cursorTransform = root->addChild(Transform::CreateShared());
     }
     
 }
@@ -79,28 +79,28 @@ void SceneGUI::unloadAll(){
 
     ResourceHelper::releaseTransformRecursive(&root);
 
-    if (button_SoftParticles != NULL){
+    if (button_SoftParticles != nullptr){
         delete button_SoftParticles;
-        button_SoftParticles = NULL;
+        button_SoftParticles = nullptr;
     }
 
     ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
     texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
     texRefCount->remove(cursorTexture);
-    cursorTexture = NULL;
+    cursorTexture = nullptr;
 
 }
 
 void SceneGUI::draw(){
     AppKit::GLEngine::Engine* engine = AppKit::GLEngine::Engine::Instance();
 
-    if (cursorTransform != NULL)
+    if (cursorTransform != nullptr)
         cursorTransform->setLocalPosition(
             MathCore::vec3f(engine->app->screenRenderWindow.MousePosRelatedToCenter, 0.0f)
         );
 
-    if (button_SoftParticles != NULL)
+    if (button_SoftParticles != nullptr)
         button_SoftParticles->update(
             MathCore::vec3f(engine->app->screenRenderWindow.MousePosRelatedToCenter, 0.0f)
 
@@ -120,7 +120,7 @@ void SceneGUI::draw(){
 }
 
 void SceneGUI::resize(const MathCore::vec2i&size) {
-    if (button_SoftParticles != NULL)
+    if (button_SoftParticles != nullptr)
         button_SoftParticles->resize(size);
 }
 
@@ -129,10 +129,10 @@ SceneGUI::SceneGUI(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper) {
     
-    button_SoftParticles = NULL;
+    button_SoftParticles = nullptr;
 
-    cursorTexture = NULL;
-    cursorTransform = NULL;
+    cursorTexture = nullptr;
+    cursorTransform = nullptr;
 }
 
 SceneGUI::~SceneGUI() {

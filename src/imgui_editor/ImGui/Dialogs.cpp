@@ -65,7 +65,7 @@ void Dialogs::RenderAndLogic()
         ImGui::SetNextWindowPos( ImGui::GetIO().DisplaySize * 0.5f, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     }
 
-	if (ImGui::BeginPopupModal("EnterTextOK", NULL, 
+	if (ImGui::BeginPopupModal("EnterTextOK", nullptr, 
         ImGuiWindowFlags_NoSavedSettings 
         | ImGuiWindowFlags_NoResize
         | ImGuiWindowFlags_NoMove
@@ -172,7 +172,7 @@ void Dialogs::RenderAndLogic()
         ImGui::SetNextWindowPos( ImGui::GetIO().DisplaySize * 0.5f, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     }
 
-	if (ImGui::BeginPopupModal("InfoOK", NULL, 
+	if (ImGui::BeginPopupModal("InfoOK", nullptr, 
         ImGuiWindowFlags_NoSavedSettings 
         | ImGuiWindowFlags_NoResize
         | ImGuiWindowFlags_NoMove

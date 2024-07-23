@@ -22,7 +22,7 @@ namespace AppKit
                                            std::map<int, std::shared_ptr<Components::ComponentMesh> > &geometryCache,
                                            std::map<int, std::shared_ptr<Components::ComponentMaterial> > &materialCache,
                                            std::shared_ptr<Transform> root,
-                                           std::shared_ptr<Components::ComponentMaterial> defaultMaterial = NULL,
+                                           std::shared_ptr<Components::ComponentMaterial> defaultMaterial = nullptr,
                                            uint32_t model_dynamic_upload = 0, uint32_t model_static_upload = 0xffffffff);
 
         public:

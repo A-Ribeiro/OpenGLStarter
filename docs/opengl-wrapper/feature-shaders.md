@@ -19,7 +19,7 @@ Example:
 
 ```cpp
 // global variable definition
-GLShaderColor *shaderColor = NULL;
+GLShaderColor *shaderColor = nullptr;
 
 int main(int argc, char* argv[]) {
   //OpenGL Inicialization

@@ -72,7 +72,7 @@ namespace AppKit
             void requestFocus();
 
             // TODO: poll window event and feed the InputManager
-            void forwardWindowEventsToInputManager(bool alwaysDraw = false, InputManager *customInputManager = NULL);
+            void forwardWindowEventsToInputManager(bool alwaysDraw = false, InputManager *customInputManager = nullptr);
 
             MathCore::vec2i getPosition() const;
             void setPosition(const MathCore::vec2i &position);
@@ -132,7 +132,7 @@ typedef void* VkAllocationCallbacks;
 
             // need headers vulkan
             void createVulkanSurface(
-                const VkInstance& instance, VkSurfaceKHR& surface, const VkAllocationCallbacks* allocator = NULL
+                const VkInstance& instance, VkSurfaceKHR& surface, const VkAllocationCallbacks* allocator = nullptr
             );
 
             ~VulkanWindow();

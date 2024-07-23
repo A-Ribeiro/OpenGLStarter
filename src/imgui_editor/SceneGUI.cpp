@@ -91,10 +91,14 @@ void SceneGUI::unloadAll(){
     
     //texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
 
-    if (cursorTexture != nullptr) {
-        //texRefCount->remove(cursorTexture);
-        cursorTexture = nullptr;
-    }
+    // if (cursorTexture != nullptr) {
+    //     //texRefCount->remove(cursorTexture);
+    //     cursorTexture = nullptr;
+    // }
+
+    cursorTexture = nullptr;
+    cursorTransform = nullptr;
+
 }
 
 void SceneGUI::draw() {
@@ -133,8 +137,8 @@ AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelp
     this->app = app;
     this->renderWindow = renderWindow;
 
-    cursorTexture = NULL;
-    cursorTransform = NULL;
+    cursorTexture = nullptr;
+    cursorTransform = nullptr;
 
     this->renderWindow->OnUpdate.add(&SceneGUI::OnUpdate, this);
 }
@@ -168,7 +172,7 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
 
     MathCore::vec3f pos3D = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenter * this->renderWindow->windowToCameraScale, 0.0f);
 
-    if (cursorTransform != NULL)
+    if (cursorTransform != nullptr)
         cursorTransform->setLocalPosition(pos3D);
 
 }

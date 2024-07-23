@@ -3,7 +3,7 @@
 #include <appkit-gl-base/platform/PlatformGL.h>
 // #include <glew/glew.h> // extensions here
 //#include <aRibeiroCore/common.h> // std types
-//#include <aRibeiroCore/SetNullAndDelete.h>
+//#include <aRibeiroCore/SetnullptrAndDelete.h>
 
 #include <appkit-gl-base/VirtualTexture.h>
 
@@ -29,16 +29,16 @@ namespace AppKit
                 data_size_bytes = size_bytes;
                 input_data_type = _input_data_type;
                 if (size_bytes == 0)
-                    data = NULL;
+                    data = nullptr;
                 else
                     data = new uint8_t[size_bytes];
             }
 
             void dispose()
             {
-                if (data != NULL) {
+                if (data != nullptr) {
                     delete [] data;
-                    data = NULL;
+                    data = nullptr;
                 }
             }
         };

@@ -7,7 +7,7 @@ namespace AppKit
 
         bool AnimationClip::findRootNode(std::shared_ptr<Transform> t, const void *userData)
         {
-            if (root_node != NULL)
+            if (root_node != nullptr)
                 return false;
 
             const ITKExtension::Model::Animation &animation = *(const ITKExtension::Model::Animation *)userData;
@@ -29,7 +29,7 @@ namespace AppKit
         {
 
             base_model = root;
-            root_node = NULL;
+            root_node = nullptr;
 
             root->traversePreOrder_DepthFirst(
                 EventCore::CallbackWrapper(&AnimationClip::findRootNode, this),
@@ -172,7 +172,7 @@ namespace AppKit
 
         AnimationMixer::AnimationMixer()
         {
-            current_clip = NULL;
+            current_clip = nullptr;
             current_index = 0;
         }
 
@@ -188,7 +188,7 @@ namespace AppKit
             clips_array.clear();
             transitions.clear();
 
-            current_clip = NULL;
+            current_clip = nullptr;
         }
 
         void AnimationMixer::addClip(AnimationClip *clip)
@@ -210,7 +210,7 @@ namespace AppKit
             MathCore::vec3f scale = model_from_file->getScale();
             printf("[AnimationMixer] Model scale: %f %f %f.\n", scale.x, scale.y, scale.z);
 
-            if (current_clip == NULL)
+            if (current_clip == nullptr)
             {
                 current_clip = clips_array[0];
 
@@ -247,7 +247,7 @@ namespace AppKit
                     {
                         auto aNode = clip_a->channels[i].node;
 
-                        NodeAnimation *channel_b = NULL;
+                        NodeAnimation *channel_b = nullptr;
 
                         bool found = false;
                         for (int j = 0; j < clip_b->channels.size(); j++)
@@ -466,9 +466,9 @@ namespace AppKit
 
         RootMotionAnalyserData::RootMotionAnalyserData()
         {
-            clipInfo[0].clip = NULL;
+            clipInfo[0].clip = nullptr;
             clipInfo[0].weight = 0.0f;
-            clipInfo[1].clip = NULL;
+            clipInfo[1].clip = nullptr;
             clipInfo[1].weight = 0.0f;
             clip_count = 0;
             clip_to_process = 0;

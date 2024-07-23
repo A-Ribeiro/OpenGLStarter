@@ -24,7 +24,7 @@ namespace AppKit
                 vertices->push_back(MathCore::vec3f(0.5f, 0.0f, 0.0f));
                 vertices->push_back(MathCore::vec3f(0.0f, 1.0f, 0.0f));
 
-                if (uv != NULL)
+                if (uv != nullptr)
                 {
                     uv->clear();
                     uv->push_back(MathCore::vec3f(MathCore::vec2f(0.0f, 0.0f), 0));
@@ -32,7 +32,7 @@ namespace AppKit
                     uv->push_back(MathCore::vec3f(MathCore::vec2f(0.5f, 0.5f), 0));
                 }
 
-                if (normals != NULL)
+                if (normals != nullptr)
                 {
                     normals->clear();
                     normals->push_back(MathCore::vec3f(0.0f, 0.0f, 1.0f));
@@ -40,7 +40,7 @@ namespace AppKit
                     normals->push_back(MathCore::vec3f(0.0f, 0.0f, 1.0f));
                 }
 
-                if (tangents != NULL)
+                if (tangents != nullptr)
                 {
                     tangents->clear();
                     tangents->push_back(MathCore::vec3f(1.0f, 0.0f, 0.0f));
@@ -48,7 +48,7 @@ namespace AppKit
                     tangents->push_back(MathCore::vec3f(1.0f, 0.0f, 0.0f));
                 }
 
-                if (binormals != NULL)
+                if (binormals != nullptr)
                 {
                     binormals->clear();
                     binormals->push_back(MathCore::vec3f(0.0f, 1.0f, 0.0f));
@@ -109,7 +109,7 @@ namespace AppKit
                     indices->push_back(i + 3);
                 }
 
-                if (uv != NULL)
+                if (uv != nullptr)
                 {
                     uv->clear();
                     uv->push_back(MathCore::vec3f(MathCore::vec2f(1.0f, 0.0f), 0));
@@ -118,7 +118,7 @@ namespace AppKit
                     uv->push_back(MathCore::vec3f(MathCore::vec2f(0.0f, 0.0f), 0));
                 }
 
-                if (normals != NULL)
+                if (normals != nullptr)
                 {
                     normals->clear();
                     normals->push_back(MathCore::vec3f(0.0f, 1.0f, 0.0f));
@@ -126,7 +126,7 @@ namespace AppKit
                     normals->push_back(MathCore::vec3f(0.0f, 1.0f, 0.0f));
                 }
 
-                if (tangents != NULL)
+                if (tangents != nullptr)
                 {
                     tangents->clear();
                     tangents->push_back(MathCore::vec3f(1.0f, 0.0f, 0.0f));
@@ -134,7 +134,7 @@ namespace AppKit
                     tangents->push_back(MathCore::vec3f(1.0f, 0.0f, 0.0f));
                 }
 
-                if (binormals != NULL)
+                if (binormals != nullptr)
                 {
                     binormals->clear();
                     binormals->push_back(MathCore::vec3f(0.0f, 0.0f, 1.0f));
@@ -196,7 +196,7 @@ namespace AppKit
                 vertices->push_back(MathCore::vec3f(halfDim.x, -halfDim.y, -halfDim.z));
                 vertices->push_back(MathCore::vec3f(-halfDim.x, -halfDim.y, -halfDim.z));
 
-                if (normals != NULL)
+                if (normals != nullptr)
                 {
                     //
                     // TOP
@@ -243,7 +243,7 @@ namespace AppKit
                     normals->push_back(MathCore::vec3f(0, 0, -1));
                 }
 
-                if (uv != NULL)
+                if (uv != nullptr)
                 {
                     //
                     // TOP
@@ -291,7 +291,7 @@ namespace AppKit
                     uv->push_back(MathCore::vec3f(0, 0, 0));
                 }
 
-                if (tangents != NULL)
+                if (tangents != nullptr)
                 {
                     //
                     // TOP
@@ -370,13 +370,13 @@ namespace AppKit
                 // clear allbuffers
                 indices->clear();
                 vertices->clear();
-                if (uv != NULL)
+                if (uv != nullptr)
                     uv->clear();
-                if (normals != NULL)
+                if (normals != nullptr)
                     normals->clear();
-                if (tangents != NULL)
+                if (tangents != nullptr)
                     tangents->clear();
-                if (binormals != NULL)
+                if (binormals != nullptr)
                     binormals->clear();
 
                 float x, y, z, xy;                           // vertex position
@@ -430,13 +430,13 @@ namespace AppKit
                         */
 
                         vertices->push_back(p);
-                        if (uv != NULL)
+                        if (uv != nullptr)
                             uv->push_back(MathCore::vec3f(MathCore::vec2f(s, t), 0));
-                        if (normals != NULL)
+                        if (normals != nullptr)
                             normals->push_back(normal);
-                        if (tangents != NULL)
+                        if (tangents != nullptr)
                             tangents->push_back(tangent);
-                        if (binormals != NULL)
+                        if (binormals != nullptr)
                             binormals->push_back(binormal);
                     }
                 }
@@ -457,9 +457,9 @@ namespace AppKit
                     int index2 = k2;
                     int index3 = k2 + 1;
 
-                    if (tangents != NULL)
+                    if (tangents != nullptr)
                         (*tangents)[index1] = MathCore::OP<MathCore::vec3f>::normalize((*tangents)[index2] + (*tangents)[index3]);
-                    if (binormals != NULL && normals != NULL && tangents != NULL)
+                    if (binormals != nullptr && normals != nullptr && tangents != nullptr)
                         (*binormals)[index1] = MathCore::OP<MathCore::vec3f>::normalize(MathCore::OP<MathCore::vec3f>::cross((*normals)[index1], (*tangents)[index1]));
                     /*
                     result->vertices[index1].tangent = normalize(result->vertices[index2].tangent + result->vertices[index3].tangent);
@@ -478,9 +478,9 @@ namespace AppKit
                     int index2 = k2;
                     int index3 = k1 + 1;
 
-                    if (tangents != NULL)
+                    if (tangents != nullptr)
                         (*tangents)[index2] = MathCore::OP<MathCore::vec3f>::normalize((*tangents)[index1] + (*tangents)[index3]);
-                    if (binormals != NULL && normals != NULL && tangents != NULL)
+                    if (binormals != nullptr && normals != nullptr && tangents != nullptr)
                         (*binormals)[index2] = MathCore::OP<MathCore::vec3f>::normalize(MathCore::OP<MathCore::vec3f>::cross((*normals)[index2], (*tangents)[index2]));
 
                     /*

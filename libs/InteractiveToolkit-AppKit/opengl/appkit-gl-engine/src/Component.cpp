@@ -17,7 +17,7 @@ namespace AppKit
         Component::Component(ComponentType type)
         {
             this->type_const_ref = type;
-            // transform = NULL;
+            // transform = nullptr;
             // mStartCalled = false;
             StartEventManager::Instance()->registerNewComponent(this);
         }

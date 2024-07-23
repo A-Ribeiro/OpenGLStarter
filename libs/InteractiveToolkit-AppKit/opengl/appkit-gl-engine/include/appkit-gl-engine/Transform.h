@@ -344,17 +344,17 @@ namespace AppKit
 
             bool traversePreOrder_DepthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
-                void *userData = NULL, int maxLevel = INT_MAX);
+                void *userData = nullptr, int maxLevel = INT_MAX);
             bool traversePostOrder_DepthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
-                void *userData = NULL, int maxLevel = INT_MAX);
+                void *userData = nullptr, int maxLevel = INT_MAX);
 
             bool traversePreOrder_DepthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
-                const void *userData = NULL, int maxLevel = INT_MAX);
+                const void *userData = nullptr, int maxLevel = INT_MAX);
             bool traversePostOrder_DepthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
-                const void *userData = NULL, int maxLevel = INT_MAX);
+                const void *userData = nullptr, int maxLevel = INT_MAX);
 
             ///////////////////////////////////////////////////////
             //

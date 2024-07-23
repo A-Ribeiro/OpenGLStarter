@@ -66,7 +66,7 @@ namespace AppKit
             void ComponentParticleSystem::OnAfterGraphPrecompute(Platform::Time *time)
             {
 
-                if (boxEmmiter != NULL)
+                if (boxEmmiter != nullptr)
                 {
                     emissionMatrix = boxEmmiter->localToWorldMatrix(true);
                     emissionDir = boxEmmiter->getRotation(true) * MathCore::vec3f(0, 0, 1);
@@ -92,7 +92,7 @@ namespace AppKit
                     {
                         // AppBase* app = Engine::Instance()->app;
 
-                        if (renderWindowRegion != NULL)
+                        if (renderWindowRegion != nullptr)
                         {
                             renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
                         }
@@ -143,21 +143,21 @@ namespace AppKit
 
                 rateElapsed_sec = 0.0f;
 
-                boxEmmiter = NULL;
+                boxEmmiter = nullptr;
 
                 textureColor = MathCore::vec4f(1, 1, 1, 1);
-                texture = NULL;
+                texture = nullptr;
 
                 soft = true;
 
-                renderWindowRegion = NULL;
+                renderWindowRegion = nullptr;
             }
 
             ComponentParticleSystem::~ComponentParticleSystem()
             {
                 // AppBase* app = Engine::Instance()->app;
 
-                if (renderWindowRegion != NULL)
+                if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
                 }
@@ -196,7 +196,7 @@ namespace AppKit
                 MathCore::vec3f pos,
                     dir = MathCore::vec3f(0, 0, 1);
 
-                if (boxEmmiter != NULL)
+                if (boxEmmiter != nullptr)
                 {
                     pos = mathRandom.next<MathCore::vec3f>() - MathCore::vec3f(0.5f);
                     pos = MathCore::CVT<MathCore::vec4f>::toVec3(emissionMatrix * MathCore::CVT<MathCore::vec3f>::toPtn4(pos));
@@ -223,7 +223,7 @@ namespace AppKit
                 elapsed_sec = 0.0f;
                 rateElapsed_sec = 0.0f;
 
-                if (boxEmmiter != NULL)
+                if (boxEmmiter != nullptr)
                 {
                     emissionMatrix = boxEmmiter->localToWorldMatrix();
                     emissionDir = boxEmmiter->getRotation() * MathCore::vec3f(0, 0, 1);
@@ -238,7 +238,7 @@ namespace AppKit
             {
                 auto transform = getTransform();
 
-                if (boxEmmiter != NULL)
+                if (boxEmmiter != nullptr)
                 {
                     emissionMatrix = boxEmmiter->localToWorldMatrix();
                     emissionDir = boxEmmiter->getRotation() * MathCore::vec3f(0, 0, 1);

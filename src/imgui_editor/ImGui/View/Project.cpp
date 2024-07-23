@@ -85,8 +85,8 @@ View *Project::Init()
                        { printf("[Project][Tree] OnCollapse on %s\n", node->getName()); });
         OnTreeSelect.add([](std::shared_ptr<TreeNode> node)
                      {
-            if (node == NULL) {
-                printf("[Project][Tree] OnSelect on NULL\n");
+            if (node == nullptr) {
+                printf("[Project][Tree] OnSelect on nullptr\n");
             } else {
                 printf("[Project][Tree] OnSelect on %s\n", node->getName());
             } });
@@ -105,8 +105,8 @@ View *Project::Init()
                           { printf("[Project][List] OnDoubleClick on %s\n", node->getName()); });
         OnListSelect.add([](std::shared_ptr<ListElement> node)
                      {
-            if (node == NULL) {
-                printf("[Project][List] OnSelect on NULL\n");
+            if (node == nullptr) {
+                printf("[Project][List] OnSelect on nullptr\n");
             } else {
                 printf("[Project][List] OnSelect on %s\n", node->getName());
             } });
@@ -126,7 +126,7 @@ void Project::RenderAndLogic()
     ImVec2 originalPadding = ImGui::GetStyle().WindowPadding;
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    if (ImGui::Begin("Project", NULL, flags))
+    if (ImGui::Begin("Project", nullptr, flags))
     {
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
@@ -338,7 +338,7 @@ void Project::RenderAndLogic()
 
 //     float text_width = size.x;
 
-//     ImVec2 text_size = ImGui::CalcTextSize(name, NULL, false, text_width);
+//     ImVec2 text_size = ImGui::CalcTextSize(name, nullptr, false, text_width);
 
 //     ImVec2 aux_pos = size - text_size;
 //     aux_pos.x = aux_pos.x * 0.5f;

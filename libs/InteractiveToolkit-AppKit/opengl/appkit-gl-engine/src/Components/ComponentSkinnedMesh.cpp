@@ -94,7 +94,7 @@ namespace AppKit
 
             void ComponentSkinnedMesh::OnTransformVisited(std::shared_ptr<Transform> t)
             {
-                if (t->userData == NULL)
+                if (t->userData == nullptr)
                     return;
 
                 int bone_index = *(int *)t->userData;
@@ -106,7 +106,7 @@ namespace AppKit
 
                 if (isGPUSkinning)
                 {
-                    if (componentMaterial != NULL)
+                    if (componentMaterial != nullptr)
                         componentMaterial->skin_gradient_matrix_dirty = true;
                 }
                 else
@@ -199,9 +199,9 @@ namespace AppKit
             ComponentSkinnedMesh::ComponentSkinnedMesh(ResourceHelper *_resourceHelper, bool _isGPUSkinning) : Component(ComponentSkinnedMesh::Type)
             {
                 isGPUSkinning = _isGPUSkinning;
-                model_base = NULL;
-                componentMesh = NULL;
-                componentMaterial = NULL;
+                model_base = nullptr;
+                componentMesh = nullptr;
+                componentMaterial = nullptr;
                 resourceHelper = _resourceHelper;
 
                 skinning_dirty = true;
@@ -425,14 +425,14 @@ namespace AppKit
                 transform->addComponent(componentMesh);
 
                 // transform[0]->addChild(model_base);
-                // model_base = NULL;
+                // model_base = nullptr;
             }
 
             void ComponentSkinnedMesh::loadAnimation(const std::string &clip_name, const std::string &filename)
             {
                 printf("[ComponentSkinnedMesh] loadAnimation %s\n", filename.c_str());
 
-                ITK_ABORT(model_base == NULL, "you need to call loadModelBase before load a new animation clip.\n");
+                ITK_ABORT(model_base == nullptr, "you need to call loadModelBase before load a new animation clip.\n");
 
                 ITKExtension::Model::ModelContainer *container = new ITKExtension::Model::ModelContainer();
                 container->read(filename.c_str());
@@ -487,7 +487,7 @@ namespace AppKit
             ComponentSkinnedMesh::~ComponentSkinnedMesh()
             {
                 // AppBase* app = Engine::Instance()->app;
-                if (renderWindowRegion != NULL)
+                if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->OnPreUpdate.remove(&ComponentSkinnedMesh::OnPreUpdate, this);
                 }

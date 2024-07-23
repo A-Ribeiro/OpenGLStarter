@@ -77,7 +77,7 @@ namespace AppKit
                                          float _distance,
                                          int cubeResolution, bool leftHanded) : cubeMap(0, 0, 0xffffffff, cubeResolution)
         {
-            vbo = NULL;
+            vbo = nullptr;
             cubeMap.loadFromFile(_negz, _posz,
                                  _negx, _posx,
                                  _negy, _posy,
@@ -90,20 +90,20 @@ namespace AppKit
                                          float _distance,
                                          int cubeResolution, bool leftHanded) : cubeMap(sRGB, cubeResolution)
         {
-            vbo = NULL;
+            vbo = nullptr;
             cubeMap.loadFromSingleFile(single_file, sRGB, leftHanded);
             createVertex(_distance);
         }
 
         GLCubeMapSkyBox::~GLCubeMapSkyBox()
         {
-            if (vbo != NULL)
+            if (vbo != nullptr)
                 delete vbo;
         }
 
         void GLCubeMapSkyBox::createVBO()
         {
-            if (vbo == NULL)
+            if (vbo == nullptr)
                 vbo = new AppKit::OpenGL::GLVertexBufferObject();
             vbo->uploadData(&vertex[0], sizeof(MathCore::vec3f) * (int)vertex.size());
         }
@@ -131,7 +131,7 @@ namespace AppKit
 
             cubeMap.active(0);
 
-            if (vbo != NULL)
+            if (vbo != nullptr)
             {
                 vbo->setLayout(cubeSkyShader.vPosition, 3, GL_FLOAT, sizeof(MathCore::vec3f), 0);
                 vbo->drawArrays(GL_TRIANGLES, 36);
@@ -176,7 +176,7 @@ namespace AppKit
 
             anotherCubeMap->active(0);
 
-            if (vbo != NULL)
+            if (vbo != nullptr)
             {
                 vbo->setLayout(cubeSkyShader.vPosition, 3, GL_FLOAT, sizeof(MathCore::vec3f), 0);
                 vbo->drawArrays(GL_TRIANGLES, 36);

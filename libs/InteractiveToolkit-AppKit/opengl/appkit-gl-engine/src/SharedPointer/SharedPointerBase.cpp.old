@@ -7,24 +7,24 @@ namespace AppKit
 
         SharedPointerBase::SharedPointerBase()
         {
-            reference = NULL;
+            reference = nullptr;
         }
 
         SharedPointerBase::~SharedPointerBase()
         {
-            setNULL();
+            setnullptr();
         }
 
-        bool SharedPointerBase::isNULL()
+        bool SharedPointerBase::isnullptr()
         {
-            return reference == NULL;
+            return reference == nullptr;
         }
 
-        void SharedPointerBase::setNULL(bool unregister)
+        void SharedPointerBase::setnullptr(bool unregister)
         {
             if (unregister)
                 SharedPointerDatabase::Instance()->unregisterPointer(this, reference);
-            reference = NULL;
+            reference = nullptr;
         }
 
     }

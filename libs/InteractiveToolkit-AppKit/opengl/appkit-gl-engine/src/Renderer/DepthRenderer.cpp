@@ -53,7 +53,7 @@ namespace AppKit
 
     // RPI 3 does not support depth textures nor float textures...
     #ifndef ITK_RPI
-            if (fbo.depthTexture == NULL)
+            if (fbo.depthTexture == nullptr)
                 depthTexture.setSize(w,h);
 
             fbo.setSize(w,h);
@@ -168,10 +168,10 @@ namespace AppKit
         // dont need another rendering pass...
         void DepthRenderer::method1_copy_from_current_framebuffer(RenderWindowRegion *renderWindowRegion)
         {
-            if (renderWindowRegion == NULL)
+            if (renderWindowRegion == nullptr)
                 renderWindowRegion = &AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
             // screen or FBO?
-            if (renderWindowRegion->fbo == NULL)
+            if (renderWindowRegion->fbo == nullptr)
             {
                 fbo.setSize(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
                 fbo.blitFromBackBuffer(0, GL_DEPTH_BUFFER_BIT, GL_NEAREST);

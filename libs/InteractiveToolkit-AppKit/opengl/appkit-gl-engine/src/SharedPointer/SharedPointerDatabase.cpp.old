@@ -18,21 +18,21 @@ namespace AppKit
             {
                 std::vector<SharedPointerBase *> &pointers = it->second;
                 for (unsigned int i = 0; i < pointers.size(); i++)
-                    pointers[i]->setNULL(false);
+                    pointers[i]->setnullptr(false);
                 refs.erase(it);
             }
         }
 
         void SharedPointerDatabase::registerPointer(SharedPointerBase *pointer, void *ref)
         {
-            if (ref == NULL || pointer == NULL)
+            if (ref == nullptr || pointer == nullptr)
                 return;
             refs[ref].push_back(pointer);
         }
 
         void SharedPointerDatabase::unregisterPointer(SharedPointerBase *pointer, void *ref)
         {
-            if (ref == NULL || pointer == NULL)
+            if (ref == nullptr || pointer == nullptr)
                 return;
             std::map<void *, std::vector<SharedPointerBase *>>::iterator it = refs.find(ref);
             if (it != refs.end())

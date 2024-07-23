@@ -19,7 +19,7 @@ namespace AppKit
                     if (handle_window_close)
                     {
                         AppKit::GLEngine::AppBase *app = AppKit::GLEngine::Engine::Instance()->app;
-                        if (app != NULL)
+                        if (app != nullptr)
                             app->exitApp();
                     }
                     break;
@@ -126,13 +126,13 @@ namespace AppKit
             WindowViewport = AppKit::GLEngine::iRect(0, 0, 0, 0);
             CameraViewport = AppKit::GLEngine::iRect(0, 0, 0, 0);
             normalization_factor = 1.0f;
-            fbo = NULL;
-            color_buffer = NULL;
-            // z_buffer = NULL;
-            z_render_buffer = NULL;
+            fbo = nullptr;
+            color_buffer = nullptr;
+            // z_buffer = nullptr;
+            z_render_buffer = nullptr;
             screenCenterI = MathCore::vec2i(0, 0);
 
-            parent = NULL;
+            parent = nullptr;
 
             inputManager.onMouseEvent.add(&RenderWindowRegion::onMouseEvent, this);
             inputManager.onWindowEvent.add(&RenderWindowRegion::onWindowEvent, this);
@@ -152,18 +152,18 @@ namespace AppKit
             // viewport = AppKit::GLEngine::iRect(0,0,0,0);
             // normalization_factor = 1.0f;
 
-            if (fbo != NULL){
+            if (fbo != nullptr){
                 delete fbo;
-                fbo = NULL;
+                fbo = nullptr;
             }
-            if (color_buffer != NULL){
+            if (color_buffer != nullptr){
                 delete color_buffer;
-                color_buffer = NULL;
+                color_buffer = nullptr;
             }
         // delete z_buffer);
-            if (z_render_buffer != NULL){
+            if (z_render_buffer != nullptr){
                 delete z_render_buffer;
-                z_render_buffer = NULL;
+                z_render_buffer = nullptr;
             }
         // screenCenterI = MathCore::vec2i::Create(0,0);
         }
@@ -187,7 +187,7 @@ namespace AppKit
             MathCore::vec2f size = MathCore::vec2f(viewport.w,viewport.h) / viewportScaleFactor;
             MathCore::vec2i sizei = (MathCore::vec2i)(MathCore::OP<MathCore::vec2f>::round(size) + 0.5f);
 
-            if (fbo != NULL){
+            if (fbo != nullptr){
                 fbo->setSize(sizei.width, sizei.height);
             }
 
@@ -226,7 +226,7 @@ namespace AppKit
 
         RenderWindowRegion *RenderWindowRegion::createFBO()
         {
-            if (fbo != NULL)
+            if (fbo != nullptr)
                 return this;
             
             int w = CameraViewport.c_ptr()->w;
@@ -297,7 +297,7 @@ namespace AppKit
         void RenderWindowRegion::forceViewportFromRealWindowSize()
         {
             AppKit::GLEngine::AppBase *app = AppKit::GLEngine::Engine::Instance()->app;
-            if (app == NULL)
+            if (app == nullptr)
                 return;
 
             MathCore::vec2i size = app->window->getSize();
@@ -307,11 +307,11 @@ namespace AppKit
         void RenderWindowRegion::forceMouseToCoord(const MathCore::vec2i &iPos) const
         {
 
-            if (parent == NULL && force_viewport_from_real_window_size)
+            if (parent == nullptr && force_viewport_from_real_window_size)
             {
 
                 AppKit::GLEngine::AppBase *app = AppKit::GLEngine::Engine::Instance()->app;
-                if (app == NULL)
+                if (app == nullptr)
                     return;
 
                 AppKit::Window::Devices::Mouse::setPosition(iPos, app->window);
@@ -337,7 +337,7 @@ namespace AppKit
         }
         void RenderWindowRegion::addChild(RenderWindowRegion *child)
         {
-            ITK_ABORT(child->parent != NULL, "This child has been added as child of another render window");
+            ITK_ABORT(child->parent != nullptr, "This child has been added as child of another render window");
             innerWindowList.push_back(child);
             child->parent = this;
         }
@@ -347,7 +347,7 @@ namespace AppKit
             {
                 if (innerWindowList[i] == child)
                 {
-                    child->parent = NULL;
+                    child->parent = nullptr;
                     innerWindowList.erase(innerWindowList.begin() + i);
                     return;
                 }
@@ -356,7 +356,7 @@ namespace AppKit
         void RenderWindowRegion::clearChildren()
         {
             for (size_t i = 0; i < innerWindowList.size(); i++)
-                innerWindowList[i]->parent = NULL;
+                innerWindowList[i]->parent = nullptr;
             innerWindowList.clear();
         }
 
@@ -372,7 +372,7 @@ namespace AppKit
             int offset_y = 0;
 
             RenderWindowRegion *parent_walker = parent;
-            while (parent_walker != NULL)
+            while (parent_walker != nullptr)
             {
 
                 offset_x += parent_walker->WindowViewport.c_ptr()->x;

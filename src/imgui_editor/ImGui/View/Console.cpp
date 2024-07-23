@@ -27,10 +27,10 @@ Console::Console() : View(Console::Type)
 
 Console::~Console()
 {
-    if (console != NULL)
+    if (console != nullptr)
     {
         delete console;
-        console = NULL;
+        console = nullptr;
     }
 }
 
@@ -52,7 +52,7 @@ void Console::RenderAndLogic()
         scroll_last_item--;
 
     auto flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
-    if (ImGui::Begin("Console", NULL, flags))
+    if (ImGui::Begin("Console", nullptr, flags))
     {
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));

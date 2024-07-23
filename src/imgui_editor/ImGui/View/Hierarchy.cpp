@@ -83,8 +83,8 @@ View* Hierarchy::Init()
             printf("[Hierarchy][Tree] OnCollapse on %s\n", node->getName());
         });
         OnTreeSelect.add([](std::shared_ptr<TreeNode> node){
-            if (node == NULL) {
-                printf("[Hierarchy][Tree] OnSelect on NULL\n");
+            if (node == nullptr) {
+                printf("[Hierarchy][Tree] OnSelect on nullptr\n");
                 if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
                     ImGuiManager::Instance()->contextMenu.open();
             } else {
@@ -125,7 +125,7 @@ void Hierarchy::RenderAndLogic()
     //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)*ImGuiManager::Instance()->GlobalScale);
 
-    bool window_opened = ImGui::Begin("Hierarchy", NULL, flags);
+    bool window_opened = ImGui::Begin("Hierarchy", nullptr, flags);
 
     if (clear_tree_selection != HierarchyClearMethod::None){
         auto action = clear_tree_selection;

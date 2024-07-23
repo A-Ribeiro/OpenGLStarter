@@ -12,7 +12,7 @@ static AppBase * CreateAppInstance() {
 }
 
 void on_signal(int) {
-    if (AppKit::GLEngine::Engine::Instance()->app != NULL)
+    if (AppKit::GLEngine::Engine::Instance()->app != nullptr)
         AppKit::GLEngine::Engine::Instance()->app->exitApp();
 }
 

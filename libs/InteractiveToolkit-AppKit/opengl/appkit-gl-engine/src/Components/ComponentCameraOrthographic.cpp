@@ -29,7 +29,7 @@ namespace AppKit
                 useSizeX = false;
                 sizeX = 1.0f;
 
-                renderWindowRegion = NULL;
+                renderWindowRegion = nullptr;
 
                 // renderWindowRegion = transform[0]->renderWindowRegion;
 
@@ -61,7 +61,7 @@ namespace AppKit
             ComponentCameraOrthographic::~ComponentCameraOrthographic()
             {
                 // AppBase* appBase = Engine::Instance()->app;
-                if (renderWindowRegion != NULL)
+                if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
                 }
@@ -107,7 +107,7 @@ namespace AppKit
                 // AppBase* appBase = Engine::Instance()->app;
                 MathCore::vec2i size;
 
-                if (renderWindowRegion != NULL)
+                if (renderWindowRegion != nullptr)
                     size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
                 else
                     size = Engine::Instance()->app->window->getSize();

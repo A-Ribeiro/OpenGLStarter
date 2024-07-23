@@ -3,8 +3,8 @@
 MenuItemController::MenuItemController()
 {
 	index = 0;
-	check_variable_ptr = NULL;
-	callback = NULL;
+	check_variable_ptr = nullptr;
+	callback = nullptr;
     visible = true;
     enabled = true;
 }
@@ -23,7 +23,7 @@ void MenuItemController::render(const std::string& parentName, bool isRoot)
 			ImGui::Separator();
 		}
 		else
-			if (ImGui::MenuItem(parentName.c_str(), shortcut.c_str(), (check_variable_ptr) ? check_variable_ptr : NULL, enabled)){
+			if (ImGui::MenuItem(parentName.c_str(), shortcut.c_str(), (check_variable_ptr) ? check_variable_ptr : nullptr, enabled)){
                 if (callback != nullptr)
                     callback();
             }

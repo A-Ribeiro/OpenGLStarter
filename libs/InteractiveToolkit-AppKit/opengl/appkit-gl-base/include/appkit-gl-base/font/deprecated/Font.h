@@ -46,7 +46,7 @@ namespace AppKit
             Font(const Font &font);
             Font();
             ~Font();
-            static Font *LoadFromBasof(const char *basofFile, std::string *errorStr = NULL);
+            static Font *LoadFromBasof(const char *basofFile, std::string *errorStr = nullptr);
 
             GLFont *createGLFont();
         };

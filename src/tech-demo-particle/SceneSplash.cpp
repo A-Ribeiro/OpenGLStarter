@@ -27,11 +27,11 @@ void SceneSplash::loadGraph()
 {
     root = new Transform();
 
-    Transform *t = root->addChild(new Transform());
+    Transform *t = root->addChild(Transform::CreateShared());
     t->Name = "Main Camera";
     //    t->LocalPosition = MathCore::vec3f(0,0,0);
 
-    t = root->addChild(new Transform());
+    t = root->addChild(Transform::CreateShared());
     t->Name = "Sprite";
 }
 // to bind the resources to the current graph
@@ -78,11 +78,11 @@ void SceneSplash::unloadAll()
     ResourceHelper::releaseTransformRecursive(&root);
 
     ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
-    if (Milky_512_512 != NULL)
+    if (Milky_512_512 != nullptr)
     {
         texRefCount->removeNoDelete(Milky_512_512);
         delete Milky_512_512;
-        Milky_512_512 = NULL;
+        Milky_512_512 = nullptr;
     }
 }
 
@@ -94,7 +94,7 @@ SceneSplash::SceneSplash(
     AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper)
 {
 
-    Milky_512_512 = NULL;
+    Milky_512_512 = nullptr;
 }
 
 SceneSplash::~SceneSplash()

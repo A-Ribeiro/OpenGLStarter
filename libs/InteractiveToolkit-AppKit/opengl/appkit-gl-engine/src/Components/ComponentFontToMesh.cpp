@@ -56,7 +56,7 @@ namespace AppKit
 
                 // mesh wrapper logic...
                 auto meshWrapper = transform->findComponent<Components::ComponentMeshWrapper>();
-                if (meshWrapper == NULL)
+                if (meshWrapper == nullptr)
                 {
                     meshWrapper = transform->addNewComponent<Components::ComponentMeshWrapper>();
                     transform->makeFirstComponent(meshWrapper);

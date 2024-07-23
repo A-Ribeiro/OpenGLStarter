@@ -27,7 +27,7 @@ namespace AppKit
 
                 ComponentFrustumCulling *frustumCulling = (ComponentFrustumCulling *)element->findComponent(ComponentFrustumCulling::Type);
 
-                if (frustumCulling != NULL) {
+                if (frustumCulling != nullptr) {
                     FrustumParameter *parameter = (FrustumParameter *)userData;
                     if (frustumCulling->cullingShape == CullingShapeSphere) {
                         frustumCulling->setVisibilityFromCamera(parameter->camera, CollisionCore::Frustum<MathCore::vec3f>::sphereOverlapsFrustum(frustumCulling->sphere, *parameter->frustum));

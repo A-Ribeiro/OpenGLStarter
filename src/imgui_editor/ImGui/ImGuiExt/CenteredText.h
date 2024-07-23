@@ -31,7 +31,7 @@ class CenteredText
         float line_width = 0.0f;
 
         const bool word_wrap_enabled = (wrap_width > 0.0f);
-        const char *word_wrap_eol = NULL;
+        const char *word_wrap_eol = nullptr;
 
         const char *s = text_begin;
 
@@ -56,7 +56,7 @@ class CenteredText
                     aux_str.clear();
 
                     line_width = 0.0f;
-                    word_wrap_eol = NULL;
+                    word_wrap_eol = nullptr;
                     s = CalcWordWrapNextLineStartA(s, text_end); // Wrapping skips upcoming blanks
                     continue;
                 }
@@ -123,7 +123,7 @@ class CenteredText
         ImFont *font = g.Font;
         const float font_size = g.FontSize;
 
-        ImVec2 text_size = CalcTextSizeA(font, font_size, FLT_MAX, wrap_width, text, NULL, NULL);
+        ImVec2 text_size = CalcTextSizeA(font, font_size, FLT_MAX, wrap_width, text, nullptr, nullptr);
 
         // Round
         // FIXME: This has been here since Dec 2015 (7b0bf230) but down the line we want this out.
@@ -153,14 +153,14 @@ public:
         this->font = font;
         this->text_width_max = text_width_max;
 
-        if (font != NULL)
+        if (font != nullptr)
             ImGui::PushFont(font);
 
         text_size = CalcTextSize(text.c_str(), text_width_max);
 
         text_size_2 = text_size * 0.5f;
 
-        if (font != NULL)
+        if (font != nullptr)
             ImGui::PopFont();
     }
 
@@ -168,7 +168,7 @@ public:
     {
         if (font != this->font)
             setText(this->text, font, text_width_max);
-        if (font != NULL)
+        if (font != nullptr)
             ImGui::PushFont(font);
 
         ImGui::SetCursorPos(at_pos - text_size_2);
@@ -177,7 +177,7 @@ public:
         ImGui::Text("%s", text.c_str());
         ImGui::PopTextWrapPos();
 
-        if (font != NULL)
+        if (font != nullptr)
             ImGui::PopFont();
     }
 
@@ -185,7 +185,7 @@ public:
     {
         if (font != this->font)
             setText(this->text, font, text_width_max);
-        if (font != NULL)
+        if (font != nullptr)
             ImGui::PushFont(font);
 
         float font_size = font->FontSize;
@@ -200,7 +200,7 @@ public:
             currentPos.y += line_height;
         }
 
-        if (font != NULL)
+        if (font != nullptr)
             ImGui::PopFont();
     }
 };

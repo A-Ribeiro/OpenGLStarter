@@ -9,9 +9,9 @@
 
 ImGuiManager::ImGuiManager()
 {
-    font_half_size = NULL;
+    font_half_size = nullptr;
 	reset_layout = true;
-	innerViewport = NULL;
+	innerViewport = nullptr;
 
 	memset(icons, 0, sizeof(AppKit::OpenGL::GLTexture*) * (int)IconType::Count);
 }
@@ -98,7 +98,7 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	ImGuiIO& io = ImGui::GetIO();
 	(void)io;
 	// dont save windows positions...
-	io.IniFilename = NULL;
+	io.IniFilename = nullptr;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
@@ -136,7 +136,7 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	// Load Fonts
 	// - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
 	// - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-	// - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+	// - If the file cannot be loaded, the function will return nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
 	// - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
 	// - Read 'docs/FONTS.md' for more instructions and details.
 	// - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
@@ -145,14 +145,14 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	// // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
 	// // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
 	// // io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-	// // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-	// IM_ASSERT(font != NULL);
+	// // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+	// IM_ASSERT(font != nullptr);
 	// //ImGui::PushFont(font);
 
     this->imGuiStyleBackup = style;
 	this->applyGlobalScale();
 
-    // render a NULL frame: force load fonts
+    // render a nullptr frame: force load fonts
     //  Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_WindowGL_NewFrame();
@@ -220,10 +220,10 @@ void ImGuiManager::applyGlobalScale() {
 	io.Fonts->Clear();
 
 	auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
-	IM_ASSERT(font != NULL);
+	IM_ASSERT(font != nullptr);
 
 	font_half_size = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 13.0f * this->GlobalScale);
-	IM_ASSERT(font_half_size != NULL);
+	IM_ASSERT(font_half_size != nullptr);
 
     // io.Fonts->Build();
 
@@ -239,15 +239,15 @@ void ImGuiManager::applyGlobalScale() {
 
 void ImGuiManager::Finalize()
 {
-	if (innerViewport != NULL) {
+	if (innerViewport != nullptr) {
 		delete innerViewport;
-		innerViewport = NULL;
+		innerViewport = nullptr;
 	}
 
 	for (auto& tex : icons) {
-		if (tex != NULL) {
+		if (tex != nullptr) {
 			delete tex;
-			tex = NULL;
+			tex = nullptr;
 		}
 	}
 
@@ -377,7 +377,7 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 	ImGui::SetNextWindowSize(viewport->WorkSize);
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	if (ImGui::Begin("FullScreen Window", NULL, flags))
+	if (ImGui::Begin("FullScreen Window", nullptr, flags))
 	{
 		// display_order.push_back(ImGui::GetCurrentWindow());
 

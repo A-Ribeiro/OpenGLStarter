@@ -43,7 +43,7 @@ namespace AppKit
         public:
             bool isFading;
 
-            Fade(Platform::Time *_time, AppKit::GLEngine::RenderWindowRegion *renderWindowRegion = NULL);
+            Fade(Platform::Time *_time, AppKit::GLEngine::RenderWindowRegion *renderWindowRegion = nullptr);
             ~Fade();
 
             void fadeIn(float _sec, const EventCore::Callback<void()> &_OnEndCall);

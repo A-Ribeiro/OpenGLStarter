@@ -77,8 +77,8 @@ namespace AppKit
             {
             public:
                 static bool isPressed(MouseButton button);
-                static MathCore::vec2i getPosition(Window *relativeToWindow = NULL);
-                static void setPosition(const MathCore::vec2i &position, Window *relativeToWindow = NULL);
+                static MathCore::vec2i getPosition(Window *relativeToWindow = nullptr);
+                static void setPosition(const MathCore::vec2i &position, Window *relativeToWindow = nullptr);
             };
 
             enum class SensorType : uint8_t
@@ -107,7 +107,7 @@ namespace AppKit
             {
             public:
                 static bool isPressed(uint32_t finger_id);
-                static MathCore::vec2i getPosition(uint32_t finger_id, Window *relativeToWindow = NULL);
+                static MathCore::vec2i getPosition(uint32_t finger_id, Window *relativeToWindow = nullptr);
             };
 
         }

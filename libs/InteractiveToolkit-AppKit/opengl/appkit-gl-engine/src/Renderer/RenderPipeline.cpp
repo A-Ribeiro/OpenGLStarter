@@ -22,15 +22,15 @@ namespace AppKit
 
         bool RenderPipeline::traverse_search_elements(Transform *element, void* userData) {
             Components::ComponentLight* light = (Components::ComponentLight*)element->findComponent(Components::ComponentLight::Type);
-            if (light != NULL && light->type == Components::LightSun)
+            if (light != nullptr && light->type == Components::LightSun)
                 sceneSunLights.push_back(light);
 
             Components::ComponentParticleSystem* particleSystem = (Components::ComponentParticleSystem*)element->findComponent(Components::ComponentParticleSystem::Type);
-            if (particleSystem != NULL)
+            if (particleSystem != nullptr)
                 sceneParticleSystem.push_back(particleSystem);
 
             Components::ComponentColorLine* colorLine = (Components::ComponentColorLine*)element->findComponent(Components::ComponentColorLine::Type);
-            if (colorLine != NULL)
+            if (colorLine != nullptr)
                 debugLines.push_back(colorLine);
 
             return true;
@@ -42,7 +42,7 @@ namespace AppKit
             debugLines.clear();
             root->traversePreOrder_DepthFirst(
                 EventCore::CallbackWrapper(this, &RenderPipeline::traverse_search_elements),
-                NULL);
+                nullptr);
         }
         */
 
@@ -162,18 +162,18 @@ namespace AppKit
 
                 frankenFormat = 0;
 
-                if (material->pbr.texAlbedo != NULL)
+                if (material->pbr.texAlbedo != nullptr)
                     frankenFormat |= ShaderAlgorithms_TextureAlbedo;
-                if (material->pbr.texSpecular != NULL)
+                if (material->pbr.texSpecular != nullptr)
                     frankenFormat |= ShaderAlgorithms_TextureSpecular;
-                if (material->pbr.texNormal != NULL)
+                if (material->pbr.texNormal != nullptr)
                     frankenFormat |= ShaderAlgorithms_NormalMap;
-                if (material->pbr.texEmission != NULL && material->pbr.emissionColor != MathCore::vec3f(0.0f))
+                if (material->pbr.texEmission != nullptr && material->pbr.emissionColor != MathCore::vec3f(0.0f))
                     frankenFormat |= ShaderAlgorithms_TextureEmission;
 
-                if (cubeAmbientLight_1x1 != NULL && ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
+                if (cubeAmbientLight_1x1 != nullptr && ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
                     frankenFormat |= ShaderAlgorithms_AmbientLightSkybox;
-                if (sphereAmbientLight != NULL && ambientLight.lightMode == AmbientLightMode_SphereMapTexture)
+                if (sphereAmbientLight != nullptr && ambientLight.lightMode == AmbientLightMode_SphereMapTexture)
                     frankenFormat |= ShaderAlgorithms_AmbientLightSpheremap;
 
                 else if (ambientLight.lightMode != AmbientLightMode_None)
@@ -235,8 +235,8 @@ namespace AppKit
                 frankenShader->frankenUniformManager.setAmbientLightColor(ambientLightColorVec3);
 
                 // texture setup... from global scene
-                frankenShader->frankenUniformManager.setEnvironmentCubeTexture(cubeAmbientLight_1x1);
-                frankenShader->frankenUniformManager.setEnvironmentSphereTexture(sphereAmbientLight);
+                frankenShader->frankenUniformManager.setEnvironmentCubeTexture(cubeAmbientLight_1x1.get());
+                frankenShader->frankenUniformManager.setEnvironmentSphereTexture(sphereAmbientLight.get());
 
                 // #if defined(PBR_MODE_TEX_LOOKUP)
                 frankenShader->frankenUniformManager.setPBROptimizationTexture(&frankenShaderManager.pbrOptimizationTexture);
@@ -313,20 +313,20 @@ namespace AppKit
                     frankenShaderManager.disable_PBR_OptimizationTexUnit(5);
                 //#endif
 
-                if (cubeAmbientLight_1x1 != NULL && ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
+                if (cubeAmbientLight_1x1 != nullptr && ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
                     cubeAmbientLight_1x1->deactive(4);
-                if (sphereAmbientLight != NULL && ambientLight.lightMode == AmbientLightMode_SphereMapTexture)
+                if (sphereAmbientLight != nullptr && ambientLight.lightMode == AmbientLightMode_SphereMapTexture)
                     sphereAmbientLight->deactive(4);
 
 
                 if ((frankenFormat & ShaderAlgorithms_TextureEmission) != 0) {
                     material->pbr.texEmission->deactive(3);
                 }
-                if (material->pbr.texNormal != NULL)
+                if (material->pbr.texNormal != nullptr)
                     material->pbr.texNormal->deactive(2);
-                if (material->pbr.texSpecular != NULL)
+                if (material->pbr.texSpecular != nullptr)
                     material->pbr.texSpecular->deactive(1);
-                if (material->pbr.texAlbedo != NULL)
+                if (material->pbr.texAlbedo != nullptr)
                     material->pbr.texAlbedo->deactive(0);
 
                 */
@@ -342,7 +342,7 @@ namespace AppKit
         // bool RenderPipeline::traverse_multipass_render(Transform *element, void *userData)
         // {
         //     Components::ComponentMaterial *material = (Components::ComponentMaterial *)element->findComponent(Components::ComponentMaterial::Type);
-        //     if (material == NULL)
+        //     if (material == nullptr)
         //         return true;
 
         //     GLRenderState *state = GLRenderState::Instance();
@@ -508,7 +508,7 @@ namespace AppKit
                 if (component->compareType(Components::ComponentMaterial::Type))
                 {
                     end_index = i;
-                    if (material != NULL && start_index != end_index)
+                    if (material != nullptr && start_index != end_index)
                     {
                         // camera matrix computation
                         if (!camera_set)
@@ -540,7 +540,7 @@ namespace AppKit
             }
 
             end_index = element->getComponentCount();
-            if (material != NULL && start_index != end_index)
+            if (material != nullptr && start_index != end_index)
             {
                 // camera matrix computation
                 if (!camera_set)
@@ -570,7 +570,7 @@ namespace AppKit
             /*
 
             Components::ComponentMaterial* material = (Components::ComponentMaterial*)element->findComponent(Components::ComponentMaterial::Type);
-            if (material == NULL)
+            if (material == nullptr)
                 return true;
 
             GLRenderState *state = GLRenderState::Instance();
@@ -643,13 +643,13 @@ namespace AppKit
 
                     frankenFormat = 0;
 
-                    if (material->pbr.texAlbedo != NULL)
+                    if (material->pbr.texAlbedo != nullptr)
                         frankenFormat |= ShaderAlgorithms_TextureAlbedo;
-                    if (material->pbr.texNormal != NULL)
+                    if (material->pbr.texNormal != nullptr)
                         frankenFormat |= ShaderAlgorithms_NormalMap;
 
 
-                    if ( cubeAmbientLight_1x1 != NULL && ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
+                    if ( cubeAmbientLight_1x1 != nullptr && ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
                         frankenFormat |= ShaderAlgorithms_AmbientLightSkybox;
                     else if (ambientLight.lightMode != AmbientLightMode_None)
                         frankenFormat |= ShaderAlgorithms_AmbientLightColor;
@@ -666,11 +666,11 @@ namespace AppKit
                     frankenShader = frankenShaderManager.getShader(frankenFormat);
                     state->CurrentShader = frankenShader;
 
-                    if (material->pbr.texAlbedo != NULL)
+                    if (material->pbr.texAlbedo != nullptr)
                         material->pbr.texAlbedo->active(0);
-                    if (material->pbr.texNormal != NULL)
+                    if (material->pbr.texNormal != nullptr)
                         material->pbr.texNormal->active(1);
-                    if (cubeAmbientLight_1x1 != NULL)
+                    if (cubeAmbientLight_1x1 != nullptr)
                         cubeAmbientLight_1x1->active(2);
 
                     frankenShader->sendParamaters(mvp, element, camera, material,
@@ -684,11 +684,11 @@ namespace AppKit
 
                     allMeshRender(element, frankenShader);
 
-                    if (cubeAmbientLight_1x1 != NULL)
+                    if (cubeAmbientLight_1x1 != nullptr)
                         cubeAmbientLight_1x1->deactive(2);
-                    if (material->pbr.texNormal != NULL)
+                    if (material->pbr.texNormal != nullptr)
                         material->pbr.texNormal->deactive(1);
-                    if (material->pbr.texAlbedo != NULL)
+                    if (material->pbr.texAlbedo != nullptr)
                         material->pbr.texAlbedo->deactive(0);
 
                     break;
@@ -703,10 +703,10 @@ namespace AppKit
 
         RenderPipeline::RenderPipeline()
         {
-            cubeSkyBox = NULL;
-            cubeAmbientLight_1x1 = NULL;
-            sphereAmbientLight = NULL;
-            depthRenderer = NULL;
+            cubeSkyBox = nullptr;
+            cubeAmbientLight_1x1 = nullptr;
+            sphereAmbientLight = nullptr;
+            depthRenderer = nullptr;
 
             ShaderAlgorithmsEnum_allowedFlags = (uint64_t)0xffffffffffffffff;
 
@@ -719,10 +719,10 @@ namespace AppKit
                 1.0f, 32, 32, // radius, sectorCount, stackCount,
                 &sunIndex,    //&result->indices,
                 &sunVertex,   //&result->pos,
-                NULL,         //&result->uv[0],
-                NULL,         //&result->normals,
-                NULL,         //&result->tangent,
-                NULL          //&result->binormal
+                nullptr,         //&result->uv[0],
+                nullptr,         //&result->normals,
+                nullptr,         //&result->tangent,
+                nullptr          //&result->binormal
             );
         }
 
@@ -730,15 +730,17 @@ namespace AppKit
         {
             // ReferenceCounter<void*> *refCounter = &Engine::Instance()->referenceCounter;
             // refCounter->remove(cubeSkyBox);
-            // cubeSkyBox = NULL;
-            if (cubeSkyBox != NULL)
-                delete cubeSkyBox;
-            if (cubeAmbientLight_1x1 != NULL)
-                delete cubeAmbientLight_1x1;
-            if (sphereAmbientLight != NULL)
-                delete sphereAmbientLight;
-            if (depthRenderer != NULL)
+            // cubeSkyBox = nullptr;
+            if (cubeSkyBox != nullptr)
+                cubeSkyBox = nullptr;
+            if (cubeAmbientLight_1x1 != nullptr)
+                cubeAmbientLight_1x1 = nullptr;
+            if (sphereAmbientLight != nullptr)
+                sphereAmbientLight = nullptr;
+            if (depthRenderer != nullptr){
                 delete depthRenderer;
+                depthRenderer = nullptr;
+            }
         }
 
         // void RenderPipeline::runMultiPassPipeline(Transform *root, Components::ComponentCamera *camera, bool clear)
@@ -753,7 +755,7 @@ namespace AppKit
 
         //     if (clear)
         //     {
-        //         if (cubeSkyBox == NULL)
+        //         if (cubeSkyBox == nullptr)
         //         {
         //             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         //         }
@@ -768,7 +770,7 @@ namespace AppKit
         //     if (
         //         (ambientLight.lightMode == AmbientLightMode_SkyBoxSolidColor ||
         //          ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture) &&
-        //         cubeSkyBox != NULL)
+        //         cubeSkyBox != nullptr)
         //     {
         //         // ambientLightColor = MathCore::vec4f(cubeSkyBox->cubeMap.colorEstimation,1.0f);
         //         ambientLightColorVec3 = cubeSkyBox->cubeMap.colorEstimation;
@@ -814,7 +816,7 @@ namespace AppKit
 
             if (clear)
             {
-                if (cubeSkyBox == NULL)
+                if (cubeSkyBox == nullptr)
                 {
                     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
                 }
@@ -828,7 +830,7 @@ namespace AppKit
             // light setup
             if ((ambientLight.lightMode == AmbientLightMode_SkyBoxSolidColor ||
                  ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture) &&
-                cubeSkyBox != NULL)
+                cubeSkyBox != nullptr)
             {
 
                 ambientLightColorVec3 = cubeSkyBox->cubeMap.colorEstimation;
@@ -1037,7 +1039,7 @@ namespace AppKit
             if (objectPlaces.sceneParticleSystem.size() > 0)
             {
                 // render depth texture
-                if (depthRenderer == NULL)
+                if (depthRenderer == nullptr)
                     depthRenderer = new DepthRenderer();
                 depthRenderer->method1_copy_from_current_framebuffer();
                 // depthRenderer->method2_render_just_depth( root, camera );
@@ -1086,7 +1088,7 @@ namespace AppKit
         bool RenderPipeline::traverse_depth_render(std::shared_ptr<Transform> element, void *userData)
         {
 
-            Components::ComponentMaterial *material = NULL;
+            Components::ComponentMaterial *material = nullptr;
             int start_index = 0;
             int end_index = 0;
             bool camera_set = false;
@@ -1104,7 +1106,7 @@ namespace AppKit
                 if (component->compareType(Components::ComponentMaterial::Type))
                 {
                     end_index = i;
-                    if (material != NULL && start_index != end_index)
+                    if (material != nullptr && start_index != end_index)
                     {
                         // camera matrix computation
                         if (!camera_set)
@@ -1138,7 +1140,7 @@ namespace AppKit
             }
 
             end_index = element->getComponentCount();
-            if (material != NULL && start_index != end_index)
+            if (material != nullptr && start_index != end_index)
             {
                 // camera matrix computation
                 if (!camera_set)

@@ -37,16 +37,16 @@ App::App()
 
     fade = new Fade(&time);
 
-    fade->fadeOut(2.0f, NULL);
+    fade->fadeOut(2.0f, nullptr);
     time.update();
 
     timer = 0.0f;
     state = 0;
 
-    sceneGUI = NULL;
-    sceneSplash = NULL;
+    sceneGUI = nullptr;
+    sceneSplash = nullptr;
 
-    activeScene = NULL;
+    activeScene = nullptr;
 
     currentScene = LoadActions_None;
 
@@ -73,25 +73,25 @@ App::~App()
     AppBase::screenRenderWindow.CameraViewport.OnChange.remove(&App::onViewportChange, this);
     AppBase::screenRenderWindow.inputManager.onMouseEvent.remove(&App::OnMouseEvent, this);
 
-    if (activeScene != NULL)
+    if (activeScene != nullptr)
     {
         activeScene->unload();
         delete activeScene;
     }
 
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
     {
         sceneGUI->unload();
         delete sceneGUI;
     }
 
-    if (sceneSplash != NULL)
+    if (sceneSplash != nullptr)
     {
         sceneSplash->unload();
         delete sceneSplash;
     }
 
-    if (fade != NULL)
+    if (fade != nullptr)
     {
         delete fade;
     }
@@ -113,20 +113,20 @@ void App::draw()
     screenRenderWindow.OnLateUpdate(&time);
 
     // pre process all scene graphs
-    if (activeScene != NULL)
+    if (activeScene != nullptr)
         activeScene->precomputeSceneGraphAndCamera();
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();
-    if (sceneSplash != NULL)
+    if (sceneSplash != nullptr)
         sceneSplash->precomputeSceneGraphAndCamera();
 
     screenRenderWindow.OnAfterGraphPrecompute(&time);
 
-    if (activeScene != NULL)
+    if (activeScene != nullptr)
         activeScene->draw();
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->draw();
-    if (sceneSplash != NULL)
+    if (sceneSplash != nullptr)
         sceneSplash->draw();
 
     fade->draw();
@@ -146,31 +146,31 @@ void App::draw()
             {
                 timer = 0.0f;
                 state = 1;
-                fade->fadeIn(2.0f, NULL);
+                fade->fadeIn(2.0f, nullptr);
             }
             break;
         case 1:        // load GUI
             state = 3; // load Mary Scene
 
-            if (activeScene != NULL)
+            if (activeScene != nullptr)
             {
                 activeScene->unload();
                 delete activeScene;
-                activeScene = NULL;
+                activeScene = nullptr;
             }
 
-            if (sceneGUI != NULL)
+            if (sceneGUI != nullptr)
             {
                 sceneGUI->unload();
                 delete sceneGUI;
-                sceneGUI = NULL;
+                sceneGUI = nullptr;
             }
 
-            if (sceneSplash != NULL)
+            if (sceneSplash != nullptr)
             {
                 sceneSplash->unload();
                 delete sceneSplash;
-                sceneSplash = NULL;
+                sceneSplash = nullptr;
             }
 
             sceneGUI = new SceneGUI(&time, &renderPipeline, &resourceHelper);
@@ -180,17 +180,17 @@ void App::draw()
 
         case 2:        // load Mary Scene - Pre fade
             state = 3; // load Mary Scene
-            fade->fadeIn(2.0f, NULL);
+            fade->fadeIn(2.0f, nullptr);
             break;
         case 3: // load Mary Scene
             state = 1000;
-            fade->fadeOut(2.0f, NULL);
+            fade->fadeOut(2.0f, nullptr);
 
-            if (activeScene != NULL)
+            if (activeScene != nullptr)
             {
                 activeScene->unload();
                 delete activeScene;
-                activeScene = NULL;
+                activeScene = nullptr;
             }
 
             activeScene = new SceneMary(&time, &renderPipeline, &resourceHelper);
@@ -204,17 +204,17 @@ void App::draw()
 
         case 4:        // load Jesus Scene - Pre fade
             state = 5; // load Jesus Scene
-            fade->fadeIn(2.0f, NULL);
+            fade->fadeIn(2.0f, nullptr);
             break;
         case 5: // load Jesus Scene
             state = 1000;
-            fade->fadeOut(2.0f, NULL);
+            fade->fadeOut(2.0f, nullptr);
 
-            if (activeScene != NULL)
+            if (activeScene != nullptr)
             {
                 activeScene->unload();
                 delete activeScene;
-                activeScene = NULL;
+                activeScene = nullptr;
             }
 
             activeScene = new SceneJesus(&time, &renderPipeline, &resourceHelper);
@@ -243,7 +243,7 @@ void App::onViewportChange(const iRect &value, const iRect &oldValue)
 {
     GLRenderState *renderState = GLRenderState::Instance();
     renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->resize(vec2i(value.w, value.h));
 }
 
@@ -256,7 +256,7 @@ void App::OnMouseEvent(const AppKit::Window::MouseEvent &evt)
 
         // check Mary and Jesus scene to lock the camera move...
 
-        if (sceneGUI != NULL && activeScene != NULL)
+        if (sceneGUI != nullptr && activeScene != nullptr)
         {
 
             /*

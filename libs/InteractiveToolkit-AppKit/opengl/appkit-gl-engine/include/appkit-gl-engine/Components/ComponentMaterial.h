@@ -91,7 +91,7 @@ namespace AppKit
                     //texNormal = nullptr;
                     //texSpecular = nullptr;
 
-                    // texCube = NULL;
+                    // texCube = nullptr;
                     //texEmission = nullptr;
 
                     // blendMode = AppKit::GLEngine::BlendModeDisabled;
@@ -140,7 +140,7 @@ namespace AppKit
                 {
                     type = MaterialNone;
 
-                    skin_gradient_matrix = NULL;
+                    skin_gradient_matrix = nullptr;
                     skin_shader_matrix_size_bitflag = 0;
                     skin_gradient_matrix_dirty = false;
                 }

@@ -36,9 +36,9 @@ namespace AppKit
             shadowMatrix = aRibeiro::translate(0.5f, 0.5f, 0.5f)*aRibeiro::scale(0.5f,0.5f,0.5f)*m;
         }
 
-        ShadowMapRGBA(int w, int h, GLRenderBuffer *sharedRealDepthBuffer24 = NULL){
+        ShadowMapRGBA(int w, int h, GLRenderBuffer *sharedRealDepthBuffer24 = nullptr){
 
-            if (sharedRealDepthBuffer24 == NULL){
+            if (sharedRealDepthBuffer24 == nullptr){
                 realDepthBuffer24 = new GLRenderBuffer();
                 realDepthBuffer24->setSize(w,h,GL_DEPTH_COMPONENT24);
                 shouldReleaseDepthBuffer = true;
@@ -60,7 +60,7 @@ namespace AppKit
                 shouldReleaseDepthBuffer = false;
                 delete realDepthBuffer24);
             }
-            realDepthBuffer24 = NULL;
+            realDepthBuffer24 = nullptr;
         }
         
         //setar o save state no primeiro e ultimo
@@ -90,7 +90,7 @@ namespace AppKit
 
         void beginDraw(bool setState){
             AppKit::GLEngine::GLRenderState *renderState = AppKit::GLEngine::GLRenderState::Instance();
-            renderState->CurrentFramebufferObject = NULL;
+            renderState->CurrentFramebufferObject = nullptr;
 
             fbo.enable();
             if (setState){

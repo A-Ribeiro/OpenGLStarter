@@ -15,8 +15,8 @@ namespace AppKit
 
         public:
             virtual ~SharedPointerBase();
-            virtual bool isNULL();
-            virtual void setNULL(bool unregister = true);
+            virtual bool isnullptr();
+            virtual void setnullptr(bool unregister = true);
         };
 
     }

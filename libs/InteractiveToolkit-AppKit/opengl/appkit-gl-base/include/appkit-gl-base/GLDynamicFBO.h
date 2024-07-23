@@ -122,7 +122,7 @@ namespace AppKit
         ///
         static void disable();
 
-        TextureBuffer readPixels(int attachmentIndex = 0, TextureBuffer *output = NULL);
+        TextureBuffer readPixels(int attachmentIndex = 0, TextureBuffer *output = nullptr);
 
         void blitFrom(GLDynamicFBO *sourceFBO, GLint sourceColorIndex, GLint targetColorIndex, 
             GLbitfield bufferToBlitBits = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, 

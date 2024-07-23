@@ -43,13 +43,13 @@ namespace AppKit
                 int targetResolution) ;*/
 
             void copyCubeMapEnhanced(
-                std::shared_ptr<AppKit::OpenGL::GLCubeMap> inputcubemap,
+                AppKit::OpenGL::GLCubeMap *inputcubemap,
                 int inputMip,
-                std::shared_ptr<AppKit::OpenGL::GLCubeMap> targetcubemap,
+                AppKit::OpenGL::GLCubeMap *targetcubemap,
                 int outputMip);
             void render1x1CubeIntoSphereTexture(
-                std::shared_ptr<AppKit::OpenGL::GLCubeMap> inputcubemap,
-                std::shared_ptr<AppKit::OpenGL::GLTexture> targetTexture,
+                AppKit::OpenGL::GLCubeMap *inputcubemap,
+                AppKit::OpenGL::GLTexture *targetTexture,
                 int width, int height);
 
             // Load skybox from the folder: resources/Skyboxes/

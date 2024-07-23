@@ -6,7 +6,7 @@
 #include <InteractiveToolkit-Extension/image/JPG.h> // JPGHelper
 #include <InteractiveToolkit-Extension/image/PNG.h> // PNGHelper
 
-// #include <aRibeiroCore/SetNullAndDelete.h>
+// #include <aRibeiroCore/SetnullptrAndDelete.h>
 // #include <aRibeiroCore/geometricOperations.h>
 
 #include <stdlib.h>
@@ -258,7 +258,7 @@ namespace AppKit
             ITK_ABORT(input_format == GL_STENCIL_INDEX && !GLAD_GL_VERSION_4_4, "VERSION_4_4 not supported.");
             ITK_ABORT((input_format == GL_DEPTH_COMPONENT || input_format == GL_DEPTH_STENCIL) && !GLAD_GL_ARB_depth_texture, "ARB_depth_texture not supported.");
 
-            OPENGL_CMD(glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, input_format, input_data_type, NULL));
+            OPENGL_CMD(glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, input_format, input_data_type, nullptr));
         }
 
         /*
@@ -307,9 +307,9 @@ namespace AppKit
             bool isPNG = ITKExtension::Image::PNG::isPNGFilename(filename);
             bool isJPG = ITKExtension::Image::JPG::isJPGFilename(filename);
 
-            void (*closeFnc)(char *&) = NULL;
+            void (*closeFnc)(char *&) = nullptr;
 
-            char *buffer = NULL;
+            char *buffer = nullptr;
             if (isPNG)
             {
                 buffer = ITKExtension::Image::PNG::readPNG(filename, &w, &h, &channels, &depth, invertY);
@@ -322,10 +322,10 @@ namespace AppKit
             }
 
             ITK_ABORT(
-                buffer == NULL,
+                buffer == nullptr,
                 "error to load: %s\n", filename);
 
-            // if (buffer == NULL) {
+            // if (buffer == nullptr) {
             //     fprintf( stderr, "error to load: %s\n", filename);
             //     exit(-1);
             // }
@@ -356,7 +356,7 @@ namespace AppKit
                 }
                 else
                     result->uploadBufferAlpha8(buffer, w, h);
-                // setNullAndDelete(buffer);
+                // setnullptrAndDelete(buffer);
                 closeFnc(buffer);
                 return result;
             }
@@ -382,7 +382,7 @@ namespace AppKit
                 else
                     result->uploadBufferRGB_888(buffer, w, h, sRGB);
 
-                // setNullAndDelete(buffer);
+                // setnullptrAndDelete(buffer);
                 closeFnc(buffer);
                 return result;
             }
@@ -407,13 +407,13 @@ namespace AppKit
                 }
                 else
                     result->uploadBufferRGBA_8888(buffer, w, h, sRGB);
-                // setNullAndDelete(buffer);
+                // setnullptrAndDelete(buffer);
                 closeFnc(buffer);
                 return result;
             }
 
             closeFnc(buffer);
-            // setNullAndDeleteArray(buffer);
+            // setnullptrAndDeleteArray(buffer);
 
             ITK_ABORT(
                 true,
@@ -422,7 +422,7 @@ namespace AppKit
             // fprintf(stderr, "invalid image format: %d channels %d depth. Error to load: %s\n", channels, depth, filename);
             // exit(-1);
 
-            return NULL;
+            return nullptr;
         }
 
         TextureBuffer GLTexture::download(TextureBuffer *output)
@@ -432,7 +432,7 @@ namespace AppKit
 
             TextureBuffer result;
 
-            if (output != NULL)
+            if (output != nullptr)
             {
                 if (output->data_size_bytes == width * height * input_raw_element_size)
                 {
@@ -465,7 +465,7 @@ namespace AppKit
             result.input_component_count = input_component_count;
             result.input_raw_element_size = input_raw_element_size;
 
-            if (output != NULL)
+            if (output != nullptr)
                 *output = result;
 
             return result;
@@ -475,7 +475,7 @@ namespace AppKit
         {
             ITK_ABORT(input_data_type != GL_UNSIGNED_BYTE, "writeToPNG only works with GL_UNSIGNED_BYTE data type.");
 
-            TextureBuffer buffer = download(NULL);
+            TextureBuffer buffer = download(nullptr);
             ITKExtension::Image::PNG::writePNG(filename, width, height, input_component_count, (char *)buffer.data, !invertY);
             buffer.dispose();
         }

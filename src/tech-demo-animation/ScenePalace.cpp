@@ -24,7 +24,7 @@ static bool ReplaceMaterial(Transform *element, void* userData) {
 
     ComponentMaterial *material = (ComponentMaterial *)element->findComponent(Components::ComponentMaterial::Type);
 
-    if ( material != NULL ){
+    if ( material != nullptr ){
         ComponentMaterial *newMaterial = (ComponentMaterial *)userData;
 
         ReferenceCounter<Component*> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
@@ -258,16 +258,16 @@ ScenePalace::ScenePalace(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper)
 {
-    Model_Palace = NULL;
-    Model_Cross = NULL;
-    //Model_Guard = NULL;
-    skinnedMesh = NULL;
-    animationMotion = NULL;
-    thirdPersonPlayerController = NULL;
-    thirdPersonCamera = NULL;
-    Texture_Guard[0] = NULL;
-	Texture_Guard[1] = NULL;
-    Texture_Guard[2] = NULL;
+    Model_Palace = nullptr;
+    Model_Cross = nullptr;
+    //Model_Guard = nullptr;
+    skinnedMesh = nullptr;
+    animationMotion = nullptr;
+    thirdPersonPlayerController = nullptr;
+    thirdPersonCamera = nullptr;
+    Texture_Guard[0] = nullptr;
+	Texture_Guard[1] = nullptr;
+    Texture_Guard[2] = nullptr;
 }
 
 ScenePalace::~ScenePalace() {
@@ -339,20 +339,20 @@ static Transform* loadSceneroot()
 	_0->LocalRotation = quatf(0,0,0,1);
 	_0->LocalScale = MathCore::vec3f(1,1,1);
 	{
-		Transform* _1 = _0->addChild(new Transform());
+		Transform* _1 = _0->addChild(Transform::CreateShared());
 		_1->Name = std::string("Main Camera");
 		_1->LocalPosition = MathCore::vec3f(0,2.475,-2.268);
 		_1->LocalRotation = quatf(0.2011371,0.005232482,-0.001074419,0.9795486);
 		_1->LocalScale = MathCore::vec3f(1,1,1);
 	}
 	{
-		Transform* _2 = _0->addChild(new Transform());
+		Transform* _2 = _0->addChild(Transform::CreateShared());
 		_2->Name = std::string("player");
 		_2->LocalPosition = MathCore::vec3f(0,0,0);
 		_2->LocalRotation = quatf(0,0,0,1);
 		_2->LocalScale = MathCore::vec3f(1,1,1);
 		{
-			Transform* _3 = _2->addChild(new Transform());
+			Transform* _3 = _2->addChild(Transform::CreateShared());
 			_3->Name = std::string("Camera-look");
 			//_3->LocalPosition = MathCore::vec3f(0.015,1.491,0.025);
             _3->LocalPosition = MathCore::vec3f(0, 1.291, 0.025);
@@ -360,7 +360,7 @@ static Transform* loadSceneroot()
 			_3->LocalScale = MathCore::vec3f(1,1,1);
 		}
         {
-            Transform* _3 = _2->addChild(new Transform());
+            Transform* _3 = _2->addChild(Transform::CreateShared());
             _3->Name = std::string("player side");
             _3->LocalPosition = MathCore::vec3f(-0.62, 0, 0);
             _3->LocalRotation = quatf(0, 0, 0, 1);
@@ -368,27 +368,27 @@ static Transform* loadSceneroot()
         }
 	}
 	{
-		Transform* _4 = _0->addChild(new Transform());
+		Transform* _4 = _0->addChild(Transform::CreateShared());
 		_4->Name = std::string("Lights");
 		_4->LocalPosition = MathCore::vec3f(-1.133002,0.5275524,-4.254147);
 		_4->LocalRotation = quatf(0,0,0,1);
 		_4->LocalScale = MathCore::vec3f(1,1,1);
 		{
-			Transform* _5 = _4->addChild(new Transform());
+			Transform* _5 = _4->addChild(Transform::CreateShared());
 			_5->Name = std::string("Directional Light (1)");
 			_5->LocalPosition = MathCore::vec3f(1.133002,2.472448,4.254147);
 			_5->LocalRotation = quatf(0.4082179,-0.2345697,0.1093816,0.8754261);
 			_5->LocalScale = MathCore::vec3f(1,1,1);
 		}
 		{
-			Transform* _6 = _4->addChild(new Transform());
+			Transform* _6 = _4->addChild(Transform::CreateShared());
 			_6->Name = std::string("Directional Light (2)");
 			_6->LocalPosition = MathCore::vec3f(2.853002,2.572448,1.264147);
 			_6->LocalRotation = quatf(0.3147533,0.6047991,-0.2820223,0.6749904);
 			_6->LocalScale = MathCore::vec3f(1,1,1);
 		}
 		{
-			Transform* _7 = _4->addChild(new Transform());
+			Transform* _7 = _4->addChild(Transform::CreateShared());
 			_7->Name = std::string("Directional Light (3)");
 			_7->LocalPosition = MathCore::vec3f(2.853002,2.572448,1.264147);
 			_7->LocalRotation = quatf(-0.1208431,0.8684675,-0.404973,-0.2591489);
@@ -396,13 +396,13 @@ static Transform* loadSceneroot()
 		}
 	}
 	{
-		Transform* _8 = _0->addChild(new Transform());
+		Transform* _8 = _0->addChild(Transform::CreateShared());
 		_8->Name = std::string("Ground");
 		_8->LocalPosition = MathCore::vec3f(0,0,0);
 		_8->LocalRotation = quatf(0,0,0,1);
 		_8->LocalScale = MathCore::vec3f(27.03765,27.03765,27.03765);
 		{
-			Transform* _9 = _8->addChild(new Transform());
+			Transform* _9 = _8->addChild(Transform::CreateShared());
 			_9->Name = std::string("Cube");
 			_9->LocalPosition = MathCore::vec3f(0,-0.5,0);
 			_9->LocalRotation = quatf(0,0,0,1);
@@ -410,13 +410,13 @@ static Transform* loadSceneroot()
 		}
 	}
 	{
-		Transform* _10 = _0->addChild(new Transform());
+		Transform* _10 = _0->addChild(Transform::CreateShared());
 		_10->Name = std::string("static");
 		_10->LocalPosition = MathCore::vec3f(0,0,0);
 		_10->LocalRotation = quatf(0,0,0,1);
 		_10->LocalScale = MathCore::vec3f(1,1,1);
 		{
-			Transform* _11 = _10->addChild(new Transform());
+			Transform* _11 = _10->addChild(Transform::CreateShared());
 			_11->Name = std::string("static_model");
 			_11->LocalPosition = MathCore::vec3f(0,3.388,-8.98);
 			_11->LocalRotation = quatf(0,0,0,1);
@@ -424,7 +424,7 @@ static Transform* loadSceneroot()
 		}
 	}
 	{
-		Transform* _12 = _0->addChild(new Transform());
+		Transform* _12 = _0->addChild(Transform::CreateShared());
 		_12->Name = std::string("RotatingCross");
 		_12->LocalPosition = MathCore::vec3f(0,0,5.1);
 		_12->LocalRotation = quatf(0,1,0,0);

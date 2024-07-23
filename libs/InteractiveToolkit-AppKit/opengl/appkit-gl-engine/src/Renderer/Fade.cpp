@@ -54,7 +54,7 @@ namespace AppKit
         Fade::Fade(Platform::Time *_time, AppKit::GLEngine::RenderWindowRegion *renderWindowRegion)
         {
             this->renderWindowRegion = renderWindowRegion;
-            if (renderWindowRegion == NULL)
+            if (renderWindowRegion == nullptr)
                 this->renderWindowRegion = &AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
 
             time = _time;

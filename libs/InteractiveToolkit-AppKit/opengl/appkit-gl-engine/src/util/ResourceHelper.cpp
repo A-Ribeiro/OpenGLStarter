@@ -12,10 +12,10 @@ namespace AppKit
 
         ResourceHelper::ResourceHelper()
         {
-            cubeMapHelper = NULL;
-            defaultAlbedoTexture = NULL;
-            defaultNormalTexture = NULL;
-            defaultPBRMaterial = NULL;
+            cubeMapHelper = nullptr;
+            defaultAlbedoTexture = nullptr;
+            defaultNormalTexture = nullptr;
+            defaultPBRMaterial = nullptr;
         }
 
         void ResourceHelper::initialize()
@@ -53,10 +53,10 @@ namespace AppKit
 
             // compRefCount->removeNoDelete(defaultPBRMaterial);
 
-            // if (defaultPBRMaterial != NULL)
+            // if (defaultPBRMaterial != nullptr)
             // {
             //     delete defaultPBRMaterial;
-            //     defaultPBRMaterial = NULL;
+            //     defaultPBRMaterial = nullptr;
             // }
             defaultPBRMaterial = nullptr;
 
@@ -65,24 +65,24 @@ namespace AppKit
             // texRefCount->removeNoDelete(defaultAlbedoTexture);
             // texRefCount->removeNoDelete(defaultNormalTexture);
 
-            // if (defaultAlbedoTexture != NULL)
+            // if (defaultAlbedoTexture != nullptr)
             // {
             //     delete defaultAlbedoTexture;
-            //     defaultAlbedoTexture = NULL;
+            //     defaultAlbedoTexture = nullptr;
             // }
-            // if (defaultNormalTexture != NULL)
+            // if (defaultNormalTexture != nullptr)
             // {
             //     delete defaultNormalTexture;
-            //     defaultNormalTexture = NULL;
+            //     defaultNormalTexture = nullptr;
             // }
 
             defaultAlbedoTexture = nullptr;
             defaultNormalTexture = nullptr;
 
-            if (cubeMapHelper != NULL)
+            if (cubeMapHelper != nullptr)
             {
                 delete cubeMapHelper;
-                cubeMapHelper = NULL;
+                cubeMapHelper = nullptr;
             }
         }
 
@@ -109,14 +109,14 @@ namespace AppKit
             }
             */
 
-        void ResourceHelper::copyCubeMapEnhanced(std::shared_ptr<AppKit::OpenGL::GLCubeMap> inputcubemap, int inputMip, std::shared_ptr<AppKit::OpenGL::GLCubeMap> targetcubemap, int outputMip)
+        void ResourceHelper::copyCubeMapEnhanced(AppKit::OpenGL::GLCubeMap *inputcubemap, int inputMip, AppKit::OpenGL::GLCubeMap *targetcubemap, int outputMip)
         {
-            cubeMapHelper->copyCubeMapEnhanced(inputcubemap.get(), inputMip, targetcubemap.get(), outputMip);
+            cubeMapHelper->copyCubeMapEnhanced(inputcubemap, inputMip, targetcubemap, outputMip);
         }
 
-        void ResourceHelper::render1x1CubeIntoSphereTexture(std::shared_ptr<AppKit::OpenGL::GLCubeMap> inputcubemap, std::shared_ptr<AppKit::OpenGL::GLTexture> targetTexture, int width, int height)
+        void ResourceHelper::render1x1CubeIntoSphereTexture(AppKit::OpenGL::GLCubeMap *inputcubemap, AppKit::OpenGL::GLTexture *targetTexture, int width, int height)
         {
-            cubeMapHelper->render1x1CubeIntoSphereTexture(inputcubemap.get(), targetTexture.get(), width, height);
+            cubeMapHelper->render1x1CubeIntoSphereTexture(inputcubemap, targetTexture, width, height);
         }
 
         std::shared_ptr<AppKit::GLEngine::GLCubeMapSkyBox> ResourceHelper::createSkybox(const std::string &name, bool sRGB, int maxResolution)
@@ -205,7 +205,7 @@ namespace AppKit
 
         std::shared_ptr<Transform> ResourceHelper::createTransformFromModel(const std::string &path, uint32_t model_dynamic_upload, uint32_t model_static_upload)
         {
-            return Basof2ToResource::loadAndConvert(path.c_str(), defaultPBRMaterial, NULL, model_dynamic_upload, model_static_upload);
+            return Basof2ToResource::loadAndConvert(path.c_str(), defaultPBRMaterial, nullptr, model_dynamic_upload, model_static_upload);
         }
 
         // bool ResourceHelper::traverse_delete(Transform *element, void *userData)
@@ -215,7 +215,7 @@ namespace AppKit
         //     ReferenceCounter<AppKit::GLEngine::Component *> *refCounter = &Engine::Instance()->componentReferenceCounter;
 
         //     Transform *parent = element->Parent;
-        //     if (parent != NULL)
+        //     if (parent != nullptr)
         //     {
         //         ITK_ABORT(parent->getChildAt(parent->getChildCount() - 1) != element, "Wrong traverse setup...");
         //         parent->removeChild(parent->getChildCount() - 1);
@@ -236,11 +236,11 @@ namespace AppKit
 
         // void ResourceHelper::releaseTransformRecursive(Transform **root)
         // {
-        //     if (root == NULL || *root == NULL)
+        //     if (root == nullptr || *root == nullptr)
         //         return;
 
         //     Transform *node = *root;
-        //     *root = NULL;
+        //     *root = nullptr;
 
         //     // traverse will delete all children, but the root remains allocated...
         //     node->traversePostOrder_DepthFirst(&ResourceHelper::traverse_delete, node);

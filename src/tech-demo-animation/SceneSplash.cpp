@@ -78,10 +78,10 @@ void SceneSplash::unloadAll(){
 
     ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    if (Milky_512_512 != NULL){
+    if (Milky_512_512 != nullptr){
         texRefCount->removeNoDelete(Milky_512_512);
         delete Milky_512_512;
-        Milky_512_512 = NULL;
+        Milky_512_512 = nullptr;
     }
 }
 
@@ -92,7 +92,7 @@ SceneSplash::SceneSplash(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper) {
     
-    Milky_512_512 = NULL;
+    Milky_512_512 = nullptr;
 
 }
 

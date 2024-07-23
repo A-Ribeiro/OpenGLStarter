@@ -46,7 +46,7 @@ namespace AppKit
                 std::weak_ptr<Transform> cameraLookRef;
                 MathCore::vec4f cameraLook_bkp_relative_skinnerMesh;
                 ThirdPersonRotateType rotateTargetNode;
-                std::shared_ptr<ComponentSkinnedMesh> skinnedMesh; // becomes null when skinned mesh is deleted
+                std::shared_ptr<ComponentSkinnedMesh> skinnedMesh; // becomes nullptr when skinned mesh is deleted
 
                 float turn_speed;
 
@@ -64,7 +64,7 @@ namespace AppKit
                     animation_str_walk = "walk";
                     animation_str_run = "run";
 
-                    renderWindowRegion = NULL;
+                    renderWindowRegion = nullptr;
                 }
 
                 void setCameraLook(std::shared_ptr<Transform> camera_look)
@@ -106,7 +106,7 @@ namespace AppKit
                 ~ComponentThirdPersonPlayerController()
                 {
                     // AppBase* app = Engine::Instance()->app;
-                    if (renderWindowRegion != NULL)
+                    if (renderWindowRegion != nullptr)
                     {
                         renderWindowRegion->OnUpdate.remove(&ComponentThirdPersonPlayerController::OnUpdate, this);
                     }

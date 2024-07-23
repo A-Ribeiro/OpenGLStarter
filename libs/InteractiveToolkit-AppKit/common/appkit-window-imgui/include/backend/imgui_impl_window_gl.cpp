@@ -240,7 +240,7 @@ void ImGui_WindowGL_InitForOpenGL(const WindowUserData &windowUserData)
 {
 
     ImGuiIO &io = ImGui::GetIO();
-    IM_ASSERT(io.BackendPlatformUserData == NULL && "Already initialized a platform backend!");
+    IM_ASSERT(io.BackendPlatformUserData == nullptr && "Already initialized a platform backend!");
 
     // Setup backend capabilities flags
 
@@ -288,16 +288,16 @@ void ImGui_WindowGL_Shutdown()
     userData->inputManager->onTouchEvent.remove(OnTouchEvent);
     userData->inputManager->onSensorEvent.remove(OnSensorEvent);
 
-    io.BackendPlatformName = NULL;
-    io.BackendPlatformUserData = NULL;
+    io.BackendPlatformName = nullptr;
+    io.BackendPlatformUserData = nullptr;
 
     ImGuiViewport *main_viewport = ImGui::GetMainViewport();
-    main_viewport->PlatformHandle = NULL;
+    main_viewport->PlatformHandle = nullptr;
 
-    if (userData != NULL)
+    if (userData != nullptr)
     {
         delete userData;
-        userData = NULL;
+        userData = nullptr;
     }
 }
 

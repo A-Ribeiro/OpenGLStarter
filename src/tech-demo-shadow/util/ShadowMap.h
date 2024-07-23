@@ -42,10 +42,10 @@ namespace AppKit
                     m;
             }
 
-            ShadowMapRGBA(int w, int h, GLRenderBuffer *sharedRealDepthBuffer24 = NULL)
+            ShadowMapRGBA(int w, int h, GLRenderBuffer *sharedRealDepthBuffer24 = nullptr)
             {
 
-                if (sharedRealDepthBuffer24 == NULL)
+                if (sharedRealDepthBuffer24 == nullptr)
                 {
                     realDepthBuffer24 = new GLRenderBuffer();
                     realDepthBuffer24->setSize(w, h, GL_DEPTH_COMPONENT24);
@@ -71,7 +71,7 @@ namespace AppKit
                 {
                     shouldReleaseDepthBuffer = false;
                     delete realDepthBuffer24;
-                    realDepthBuffer24 = NULL;
+                    realDepthBuffer24 = nullptr;
                 }
             }
 
@@ -105,7 +105,7 @@ namespace AppKit
             void beginDraw(bool setState)
             {
                 AppKit::GLEngine::GLRenderState *renderState = AppKit::GLEngine::GLRenderState::Instance();
-                renderState->CurrentFramebufferObject = NULL;
+                renderState->CurrentFramebufferObject = nullptr;
 
                 fbo.enable();
                 if (setState)

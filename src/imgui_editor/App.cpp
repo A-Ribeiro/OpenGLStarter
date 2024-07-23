@@ -49,7 +49,7 @@ App::App()
 
     fade = new Fade(&time);
 
-    fade->fadeOut(5.0f, NULL);
+    fade->fadeOut(5.0f, nullptr);
     time.update();
 
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
@@ -74,7 +74,7 @@ void App::load()
         }
     );
 
-    ImGuiMenu::Instance()->AddMenu(10000, "File/<<>>", "", NULL);
+    ImGuiMenu::Instance()->AddMenu(10000, "File/<<>>", "", nullptr);
     ImGuiMenu::Instance()->AddMenu(20000, "File/Quit", "Ctrl+Q", [this]()
         { this->exitApp(); });
 
@@ -86,7 +86,7 @@ void App::load()
 
     Editor::Instance()->init();
     
-    fade->fadeOut(0.5f, NULL);
+    fade->fadeOut(0.5f, nullptr);
 }
 
 App::~App()
@@ -94,9 +94,9 @@ App::~App()
     ImGuiManager::Instance()->SaveLayout();
     ImGuiManager::Instance()->Finalize();
 
-    if (fade != NULL){
+    if (fade != nullptr){
         delete fade;
-        fade = NULL;
+        fade = nullptr;
     }
     resourceHelper.finalize();
 }
@@ -115,16 +115,16 @@ void App::draw()
     screenRenderWindow.OnLateUpdate(&time);
 
     // pre process all scene graphs
-    /*if (sceneJesusCross != NULL)
+    /*if (sceneJesusCross != nullptr)
         sceneJesusCross->precomputeSceneGraphAndCamera();
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();*/
 
     screenRenderWindow.OnAfterGraphPrecompute(&time);
 
-    /*if (sceneJesusCross != NULL)
+    /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->draw();*/
 
     GLRenderState *renderState = GLRenderState::Instance();

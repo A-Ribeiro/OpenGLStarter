@@ -59,7 +59,7 @@ namespace AppKit
                     MathCore::vec3f right = rotation * MathCore::vec3f(0.25f, 0, 0);
 
                     auto lines = transform->findComponent<ComponentColorLine>();
-                    if (lines == NULL)
+                    if (lines == nullptr)
                         lines = transform->addNewComponent<ComponentColorLine>();
 
                     lines->vertices.clear();

@@ -24,7 +24,7 @@ namespace AppKit
 
             auto result = root;
 
-            if (result == NULL)
+            if (result == nullptr)
             {
                 result = Transform::CreateShared();
 
@@ -84,8 +84,8 @@ namespace AppKit
                 // ReferenceCounter<AppKit::GLEngine::Component *> *refCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
 
                 /*
-                Components::ComponentMaterial *material = NULL;
-                if (defaultMaterial != NULL)
+                Components::ComponentMaterial *material = nullptr;
+                if (defaultMaterial != nullptr)
                     result->addComponent(refCount->add(material = defaultMaterial));
                 else
                     result->addComponent(refCount->add(material = new Components::ComponentMaterial()));
@@ -185,7 +185,7 @@ namespace AppKit
                                               container,
                                               geometryCache,
                                               materialCache,
-                                              NULL,
+                                              nullptr,
                                               defaultMaterial,
                                               model_dynamic_upload, model_static_upload));
             }

@@ -16,7 +16,7 @@ protected:
     //clear all loaded scene
     virtual void unloadAll();
     
-    AppKit::OpenGL::GLTexture *cursorTexture;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> cursorTexture;
 
     AppKit::OpenGL::GLFont2Builder fontBuilder;
 
@@ -30,11 +30,11 @@ public:
 
     //right
     AppKit::GLEngine::Button* button_NextScene;
-    AppKit::GLEngine::Components::ComponentFontToMesh* componentFontToMesh;
-    AppKit::GLEngine::Components::ComponentFontToMesh* fps;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentFontToMesh> componentFontToMesh;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentFontToMesh> fps;
     float f_fps;
 
-    AppKit::GLEngine::Transform* cursorTransform;
+    std::shared_ptr<AppKit::GLEngine::Transform> cursorTransform;
 
 
     std::vector<AppKit::GLEngine::Button*> allButtons;

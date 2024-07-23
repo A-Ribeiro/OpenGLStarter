@@ -9,8 +9,8 @@ namespace AppKit
 
         const AppKit::OpenGL::VirtualTexture *FrankenUniformManager::last_tex_unit[FrankenUniformTextureSlot_Count] =
             {
-                NULL, NULL, NULL, NULL, NULL,
-                NULL, NULL, NULL, NULL // shadowSunLight
+                nullptr, nullptr, nullptr, nullptr, nullptr,
+                nullptr, nullptr, nullptr, nullptr // shadowSunLight
         };
 
         FrankenUniformManager::FrankenUniformManager(FrankenShader *_frankenShader)
@@ -305,10 +305,10 @@ namespace AppKit
                 if (strcmp(oldShader->class_name, "FrankenShader") == 0)
                     old_frankenShader = (FrankenShader *)oldShader;
                 else
-                    old_frankenShader = NULL;
+                    old_frankenShader = nullptr;
             }
             else
-                old_frankenShader = NULL;
+                old_frankenShader = nullptr;
         }
 
         void FrankenUniformManager::activeTexUnit()
@@ -321,7 +321,7 @@ namespace AppKit
                 if ( // old_frankenShader->frankenUniformManager.tex_unit[i] == tex_unit[i] &&
                     last_tex_unit[i] == tex_unit[i])
                 {
-                    if (tex_unit[i] != NULL)
+                    if (tex_unit[i] != nullptr)
                     {
                         count++;
                         count_old++;
@@ -329,14 +329,14 @@ namespace AppKit
                     continue;
                 }
 
-                if (last_tex_unit[i] != NULL)
+                if (last_tex_unit[i] != nullptr)
                 {
                     last_tex_unit[i]->deactive(count_old);
                     count_old++;
                 }
 
                 last_tex_unit[i] = tex_unit[i];
-                if (tex_unit[i] != NULL)
+                if (tex_unit[i] != nullptr)
                 {
                     tex_unit[i]->active(count);
                     // frankenShader->setUniform(tex_unit_uniform_location[i], count);
@@ -350,9 +350,9 @@ namespace AppKit
             int count = 0;
             for (int i = 0; i < FrankenUniformTextureSlot_Count; i++)
             {
-                if (last_tex_unit[i] != NULL)
+                if (last_tex_unit[i] != nullptr)
                     last_tex_unit[i]->deactive(count++);
-                last_tex_unit[i] = NULL;
+                last_tex_unit[i] = nullptr;
             }
         }
 

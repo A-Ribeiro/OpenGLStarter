@@ -44,8 +44,8 @@ namespace AppKit
             ITK_ABORT(!GLAD_GL_ARB_framebuffer_object, "ARB_framebuffer_object not supported.");
 
             initialized = false;
-            depth = NULL;
-            stencil = NULL;
+            depth = nullptr;
+            stencil = nullptr;
             mFbo = 0;
             width = 0;
             height = 0;
@@ -124,10 +124,10 @@ namespace AppKit
             // }
 
             ITK_ABORT(
-                (depth == NULL && color.size() == 0),
+                (depth == nullptr && color.size() == 0),
                 "Cannot create a framebuffer object without any texture. \n");
 
-            // if (depth == NULL && color.size() == 0) {
+            // if (depth == nullptr && color.size() == 0) {
             //     fprintf(stderr, "[GLFramebufferObject] Cannot create a framebuffer object without any texture. \n");
             //     exit(-1);
             // }
@@ -140,12 +140,12 @@ namespace AppKit
             for (int i = 0; i < (int)color.size(); i++)
                 OPENGL_CMD(glFramebufferTexture2D(GL_FRAMEBUFFER, DrawBuffersUnit[i], GL_TEXTURE_2D, color[i]->mTexture, 0));
 
-            if (depth != NULL)
+            if (depth != nullptr)
             {
                 OPENGL_CMD(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth->mTexture, 0));
             }
 
-            if (stencil != NULL)
+            if (stencil != nullptr)
             {
                 OPENGL_CMD(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, stencil->mTexture, 0));
             }
@@ -238,7 +238,7 @@ namespace AppKit
                 return;
             this->width = w;
             this->height = h;
-            if (depth != NULL)
+            if (depth != nullptr)
             {
                 ITK_ABORT(
                     !GLAD_GL_ARB_depth_texture,
@@ -249,7 +249,7 @@ namespace AppKit
                 // }
                 depth->setSize(w, h, depthFormat);
             }
-            if (stencil != NULL)
+            if (stencil != nullptr)
                 stencil->setSize(w, h, stencilFormat);
             for (int i = 0; i < (int)color.size(); i++)
                 color[i]->setSize(w, h, colorFormat);

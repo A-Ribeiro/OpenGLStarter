@@ -114,22 +114,22 @@ public:
         AppBase::screenRenderWindow.Viewport.OnChange.add(&App::onViewportChange, this);
         
         fade = new Fade(&time);
-        fade->fadeOut(2.0f, NULL);
+        fade->fadeOut(2.0f, nullptr);
         time.update();
-        activeScene = NULL;
+        activeScene = nullptr;
         renderPipeline.ambientLight.lightMode = AmbientLightMode_SkyBoxCubeTexture;
     }
     ~App(){
-        if (activeScene != NULL){
+        if (activeScene != nullptr){
             activeScene->unload();
             delete activeScene;
-            activeScene = NULL;
+            activeScene = nullptr;
         }
 
-        if (fade != NULL)
+        if (fade != nullptr)
         {
             delete fade;
-            fade = NULL;
+            fade = nullptr;
         }
 
         resourceHelper.finalize();
@@ -146,12 +146,12 @@ public:
         OnLateUpdate(&time);
 
         // pre process all scene graphs
-        if (activeScene != NULL)
+        if (activeScene != nullptr)
             activeScene->precomputeSceneGraphAndCamera();
 
         OnAfterGraphPrecompute(&time);
 
-        if (activeScene != NULL)
+        if (activeScene != nullptr)
             activeScene->draw();
 
         fade->draw();
@@ -293,10 +293,10 @@ void SceneSplash::unloadAll(){
 
     ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    if (Milky_512_512 != NULL){
+    if (Milky_512_512 != nullptr){
         texRefCount->removeNoDelete(Milky_512_512);
         delete Milky_512_512;
-        Milky_512_512 = NULL;
+        Milky_512_512 = nullptr;
     }
 }
 
@@ -305,7 +305,7 @@ SceneSplash::SceneSplash(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper) {
     
-    Milky_512_512 = NULL;
+    Milky_512_512 = nullptr;
 
 }
 

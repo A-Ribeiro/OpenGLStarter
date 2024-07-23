@@ -24,10 +24,10 @@ namespace AppKit
 
         GLWindow::GLWindow(const WindowConfig &_windowConfig, const GLContextConfig &_glContextConfig)
         {
-            libraryHandle = NULL;
-            usr1Handle = NULL;
-            usr2Handle = NULL;
-            usr3Handle = NULL;
+            libraryHandle = nullptr;
+            usr1Handle = nullptr;
+            usr2Handle = nullptr;
+            usr3Handle = nullptr;
 
             windowConfig = _windowConfig;
             glContextConfig = _glContextConfig;
@@ -88,7 +88,7 @@ namespace AppKit
         GLWindow::~GLWindow()
         {
             sf::RenderWindow *window = static_cast<sf::RenderWindow *>(usr2Handle);
-            libraryHandle = NULL;
+            libraryHandle = nullptr;
             if (window->isOpen())
                 window->close();
             delete window;
@@ -123,10 +123,10 @@ namespace AppKit
 
         VulkanWindow::VulkanWindow(const WindowConfig &_windowConfig)
         {
-            libraryHandle = NULL;
-            usr1Handle = NULL;
-            usr2Handle = NULL;
-            usr3Handle = NULL;
+            libraryHandle = nullptr;
+            usr1Handle = nullptr;
+            usr2Handle = nullptr;
+            usr3Handle = nullptr;
 
             windowConfig = _windowConfig;
 
@@ -151,7 +151,7 @@ namespace AppKit
         {
             sf::WindowBase *window = static_cast<sf::WindowBase *>(usr1Handle);
 
-            libraryHandle = NULL;
+            libraryHandle = nullptr;
             if (window->isOpen())
                 window->close();
             delete window;
@@ -350,7 +350,7 @@ namespace AppKit
         void Window::forwardWindowEventsToInputManager(bool alwaysDraw, InputManager *customInputManager)
         {
             InputManager *targetInputManager = customInputManager;
-            if (targetInputManager == NULL)
+            if (targetInputManager == nullptr)
                 targetInputManager = &this->inputManager;
 
             sf::WindowBase *window = static_cast<sf::WindowBase *>(usr1Handle);
@@ -1185,7 +1185,7 @@ namespace windowGLWrapper
 
         DispManX(WindowConfig *windowConfig)
         {
-            egl = NULL;
+            egl = nullptr;
             this->windowConfig = windowConfig;
             initialize_bcm_host();
 
@@ -1255,7 +1255,7 @@ namespace windowGLWrapper
         ~DispManX()
         {
             delete egl;
-            egl = NULL;
+            egl = nullptr;
 
             if (m_nativeWindow.element)
             {
@@ -1284,7 +1284,7 @@ namespace windowGLWrapper
 
     Window::Window(const WindowConfig &_windowConfig)
     {
-        libraryHandle = NULL;
+        libraryHandle = nullptr;
 
         windowConfig = _windowConfig;
 
@@ -1301,7 +1301,7 @@ namespace windowGLWrapper
     Window::~Window()
     {
         DispManX *dispmanx = static_cast<DispManX *>(libraryHandle);
-        libraryHandle = NULL;
+        libraryHandle = nullptr;
         // if (window->isOpen())
         // window->close();
         delete dispmanx;
@@ -1459,7 +1459,7 @@ namespace windowGLWrapper
     }
     bool Window::isOpen()
     {
-        return libraryHandle != NULL;
+        return libraryHandle != nullptr;
     }
 
     bool Window::hasFocus()
@@ -1501,7 +1501,7 @@ namespace windowGLWrapper
     void Window::forwardWindowEventsToInputManager(bool alwaysDraw, InputManager *customInputManager)
     {
         InputManager *targetInputManager = customInputManager;
-        if (targetInputManager == NULL)
+        if (targetInputManager == nullptr)
             targetInputManager = &this->inputManager;
 
         Window *thiz = this;

@@ -73,7 +73,7 @@ public:
     //int64_t time_acc_micro;
 
     ServiceEntry() {
-        process = NULL;
+        process = nullptr;
         //time_acc_micro = 0;
     }
 
@@ -83,7 +83,7 @@ public:
         if (type == ServiceType::Service)
             has_windows_special_signal = service.has_windows_special_signal;
 
-        if (process != NULL) {
+        if (process != nullptr) {
             #if defined(_WIN32)
                 if (has_windows_special_signal)
                     process->signal(SIGINT);
@@ -101,7 +101,7 @@ public:
     void start() {
         if(type != ServiceType::Service)
             return;
-        if (process != NULL)
+        if (process != nullptr)
             return;
         process = new PlatformProcess(
             service.command,
@@ -112,7 +112,7 @@ public:
     void stop() {
         if(type != ServiceType::Service)
             return;
-        if (process == NULL)
+        if (process == nullptr)
             return;
         closeProcess();
     }
@@ -120,7 +120,7 @@ public:
     void runOnce() {
         if(type != ServiceType::RunOnce)
             return;
-        if (process != NULL)
+        if (process != nullptr)
             return;
         run_once.timeout_counter_ms = run_once.timeout_ms;
         process = new PlatformProcess(
@@ -132,7 +132,7 @@ public:
     void install() {
         if(type != ServiceType::InstallUninstall)
             return;
-        if (process != NULL)
+        if (process != nullptr)
             return;
         // process = new PlatformProcess(
         //     install_uninstall.install.command,
@@ -143,7 +143,7 @@ public:
     void uninstall() {
         if(type != ServiceType::InstallUninstall)
             return;
-        if (process != NULL)
+        if (process != nullptr)
             return;
         // process = new PlatformProcess(
         //     install_uninstall.uninstall.command,
@@ -154,7 +154,7 @@ public:
     bool is_installed() {
         if(type != ServiceType::InstallUninstall)
             return false;
-        if (process != NULL)
+        if (process != nullptr)
             return false;
         // process = new PlatformProcess(
         //     install_uninstall.check_installed.command,
@@ -167,7 +167,7 @@ public:
     void process_status_update() {
         switch(type){
             case ServiceType::Service:
-                if (process != NULL){
+                if (process != nullptr){
                     if (process->isRunning())
                         strcpy(process_status, "[Running]");
                     else
@@ -179,7 +179,7 @@ public:
             case ServiceType::InstallUninstall:
                 strcpy(process_status, "[NotInstalled]");
                 /*
-                if (process != NULL){
+                if (process != nullptr){
                     result = "[Running]";
                 }else{
                     result = "[Stopped]";
@@ -187,7 +187,7 @@ public:
                 */
                 break;
             case ServiceType::RunOnce:
-                if (process != NULL){
+                if (process != nullptr){
 
                     run_once.timeout_counter_ms -= 500;
                     if (run_once.timeout_counter_ms <= 0) {

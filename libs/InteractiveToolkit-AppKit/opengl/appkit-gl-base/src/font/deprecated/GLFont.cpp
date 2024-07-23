@@ -11,7 +11,7 @@
 #include <appkit-gl-base/font/deprecated/GLFont.h>
 #include <appkit-gl-base/font/deprecated/GLStripText.h>
 #include <appkit-gl-base/platform/PlatformGL.h>
-// #include <aRibeiroCore/SetNullAndDelete.h>
+// #include <aRibeiroCore/SetnullptrAndDelete.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -25,7 +25,7 @@ namespace AppKit
     namespace OpenGL
     {
 
-        GLShaderFont *GLFont::globalShader = NULL;
+        GLShaderFont *GLFont::globalShader = nullptr;
 
         //
         // private constructors, avoid copy construct
@@ -37,9 +37,9 @@ namespace AppKit
         //
         void GLFont::releaseSharedResources()
         {
-            if (globalShader != NULL){
+            if (globalShader != nullptr){
                 delete globalShader;
-                globalShader = NULL;
+                globalShader = nullptr;
             }
         }
         //
@@ -50,7 +50,7 @@ namespace AppKit
                        const char *luminancePointer)
         {
 
-            if (globalShader == NULL)
+            if (globalShader == nullptr)
                 globalShader = new GLShaderFont();
 
             mHeader = aHeader;

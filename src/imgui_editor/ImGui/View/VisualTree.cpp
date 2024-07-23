@@ -8,7 +8,7 @@ const char *DRAG_PAYLOAD_ID_PROJECT_TREE = "PROJECT_TREE";
 TreeNode::TreeNode()
 {
     this->uid = 0;
-    // this->icon_alias = NULL;
+    // this->icon_alias = nullptr;
     // this->path = "-not-initialized-";
     //snprintf(this->name, 64, "-not-initialized-");
     setName("-not-initialized-");
@@ -362,9 +362,9 @@ void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder
     }
 
 
-    // treeHolder->tree_drop_payload_id = NULL;
-    // treeHolder->tree_drop_child = NULL;
-    // treeHolder->tree_drop_new_parent = NULL;
+    // treeHolder->tree_drop_payload_id = nullptr;
+    // treeHolder->tree_drop_child = nullptr;
+    // treeHolder->tree_drop_new_parent = nullptr;
     // treeHolder->aux_dragdrop = nullptr;
 
     bool deselect_all = false;
@@ -400,9 +400,9 @@ void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder
         treeHolder->OnTreeSelect(nullptr);
     }
 
-    // if (treeHolder->tree_drop_payload_id != NULL &&
-    //     treeHolder->tree_drop_child != NULL &&
-    //     treeHolder->tree_drop_new_parent != NULL)
+    // if (treeHolder->tree_drop_payload_id != nullptr &&
+    //     treeHolder->tree_drop_child != nullptr &&
+    //     treeHolder->tree_drop_new_parent != nullptr)
     // {
     //     treeHolder->OnTreeDragDrop(
     //         treeHolder->tree_drop_payload_id,

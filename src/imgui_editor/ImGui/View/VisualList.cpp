@@ -163,7 +163,7 @@ bool VisualList::CustomImGuiCommand_DrawItem(
 
     // ImGui::PushFont(ImGuiManager::Instance()->font_half_size);
 
-    // ImVec2 text_size = ImGui::CalcTextSize(itemSelf->name, NULL, false, text_width);
+    // ImVec2 text_size = ImGui::CalcTextSize(itemSelf->name, nullptr, false, text_width);
 
     // ImVec2 aux_pos = size - text_size;
     // aux_pos.x = aux_pos.x * 0.5f;
@@ -204,7 +204,7 @@ bool VisualList::CustomImGuiCommand_DrawItem(
 ListElement::ListElement()
 {
     uid = 0;
-    visualList = NULL;
+    visualList = nullptr;
     this->setName("-not-set-");
     // this->setIcon(RandomListIcon());
     selected = false;

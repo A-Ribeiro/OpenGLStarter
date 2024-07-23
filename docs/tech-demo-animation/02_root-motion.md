@@ -115,7 +115,7 @@ public:
    void queryInterval_ForwardLoop(
        const std::vector<KeyframePos> &channel, float time,
        KeyframePos **out_A, KeyframePos **out_B, float *out_lrp,
-       vec3f *interquery_delta = NULL ) {
+       vec3f *interquery_delta = nullptr ) {
        if (lastIndexA == -1) {
            // initialize data
            lastIndexA = 0;
@@ -124,11 +124,11 @@ public:
            lastTimeQuery = channel[0].time;
        }
        if (channel.size() == 0) {
-           *out_A = *out_B = NULL;
+           *out_A = *out_B = nullptr;
            *out_lrp = 0.0f;
  
            // new code
-           if (interquery_delta != NULL)
+           if (interquery_delta != nullptr)
                *interquery_delta = MathCore::vec3f(0);
           
            return;
@@ -137,7 +137,7 @@ public:
            *out_lrp = 0.0f;
  
            // new code
-           if (interquery_delta != NULL)
+           if (interquery_delta != nullptr)
                *interquery_delta = MathCore::vec3f(0);
           
            return;
@@ -146,7 +146,7 @@ public:
        if (time < lastTimeQuery) {
           
            // new code
-           if (interquery_delta != NULL) {
+           if (interquery_delta != nullptr) {
                vec3f lastReturned = lerp(channel[lastIndexA].pos, channel[lastIndexB].pos, lastLrp);
                *interquery_delta = channel[channel.size() - 1].pos - lastReturned;
            }
@@ -159,7 +159,7 @@ public:
        } else {
  
            // new code
-           if (interquery_delta != NULL)
+           if (interquery_delta != nullptr)
                *interquery_delta = MathCore::vec3f(0);
  
        }
@@ -168,7 +168,7 @@ public:
        if (time > lastTimeQuery) {
  
            // new code
-           if (interquery_delta != NULL)
+           if (interquery_delta != nullptr)
                lastReturned = lerp(channel[lastIndexA].pos, channel[lastIndexB].pos, lastLrp);
  
            lastTimeQuery = time;
@@ -191,7 +191,7 @@ public:
            lastLrp = (time - channel[lastIndexA].time) / delta;
  
        // new code
-       if (interquery_delta != NULL) {
+       if (interquery_delta != nullptr) {
            vec3f result = lerp(channel[lastIndexA].pos, channel[lastIndexB].pos, lastLrp);
            *interquery_delta += result - lastReturned;
        }
@@ -235,17 +235,17 @@ public:
        if (process_as_root)
            start_position_local = channelPosition[0].value;
    }
-   vec3f queryPosition(float time, vec3f *interquery_delta_local = NULL) {
+   vec3f queryPosition(float time, vec3f *interquery_delta_local = nullptr) {
        KeyframePos *out_A, *out_B;
        float out_lrp;
        if (!process_as_root)
-            interquery_delta_local = NULL;
+            interquery_delta_local = nullptr;
        queryInterpolationPos.queryInterval_ForwardLoop(
            &channelPosition, time, // vector, seconds
            &out_A, &out_B, &out_lrp, // output parameters
            interquery_delta_local
        );
-       if (out_A == NULL)
+       if (out_A == nullptr)
            return MathCore::vec3f(0);
       
        if (process_as_root) {
@@ -260,11 +260,11 @@ public:
            &channelRotation, time, // vector, seconds
            &out_A, &out_B, &out_lrp // output parameters
        );
-       if (out_A == NULL)
+       if (out_A == nullptr)
            return quatf(0,0,0,1);
        return slerp( out_A->rot, out_B->rot, out_lrp);
    }
-   mat4f computeMatrix(float time, vec3f *interquery_delta = NULL) {
+   mat4f computeMatrix(float time, vec3f *interquery_delta = nullptr) {
        vec3f pos = queryPosition(time, interquery_delta);
        quatf rot = queryRotation(time);
        return translateMatrix(pos) * GEN<mat4f>::fromQuat(rot);

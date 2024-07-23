@@ -43,7 +43,7 @@ namespace AppKit
                 // RPI 2.0 only supports render to RGBA buffers...
                 targetcubemap->setSize(resolution, resolution, GL_RGB);
 
-                state->CurrentFramebufferObject = NULL;
+                state->CurrentFramebufferObject = nullptr;
 
                 targetFBO.enable();
 
@@ -112,8 +112,8 @@ namespace AppKit
                 OPENGL_CMD(glEnableVertexAttribArray(shaderCopyCubeMap.vUV));
                 OPENGL_CMD(glVertexAttribPointer(shaderCopyCubeMap.vUV, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &uv[0]));
 
-                //static AppKit::OpenGL::GLTexture *tex = NULL;
-                //if (tex == NULL)
+                //static AppKit::OpenGL::GLTexture *tex = nullptr;
+                //if (tex == nullptr)
                 //    tex = new AppKit::OpenGL::GLTexture();
                 //tex->setSize(resolution,resolution);
                 //dinamicFBO_1x1.setColorAttachment(tex, 0);
@@ -140,7 +140,7 @@ namespace AppKit
                 OPENGL_CMD(glDisableVertexAttribArray(shaderCopyCubeMap.vUV));
 
 
-                targetFBO.setColorAttachmentCube(NULL, 0, 0);
+                targetFBO.setColorAttachmentCube(nullptr, 0, 0);
 
                 targetFBO.disable();
 
@@ -188,7 +188,7 @@ namespace AppKit
 
             sphereFBO.enable();
 
-            sphereFBO.setColorAttachment(NULL, 0);
+            sphereFBO.setColorAttachment(nullptr, 0);
             targetTexture->setSize(width, height, inputcubemap->internal_format);
             sphereFBO.setSize(width, height);
             sphereFBO.setColorAttachment(targetTexture, 0);
@@ -222,7 +222,7 @@ namespace AppKit
             OPENGL_CMD(glDisableVertexAttribArray(ShaderRender1x1CubeMap::vPosition));
 
             inputcubemap->deactive(0);
-            sphereFBO.setColorAttachment(NULL, 0);
+            sphereFBO.setColorAttachment(nullptr, 0);
             sphereFBO.disable();
 
             // restore state

@@ -146,14 +146,14 @@ namespace AppKit
                 forwardSpeed = 1.0f;
                 strafeSpeed = 1.0f;
                 angleSpeed = MathCore::OP<float>::deg_2_rad(0.10f);
-                renderWindowRegion = NULL;
+                renderWindowRegion = nullptr;
             }
 
             ComponentCameraMove::~ComponentCameraMove()
             {
                 // AppBase* app = Engine::Instance()->app;
 
-                if (renderWindowRegion != NULL)
+                if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->OnLateUpdate.remove(&ComponentCameraMove::OnLateUpdate, this);
 

@@ -34,15 +34,15 @@ namespace AppKit
             height = h;
             for (int i = 0; i < 16; i++)
             {
-                if (colorAttachment[i] != NULL)
+                if (colorAttachment[i] != nullptr)
                     colorAttachment[i]->setSize(w, h);
 
-                if (cubeAttachment[i] != NULL)
+                if (cubeAttachment[i] != nullptr)
                     cubeAttachment[i]->setSize(w, h);
             }
-            if (depthRenderBuffer != NULL)
+            if (depthRenderBuffer != nullptr)
                 depthRenderBuffer->setSize(w, h);
-            if (depthTexture != NULL)
+            if (depthTexture != nullptr)
                 depthTexture->setSize(w, h);
         }
 
@@ -54,13 +54,13 @@ namespace AppKit
             OPENGL_CMD(glGenFramebuffers(1, &mFBO));
 
             for (int i = 0; i < 16; i++)
-                colorAttachment[i] = NULL;
+                colorAttachment[i] = nullptr;
 
             for (int i = 0; i < 16; i++)
-                cubeAttachment[i] = NULL;
+                cubeAttachment[i] = nullptr;
 
-            depthRenderBuffer = NULL;
-            depthTexture = NULL;
+            depthRenderBuffer = nullptr;
+            depthTexture = nullptr;
 
             width = 0;
             height = 0;
@@ -100,7 +100,7 @@ namespace AppKit
             ITK_ABORT((color_index >= max_color_attachment), "Trying to write to color buffer %i. Max Color attachment is: %i.\n", color_index, max_color_attachment);
 #endif
 
-            if (texture == NULL)
+            if (texture == nullptr)
                 OPENGL_CMD(glFramebufferTexture2D(GL_FRAMEBUFFER, FBO_ATTACHMENT_ENUM[color_index], GL_TEXTURE_2D, 0, 0));
             else
             {
@@ -121,7 +121,7 @@ namespace AppKit
             ITK_ABORT((color_index >= max_color_attachment), "Trying to write to color buffer %i. Max Color attachment is: %i.\n", color_index, max_color_attachment);
 #endif
 
-            if (texture == NULL)
+            if (texture == nullptr)
                 OPENGL_CMD(glFramebufferTexture2D(GL_FRAMEBUFFER, FBO_ATTACHMENT_ENUM[color_index], side, 0, 0));
             else
             {
@@ -140,10 +140,10 @@ namespace AppKit
         void GLDynamicFBO::setDepthRenderBufferAttachment(GLRenderBuffer *renderBuffer)
         {
 
-            if (renderBuffer == NULL)
+            if (renderBuffer == nullptr)
             {
 #ifndef ITK_RPI
-                if (depthRenderBuffer != NULL && depthRenderBuffer->is_depth_stencil)
+                if (depthRenderBuffer != nullptr && depthRenderBuffer->is_depth_stencil)
                     OPENGL_CMD(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0));
                 else
 #endif
@@ -163,10 +163,10 @@ namespace AppKit
 
         void GLDynamicFBO::setDepthTextureAttachment(GLTexture *texture, GLint mip_level)
         {
-            if (texture == NULL)
+            if (texture == nullptr)
             {
 #ifndef ITK_RPI
-                if (depthTexture != NULL && depthTexture->is_depth_stencil)
+                if (depthTexture != nullptr && depthTexture->is_depth_stencil)
                     OPENGL_CMD(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 0, 0));
                 else
 #endif
@@ -291,7 +291,7 @@ namespace AppKit
         {
             TextureBuffer result;
 
-            if (colorAttachment[attachmentIndex] != NULL)
+            if (colorAttachment[attachmentIndex] != nullptr)
             {
                 GLTexture *tex = colorAttachment[attachmentIndex];
                 GLint mip = colorAttachment_mip[attachmentIndex];
@@ -303,7 +303,7 @@ namespace AppKit
                     h = 1;
                 uint32_t size_bytes = w * h * tex->input_raw_element_size;
 
-                if (output != NULL)
+                if (output != nullptr)
                 {
                     if (output->data_size_bytes == size_bytes)
                     {
@@ -331,7 +331,7 @@ namespace AppKit
                 OPENGL_CMD(glReadPixels(0, 0, result.width, result.height, tex->input_format, tex->input_data_type, result.data));
                 OPENGL_CMD(glPixelStorei(GL_PACK_ALIGNMENT, 4));
             }
-            else if (cubeAttachment[attachmentIndex] != NULL)
+            else if (cubeAttachment[attachmentIndex] != nullptr)
             {
                 GLCubeMap *cube = cubeAttachment[attachmentIndex];
                 GLint mip = cubeAttachment_mip[attachmentIndex];
@@ -343,7 +343,7 @@ namespace AppKit
                     h = 1;
                 uint32_t size_bytes = w * h * cube->input_raw_element_size;
 
-                if (output != NULL)
+                if (output != nullptr)
                 {
                     if (output->data_size_bytes == size_bytes)
                     {
@@ -373,10 +373,10 @@ namespace AppKit
             }
             else
             {
-                ITK_ABORT(true, "Trying to read buffer Null from FBO...");
+                ITK_ABORT(true, "Trying to read buffer nullptr from FBO...");
             }
 
-            if (output != NULL)
+            if (output != nullptr)
                 *output = result;
 
             return result;

@@ -10,21 +10,21 @@ using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
-Transform* loadSceneroot_Mary();
+std::shared_ptr<Transform> loadSceneroot_Mary();
 
-static bool ReplaceMaterial(Transform *element, void* userData) {
+static bool ReplaceMaterial(std::shared_ptr<Transform> element, void* userData) {
     
-    ComponentMaterial *material = (ComponentMaterial *)element->findComponent(Components::ComponentMaterial::Type);
+    auto material = element->findComponent<ComponentMaterial>();
     
-    if ( material != NULL ){
-        ComponentMaterial *newMaterial = (ComponentMaterial *)userData;
+    if ( material != nullptr ){
+        std::shared_ptr<ComponentMaterial> &newMaterial = *(std::shared_ptr<ComponentMaterial> *)userData;
         
-        ReferenceCounter<Component*> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
+        // ReferenceCounter<Component*> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
+
+        auto componentMaterial = element->removeComponent(material);
+//        compRefCount->remove(componentMaterial);
         
-        Component * componentMaterial = element->removeComponent(material);
-        compRefCount->remove(componentMaterial);
-        
-        element->addComponent(compRefCount->add(newMaterial));
+        element->addComponent(newMaterial);
 
 		//little optimization
 		element->makeFirstComponent(newMaterial);
@@ -47,19 +47,18 @@ void SceneMary::loadResources() {
     Mary3DModel = resourceHelper->createTransformFromModel("resources/VirginMary/VirginMary.bams");
 
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     
-    ComponentMaterial * newMaterial;
-    
-    newMaterial = new ComponentMaterial();
+    auto newMaterial = Component::CreateShared<ComponentMaterial>();
+    // newMaterial = new ComponentMaterial();
     newMaterial->type = Components::MaterialPBR;
     newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
     newMaterial->pbr.metallic = 0.2f;
     newMaterial->pbr.roughness = 0.8f;
-    newMaterial->pbr.texAlbedo = texRefCount->add(MaryTextures[0]);
-    newMaterial->pbr.texNormal = texRefCount->add(MaryTextures[1]);
+    newMaterial->pbr.texAlbedo = MaryTextures[0];
+    newMaterial->pbr.texNormal = MaryTextures[1];
     
-    Mary3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, newMaterial);
+    Mary3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
     
 }
 
@@ -74,15 +73,15 @@ void SceneMary::bindResourcesToGraph() {
 
     //setup cubemap
     {
-        if (renderPipeline->cubeSkyBox != NULL)
-            delete renderPipeline->cubeSkyBox;
+        if (renderPipeline->cubeSkyBox != nullptr)
+            renderPipeline->cubeSkyBox = nullptr;
         renderPipeline->cubeSkyBox = resourceHelper->createSkybox("SantaMariaDeiMiracoli",
             true && engine->sRGBCapable,
             1024
         );
 
-        if (renderPipeline->cubeAmbientLight_1x1 != NULL)
-            delete renderPipeline->cubeAmbientLight_1x1;
+        if (renderPipeline->cubeAmbientLight_1x1 != nullptr)
+            renderPipeline->cubeAmbientLight_1x1 = nullptr;
 
 #if ITK_RPI
         renderPipeline->cubeAmbientLight_1x1 = resourceHelper->createCubeMap("SantaMariaDeiMiracoli",
@@ -91,13 +90,13 @@ void SceneMary::bindResourcesToGraph() {
         );
 #else
         if (engine->sRGBCapable)
-            renderPipeline->cubeAmbientLight_1x1 = new GLCubeMap(1, 1, GL_SRGB, 1);
+            renderPipeline->cubeAmbientLight_1x1 = std::make_shared<GLCubeMap>(1, 1, GL_SRGB, 1);
         else
-            renderPipeline->cubeAmbientLight_1x1 = new GLCubeMap(1, 1, GL_RGB, 1);
+            renderPipeline->cubeAmbientLight_1x1 = std::make_shared<GLCubeMap>(1, 1, GL_RGB, 1);
 
         resourceHelper->copyCubeMapEnhanced(
             &renderPipeline->cubeSkyBox->cubeMap,renderPipeline->cubeSkyBox->cubeMap.max_mip_level,
-            renderPipeline->cubeAmbientLight_1x1,0
+            renderPipeline->cubeAmbientLight_1x1.get(),0
         );
         
         /*
@@ -110,9 +109,9 @@ void SceneMary::bindResourcesToGraph() {
 #endif
 
         //create sphere map
-        if (renderPipeline->sphereAmbientLight != NULL)
-            delete renderPipeline->sphereAmbientLight;
-        renderPipeline->sphereAmbientLight = new AppKit::OpenGL::GLTexture();
+        if (renderPipeline->sphereAmbientLight != nullptr)
+            renderPipeline->sphereAmbientLight = nullptr;
+        renderPipeline->sphereAmbientLight = std::make_shared<AppKit::OpenGL::GLTexture>();
         renderPipeline->sphereAmbientLight->active(0);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -121,8 +120,8 @@ void SceneMary::bindResourcesToGraph() {
         renderPipeline->sphereAmbientLight->deactive(0);
 
         resourceHelper->render1x1CubeIntoSphereTexture(
-            renderPipeline->cubeAmbientLight_1x1,
-            renderPipeline->sphereAmbientLight,
+            renderPipeline->cubeAmbientLight_1x1.get(),
+            renderPipeline->sphereAmbientLight.get(),
             16,16
         );
 
@@ -137,31 +136,31 @@ void SceneMary::bindResourcesToGraph() {
    
     //setup camera
     {
-        Transform *mainCamera = root->findTransformByName("Main Camera");
-        mainCamera->addComponent(camera = new ComponentCameraPerspective());
+        auto mainCamera = root->findTransformByName("Main Camera");
+        camera = mainCamera->addNewComponent<ComponentCameraPerspective>();
         
-        ((ComponentCameraPerspective*)camera)->fovDegrees = 60.0f;
+        ((ComponentCameraPerspective*)camera.get())->fovDegrees = 60.0f;
 		//((ComponentCameraPerspective*)camera)->nearPlane = 5.0f;
-		((ComponentCameraPerspective*)camera)->farPlane = 50.0f;
+		((ComponentCameraPerspective*)camera.get())->farPlane = 50.0f;
 
-        Transform *toLookNode = root->findTransformByName("RotationPivot");
+        auto toLookNode = root->findTransformByName("RotationPivot");
         
         mainCamera->lookAtLeftHanded(toLookNode);
 
 		//componentCameraRotateOnTarget
 		{
-			mainCamera->addComponent(componentCameraRotateOnTarget = new ComponentCameraRotateOnTarget());
+			componentCameraRotateOnTarget = mainCamera->addNewComponent<ComponentCameraRotateOnTarget>();
 			componentCameraRotateOnTarget->Target = toLookNode;
 		}
     }
 
     //cube mesh
     {
-        Transform *cube = root->findTransformByName("VirginMaryBase");
+        auto cube = root->findTransformByName("VirginMaryBase");
         if (cube) {
-            ReferenceCounter<GLTexture*> *refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+            // ReferenceCounter<GLTexture*> *refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-            ComponentMaterial *material = (ComponentMaterial*)cube->addComponent(new ComponentMaterial());
+            auto material = cube->addNewComponent<ComponentMaterial>();
             cube->addComponent(ComponentMesh::createBox(MathCore::vec3f(1, 1, 1)));
             //material->type = MaterialUnlit;
             //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
@@ -170,16 +169,16 @@ void SceneMary::bindResourcesToGraph() {
             material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
             material->pbr.metallic = 0.0f;
             material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = refCount->add( resourceHelper->defaultAlbedoTexture );
-            material->pbr.texNormal = NULL;//refCount->add( resourceHelper->defaultNormalTexture );
+            material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
+            material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
         }
     }
     
     //light
     {
-        Transform *lightTransform = root->findTransformByName("DirectionalLight0");
-        ComponentLight *light = (ComponentLight *)lightTransform->addComponent(new ComponentLight());
+        auto lightTransform = root->findTransformByName("DirectionalLight0");
+        auto light = lightTransform->addNewComponent<ComponentLight>();
         light->type = LightSun;
         light->sun.color = MathCore::vec3f(1, 0.9568627f, 0.8392157f);
         light->sun.intensity = 0.6f;
@@ -187,7 +186,7 @@ void SceneMary::bindResourcesToGraph() {
     
     //Mary 3DModel
     {
-        Transform *node = root->findTransformByName("VirginMary");
+        auto node = root->findTransformByName("VirginMary");
         node->addChild(ResourceHelper::cloneTransformRecursive(Mary3DModel));
     }
 
@@ -201,8 +200,11 @@ void SceneMary::bindResourcesToGraph() {
 
 //clear all loaded scene
 void SceneMary::unloadAll() {
-    ResourceHelper::releaseTransformRecursive(&root);
-    ResourceHelper::releaseTransformRecursive(&Mary3DModel);
+    // ResourceHelper::releaseTransformRecursive(&root);
+    // ResourceHelper::releaseTransformRecursive(&Mary3DModel);
+
+    root = nullptr;
+    Mary3DModel = nullptr;
 }
 
 SceneMary::SceneMary(
@@ -210,10 +212,16 @@ SceneMary::SceneMary(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper) 
 {
-    Mary3DModel = NULL;
+    Mary3DModel = nullptr;
 }
 
 SceneMary::~SceneMary() {
+
+    Mary3DModel = nullptr;
+    MaryTextures[0] = nullptr;
+    MaryTextures[1] = nullptr;
+    componentCameraRotateOnTarget = nullptr;
+
     unload();
 }
 
@@ -223,8 +231,8 @@ void SceneMary::draw() {
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
 
 
-    Transform *t = root->findTransformByName("Light");
-    if (t != NULL && 
+    auto t = root->findTransformByName("Light");
+    if (t != nullptr && 
         ITKCommon::StringUtil::endsWith(((App*)engine->app)->sceneGUI->button_SunLightRotate->rendered_text , "ON")
         ) {
         t->LocalRotation = t->LocalRotation * GEN<quatf>::fromEuler(0, time->deltaTime * MathCore::OP<float>::deg_2_rad(20.0f), 0);
@@ -233,15 +241,15 @@ void SceneMary::draw() {
     AppKit::GLEngine::SceneBase::draw();
 }
 
-Transform* loadSceneroot_Mary()
+std::shared_ptr<Transform> loadSceneroot_Mary()
 {
-    Transform* _0 = new Transform();
+    auto _0 = Transform::CreateShared();
     _0->Name = std::string("root");
     _0->LocalPosition = MathCore::vec3f(0, 0, 0);
     _0->LocalRotation = MathCore::quatf(0, 0, 0, 1);
     _0->LocalScale = MathCore::vec3f(1, 1, 1);
     {
-        Transform* _1 = _0->addChild(new Transform());
+        auto  _1 = _0->addChild(Transform::CreateShared());
         _1->Name = std::string("Main Camera");
         //_1->LocalPosition = MathCore::vec3f(7.9, 6.5, 0);
         _1->LocalPosition = MathCore::vec3f(5.0, 6.5, 0);
@@ -249,27 +257,27 @@ Transform* loadSceneroot_Mary()
         _1->LocalScale = MathCore::vec3f(1, 1, 1);
     }
     {
-        Transform* _2 = _0->addChild(new Transform());
+        auto  _2 = _0->addChild(Transform::CreateShared());
         _2->Name = std::string("shadow_plane");
         _2->LocalPosition = MathCore::vec3f(0.006, -0.81, 0.04770672);
         _2->LocalRotation = MathCore::quatf(0, 0, 0, 1);
         _2->LocalScale = MathCore::vec3f(30, 0.6394801, 30);
     }
     {
-        Transform* _3 = _0->addChild(new Transform());
+        auto  _3 = _0->addChild(Transform::CreateShared());
         _3->Name = std::string("Light");
         _3->LocalPosition = MathCore::vec3f(0, 0, 0);
         _3->LocalRotation = MathCore::quatf(0, 0.4520463, 0, 0.8919945);
         _3->LocalScale = MathCore::vec3f(1, 1, 1);
         {
-            Transform* _4 = _3->addChild(new Transform());
+            auto  _4 = _3->addChild(Transform::CreateShared());
             _4->Name = std::string("DirectionalLight0");
             _4->LocalPosition = MathCore::vec3f(0, 4.92, 2.24);
             _4->LocalRotation = MathCore::quatf(0.7429565, 0.5067579, -0.3551862, 0.2550589);
             _4->LocalScale = MathCore::vec3f(1, 1, 1);
         }
         {
-            Transform* _5 = _3->addChild(new Transform());
+            auto  _5 = _3->addChild(Transform::CreateShared());
             _5->Name = std::string("DirectionalLight1");
             _5->LocalPosition = MathCore::vec3f(0, 4.92, 2.24);
             _5->LocalRotation = MathCore::quatf(0.2382822, 0.1166905, 0.597909, 0.7563793);
@@ -277,20 +285,20 @@ Transform* loadSceneroot_Mary()
         }
     }
     {
-        Transform* _6 = _0->addChild(new Transform());
+        auto  _6 = _0->addChild(Transform::CreateShared());
         _6->Name = std::string("VirginMary");
         _6->LocalPosition = MathCore::vec3f(0, 0, 0);
         _6->LocalRotation = MathCore::quatf(0, 0, 0, 1);
         _6->LocalScale = MathCore::vec3f(1, 1, 1);
         {
-            Transform* _7 = _6->addChild(new Transform());
+            auto  _7 = _6->addChild(Transform::CreateShared());
             _7->Name = std::string("Model");
             _7->LocalPosition = MathCore::vec3f(0, 0, 0);
             _7->LocalRotation = MathCore::quatf(-0.7071068, 0, 0, 0.7071067);
             _7->LocalScale = MathCore::vec3f(100, 100, 100);
         }
         {
-            Transform* _8 = _6->addChild(new Transform());
+            auto  _8 = _6->addChild(Transform::CreateShared());
             _8->Name = std::string("VirginMaryBase");
             _8->LocalPosition = MathCore::vec3f(0.006, -5.969997, 0.0477066);
             _8->LocalRotation = MathCore::quatf(0, 0, 0, 1);
@@ -298,20 +306,20 @@ Transform* loadSceneroot_Mary()
         }
     }
     {
-        Transform* _9 = _0->addChild(new Transform());
+        auto  _9 = _0->addChild(Transform::CreateShared());
         _9->Name = std::string("SacredHeart");
         _9->LocalPosition = MathCore::vec3f(0.084, 0, 0.046);
         _9->LocalRotation = MathCore::quatf(0, 0.7071068, 0, 0.7071068);
         _9->LocalScale = MathCore::vec3f(0.4760795, 0.4760795, 0.4760795);
         {
-            Transform* _10 = _9->addChild(new Transform());
+            auto  _10 = _9->addChild(Transform::CreateShared());
             _10->Name = std::string("Jesus");
             _10->LocalPosition = MathCore::vec3f(0, 0, 0);
             _10->LocalRotation = MathCore::quatf(-0.7071068, 0, 0, 0.7071067);
             _10->LocalScale = MathCore::vec3f(100, 100, 100);
         }
         {
-            Transform* _11 = _9->addChild(new Transform());
+            auto  _11 = _9->addChild(Transform::CreateShared());
             _11->Name = std::string("SacredHeartBase");
             _11->LocalPosition = MathCore::vec3f(0.0966225, -12.53992, -0.1764411);
             _11->LocalRotation = MathCore::quatf(0, -0.7071068, 0, 0.7071068);
@@ -319,7 +327,7 @@ Transform* loadSceneroot_Mary()
         }
     }
     {
-        Transform* _12 = _0->addChild(new Transform());
+        auto  _12 = _0->addChild(Transform::CreateShared());
         _12->Name = std::string("RotationPivot");
         _12->LocalPosition = MathCore::vec3f(0, 2.739999, 0);
         _12->LocalRotation = MathCore::quatf(0, 0, 0, 1);

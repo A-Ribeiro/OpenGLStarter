@@ -51,7 +51,7 @@ App::App()
 
     fade = new Fade(&time);
 
-    fade->fadeOut(5.0f, NULL);
+    fade->fadeOut(5.0f, nullptr);
     time.update();
 
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
@@ -97,7 +97,7 @@ void App::load() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     // dont save windows positions...
-    io.IniFilename = NULL;
+    io.IniFilename = nullptr;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -130,7 +130,7 @@ void App::load() {
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+    // - If the file cannot be loaded, the function will return nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
     // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
@@ -140,14 +140,14 @@ void App::load() {
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
+    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+    //IM_ASSERT(font != nullptr);
 
     this->imGuiStyleBackup = ImGui::GetStyle();
 
     this->applyGlobalScale();
 
-    fade->fadeOut(3.0f,NULL);
+    fade->fadeOut(3.0f,nullptr);
 }
 
 void App::applyGlobalScale() {
@@ -177,7 +177,7 @@ void App::applyGlobalScale() {
     io.Fonts->Clear();
 
     auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
-	IM_ASSERT(font != NULL);
+	IM_ASSERT(font != nullptr);
 
 }
 
@@ -189,9 +189,9 @@ App::~App(){
     ImGui_WindowGL_Shutdown();
     ImGui::DestroyContext();
 
-    if (fade != NULL){
+    if (fade != nullptr){
         delete fade;
-        fade = NULL;
+        fade = nullptr;
     }
     
     resourceHelper.finalize();
@@ -210,16 +210,16 @@ void App::draw() {
     screenRenderWindow.OnLateUpdate(&time);
 
     // pre process all scene graphs
-    /*if (sceneJesusCross != NULL)
+    /*if (sceneJesusCross != nullptr)
         sceneJesusCross->precomputeSceneGraphAndCamera();
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();*/
 
     screenRenderWindow.OnAfterGraphPrecompute(&time);
 
-    /*if (sceneJesusCross != NULL)
+    /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->draw();*/
 
     GLRenderState *renderState = GLRenderState::Instance();
@@ -268,7 +268,7 @@ void App::draw() {
         ImGui::SetNextWindowPos(viewport->WorkPos);
         ImGui::SetNextWindowSize(viewport->WorkSize);
 
-        if (ImGui::Begin("Service Controller", NULL, flags))
+        if (ImGui::Begin("Service Controller", nullptr, flags))
         {
             static float max_line_width = 0.0f;
             

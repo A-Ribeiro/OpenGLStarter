@@ -46,15 +46,15 @@ App::App()
 
     fade = new Fade(&time);
 
-    fade->fadeOut(2.0f, NULL);
+    fade->fadeOut(2.0f, nullptr);
     time.update();
 
     timer = 0.0f;
     state = 0;
 
-    sceneJesusCross = NULL;
-    sceneGUI = NULL;
-    sceneSplash = NULL;
+    sceneJesusCross = nullptr;
+    sceneGUI = nullptr;
+    sceneSplash = nullptr;
 
     screenRenderWindow.setHandleWindowCloseButtonEnabled(true);
     screenRenderWindow.setViewportFromRealWindowSizeEnabled(true);
@@ -75,25 +75,25 @@ App::~App()
 
     AppBase::screenRenderWindow.inputManager.onMouseEvent.remove(&App::OnMouseEvent, this);
 
-    if (sceneJesusCross != NULL)
+    if (sceneJesusCross != nullptr)
     {
         sceneJesusCross->unload();
         delete sceneJesusCross;
     }
 
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
     {
         sceneGUI->unload();
         delete sceneGUI;
     }
 
-    if (sceneSplash != NULL)
+    if (sceneSplash != nullptr)
     {
         sceneSplash->unload();
         delete sceneSplash;
     }
 
-    if (fade != NULL)
+    if (fade != nullptr)
     {
         delete fade;
     }
@@ -115,20 +115,20 @@ void App::draw()
     screenRenderWindow.OnLateUpdate(&time);
 
     // pre process all scene graphs
-    if (sceneJesusCross != NULL)
+    if (sceneJesusCross != nullptr)
         sceneJesusCross->precomputeSceneGraphAndCamera();
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();
-    if (sceneSplash != NULL)
+    if (sceneSplash != nullptr)
         sceneSplash->precomputeSceneGraphAndCamera();
 
     screenRenderWindow.OnAfterGraphPrecompute(&time);
 
-    if (sceneJesusCross != NULL)
+    if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->draw();
-    if (sceneSplash != NULL)
+    if (sceneSplash != nullptr)
         sceneSplash->draw();
 
     fade->draw();
@@ -148,29 +148,29 @@ void App::draw()
             {
                 timer = 0.0f;
                 state = 1;
-                fade->fadeIn(2.0f, NULL);
+                fade->fadeIn(2.0f, nullptr);
             }
             break;
         case 1:
             state = 2;
-            fade->fadeOut(2.0f, NULL);
+            fade->fadeOut(2.0f, nullptr);
 
-            if (sceneJesusCross != NULL){
+            if (sceneJesusCross != nullptr){
                 sceneJesusCross->unload();
                 delete sceneJesusCross;
-                sceneJesusCross = NULL;
+                sceneJesusCross = nullptr;
             }
 
-            if (sceneGUI != NULL){
+            if (sceneGUI != nullptr){
                 sceneGUI->unload();
                 delete sceneGUI;
-                sceneGUI = NULL;
+                sceneGUI = nullptr;
             }
 
-            if (sceneSplash != NULL){
+            if (sceneSplash != nullptr){
                 sceneSplash->unload();
                 delete sceneSplash;
-                sceneSplash = NULL;
+                sceneSplash = nullptr;
             }
 
             sceneJesusCross = new SceneJesusCross(&time, &renderPipeline, &resourceHelper);
@@ -201,7 +201,7 @@ void App::onViewportChange(const iRect &value, const iRect &oldValue)
     renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
 
     // gui->resize(prop->value);
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->resize(vec2i(value.w, value.h));
 }
 

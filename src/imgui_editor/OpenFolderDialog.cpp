@@ -36,15 +36,15 @@ namespace Native
             // open a file name
             ZeroMemory(&ofn, sizeof(ofn));
             ofn.lStructSize = sizeof(ofn);
-            ofn.hwndOwner = NULL;
+            ofn.hwndOwner = nullptr;
             ofn.lpstrFile = szFile;
             // ofn.lpstrFile[0] = '\0';
             ofn.nMaxFile = sizeof(szFile);
             // ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
             // ofn.nFilterIndex = 1;
-            ofn.lpstrFileTitle = NULL;
+            ofn.lpstrFileTitle = nullptr;
             ofn.nMaxFileTitle = 0;
-            ofn.lpstrInitialDir = NULL;
+            ofn.lpstrInitialDir = nullptr;
             // ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
             ofn.Flags = OFN_PATHMUSTEXIST; // | OFN_FILEMUSTEXIST;
 
@@ -55,7 +55,7 @@ namespace Native
             }
 
             // Now simpley display the file name
-            // MessageBox(NULL, ofn.lpstrFile, "File Name", MB_OK);
+            // MessageBox(nullptr, ofn.lpstrFile, "File Name", MB_OK);
             return false;
         }
     };
@@ -67,7 +67,7 @@ namespace Native
         {
             bool result = false;
             IFileDialog *fileDialog;
-            if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog))))
+            if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog))))
             {
                 DWORD dwOptions;
                 if (SUCCEEDED(fileDialog->GetOptions(&dwOptions)))
@@ -88,7 +88,7 @@ namespace Native
                     }
 
                     HRESULT hr = SHCreateItemFromParsingName(wstr.c_str(), nullptr, IID_PPV_ARGS(&shellItemSelectFolder));
-                    // HRESULT hr = SHGetKnownFolderItem(FOLDERID_Windows, KF_FLAG_DEFAULT, NULL, IID_IShellItem, (void**)&psiwindir);
+                    // HRESULT hr = SHGetKnownFolderItem(FOLDERID_Windows, KF_FLAG_DEFAULT, nullptr, IID_IShellItem, (void**)&psiwindir);
                     if (hr == S_OK)
                     {
                         hr = fileDialog->SetFolder(shellItemSelectFolder); // MSDN says it is OK to change the folder in OnFolderChanging with SetFolder
@@ -100,12 +100,12 @@ namespace Native
                     IShellItem *shellItem;
                     if (SUCCEEDED(fileDialog->GetResult(&shellItem)))
                     {
-                        WCHAR *tmp = NULL;
+                        WCHAR *tmp = nullptr;
                         if (!SUCCEEDED(shellItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &tmp)))
                         {
-                            MessageBox(NULL, "GetIDListName() failed", NULL, NULL);
+                            MessageBox(nullptr, "GetIDListName() failed", nullptr, nullptr);
                         }
-                        if (tmp != NULL)
+                        if (tmp != nullptr)
                         {
                             if (sizeof(wchar_t) == 2) {
                                 std::u32string _u32_str = ITKCommon::StringUtil::utf16_to_utf32((char16_t*)tmp);
@@ -134,17 +134,17 @@ namespace Native
             BROWSEINFO bi;
             ZeroMemory(&bi, sizeof(bi));
 
-            bi.hwndOwner = (HWND)AppKit::GLEngine::Engine::Instance()->window->getNativeWindowHandle(); // NULL;// Process.GetCurrentProcess().MainWindowHandle; ;
-            bi.pidlRoot = NULL;
+            bi.hwndOwner = (HWND)AppKit::GLEngine::Engine::Instance()->window->getNativeWindowHandle(); // nullptr;// Process.GetCurrentProcess().MainWindowHandle; ;
+            bi.pidlRoot = nullptr;
             bi.pszDisplayName = szFile;
             bi.lpszTitle = "Choose a Folder";
             bi.ulFlags = 0; // BIF_NEWDIALOGSTYLE | BIF_SHAREABLE;
-            bi.lpfn = NULL; // new BrowseCallBackProc(OnBrowseEvent);
-            bi.lParam = NULL;
+            bi.lpfn = nullptr; // new BrowseCallBackProc(OnBrowseEvent);
+            bi.lParam = nullptr;
             bi.iImage = 0;
 
             PIDLIST_ABSOLUTE pidl = SHBrowseForFolder(&bi);
-            if (pidl != NULL)
+            if (pidl != nullptr)
             {
                 if (SHGetPathFromIDList(pidl, szFile))
                 {
@@ -205,7 +205,7 @@ namespace Native
             aRibeiro::PlatformProcess process("osascript",
                                               ITKCommon::StringUtil::parseArgv(parameter),
                                               INT32_MAX,
-                                              NULL, &child_stdout, NULL);
+                                              nullptr, &child_stdout, nullptr);
 
             std::vector<uint8_t> raw_output;
             aRibeiro::ObjectBuffer buffer;
@@ -274,7 +274,7 @@ namespace Native
             if (available[LinuxDialogZenity] && available[LinuxDialogKDialog])
             {
                 char *buf = std::getenv("XDG_SESSION_DESKTOP");
-                std::string XDG_SESSION_DESKTOP = (buf != NULL) ? buf : "";
+                std::string XDG_SESSION_DESKTOP = (buf != nullptr) ? buf : "";
                 if (XDG_SESSION_DESKTOP == std::string("gnome"))
                     available[LinuxDialogKDialog] = false;
                 else if (XDG_SESSION_DESKTOP == std::string("KDE"))
@@ -341,7 +341,7 @@ namespace Native
                 Platform::Process process(command,
                                                   ITKCommon::StringUtil::parseArgv(parameters),
                                                   INT32_MAX,
-                                                  NULL, &child_stdout, NULL);
+                                                  nullptr, &child_stdout, nullptr);
 
                 std::vector<uint8_t> raw_output;
                 Platform::ObjectBuffer buffer;
@@ -398,7 +398,7 @@ namespace Native
             return true;
         }
         // Now simpley display the file name
-        // MessageBox(NULL, ofn.lpstrFile, "File Name", MB_OK);
+        // MessageBox(nullptr, ofn.lpstrFile, "File Name", MB_OK);
 #elif defined(__APPLE__)
 
         std::string fullFilename = ITKCommon::Path::getAbsolutePath(starting_path);

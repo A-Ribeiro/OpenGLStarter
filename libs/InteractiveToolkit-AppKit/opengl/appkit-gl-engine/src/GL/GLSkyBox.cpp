@@ -17,12 +17,12 @@ namespace AppKit
                            float d, float rotation)
         {
 
-            back = NULL;
-            front = NULL;
-            left = NULL;
-            right = NULL;
-            bottom = NULL;
-            top = NULL;
+            back = nullptr;
+            front = nullptr;
+            left = nullptr;
+            right = nullptr;
+            bottom = nullptr;
+            top = nullptr;
 
             back = AppKit::OpenGL::GLTexture::loadFromFile(_negz.c_str());
             back->generateMipMap();
@@ -150,17 +150,17 @@ namespace AppKit
 
         GLSkyBox::~GLSkyBox()
         {
-            if (back != NULL)
+            if (back != nullptr)
                 delete  back;
-            if (front != NULL)
+            if (front != nullptr)
                 delete  front;
-            if (left != NULL)
+            if (left != nullptr)
                 delete  left;
-            if (right != NULL)
+            if (right != nullptr)
                 delete  right;
-            if (bottom != NULL)
+            if (bottom != nullptr)
                 delete  bottom;
-            if (top != NULL)
+            if (top != nullptr)
                 delete  top;
         }
 

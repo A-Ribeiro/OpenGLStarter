@@ -36,14 +36,14 @@ void SceneGUI::draw(){
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
     MathCore::vec3f pos3D = MathCore::vec3f(engine->app->MousePosRelatedToCenter, 0.0f);
 
-    if (button_SoftParticles != NULL)
+    if (button_SoftParticles != nullptr)
         button_SoftParticles->update(pos3D);
 
     // ...
 }
 
 void SceneGUI::resize(const sf::Vector2i &size) {
-    if (button_SoftParticles != NULL)
+    if (button_SoftParticles != nullptr)
         button_SoftParticles->resize(size);
 }
 

@@ -154,7 +154,7 @@ Example of creating a root node with an element:
 Transform *root = new Transform();
 
 
-Transform *_1st_child_ = root->addChild(new Transform());
+Transform *_1st_child_ = root->addChild(Transform::CreateShared());
 
 _1st_child_->Name = std::string("Element 1");
 _1st_child_->LocalPosition = MathCore::vec3f(0, 10, 0);
@@ -181,7 +181,7 @@ Example:
 ```cpp
 Transform root = new Transform();
 // create all hierarchy
-Transform *_1st_child_ = root->addChild(new Transform());
+Transform *_1st_child_ = root->addChild(Transform::CreateShared());
 // ...
 
 //

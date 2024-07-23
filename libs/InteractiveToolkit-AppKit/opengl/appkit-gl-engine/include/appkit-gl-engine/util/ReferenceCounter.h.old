@@ -26,7 +26,7 @@ namespace AppKit
             T add(T c, bool isArray = false)
             {
 
-                ITK_ABORT(c == NULL, "trying to register NULL on reference counter.\n");
+                ITK_ABORT(c == nullptr, "trying to register nullptr on reference counter.\n");
 
                 // if (map.find(c) == map.end())
                 // map[c] = 0;
@@ -55,7 +55,7 @@ namespace AppKit
 
             void remove(T &c, bool isArray = false)
             {
-                if (c == NULL)
+                if (c == nullptr)
                     return;
 
                 typename std::map<T, ReferenceCounterElement>::iterator it = map.find(c);
@@ -98,7 +98,7 @@ namespace AppKit
                     if (it->second.count <= 0)
                     {
                         // if (it->second.isArray)
-                        //     aRibeiro::setNullAndDeleteArray(c);
+                        //     aRibeiro::setnullptrAndDeleteArray(c);
                         // else
                         //     delete c);
                         map.erase(it);
@@ -107,7 +107,7 @@ namespace AppKit
                 else
                 {
                     // if (isArray)
-                    //     aRibeiro::setNullAndDeleteArray(c);
+                    //     aRibeiro::setnullptrAndDeleteArray(c);
                     // else
                     //     delete c);
                 }
@@ -120,7 +120,7 @@ namespace AppKit
                 while (it != map.end()){
                     T c = it->first;
                     if (it->second.isArray)
-                        aRibeiro::setNullAndDeleteArray(c);
+                        aRibeiro::setnullptrAndDeleteArray(c);
                     else
                         delete c);
                     it++;

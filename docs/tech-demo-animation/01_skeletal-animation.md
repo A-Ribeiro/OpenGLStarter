@@ -152,7 +152,7 @@ public:
         }
  
         if (channel.size() == 0) {
-            *out_A = *out_B = NULL;
+            *out_A = *out_B = nullptr;
             *out_lrp = 0.0f;
             return;
         } else if (channel.size() == 1) {
@@ -357,7 +357,7 @@ void example_query_position() {
     );
  
     //check if found a keyframe
-    if (out_A == NULL)
+    if (out_A == nullptr)
         return;
  
     //now we can compute our interpolation
@@ -394,7 +394,7 @@ public:
             &channelPosition, time, // vector, seconds
             &out_A, &out_B, &out_lrp // output parameters
         );
-        if (out_A == NULL)
+        if (out_A == nullptr)
             return MathCore::vec3f(0);
         return lerp( out_A->pos, out_B->pos, out_lrp);
     }
@@ -406,7 +406,7 @@ public:
             &channelRotation, time, // vector, seconds
             &out_A, &out_B, &out_lrp // output parameters
         );
-        if (out_A == NULL)
+        if (out_A == nullptr)
             return quatf(0,0,0,1);
         return slerp( out_A->rot, out_B->rot, out_lrp);
     }

@@ -28,9 +28,9 @@ namespace AppKit
 
         Engine::Engine()
         {
-            OnCreateInstanceFnc = NULL;
-            app = NULL;
-            window = NULL;
+            OnCreateInstanceFnc = nullptr;
+            app = nullptr;
+            window = nullptr;
             setNewWindowConfig = false;
             alwaysDraw = false;
         }
@@ -42,8 +42,8 @@ namespace AppKit
             ITK_ABORT(OnCreateInstanceFnc != nullptr, "Engine Already Initialized.\n");
 
             OnCreateInstanceFnc = _OnCreateInstanceFnc;
-            app = NULL;
-            window = NULL;
+            app = nullptr;
+            window = nullptr;
             companyName = _companyName;
             gameName = _gameName;
         }
@@ -56,7 +56,7 @@ namespace AppKit
         void Engine::configureWindow(const EngineWindowConfig &windowConfig)
         {
 
-            if (app != NULL)
+            if (app != nullptr)
             {
                 changeWindowConfig = windowConfig;
                 setNewWindowConfig = true;
@@ -85,7 +85,7 @@ namespace AppKit
 #if defined(GLAD_GLES2)
             gladLoaderUnloadGLES2();
             gladLoaderLoadGLES2();
-            ITK_ABORT(glClearColor == NULL, "Function not loaded...\n");
+            ITK_ABORT(glClearColor == nullptr, "Function not loaded...\n");
 
             char *lang_ver = (char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
             printf("GL_SHADING_LANGUAGE_VERSION: %s\n", lang_ver);
@@ -112,23 +112,23 @@ namespace AppKit
 
         void Engine::clear()
         {
-            if (app != NULL)
+            if (app != nullptr)
             {
                 delete app;
-                app = NULL;
+                app = nullptr;
             }
 
             GLRenderState::Instance()->releaseResources();
             AppKit::OpenGL::GLFont::releaseSharedResources();
 
-            // cannot setnull and delete app... some components need app access when deleting
+            // cannot setnullptr and delete app... some components need app access when deleting
             // delete app);
 
-            if (window != NULL)
+            if (window != nullptr)
             {
                 window->close();
                 delete window;
-                window = NULL;
+                window = nullptr;
             }
         }
 
@@ -136,7 +136,7 @@ namespace AppKit
         {
             EventCore::PressReleaseDetector focusChange;
 
-            while (window != NULL && window->isOpen())
+            while (window != nullptr && window->isOpen())
             {
                 focusChange.setState(window->hasFocus());
 
@@ -185,12 +185,12 @@ namespace AppKit
                     Platform::Sleep::millis(100);
                 }
 
-                AppKit::Window::InputManager *inputManager = NULL;
-                if (app != NULL)
+                AppKit::Window::InputManager *inputManager = nullptr;
+                if (app != nullptr)
                     inputManager = &app->screenRenderWindow.inputManager;
                 window->forwardWindowEventsToInputManager(alwaysDraw, inputManager);
 
-                if (app != NULL && app->canExitApplication)
+                if (app != nullptr && app->canExitApplication)
                     clear();
 
                 // resize, or change resolution, or turn on AA... etc...

@@ -47,7 +47,7 @@ namespace AppKit
 
             it = glyphs.find(charcode);
             if (it == glyphs.end())
-                return NULL;
+                return nullptr;
             return &(it->second);
         }
 

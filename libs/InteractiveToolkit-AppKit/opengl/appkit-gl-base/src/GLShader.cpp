@@ -16,7 +16,7 @@ namespace AppKit
             GLint shader;// = glCreateShader(type);
             OPENGL_CMD_FL(shader = glCreateShader(type), file, line);
             const char* shaderArray[] = { shaderCode };
-            OPENGL_CMD_FL(glShaderSource(shader, 1, shaderArray, NULL), file, line);
+            OPENGL_CMD_FL(glShaderSource(shader, 1, shaderArray, nullptr), file, line);
             OPENGL_CMD_FL(glCompileShader(shader), file, line);
             return shader;
         }
@@ -68,7 +68,7 @@ namespace AppKit
             {
                 OPENGL_CMD_FL(mVertShader = glCreateShader(GL_VERTEX_SHADER), file, line);
                 const char *shaderArray[] = {vertex};
-                OPENGL_CMD_FL(glShaderSource(mVertShader, 1, shaderArray, NULL), file, line);
+                OPENGL_CMD_FL(glShaderSource(mVertShader, 1, shaderArray, nullptr), file, line);
                 OPENGL_CMD_FL(glCompileShader(mVertShader), file, line);
                 PlatformGL::checkShaderStatus(mVertShader, file, line, "[VERTEX]");
             }
@@ -76,7 +76,7 @@ namespace AppKit
             {
                 OPENGL_CMD_FL(mFragShader = glCreateShader(GL_FRAGMENT_SHADER), file, line);
                 const char *shaderArray[] = {fragment};
-                OPENGL_CMD_FL(glShaderSource(mFragShader, 1, shaderArray, NULL), file, line);
+                OPENGL_CMD_FL(glShaderSource(mFragShader, 1, shaderArray, nullptr), file, line);
                 OPENGL_CMD_FL(glCompileShader(mFragShader), file, line);
                 PlatformGL::checkShaderStatus(mFragShader, file, line, "[FRAGMENT]");
             }

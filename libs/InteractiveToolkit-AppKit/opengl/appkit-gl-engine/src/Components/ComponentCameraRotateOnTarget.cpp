@@ -18,7 +18,7 @@ namespace AppKit
             void ComponentCameraRotateOnTarget::setTarget(std::shared_ptr<Transform> _transform)
             {
                 targetRef = _transform;
-                if (_transform == NULL)
+                if (_transform == nullptr)
                 {
                     mouseMoving = false;
                     return;
@@ -78,7 +78,7 @@ namespace AppKit
             }
 
             void ComponentCameraRotateOnTarget::OnMouseDown(sf::Mouse::Button button, const MathCore::vec2f &pos){
-                if (target == NULL)
+                if (target == nullptr)
                     return;
 
                 AppBase* app = Engine::Instance()->app;
@@ -97,7 +97,7 @@ namespace AppKit
                 case AppKit::Window::MouseEventType::ButtonPressed:
                 {
                     auto target = ToShared(targetRef);
-                    if (target == NULL)
+                    if (target == nullptr)
                         return;
                     // AppBase* app = Engine::Instance()->app;
 
@@ -167,14 +167,14 @@ namespace AppKit
                 rotation_x_deg_min = -22.0f;
                 rotation_x_deg_max = 47.0f;
 
-                renderWindowRegion = NULL;
+                renderWindowRegion = nullptr;
             }
 
             ComponentCameraRotateOnTarget::~ComponentCameraRotateOnTarget()
             {
                 // AppBase* app = Engine::Instance()->app;
 
-                if (renderWindowRegion != NULL)
+                if (renderWindowRegion != nullptr)
                 {
                     renderWindowRegion->MousePosRelatedToCenterNormalized.OnChange.remove(&ComponentCameraRotateOnTarget::OnNormalizedMousePosChanged, this);
                     // app->OnMouseDown.remove(this, &ComponentCameraRotateOnTarget::OnMouseDown);

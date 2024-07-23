@@ -56,7 +56,7 @@ namespace AppKit
                             ClipInfo &_clipInfo = data->clipInfo[i];
 
                             ClipMotionInfluence *influence = GetInfluence(_clipInfo.clip->name);
-                            if (influence != NULL)
+                            if (influence != nullptr)
                             {
                                 MathCore::vec3f aux = MathCore::vec3f(influence->right, influence->up, influence->forward);
                                 MathCore::vec3f weighted_delta = _clipInfo.position_delta * _clipInfo.weight;
@@ -80,7 +80,7 @@ namespace AppKit
 
                         {
                             ClipMotionInfluence *influence = GetInfluence(clipInfo_a.clip->name);
-                            if (influence != NULL)
+                            if (influence != nullptr)
                             {
                                 MathCore::vec3f aux = MathCore::vec3f(influence->right, influence->up, influence->forward);
                                 MathCore::vec3f weighted_delta = clipInfo_a.position_delta; // *clipInfo_a.weight; // 100%
@@ -92,7 +92,7 @@ namespace AppKit
 
                         {
                             ClipMotionInfluence *influence = GetInfluence(clipInfo_b.clip->name);
-                            if (influence != NULL)
+                            if (influence != nullptr)
                             {
                                 MathCore::vec3f aux = MathCore::vec3f(influence->right, influence->up, influence->forward);
                                 MathCore::vec3f weighted_delta = clipInfo_b.position_delta; // *clipInfo_b.weight;// 100%
@@ -126,7 +126,7 @@ namespace AppKit
                         {
                             ClipInfo &_clipInfo = data->clipInfo[i];
                             ClipMotionInfluence *influence = GetInfluence(_clipInfo.clip->name);
-                            if (influence != NULL)
+                            if (influence != nullptr)
                             {
                                 MathCore::vec3f aux = MathCore::vec3f(influence->right, influence->up, influence->forward);
                                 MathCore::vec3f weighted_delta_interframe = _clipInfo.position_delta_interframe * _clipInfo.weight;
@@ -162,7 +162,7 @@ namespace AppKit
                 static const ComponentType Type;
 
                 std::vector<ClipMotionInfluence> motionInfluence;
-                std::weak_ptr<ComponentSkinnedMesh> skinnedMeshRef; // becomes null when skinned mesh is deleted
+                std::weak_ptr<ComponentSkinnedMesh> skinnedMeshRef; // becomes nullptr when skinned mesh is deleted
 
                 EventCore::Event<void(float right, float up, float forward, const MathCore::vec3f &localPosition)> OnMove;
 
@@ -180,7 +180,7 @@ namespace AppKit
                     if (skinnedMesh == nullptr)
                         skinnedMesh = _transform->findComponentInChildren<ComponentSkinnedMesh>();
 
-                    ITK_ABORT(skinnedMesh == NULL, "Failed to query skinned mesh\n.");
+                    ITK_ABORT(skinnedMesh == nullptr, "Failed to query skinned mesh\n.");
                     skinnedMeshRef = skinnedMesh;
 
                     skinnedMesh->mixer.setRootMotionAnalyserCallback(EventCore::CallbackWrapper(&ComponentAnimationMotion::OnRootMotionAnalyser, this));
@@ -193,7 +193,7 @@ namespace AppKit
                         if (name.compare(motionInfluence[i].name) == 0)
                             return &motionInfluence[i];
                     }
-                    return NULL;
+                    return nullptr;
                 }
 
                 void TriggerClip(const std::string &name)
@@ -206,9 +206,9 @@ namespace AppKit
                 ~ComponentAnimationMotion()
                 {
                     auto skinnedMesh = ToShared(skinnedMeshRef);
-                    if (skinnedMesh != NULL)
+                    if (skinnedMesh != nullptr)
                     {
-                        skinnedMesh->mixer.setRootMotionAnalyserCallback(NULL);
+                        skinnedMesh->mixer.setRootMotionAnalyserCallback(nullptr);
                         // skinnedMesh = nullptr;
                         skinnedMeshRef.reset();
                     }

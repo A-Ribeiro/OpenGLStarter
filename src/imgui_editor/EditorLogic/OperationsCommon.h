@@ -19,8 +19,8 @@ public:
 
 
     OperationsCommon() {
-        imGuiManager = NULL;
-        imGuiMenu = NULL;
+        imGuiManager = nullptr;
+        imGuiMenu = nullptr;
     }
 
     void init() {

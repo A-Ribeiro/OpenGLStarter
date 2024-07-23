@@ -52,7 +52,7 @@ namespace AppKit
                     pos_speed = 2.0f;
                     rotacional_speed_y = 50.0f;
                     rotacional_speed_x = 10.0f;
-                    renderWindowRegion = NULL;
+                    renderWindowRegion = nullptr;
                 }
 
                 void start()
@@ -98,9 +98,9 @@ namespace AppKit
                         newMaterial->pbr.albedoColor = MathCore::vec4f(1, 0, 0, 1);
                         newMaterial->pbr.metallic = 0.0f;
                         newMaterial->pbr.roughness = 1.0f;
-                        newMaterial->pbr.texAlbedo = NULL;
-                        newMaterial->pbr.texNormal = NULL;
-                        newMaterial->pbr.texSpecular = NULL;
+                        newMaterial->pbr.texAlbedo = nullptr;
+                        newMaterial->pbr.texNormal = nullptr;
+                        newMaterial->pbr.texSpecular = nullptr;
 
                         debugSphere->addComponent(newMaterial);
 
@@ -112,9 +112,9 @@ namespace AppKit
                         newMaterial->pbr.albedoColor = MathCore::vec4f(0, 0, 1, 1);
                         newMaterial->pbr.metallic = 0.0f;
                         newMaterial->pbr.roughness = 1.0f;
-                        newMaterial->pbr.texAlbedo = NULL;
-                        newMaterial->pbr.texNormal = NULL;
-                        newMaterial->pbr.texSpecular = NULL;
+                        newMaterial->pbr.texAlbedo = nullptr;
+                        newMaterial->pbr.texNormal = nullptr;
+                        newMaterial->pbr.texSpecular = nullptr;
 
                         debugSphere2->addComponent(newMaterial);
                         debugSphere2->addComponent(ComponentMesh::createSphere(0.1, 8, 8));
@@ -125,7 +125,7 @@ namespace AppKit
                 ~ComponentThirdPersonCamera()
                 {
                     // AppBase* app = Engine::Instance()->app;
-                    if (renderWindowRegion != NULL)
+                    if (renderWindowRegion != nullptr)
                     {
                         renderWindowRegion->OnLateUpdate.remove(&ComponentThirdPersonCamera::OnLateUpdate, this);
                     }
@@ -134,14 +134,14 @@ namespace AppKit
                     
                     if (Target != nullptr)
                     {
-                        //Target = NULL;
+                        //Target = nullptr;
                         TargetRef.reset();
                     }
 
                     auto Player_Forward = ToShared(Player_ForwardRef);
                     if (Player_Forward != nullptr)
                     {
-                        //Player_Forward = NULL;
+                        //Player_Forward = nullptr;
                         Player_ForwardRef.reset();
                     }
                 }
@@ -150,7 +150,7 @@ namespace AppKit
                 {
                     auto Target = ToShared(TargetRef);
 
-                    if (Target == NULL)
+                    if (Target == nullptr)
                         return;
 
                     Position_1st_Quadratic_Clamp(time);
@@ -251,7 +251,7 @@ namespace AppKit
 
                     MathCore::vec3f player_forward;
 
-                    if (Player_Forward != NULL)
+                    if (Player_Forward != nullptr)
                         player_forward = Player_Forward->Rotation * MathCore::vec3f(0, 0, 1);
                     else
                         player_forward = Target->getParent()->Rotation * MathCore::vec3f(0, 0, 1);
@@ -265,7 +265,7 @@ namespace AppKit
 
                         MathCore::vec3f player_left;
 
-                        if (Player_Forward != NULL)
+                        if (Player_Forward != nullptr)
                             player_left = Player_Forward->Rotation * MathCore::vec3f(-1, 0, 0);
                         else
                             player_left = Target->getParent()->Rotation * MathCore::vec3f(-1, 0, 0);

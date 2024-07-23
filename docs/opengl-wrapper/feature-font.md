@@ -100,7 +100,7 @@ Example of use:
 
 ```cpp
 // global variable definition
-GLFont *font = NULL;
+GLFont *font = nullptr;
 
 int main(int argc, char* argv[]) {
   //OpenGL Inicialization
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
   {
     Font* font_raw = Font::LoadFromBasof("resources/goudy_bookletter_1911.basof");
     font = font_raw->createGLFont();
-    setNullAndDelete(font_raw);
+    setnullptrAndDelete(font_raw);
   }
 
   //Inside Main Loop

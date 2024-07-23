@@ -15,12 +15,12 @@ protected:
     //clear all loaded scene
     virtual void unloadAll();
     
-    AppKit::GLEngine::Transform* Mary3DModel;
-    AppKit::OpenGL::GLTexture *MaryTextures[2];//diffuse + normal
+    std::shared_ptr<AppKit::GLEngine::Transform> Mary3DModel;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> MaryTextures[2];//diffuse + normal
     
 public:
     
-    AppKit::GLEngine::Components::ComponentCameraRotateOnTarget *componentCameraRotateOnTarget;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentCameraRotateOnTarget> componentCameraRotateOnTarget;
 
     SceneMary(
         Platform::Time *_time,

@@ -54,7 +54,7 @@ namespace AppKit
                 else
                 {
                     const GLFont2Glyph *glyph = glFont2.getGlyph(str[i]);
-                    if (glyph != NULL)
+                    if (glyph != nullptr)
                     {
                         length += glyph->advancex.x;
                         if (glyph->face.height > height)
@@ -89,7 +89,7 @@ namespace AppKit
                 else
                 {
                     const GLFont2Glyph *glyph = glFont2.getGlyph(str[i]);
-                    if (glyph != NULL)
+                    if (glyph != nullptr)
                         length += glyph->advancex.x;
                 }
             }
@@ -197,7 +197,7 @@ namespace AppKit
                 else
                 {
                     const GLFont2Glyph *glyph = glFont2.getGlyph(c);
-                    if (glyph != NULL)
+                    if (glyph != nullptr)
                     {
                         position.x += glyph->advancex.x;
 
@@ -283,7 +283,7 @@ namespace AppKit
                 else
                 {
                     const GLFont2Glyph *glyph = glFont2.getGlyph(c);
-                    if (glyph != NULL)
+                    if (glyph != nullptr)
                     {
 
                         if (drawFace)

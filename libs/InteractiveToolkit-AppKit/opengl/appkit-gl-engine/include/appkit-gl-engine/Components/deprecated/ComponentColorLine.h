@@ -32,15 +32,15 @@ namespace AppKit
                 {
                     width = 1.0f;
                     color = MathCore::vec4f(0, 0, 0, 1);
-                    vbo_data = NULL;
+                    vbo_data = nullptr;
                     vbo_vertexCount = 0;
                 }
 
                 ~ComponentColorLine()
                 {
-                    if (vbo_data != NULL){
+                    if (vbo_data != nullptr){
                         delete vbo_data;
-                        vbo_data = NULL;
+                        vbo_data = nullptr;
                     }
                 }
 
@@ -48,7 +48,7 @@ namespace AppKit
                 {
                     if (vertices.size() == 0)
                         return;
-                    if (vbo_data == NULL)
+                    if (vbo_data == nullptr)
                         vbo_data = new AppKit::OpenGL::GLVertexBufferObject();
 
                     vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * (int)vertices.size());
@@ -59,7 +59,7 @@ namespace AppKit
                 {
                     if (vertices.size() == 0)
                         return;
-                    if (vbo_data == NULL)
+                    if (vbo_data == nullptr)
                         vbo_data = new AppKit::OpenGL::GLVertexBufferObject();
 
                     vbo_data->uploadData((void *)&vertices[0], sizeof(MathCore::vec3f) * (int)vertices.size(), true);

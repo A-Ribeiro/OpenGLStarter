@@ -22,7 +22,7 @@ namespace AppKit
             {
                 wrapShape = WrapShapeNone;
                 debugCollisionShapes = false;
-                renderWindowRegion = NULL;
+                renderWindowRegion = nullptr;
             }
 
             ComponentMeshWrapper::~ComponentMeshWrapper()
@@ -30,10 +30,12 @@ namespace AppKit
                 // precisa de evento de attach to transform e detach from transform para lidar com essas situações
                 if (getTransformCount() > 0){
                     auto transform = getTransform();
-                    transform->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
+                    if (transform != nullptr) {
+                        transform->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
+                        if (renderWindowRegion != nullptr)
+                            renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                    }
                 }
-                if (renderWindowRegion != NULL)
-                    renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
             void ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty(Platform::Time *time)
@@ -559,7 +561,7 @@ namespace AppKit
                 auto transform = getTransform();
 
                 auto lines = transform->findComponent<ComponentColorLine>();
-                if (lines == NULL)
+                if (lines == nullptr)
                     lines = transform->addNewComponent<ComponentColorLine>();
 
                 lines->vertices.clear();

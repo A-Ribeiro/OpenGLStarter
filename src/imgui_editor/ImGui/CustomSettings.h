@@ -49,7 +49,7 @@ public:
 					//settings->WantApply = true;
 					//return (void*)settings;
 					if (strcmp(name, "Data") != 0)
-						return (void*)NULL;
+						return (void*)nullptr;
 					return (void*)1;
 				};
 			ini_handler.ReadLineFn = [](ImGuiContext*, ImGuiSettingsHandler*, void* entry, const char* line)
@@ -77,7 +77,7 @@ public:
 			ini_handler.ApplyAllFn = [](ImGuiContext* ctx, ImGuiSettingsHandler*)
 				{
 					//ImGuiContext& g = *ctx;
-					//for (ImGuiWindowSettings* settings = g.SettingsWindows.begin(); settings != NULL; settings = g.SettingsWindows.next_chunk(settings))
+					//for (ImGuiWindowSettings* settings = g.SettingsWindows.begin(); settings != nullptr; settings = g.SettingsWindows.next_chunk(settings))
 					//	if (settings->WantApply)
 					//	{
 					//		if (ImGuiWindow* window = ImGui::FindWindowByID(settings->ID))
@@ -111,7 +111,7 @@ public:
 					//	settings->Size = ImVec2ih(window->SizeFull);
 					//	settings->ViewportId = window->ViewportId;
 					//	settings->ViewportPos = ImVec2ih(window->ViewportPos);
-					//	IM_ASSERT(window->DockNode == NULL || window->DockNode->ID == window->DockId);
+					//	IM_ASSERT(window->DockNode == nullptr || window->DockNode->ID == window->DockId);
 					//	settings->DockId = window->DockId;
 					//	settings->ClassId = window->WindowClass.ClassId;
 					//	settings->DockOrder = window->DockOrder;
@@ -122,7 +122,7 @@ public:
 
 					//// Write to text buffer
 					//buf->reserve(buf->size() + g.SettingsWindows.size() * 6); // ballpark reserve
-					//for (ImGuiWindowSettings* settings = g.SettingsWindows.begin(); settings != NULL; settings = g.SettingsWindows.next_chunk(settings))
+					//for (ImGuiWindowSettings* settings = g.SettingsWindows.begin(); settings != nullptr; settings = g.SettingsWindows.next_chunk(settings))
 					//{
 					//	if (settings->WantDelete)
 					//		continue;

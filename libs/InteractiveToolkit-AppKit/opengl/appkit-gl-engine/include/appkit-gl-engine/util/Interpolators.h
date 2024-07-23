@@ -62,7 +62,7 @@ namespace AppKit
                 }
             }
 
-            T getValue_ForwardLoop(float t, T *interquery_delta = NULL)
+            T getValue_ForwardLoop(float t, T *interquery_delta = nullptr)
             {
                 if (keys.size() == 0)
                     return T();
@@ -74,13 +74,13 @@ namespace AppKit
                 if (t < lastTimeQuery)
                 {
                     // add the last animation value related to the last returned
-                    if (interquery_delta != NULL)
+                    if (interquery_delta != nullptr)
                         *interquery_delta = keys[keys.size() - 1].value - lastReturned;
                     resetToBegin();
                 }
                 else
                 {
-                    if (interquery_delta != NULL)
+                    if (interquery_delta != nullptr)
                         *interquery_delta = T(0);
                 }
 
@@ -97,7 +97,7 @@ namespace AppKit
                 }
                 else
                 {
-                    // if (interquery_delta != NULL)
+                    // if (interquery_delta != nullptr)
                     //     *interquery_delta = T(0);
                     return lastReturned;
                 }
@@ -112,7 +112,7 @@ namespace AppKit
 
                 T result = MathCore::OP<T>::lerp(keys[lastIndexA].value, keys[lastIndexB].value, lrp);
 
-                if (interquery_delta != NULL)
+                if (interquery_delta != nullptr)
                     *interquery_delta += result - lastReturned;
 
                 lastReturned = result;
@@ -329,7 +329,7 @@ namespace AppKit
                 }
             }
 
-            MathCore::quatf getValue_ForwardLoop(float t, MathCore::quatf *interquery_delta = NULL)
+            MathCore::quatf getValue_ForwardLoop(float t, MathCore::quatf *interquery_delta = nullptr)
             {
                 if (keys.size() == 0)
                     return MathCore::quatf();
@@ -341,13 +341,13 @@ namespace AppKit
                 if (t < lastTimeQuery)
                 {
                     // add the last animation value related to the last returned
-                    if (interquery_delta != NULL)
+                    if (interquery_delta != nullptr)
                         *interquery_delta = MathCore::OP<MathCore::quatf>::inverse(lastReturned) * keys[keys.size() - 1].value;
                     resetToBegin();
                 }
                 else
                 {
-                    if (interquery_delta != NULL)
+                    if (interquery_delta != nullptr)
                         *interquery_delta = MathCore::quatf();
                 }
 
@@ -375,7 +375,7 @@ namespace AppKit
 
                 MathCore::quatf result = MathCore::OP<MathCore::quatf>::slerp(keys[lastIndexA].value, keys[lastIndexB].value, lrp);
 
-                if (interquery_delta != NULL)
+                if (interquery_delta != nullptr)
                     *interquery_delta = (*interquery_delta) * (MathCore::OP<MathCore::quatf>::inverse(lastReturned) * result);
 
                 lastReturned = result;

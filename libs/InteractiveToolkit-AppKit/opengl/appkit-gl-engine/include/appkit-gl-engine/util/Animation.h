@@ -266,7 +266,7 @@ namespace AppKit
                     // rootMotionAnalyser->data.clipInfo[0].position_delta_interframe = MathCore::vec3f(0);
                     // rootMotionAnalyser->data.clipInfo[1].position_delta_interframe = MathCore::vec3f(0);
 
-                    MathCore::vec3f pos = MathCore::OP<MathCore::vec3f>::lerp(samplePos(time_a, NULL), b->samplePos(time_b, NULL), lrp);
+                    MathCore::vec3f pos = MathCore::OP<MathCore::vec3f>::lerp(samplePos(time_a, nullptr), b->samplePos(time_b, nullptr), lrp);
                     node->setLocalPosition(pos);
                 }
                 node->setLocalScale(scale);
@@ -381,7 +381,7 @@ namespace AppKit
 
             AnimationMixerLerpTarget()
             {
-                clip = NULL;
+                clip = nullptr;
                 index = -1;
                 transition_duration_secs = 0.0f;
                 transition_current = 0.0f;

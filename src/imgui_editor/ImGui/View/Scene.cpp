@@ -26,7 +26,7 @@ void Scene::RenderAndLogic()
     auto flags = ImGuiWindowFlags_NoCollapse; // | ImGuiWindowFlags_AlwaysAutoResize;// | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1, 0, 1, 1.0));
-    if (ImGui::Begin("Scene", NULL, flags))
+    if (ImGui::Begin("Scene", nullptr, flags))
     {
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));

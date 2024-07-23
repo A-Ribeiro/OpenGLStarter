@@ -62,7 +62,7 @@ namespace ImGui
     void BeginChildCustom(const char *name)
     {
         ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, 0));
-        ImGui::Begin(name, NULL, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_ChildWindow | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground);
+        ImGui::Begin(name, nullptr, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_ChildWindow | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground);
     }
 
     bool DragFloatInverted(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format, float header_width)

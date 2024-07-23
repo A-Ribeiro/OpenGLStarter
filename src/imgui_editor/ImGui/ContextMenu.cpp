@@ -67,7 +67,7 @@ void ContextMenu::RenderAndLogic()
 
 		// if (ImGui::BeginMenu("Menu", true))
 		// {
-		//     if (ImGui::MenuItem("Custom", NULL, false))
+		//     if (ImGui::MenuItem("Custom", nullptr, false))
 		//     {
 		//         // ImGui::CloseCurrentPopup();
 		//     }

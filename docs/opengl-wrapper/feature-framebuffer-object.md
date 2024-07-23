@@ -73,7 +73,7 @@ fbo.setColorAttachmentCube(targetcubemap, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0);
 fbo.setColorAttachmentCube(targetcubemap, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0);
 // draw code
 
-fbo.setColorAttachmentCube(NULL, 0, 0);
+fbo.setColorAttachmentCube(nullptr, 0, 0);
 
 fbo.disable();
 ```

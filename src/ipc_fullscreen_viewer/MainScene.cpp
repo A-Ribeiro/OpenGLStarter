@@ -22,11 +22,11 @@ void MainScene::loadGraph(){
     root = new Transform();
     root->addChild( new Transform() )->Name = "Main Camera";
 
-    scaleNode = root->addChild(new Transform());
+    scaleNode = root->addChild(Transform::CreateShared());
 
     //text transform
     {
-        Transform *textNode = scaleNode->addChild(new Transform());
+        Transform *textNode = scaleNode->addChild(Transform::CreateShared());
         textNode->Name = "center Text";
         textNode->setLocalPosition(MathCore::vec3f(0,0,-0.1f));
 
@@ -35,7 +35,7 @@ void MainScene::loadGraph(){
 
     //plane with texture
     {
-        imageNode = scaleNode->addChild(new Transform());
+        imageNode = scaleNode->addChild(Transform::CreateShared());
         imageNode->Name = "yuv420 image";
         imageNode->setLocalRotation(MathCore::GEN<MathCore::quatf>::fromEuler(0, MathCore::OP<float>::deg_2_rad(90.0f), 0));
     }
@@ -43,7 +43,7 @@ void MainScene::loadGraph(){
 
 void MainScene::setText(const std::string &text, float _size, float horiz_margin) {
     
-    if (componentFontToMesh == NULL)
+    if (componentFontToMesh == nullptr)
         return;
 
     this->text = text;
@@ -163,9 +163,9 @@ void MainScene::unloadAll(){
 
     ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
-    if (texture != NULL){
+    if (texture != nullptr){
         texRefCount->remove(texture);
-        texture = NULL;
+        texture = nullptr;
     }
 }
 
@@ -179,10 +179,10 @@ void MainScene::draw() {
                 aux_rgb_buffer.setSize(1920 * 1080 * 4);
                 memset(aux_rgb_buffer.data, 255, 1920 * 1080 * 4);
 
-                componentFontToMesh = NULL;
+                componentFontToMesh = nullptr;
                 
                 Transform* textNode = scaleNode->findTransformByName("center Text");
-                textNode->setParent(NULL);
+                textNode->setParent(nullptr);
                 ResourceHelper::releaseTransformRecursive(&textNode);
 
                 imageNode->setLocalRotation(MathCore::quatf());
@@ -262,10 +262,10 @@ MainScene::MainScene(
         yuy2_queue( "aRibeiro Cam 01", Platform::IPC::QueueIPC_READ, 8, 1920 * 1080 * 2, false),
         m_YUV2RGB_Multithread( Platform::Thread::QueryNumberOfSystemThreads(), Platform::Thread::QueryNumberOfSystemThreads()*4 )
 {
-    texture = NULL;
-    componentFontToMesh = NULL;
-    scaleNode = NULL;
-    imageNode = NULL;
+    texture = nullptr;
+    componentFontToMesh = nullptr;
+    scaleNode = nullptr;
+    imageNode = nullptr;
 }
 
 MainScene::~MainScene() {

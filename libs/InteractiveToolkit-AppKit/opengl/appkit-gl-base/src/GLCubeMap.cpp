@@ -157,7 +157,7 @@ namespace AppKit
             int w = w_;
             int h = h_;
 
-            MipMapGenerator *generator = NULL;
+            MipMapGenerator *generator = nullptr;
             {
                 Platform::Time timer;
 
@@ -205,7 +205,7 @@ namespace AppKit
             int w = w_;
             int h = h_;
 
-            MipMapGenerator *generator = NULL;
+            MipMapGenerator *generator = nullptr;
             {
                 Platform::Time timer;
 
@@ -258,7 +258,7 @@ namespace AppKit
             int w = w_;
             int h = h_;
 
-            MipMapGenerator *generator = NULL;
+            MipMapGenerator *generator = nullptr;
             {
                 Platform::Time timer;
 
@@ -519,12 +519,12 @@ namespace AppKit
         {
             int w, h, channels, depth;
 
-            char *buffer = NULL;
+            char *buffer = nullptr;
 
             bool isPNG = ITKExtension::Image::PNG::isPNGFilename(filename);
             bool isJPG = ITKExtension::Image::JPG::isJPGFilename(filename);
 
-            void (*closeFnc)(char *&) = NULL;
+            void (*closeFnc)(char *&) = nullptr;
 
             if (isPNG)
             {
@@ -538,7 +538,7 @@ namespace AppKit
             }
 
             ITK_ABORT(
-                buffer == NULL,
+                buffer == nullptr,
                 "error to load: %s\n", filename);
 
             GLint max_tex_size;
@@ -627,7 +627,7 @@ namespace AppKit
             bool isPNG = ITKExtension::Image::PNG::isPNGFilename(single_file.c_str());
             bool isJPG = ITKExtension::Image::JPG::isJPGFilename(single_file.c_str());
 
-            char *buffer = NULL;
+            char *buffer = nullptr;
 
             if (isPNG)
                 buffer = ITKExtension::Image::PNG::readPNG(single_file.c_str(), &w, &h, &channels, &depth, false);
@@ -635,7 +635,7 @@ namespace AppKit
                 buffer = ITKExtension::Image::JPG::readJPG(single_file.c_str(), &w, &h, &channels, &depth, false);
 
             ITK_ABORT(
-                buffer == NULL,
+                buffer == nullptr,
                 "error to load: %s\n", single_file.c_str());
 
             ITK_ABORT((depth != 8), "Bit depth (%i) not supported.\n", depth);

@@ -67,9 +67,9 @@ void SceneGUI::loadResources()
 // to load the scene graph
 void SceneGUI::loadGraph()
 {
-    root = new Transform();
+    root = Transform::CreateShared();
 
-    Transform *t = root->addChild(new Transform());
+    auto t = root->addChild(Transform::CreateShared());
     t->Name = "Main Camera";
 
     for (size_t i = 0; i < allButtons.size(); i++)
@@ -79,19 +79,19 @@ void SceneGUI::loadGraph()
 
     // text transform
     {
-        Transform *textNode = root->addChild(new Transform());
+        auto textNode = root->addChild(Transform::CreateShared());
         textNode->Name = "bottom Text";
 
-        componentFontToMesh = (AppKit::GLEngine::Components::ComponentFontToMesh *)textNode->addComponent(new Components::ComponentFontToMesh());
+        componentFontToMesh = textNode->addNewComponent<AppKit::GLEngine::Components::ComponentFontToMesh>();
 
-        textNode = root->addChild(new Transform());
+        textNode = root->addChild(Transform::CreateShared());
         textNode->Name = "fps";
-        fps = (AppKit::GLEngine::Components::ComponentFontToMesh *)textNode->addComponent(new Components::ComponentFontToMesh());
+        fps = textNode->addNewComponent<AppKit::GLEngine::Components::ComponentFontToMesh>();
         f_fps = 0.0f;
     }
 
     {
-        cursorTransform = root->addChild(new Transform());
+        cursorTransform = root->addChild(Transform::CreateShared());
     }
 }
 
@@ -117,25 +117,24 @@ void SceneGUI::bindResourcesToGraph()
 
     // setup renderstate
 
-    Transform *mainCamera = root->findTransformByName("Main Camera");
-    ComponentCameraOrthographic *componentCameraOrthographic;
-    mainCamera->addComponent(camera = componentCameraOrthographic = new ComponentCameraOrthographic());
+    auto mainCamera = root->findTransformByName("Main Camera");
+    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+    camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    //ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
     {
-        ComponentMaterial *cursorMaterial;
-        cursorTransform->addComponent(cursorMaterial = new ComponentMaterial());
+        auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
         cursorTransform->addComponent(ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height));
 
         cursorMaterial->type = MaterialUnlitTexture;
         cursorMaterial->unlit.blendMode = BlendModeAlpha;
-        cursorMaterial->unlit.tex = texRefCount->add(cursorTexture);
+        cursorMaterial->unlit.tex = cursorTexture;
     }
 
-    texRefCount->add(&fontBuilder.glFont2.texture);
+    // texRefCount->add(&fontBuilder.glFont2.texture);
 
-    texRefCount->add(cursorTexture);
+    // texRefCount->add(cursorTexture);
 
     // call resize
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
@@ -152,44 +151,50 @@ void SceneGUI::bindResourcesToGraph()
 void SceneGUI::unloadAll()
 {
 
-    ResourceHelper::releaseTransformRecursive(&root);
+    //ResourceHelper::releaseTransformRecursive(&root);
+    root = nullptr;
 
     allButtons.clear();
 
-    if (button_NormalMap != NULL)
+    if (button_NormalMap != nullptr)
     {
         delete button_NormalMap;
-        button_NormalMap = NULL;
+        button_NormalMap = nullptr;
     }
-    if (button_AmbientLight != NULL)
+    if (button_AmbientLight != nullptr)
     {
         delete button_AmbientLight;
-        button_AmbientLight = NULL;
+        button_AmbientLight = nullptr;
     }
-    if (button_SunLight != NULL)
+    if (button_SunLight != nullptr)
     {
         delete button_SunLight;
-        button_SunLight = NULL;
+        button_SunLight = nullptr;
     }
-    if (button_SunLightRotate != NULL)
+    if (button_SunLightRotate != nullptr)
     {
         delete button_SunLightRotate;
-        button_SunLightRotate = NULL;
+        button_SunLightRotate = nullptr;
     }
-    if (button_NextScene != NULL)
+    if (button_NextScene != nullptr)
     {
         delete button_NextScene;
-        button_NextScene = NULL;
+        button_NextScene = nullptr;
     }
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    // ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
+    // texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
 
-    if (cursorTexture != NULL){
-        texRefCount->remove(cursorTexture);
-        cursorTexture = NULL;
-    }
+    // if (cursorTexture != nullptr){
+    //     // texRefCount->remove(cursorTexture);
+    //     cursorTexture = nullptr;
+    // }
+
+    cursorTexture = nullptr;
+    componentFontToMesh = nullptr;
+    fps = nullptr;
+    cursorTransform = nullptr;
 }
 
 void SceneGUI::draw()
@@ -217,7 +222,7 @@ void SceneGUI::draw()
         0.0f
     );
 
-    if (cursorTransform != NULL)
+    if (cursorTransform != nullptr)
         cursorTransform->setLocalPosition(pos3D);
 
     for (size_t i = 0; i < allButtons.size(); i++)
@@ -247,10 +252,10 @@ void SceneGUI::resize(const MathCore::vec2i &size)
     int center_y = size.height >> 1;
     int margin = 32 - 9;
 
-    Transform *textNode = componentFontToMesh->transform[0];
+    auto textNode = componentFontToMesh->getTransform();
     textNode->setLocalPosition(MathCore::vec3f(center_x - margin, -center_y + margin, 0));
 
-    textNode = fps->transform[0];
+    textNode = fps->getTransform();
     textNode->setLocalPosition(MathCore::vec3f(-center_x + margin, -center_y + margin, 0));
 }
 
@@ -270,16 +275,16 @@ SceneGUI::SceneGUI(
     AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper)
 {
 
-    button_NormalMap = NULL;
-    button_AmbientLight = NULL;
-    button_SunLight = NULL;
-    button_SunLightRotate = NULL;
+    button_NormalMap = nullptr;
+    button_AmbientLight = nullptr;
+    button_SunLight = nullptr;
+    button_SunLightRotate = nullptr;
 
     // right
-    button_NextScene = NULL;
+    button_NextScene = nullptr;
 
-    cursorTexture = NULL;
-    cursorTransform = NULL;
+    cursorTexture = nullptr;
+    cursorTransform = nullptr;
 }
 
 SceneGUI::~SceneGUI()

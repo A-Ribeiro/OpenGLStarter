@@ -5,7 +5,7 @@
 #include <InteractiveToolkit-Extension/image/PNG.h>
 
 InnerViewport::InnerViewport(App *app, bool createFBO){
-    sceneGUI = NULL;
+    sceneGUI = nullptr;
 
     this->visible = true;
     this->app = app;
@@ -29,19 +29,19 @@ InnerViewport::InnerViewport(App *app, bool createFBO){
 
 InnerViewport::~InnerViewport(){
 
-    if (sceneGUI != NULL){
+    if (sceneGUI != nullptr){
         sceneGUI->unload();
         delete sceneGUI;
-        sceneGUI = NULL;
+        sceneGUI = nullptr;
     }
 
     app->screenRenderWindow.removeChild(&renderWindow);
     app->screenRenderWindow.OnUpdate.remove(&InnerViewport::OnUpdate, this);
     app->screenRenderWindow.OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
 
-    if (fade != NULL){
+    if (fade != nullptr){
         delete fade;
-        fade = NULL;
+        fade = nullptr;
     }
 }
 
@@ -56,7 +56,7 @@ void InnerViewport::setVisible(bool v){
 
         if (visible){
             //attach from onUpdate event
-            if (renderWindow.fbo!=NULL) {
+            if (renderWindow.fbo!=nullptr) {
                 app->screenRenderWindow.OnUpdate.add(&InnerViewport::OnUpdate, this);
 
                 //printf("Re-Render Update\n");
@@ -78,14 +78,14 @@ void InnerViewport::OnUpdate(Platform::Time *time){
     renderWindow.OnLateUpdate(time);
 
     // pre process all scene graphs
-    /*if (sceneJesusCross != NULL)
+    /*if (sceneJesusCross != nullptr)
         sceneJesusCross->precomputeSceneGraphAndCamera();*/
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();
 
     renderWindow.OnAfterGraphPrecompute(time);
 
-    bool isFBO = renderWindow.fbo != NULL;
+    bool isFBO = renderWindow.fbo != nullptr;
 
 
     GLRenderState *renderState = GLRenderState::Instance();
@@ -128,9 +128,9 @@ void InnerViewport::OnUpdate(Platform::Time *time){
         glDisable(GL_SCISSOR_TEST);
     }
 
-    /*if (sceneJesusCross != NULL)
+    /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();*/
-    if (sceneGUI != NULL)
+    if (sceneGUI != nullptr)
         sceneGUI->draw();
 
     fade->draw();
@@ -168,6 +168,6 @@ void InnerViewport::OnUpdate(Platform::Time *time){
 }
 
 void InnerViewport::fadeFromBlack(float time_sec) {
-    fade->fadeOut(time_sec, NULL);
+    fade->fadeOut(time_sec, nullptr);
 }
 
