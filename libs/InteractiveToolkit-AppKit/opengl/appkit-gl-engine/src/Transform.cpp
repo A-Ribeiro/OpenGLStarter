@@ -94,7 +94,8 @@ namespace AppKit
                 {
                     children.erase(children.begin() + i);
                     
-                    transform->setParent(nullptr);
+                    //transform->setParent(nullptr);
+                    transform->mParent.reset();
 
                     transform->visited = false;
 
