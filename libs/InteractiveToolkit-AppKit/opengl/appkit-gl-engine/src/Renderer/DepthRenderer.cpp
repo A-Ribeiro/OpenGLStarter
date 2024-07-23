@@ -198,7 +198,7 @@ namespace AppKit
             */
         }
 
-        void DepthRenderer::method2_render_just_depth(Transform *root, Components::ComponentCamera *camera)
+        void DepthRenderer::method2_render_just_depth(std::shared_ptr<Transform>root, Components::ComponentCamera *camera)
         {
             auto renderWindowRegion = ToShared(root->renderWindowRegion);
 

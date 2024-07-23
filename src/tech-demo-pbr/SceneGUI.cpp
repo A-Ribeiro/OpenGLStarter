@@ -218,7 +218,7 @@ void SceneGUI::draw()
 
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
     MathCore::vec3f pos3D = MathCore::vec3f(
-        engine->app->screenRenderWindow.MousePosRelatedToCenter, 
+        engine->app->screenRenderWindow->MousePosRelatedToCenter, 
         0.0f
     );
 

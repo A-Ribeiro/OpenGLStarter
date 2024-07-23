@@ -23,7 +23,7 @@ namespace AppKit
                 collision::Frustum *frustum;
             };
 
-            bool App::traverse_frustum(Transform *element, void *userData) {
+            bool App::traverse_frustum(std::shared_ptr<Transform> element, void *userData) {
 
                 ComponentFrustumCulling *frustumCulling = (ComponentFrustumCulling *)element->findComponent(ComponentFrustumCulling::Type);
 

@@ -30,8 +30,8 @@ App::App()
 #endif
 
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
-    AppBase::screenRenderWindow.CameraViewport.OnChange.add(&App::onViewportChange, this);
-    AppBase::screenRenderWindow.inputManager.onMouseEvent.add(&App::OnMouseEvent, this);
+    AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->inputManager.onMouseEvent.add(&App::OnMouseEvent, this);
 
     // AppBase::OnMouseDown.add(this, &App::onMouseDown);
 
@@ -52,8 +52,8 @@ App::App()
 
     renderPipeline.ambientLight.lightMode = AmbientLightMode_SphereMapTexture; // AmbientLightMode_SkyBoxCubeTexture;
 
-    screenRenderWindow.setHandleWindowCloseButtonEnabled(true);
-    screenRenderWindow.setViewportFromRealWindowSizeEnabled(true);
+    screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
+    screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
     // screenRenderWindow.setEventForwardingEnabled(true);
 }
 
@@ -70,8 +70,8 @@ App::~App()
 {
 
     AppBase::OnGainFocus.remove(&App::onGainFocus, this);
-    AppBase::screenRenderWindow.CameraViewport.OnChange.remove(&App::onViewportChange, this);
-    AppBase::screenRenderWindow.inputManager.onMouseEvent.remove(&App::OnMouseEvent, this);
+    AppBase::screenRenderWindow->CameraViewport.OnChange.remove(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->inputManager.onMouseEvent.remove(&App::OnMouseEvent, this);
 
     if (activeScene != nullptr)
     {
@@ -108,9 +108,9 @@ void App::draw()
 
     StartEventManager::Instance()->processAllComponentsWithTransform();
 
-    screenRenderWindow.OnPreUpdate(&time);
-    screenRenderWindow.OnUpdate(&time);
-    screenRenderWindow.OnLateUpdate(&time);
+    screenRenderWindow->OnPreUpdate(&time);
+    screenRenderWindow->OnUpdate(&time);
+    screenRenderWindow->OnLateUpdate(&time);
 
     // pre process all scene graphs
     if (activeScene != nullptr)
@@ -120,7 +120,7 @@ void App::draw()
     if (sceneSplash != nullptr)
         sceneSplash->precomputeSceneGraphAndCamera();
 
-    screenRenderWindow.OnAfterGraphPrecompute(&time);
+    screenRenderWindow->OnAfterGraphPrecompute(&time);
 
     if (activeScene != nullptr)
         activeScene->draw();

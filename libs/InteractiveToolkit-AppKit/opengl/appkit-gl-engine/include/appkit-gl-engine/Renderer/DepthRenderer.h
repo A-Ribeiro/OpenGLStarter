@@ -52,7 +52,7 @@ namespace AppKit
             // dont need another rendering pass...
             void method1_copy_from_current_framebuffer(RenderWindowRegion *renderWindowRegion = nullptr);
 
-            void method2_render_just_depth(Transform *root, Components::ComponentCamera *camera);
+            void method2_render_just_depth(std::shared_ptr<Transform> root, Components::ComponentCamera *camera);
         };
 
     }

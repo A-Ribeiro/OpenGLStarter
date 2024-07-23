@@ -84,7 +84,7 @@ namespace AppKit
                 LinearInterpolator<MathCore::vec3f> Color;
                 LinearInterpolator<float> Alpha;
 
-                Transform *boxEmmiter;
+                std::shared_ptr<Transform> boxEmmiter;
                 MathCore::mat4f emissionMatrix;
                 MathCore::vec3f emissionDir;
 
