@@ -56,7 +56,7 @@ App::App()
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
     AppBase::OnLostFocus.add(&App::onLostFocus, this);
 
-    screenRenderWindow.CameraViewport.OnChange.add(&App::onViewportChange, this);
+    screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
 
     fade = new Fade(&time);
 
@@ -102,7 +102,7 @@ void App::load() {
     }
 
     // Setup Platform/Renderer backends
-    ImGui_WindowGL_InitForOpenGL(WindowUserData::Create(window, &this->screenRenderWindow.inputManager));
+    ImGui_WindowGL_InitForOpenGL(WindowUserData::Create(window, &this->screenRenderWindow->inputManager));
     OPENGL_CMD(ImGui_ImplOpenGL3_Init(glsl_version));
 
     // Load Fonts
@@ -149,9 +149,9 @@ void App::draw() {
 
     StartEventManager::Instance()->processAllComponentsWithTransform();
     
-    this->screenRenderWindow.OnPreUpdate(&time);
-    this->screenRenderWindow.OnUpdate(&time);
-    this->screenRenderWindow.OnLateUpdate(&time);
+    this->screenRenderWindow->OnPreUpdate(&time);
+    this->screenRenderWindow->OnUpdate(&time);
+    this->screenRenderWindow->OnLateUpdate(&time);
 
     // pre process all scene graphs
     /*if (sceneJesusCross != nullptr)
@@ -159,7 +159,7 @@ void App::draw() {
     if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();*/
 
-    this->screenRenderWindow.OnAfterGraphPrecompute(&time);
+    this->screenRenderWindow->OnAfterGraphPrecompute(&time);
 
     /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();
@@ -168,10 +168,10 @@ void App::draw() {
 
     GLRenderState *renderState = GLRenderState::Instance();
     
-    auto wViewport = this->screenRenderWindow.WindowViewport.c_ptr();
+    auto wViewport = this->screenRenderWindow->WindowViewport.c_ptr();
     renderState->Viewport = AppKit::GLEngine::iRect(
             wViewport->x,
-            this->screenRenderWindow.WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
+            this->screenRenderWindow->WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
             wViewport->w,
             wViewport->h
         );

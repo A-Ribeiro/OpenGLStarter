@@ -19,18 +19,18 @@ void MainScene::loadResources(){
 }
 //to load the scene graph
 void MainScene::loadGraph(){
-    root = new Transform();
-    root->addChild( new Transform() )->Name = "Main Camera";
+    root = Transform::CreateShared();
+    root->addChild( Transform::CreateShared() )->Name = "Main Camera";
 
     scaleNode = root->addChild(Transform::CreateShared());
 
     //text transform
     {
-        Transform *textNode = scaleNode->addChild(Transform::CreateShared());
+        auto textNode = scaleNode->addChild(Transform::CreateShared());
         textNode->Name = "center Text";
         textNode->setLocalPosition(MathCore::vec3f(0,0,-0.1f));
 
-        componentFontToMesh = (AppKit::GLEngine::Components::ComponentFontToMesh*)textNode->addComponent(new Components::ComponentFontToMesh());
+        componentFontToMesh = textNode->addNewComponent<AppKit::GLEngine::Components::ComponentFontToMesh>();
     }
 
     //plane with texture
@@ -107,8 +107,8 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
 
     fontBuilder.build(breakLinedTest.c_str());
     componentFontToMesh->toMesh(fontBuilder, true);
-    
-    componentFontToMesh->transform[0]->setLocalScale(text_scale_factor);
+    auto componentFontToMesh_transform = componentFontToMesh->getTransform();
+    componentFontToMesh_transform->setLocalScale(text_scale_factor);
 }
 
 //to bind the resources to the current graph
@@ -118,32 +118,31 @@ void MainScene::bindResourcesToGraph(){
 
     //setup renderstate
 
-    Transform *mainCamera = root->findTransformByName("Main Camera");
-    ComponentCameraOrthographic* componentCameraOrthographic;
-    mainCamera->addComponent(camera = componentCameraOrthographic = new ComponentCameraOrthographic());
+    auto mainCamera = root->findTransformByName("Main Camera");
+    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+    camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
     {
-        Transform *imageNode = root->findTransformByName("yuv420 image");
+        auto imageNode = root->findTransformByName("yuv420 image");
         
-        ComponentMaterial *imageMaterial;
-        imageNode->addComponent(imageMaterial = new ComponentMaterial());
+        auto imageMaterial = imageNode->addNewComponent<ComponentMaterial>();
         imageNode->addComponent(ComponentMesh::createPlaneXY(1920.0f, 1080.0f));
 
         imageMaterial->type = MaterialUnlitTexture;
         imageMaterial->unlit.blendMode = BlendModeAlpha;
 
-        texture = new AppKit::OpenGL::GLTexture(1920, 1080, GL_RGBA);
+        texture = std::make_shared<AppKit::OpenGL::GLTexture>(1920, 1080, GL_RGBA);
 
         std::vector<uint8_t> data(1920 * 1080 * 4, 255);
         texture->uploadBufferRGBA_8888(&data[0], 1920, 1080, false);
 
-        imageMaterial->unlit.tex = texRefCount->add(texture);
+        imageMaterial->unlit.tex = texture;
     }
 
-    texRefCount->add(&fontBuilder.glFont2.texture);
-    texRefCount->add(texture);
+    // texRefCount->add(&fontBuilder.glFont2.texture);
+    // texRefCount->add(texture);
 
     // call resize
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
@@ -159,14 +158,21 @@ void MainScene::bindResourcesToGraph(){
 //clear all loaded scene
 void MainScene::unloadAll(){
 
-    ResourceHelper::releaseTransformRecursive(&root);
+    //ResourceHelper::releaseTransformRecursive(&root);
+    root = nullptr;
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
-    texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
-    if (texture != nullptr){
-        texRefCount->remove(texture);
-        texture = nullptr;
-    }
+    // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    // texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
+    // if (texture != nullptr){
+    //     texRefCount->remove(texture);
+    //     texture = nullptr;
+    // }
+
+    texture = nullptr;
+    imageNode = nullptr;
+
+    componentFontToMesh = nullptr;
+    scaleNode = nullptr;
 }
 
 void MainScene::draw() {
@@ -181,9 +187,10 @@ void MainScene::draw() {
 
                 componentFontToMesh = nullptr;
                 
-                Transform* textNode = scaleNode->findTransformByName("center Text");
+                auto textNode = scaleNode->findTransformByName("center Text");
                 textNode->setParent(nullptr);
-                ResourceHelper::releaseTransformRecursive(&textNode);
+                textNode = nullptr;
+                //ResourceHelper::releaseTransformRecursive(&textNode);
 
                 imageNode->setLocalRotation(MathCore::quatf());
             }

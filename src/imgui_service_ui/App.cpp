@@ -47,7 +47,7 @@ App::App()
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
     AppBase::OnLostFocus.add(&App::onLostFocus, this);
 
-    AppBase::screenRenderWindow.CameraViewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
 
     fade = new Fade(&time);
 
@@ -56,9 +56,9 @@ App::App()
 
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
 
-    screenRenderWindow.setHandleWindowCloseButtonEnabled(true);
-    screenRenderWindow.setViewportFromRealWindowSizeEnabled(true);
-    screenRenderWindow.setEventForwardingEnabled(true);
+    screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
+    screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
+    screenRenderWindow->setEventForwardingEnabled(true);
 
     // DPI Computation
     {
@@ -124,7 +124,7 @@ void App::load() {
     }
 
     // Setup Platform/Renderer backends
-    ImGui_WindowGL_InitForOpenGL(WindowUserData::Create(window, &this->screenRenderWindow.inputManager));
+    ImGui_WindowGL_InitForOpenGL(WindowUserData::Create(window, &this->screenRenderWindow->inputManager));
     OPENGL_CMD(ImGui_ImplOpenGL3_Init(glsl_version));
 
     // Load Fonts
@@ -205,9 +205,9 @@ void App::draw() {
 
     StartEventManager::Instance()->processAllComponentsWithTransform();
     
-    screenRenderWindow.OnPreUpdate(&time);
-    screenRenderWindow.OnUpdate(&time);
-    screenRenderWindow.OnLateUpdate(&time);
+    screenRenderWindow->OnPreUpdate(&time);
+    screenRenderWindow->OnUpdate(&time);
+    screenRenderWindow->OnLateUpdate(&time);
 
     // pre process all scene graphs
     /*if (sceneJesusCross != nullptr)
@@ -215,7 +215,7 @@ void App::draw() {
     if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();*/
 
-    screenRenderWindow.OnAfterGraphPrecompute(&time);
+    screenRenderWindow->OnAfterGraphPrecompute(&time);
 
     /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();

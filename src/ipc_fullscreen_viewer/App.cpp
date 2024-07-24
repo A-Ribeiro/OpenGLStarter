@@ -32,7 +32,7 @@ App::App()
 #endif
 
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
-    AppBase::screenRenderWindow.CameraViewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
 
     fade = new Fade(&time);
 
@@ -43,8 +43,8 @@ App::App()
 
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
 
-    screenRenderWindow.setHandleWindowCloseButtonEnabled(true);
-    screenRenderWindow.setViewportFromRealWindowSizeEnabled(true);
+    screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
+    screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
     // screenRenderWindow.setEventForwardingEnabled(true);
 }
 
@@ -89,15 +89,15 @@ void App::draw() {
 
     StartEventManager::Instance()->processAllComponentsWithTransform();
 
-    screenRenderWindow.OnPreUpdate(&time);
-    screenRenderWindow.OnUpdate(&time);
-    screenRenderWindow.OnLateUpdate(&time);
+    screenRenderWindow->OnPreUpdate(&time);
+    screenRenderWindow->OnUpdate(&time);
+    screenRenderWindow->OnLateUpdate(&time);
 
     // pre process all scene graphs
     if (mainScene != nullptr)
         mainScene->precomputeSceneGraphAndCamera();
 
-    screenRenderWindow.OnAfterGraphPrecompute(&time);
+    screenRenderWindow->OnAfterGraphPrecompute(&time);
 
     if (mainScene != nullptr)
         mainScene->draw();

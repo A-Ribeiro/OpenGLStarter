@@ -222,11 +222,11 @@ public:
 
     AppKit::OpenGL::GLFont2Builder fontBuilder;
 
-    AppKit::OpenGL::GLTexture *texture;
-    AppKit::GLEngine::Transform *imageNode;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
+    std::shared_ptr<AppKit::GLEngine::Transform> imageNode;
 
-    AppKit::GLEngine::Components::ComponentFontToMesh *componentFontToMesh;
-    AppKit::GLEngine::Transform *scaleNode;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentFontToMesh> componentFontToMesh;
+    std::shared_ptr<AppKit::GLEngine::Transform> scaleNode;
 
     std::string text;
     float text_size;
