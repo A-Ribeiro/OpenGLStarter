@@ -61,7 +61,7 @@ void Dialogs::RenderAndLogic()
     }
 
     if (open_EnterText_OKCancel == DialogPosition::ForceCentering){
-        open_EnterText_OKCancel == DialogPosition::None;
+        open_EnterText_OKCancel = DialogPosition::None;
         ImGui::SetNextWindowPos( ImGui::GetIO().DisplaySize * 0.5f, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     }
 
@@ -168,7 +168,7 @@ void Dialogs::RenderAndLogic()
     }
 
     if (open_showInfo_OK == DialogPosition::ForceCentering){
-        open_showInfo_OK == DialogPosition::None;
+        open_showInfo_OK = DialogPosition::None;
         ImGui::SetNextWindowPos( ImGui::GetIO().DisplaySize * 0.5f, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     }
 

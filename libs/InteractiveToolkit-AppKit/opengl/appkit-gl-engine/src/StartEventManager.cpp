@@ -20,7 +20,7 @@ namespace AppKit
         }
         void StartEventManager::unregisterComponent(Component *c)
         {
-            for (int i = componentList.size() - 1; i >= 0; i--)
+            for (int i = (int)componentList.size() - 1; i >= 0; i--)
             {
                 if (componentList[i] == c)
                 {
@@ -31,7 +31,7 @@ namespace AppKit
         }
         void StartEventManager::processAllComponentsWithTransform()
         {
-            for (int i = componentList.size() - 1; i >= 0; i--)
+            for (int i = (int)componentList.size() - 1; i >= 0; i--)
             {
                 if (componentList[i]->getTransformCount() > 0)
                 {

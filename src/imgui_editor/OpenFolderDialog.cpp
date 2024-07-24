@@ -103,7 +103,7 @@ namespace Native
                         WCHAR *tmp = nullptr;
                         if (!SUCCEEDED(shellItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &tmp)))
                         {
-                            MessageBox(nullptr, "GetIDListName() failed", nullptr, nullptr);
+                            MessageBox(nullptr, "GetIDListName() failed", nullptr, NULL);
                         }
                         if (tmp != nullptr)
                         {
@@ -140,7 +140,7 @@ namespace Native
             bi.lpszTitle = "Choose a Folder";
             bi.ulFlags = 0; // BIF_NEWDIALOGSTYLE | BIF_SHAREABLE;
             bi.lpfn = nullptr; // new BrowseCallBackProc(OnBrowseEvent);
-            bi.lParam = nullptr;
+            bi.lParam = NULL;
             bi.iImage = 0;
 
             PIDLIST_ABSOLUTE pidl = SHBrowseForFolder(&bi);

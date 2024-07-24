@@ -48,7 +48,7 @@ namespace AppKit
                 format = 0;
                 // format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0;
 
-                sprintf(class_name, "DefaultEngineShader");
+                snprintf(class_name, 128, "DefaultEngineShader");
             }
 
             virtual int queryAttribLocation(const char *aname)
@@ -87,14 +87,14 @@ namespace AppKit
                 {
                     if (format & (ITKExtension::Model::CONTAINS_UV0 << i))
                     {
-                        sprintf(name, "aUV%i", i);
+                        snprintf(name, 16, "aUV%i", i);
                         if (strcmp(aname, name) == 0)
                             return count;
                         count++;
                     }
                     if (format & (ITKExtension::Model::CONTAINS_COLOR0 << i))
                     {
-                        sprintf(name, "aColor%i", i);
+                        snprintf(name, 16, "aColor%i", i);
                         if (strcmp(aname, name) == 0)
                             return count;
                         count++;
@@ -194,12 +194,12 @@ namespace AppKit
                 {
                     if (format & (ITKExtension::Model::CONTAINS_UV0 << i))
                     {
-                        sprintf(name, "aUV%i", i);
+                        snprintf(name, 16, "aUV%i", i);
                         bindAttribLocation(count++, name);
                     }
                     if (format & (ITKExtension::Model::CONTAINS_COLOR0 << i))
                     {
-                        sprintf(name, "aColor%i", i);
+                        snprintf(name, 16, "aColor%i", i);
                         bindAttribLocation(count++, name);
                     }
                 }

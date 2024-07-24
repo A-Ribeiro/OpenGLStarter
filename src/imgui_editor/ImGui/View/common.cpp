@@ -68,7 +68,7 @@ namespace ImGui
     bool DragFloatInverted(const char *label, float *v, float v_speed, float v_min, float v_max, const char *format, float header_width)
     {
         char aux[64];
-        sprintf(aux, "##%s", label);
+        snprintf(aux, 64, "##%s", label);
 
         ImGui::AlignTextToFramePadding();
         // ImGui::SetNextItemWidth(header_width);
@@ -87,7 +87,7 @@ namespace ImGui
     bool DragFloat2Inverted(const char *label, float v[2], float v_speed, float v_min, float v_max, const char *format, float header_width)
     {
         char aux[64];
-        sprintf(aux, "##%s", label);
+        snprintf(aux, 64, "##%s", label);
 
         ImGui::AlignTextToFramePadding();
         // ImGui::SetNextItemWidth(header_width);
@@ -106,7 +106,7 @@ namespace ImGui
     bool DragFloat3Inverted(const char *label, float v[3], float v_speed, float v_min, float v_max, const char *format, float header_width)
     {
         char aux[64];
-        sprintf(aux, "##%s", label);
+        snprintf(aux, 64, "##%s", label);
 
         ImGui::AlignTextToFramePadding();
 
@@ -126,7 +126,7 @@ namespace ImGui
     bool DragFloat4Inverted(const char *label, float v[4], float v_speed, float v_min, float v_max, const char *format, float header_width)
     {
         char aux[64];
-        sprintf(aux, "##%s", label);
+        snprintf(aux, 64, "##%s", label);
 
         ImGui::AlignTextToFramePadding();
         // ImGui::SetNextItemWidth(header_width);

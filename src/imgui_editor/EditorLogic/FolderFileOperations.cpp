@@ -909,8 +909,8 @@ void FolderFileOperations::refreshDirectoryStructure(std::shared_ptr<TreeNode> t
     {
         auto selectedFile = std::dynamic_pointer_cast<FileTreeData>(treeNode->data);
         _to_insert.push_back(_To_insert_struct{
-            .dir_info=Directory::FromFile(selectedFile->file),
-            .insert_where=treeNode
+            Directory::FromFile(selectedFile->file),
+            treeNode
         });
     }
 
@@ -962,8 +962,8 @@ void FolderFileOperations::refreshDirectoryStructure(std::shared_ptr<TreeNode> t
 
             // enqueue element to get subdirectories
             _to_insert.push_back(_To_insert_struct{ 
-                .dir_info=Directory(entry.full_path), 
-                .insert_where=tree_node
+                Directory(entry.full_path), 
+                tree_node
             });
 
             // create children map

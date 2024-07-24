@@ -34,7 +34,7 @@ bool VisualList::CustomImGuiCommand_DrawItem(
     // ImGui::SetCursorPos(pos);
     char aux[70];
     // sprintf(aux, "##%s_%i", name, id);
-    sprintf(aux, "##%s_%i", prefix_id, id);
+    snprintf(aux, 70, "##%s_%i", prefix_id, id);
     bool result = ImGui::Selectable(aux, itemSelf->selected, ImGuiSelectableFlags_None | ImGuiSelectableFlags_NoPadWithHalfSpacing, size);
 
     if (itemSelf->scroll_to_this_item){
@@ -410,7 +410,7 @@ void VisualList::render(const char *str_imgui_id_selection, ListHolder *listHold
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, spacing);
 
     float count_size = icon_size.x;
-    for (size_t i = 0; i < items.size(); i++)
+    for (int i = 0; i < (int)items.size(); i++)
     {
         auto &item = items[i];
 

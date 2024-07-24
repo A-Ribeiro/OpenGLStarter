@@ -139,7 +139,7 @@ namespace AppKit
 
         int Transform::getChildCount()
         {
-            return children.size();
+            return (int)children.size();
         }
 
         std::shared_ptr<Transform> Transform::getChildAt(int i)
@@ -786,7 +786,7 @@ namespace AppKit
             {
                 if (components[i] == c)
                 {
-                    int lastIndex = components.size() - 1;
+                    int lastIndex = (int)components.size() - 1;
                     for (int j = i; j < lastIndex; j++)
                         components[j] = components[j + 1];
                     components[lastIndex] = c;
@@ -887,7 +887,7 @@ namespace AppKit
 
         int Transform::getComponentCount() const
         {
-            return components.size();
+            return (int)components.size();
         }
         std::shared_ptr<Component> Transform::getComponentAt(int i)
         {
@@ -1113,7 +1113,7 @@ namespace AppKit
             maxLevel--;
             if (maxLevel > 0)
             {
-                for (int i = children.size() - 1; i >= 0; i--)
+                for (int i = (int)children.size() - 1; i >= 0; i--)
                 {
                     bool should_continue_traversing = children[i]->traversePostOrder_DepthFirst(OnNode, userData, maxLevel);
                     if (!should_continue_traversing)
@@ -1149,7 +1149,7 @@ namespace AppKit
             maxLevel--;
             if (maxLevel > 0)
             {
-                for (int i = children.size() - 1; i >= 0; i--)
+                for (int i = (int)children.size() - 1; i >= 0; i--)
                 {
                     bool should_continue_traversing = children[i]->traversePostOrder_DepthFirst(OnNode, userData, maxLevel);
                     if (!should_continue_traversing)

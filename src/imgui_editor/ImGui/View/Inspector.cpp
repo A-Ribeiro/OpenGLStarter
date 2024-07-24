@@ -58,7 +58,7 @@ void Inspector::RenderAndLogic()
     {
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
-        for (size_t i = 0; i < components.size(); i++)
+        for (int i = 0; i < (int)components.size(); i++)
             components[i]->renderAndLogic(i);
     }
     else

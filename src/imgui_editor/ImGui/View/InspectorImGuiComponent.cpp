@@ -12,7 +12,7 @@ InspectorImGuiComponent::~InspectorImGuiComponent() {
 
 void InspectorImGuiComponent::renderAndLogic(int count) {
     char aux[64];
-    sprintf(aux, "%s##%i", this->title.c_str(), count);
+    snprintf(aux, 64, "%s##%i", this->title.c_str(), count);
 
     ImGui::SetNextItemOpen(opened);
     opened = ImGui::CollapsingHeader(aux,
@@ -21,7 +21,7 @@ void InspectorImGuiComponent::renderAndLogic(int count) {
         ImGuiTreeNodeFlags_AllowItemOverlap |
         ImGuiTreeNodeFlags_Framed);
 
-    sprintf(aux, "[x]##%s_%i", this->title.c_str(), count);
+    snprintf(aux, 64, "[x]##%s_%i", this->title.c_str(), count);
     ImGUIButtonEx buttons[] = {
         ImGUIButtonEx::FromText(aux)
     };
@@ -36,7 +36,7 @@ void InspectorImGuiComponent::renderAndLogic(int count) {
         //     });
     }
     if (opened) {
-        sprintf(aux,"##%s_%i", this->title.c_str(), count);
+        snprintf(aux, 64,"##%s_%i", this->title.c_str(), count);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(6, 4));
 
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);

@@ -57,7 +57,7 @@ namespace AppKit
                         MathCore::OP<MathCore::vec3f>::length(points->at(i)));
                     toSort[i].index = i;
                 }
-                AlgorithmCore::Sorting::RadixCountingSorti::sortIndex(&toSort[0], toSort.size(), &toSortAux[0]);
+                AlgorithmCore::Sorting::RadixCountingSorti::sortIndex(&toSort[0], (uint32_t)toSort.size(), &toSortAux[0]);
             }
             else
             {
@@ -71,7 +71,7 @@ namespace AppKit
                     );
                     toSort[i].index = i;
                 }
-                AlgorithmCore::Sorting::RadixCountingSorti::sortIndex(&toSort[0], toSort.size(), &toSortAux[0]);
+                AlgorithmCore::Sorting::RadixCountingSorti::sortIndex(&toSort[0], (uint32_t)toSort.size(), &toSortAux[0]);
 
                 // sort y
                 for (int i = 0; i < (int)toSort.size(); i++)
@@ -81,7 +81,7 @@ namespace AppKit
                         MathCore::OP<float>::floor( points->at(toSort[i].index).y * (float)texturesize )
                     );
                 }
-                AlgorithmCore::Sorting::RadixCountingSorti::sortIndex(&toSort[0], toSort.size(), &toSortAux[0]);
+                AlgorithmCore::Sorting::RadixCountingSorti::sortIndex(&toSort[0], (uint32_t)toSort.size(), &toSortAux[0]);
             }
 
             // set the final array
