@@ -12,26 +12,17 @@ using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
-Transform* loadSceneroot();
+std::shared_ptr<Transform> loadSceneroot();
 
-bool ReplaceMaterial(Transform *element, void* userData) {
-    
-    ComponentMaterial *material = (ComponentMaterial *)element->findComponent(Components::ComponentMaterial::Type);
-    
+static bool ReplaceMaterial(std::shared_ptr<Transform> element, void* userData) {
+    auto material = element->findComponent<ComponentMaterial>();
     if ( material != nullptr ){
-        ComponentMaterial *newMaterial = (ComponentMaterial *)userData;
-        
-        ReferenceCounter<Component*> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
-        
-        Component * componentMaterial = element->removeComponent(material);
-        compRefCount->remove(componentMaterial);
-        
-        element->addComponent(compRefCount->add(newMaterial));
-
+        std::shared_ptr<ComponentMaterial> &newMaterial = *(std::shared_ptr<ComponentMaterial> *)userData;
+        auto componentMaterial = element->removeComponent(material);
+        element->addComponent(newMaterial);
 		//little optimization
 		element->makeFirstComponent(newMaterial);
     }
-    
     return true;
 }
 
@@ -46,19 +37,17 @@ void SceneJesusCross::loadResources() {
         
     Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/JesusOnCross.bams");
     
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     
-    ComponentMaterial * newMaterial;
-    
-    newMaterial = new ComponentMaterial();
+    auto newMaterial = Component::CreateShared<ComponentMaterial>();
     newMaterial->type = Components::MaterialPBR;
     newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
     newMaterial->pbr.metallic = 0.0f;
     newMaterial->pbr.roughness = 1.0f;
-    newMaterial->pbr.texAlbedo = texRefCount->add(JesusTextures[0]);
+    newMaterial->pbr.texAlbedo = JesusTextures[0];
     newMaterial->pbr.texNormal = nullptr;//texRefCount->add(JesusTextures[1]);
     
-    Jesus3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, newMaterial);
+    Jesus3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
 
 }
 
@@ -84,19 +73,19 @@ void SceneJesusCross::bindResourcesToGraph() {
     
     //setup camera
     {
-        Transform *mainCamera = root->findTransformByName("Main Camera");
-        mainCamera->addComponent(camera = new ComponentCameraPerspective());
+        auto mainCamera = root->findTransformByName("Main Camera");
+        camera = mainCamera->addNewComponent<ComponentCameraPerspective>();
         
-        ((ComponentCameraPerspective*)camera)->fovDegrees = 60.0f;
-		((ComponentCameraPerspective*)camera)->nearPlane = 1.0f;
-		((ComponentCameraPerspective*)camera)->farPlane = 50.0f;
+        ((ComponentCameraPerspective*)camera.get())->fovDegrees = 60.0f;
+		((ComponentCameraPerspective*)camera.get())->nearPlane = 1.0f;
+		((ComponentCameraPerspective*)camera.get())->farPlane = 50.0f;
 
-        Transform *toLookNode = root->findTransformByName("ToLookNode");
+        auto toLookNode = root->findTransformByName("ToLookNode");
         mainCamera->lookAtLeftHanded(toLookNode);
 
 		//componentCameraRotateOnTarget
 		{
-			mainCamera->addComponent(componentCameraRotateOnTarget = new ComponentCameraRotateOnTarget());
+			componentCameraRotateOnTarget = mainCamera->addNewComponent<ComponentCameraRotateOnTarget>();
             componentCameraRotateOnTarget->rotation_x_deg_min = -90.0f;
             componentCameraRotateOnTarget->rotation_x_deg_max = 90.0f;
 			componentCameraRotateOnTarget->Target = toLookNode;
@@ -106,8 +95,8 @@ void SceneJesusCross::bindResourcesToGraph() {
     
     //light
     {
-        Transform *lightTransform = root->findTransformByName("Directional Light");
-        light = (ComponentLight *)lightTransform->addComponent(new ComponentLight());
+        auto lightTransform = root->findTransformByName("Directional Light");
+        light = lightTransform->addNewComponent<ComponentLight>();
         light->type = LightSun;
         light->sun.color = MathCore::vec3f(1, 0.9568627f, 0.8392157f);
         light->sun.intensity = 0.5f + 0.5f;
@@ -128,17 +117,17 @@ void SceneJesusCross::bindResourcesToGraph() {
     
     //Jesus 3DModel
     {
-        Transform *node = root->findTransformByName("JesusCross1")->findTransformByName("ToInsertModel");
+        auto node = root->findTransformByName("JesusCross1")->findTransformByName("ToInsertModel");
         node->addChild(ResourceHelper::cloneTransformRecursive(Jesus3DModel));
     }
 
 	//Ground
 	{
-		Transform *node = root->findTransformByName("Ground_aux");
+		auto node = root->findTransformByName("Ground_aux");
 		if (node) {
-            ReferenceCounter<GLTexture*> *refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+            //ReferenceCounter<GLTexture*> *refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-            ComponentMaterial *material = (ComponentMaterial*)node->addComponent(new ComponentMaterial());
+            auto material = node->addNewComponent<ComponentMaterial>();
             node->addComponent(ComponentMesh::createBox(MathCore::vec3f(50, 1, 50)));
             //material->type = MaterialUnlit;
             //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
@@ -147,7 +136,7 @@ void SceneJesusCross::bindResourcesToGraph() {
             material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
             material->pbr.metallic = 0.0f;
             material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = refCount->add( resourceHelper->defaultAlbedoTexture );
+            material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
             material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
         }
@@ -157,11 +146,11 @@ void SceneJesusCross::bindResourcesToGraph() {
 
     //Sphere
     {
-        Transform* node = root->addChild(Transform::CreateShared());
+        auto node = root->addChild(Transform::CreateShared());
         if (node) {
-            ReferenceCounter<GLTexture*>* refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+            // ReferenceCounter<GLTexture*>* refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-            ComponentMaterial* material = (ComponentMaterial*)node->addComponent(new ComponentMaterial());
+            auto material = node->addNewComponent<ComponentMaterial>();
             node->addComponent(ComponentMesh::createSphere(1.0f,16,16));
             node->LocalPosition = MathCore::vec3f(2,3,0);
             node->LocalScale = MathCore::vec3f(0.2f,0.4f,0.2f);
@@ -173,7 +162,7 @@ void SceneJesusCross::bindResourcesToGraph() {
             material->pbr.albedoColor = MathCore::vec3f(1, 1, 0);
             material->pbr.metallic = 0.0f;
             material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = refCount->add(resourceHelper->defaultAlbedoTexture);
+            material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
             material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
         }
@@ -191,8 +180,18 @@ void SceneJesusCross::bindResourcesToGraph() {
 
 //clear all loaded scene
 void SceneJesusCross::unloadAll() {
-    ResourceHelper::releaseTransformRecursive(&root);
-    ResourceHelper::releaseTransformRecursive(&Jesus3DModel);
+    // ResourceHelper::releaseTransformRecursive(&root);
+    // ResourceHelper::releaseTransformRecursive(&Jesus3DModel);
+
+    root = nullptr;
+    Jesus3DModel = nullptr;
+
+    JesusTextures[0] = nullptr;
+    JesusTextures[1] = nullptr;
+
+    componentCameraRotateOnTarget = nullptr;
+    light = nullptr;
+
 }
 
 SceneJesusCross::SceneJesusCross(
@@ -233,15 +232,15 @@ void SceneJesusCross::draw(){
     SceneBase::draw();
 }
 
-Transform* loadSceneroot()
+std::shared_ptr<Transform> loadSceneroot()
 {
-	Transform* _0 = new Transform();
+	auto _0 = Transform::CreateShared();
 	_0->Name = std::string("root");
 	_0->LocalPosition = MathCore::vec3f(0,0,0);
 	_0->LocalRotation = quatf(0,0,0,1);
 	_0->LocalScale = MathCore::vec3f(1,1,1);
 	{
-		Transform* _1 = _0->addChild(Transform::CreateShared());
+		auto _1 = _0->addChild(Transform::CreateShared());
 		_1->Name = std::string("Main Camera");
 		//_1->LocalPosition = MathCore::vec3f(0,3.45,-7.37);
 		//_1->LocalPosition = MathCore::vec3f(0,3.45,-17.37);
@@ -250,7 +249,7 @@ Transform* loadSceneroot()
 		_1->LocalScale = MathCore::vec3f(1,1,1);
 	}
 	{
-		Transform* _2 = _0->addChild(Transform::CreateShared());
+		auto _2 = _0->addChild(Transform::CreateShared());
 		_2->Name = std::string("Directional Light");
 		_2->LocalPosition = MathCore::vec3f(0,3,0);
 		_2->LocalRotation = quatf(-0.4886241,0.4844012,0.06177928,-0.723039);
@@ -259,14 +258,14 @@ Transform* loadSceneroot()
         _2->LocalPosition = _2->LocalPosition - _2->LocalRotation * MathCore::vec3f(0, 0, 3);
 	}
 	{
-		Transform* _3 = _0->addChild(Transform::CreateShared());
+		auto _3 = _0->addChild(Transform::CreateShared());
 		_3->Name = std::string("JesusCross1");
 		_3->LocalPosition = MathCore::vec3f(0,0,0);
 		//_3->LocalRotation = quatf(0,1,0,0);
         _3->LocalRotation = GEN<quatf>::fromEuler(0,MathCore::OP<float>::deg_2_rad(45.0f),0);
 		_3->LocalScale = MathCore::vec3f(0.4457346,0.4457346,0.4457346);
 		{
-			Transform* _4 = _3->addChild(Transform::CreateShared());
+			auto _4 = _3->addChild(Transform::CreateShared());
 			_4->Name = std::string("ToInsertModel");
 			_4->LocalPosition = MathCore::vec3f(-11.63,6.67,0.12);
 			_4->LocalRotation = quatf(0,0,0,1);
@@ -274,13 +273,13 @@ Transform* loadSceneroot()
 		}
 	}
 	{
-		Transform* _5 = _0->addChild(Transform::CreateShared());
+		auto _5 = _0->addChild(Transform::CreateShared());
 		_5->Name = std::string("ground");
 		_5->LocalPosition = MathCore::vec3f(0,0,0);
 		_5->LocalRotation = quatf(0,0,0,1);
 		_5->LocalScale = MathCore::vec3f(1,1,1);
 		{
-			Transform* _16 = _5->addChild(Transform::CreateShared());
+			auto _16 = _5->addChild(Transform::CreateShared());
 			_16->Name = std::string("Ground_aux");
 			//_16->LocalPosition = MathCore::vec3f(0,-1.98,0);
 			_16->LocalPosition = MathCore::vec3f(0,-0.5,0);
@@ -289,14 +288,14 @@ Transform* loadSceneroot()
 		}
 	}
 	{
-		Transform* _52 = _0->addChild(Transform::CreateShared());
+		auto _52 = _0->addChild(Transform::CreateShared());
 		_52->Name = std::string("ToLookNode");
 		_52->LocalPosition = MathCore::vec3f(0,3.45,0);
 		_52->LocalRotation = quatf(0,0,0,1);
 		_52->LocalScale = MathCore::vec3f(1,1,1);
 	}
 	{
-		Transform* _53 = _0->addChild(Transform::CreateShared());
+		auto _53 = _0->addChild(Transform::CreateShared());
 		_53->Name = std::string("Particle System");
 		_53->LocalPosition = MathCore::vec3f(0,3.5,-12.97);
 		_53->LocalRotation = quatf(0,0,0,1);

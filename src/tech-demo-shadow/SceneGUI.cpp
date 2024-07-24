@@ -30,9 +30,9 @@ void SceneGUI::loadResources(){
 }
 //to load the scene graph
 void SceneGUI::loadGraph(){
-    root = new Transform();
+    root = Transform::CreateShared();
 
-    Transform *t = root->addChild( new Transform() );
+    auto t = root->addChild( Transform::CreateShared() );
     t->Name = "Main Camera";
 
     //t = root->addChild( button_SoftParticles->getTransform() );
@@ -49,25 +49,24 @@ void SceneGUI::bindResourcesToGraph(){
 
     //setup renderstate
 
-    Transform *mainCamera = root->findTransformByName("Main Camera");
-    ComponentCameraOrthographic* componentCameraOrthographic;
-    mainCamera->addComponent(camera = componentCameraOrthographic = new ComponentCameraOrthographic());
+    auto mainCamera = root->findTransformByName("Main Camera");
+    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+    camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*>* texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    //ReferenceCounter<AppKit::OpenGL::GLTexture*>* texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
     {
-        ComponentMaterial* cursorMaterial;
-        cursorTransform->addComponent(cursorMaterial = new ComponentMaterial());
+        auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
         cursorTransform->addComponent(ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height));
 
         cursorMaterial->type = MaterialUnlitTexture;
         cursorMaterial->unlit.blendMode = BlendModeAlpha;
-        cursorMaterial->unlit.tex = texRefCount->add(cursorTexture);
+        cursorMaterial->unlit.tex = cursorTexture;
     }
 
-    texRefCount->add(&fontBuilder.glFont2.texture);
+    //texRefCount->add(&fontBuilder.glFont2.texture);
     
-    texRefCount->add(cursorTexture);
+    //texRefCount->add(cursorTexture);
 
 
     //Add AABB for all meshs...
@@ -80,18 +79,20 @@ void SceneGUI::bindResourcesToGraph(){
 //clear all loaded scene
 void SceneGUI::unloadAll(){
 
-    ResourceHelper::releaseTransformRecursive(&root);
+    //ResourceHelper::releaseTransformRecursive(&root);
+    root = nullptr;
 
     if (button_SoftParticles != nullptr){
         delete button_SoftParticles;
         button_SoftParticles = nullptr;
     }
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
-    texRefCount->remove(cursorTexture);
+    //texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
+    //texRefCount->remove(cursorTexture);
     cursorTexture = nullptr;
+    cursorTransform = nullptr;
 
 }
 
@@ -99,7 +100,7 @@ void SceneGUI::draw(){
     AppKit::GLEngine::Engine* engine = AppKit::GLEngine::Engine::Instance();
 
     MathCore::vec3f pos3D = MathCore::vec3f(
-        engine->app->screenRenderWindow.MousePosRelatedToCenter, 
+        engine->app->screenRenderWindow->MousePosRelatedToCenter, 
         0.0f
     );
 

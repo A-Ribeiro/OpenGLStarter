@@ -15,14 +15,14 @@ protected:
     //clear all loaded scene
     virtual void unloadAll();
     
-    AppKit::GLEngine::Transform* Jesus3DModel;
-    AppKit::OpenGL::GLTexture *JesusTextures[2];//diffuse
+    std::shared_ptr<AppKit::GLEngine::Transform> Jesus3DModel;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> JesusTextures[2];//diffuse
     
-    AppKit::GLEngine::Components::ComponentCameraRotateOnTarget *componentCameraRotateOnTarget;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentCameraRotateOnTarget> componentCameraRotateOnTarget;
 
 public:
 
-    AppKit::GLEngine::Components::ComponentLight *light;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentLight> light;
 
     SceneJesusCross(
         Platform::Time *_time,
