@@ -20,13 +20,15 @@ namespace AppKit
             void RotatingCross::start()
             {
                 AppBase *app = Engine::Instance()->app;
-                app->screenRenderWindow.OnUpdate.add(&RotatingCross::OnUpdate, this);
+                app->screenRenderWindow->OnUpdate.add(&RotatingCross::OnUpdate, this);
             }
 
             void RotatingCross::OnUpdate(Platform::Time *time)
             {
-                transform[0]->LocalRotation =
-                    transform[0]->LocalRotation *
+                auto transform = getTransform();
+
+                transform->LocalRotation =
+                    transform->LocalRotation *
                     MathCore::GEN<MathCore::quatf>::fromEuler(
                         0,
                         MathCore::OP<float>::deg_2_rad(speed_degrees) * time->deltaTime,
@@ -36,7 +38,7 @@ namespace AppKit
             RotatingCross::~RotatingCross()
             {
                 AppBase *app = Engine::Instance()->app;
-                app->screenRenderWindow.OnUpdate.remove(&RotatingCross::OnUpdate, this);
+                app->screenRenderWindow->OnUpdate.remove(&RotatingCross::OnUpdate, this);
             }
 
         }

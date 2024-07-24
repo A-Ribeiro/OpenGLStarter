@@ -68,13 +68,13 @@ namespace AppKit
                 return std::dynamic_pointer_cast<_ComponentType>(self());
             }
 
-            template <typename _ComponentType,
+            template <typename _ComponentType, typename... _param_args,
                   typename std::enable_if<
                       std::is_base_of< Component, _ComponentType >::value,
                       bool>::type = true>
-            static inline std::shared_ptr<_ComponentType> CreateShared()
+            static inline std::shared_ptr<_ComponentType> CreateShared(_param_args &&...args)
             {
-                auto result = std::make_shared<_ComponentType>();
+                auto result = std::make_shared<_ComponentType>(std::forward<_param_args>(args)...);
                 result->mSelf = std::weak_ptr<Component>(result);
                 return result;
             }

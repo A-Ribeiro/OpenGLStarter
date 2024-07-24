@@ -18,26 +18,17 @@ using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
-static Transform* loadSceneroot();
+std::shared_ptr<Transform> loadSceneroot();
 
-static bool ReplaceMaterial(Transform *element, void* userData) {
-
-    ComponentMaterial *material = (ComponentMaterial *)element->findComponent(Components::ComponentMaterial::Type);
-
+static bool ReplaceMaterial(std::shared_ptr<Transform> element, void* userData) {
+    auto material = element->findComponent<ComponentMaterial>();
     if ( material != nullptr ){
-        ComponentMaterial *newMaterial = (ComponentMaterial *)userData;
-
-        ReferenceCounter<Component*> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
-
-        Component * componentMaterial = element->removeComponent(material);
-        compRefCount->remove(componentMaterial);
-
-        element->addComponent(compRefCount->add(newMaterial));
-
+        std::shared_ptr<ComponentMaterial> &newMaterial = *(std::shared_ptr<ComponentMaterial> *)userData;
+        auto componentMaterial = element->removeComponent(material);
+        element->addComponent(newMaterial);
 		//little optimization
 		element->makeFirstComponent(newMaterial);
     }
-
     return true;
 }
 
@@ -60,7 +51,7 @@ void ScenePalace::loadResources() {
     use_gpu = false;
     #endif
 
-    skinnedMesh = new AppKit::GLEngine::Components::ComponentSkinnedMesh( resourceHelper, use_gpu );
+    skinnedMesh = Component::CreateShared<AppKit::GLEngine::Components::ComponentSkinnedMesh>(resourceHelper, use_gpu);
     skinnedMesh->loadModelBase("resources/castle_guard/castle_guard_01.bams");
 
     skinnedMesh->loadAnimation("idle","resources/castle_guard/castle_guard_01@Idle.bams");
@@ -69,24 +60,22 @@ void ScenePalace::loadResources() {
 
     skinnedMesh->done();
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    ComponentMaterial * newMaterial;
-
-    newMaterial = new ComponentMaterial();
+    auto newMaterial = Component::CreateShared<ComponentMaterial>();
     newMaterial->type = Components::MaterialPBR;
     newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
     newMaterial->pbr.metallic = 1.0f;
     newMaterial->pbr.roughness = 0.5f;
-    newMaterial->pbr.texAlbedo = texRefCount->add(Texture_Guard[0]);
-    newMaterial->pbr.texNormal = texRefCount->add(Texture_Guard[1]);
-    newMaterial->pbr.texSpecular = texRefCount->add(Texture_Guard[2]);
+    newMaterial->pbr.texAlbedo = Texture_Guard[0];
+    newMaterial->pbr.texNormal = Texture_Guard[1];
+    newMaterial->pbr.texSpecular = Texture_Guard[2];
 
     //Model_Guard->traversePreOrder_DepthFirst(ReplaceMaterial, newMaterial);
 
-    skinnedMesh->model_base->traversePreOrder_DepthFirst(ReplaceMaterial, newMaterial);
+    skinnedMesh->model_base->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
 
-    newMaterial = new ComponentMaterial();
+    newMaterial = Component::CreateShared<ComponentMaterial>();
     newMaterial->type = Components::MaterialPBR;
     newMaterial->pbr.albedoColor = MathCore::vec3f(1, 0.9814019f, 0.7490196f);
     newMaterial->pbr.metallic = 0.0f;
@@ -96,9 +85,9 @@ void ScenePalace::loadResources() {
     newMaterial->pbr.albedoColor = ResourceHelper::vec3ColorGammaToLinear(newMaterial->pbr.albedoColor);
     newMaterial->pbr.emissionColor = ResourceHelper::vec3ColorGammaToLinear(MathCore::vec3f(1.0f, 1.0f, 0.5f)) * 8.0f;
 
-    Model_Cross->findTransformByName("circle")->traversePreOrder_DepthFirst(ReplaceMaterial, newMaterial);
+    Model_Cross->findTransformByName("circle")->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
 
-    newMaterial = new ComponentMaterial();
+    newMaterial = Component::CreateShared<ComponentMaterial>();
     newMaterial->type = Components::MaterialPBR;
     newMaterial->pbr.albedoColor = MathCore::vec3f(1, 0.8521127f, 0.7464789f);
     newMaterial->pbr.metallic = 0.0f;
@@ -107,7 +96,7 @@ void ScenePalace::loadResources() {
     //newMaterial->pbr.texNormal = texRefCount->add(Rock03Textures[1]);
     newMaterial->pbr.albedoColor = ResourceHelper::vec3ColorGammaToLinear(newMaterial->pbr.albedoColor);
 
-    Model_Cross->findTransformByName("cross")->traversePreOrder_DepthFirst(ReplaceMaterial, newMaterial);
+    Model_Cross->findTransformByName("cross")->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
 
 }
 
@@ -133,21 +122,21 @@ void ScenePalace::bindResourcesToGraph() {
 
     //setup camera
     {
-        Transform *mainCamera = root->findTransformByName("Main Camera");
-        mainCamera->addComponent(camera = new ComponentCameraPerspective());
+        auto mainCamera = root->findTransformByName("Main Camera");
+        camera = mainCamera->addNewComponent<ComponentCameraPerspective>();
 
-        ((ComponentCameraPerspective*)camera)->fovDegrees = 60.0f;
-		((ComponentCameraPerspective*)camera)->nearPlane = 0.1f;
-		((ComponentCameraPerspective*)camera)->farPlane = 30.0f;
+        ((ComponentCameraPerspective*)camera.get())->fovDegrees = 60.0f;
+		((ComponentCameraPerspective*)camera.get())->nearPlane = 0.1f;
+		((ComponentCameraPerspective*)camera.get())->farPlane = 30.0f;
 
-        Transform *camera_look = root->findTransformByName("Camera-look");
+        auto camera_look = root->findTransformByName("Camera-look");
 
         mainCamera->lookAtLeftHanded(camera_look);
 
         //ThirdPersonCamera
         {
-            mainCamera->addComponent(thirdPersonCamera = new ComponentThirdPersonCamera());
-            thirdPersonCamera->Target = camera_look;
+            thirdPersonCamera = mainCamera->addNewComponent<ComponentThirdPersonCamera>();
+            thirdPersonCamera->TargetRef = camera_look;
         }
 
         /*
@@ -163,11 +152,11 @@ void ScenePalace::bindResourcesToGraph() {
 
     //light
     {
-		Transform *lightTransform;
-        ComponentLight *light;
+		std::shared_ptr<Transform> lightTransform;
+        std::shared_ptr<ComponentLight> light;
 
         lightTransform = root->findTransformByName("Directional Light (1)");
-        light = (ComponentLight *)lightTransform->addComponent(new ComponentLight());
+        light = lightTransform->addNewComponent<ComponentLight>();
         light->type = LightSun;
         light->sun.color = MathCore::vec3f(1, 0.9568627f, 0.8392157f);
         light->sun.intensity = 0.3333f * 8.0f; //0.5f + 0.5f;
@@ -175,14 +164,14 @@ void ScenePalace::bindResourcesToGraph() {
 
 
 		lightTransform = root->findTransformByName("Directional Light (2)");
-        light = (ComponentLight *)lightTransform->addComponent(new ComponentLight());
+        light = lightTransform->addNewComponent<ComponentLight>();
         light->type = LightSun;
         light->sun.color = MathCore::vec3f(1, 0.9568627f, 0.8392157f);
         light->sun.intensity = 0.3333f * 8.0f; //0.5f + 0.5f;
         light->sun.color = ResourceHelper::vec3ColorGammaToLinear(light->sun.color);
 
 		lightTransform = root->findTransformByName("Directional Light (3)");
-        light = (ComponentLight *)lightTransform->addComponent(new ComponentLight());
+        light = lightTransform->addNewComponent<ComponentLight>();
         light->type = LightSun;
         light->sun.color = MathCore::vec3f(1, 0.9568627f, 0.8392157f);
         light->sun.intensity = 0.3333f * 8.0f; //0.5f + 0.5f;
@@ -195,32 +184,32 @@ void ScenePalace::bindResourcesToGraph() {
 
     //3DModel
     {
-        Transform *node;
+        std::shared_ptr<Transform> node;
 
 		node = root->findTransformByName("static_model");
         node->addChild(ResourceHelper::cloneTransformRecursive(Model_Palace));
 
 		node = root->findTransformByName("RotatingCross");
         node->addChild(ResourceHelper::cloneTransformRecursive(Model_Cross));
-        node->addComponent(new RotatingCross());
+        node->addComponent(Component::CreateShared<RotatingCross>());
 
         node = root->findTransformByName("player side");
         //node->addChild(ResourceHelper::removeEmptyTransforms(ResourceHelper::cloneTransformRecursive(Model_Guard)));
         node->addComponent(skinnedMesh);
         skinnedMesh->moveMeshToTransform();
 
-        thirdPersonCamera->Player_Forward = node;
+        thirdPersonCamera->Player_ForwardRef = node;
 
         node = root->findTransformByName("player");
-        node->addComponent(animationMotion = new ComponentAnimationMotion());
+        animationMotion = node->addNewComponent<ComponentAnimationMotion>();
 
         animationMotion->motionInfluence.push_back( ClipMotionInfluence("idle",0,0,0) );
         animationMotion->motionInfluence.push_back( ClipMotionInfluence("walk",0,0,1) );
         animationMotion->motionInfluence.push_back( ClipMotionInfluence("run",0,0,1) );
 
-        node->addComponent(thirdPersonPlayerController = new ComponentThirdPersonPlayerController());
+        thirdPersonPlayerController = node->addNewComponent<ComponentThirdPersonPlayerController>();
 
-        Transform *camera_look = root->findTransformByName("Camera-look");
+        auto camera_look = root->findTransformByName("Camera-look");
 
         thirdPersonPlayerController->setCameraLook(camera_look);
 
@@ -246,11 +235,25 @@ void ScenePalace::bindResourcesToGraph() {
 
 //clear all loaded scene
 void ScenePalace::unloadAll() {
-    ResourceHelper::releaseTransformRecursive(&root);
-    ResourceHelper::releaseTransformRecursive(&Model_Palace);
-	ResourceHelper::releaseTransformRecursive(&Model_Cross);
+    // ResourceHelper::releaseTransformRecursive(&root);
+    // ResourceHelper::releaseTransformRecursive(&Model_Palace);
+	// ResourceHelper::releaseTransformRecursive(&Model_Cross);
 	//ResourceHelper::releaseTransformRecursive(&Model_Guard);
     //delete skinnedMesh);
+    root = nullptr;
+
+    Model_Palace = nullptr;
+    Model_Cross = nullptr;
+    //AppKit::GLEngine::Transform* Model_Guard;
+    Texture_Guard[0] = nullptr;
+    Texture_Guard[1] = nullptr;
+    Texture_Guard[2] = nullptr;
+
+    skinnedMesh = nullptr;
+    animationMotion = nullptr;
+    thirdPersonPlayerController = nullptr;
+    thirdPersonCamera = nullptr;
+
 }
 
 ScenePalace::ScenePalace(
@@ -331,28 +334,28 @@ void ScenePalace::draw(){
     SceneBase::draw();
 }
 
-static Transform* loadSceneroot()
+std::shared_ptr<Transform> loadSceneroot()
 {
-	Transform* _0 = new Transform();
+	auto _0 = Transform::CreateShared();
 	_0->Name = std::string("root");
 	_0->LocalPosition = MathCore::vec3f(0,0,0);
 	_0->LocalRotation = quatf(0,0,0,1);
 	_0->LocalScale = MathCore::vec3f(1,1,1);
 	{
-		Transform* _1 = _0->addChild(Transform::CreateShared());
+		auto _1 = _0->addChild(Transform::CreateShared());
 		_1->Name = std::string("Main Camera");
 		_1->LocalPosition = MathCore::vec3f(0,2.475,-2.268);
 		_1->LocalRotation = quatf(0.2011371,0.005232482,-0.001074419,0.9795486);
 		_1->LocalScale = MathCore::vec3f(1,1,1);
 	}
 	{
-		Transform* _2 = _0->addChild(Transform::CreateShared());
+		auto _2 = _0->addChild(Transform::CreateShared());
 		_2->Name = std::string("player");
 		_2->LocalPosition = MathCore::vec3f(0,0,0);
 		_2->LocalRotation = quatf(0,0,0,1);
 		_2->LocalScale = MathCore::vec3f(1,1,1);
 		{
-			Transform* _3 = _2->addChild(Transform::CreateShared());
+			auto _3 = _2->addChild(Transform::CreateShared());
 			_3->Name = std::string("Camera-look");
 			//_3->LocalPosition = MathCore::vec3f(0.015,1.491,0.025);
             _3->LocalPosition = MathCore::vec3f(0, 1.291, 0.025);
@@ -360,7 +363,7 @@ static Transform* loadSceneroot()
 			_3->LocalScale = MathCore::vec3f(1,1,1);
 		}
         {
-            Transform* _3 = _2->addChild(Transform::CreateShared());
+            auto _3 = _2->addChild(Transform::CreateShared());
             _3->Name = std::string("player side");
             _3->LocalPosition = MathCore::vec3f(-0.62, 0, 0);
             _3->LocalRotation = quatf(0, 0, 0, 1);
@@ -368,27 +371,27 @@ static Transform* loadSceneroot()
         }
 	}
 	{
-		Transform* _4 = _0->addChild(Transform::CreateShared());
+		auto _4 = _0->addChild(Transform::CreateShared());
 		_4->Name = std::string("Lights");
 		_4->LocalPosition = MathCore::vec3f(-1.133002,0.5275524,-4.254147);
 		_4->LocalRotation = quatf(0,0,0,1);
 		_4->LocalScale = MathCore::vec3f(1,1,1);
 		{
-			Transform* _5 = _4->addChild(Transform::CreateShared());
+			auto _5 = _4->addChild(Transform::CreateShared());
 			_5->Name = std::string("Directional Light (1)");
 			_5->LocalPosition = MathCore::vec3f(1.133002,2.472448,4.254147);
 			_5->LocalRotation = quatf(0.4082179,-0.2345697,0.1093816,0.8754261);
 			_5->LocalScale = MathCore::vec3f(1,1,1);
 		}
 		{
-			Transform* _6 = _4->addChild(Transform::CreateShared());
+			auto _6 = _4->addChild(Transform::CreateShared());
 			_6->Name = std::string("Directional Light (2)");
 			_6->LocalPosition = MathCore::vec3f(2.853002,2.572448,1.264147);
 			_6->LocalRotation = quatf(0.3147533,0.6047991,-0.2820223,0.6749904);
 			_6->LocalScale = MathCore::vec3f(1,1,1);
 		}
 		{
-			Transform* _7 = _4->addChild(Transform::CreateShared());
+			auto _7 = _4->addChild(Transform::CreateShared());
 			_7->Name = std::string("Directional Light (3)");
 			_7->LocalPosition = MathCore::vec3f(2.853002,2.572448,1.264147);
 			_7->LocalRotation = quatf(-0.1208431,0.8684675,-0.404973,-0.2591489);
@@ -396,13 +399,13 @@ static Transform* loadSceneroot()
 		}
 	}
 	{
-		Transform* _8 = _0->addChild(Transform::CreateShared());
+		auto _8 = _0->addChild(Transform::CreateShared());
 		_8->Name = std::string("Ground");
 		_8->LocalPosition = MathCore::vec3f(0,0,0);
 		_8->LocalRotation = quatf(0,0,0,1);
 		_8->LocalScale = MathCore::vec3f(27.03765,27.03765,27.03765);
 		{
-			Transform* _9 = _8->addChild(Transform::CreateShared());
+			auto _9 = _8->addChild(Transform::CreateShared());
 			_9->Name = std::string("Cube");
 			_9->LocalPosition = MathCore::vec3f(0,-0.5,0);
 			_9->LocalRotation = quatf(0,0,0,1);
@@ -410,13 +413,13 @@ static Transform* loadSceneroot()
 		}
 	}
 	{
-		Transform* _10 = _0->addChild(Transform::CreateShared());
+		auto _10 = _0->addChild(Transform::CreateShared());
 		_10->Name = std::string("static");
 		_10->LocalPosition = MathCore::vec3f(0,0,0);
 		_10->LocalRotation = quatf(0,0,0,1);
 		_10->LocalScale = MathCore::vec3f(1,1,1);
 		{
-			Transform* _11 = _10->addChild(Transform::CreateShared());
+			auto _11 = _10->addChild(Transform::CreateShared());
 			_11->Name = std::string("static_model");
 			_11->LocalPosition = MathCore::vec3f(0,3.388,-8.98);
 			_11->LocalRotation = quatf(0,0,0,1);
@@ -424,7 +427,7 @@ static Transform* loadSceneroot()
 		}
 	}
 	{
-		Transform* _12 = _0->addChild(Transform::CreateShared());
+		auto _12 = _0->addChild(Transform::CreateShared());
 		_12->Name = std::string("RotatingCross");
 		_12->LocalPosition = MathCore::vec3f(0,0,5.1);
 		_12->LocalRotation = quatf(0,1,0,0);

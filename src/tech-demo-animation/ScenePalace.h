@@ -32,15 +32,15 @@ protected:
     virtual void unloadAll();
     
     
-    AppKit::GLEngine::Transform* Model_Palace;
-    AppKit::GLEngine::Transform* Model_Cross;
+    std::shared_ptr<AppKit::GLEngine::Transform> Model_Palace;
+    std::shared_ptr<AppKit::GLEngine::Transform> Model_Cross;
     //AppKit::GLEngine::Transform* Model_Guard;
-    AppKit::OpenGL::GLTexture *Texture_Guard[3];//diffuse + normal + specular
+    std::shared_ptr<AppKit::OpenGL::GLTexture> Texture_Guard[3];//diffuse + normal + specular
 
-    AppKit::GLEngine::Components::ComponentSkinnedMesh *skinnedMesh;
-    AppKit::GLEngine::Components::ComponentAnimationMotion *animationMotion;
-    AppKit::GLEngine::Components::ComponentThirdPersonPlayerController *thirdPersonPlayerController;
-    AppKit::GLEngine::Components::ComponentThirdPersonCamera *thirdPersonCamera;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentSkinnedMesh> skinnedMesh;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentAnimationMotion> animationMotion;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentThirdPersonPlayerController> thirdPersonPlayerController;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentThirdPersonCamera> thirdPersonCamera;
 
 public:
     ScenePalace(

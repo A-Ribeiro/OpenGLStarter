@@ -87,7 +87,7 @@ namespace AppKit
 
                 // MathCore::vec3f clip_motion;
 
-                ComponentSkinnedMesh(ResourceHelper *_resourceHelper, bool isGPUSkinning);
+                ComponentSkinnedMesh(ResourceHelper *_resourceHelper = nullptr, bool isGPUSkinning = true);
 
                 void loadModelBase(const std::string &filename);
 

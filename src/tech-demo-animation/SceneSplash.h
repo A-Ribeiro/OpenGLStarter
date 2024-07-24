@@ -14,7 +14,7 @@ protected:
     //clear all loaded scene
     virtual void unloadAll();
     
-    AppKit::OpenGL::GLTexture *Milky_512_512;
+    std::shared_ptr<AppKit::OpenGL::GLTexture> Milky_512_512;
 
 public:
     SceneSplash(

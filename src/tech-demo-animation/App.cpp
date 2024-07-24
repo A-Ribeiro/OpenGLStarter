@@ -44,9 +44,9 @@ App::App()
 #endif
 
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
-    AppBase::screenRenderWindow.CameraViewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
 
-    AppBase::screenRenderWindow.inputManager.onMouseEvent.add(&App::OnMouseEvent, this);
+    AppBase::screenRenderWindow->inputManager.onMouseEvent.add(&App::OnMouseEvent, this);
 
     // AppBase::OnMouseDown.add(this, &App::onMouseDown);
     // AppBase::OnMouseUp.add(this, &App::onMouseUp);
@@ -66,8 +66,8 @@ App::App()
     sceneSplash = nullptr;
     scenePalace = nullptr;
 
-    screenRenderWindow.setHandleWindowCloseButtonEnabled(true);
-    screenRenderWindow.setViewportFromRealWindowSizeEnabled(true);
+    screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
+    screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
     // screenRenderWindow.setEventForwardingEnabled(true);
 }
 
@@ -131,9 +131,9 @@ void App::draw()
 
     StartEventManager::Instance()->processAllComponentsWithTransform();
 
-    screenRenderWindow.OnPreUpdate(&time);
-    screenRenderWindow.OnUpdate(&time);
-    screenRenderWindow.OnLateUpdate(&time);
+    screenRenderWindow->OnPreUpdate(&time);
+    screenRenderWindow->OnUpdate(&time);
+    screenRenderWindow->OnLateUpdate(&time);
 
     // pre process all scene graphs
     /*if (sceneJesusCross != nullptr)
@@ -145,7 +145,7 @@ void App::draw()
     if (scenePalace != nullptr)
         scenePalace->precomputeSceneGraphAndCamera();
 
-    screenRenderWindow.OnAfterGraphPrecompute(&time);
+    screenRenderWindow->OnAfterGraphPrecompute(&time);
 
     /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();

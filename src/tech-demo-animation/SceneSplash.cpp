@@ -18,20 +18,20 @@ void SceneSplash::loadResources(){
     
     Milky_512_512 = resourceHelper->createTextureFromFile("resources/opengl_logo_white.png",true && engine->sRGBCapable);
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    texRefCount->add(Milky_512_512);
+    //texRefCount->add(Milky_512_512);
 
 }
 //to load the scene graph
 void SceneSplash::loadGraph(){
-    root = new Transform();
+    root = Transform::CreateShared();
 
-    Transform *t = root->addChild( new Transform() );
+    auto t = root->addChild( Transform::CreateShared() );
     t->Name = "Main Camera";
 //    t->LocalPosition = MathCore::vec3f(0,0,0);
 
-    t = root->addChild( new Transform() );
+    t = root->addChild( Transform::CreateShared() );
     t->Name = "Sprite";
 }
 //to bind the resources to the current graph
@@ -42,26 +42,25 @@ void SceneSplash::bindResourcesToGraph(){
     //setup renderstate
     renderState->ClearColor = vec4f(0.0f, 0.0f, 0.0f,1.0f);
 
-    Transform *mainCamera = root->findTransformByName("Main Camera");
-    ComponentCameraOrthographic* componentCameraOrthographic;
-    mainCamera->addComponent(camera = componentCameraOrthographic = new ComponentCameraOrthographic());
+    auto mainCamera = root->findTransformByName("Main Camera");
+    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+    camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
     
     componentCameraOrthographic->useSizeY = true;
     componentCameraOrthographic->sizeY = 512.0f * 2.5f;
     
-    Transform *spriteTransform = root->findTransformByName("Sprite");
+    auto spriteTransform = root->findTransformByName("Sprite");
     //spriteTransform->LocalRotation = quatFromEuler(MathCore::OP<float>::deg_2_rad(-90.0f), 0, 0);
 
-    ComponentMaterial *material;
-    spriteTransform->addComponent(material = new ComponentMaterial());
+    auto material = spriteTransform->addNewComponent<ComponentMaterial>();
     spriteTransform->addComponent(ComponentMesh::createPlaneXY(512.0f,512.0f) );
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
     material->type = MaterialUnlitTexture;
     material->unlit.color = vec4f(1.0f);
     material->unlit.blendMode = BlendModeAlpha;
-    material->unlit.tex = texRefCount->add(Milky_512_512);
+    material->unlit.tex = Milky_512_512;
 
     //Add AABB for all meshs...
     {
@@ -73,16 +72,18 @@ void SceneSplash::bindResourcesToGraph(){
 //clear all loaded scene
 void SceneSplash::unloadAll(){
 
-    ResourceHelper::releaseTransformRecursive(&root);
+    //ResourceHelper::releaseTransformRecursive(&root);
+    root = nullptr;
     
 
-    ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    if (Milky_512_512 != nullptr){
-        texRefCount->removeNoDelete(Milky_512_512);
-        delete Milky_512_512;
-        Milky_512_512 = nullptr;
-    }
+    // if (Milky_512_512 != nullptr){
+    //     texRefCount->removeNoDelete(Milky_512_512);
+    //     delete Milky_512_512;
+    //     Milky_512_512 = nullptr;
+    // }
+    Milky_512_512 = nullptr;
 }
 
 //AppKit::OpenGL::GLTexture *Milky_512_512;
