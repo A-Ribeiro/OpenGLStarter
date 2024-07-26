@@ -1,4 +1,5 @@
 #include "HierarchyOperations.h"
+#include "../App.h"
 
 HierarchyOperations::HierarchyOperations()
 {
@@ -376,6 +377,23 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
 
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
                 ImGuiManager::Instance()->contextMenu.open();
+        });
+    }
+
+    // main save scene
+    {
+        auto imGuiMenu = ImGuiMenu::Instance();
+        auto &controller = imGuiMenu->getController("File/Save Scene");
+        controller.callback = [&]() { 
+            printf("new save scene\n");
+        };
+        controller.enabled = true;
+        imGuiMenu->UpdateUI();
+
+        auto app = (App*)AppKit::GLEngine::Engine::Instance()->app;
+        app->CtrlS_Detector.OnDown.clear();
+        app->CtrlS_Detector.OnDown.add([&](){
+            printf("new Ctrl+S save scene action\n");
         });
     }
 }

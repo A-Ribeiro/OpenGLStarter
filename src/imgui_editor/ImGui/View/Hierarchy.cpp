@@ -60,21 +60,20 @@ View* Hierarchy::Init()
             printf("[Hierarchy][Tree] OnHover on %s: %i\n", node->getName(), hovered);
         });
         OnTreeSingleClick.add([](std::shared_ptr<TreeNode> node){
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-                ImGuiManager::Instance()->contextMenu.open();
-
+            // if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+            //     ImGuiManager::Instance()->contextMenu.open();
             printf("[Hierarchy][Tree] OnSingleClick on %s\n", node->getName());
         });
         OnTreeDoubleClick.add([=](std::shared_ptr<TreeNode> node){
             printf("[Hierarchy][Tree] OnDoubleClick on %s\n", node->getName());
-            if (node->isRoot)
-                return;
-            ImGuiManager::Instance()->dialogs.showEnterText_OKCancel(node->getName(), 
-            [=](const std::string &new_str){
-                printf("new text: %s\n", new_str.c_str());
-                if (new_str.compare(node->getName()) != 0)
-                    node->setName(new_str.c_str());
-            });
+            // if (node->isRoot)
+            //     return;
+            // ImGuiManager::Instance()->dialogs.showEnterText_OKCancel(node->getName(), 
+            // [=](const std::string &new_str){
+            //     printf("new text: %s\n", new_str.c_str());
+            //     if (new_str.compare(node->getName()) != 0)
+            //         node->setName(new_str.c_str());
+            // });
         });
         OnTreeExpand.add([](std::shared_ptr<TreeNode> node){
             printf("[Hierarchy][Tree] OnExpand on %s\n", node->getName());
@@ -85,30 +84,30 @@ View* Hierarchy::Init()
         OnTreeSelect.add([](std::shared_ptr<TreeNode> node){
             if (node == nullptr) {
                 printf("[Hierarchy][Tree] OnSelect on nullptr\n");
-                if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-                    ImGuiManager::Instance()->contextMenu.open();
+                // if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                //     ImGuiManager::Instance()->contextMenu.open();
             } else {
                 printf("[Hierarchy][Tree] OnSelect on %s\n", node->getName());
             }
         });
         OnTreeDragDrop.add([&](const char* drag_payload, void *src, std::shared_ptr<TreeNode>target){
             printf("[Hierarchy][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
-            if (drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
-                if (target != nullptr){
-                    std::shared_ptr<TreeNode> source_node = ((TreeNode*)src)->self();
-                    printf("                  Before PostAction %s to %s !\n", source_node->getName(), target->getName());
-                    ImGuiManager::Instance()->PostAction.add([=](){
-                        printf("                  [PostAction]\n");
+            // if (drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
+            //     if (target != nullptr){
+            //         std::shared_ptr<TreeNode> source_node = ((TreeNode*)src)->self();
+            //         printf("                  Before PostAction %s to %s !\n", source_node->getName(), target->getName());
+            //         ImGuiManager::Instance()->PostAction.add([=](){
+            //             printf("                  [PostAction]\n");
 
-                        printf("                  Trying to reparent %s to %s !\n", source_node->getName(), target->getName());
-                        if (TreeNode::Reparent(source_node, target)){
-                            printf("                  Reparent OK!\n");
-                        }else {
-                            printf("                  Reparent Fail!\n");
-                        }
-                    });
-                }
-            }
+            //             printf("                  Trying to reparent %s to %s !\n", source_node->getName(), target->getName());
+            //             if (TreeNode::Reparent(source_node, target)){
+            //                 printf("                  Reparent OK!\n");
+            //             }else {
+            //                 printf("                  Reparent Fail!\n");
+            //             }
+            //         });
+            //     }
+            // }
         });
         
     }

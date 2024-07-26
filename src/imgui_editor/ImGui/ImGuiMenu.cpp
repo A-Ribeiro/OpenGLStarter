@@ -75,7 +75,7 @@ ImGuiMenu::ImGuiMenu() {
 	global_index = 1;
 }
 
-void ImGuiMenu::AddMenu(int increment_UID, const std::string& path, const std::string& shortcut, std::function<void(void)> callback, bool* check_variable_ptr)
+MenuItemController& ImGuiMenu::AddMenu(int increment_UID, const std::string& path, const std::string& shortcut, std::function<void(void)> callback, bool* check_variable_ptr)
 {
 	auto string_splitted = ITKCommon::StringUtil::tokenizer(path, "/");
 	auto* tree_node = &menu;
@@ -90,6 +90,8 @@ void ImGuiMenu::AddMenu(int increment_UID, const std::string& path, const std::s
 	tree_node->shortcut = shortcut;
 	tree_node->check_variable_ptr = check_variable_ptr;
     tree_node->index += increment_UID;
+
+    return *tree_node;
 }
 
 void ImGuiMenu::makeLast(const std::string& path)

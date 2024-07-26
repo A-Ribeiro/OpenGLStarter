@@ -33,7 +33,7 @@ public:
 
     ImGuiMenu();
 
-    void AddMenu(int increment_UID, const std::string& path, const std::string& shortcut, std::function<void(void)> callback, bool* check_variable_ptr = nullptr);
+    MenuItemController& AddMenu(int increment_UID, const std::string& path, const std::string& shortcut, std::function<void(void)> callback, bool* check_variable_ptr = nullptr);
     void makeLast(const std::string& path);
 
     bool GetCheckState(const std::string& path);

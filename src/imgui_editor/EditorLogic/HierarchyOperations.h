@@ -13,7 +13,6 @@ class HierarchyOperations : virtual public OperationsCommon
     std::shared_ptr<HierarchyTreeData> selectedTransformInfo;
     std::shared_ptr<TreeNode> selectedTreeNode;
 
-
     HierarchyOperations();
 
     void init();

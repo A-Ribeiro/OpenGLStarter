@@ -74,6 +74,11 @@ void App::load()
         }
     );
 
+    auto &controller = ImGuiMenu::Instance()->AddMenu(0, "File/Save Scene", "Ctrl+S",
+        []() { printf("save scene\n"); }
+    );
+    controller.enabled = false;
+
     ImGuiMenu::Instance()->AddMenu(10000, "File/<<>>", "", nullptr);
     ImGuiMenu::Instance()->AddMenu(20000, "File/Quit", "Ctrl+Q", [this]()
         { this->exitApp(); });
@@ -141,10 +146,11 @@ void App::draw()
 
     fade->draw();
     bool ctrl_pressed = Keyboard::isPressed(KeyCode::LControl) || Keyboard::isPressed(KeyCode::RControl);
-    if (
-        // Keyboard::isPressed(KeyCode::Escape) ||
-        (ctrl_pressed && Keyboard::isPressed(KeyCode::Q)))
+    CtrlQ_Detector.setState(ctrl_pressed && Keyboard::isPressed(KeyCode::Q));
+    CtrlS_Detector.setState(ctrl_pressed && Keyboard::isPressed(KeyCode::S));
+    if (CtrlQ_Detector.down)
         exitApp();
+    
     if (fade->isFading)
         return;
 }

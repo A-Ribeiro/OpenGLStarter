@@ -1,6 +1,7 @@
 #pragma once
 
 #include <InteractiveToolkit/EventCore/HandleCallback.h>
+#include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
 
 #include <appkit-gl-engine/Renderer/RenderPipeline.h>
 #include <appkit-gl-engine/util/ResourceHelper.h>
@@ -26,6 +27,10 @@ public:
     Platform::Time time;
     ResourceHelper resourceHelper;
     Fade *fade;
+
+    EventCore::PressReleaseDetector CtrlQ_Detector;
+    EventCore::PressReleaseDetector CtrlS_Detector;
+
 
     App();
     ~App();
