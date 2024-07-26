@@ -24,6 +24,7 @@ void Editor::init()
 void Editor::openFolder(const std::string &path)
 {
     openFolder_FolderFileOperations(path);
+    clear_HierarchyOperations();
 }
 
 void Editor::tryToOpenFile(const ITKCommon::FileSystem::File &file)

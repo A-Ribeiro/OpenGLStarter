@@ -17,6 +17,8 @@ class HierarchyOperations : virtual public OperationsCommon
 
     void init();
 
+    void clear_HierarchyOperations();
+
     void openFile_HierarchyOperations(const ITKCommon::FileSystem::File &file);
 
     void hierarchyCreateNewChildOnNode(std::shared_ptr<TreeNode> src, const std::string &new_name);

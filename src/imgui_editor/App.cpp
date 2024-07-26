@@ -62,7 +62,7 @@ App::App()
 void App::load()
 {
     ImGuiMenu::Instance()->Clear();
-    ImGuiMenu::Instance()->AddMenu(0, "File/Open Folder", "",
+    ImGuiMenu::Instance()->AddMenu(0, "File/Open Folder", "Ctrl+O",
         [this]() {
             std::string out;
             if (Native::OpenFolderDialog("./", &out) ){
@@ -148,6 +148,9 @@ void App::draw()
     bool ctrl_pressed = Keyboard::isPressed(KeyCode::LControl) || Keyboard::isPressed(KeyCode::RControl);
     CtrlQ_Detector.setState(ctrl_pressed && Keyboard::isPressed(KeyCode::Q));
     CtrlS_Detector.setState(ctrl_pressed && Keyboard::isPressed(KeyCode::S));
+    CtrlO_Detector.setState(ctrl_pressed && Keyboard::isPressed(KeyCode::O));
+    if (CtrlO_Detector.down)
+        ImGuiMenu::Instance()->getController("File/Open Folder").callback();
     if (CtrlQ_Detector.down)
         exitApp();
     

@@ -28,6 +28,7 @@ public:
     ResourceHelper resourceHelper;
     Fade *fade;
 
+    EventCore::PressReleaseDetector CtrlO_Detector;
     EventCore::PressReleaseDetector CtrlQ_Detector;
     EventCore::PressReleaseDetector CtrlS_Detector;
 

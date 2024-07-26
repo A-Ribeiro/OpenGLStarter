@@ -305,7 +305,7 @@ void HierarchyOperations::init()
 
                         } else if (clipboardState->compareType(CutTransformOP::Type)){
                             auto cutTransform = std::dynamic_pointer_cast<CutTransformOP>(clipboardState);
-                            this->hierarchyPasteFromCopy(cutTransform->treeNode, this->selectedTreeNode);
+                            this->hierarchyPasteFromCut(cutTransform->treeNode, this->selectedTreeNode);
                         }
                     }
                 )
@@ -317,6 +317,21 @@ void HierarchyOperations::init()
         imGuiManager->hierarchy.OnTreeSelect.clear();
         imGuiManager->hierarchy.OnTreeSingleClick.clear();
     }
+}
+
+void HierarchyOperations::clear_HierarchyOperations(){
+    imGuiManager->hierarchy.clearTree();
+    imGuiManager->hierarchy.OnTreeSelect.clear();
+    imGuiManager->hierarchy.OnTreeSingleClick.clear();
+    imGuiManager->hierarchy.OnTreeDoubleClick.clear();
+    imGuiManager->hierarchy.OnTreeDragDrop.clear();
+
+    auto root = imGuiManager->hierarchy.getTreeRoot();
+
+    root->setName( "root" );
+    root->data = nullptr;
+
+    clipboardState = nullptr;
 }
 
 void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSystem::File &file)
@@ -345,7 +360,8 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
         imGuiManager->hierarchy.clearTree();
         auto root = imGuiManager->hierarchy.getTreeRoot();
 
-
+        root->setName( opened_file.name.c_str() );
+        root->data = HierarchyTreeData::CreateShared( Transform::CreateShared() );
     }
 
     // load file hierarchy from scene file
@@ -378,6 +394,39 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
                 ImGuiManager::Instance()->contextMenu.open();
         });
+        imGuiManager->hierarchy.OnTreeDoubleClick.clear();
+        imGuiManager->hierarchy.OnTreeDoubleClick.add([&](std::shared_ptr<TreeNode> node){
+            if (this->selectedTreeNode == nullptr)
+                return;
+            
+            hierarchyRename(this->selectedTreeNode, this->selectedTreeNode->getName());
+            // this->selectedTreeNode = node;
+            // this->selectedTransformInfo = std::dynamic_pointer_cast<HierarchyTreeData>(node->data);
+
+            // imGuiManager->shortcutManager.setActionShortCutByCategory("Action:TransformOps");
+
+            // if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+            //     ImGuiManager::Instance()->contextMenu.open();
+        });
+    }
+
+    // drag n drop
+    {
+        imGuiManager->hierarchy.OnTreeDragDrop.clear();
+        imGuiManager->hierarchy.OnTreeDragDrop.add([&](const char* drag_payload, void *src, std::shared_ptr<TreeNode>target){
+            printf("[Hierarchy][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
+            if (target != nullptr && drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
+                std::shared_ptr<TreeNode> source_node = ((TreeNode*)src)->self();
+                ImGuiManager::Instance()->PostAction.add([&, source_node, target](){
+                    hierarchyDragMove(source_node, target);
+                    // if (TreeNode::Reparent(source_node, target)){
+                    //     printf("                  Reparent OK!\n");
+                    // }else {
+                    //     printf("                  Reparent Fail!\n");
+                    // }
+                });
+            }
+        });
     }
 
     // main save scene
@@ -407,12 +456,12 @@ void HierarchyOperations::hierarchyCreateNewChildOnNode(std::shared_ptr<TreeNode
         new_name,
         [&, src](const std::string &new_str){
             //auto treeData = std::dynamic_pointer_cast< HierarchyTreeData >(src->data);
-            if (new_str.length() == 0){
-                this->showErrorAndRetry("Empty node name",[&,src,new_str](){
-                    hierarchyCreateNewChildOnNode(src, new_str);
-                });
-                return;
-            }
+            // if (new_str.length() == 0){
+            //     this->showErrorAndRetry("Empty node name",[&,src,new_str](){
+            //         hierarchyCreateNewChildOnNode(src, new_str);
+            //     });
+            //     return;
+            // }
             
             using namespace AppKit::GLEngine;
 
@@ -506,14 +555,14 @@ void HierarchyOperations::hierarchyDuplicate(std::shared_ptr<TreeNode> src)
         new_name, 
         HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
     );
-    src->addChild(tree_node, src->uid);
+    parent->addChild(tree_node, src->uid);
 
 
 }
 void HierarchyOperations::hierarchyPasteFromCopy(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target)
 {
     clipboardState = nullptr;
-    if (src == nullptr || target == nullptr)
+    if (src == nullptr || target == nullptr || src == target)
         return;
     
     if (src->isChild(target->uid)){
@@ -522,6 +571,8 @@ void HierarchyOperations::hierarchyPasteFromCopy(std::shared_ptr<TreeNode> src, 
     }
 
     using namespace AppKit::GLEngine;
+
+    // needs to clone the entire hierarchy
 
     auto tree_node = imGuiManager->hierarchy.createTreeNode( 
         src->getName(), 
@@ -532,7 +583,7 @@ void HierarchyOperations::hierarchyPasteFromCopy(std::shared_ptr<TreeNode> src, 
 void HierarchyOperations::hierarchyPasteFromCut(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target)
 {
     clipboardState = nullptr;
-    if (src == nullptr || target == nullptr)
+    if (src == nullptr || target == nullptr || src == target)
         return;
     if (src->isChild(target->uid)){
         this->showErrorAndRetry("Parent/child invalid cut", nullptr);
@@ -544,7 +595,7 @@ void HierarchyOperations::hierarchyPasteFromCut(std::shared_ptr<TreeNode> src, s
 
 void HierarchyOperations::hierarchyDragMove(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target)
 {
-    if (src == nullptr || target == nullptr)
+    if (src == nullptr || target == nullptr || src == target)
         return;
 
     if (src->isChild(target->uid)){
