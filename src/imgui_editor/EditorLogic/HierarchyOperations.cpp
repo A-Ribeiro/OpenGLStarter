@@ -551,10 +551,12 @@ void HierarchyOperations::hierarchyDuplicate(std::shared_ptr<TreeNode> src)
     using namespace AppKit::GLEngine;
 
     // create the new node
-    auto tree_node = imGuiManager->hierarchy.createTreeNode( 
-        new_name, 
-        HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
-    );
+    // auto tree_node = imGuiManager->hierarchy.createTreeNode( 
+    //     new_name, 
+    //     HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
+    // );
+    auto tree_node = imGuiManager->hierarchy.cloneTreeNode(src);
+    tree_node->setName(new_name.c_str());
     parent->addChild(tree_node, src->uid);
 
 
@@ -574,10 +576,11 @@ void HierarchyOperations::hierarchyPasteFromCopy(std::shared_ptr<TreeNode> src, 
 
     // needs to clone the entire hierarchy
 
-    auto tree_node = imGuiManager->hierarchy.createTreeNode( 
-        src->getName(), 
-        HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
-    );
+    // auto tree_node = imGuiManager->hierarchy.createTreeNode( 
+    //     src->getName(), 
+    //     HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
+    // );
+    auto tree_node = imGuiManager->hierarchy.cloneTreeNode(src);
     target->addChild(tree_node, src->uid);
 }
 void HierarchyOperations::hierarchyPasteFromCut(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target)
