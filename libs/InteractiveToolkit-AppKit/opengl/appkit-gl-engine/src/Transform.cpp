@@ -1067,7 +1067,10 @@ namespace AppKit
 
             renderDirty = true;
 
-            renderWindowRegion = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+            // renderWindowRegion = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+            auto app = AppKit::GLEngine::Engine::Instance()->app;
+            if (app != nullptr)
+                renderWindowRegion = app->screenRenderWindow;
         }
 
         Transform::~Transform()
