@@ -489,12 +489,18 @@ void HierarchyOperations::hierarchyCreateNewChildOnNode(std::shared_ptr<TreeNode
             
             using namespace AppKit::GLEngine;
 
+            auto parent_transform = std::dynamic_pointer_cast<HierarchyTreeData>(src->data)->transform;
+            auto transform = parent_transform->addChild(Transform::CreateShared());
+            transform->setName(new_str);
+
             auto tree_node = imGuiManager->hierarchy.createTreeNode( 
                 new_str, 
-                HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
+                HierarchyTreeData::CreateShared( transform ) 
             );
             src->addChild(tree_node);
-            
+
+
+            this->printHierarchy();
         },
         DialogPosition::OpenOnScreenCenter
     );
@@ -510,12 +516,23 @@ void HierarchyOperations::hierarchyMakeFirst(std::shared_ptr<TreeNode> src)
     if (src == nullptr)
         return;
     src->makeFirst();
+
+    auto parent_transform = std::dynamic_pointer_cast<HierarchyTreeData>(src->data)->transform;
+    parent_transform->makeFirst();
+    
+    this->printHierarchy();
+
 }
 void HierarchyOperations::hierarchyMakeLast(std::shared_ptr<TreeNode> src)
 {
     if (src == nullptr)
         return;
     src->makeLast();
+
+    auto parent_transform = std::dynamic_pointer_cast<HierarchyTreeData>(src->data)->transform;
+    parent_transform->makeLast();
+    
+    this->printHierarchy();
 }
 void HierarchyOperations::hierarchyRename(std::shared_ptr<TreeNode> src, const std::string &new_name)
 {
@@ -534,6 +551,11 @@ void HierarchyOperations::hierarchyRename(std::shared_ptr<TreeNode> src, const s
             if (new_str.compare( src->getName()) == 0)
                 return;
             src->setName(new_str.c_str());
+
+            auto parent_transform = std::dynamic_pointer_cast<HierarchyTreeData>(src->data)->transform;
+            parent_transform->setName(new_str);
+            this->printHierarchy();
+
         },
         DialogPosition::OpenOnScreenCenter
     );
@@ -549,6 +571,11 @@ void HierarchyOperations::hierarchyRemove(std::shared_ptr<TreeNode> src)
     }
 
     src->removeSelf();
+
+    auto parent_transform = std::dynamic_pointer_cast<HierarchyTreeData>(src->data)->transform;
+    parent_transform->removeSelf();
+
+    this->printHierarchy();
 
     imGuiManager->hierarchy.clearTreeSelection(HierarchyClearMethod::ClearNoCallback);
     
@@ -618,6 +645,14 @@ void HierarchyOperations::hierarchyPasteFromCut(std::shared_ptr<TreeNode> src, s
     }
 
     TreeNode::Reparent(src, target);
+
+    auto src_transform = std::dynamic_pointer_cast<HierarchyTreeData>(src->data)->transform;
+    auto target_transform = std::dynamic_pointer_cast<HierarchyTreeData>(target->data)->transform;
+
+    target_transform->addChild(src_transform);
+
+    this->printHierarchy();
+
 }
 
 void HierarchyOperations::hierarchyDragMove(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target)
@@ -631,6 +666,13 @@ void HierarchyOperations::hierarchyDragMove(std::shared_ptr<TreeNode> src, std::
     }
 
     TreeNode::Reparent(src, target);
+
+    auto src_transform = std::dynamic_pointer_cast<HierarchyTreeData>(src->data)->transform;
+    auto target_transform = std::dynamic_pointer_cast<HierarchyTreeData>(target->data)->transform;
+
+    target_transform->addChild(src_transform);
+
+    this->printHierarchy();
 }
 
 void HierarchyOperations::printHierarchy() {

@@ -113,25 +113,24 @@ void Scene3D::setRoot(std::shared_ptr<AppKit::GLEngine::Transform> v)
     root = v;
 }
 
-void Scene3D::printHierarchy() {
+void Scene3D::printHierarchy()
+{
 
-    std::vector< std::shared_ptr<Transform> > toVisit;
+    std::vector<std::shared_ptr<Transform>> toVisit;
     toVisit.push_back(root);
-    std::vector< std::string > spaces;
+    std::vector<std::string> spaces;
     spaces.push_back("");
-    while (toVisit.size() > 0){
+    while (toVisit.size() > 0)
+    {
         auto element = *toVisit.begin();
         toVisit.erase(toVisit.begin());
         std::string space = *spaces.begin();
         spaces.erase(spaces.begin());
 
-        printf("%s- %s\n", space.c_str(), element->getName().c_str() );
+        printf("%s- %s\n", space.c_str(), element->getName().c_str());
         space += "  ";
-        for(int i=0;i<element->getChildCount();i++) {
-            auto child = element->getChildAt(i);
-            toVisit.push_back(child);
-            spaces.push_back(space);
-        }
-    }
 
+        toVisit.insert(toVisit.begin(), element->getChildren().begin(), element->getChildren().end());
+        spaces.insert(spaces.begin(), element->getChildCount(), space);
+    }
 }

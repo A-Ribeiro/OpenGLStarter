@@ -55,6 +55,10 @@ namespace AppKit
             int getChildCount();
             std::shared_ptr<Transform> getChildAt(int);
 
+            std::vector<std::shared_ptr<Transform>> &getChildren(){
+                return children;
+            }
+
             void clearChildren();
 
             bool isRoot();
@@ -66,6 +70,39 @@ namespace AppKit
 
             std::shared_ptr<Transform> getParent();
             void setParent(std::shared_ptr<Transform> new_parent);
+
+            void makeFirst() {
+                auto parent = getParent();
+                if (parent == nullptr)
+                    return;
+                auto self_transform = this->self();
+                auto result = std::find(parent->children.begin(),parent->children.end(),self_transform);
+                if (result == parent->children.end() || result == parent->children.begin())
+                    return;
+                parent->children.erase(result);
+                parent->children.insert(parent->children.begin(), self_transform);
+            }
+
+            void makeLast() {
+                auto parent = getParent();
+                if (parent == nullptr)
+                    return;
+                auto self_transform = this->self();
+                auto result = std::find(parent->children.begin(),parent->children.end(),self_transform);
+                if (result == parent->children.end() || result == parent->children.rbegin().base() )
+                    return;
+                parent->children.erase(result);
+                parent->children.push_back(self_transform);
+            }
+
+            std::shared_ptr<AppKit::GLEngine::Transform> removeSelf() {
+                auto self_transform = this->self();
+                auto parent = getParent();
+                if (parent == nullptr)
+                    return self_transform;
+                parent->removeChild(self_transform);
+                return self_transform;
+            }
 
             // EventCore::VirtualProperty<Transform *> Parent;
             ///////////////////////////////////////////////////////
@@ -309,6 +346,9 @@ namespace AppKit
             }
 
             void clearComponents();
+            std::vector<std::shared_ptr<Component>> &getComponents(){
+                return components;
+            }
 
             // std::shared_ptr<Component> findComponentInChildren(ComponentType);
             // std::vector<std::shared_ptr<Component>> findComponentsInChildren(ComponentType);
