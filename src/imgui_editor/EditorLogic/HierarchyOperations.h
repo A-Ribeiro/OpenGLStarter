@@ -34,5 +34,7 @@ class HierarchyOperations : virtual public OperationsCommon
 
     void hierarchyDragMove(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target);
 
+    void printHierarchy();
+
 };
 

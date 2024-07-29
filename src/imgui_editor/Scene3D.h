@@ -35,5 +35,7 @@ public:
     void setCamera(std::shared_ptr<AppKit::GLEngine::Components::ComponentCameraPerspective> v);
     void setRoot(std::shared_ptr<AppKit::GLEngine::Transform> v);
 
+    void printHierarchy();
+
 };
 

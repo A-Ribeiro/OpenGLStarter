@@ -5,6 +5,7 @@
 #include "Clipboard.h"
 
 class SceneGUI;
+class Scene3D;
 
 class OperationsCommon: public EventCore::HandleCallback {
 
@@ -12,6 +13,7 @@ public:
     ImGuiManager *imGuiManager;
     ImGuiMenu *imGuiMenu;
     SceneGUI *sceneGUI;
+    Scene3D *scene3D;
 
     std::string lastError;
     std::string _tmp_str;

@@ -2,6 +2,7 @@
 #include "../App.h"
 #include "../InnerViewport.h"
 #include "../SceneGUI.h"
+#include "../Scene3D.h"
 
 HierarchyOperations::HierarchyOperations()
 {
@@ -337,9 +338,10 @@ void HierarchyOperations::clear_HierarchyOperations(){
 
     // clear current root transforms and components
     {
-        auto root_editor = sceneGUI->root->findTransformByName("_editor_root_",1);
+        auto _3d_root = scene3D->getRoot();
+        auto root_editor = _3d_root->findTransformByName("_editor_root_",1);
         if (root_editor == nullptr){
-            root_editor = sceneGUI->root->addChild( Transform::CreateShared() );
+            root_editor = _3d_root->addChild( Transform::CreateShared() );
             root_editor->setName("_editor_root_");
         }
 
@@ -377,7 +379,11 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
         auto root = imGuiManager->hierarchy.getTreeRoot();
 
         root->setName( opened_file.name.c_str() );
-        root->data = HierarchyTreeData::CreateShared( Transform::CreateShared() );
+
+        auto _3d_root = scene3D->getRoot();
+        auto root_editor = _3d_root->findTransformByName("_editor_root_",1);
+
+        root->data = HierarchyTreeData::CreateShared( root_editor );
     }
 
     // load file hierarchy from scene file
@@ -461,6 +467,8 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
             printf("new Ctrl+S save scene action\n");
         });
     }
+
+    printHierarchy();
 }
 
 void HierarchyOperations::hierarchyCreateNewChildOnNode(std::shared_ptr<TreeNode> src, const std::string &new_name) 
@@ -623,5 +631,11 @@ void HierarchyOperations::hierarchyDragMove(std::shared_ptr<TreeNode> src, std::
     }
 
     TreeNode::Reparent(src, target);
+}
+
+void HierarchyOperations::printHierarchy() {
+    printf("\nScene3D:\n\n");
+    scene3D->printHierarchy();
+    printf("\n");
 }
 
