@@ -76,6 +76,7 @@ void SceneSplash::unloadAll()
 
     //ResourceHelper::releaseTransformRecursive(&root);
     root = nullptr;
+    camera = nullptr;
 
     // ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     // if (Milky_512_512 != nullptr)

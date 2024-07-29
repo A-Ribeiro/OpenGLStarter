@@ -241,6 +241,7 @@ void ScenePalace::unloadAll() {
 	//ResourceHelper::releaseTransformRecursive(&Model_Guard);
     //delete skinnedMesh);
     root = nullptr;
+    camera = nullptr;
 
     Model_Palace = nullptr;
     Model_Cross = nullptr;

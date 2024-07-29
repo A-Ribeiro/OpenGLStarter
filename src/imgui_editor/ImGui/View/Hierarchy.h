@@ -77,60 +77,7 @@ public:
         return TreeNode::CreateShared(uid_incrementer++, data, name.c_str());
     }
 
-    std::shared_ptr<TreeNode> cloneTreeNode(std::shared_ptr<TreeNode> src)
-    {
-        using namespace AppKit::GLEngine;
-
-        auto currentData = std::dynamic_pointer_cast<HierarchyTreeData>(src->data);
-        auto new_transform = Transform::CreateShared();
-        new_transform->setLocalPosition(currentData->transform->getLocalPosition());
-        new_transform->setLocalRotation(currentData->transform->getLocalRotation());
-        new_transform->setLocalScale(currentData->transform->getLocalScale());
-        auto result = 
-            createTreeNode(src->getName(), 
-                HierarchyTreeData::CreateShared(
-                    new_transform
-                )
-            );
-
-        struct _child {
-            std::shared_ptr<TreeNode> cloneSrc;
-            //std::vector<std::shared_ptr<TreeNode>> cloneSrcChildren;
-            std::shared_ptr<TreeNode> target;
-        };
-
-        std::vector<_child> to_clone;
-        to_clone.push_back(_child{
-            src,
-            result
-        });
-        while (to_clone.size() > 0){
-            auto element = *to_clone.begin();
-            to_clone.erase(to_clone.begin());
-
-            for(auto srcChild: element.cloneSrc->children){
-                auto currentData = std::dynamic_pointer_cast<HierarchyTreeData>(srcChild->data);
-                auto new_transform = Transform::CreateShared();
-                new_transform->setLocalPosition(currentData->transform->getLocalPosition());
-                new_transform->setLocalRotation(currentData->transform->getLocalRotation());
-                new_transform->setLocalScale(currentData->transform->getLocalScale());
-                auto target_child = createTreeNode(srcChild->getName(), 
-                    HierarchyTreeData::CreateShared(
-                        new_transform
-                    )
-                );
-                element.target->addChild(target_child);
-                to_clone.push_back(_child{
-                    srcChild,
-                    target_child
-                });
-            }
-
-        }
-
-
-        return result;
-    }
+    std::shared_ptr<TreeNode> cloneTreeNode(std::shared_ptr<TreeNode> src);
 
     void clearTreeSelection(HierarchyClearMethod method) {        
         // tree

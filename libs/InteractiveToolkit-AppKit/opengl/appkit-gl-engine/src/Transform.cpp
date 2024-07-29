@@ -149,6 +149,15 @@ namespace AppKit
             return nullptr;
         }
 
+        void Transform::clearChildren(){
+            for(int i= getChildCount()-1;i>=0;i--)
+                removeChild(i);
+            // for(int i= getComponentCount()-1;i>=0;i--)
+            //     removeComponentAt(i);
+
+            // renderWindowRegion.reset();// = nullptr;
+        }
+
         std::shared_ptr<Transform> Transform::getParent()
         {
             return ToShared(mParent);
@@ -927,6 +936,15 @@ namespace AppKit
         //     return result;
         // }
 
+        void Transform::clearComponents() {
+            // for(int i= getChildCount()-1;i>=0;i--)
+            //     removeChild(i);
+            for(int i= getComponentCount()-1;i>=0;i--)
+                removeComponentAt(i);
+
+            // renderWindowRegion.reset();// = nullptr;
+        }
+
         void Transform::setName(const std::string &p)
         {
             if (name == p)
@@ -1076,10 +1094,13 @@ namespace AppKit
         Transform::~Transform()
         {
             // SharedPointerDatabase::Instance()->notifyDeletion(this);
-            for(int i= getChildCount()-1;i>=0;i--)
-                removeChild(i);
-            for(int i= getComponentCount()-1;i>=0;i--)
-                removeComponentAt(i);
+            // for(int i= getChildCount()-1;i>=0;i--)
+            //     removeChild(i);
+            // for(int i= getComponentCount()-1;i>=0;i--)
+            //     removeComponentAt(i);
+
+            clearChildren();
+            clearComponents();
 
             renderWindowRegion.reset();// = nullptr;
         }

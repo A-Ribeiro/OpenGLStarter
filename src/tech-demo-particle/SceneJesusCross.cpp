@@ -279,6 +279,7 @@ void SceneJesusCross::unloadAll() {
     // ResourceHelper::releaseTransformRecursive(&Rocks02_3DModel);
     // ResourceHelper::releaseTransformRecursive(&Rocks03_3DModel);
     root = nullptr;
+    camera = nullptr;
 
     Jesus3DModel = nullptr;
     JesusTextures[0] = nullptr;

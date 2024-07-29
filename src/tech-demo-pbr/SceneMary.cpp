@@ -204,6 +204,7 @@ void SceneMary::unloadAll() {
     // ResourceHelper::releaseTransformRecursive(&Mary3DModel);
 
     root = nullptr;
+    camera = nullptr;
     Mary3DModel = nullptr;
 }
 

@@ -85,6 +85,7 @@ void SceneGUI::unloadAll(){
     this->renderWindow->CameraViewport.OnChange.remove(&SceneGUI::OnViewportChange, this);
 
     root = nullptr;
+    camera = nullptr;
     //ResourceHelper::releaseTransformRecursive(&root);
 
     //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;

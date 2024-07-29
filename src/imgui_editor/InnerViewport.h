@@ -5,6 +5,7 @@
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
 
+class Scene3D;
 class SceneGUI;
 class App;
 
@@ -18,6 +19,7 @@ public:
     Fade *fade;
 
     SceneGUI *sceneGUI;
+    Scene3D *scene3D;
 
     InnerViewport(App *app, bool createFBO);
 

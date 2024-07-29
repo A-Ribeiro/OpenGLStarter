@@ -55,6 +55,8 @@ namespace AppKit
             int getChildCount();
             std::shared_ptr<Transform> getChildAt(int);
 
+            void clearChildren();
+
             bool isRoot();
 
             inline std::shared_ptr<Transform> self()
@@ -305,6 +307,8 @@ namespace AppKit
                 }
                 return result;
             }
+
+            void clearComponents();
 
             // std::shared_ptr<Component> findComponentInChildren(ComponentType);
             // std::vector<std::shared_ptr<Component>> findComponentsInChildren(ComponentType);

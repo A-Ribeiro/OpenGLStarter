@@ -4,12 +4,14 @@
 //#include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
 #include "Clipboard.h"
 
+class SceneGUI;
 
 class OperationsCommon: public EventCore::HandleCallback {
 
 public:
     ImGuiManager *imGuiManager;
     ImGuiMenu *imGuiMenu;
+    SceneGUI *sceneGUI;
 
     std::string lastError;
     std::string _tmp_str;
@@ -18,29 +20,16 @@ public:
     std::shared_ptr<ClipboardOperation> clipboardState;
 
 
-    OperationsCommon() {
-        imGuiManager = nullptr;
-        imGuiMenu = nullptr;
-    }
+    OperationsCommon();
 
-    void init() {
-        imGuiManager = ImGuiManager::Instance();
-        imGuiMenu = ImGuiMenu::Instance();
-    }
+    void init();
 
     // shared methods that can be called from any subclass
     virtual void openFolder(const std::string &path) = 0;
 
     virtual void tryToOpenFile(const ITKCommon::FileSystem::File &full_path) = 0;
     
-    void showErrorAndRetry(const std::string &error, EventCore::Callback<void()> retry_callback){
-        printf("ERROR: %s\n", error.c_str());
-        ImGuiManager::Instance()->dialogs.showInfo_OK(
-            std::string("Error: ") + error,
-            retry_callback,
-            DialogPosition::OpenOnScreenCenter
-        );
-    }
+    void showErrorAndRetry(const std::string &error, EventCore::Callback<void()> retry_callback);
 
 };
 

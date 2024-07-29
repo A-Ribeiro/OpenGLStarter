@@ -160,6 +160,7 @@ void MainScene::unloadAll(){
 
     //ResourceHelper::releaseTransformRecursive(&root);
     root = nullptr;
+    camera = nullptr;
 
     // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     // texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);

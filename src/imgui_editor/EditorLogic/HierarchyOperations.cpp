@@ -1,5 +1,7 @@
 #include "HierarchyOperations.h"
 #include "../App.h"
+#include "../InnerViewport.h"
+#include "../SceneGUI.h"
 
 HierarchyOperations::HierarchyOperations()
 {
@@ -332,6 +334,20 @@ void HierarchyOperations::clear_HierarchyOperations(){
     root->data = nullptr;
 
     clipboardState = nullptr;
+
+    // clear current root transforms and components
+    {
+        auto root_editor = sceneGUI->root->findTransformByName("_editor_root_",1);
+        if (root_editor == nullptr){
+            root_editor = sceneGUI->root->addChild( Transform::CreateShared() );
+            root_editor->setName("_editor_root_");
+        }
+
+        root_editor->clearChildren();
+        root_editor->clearComponents();
+    }
+
+
 }
 
 void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSystem::File &file)

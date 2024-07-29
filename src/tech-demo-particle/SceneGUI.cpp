@@ -78,6 +78,7 @@ void SceneGUI::unloadAll(){
 
     //ResourceHelper::releaseTransformRecursive(&root);
     root = nullptr;
+    camera = nullptr;
 
     if (button_SoftParticles != nullptr){
         delete button_SoftParticles;

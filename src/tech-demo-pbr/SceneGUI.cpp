@@ -153,6 +153,7 @@ void SceneGUI::unloadAll()
 
     //ResourceHelper::releaseTransformRecursive(&root);
     root = nullptr;
+    camera = nullptr;
 
     allButtons.clear();
 

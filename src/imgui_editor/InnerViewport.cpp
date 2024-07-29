@@ -1,11 +1,13 @@
 #include "InnerViewport.h"
 #include "App.h"
 #include "SceneGUI.h"
+#include "Scene3D.h"
 #include "ImGui/ImGuiManager.h"
 #include <InteractiveToolkit-Extension/image/PNG.h>
 
 InnerViewport::InnerViewport(App *app, bool createFBO){
     sceneGUI = nullptr;
+    scene3D = nullptr;
 
     renderWindow = RenderWindowRegion::CreateShared();
 
@@ -27,6 +29,9 @@ InnerViewport::InnerViewport(App *app, bool createFBO){
 
     sceneGUI = new SceneGUI(app, renderWindow);
     sceneGUI->load();
+
+    scene3D = new Scene3D(app, renderWindow);
+    scene3D->load();
 }
 
 InnerViewport::~InnerViewport(){
@@ -35,6 +40,11 @@ InnerViewport::~InnerViewport(){
         sceneGUI->unload();
         delete sceneGUI;
         sceneGUI = nullptr;
+    }
+    if (scene3D != nullptr){
+        scene3D->unload();
+        delete scene3D;
+        scene3D = nullptr;
     }
 
     app->screenRenderWindow->removeChild(renderWindow);
@@ -82,9 +92,11 @@ void InnerViewport::OnUpdate(Platform::Time *time){
     // pre process all scene graphs
     /*if (sceneJesusCross != nullptr)
         sceneJesusCross->precomputeSceneGraphAndCamera();*/
+    if (scene3D != nullptr)
+        scene3D->precomputeSceneGraphAndCamera();
     if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();
-
+    
     renderWindow->OnAfterGraphPrecompute(time);
 
     bool isFBO = renderWindow->fbo != nullptr;
@@ -132,8 +144,11 @@ void InnerViewport::OnUpdate(Platform::Time *time){
 
     /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();*/
+    if (scene3D != nullptr)
+        scene3D->draw();
     if (sceneGUI != nullptr)
         sceneGUI->draw();
+        
 
     fade->draw();
     
