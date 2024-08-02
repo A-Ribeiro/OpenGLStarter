@@ -14,11 +14,11 @@ namespace AppKit
     namespace GLEngine
     {
 
-        Transform::Transform(const Transform &v) : 
-        
-                                                    // Parent(
-                                                    //    EventCore::CallbackWrapper(&Transform::getParent, this),
-                                                    //    EventCore::CallbackWrapper(&Transform::setParent, this)),
+        Transform::Transform(const Transform &v) :
+
+                                                   // Parent(
+                                                   //    EventCore::CallbackWrapper(&Transform::getParent, this),
+                                                   //    EventCore::CallbackWrapper(&Transform::setParent, this)),
 
                                                    LocalPosition(
                                                        EventCore::CallbackWrapper(&Transform::getLocalPosition, this),
@@ -78,8 +78,8 @@ namespace AppKit
             auto node = children[index];
             children.erase(children.begin() + index);
 
-            //node->setParent(nullptr);
-            node->mParent.reset();// = std::shared_ptr<Transform>(nullptr);
+            // node->setParent(nullptr);
+            node->mParent.reset(); // = std::shared_ptr<Transform>(nullptr);
             node->visited = false;
 
             // removeMapName(node);
@@ -93,8 +93,8 @@ namespace AppKit
                 if (children[i] == transform)
                 {
                     children.erase(children.begin() + i);
-                    
-                    //transform->setParent(nullptr);
+
+                    // transform->setParent(nullptr);
                     transform->mParent.reset();
 
                     transform->visited = false;
@@ -114,13 +114,13 @@ namespace AppKit
 
         std::shared_ptr<Transform> Transform::addChild(std::shared_ptr<Transform> transform)
         {
-            
+
             auto _currentParent = transform->getParent();
             if (_currentParent != nullptr)
                 _currentParent->removeChild(transform);
-            
+
             auto _self = this->self();
-            //transform->setParent(_self);
+            // transform->setParent(_self);
             transform->mParent = _self;
 
             transform->visited = false;
@@ -149,8 +149,9 @@ namespace AppKit
             return nullptr;
         }
 
-        void Transform::clearChildren(){
-            for(int i= getChildCount()-1;i>=0;i--)
+        void Transform::clearChildren()
+        {
+            for (int i = getChildCount() - 1; i >= 0; i--)
                 removeChild(i);
             // for(int i= getComponentCount()-1;i>=0;i--)
             //     removeComponentAt(i);
@@ -163,7 +164,7 @@ namespace AppKit
             return ToShared(mParent);
         }
 
-        //void Transform::setParent(Transform *const &prnt)
+        // void Transform::setParent(Transform *const &prnt)
         void Transform::setParent(std::shared_ptr<Transform> new_parent)
         {
             auto self = this->self();
@@ -775,7 +776,7 @@ namespace AppKit
         }
         */
 
-        void Transform::makeFirstComponent(std::shared_ptr<Component>c)
+        void Transform::makeFirstComponent(std::shared_ptr<Component> c)
         {
             for (int i = 0; i < components.size(); i++)
             {
@@ -789,7 +790,7 @@ namespace AppKit
             }
         }
 
-        void Transform::makeLastComponent(std::shared_ptr<Component>c)
+        void Transform::makeLastComponent(std::shared_ptr<Component> c)
         {
             for (int i = 0; i < components.size(); i++)
             {
@@ -804,7 +805,7 @@ namespace AppKit
             }
         }
 
-        std::shared_ptr<Component> Transform::addComponent(std::shared_ptr<Component>c)
+        std::shared_ptr<Component> Transform::addComponent(std::shared_ptr<Component> c)
         {
             // ITK_ABORT(c->transform!=nullptr,"cannot add same component to two or more transforms\n.");
             components.push_back(c);
@@ -818,7 +819,7 @@ namespace AppKit
             return c;
         }
 
-        std::shared_ptr<Component> Transform::removeComponent(std::shared_ptr<Component>c)
+        std::shared_ptr<Component> Transform::removeComponent(std::shared_ptr<Component> c)
         {
             for (int i = 0; i < components.size(); i++)
             {
@@ -936,10 +937,11 @@ namespace AppKit
         //     return result;
         // }
 
-        void Transform::clearComponents() {
+        void Transform::clearComponents()
+        {
             // for(int i= getChildCount()-1;i>=0;i--)
             //     removeChild(i);
-            for(int i= getComponentCount()-1;i>=0;i--)
+            for (int i = getComponentCount() - 1; i >= 0; i--)
                 removeComponentAt(i);
 
             // renderWindowRegion.reset();// = nullptr;
@@ -1011,10 +1013,9 @@ namespace AppKit
         //
         ///////////////////////////////////////////////////////
 
-        Transform::Transform() : 
-                                // Parent(
-                                //      EventCore::CallbackWrapper(&Transform::getParent, this),
-                                //      EventCore::CallbackWrapper(&Transform::setParent, this)),
+        Transform::Transform() : // Parent(
+                                 //      EventCore::CallbackWrapper(&Transform::getParent, this),
+                                 //      EventCore::CallbackWrapper(&Transform::setParent, this)),
 
                                  LocalPosition(
                                      EventCore::CallbackWrapper(&Transform::getLocalPosition, this),
@@ -1102,7 +1103,7 @@ namespace AppKit
             clearChildren();
             clearComponents();
 
-            renderWindowRegion.reset();// = nullptr;
+            renderWindowRegion.reset(); // = nullptr;
         }
 
         std::shared_ptr<Transform> Transform::setRenderWindowRegion(std::shared_ptr<RenderWindowRegion> renderWindowRegion)
@@ -1112,7 +1113,7 @@ namespace AppKit
         }
 
         bool Transform::traversePreOrder_DepthFirst(
-            const EventCore::Callback<bool(std::shared_ptr<Transform>t, void *userData)> &OnNode,
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
             void *userData, int maxLevel)
         {
             if (!OnNode(this->self(), userData))
@@ -1131,7 +1132,7 @@ namespace AppKit
         }
 
         bool Transform::traversePostOrder_DepthFirst(
-            const EventCore::Callback<bool(std::shared_ptr<Transform>t, void *userData)> &OnNode,
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
             void *userData, int maxLevel)
         {
             maxLevel--;
@@ -1148,7 +1149,7 @@ namespace AppKit
         }
 
         bool Transform::traversePreOrder_DepthFirst(
-            const EventCore::Callback<bool(std::shared_ptr<Transform>t, const void *userData)> &OnNode,
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
             const void *userData, int maxLevel)
         {
             if (!OnNode(this->self(), userData))
@@ -1167,7 +1168,7 @@ namespace AppKit
         }
 
         bool Transform::traversePostOrder_DepthFirst(
-            const EventCore::Callback<bool(std::shared_ptr<Transform>t, const void *userData)> &OnNode,
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
             const void *userData, int maxLevel)
         {
             maxLevel--;
@@ -1181,6 +1182,80 @@ namespace AppKit
                 }
             }
             return OnNode(this->self(), userData);
+        }
+
+        std::shared_ptr<Transform> Transform::clone(
+            bool force_make_component_copy,
+            TransformMapT *_transformMap,
+            ComponentMapT *_componentMap)
+        {
+            std::shared_ptr<TransformMapT> transformMap;
+            if (!_transformMap)
+                transformMap = std::make_shared<TransformMapT>();
+            else 
+                transformMap = std::shared_ptr<TransformMapT>( _transformMap, [](TransformMapT *v){} );
+
+            std::shared_ptr<ComponentMapT> componentMap;
+            if (!_componentMap)
+                componentMap = std::make_shared<ComponentMapT>();
+            else 
+                componentMap = std::shared_ptr<ComponentMapT>( _componentMap, [](ComponentMapT *v){} );
+
+
+            transformMap->clear();
+            componentMap->clear();
+
+            auto result = Transform::CreateShared();
+
+            struct _clone_structT {
+                std::shared_ptr<Transform> cloneSrc;
+                std::shared_ptr<Transform> cloneDst;
+            };
+            std::list<_clone_structT> to_clone;
+            {
+                auto _self = self();
+                to_clone.push_back(_clone_structT{_self,result});
+                transformMap->operator[](_self) = result;
+            }
+
+            while (to_clone.size() > 0) {
+                auto entry = to_clone.front();
+                to_clone.pop_front();
+
+                entry.cloneDst->setName(entry.cloneSrc->getName());
+                entry.cloneDst->setLocalPosition(entry.cloneSrc->getLocalPosition());
+                entry.cloneDst->setLocalRotation(entry.cloneSrc->getLocalRotation());
+                entry.cloneDst->setLocalScale(entry.cloneSrc->getLocalScale());
+
+                for(auto &src_transform: entry.cloneSrc->getChildren() ){
+                    auto new_transform = entry.cloneDst->addChild( Transform::CreateShared() );
+                    to_clone.push_back(_clone_structT{src_transform,new_transform});
+                    transformMap->operator[](src_transform) = new_transform;
+                }
+            }
+
+            // clone components
+            for(auto &pair: *transformMap){
+                auto &src = pair.first;
+                auto &dst = pair.second;
+                for(auto & src_component: src->getComponents()) {
+                    auto new_component = dst->addComponent(src_component->duplicate_ref_or_clone(force_make_component_copy));
+                    if (src_component != new_component){
+                        // the component was fully cloned, so it needs 
+                        // to update its references
+                        componentMap->operator[](src_component) = new_component;
+                    }
+                }
+            }
+
+            // fix fully cloned components references
+            for(auto &pair: *componentMap){
+                //auto &src = pair.first;
+                auto &dst = pair.second;
+                dst->fix_internal_references(*transformMap,*componentMap);
+            }
+
+            return result;
         }
 
     }

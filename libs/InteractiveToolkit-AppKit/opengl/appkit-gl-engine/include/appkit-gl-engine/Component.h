@@ -56,6 +56,15 @@ namespace AppKit
             virtual void attachToTransform(std::shared_ptr<Transform> t);
             virtual void detachFromTransform(std::shared_ptr<Transform> t);
 
+            using TransformMapT = std::unordered_map<std::shared_ptr<Transform>, std::shared_ptr<Transform>>;
+            using ComponentMapT = std::unordered_map<std::shared_ptr<Component>, std::shared_ptr<Component>>;
+
+            // clone a component by using the same reference when possible,
+            // or making a new object from the original
+            virtual std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone) = 0;
+            // after a full clone, you need to fix the internal component references
+            virtual void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap) = 0;
+
             inline std::shared_ptr<Component> self() {
                 return std::shared_ptr<Component>(mSelf);
             }
