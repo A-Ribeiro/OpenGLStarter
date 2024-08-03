@@ -33,6 +33,7 @@ namespace AppKit
 
                         // if (std::find(model_bone_list.begin(), model_bone_list.end(), bone) == model_bone_list.end())
                         model_bone_list.push_back(bone);
+                        break;
                     }
                 }
                 return true;
@@ -365,6 +366,7 @@ namespace AppKit
 
                             // sync all static...
                             componentMesh->syncVBO(0, 0xffffffff);
+                            componentMesh->always_clone = false;
                         }
                     }
 
@@ -382,6 +384,7 @@ namespace AppKit
                     // componentMesh->syncVBO(SkinnedMesh_VBO_Upload_Bitflag, 0);
 
                     componentMesh->syncVBO(SkinnedMesh_VBO_Upload_Bitflag, 0xffffffff ^ SkinnedMesh_VBO_Upload_Bitflag);
+                    componentMesh->always_clone = true;
                 }
             }
 
@@ -506,6 +509,99 @@ namespace AppKit
                 model_base = nullptr;
                 // ResourceHelper::releaseTransformRecursive(&model_base);
                 //  AppBase* app = Engine::Instance()->app;
+            }
+
+            // always clone
+            std::shared_ptr<Component> ComponentSkinnedMesh::duplicate_ref_or_clone(bool force_clone)
+            {
+                auto result = Component::CreateShared<ComponentSkinnedMesh>();
+
+                result->mixer.copy(this->mixer);
+
+                result->model_base = this->model_base; // the actually animation hierarchy
+                result->resourceHelper = this->resourceHelper;
+
+                result->componentMesh = this->componentMesh;
+                result->componentMaterial = this->componentMaterial;
+
+                //
+                // bone processing aux structure
+                //
+                result->bone_processed = this->bone_processed;
+
+                result->bone_gradient = this->bone_gradient;
+                // std::vector<MathCore::mat4f> bone_target;
+                result->bone_inverse = this->bone_inverse;
+
+                result->vertex_weight = this->vertex_weight;
+
+                result->src_pos = this->src_pos;
+                result->src_normals = this->src_normals;
+                result->src_tangent = this->src_tangent;
+                result->src_binormal = this->src_binormal;
+
+                result->transform_to_bone = this->transform_to_bone;
+                result->transform_list = this->transform_list;
+                result->model_bone_list = this->model_bone_list;
+
+                //
+                // GPU Skinning
+                //
+                result->isGPUSkinning = this->isGPUSkinning;
+                result->SkinnedMesh_GPU_VBO_Upload_Bitflag = this->SkinnedMesh_GPU_VBO_Upload_Bitflag; // model::CONTAINS_VERTEX_WEIGHT16;
+
+                return result;
+            }
+            void ComponentSkinnedMesh::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            {
+
+                TransformMapT internalModelMap;
+
+                this->model_base = this->model_base->clone(false, &internalModelMap);
+
+                {
+                    mixer.fix_internal_references(internalModelMap);
+                }
+
+                {
+                    auto found = componentMap.find(componentMesh);
+                    if (found != componentMap.end())
+                    {
+                        auto newComponentMesh = std::dynamic_pointer_cast<ComponentMesh>(found->second);
+
+                        // remap bone from old mesh to new mesh
+                        std::unordered_map<ITKExtension::Model::Bone *, ITKExtension::Model::Bone *> boneMap;
+                        for (int i = 0; i < componentMesh->bones.size(); i++)
+                            boneMap[&componentMesh->bones[i]] = &newComponentMesh->bones[i];
+                        
+                        componentMesh = newComponentMesh;
+
+                        for(auto &item: model_bone_list)
+                            item = boneMap[item];
+                    }
+                }
+                {
+                    auto found = componentMap.find(componentMaterial);
+                    if (found != componentMap.end())
+                        componentMaterial = std::dynamic_pointer_cast<ComponentMaterial>(found->second);
+                }
+                {
+                    for (int i = 0; i < transform_list.size(); i++)
+                    {
+                        auto transform = ToShared(transform_list[i]);
+
+                        auto found = internalModelMap.find(transform);
+                        if (found != internalModelMap.end())
+                        {
+                            transform = found->second;
+                            transform_list[i] = transform;
+                            transform->userData = &transform_to_bone[i];
+                        } else {
+                            printf("some error occured in the transform map\n");
+                        }
+
+                    }
+                }
             }
 
         }

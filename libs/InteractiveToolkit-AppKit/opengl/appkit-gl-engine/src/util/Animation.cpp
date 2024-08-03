@@ -33,7 +33,7 @@ namespace AppKit
 
             root->traversePreOrder_DepthFirst(
                 EventCore::CallbackWrapper(&AnimationClip::findRootNode, this),
-                 &animation);
+                &animation);
 
             loop = true;
             wait_end_to_transition = false;
@@ -165,9 +165,50 @@ namespace AppKit
             last_sampled_time = current_time;
         }
 
+        AnimationClip *AnimationClip::clone(std::unordered_map<NodeAnimation *, NodeAnimation *> *nodeMap)
+        {
+            AnimationClip *result;
+
+            result = new AnimationClip();
+
+            result->last_sampled_time = last_sampled_time;
+
+            result->name = name;
+            result->duration = duration;
+            result->channels = channels;
+
+            for (int i = 0; i < (int)result->channels.size(); i++)
+            {
+                nodeMap->operator[](&result->channels[i]) = &channels[i];
+            }
+
+            result->current_time = current_time;
+            result->loop = loop;
+            result->wait_end_to_transition = wait_end_to_transition;
+
+            result->base_model = base_model;
+            result->root_node = root_node;
+            result->root_node_animation = nodeMap->operator[](root_node_animation);
+
+            return result;
+        }
+
         AnimationTransitionChannelInformation &AnimationMixer::getTransition(uint32_t x, uint32_t y)
         {
             return transitions[x + y * clips_array.size()];
+        }
+
+        void AnimationMixer::clear()
+        {
+
+            for (auto &item : clips_array)
+                delete item;
+
+            clips_index.clear();
+            clips_array.clear();
+            transitions.clear();
+
+            current_clip = nullptr;
         }
 
         AnimationMixer::AnimationMixer()
@@ -178,17 +219,7 @@ namespace AppKit
 
         AnimationMixer::~AnimationMixer()
         {
-
-            for (int i = 0; i < clips_array.size(); i++)
-            {
-                delete clips_array[i];
-            }
-
-            clips_index.clear();
-            clips_array.clear();
-            transitions.clear();
-
-            current_clip = nullptr;
+            clear();
         }
 
         void AnimationMixer::addClip(AnimationClip *clip)
@@ -464,6 +495,63 @@ namespace AppKit
             return current_clip->root_node;
         }
 
+        void AnimationMixer::copy(const AnimationMixer &src)
+        {
+
+            clear();
+
+            std::unordered_map<NodeAnimation *, NodeAnimation *> nodeMap;
+            std::unordered_map<AnimationClip *, AnimationClip *> clipMap;
+
+            for (auto &item : src.clips_array)
+            {
+                clips_array.push_back(item->clone(&nodeMap));
+                clipMap[item] = clips_array.back();
+                if (item == src.current_clip)
+                    current_clip = clips_array.back();
+            }
+
+            current_index = src.current_index;
+
+            clips_index = src.clips_index;
+
+            // export transitions
+            transitions = src.transitions;
+            for (auto &item : transitions)
+            {
+                for (auto &node : item.no_matching_a_elements)
+                    node = nodeMap[node];
+                for (auto &node : item.no_matching_b_elements)
+                    node = nodeMap[node];
+                for (auto &node : item.matching_a_elements)
+                    node = nodeMap[node];
+                for (auto &node : item.matching_b_elements)
+                    node = nodeMap[node];
+            }
+
+            request_queue = src.request_queue;
+            for (auto &element : request_queue)
+            {
+                element.clip = clipMap[element.clip];
+            }
+
+            rootMotionAnalyser.copy(clipMap, src.rootMotionAnalyser);
+        }
+
+        void AnimationMixer::fix_internal_references(Transform::TransformMapT &transformMap)
+        {
+            for (auto &item : clips_array)
+            {
+                item->base_model = transformMap[item->base_model];
+                item->root_node = transformMap[item->root_node];
+                for (auto &chnl : item->channels)
+                {
+                    chnl.node = transformMap[chnl.node];
+                }
+            }
+            
+        }
+
         RootMotionAnalyserData::RootMotionAnalyserData()
         {
             clipInfo[0].clip = nullptr;
@@ -639,6 +727,14 @@ namespace AppKit
                     clipInfo_b.position,
                     clipInfo_b.weight));
             }
+        }
+
+        void RootMotionAnalyser::copy(std::unordered_map<AnimationClip *, AnimationClip *> &clipMap,
+                                      const RootMotionAnalyser &rootMotionAnalyser)
+        {
+            data = rootMotionAnalyser.data;
+            for (int i = 0; i < data.clip_count; i++)
+                data.clipInfo[i].clip = clipMap[data.clipInfo[i].clip];
         }
     }
 }
