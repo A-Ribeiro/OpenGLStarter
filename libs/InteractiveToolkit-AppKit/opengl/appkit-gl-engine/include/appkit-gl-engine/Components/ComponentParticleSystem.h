@@ -118,6 +118,10 @@ namespace AppKit
                 void sortPositions(const MathCore::vec3f &cameraPos, const MathCore::vec3f &cameraDirection);
 
                 void computeAABB();
+
+                // always clone 
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone);
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
             };
 
         }

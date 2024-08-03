@@ -136,6 +136,8 @@ namespace AppKit
                 std::vector<MathCore::mat4f> *skin_gradient_matrix;
                 uint32_t skin_shader_matrix_size_bitflag; // skin hint to help to select shader
 
+                bool always_clone;
+
                 ComponentMaterial() : Component(ComponentMaterial::Type)
                 {
                     type = MaterialNone;
@@ -143,6 +145,8 @@ namespace AppKit
                     skin_gradient_matrix = nullptr;
                     skin_shader_matrix_size_bitflag = 0;
                     skin_gradient_matrix_dirty = false;
+
+                    always_clone = false;
                 }
 
                 ~ComponentMaterial()
@@ -150,6 +154,31 @@ namespace AppKit
                     unlit.releaseTextureReferences();
                     pbr.releaseTextureReferences();
                 }
+
+                // always clone
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone) {
+                    if (!always_clone && !force_clone)
+                        return self();
+                    auto result = Component::CreateShared<ComponentMaterial>();
+
+                    result->type = this->type;
+
+                    result->unlit = this->unlit;
+                    result->pbr = this->pbr;
+
+                    // // used for mesh skinning
+                    // bool skin_gradient_matrix_dirty;
+                    // std::vector<MathCore::mat4f> *skin_gradient_matrix;
+                    // uint32_t skin_shader_matrix_size_bitflag; // skin hint to help to select shader
+
+                    result->always_clone = this->always_clone;
+
+                    return result;
+                }
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+
+                }
+
             };
         }
     }

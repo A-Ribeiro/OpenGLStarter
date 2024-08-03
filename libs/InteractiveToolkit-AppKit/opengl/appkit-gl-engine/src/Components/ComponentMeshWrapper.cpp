@@ -695,6 +695,31 @@ namespace AppKit
                 lines->syncVBODynamic();
             }
 
+
+            std::shared_ptr<Component> ComponentMeshWrapper::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentMeshWrapper>();
+
+                result->debugCollisionShapes = this->debugCollisionShapes;
+
+                result->wrapShape = this->wrapShape;
+                result->sphere = this->sphere;
+                result->aabb = this->aabb;
+                result->obb = this->obb;
+
+                // sphere shape
+                result->sphereCenter = this->sphereCenter;
+                result->sphereRadius = this->sphereRadius;
+
+                // aabb / obb
+                result->aabbDimension_2_or_aabbDimension = this->aabbDimension_2_or_aabbDimension;
+                result->aabbCenter = this->aabbCenter;
+
+                return result;
+            }
+            void ComponentMeshWrapper::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+
+            }
+
         }
     }
 }

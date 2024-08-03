@@ -74,7 +74,7 @@ namespace AppKit
                     double tangent_d = sunRadiusKm / sunDistanceFromEarthKm;
                     cone_tangent = (float)tangent_d;
 
-                    double hypotenuse_d = sqrt(sunRadiusKm * sunRadiusKm + sunDistanceFromEarthKm * sunDistanceFromEarthKm);
+                    double hypotenuse_d = MathCore::OP<double>::sqrt(sunRadiusKm * sunRadiusKm + sunDistanceFromEarthKm * sunDistanceFromEarthKm);
 
                     double cone_cos_d = sunDistanceFromEarthKm / hypotenuse_d;
                     cone_cos = (float)cone_cos_d;
@@ -111,6 +111,10 @@ namespace AppKit
 
                 void postProcessing_computeLightParameters();
                 void createDebugLines();
+
+                // always clone
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone);
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
             };
         }
     }

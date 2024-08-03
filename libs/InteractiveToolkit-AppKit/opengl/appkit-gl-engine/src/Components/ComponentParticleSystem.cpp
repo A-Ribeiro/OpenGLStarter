@@ -322,6 +322,53 @@ namespace AppKit
                 }
             }
 
+            // always clone 
+            std::shared_ptr<Component> ComponentParticleSystem::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentParticleSystem>();
+
+                //result->random32;
+                //MathCore::MathRandomExt<ITKCommon::Random32> mathRandom;
+
+                //result->particles = this->particles;
+
+                result->loop = this->loop;
+                result->elapsed_sec = this->elapsed_sec;
+                result->duration_sec = this->duration_sec;
+
+                result->Speed = this->Speed;
+                result->Size = this->Size;
+                result->Color = this->Color;
+                result->Alpha = this->Alpha;
+
+                result->boxEmmiter = this->boxEmmiter;
+                result->emissionMatrix = this->emissionMatrix;
+                result->emissionDir = this->emissionDir;
+
+                result->aabb = this->aabb;
+                result->aabb_center = this->aabb_center;
+                result->distance_to_camera = this->distance_to_camera;
+
+                result->textureColor = this->textureColor;
+                result->texture = this->texture;
+
+                result->soft = this->soft;
+
+
+                result->lifetime_sec = this->lifetime_sec;
+                result->lifetime_sec_inv = this->lifetime_sec_inv;
+
+                result->rateOverTime = this->rateOverTime;
+                result->rateOverTime_inv = this->rateOverTime_inv;
+                result->rateElapsed_sec = this->rateElapsed_sec;
+
+                return result;
+            }
+            void ComponentParticleSystem::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+                auto found_transform = transformMap.find(this->boxEmmiter);
+                if (found_transform != transformMap.end())
+                    this->boxEmmiter = found_transform->second;
+            }
+
         }
     }
 }

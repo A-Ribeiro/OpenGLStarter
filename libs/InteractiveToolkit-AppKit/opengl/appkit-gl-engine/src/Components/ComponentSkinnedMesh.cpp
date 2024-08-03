@@ -17,16 +17,22 @@ namespace AppKit
             {
                 for (int i = 0; i < componentMesh->bones.size(); i++)
                 {
-                    if (componentMesh->bones[i].name.compare(element->Name) == 0)
+                    ITKExtension::Model::Bone *bone = &componentMesh->bones[i];
+
+                    // skip if this bone is already used
+                    if (std::find(model_bone_list.begin(), model_bone_list.end(), bone) != model_bone_list.end())
+                        continue;
+
+                    if (bone->name.compare(element->Name) == 0)
                     {
                         transform_list.push_back(element);
                         int &count = *(int *)userData;
                         count++;
 
-                        ITKExtension::Model::Bone *bone = &componentMesh->bones[i];
+                        // ITKExtension::Model::Bone *bone = &componentMesh->bones[i];
 
-                        if (std::find(model_bone_list.begin(), model_bone_list.end(), bone) == model_bone_list.end())
-                            model_bone_list.push_back(bone);
+                        // if (std::find(model_bone_list.begin(), model_bone_list.end(), bone) == model_bone_list.end())
+                        model_bone_list.push_back(bone);
                     }
                 }
                 return true;
@@ -37,7 +43,7 @@ namespace AppKit
 
                 int count = 0;
                 model_base->traversePreOrder_DepthFirst(
-                    EventCore::CallbackWrapper(&ComponentSkinnedMesh::countBonesLinkedToTransforms, this), 
+                    EventCore::CallbackWrapper(&ComponentSkinnedMesh::countBonesLinkedToTransforms, this),
                     &count);
 
                 transform_to_bone.resize(count);
@@ -50,7 +56,8 @@ namespace AppKit
                 for (int i = 0; i < bone_processed.size(); i++)
                     bone_processed[i] = false;
 
-                for (int i = 0; i < transform_list.size(); i++){
+                for (int i = 0; i < transform_list.size(); i++)
+                {
                     auto transform = ToShared(transform_list[i]);
                     transform->userData = &transform_to_bone[i];
                 }
@@ -497,8 +504,8 @@ namespace AppKit
 
                 // release model_base
                 model_base = nullptr;
-                //ResourceHelper::releaseTransformRecursive(&model_base);
-                // AppBase* app = Engine::Instance()->app;
+                // ResourceHelper::releaseTransformRecursive(&model_base);
+                //  AppBase* app = Engine::Instance()->app;
             }
 
         }

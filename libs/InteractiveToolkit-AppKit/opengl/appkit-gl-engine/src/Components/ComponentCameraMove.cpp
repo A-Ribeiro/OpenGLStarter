@@ -169,6 +169,30 @@ namespace AppKit
                 }
             }
 
+            // always clone
+            std::shared_ptr<Component> ComponentCameraMove::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentCameraMove>();
+
+                result->forwardSpeed = this->forwardSpeed;
+                result->strafeSpeed = this->strafeSpeed;
+                result->angleSpeed = this->angleSpeed;
+
+                result->euler = this->euler;
+
+                // start() will set cameraRef
+                // result->cameraRef = this->cameraRef;
+
+                return result;
+            }
+
+            void ComponentCameraMove::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+                // start() will set cameraRef
+                // auto camera_shared = ToShared(this->cameraRef);
+                // auto found = componentMap.find(camera_shared);
+                // if (found != componentMap.end())
+                //     this->cameraRef = std::dynamic_pointer_cast<ComponentCameraPerspective>( found->second );
+            }
+
         }
     }
 

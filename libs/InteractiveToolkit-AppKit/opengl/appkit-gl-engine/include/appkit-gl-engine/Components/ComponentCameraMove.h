@@ -44,6 +44,11 @@ namespace AppKit
                 static const ComponentType Type;
                 ComponentCameraMove();
                 ~ComponentCameraMove();
+
+                // always clone
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone);
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
+
             };
 
         }

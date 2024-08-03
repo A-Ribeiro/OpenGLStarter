@@ -39,6 +39,9 @@ namespace AppKit
 
                 int vbo_indexCount;
 
+                uint32_t last_model_dynamic_upload;
+                uint32_t last_model_static_upload;
+
                 void allocateVBO();
 
                 void uploadVBO(uint32_t model_dynamic_upload, uint32_t model_static_upload);
@@ -64,6 +67,8 @@ namespace AppKit
                 std::vector<MathCore::vec4f> skin_index;
                 std::vector<MathCore::vec4f> skin_weights;
 
+                bool always_clone;
+
                 void ComputeFormat();
 
                 ComponentMesh();
@@ -81,6 +86,12 @@ namespace AppKit
                 void draw();
 
                 void unsetLayoutPointers(const DefaultEngineShader *shader);
+
+                // best option is to return a ref, 
+                // but can clone if necessary
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone);
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
+
 
                 //
                 // Another constructor
