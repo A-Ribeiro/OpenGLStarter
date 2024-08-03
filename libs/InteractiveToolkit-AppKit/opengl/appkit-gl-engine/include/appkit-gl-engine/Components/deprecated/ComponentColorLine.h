@@ -38,7 +38,8 @@ namespace AppKit
 
                 ~ComponentColorLine()
                 {
-                    if (vbo_data != nullptr){
+                    if (vbo_data != nullptr)
+                    {
                         delete vbo_data;
                         vbo_data = nullptr;
                     }
@@ -95,6 +96,29 @@ namespace AppKit
                     {
                         OPENGL_CMD(glDisableVertexAttribArray(positionLayout));
                     }
+                }
+
+                // always clone
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone)
+                {
+                    auto result = Component::CreateShared<ComponentColorLine>();
+
+                    result->vertices = this->vertices;
+                    result->color = this->color;
+                    result->width = this->width;
+
+                    if (this->vbo_data != nullptr)
+                    {
+                        if (this->vbo_data->isLastUploadDynamic())
+                            result->syncVBODynamic();
+                        else
+                            result->syncVBOStatic();
+                    }
+
+                    return result;
+                }
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+                {
                 }
             };
 

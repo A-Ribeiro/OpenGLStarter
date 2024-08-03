@@ -4,7 +4,6 @@
 
 #include <InteractiveToolkit/CollisionCore/CollisionCore.h>
 
-
 #include <appkit-gl-engine/Component.h>
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
@@ -13,7 +12,6 @@
 
 #include <appkit-gl-engine/Components/ComponentMaterial.h>
 #include <appkit-gl-engine/Components/ComponentMesh.h>
-
 
 namespace AppKit
 {
@@ -65,7 +63,7 @@ namespace AppKit
                     renderWindowRegion->OnLateUpdate.add(&ComponentThirdPersonCamera::OnLateUpdate, this);
 
                     transform_position_target = transform->Position;
-                    
+
                     auto Target = ToShared(TargetRef);
 
                     if (Target == nullptr)
@@ -78,12 +76,10 @@ namespace AppKit
                     {
                         MathCore::vec3f cam2target = MathCore::OP<MathCore::vec3f>::normalize(Target->Position - transform_position_target);
                         MathCore::vec2f angle_x_aux = MathCore::vec2f(
-                            MathCore::OP<float>::sqrt(cam2target.x * cam2target.x + cam2target.z * cam2target.z), 
-                            cam2target.y
-                        );
+                            MathCore::OP<float>::sqrt(cam2target.x * cam2target.x + cam2target.z * cam2target.z),
+                            cam2target.y);
                         current_x_angle = MathCore::OP<float>::rad_2_deg(
-                            -MathCore::OP<float>::atan2(angle_x_aux.y, angle_x_aux.x)
-                        );
+                            -MathCore::OP<float>::atan2(angle_x_aux.y, angle_x_aux.x));
                     }
 
                     /*
@@ -134,17 +130,17 @@ namespace AppKit
                     }
 
                     auto Target = ToShared(TargetRef);
-                    
+
                     if (Target != nullptr)
                     {
-                        //Target = nullptr;
+                        // Target = nullptr;
                         TargetRef.reset();
                     }
 
                     auto Player_Forward = ToShared(Player_ForwardRef);
                     if (Player_Forward != nullptr)
                     {
-                        //Player_Forward = nullptr;
+                        // Player_Forward = nullptr;
                         Player_ForwardRef.reset();
                     }
                 }
@@ -299,7 +295,7 @@ namespace AppKit
                 void RaycastPlayerToScene(Platform::Time *time)
                 {
                     auto Target = ToShared(TargetRef);
-                    //auto Player_Forward = ToShared(Player_ForwardRef);
+                    // auto Player_Forward = ToShared(Player_ForwardRef);
                     auto transform = getTransform();
 
                     MathCore::vec3f target2cam = transform->Position - Target->Position;
@@ -321,6 +317,39 @@ namespace AppKit
                         transform[0]->Position = transform_position_target;
                     }
                     */
+                }
+
+                // always clone
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone)
+                {
+                    auto result = Component::CreateShared<ComponentThirdPersonCamera>();
+
+                    result->current_x_angle = this->current_x_angle;
+                    result->distance = this->distance;
+                    result->distance_offset = this->distance_offset;
+                    result->pos_speed = this->pos_speed;
+                    result->rotacional_speed_y = this->rotacional_speed_y;
+                    result->rotacional_speed_x = this->rotacional_speed_x;
+
+                    result->TargetRef = this->TargetRef;
+                    result->transform_position_target = this->transform_position_target;
+
+                    result->Player_ForwardRef = this->Player_ForwardRef;
+
+                    return result;
+                }
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+                {
+                    {
+                        auto found = transformMap.find(ToShared(this->TargetRef));
+                        if (found != transformMap.end())
+                            this->TargetRef = found->second;
+                    }
+                    {
+                        auto found = transformMap.find(ToShared(this->Player_ForwardRef));
+                        if (found != transformMap.end())
+                            this->Player_ForwardRef = found->second;
+                    }
                 }
             };
 
