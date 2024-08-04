@@ -1202,8 +1202,8 @@ namespace AppKit
                 componentMap = std::shared_ptr<ComponentMapT>( _componentMap, [](ComponentMapT *v){} );
 
 
-            transformMap->clear();
-            componentMap->clear();
+            // transformMap->clear();
+            // componentMap->clear();
 
             auto result = Transform::CreateShared();
 

@@ -500,7 +500,7 @@ void TreeNode::scrollToThisItem() {
     scroll_to_this_item = true;
 }
 
-TreeNode &TreeNode::addChild(std::shared_ptr<TreeNode> treeNode, int before_uid)
+std::shared_ptr<TreeNode> TreeNode::addChild(std::shared_ptr<TreeNode> treeNode, int before_uid)
 {
     treeNode->removeSelf();
     treeNode->setParent(this->self());
@@ -514,7 +514,11 @@ TreeNode &TreeNode::addChild(std::shared_ptr<TreeNode> treeNode, int before_uid)
     } else
         children.push_back(treeNode);
 
-    return children.back()->setIsRoot(false).setPrefixID(this->prefix_id).setDragPayloadID(this->drag_payload_identifier).setDropPayload(this->drop_payload_identifier);
+    auto result = children.back();
+
+    result->setIsRoot(false).setPrefixID(this->prefix_id).setDragPayloadID(this->drag_payload_identifier).setDropPayload(this->drop_payload_identifier);
+    
+    return result;
 }
 
 bool TreeNode::Reparent(std::shared_ptr<TreeNode> child, std::shared_ptr<TreeNode> new_parent)
