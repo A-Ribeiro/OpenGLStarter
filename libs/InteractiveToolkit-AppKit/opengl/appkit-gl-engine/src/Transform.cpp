@@ -112,7 +112,7 @@ namespace AppKit
             return nullptr;
         }
 
-        std::shared_ptr<Transform> Transform::addChild(std::shared_ptr<Transform> transform)
+        std::shared_ptr<Transform> Transform::addChild(std::shared_ptr<Transform> transform, std::shared_ptr<Transform> before_transform)
         {
 
             auto _currentParent = transform->getParent();
@@ -124,7 +124,14 @@ namespace AppKit
             transform->mParent = _self;
 
             transform->visited = false;
-            children.push_back(transform);
+
+            if (before_transform != nullptr) {
+                children.insert( 
+                    std::find(children.begin(),children.end(),before_transform),
+                    transform
+                );
+            } else
+                children.push_back(transform);
 
             transform->renderWindowRegion = this->renderWindowRegion;
 

@@ -50,7 +50,7 @@ namespace AppKit
 
             std::shared_ptr<Transform> removeChild(int index);
             std::shared_ptr<Transform> removeChild(std::shared_ptr<Transform> transform);
-            std::shared_ptr<Transform> addChild(std::shared_ptr<Transform> transform);
+            std::shared_ptr<Transform> addChild(std::shared_ptr<Transform> transform, std::shared_ptr<Transform> before_transform = nullptr);
             // std::vector<Transform*> &getChildren();
             int getChildCount();
             std::shared_ptr<Transform> getChildAt(int);
