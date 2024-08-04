@@ -7,6 +7,8 @@
 #include <InteractiveToolkit/EventCore/HandleCallback.h>
 #include "ToShared.h"
 
+#include <unordered_map>
+
 namespace AppKit
 {
     namespace GLEngine
