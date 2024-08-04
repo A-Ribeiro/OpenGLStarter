@@ -530,7 +530,7 @@ std::shared_ptr<TreeNode> TreeNode::addChild(std::shared_ptr<TreeNode> treeNode,
     else
         children.push_back(treeNode);
 
-    auto result = children.back();
+    auto result = treeNode;
 
     std::list<std::shared_ptr<TreeNode>> toUpdatePrefix = {result};
 
