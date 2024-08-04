@@ -10,10 +10,10 @@ TreeNode::TreeNode()
     this->uid = 0;
     // this->icon_alias = nullptr;
     // this->path = "-not-initialized-";
-    //snprintf(this->name, 64, "-not-initialized-");
+    // snprintf(this->name, 64, "-not-initialized-");
     setName("-not-initialized-");
 
-    //this->iconType = TreeNodeIconType::Hierarchy;
+    // this->iconType = TreeNodeIconType::Hierarchy;
     this->expanded.setState(true);
     this->hovered.setState(false);
 
@@ -55,11 +55,13 @@ bool TreeNode::isNode()
     return children.size() > 0;
 }
 
-void TreeNode::clear() {
+void TreeNode::clear()
+{
     children.clear();
 }
 
-bool TreeNode::removeUID(int32_t uid) {
+bool TreeNode::removeUID(int32_t uid)
+{
     for (auto it = children.begin(); it != children.end(); it++)
     {
         if ((*it)->uid == uid)
@@ -88,12 +90,14 @@ bool TreeNode::removeUIDRecursive(int32_t uid)
     return false;
 }
 
-std::shared_ptr<TreeNode> TreeNode::findUID(int32_t uid) {
+std::shared_ptr<TreeNode> TreeNode::findUID(int32_t uid)
+{
     for (auto &chld : children)
     {
         if (chld->uid == uid)
             return chld;
-        else {
+        else
+        {
             auto result = chld->findUID(uid);
             if (result != nullptr)
                 return result;
@@ -102,12 +106,14 @@ std::shared_ptr<TreeNode> TreeNode::findUID(int32_t uid) {
     return nullptr;
 }
 
-std::shared_ptr<TreeNode> TreeNode::findChildByName(const char* name_param, bool recursive) {
+std::shared_ptr<TreeNode> TreeNode::findChildByName(const char *name_param, bool recursive)
+{
     for (auto &chld : children)
     {
-        if ( strcmp(chld->name, name_param) == 0)
+        if (strcmp(chld->name, name_param) == 0)
             return chld;
-        else if (recursive) {
+        else if (recursive)
+        {
             auto result = chld->findUID(uid);
             if (result != nullptr)
                 return result;
@@ -120,9 +126,11 @@ bool TreeNode::isChild(int32_t uid) const
 {
     for (const auto &chld : children)
     {
-        if (chld->uid == uid){
+        if (chld->uid == uid)
+        {
             return true;
-        } else if (chld->isChild(uid))
+        }
+        else if (chld->isChild(uid))
             return true;
     }
     return false;
@@ -145,9 +153,10 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
     leaf_flags = (leaf_flags & ~ImGuiTreeNodeFlags_Selected) | selected_uint32;
 
     ImGuiTreeNodeFlags flag_to_use = parent_flags;
-    
+
     IconType iconToUse = IconType::Small_BoxNode;
-    if (data != nullptr){
+    if (data != nullptr)
+    {
         iconToUse = data->getIcon();
     }
 
@@ -184,7 +193,8 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
     bool send_double_click = false;
     bool send_on_select = false;
 
-    if (scroll_to_this_item){
+    if (scroll_to_this_item)
+    {
         scroll_to_this_item = false;
         ImGui::ScrollToItem(ImGuiScrollFlags_KeepVisibleEdgeY);
     }
@@ -199,17 +209,16 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
                 // //(const char* drag_payload, void *src, TreeNode*target)
                 // // treeHolder->OnTreeDragDrop(drop_target, payload->Data, this);
                 // treeHolder->tree_drop_payload_id = drop_target;
-                
+
                 // treeHolder->tree_drop_child = (void*)*(intptr_t*)payload->Data;
 
                 // //memcpy(&treeHolder->tree_drop_child, &payload->Data, sizeof(intptr_t));
                 // //treeHolder->tree_drop_child = payload->Data;
                 // treeHolder->tree_drop_new_parent = self;
 
-                treeHolder->OnTreeDragDrop(drop_target, 
-                    (void*)*(intptr_t*)payload->Data,
-                    self
-                );
+                treeHolder->OnTreeDragDrop(drop_target,
+                                           (void *)*(intptr_t *)payload->Data,
+                                           self);
             }
         }
         ImGui::EndDragDropTarget();
@@ -218,7 +227,7 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
     if (ImGui::IsItemActive() && ImGui::IsMouseDown(ImGuiMouseButton_Left))
     {
         ImGuiIO &io = ImGui::GetIO();
-        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImVec4(1,0,0,1)), 4.0f); // Draw a line between the button and the mouse cursor
+        ImGui::GetForegroundDrawList()->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 4.0f); // Draw a line between the button and the mouse cursor
 
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip))
         {
@@ -324,7 +333,7 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
 //     //     {
 //     //         if (payload = ImGui::AcceptDragDropPayload(drop_target))
 //     //         {
-//     //             treeHolder->OnTreeDragDrop(drop_target, 
+//     //             treeHolder->OnTreeDragDrop(drop_target,
 //     //                 (void*)*(intptr_t*)payload->Data,
 //     //                 nullptr
 //     //             );
@@ -333,34 +342,31 @@ void TreeNode::renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode>
 //     //     ImGui::EndDragDropTarget();
 //     // }
 
-
 // }
 
 void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder)
 {
-    if (!isRoot)// || getParent()->children.size() != 1)
+    if (!isRoot) // || getParent()->children.size() != 1)
         return;
 
     auto window = ImGui::GetCurrentWindow();
     ImRect window_frame = window->ClipRect;
     window_frame.Expand(-3.5f);
 
-    if (ImGui::BeginDragDropTargetCustom( window_frame, window->ID ))
+    if (ImGui::BeginDragDropTargetCustom(window_frame, window->ID))
     {
         const ImGuiPayload *payload;
         for (const char *drop_target : this->drop_payload_identifier)
         {
             if (payload = ImGui::AcceptDragDropPayload(drop_target))
             {
-                treeHolder->OnTreeDragDrop(drop_target, 
-                    (void*)*(intptr_t*)payload->Data,
-                    nullptr
-                );
+                treeHolder->OnTreeDragDrop(drop_target,
+                                           (void *)*(intptr_t *)payload->Data,
+                                           nullptr);
             }
         }
         ImGui::EndDragDropTarget();
     }
-
 
     // treeHolder->tree_drop_payload_id = nullptr;
     // treeHolder->tree_drop_child = nullptr;
@@ -371,9 +377,7 @@ void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder
 
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
     {
-        if (ImGui::IsMouseClicked( ImGuiMouseButton_Left ) 
-        || ImGui::IsMouseClicked( ImGuiMouseButton_Right ) 
-        || ImGui::IsKeyPressed(ImGuiKey_Escape, false))
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) || ImGui::IsMouseClicked(ImGuiMouseButton_Right) || ImGui::IsKeyPressed(ImGuiKey_Escape, false))
         {
             // printf("Clicked on begin...\n");
             deselect_all = true;
@@ -384,10 +388,10 @@ void TreeNode::render(const char *str_imgui_id_selection, TreeHolder *treeHolder
     int selected_UID = ImGui::GetStateStorage()->GetInt(id_sel, 0);
 
     bool any_click_occured = false;
-    //std::shared_ptr<TreeNode> &self_root = this->parent->children[0];
-    
+    // std::shared_ptr<TreeNode> &self_root = this->parent->children[0];
+
     std::shared_ptr<TreeNode> self_root = this->self();
-    
+
     this->renderRecursive(treeHolder, self_root, id_sel, selected_UID, &any_click_occured); // , & time);
     if (any_click_occured)
         deselect_all = false;
@@ -437,7 +441,8 @@ TreeNode &TreeNode::addDropPayload(const char *value)
     return *this;
 }
 
-TreeNode &TreeNode::setName(const char *value) {
+TreeNode &TreeNode::setName(const char *value)
+{
     snprintf(this->name, 64, "%s", value);
     std::string lower_no_accents = ITKCommon::StringUtil::removeAccents(this->name);
     lower_no_accents = ITKCommon::StringUtil::toLower(lower_no_accents);
@@ -445,19 +450,22 @@ TreeNode &TreeNode::setName(const char *value) {
     return *this;
 }
 
-std::shared_ptr<TreeNode> TreeNode::self() {
+std::shared_ptr<TreeNode> TreeNode::self()
+{
     // if (this->parent != nullptr)
     //     return this->parent->findUID(this->uid);
     // return nullptr;
     return std::shared_ptr<TreeNode>(this->mSelf);
 }
 
-std::shared_ptr<TreeNode> TreeNode::removeSelf(){
+std::shared_ptr<TreeNode> TreeNode::removeSelf()
+{
 
     auto parent = getParent();
     auto result = this->self();
 
-    if (parent != nullptr){
+    if (parent != nullptr)
+    {
         parent->removeUID(this->uid);
 
         // result = this->parent->findUID(this->uid);
@@ -468,10 +476,12 @@ std::shared_ptr<TreeNode> TreeNode::removeSelf(){
     return result;
 }
 
-void TreeNode::makeFirst(){
+void TreeNode::makeFirst()
+{
     auto parent = getParent();
 
-    if (parent != nullptr){
+    if (parent != nullptr)
+    {
 
         // auto self = this->parent->findUID(this->uid);
         // if (self == nullptr)
@@ -482,10 +492,12 @@ void TreeNode::makeFirst(){
         parent->children.insert(parent->children.begin(), self);
     }
 }
-void TreeNode::makeLast(){
+void TreeNode::makeLast()
+{
     auto parent = getParent();
 
-    if (parent != nullptr){
+    if (parent != nullptr)
+    {
         // auto self = this->parent->findUID(this->uid);
         // if (self == nullptr)
         //     return;
@@ -496,7 +508,8 @@ void TreeNode::makeLast(){
     }
 }
 
-void TreeNode::scrollToThisItem() {
+void TreeNode::scrollToThisItem()
+{
     scroll_to_this_item = true;
 }
 
@@ -505,19 +518,36 @@ std::shared_ptr<TreeNode> TreeNode::addChild(std::shared_ptr<TreeNode> treeNode,
     treeNode->removeSelf();
     treeNode->setParent(this->self());
 
-    if (before_uid != -1){
+    if (before_uid != -1)
+    {
         auto it = children.begin();
-        while (it != children.end() && (*it)->uid != before_uid){
+        while (it != children.end() && (*it)->uid != before_uid)
+        {
             it++;
         }
-        children.insert(it,treeNode);
-    } else
+        children.insert(it, treeNode);
+    }
+    else
         children.push_back(treeNode);
 
     auto result = children.back();
 
-    result->setIsRoot(false).setPrefixID(this->prefix_id).setDragPayloadID(this->drag_payload_identifier).setDropPayload(this->drop_payload_identifier);
-    
+    std::list<std::shared_ptr<TreeNode>> toUpdatePrefix = {result};
+
+    while (toUpdatePrefix.size() > 0)
+    {
+        auto entry = toUpdatePrefix.front();
+        toUpdatePrefix.pop_front();
+
+        for (auto &child : entry->children)
+            toUpdatePrefix.push_back(child);
+        
+        // auto aux_list = std::list<std::shared_ptr<TreeNode>>(entry->children.begin(),entry->children.end());
+        // toUpdatePrefix.insert(aux_list.begin(),aux_list.end(),toUpdatePrefix.end());
+
+        entry->setIsRoot(false).setPrefixID(this->prefix_id).setDragPayloadID(this->drag_payload_identifier).setDropPayload(this->drop_payload_identifier);
+    }
+
     return result;
 }
 
