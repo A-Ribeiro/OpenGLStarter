@@ -372,6 +372,7 @@ namespace AppKit
             void didExternalSample();
 
             AnimationClip* clone(std::unordered_map<NodeAnimation*,NodeAnimation*> *nodeMap);
+            void fix_internal_references(Transform::TransformMapT &transformMap);
         };
 
         class AnimationTransitionChannelInformation

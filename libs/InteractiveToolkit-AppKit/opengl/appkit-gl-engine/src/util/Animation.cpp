@@ -193,6 +193,13 @@ namespace AppKit
             return result;
         }
 
+        void AnimationClip::fix_internal_references(Transform::TransformMapT &transformMap) {
+            this->base_model = transformMap[this->base_model];
+            this->root_node = transformMap[this->root_node];
+            for (auto &chnl : this->channels)
+                chnl.node = transformMap[chnl.node];
+        }
+
         AnimationTransitionChannelInformation &AnimationMixer::getTransition(uint32_t x, uint32_t y)
         {
             return transitions[x + y * clips_array.size()];
@@ -541,14 +548,15 @@ namespace AppKit
         void AnimationMixer::fix_internal_references(Transform::TransformMapT &transformMap)
         {
             for (auto &item : clips_array)
-            {
-                item->base_model = transformMap[item->base_model];
-                item->root_node = transformMap[item->root_node];
-                for (auto &chnl : item->channels)
-                {
-                    chnl.node = transformMap[chnl.node];
-                }
-            }
+                item->fix_internal_references(transformMap);
+            // {
+            //     item->base_model = transformMap[item->base_model];
+            //     item->root_node = transformMap[item->root_node];
+            //     for (auto &chnl : item->channels)
+            //     {
+            //         chnl.node = transformMap[chnl.node];
+            //     }
+            // }
             
         }
 
