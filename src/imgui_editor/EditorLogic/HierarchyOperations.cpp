@@ -641,7 +641,14 @@ void HierarchyOperations::hierarchyPasteFromCopy(std::shared_ptr<TreeNode> src, 
     //     HierarchyTreeData::CreateShared( Transform::CreateShared() ) 
     // );
     auto tree_node = imGuiManager->hierarchy.cloneTreeNode(src);
-    target->addChild(tree_node, src->uid);
+    auto tree_node_treeData = std::dynamic_pointer_cast<HierarchyTreeData>(tree_node->data);
+
+    target->addChild(tree_node);//, src->uid);
+
+    auto target_treeData = std::dynamic_pointer_cast<HierarchyTreeData>(target->data);
+    target_treeData->transform->addChild(tree_node_treeData->transform);
+
+    this->printHierarchy();
 }
 void HierarchyOperations::hierarchyPasteFromCut(std::shared_ptr<TreeNode> src, std::shared_ptr<TreeNode> target)
 {
