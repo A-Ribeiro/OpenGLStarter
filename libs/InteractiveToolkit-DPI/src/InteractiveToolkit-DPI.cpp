@@ -116,6 +116,22 @@ namespace DPI
 
             monitor.mwidth = monitor_info->mwidth;
             monitor.mheight = monitor_info->mheight;
+            {
+                const char* gdk_dpi_scale_str = std::getenv("GDK_DPI_SCALE");
+                if (!gdk_dpi_scale_str)
+                    gdk_dpi_scale_str = std::getenv("GTK_SCALE");
+                if (!gdk_dpi_scale_str)
+                    gdk_dpi_scale_str = std::getenv("QT_SCALE_FACTOR");
+                if (!gdk_dpi_scale_str)
+                    gdk_dpi_scale_str = std::getenv("GDK_SCALE");
+
+                if (gdk_dpi_scale_str){
+                    double gdk_dpi_scale = atof(gdk_dpi_scale_str);
+                    gdk_dpi_scale *= 96.0 / 25.4;
+                    monitor.mwidth = (int)((double)monitor.width / gdk_dpi_scale);
+                    monitor.mheight = (int)((double)monitor.height / gdk_dpi_scale);
+                }
+            }
 
             monitor.current_freq_index = 0;
             monitor.current_mode_index = 0;
