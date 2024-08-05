@@ -57,6 +57,15 @@ namespace AppKit
                 std::shared_ptr<Components::ComponentLight> _light,
                 const CollisionCore::Sphere<MathCore::vec3f> &scene_sphere,
                 const CollisionCore::Sphere<MathCore::vec3f> &camera_sphere);
+            
+
+            std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone) {
+                return nullptr;
+            }
+            void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+                
+            }
+
         };
 
         class LightAndShadowManager

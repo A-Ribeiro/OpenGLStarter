@@ -87,11 +87,14 @@ namespace AppKit
             void operator=(const GLVertexBufferObject &v);
 
             GLuint mVBO;
+            bool mIsLastUploadDynamic;
 
         public:
             GLVertexBufferObject();
 
             ~GLVertexBufferObject();
+
+            bool isLastUploadDynamic();
 
             /// \brief Upload binary data to this VBO as vertex attributes.
             ///
@@ -119,7 +122,7 @@ namespace AppKit
             /// \param sizeBytes size in bytes
             /// \param dynamic if true then the VBO will be created with GL_DYNAMIC_DRAW parameter.
             ///
-            void uploadData(const void *data, int sizeBytes, bool dynamic = false) const;
+            void uploadData(const void *data, int sizeBytes, bool dynamic = false);
 
             /// \brief Upload binary data to this VBO as vertex index.
             ///
@@ -143,7 +146,7 @@ namespace AppKit
             /// \param sizeBytes size in bytes
             /// \param dynamic if true then the VBO will be created with GL_DYNAMIC_DRAW parameter.
             ///
-            void uploadIndex(const void *data, int sizeBytes, bool dynamic = false) const;
+            void uploadIndex(const void *data, int sizeBytes, bool dynamic = false);
 
             /// \brief Active this VBO to be used as index buffer
             ///

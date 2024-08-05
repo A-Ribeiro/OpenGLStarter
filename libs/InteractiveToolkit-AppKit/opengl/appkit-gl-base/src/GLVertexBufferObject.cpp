@@ -27,6 +27,8 @@ namespace AppKit
             ITK_ABORT(!GLAD_GL_ARB_vertex_buffer_object, "ARB_vertex_buffer_object not supported.");
 #endif
             OPENGL_CMD(glGenBuffers(1, &mVBO));
+
+            mIsLastUploadDynamic = false;
         }
 
         GLVertexBufferObject::~GLVertexBufferObject()
@@ -34,7 +36,11 @@ namespace AppKit
             OPENGL_CMD(glDeleteBuffers(1, &mVBO));
         }
 
-        void GLVertexBufferObject::uploadData(const void *data, int sizeBytes, bool dynamic) const
+        bool GLVertexBufferObject::isLastUploadDynamic() {
+            return mIsLastUploadDynamic;
+        }
+
+        void GLVertexBufferObject::uploadData(const void *data, int sizeBytes, bool dynamic)
         {
             OPENGL_CMD(glBindBuffer(GL_ARRAY_BUFFER, mVBO));
             if (dynamic)
@@ -42,9 +48,11 @@ namespace AppKit
             else
                 OPENGL_CMD(glBufferData(GL_ARRAY_BUFFER, sizeBytes, data, GL_STATIC_DRAW));
             OPENGL_CMD(glBindBuffer(GL_ARRAY_BUFFER, 0));
+
+            mIsLastUploadDynamic = dynamic;
         }
 
-        void GLVertexBufferObject::uploadIndex(const void *data, int sizeBytes, bool dynamic) const
+        void GLVertexBufferObject::uploadIndex(const void *data, int sizeBytes, bool dynamic)
         {
             OPENGL_CMD(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVBO));
             if (dynamic)
@@ -52,6 +60,8 @@ namespace AppKit
             else
                 OPENGL_CMD(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeBytes, data, GL_STATIC_DRAW));
             OPENGL_CMD(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+            mIsLastUploadDynamic = dynamic;
         }
 
         void GLVertexBufferObject::setIndex() const

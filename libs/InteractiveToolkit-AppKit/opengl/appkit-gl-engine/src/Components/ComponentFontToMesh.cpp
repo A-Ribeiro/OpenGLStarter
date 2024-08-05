@@ -90,6 +90,7 @@ namespace AppKit
                 if (mesh == nullptr)
                 {
                     mesh = transform->addNewComponent<ComponentMesh>();
+                    mesh->always_clone = true;
                 }
             }
 
@@ -106,6 +107,25 @@ namespace AppKit
             {
                 createAuxiliaryComponents();
             }
+
+            std::shared_ptr<Component> ComponentFontToMesh::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentFontToMesh>();
+
+                result->material = this->material;
+                result->mesh = this->mesh;
+
+                return result;
+            }
+            void ComponentFontToMesh::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+                auto found_material = componentMap.find(this->material);
+                if (found_material != componentMap.end())
+                    this->material = std::dynamic_pointer_cast<ComponentMaterial>(found_material->second);
+                
+                auto found_mesh = componentMap.find(this->mesh);
+                if (found_mesh != componentMap.end())
+                    this->mesh = std::dynamic_pointer_cast<ComponentMesh>(found_mesh->second);
+            }
+
 
         }
     }

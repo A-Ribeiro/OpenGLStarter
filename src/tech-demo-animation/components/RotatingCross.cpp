@@ -35,6 +35,15 @@ namespace AppKit
                         0);
             }
 
+            std::shared_ptr<Component> RotatingCross::duplicate_ref_or_clone(bool force_clone) {
+                auto result = Component::CreateShared<RotatingCross>();
+                result->speed_degrees = this->speed_degrees;
+                return result;
+            }
+            void RotatingCross::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+                
+            }
+
             RotatingCross::~RotatingCross()
             {
                 AppBase *app = Engine::Instance()->app;

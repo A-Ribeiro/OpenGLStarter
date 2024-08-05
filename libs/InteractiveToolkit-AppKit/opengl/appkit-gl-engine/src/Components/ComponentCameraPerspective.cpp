@@ -218,6 +218,23 @@ namespace AppKit
                     renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraPerspective::OnViewportChanged, this);
                 renderWindowRegionRef.reset();
             }
+
+            // always clone
+            std::shared_ptr<Component> ComponentCameraPerspective::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentCameraPerspective>();
+
+                result->nearPlane.setValueNoCallback(this->nearPlane);
+                result->farPlane.setValueNoCallback(this->farPlane);
+
+                result->leftHanded.setValueNoCallback(this->leftHanded);
+                result->rightHanded.setValueNoCallback(this->rightHanded);
+
+                result->fovDegrees.setValueNoCallback(this->fovDegrees);
+
+                // configureProjection() is called once the start command is called
+
+                return result;
+            }
         }
     }
 

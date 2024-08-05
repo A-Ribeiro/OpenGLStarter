@@ -168,52 +168,104 @@ std::shared_ptr<TreeNode> Hierarchy::cloneTreeNode(std::shared_ptr<TreeNode> src
 {
     using namespace AppKit::GLEngine;
 
-    auto currentData = std::dynamic_pointer_cast<HierarchyTreeData>(src->data);
-    auto new_transform = Transform::CreateShared();
-    new_transform->setLocalPosition(currentData->transform->getLocalPosition());
-    new_transform->setLocalRotation(currentData->transform->getLocalRotation());
-    new_transform->setLocalScale(currentData->transform->getLocalScale());
-    auto result = 
-        createTreeNode(src->getName(), 
-            HierarchyTreeData::CreateShared(
-                new_transform
-            )
-        );
+    using TreeNodeMapT = std::unordered_map<std::shared_ptr<TreeNode>, std::shared_ptr<TreeNode>>;
 
-    struct _child {
+    Transform::TransformMapT transformMap;
+    Transform::ComponentMapT componentMap;
+    TreeNodeMapT treeNodeMap;
+
+    auto treeData = std::dynamic_pointer_cast<HierarchyTreeData>(src->data);
+    // clone current transform
+    auto cloned_transform = treeData->transform->clone(false, &transformMap, &componentMap);
+
+    auto result = createTreeNode(
+        src->getName(), 
+        HierarchyTreeData::CreateShared(transformMap[treeData->transform])
+    );
+
+    struct _clone_structT {
         std::shared_ptr<TreeNode> cloneSrc;
-        //std::vector<std::shared_ptr<TreeNode>> cloneSrcChildren;
-        std::shared_ptr<TreeNode> target;
+        std::shared_ptr<TreeNode> cloneDst;
     };
 
-    std::vector<_child> to_clone;
-    to_clone.push_back(_child{
-        src,
-        result
-    });
-    while (to_clone.size() > 0){
-        auto element = *to_clone.begin();
-        to_clone.erase(to_clone.begin());
-
-        for(auto srcChild: element.cloneSrc->children){
-            auto currentData = std::dynamic_pointer_cast<HierarchyTreeData>(srcChild->data);
-            auto new_transform = Transform::CreateShared();
-            new_transform->setLocalPosition(currentData->transform->getLocalPosition());
-            new_transform->setLocalRotation(currentData->transform->getLocalRotation());
-            new_transform->setLocalScale(currentData->transform->getLocalScale());
-            auto target_child = createTreeNode(srcChild->getName(), 
-                HierarchyTreeData::CreateShared(
-                    new_transform
-                )
-            );
-            element.target->addChild(target_child);
-            to_clone.push_back(_child{
-                srcChild,
-                target_child
-            });
-        }
-
+    std::list<_clone_structT> to_clone;
+    {
+        to_clone.push_back(_clone_structT{src,result});
+        treeNodeMap[src] = result;
     }
+
+    while (to_clone.size() > 0) {
+        auto entry = to_clone.front();
+        to_clone.pop_front();
+
+        for(auto &src_treenode: entry.cloneSrc->children ){
+    
+            treeData = std::dynamic_pointer_cast<HierarchyTreeData>(src_treenode->data);
+
+            auto new_treenode = entry.cloneDst->addChild(
+                createTreeNode(
+                    src_treenode->getName(), 
+                    HierarchyTreeData::CreateShared(transformMap[treeData->transform])
+                ) 
+            );
+
+            {
+                to_clone.push_back(_clone_structT{src_treenode,new_treenode});
+                treeNodeMap[src_treenode] = new_treenode;
+            }
+        }
+    }
+
+
+
+    
+
+    // auto currentData = std::dynamic_pointer_cast<HierarchyTreeData>(src->data);
+    // auto new_transform = Transform::CreateShared();
+    // new_transform->setLocalPosition(currentData->transform->getLocalPosition());
+    // new_transform->setLocalRotation(currentData->transform->getLocalRotation());
+    // new_transform->setLocalScale(currentData->transform->getLocalScale());
+    // auto result = 
+    //     createTreeNode(src->getName(), 
+    //         HierarchyTreeData::CreateShared(
+    //             new_transform
+    //         )
+    //     );
+
+    // struct _child {
+    //     std::shared_ptr<TreeNode> cloneSrc;
+    //     //std::vector<std::shared_ptr<TreeNode>> cloneSrcChildren;
+    //     std::shared_ptr<TreeNode> target;
+    // };
+
+    // std::vector<_child> to_clone;
+    // to_clone.push_back(_child{
+    //     src,
+    //     result
+    // });
+    // while (to_clone.size() > 0){
+    //     auto element = *to_clone.begin();
+    //     to_clone.erase(to_clone.begin());
+
+    //     for(auto srcChild: element.cloneSrc->children){
+    //         auto currentData = std::dynamic_pointer_cast<HierarchyTreeData>(srcChild->data);
+    //         auto new_transform = Transform::CreateShared();
+    //         new_transform->setLocalPosition(currentData->transform->getLocalPosition());
+    //         new_transform->setLocalRotation(currentData->transform->getLocalRotation());
+    //         new_transform->setLocalScale(currentData->transform->getLocalScale());
+    //         auto target_child = createTreeNode(srcChild->getName(), 
+    //             HierarchyTreeData::CreateShared(
+    //                 new_transform
+    //             )
+    //         );
+    //         element.target->addChild(target_child);
+    //         to_clone.push_back(_child{
+    //             srcChild,
+    //             target_child
+    //         });
+    //     }
+
+    // }
 
 
     return result;

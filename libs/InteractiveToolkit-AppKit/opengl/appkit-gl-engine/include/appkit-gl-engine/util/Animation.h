@@ -72,9 +72,18 @@ namespace AppKit
 
         class RootMotionAnalyser
         {
+            // avoid copy, using copy constructors
+            RootMotionAnalyser(const RootMotionAnalyser &) {}
+            void operator=(const RootMotionAnalyser &) {}
         public:
+
             EventCore::Callback<void(RootMotionAnalyserData *data)> method;
             RootMotionAnalyserData data;
+
+            RootMotionAnalyser(){}
+
+            void copy(std::unordered_map<AnimationClip *, AnimationClip *> &clipMap,
+                      const RootMotionAnalyser &rootMotionAnalyser);
         };
 
         //
@@ -335,6 +344,7 @@ namespace AppKit
 
             bool findRootNode(std::shared_ptr<Transform> t, const void *userData);
 
+            AnimationClip(){}
         public:
             std::string name;
             float duration;
@@ -360,6 +370,9 @@ namespace AppKit
             bool canDoSample();
 
             void didExternalSample();
+
+            AnimationClip* clone(std::unordered_map<NodeAnimation*,NodeAnimation*> *nodeMap);
+            void fix_internal_references(Transform::TransformMapT &transformMap);
         };
 
         class AnimationTransitionChannelInformation
@@ -435,6 +448,11 @@ namespace AppKit
 
             AnimationTransitionChannelInformation &getTransition(uint32_t x, uint32_t y);
 
+            // avoid copy, using copy constructors
+            AnimationMixer(const AnimationMixer &) {}
+            void operator=(const AnimationMixer &) {}
+
+            void clear();
         public:
             AnimationMixer();
             ~AnimationMixer();
@@ -462,6 +480,11 @@ namespace AppKit
                     rootMotionAnalyser.method(&rootMotionAnalyser.data);
                 }
             }
+
+            void copy(const AnimationMixer& src);
+
+            void fix_internal_references(Transform::TransformMapT &transformMap);
+
         };
 
     }

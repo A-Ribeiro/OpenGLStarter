@@ -45,6 +45,8 @@ namespace AppKit
 
             void ComponentMesh::uploadVBO(uint32_t model_dynamic_upload, uint32_t model_static_upload)
             {
+                last_model_dynamic_upload = model_dynamic_upload;
+                last_model_static_upload = model_static_upload;
 
                 for (int i = 0; i < getTransformCount(); i++)
                 {
@@ -172,6 +174,11 @@ namespace AppKit
                 vbo_index = nullptr;
 
                 format = 0;
+
+                always_clone = false;
+
+                last_model_dynamic_upload = 0;
+                last_model_static_upload = 0;
             }
 
             ComponentMesh::~ComponentMesh()
@@ -402,6 +409,47 @@ namespace AppKit
                         OPENGL_CMD(glDisableVertexAttribArray(count++));
                     }
                 }
+            }
+
+            // best option to ref,
+            // but can clone if necessary
+            std::shared_ptr<Component> ComponentMesh::duplicate_ref_or_clone(bool force_clone)
+            {
+                if (!always_clone && !force_clone)
+                    return self();
+                auto result = Component::CreateShared<ComponentMesh>();
+
+                result->format = this->format;
+
+                result->pos = this->pos;
+                result->normals = this->normals;
+                result->tangent = this->tangent;
+                result->binormal = this->binormal;
+                for (int i = 0; i < 8; i++)
+                {
+                    result->uv[i] = this->uv[i];
+                    result->color[i] = this->color[i];
+                }
+                // std::vector<uint32_t> color[8];//RGBA
+
+                result->indices = this->indices;
+
+                // store the structure for vertex skinning
+                result->bones = this->bones;
+                result->skin_index = this->skin_index;
+                result->skin_weights = this->skin_weights;
+
+                result->always_clone = this->always_clone;
+
+                // check VBO
+                if(this->vbo_indexCount > 0){
+                    result->syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload);
+                }
+
+                return result;
+            }
+            void ComponentMesh::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            {
             }
 
             //

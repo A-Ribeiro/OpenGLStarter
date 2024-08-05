@@ -142,7 +142,7 @@ public:
     void render(const char *str_imgui_id_selection, TreeHolder *treeHolder);
     //void afterChild(TreeHolder *treeHolder);
 
-    TreeNode &addChild(std::shared_ptr<TreeNode> treeNode, int before_uid = -1);
+    std::shared_ptr<TreeNode> addChild(std::shared_ptr<TreeNode> treeNode, int before_uid = -1);
 
     // check if a < b
     void sort(const std::function<bool(const std::shared_ptr<TreeNode>&,const std::shared_ptr<TreeNode>&)> &comparer = Comparer_ASC){

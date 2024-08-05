@@ -101,6 +101,20 @@ namespace AppKit
                 }
             }
 
+            // always clone
+            std::shared_ptr<Component> ComponentLight::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentLight>();
+
+                result->type = this->type;
+                result->sun = this->sun;
+                result->cast_shadow = this->cast_shadow;
+
+                return result;
+            }
+            void ComponentLight::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+
+            }
+
         }
     }
 

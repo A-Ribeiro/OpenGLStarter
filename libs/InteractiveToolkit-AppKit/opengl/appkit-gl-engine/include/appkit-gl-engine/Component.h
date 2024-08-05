@@ -7,6 +7,8 @@
 #include <InteractiveToolkit/EventCore/HandleCallback.h>
 #include "ToShared.h"
 
+#include <unordered_map>
+
 namespace AppKit
 {
     namespace GLEngine
@@ -35,16 +37,19 @@ namespace AppKit
 
             std::weak_ptr<Component> mSelf;
             std::vector<std::weak_ptr<Transform>> mTransform;
+
         public:
-            std::shared_ptr<Transform> getTransform(int i = 0){
+            std::shared_ptr<Transform> getTransform(int i = 0)
+            {
                 if (i >= (int)mTransform.size())
                     return nullptr;
                 return ToShared(mTransform[i]);
             }
-            int getTransformCount() const {
+            int getTransformCount() const
+            {
                 return (int)mTransform.size();
             }
-            
+
             ComponentType getType() const;
             bool compareType(ComponentType t) const;
 
@@ -56,29 +61,42 @@ namespace AppKit
             virtual void attachToTransform(std::shared_ptr<Transform> t);
             virtual void detachFromTransform(std::shared_ptr<Transform> t);
 
-            inline std::shared_ptr<Component> self() {
+            using TransformMapT = std::unordered_map<std::shared_ptr<Transform>, std::shared_ptr<Transform>>;
+            using ComponentMapT = std::unordered_map<std::shared_ptr<Component>, std::shared_ptr<Component>>;
+
+        protected:
+            // clone a component by using the same reference when possible,
+            // or making a new object from the original
+            virtual std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone) = 0;
+            // after a full clone, you need to fix the internal component references
+            virtual void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap) = 0;
+
+        public:
+            inline std::shared_ptr<Component> self()
+            {
                 return std::shared_ptr<Component>(mSelf);
             }
 
             template <typename _ComponentType,
-                  typename std::enable_if<
-                      std::is_base_of< Component, _ComponentType >::value,
-                      bool>::type = true>
-            inline std::shared_ptr<_ComponentType> self() {
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value,
+                          bool>::type = true>
+            inline std::shared_ptr<_ComponentType> self()
+            {
                 return std::dynamic_pointer_cast<_ComponentType>(self());
             }
 
             template <typename _ComponentType, typename... _param_args,
-                  typename std::enable_if<
-                      std::is_base_of< Component, _ComponentType >::value,
-                      bool>::type = true>
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value,
+                          bool>::type = true>
             static inline std::shared_ptr<_ComponentType> CreateShared(_param_args &&...args)
             {
                 auto result = std::make_shared<_ComponentType>(std::forward<_param_args>(args)...);
                 result->mSelf = std::weak_ptr<Component>(result);
                 return result;
             }
-            
+
             friend class Transform;
         };
 

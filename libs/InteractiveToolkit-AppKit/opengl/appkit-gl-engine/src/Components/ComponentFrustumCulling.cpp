@@ -169,12 +169,12 @@ namespace AppKit
 
             void ComponentFrustumCulling::resetVisibility()
             {
-                std::map<Component *, bool>::iterator it, aux;
-                for (it = visibleFromCameras.begin(); it != visibleFromCameras.end(); it++)
+                std::map<Component *, bool>::iterator it;//, aux;
+                for (it = visibleFromCameras.begin(); it != visibleFromCameras.end(); )// it++)
                 {
                     Component *cameraComponent = it->first;
-                    aux = it;
-                    visibleFromCameras.erase(aux);
+                    //aux = it++;
+                    visibleFromCameras.erase(it++);
                     // visibleFromCameras.erase(it++);
                     OnBecomeInvisible(this, cameraComponent);
                 }
@@ -269,6 +269,32 @@ namespace AppKit
                 }
 
                 lines->syncVBODynamic();
+            }
+
+
+            std::shared_ptr<Component> ComponentFrustumCulling::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentFrustumCulling>();
+
+                result->debugCollisionShapes = this->debugCollisionShapes;
+
+                result->cullingShape = this->cullingShape;
+
+                // sphere shape
+                result->sphereCenter = this->sphereCenter;
+                result->sphereRadius = this->sphereRadius;
+                
+                result->sphere = this->sphere;
+
+                // aabb
+                result->aabbDimension_2 = this->aabbDimension_2;
+                result->aabbCenter = this->aabbCenter;
+
+                result->aabb;
+
+                return result;
+            }
+            void ComponentFrustumCulling::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+
             }
 
         }

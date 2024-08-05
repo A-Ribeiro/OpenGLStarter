@@ -191,6 +191,32 @@ namespace AppKit
                 }
             }
 
+            // always clone
+            std::shared_ptr<Component> ComponentCameraRotateOnTarget::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentCameraRotateOnTarget>();
+
+                result->speedAngle = this->speedAngle;
+                result->enabled = this->enabled;
+
+                result->rotation_x_deg_min = this->rotation_x_deg_min;
+                result->rotation_x_deg_max = this->rotation_x_deg_max;
+
+                result->distanceRotation = this->distanceRotation;
+                result->euler = this->euler;
+                result->lastPosition = this->lastPosition;
+                //result->mouseMoving = this->mouseMoving;
+
+                result->targetRef = this->targetRef;
+
+                return result;
+            }
+            void ComponentCameraRotateOnTarget::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+                auto target_shared = ToShared(this->targetRef);
+                auto found = transformMap.find(target_shared);
+                if (found != transformMap.end())
+                    setTarget(found->second);
+            }
+
         }
     }
 }
