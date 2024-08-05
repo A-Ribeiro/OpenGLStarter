@@ -209,6 +209,45 @@ namespace AppKit
                     }
                     */
                 }
+
+                // always clone
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone)
+                {
+                    auto result = Component::CreateShared<ComponentThirdPersonPlayerController>();
+
+                    result->animationMotion = this->animationMotion;
+
+                    result->cameraLookRef = this->cameraLookRef;
+                    result->cameraLook_bkp_relative_skinnerMesh = this->cameraLook_bkp_relative_skinnerMesh;
+                    result->rotateTargetNode = this->rotateTargetNode;
+                    result->skinnedMesh = this->skinnedMesh;
+
+                    result->turn_speed = this->turn_speed;
+
+                    result->animation_str_idle = this->animation_str_idle;
+                    result->animation_str_walk = this->animation_str_walk;
+                    result->animation_str_run = this->animation_str_run;
+
+                    return result;
+                }
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+                {
+                    {
+                        auto found = transformMap.find(ToShared(this->cameraLookRef));
+                        if (found != transformMap.end())
+                            this->cameraLookRef = found->second;
+                    }
+                    {
+                        auto found = componentMap.find(this->animationMotion);
+                        if (found != componentMap.end())
+                            this->animationMotion = std::dynamic_pointer_cast<ComponentAnimationMotion>(found->second);
+                    }
+                    {
+                        auto found = componentMap.find(this->skinnedMesh);
+                        if (found != componentMap.end())
+                            this->skinnedMesh = std::dynamic_pointer_cast<ComponentSkinnedMesh>(found->second);
+                    }
+                }
             };
 
         }

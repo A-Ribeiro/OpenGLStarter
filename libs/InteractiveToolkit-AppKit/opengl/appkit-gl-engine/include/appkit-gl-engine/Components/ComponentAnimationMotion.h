@@ -9,7 +9,7 @@
 #include <appkit-gl-engine/Components/ComponentSkinnedMesh.h>
 
 #include <appkit-gl-engine/util/Animation.h>
-//#include <appkit-gl-engine/SharedPointer/SharedPointer.h>
+// #include <appkit-gl-engine/SharedPointer/SharedPointer.h>
 
 namespace AppKit
 {
@@ -198,7 +198,7 @@ namespace AppKit
 
                 void TriggerClip(const std::string &name)
                 {
-                    //auto skinnedMesh = std::shared_ptr<ComponentSkinnedMesh>(skinnedMeshRef);
+                    // auto skinnedMesh = std::shared_ptr<ComponentSkinnedMesh>(skinnedMeshRef);
                     auto skinnedMesh = ToShared(skinnedMeshRef);
                     skinnedMesh->mixer.play(name);
                 }
@@ -211,6 +211,25 @@ namespace AppKit
                         skinnedMesh->mixer.setRootMotionAnalyserCallback(nullptr);
                         // skinnedMesh = nullptr;
                         skinnedMeshRef.reset();
+                    }
+                }
+
+                // always clone
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone)
+                {
+                    auto result = Component::CreateShared<ComponentAnimationMotion>();
+
+                    result->motionInfluence = this->motionInfluence;
+                    result->skinnedMeshRef = this->skinnedMeshRef;
+
+                    return result;
+                }
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+                {
+                    {
+                        auto found = componentMap.find(ToShared(this->skinnedMeshRef));
+                        if (found != componentMap.end())
+                            this->skinnedMeshRef = std::dynamic_pointer_cast<ComponentSkinnedMesh>(found->second);
                     }
                 }
             };

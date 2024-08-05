@@ -188,6 +188,35 @@ namespace AppKit
                 }
             }
 
+            std::shared_ptr<Component> ComponentCameraLookToNode::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentCameraLookToNode>();
+
+                result->camera = this->camera;
+                result->euler = this->euler;
+                result->distance_to_target = this->distance_to_target;
+
+                result->targetRef = this->targetRef;
+
+                //EventCore::VirtualProperty<std::shared_ptr<Transform>> Target;
+
+                result->zoomSpeed = this->zoomSpeed;
+                result->angleSpeed = this->angleSpeed;
+
+                return result;
+            }
+            void ComponentCameraLookToNode::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+                {
+                    auto found = transformMap.find(ToShared(this->targetRef));
+                    if (found != transformMap.end())
+                        this->targetRef = found->second;
+                }
+                {
+                    auto found = componentMap.find(this->camera);
+                    if (found != componentMap.end())
+                        this->camera = std::dynamic_pointer_cast<ComponentCameraPerspective>(found->second);
+                }
+            }
+
         }
     }
 

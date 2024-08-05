@@ -281,7 +281,27 @@ namespace AppKit
                     renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
                 renderWindowRegionRef.reset();
             }
+
+            // always clone
+            std::shared_ptr<Component> ComponentCameraOrthographic::duplicate_ref_or_clone(bool force_clone){
+                auto result = Component::CreateShared<ComponentCameraOrthographic>();
+
+                result->nearPlane.setValueNoCallback(this->nearPlane);
+                result->farPlane.setValueNoCallback(this->farPlane);
+
+                result->leftHanded.setValueNoCallback(this->leftHanded);
+                result->rightHanded.setValueNoCallback(this->rightHanded);
+
+                result->useSizeY.setValueNoCallback(this->useSizeY);
+                result->sizeY.setValueNoCallback(this->sizeY);
+
+                result->useSizeX.setValueNoCallback(this->useSizeX);
+                result->sizeX.setValueNoCallback(this->sizeX);
+
+                // configureProjection() is called once the start command is called
+
+                return result;
+            }
         }
     }
-
 }
