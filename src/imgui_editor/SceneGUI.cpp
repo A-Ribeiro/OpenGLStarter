@@ -180,7 +180,7 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
 
     // auto window_rect = this->renderWindow->WindowViewport.c_val();
     // auto mouse_relative_to_window = this->renderWindow->MousePos.c_val();
-    // if (window_rect.isInside(mouse_relative_to_window)){
+    // if (window_rect.contains(mouse_relative_to_window)){
     //     printf("inside...\n");
     // } else {
     //     printf("not inside...\n");
