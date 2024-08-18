@@ -37,5 +37,8 @@ public:
 
     void printHierarchy();
 
+    void OnUpdate(Platform::Time *time);
+
+
 };
 

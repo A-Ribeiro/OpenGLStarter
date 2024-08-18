@@ -36,5 +36,11 @@ class HierarchyOperations : virtual public OperationsCommon
 
     void printHierarchy();
 
+
+    // components
+    void componentsClear(std::shared_ptr<TreeNode> target);
+    void componentsAddCubeAt(std::shared_ptr<TreeNode> target);
+
+
 };
 

@@ -89,7 +89,7 @@ namespace AppKit
             bool addAABBMesh_traverser(std::shared_ptr<Transform> element, void *userData);
 
         public:
-            void addAABBMesh(std::shared_ptr<Transform> element);
+            void addAABBMesh(std::shared_ptr<Transform> element, bool recursive = true);
         };
 
     }

@@ -174,6 +174,12 @@ View* ShortcutManager::Init(){
                 ),
 
                 ShortCut(
+                    "Action/Components", MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+                    "Components", MenuBehaviour::SetItemVisibility // MenuBehaviour contextMenuBehaviour,
+                ),
+
+
+                ShortCut(
                     "Action/<<>>##0", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
                     "<<>>##0", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
                     "" //shortcutStr

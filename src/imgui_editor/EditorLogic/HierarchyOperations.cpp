@@ -38,6 +38,14 @@ void HierarchyOperations::init()
                 ),
 
                 ShortCut(
+                    "Action/Components", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "Components", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility // MenuBehaviour contextMenuBehaviour,
+                ),
+
+                ShortCut(
                     "Action/<<>>##0", MenuBehaviour::SetItemVisibility, // "mainMenuPath"
                     "<<>>##0", MenuBehaviour::SetItemVisibility, // "contextMenuPath"
                     "" //shortcutStr
@@ -124,6 +132,46 @@ void HierarchyOperations::init()
                         //activate
                         //printf("New Scene\n");
                         hierarchyCreateNewChildOnNode( this->selectedTreeNode ,"NewNode");
+                    }
+                ),
+
+                ShortCut(
+                    "Action/Components/Clear", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "Components/Clear", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+                    
+                    "",//shortcutStr
+                    
+                    //ctrl,shift,alt,window,
+                    false,false,false,false,
+                    KeyCode::Unknown, //AppKit::Window::Devices::KeyCode keyCode,
+                    //EventCore::CallbackWrapper(&FolderFileOperations::createNewSceneOnCurrentDirectory, this)
+                    [&](){
+                        //activate
+                        //printf("New Scene\n");
+                        componentsClear( this->selectedTreeNode );
+                    }
+                ),
+
+                ShortCut(
+                    "Action/Components/AddCube", // "mainMenuPath"
+                    MenuBehaviour::SetItemVisibility, // mainMenuBehaviour,
+
+                    "Components/AddCube", // "contextMenuPath"
+                    MenuBehaviour::SetItemVisibility, // MenuBehaviour contextMenuBehaviour,
+                    
+                    "",//shortcutStr
+                    
+                    //ctrl,shift,alt,window,
+                    false,false,false,false,
+                    KeyCode::Unknown, //AppKit::Window::Devices::KeyCode keyCode,
+                    //EventCore::CallbackWrapper(&FolderFileOperations::createNewSceneOnCurrentDirectory, this)
+                    [&](){
+                        //activate
+                        //printf("New Scene\n");
+                        componentsAddCubeAt( this->selectedTreeNode);
                     }
                 ),
 
@@ -695,5 +743,41 @@ void HierarchyOperations::printHierarchy() {
     printf("\nScene3D:\n\n");
     scene3D->printHierarchy();
     printf("\n");
+}
+
+void HierarchyOperations::componentsClear(std::shared_ptr<TreeNode> target) {
+    if (target == nullptr)
+        return;
+    auto transform = std::dynamic_pointer_cast<HierarchyTreeData>(target->data)->transform;
+    if (transform == nullptr)
+        return;
+    
+    transform->clearComponents();
+}
+
+void HierarchyOperations::componentsAddCubeAt(std::shared_ptr<TreeNode> target) {
+    if (target == nullptr)
+        return;
+    auto transform = std::dynamic_pointer_cast<HierarchyTreeData>(target->data)->transform;
+    if (transform == nullptr)
+        return;
+    
+    auto resourceHelper = imGuiManager->innerViewport->scene3D->resourceHelper;
+
+    auto material = transform->addNewComponent<ComponentMaterial>();
+    transform->addComponent(ComponentMesh::createBox(MathCore::vec3f(1, 1, 1)));
+    
+    //material->type = MaterialUnlit;
+    //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
+
+    material->type = MaterialPBR;
+    material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+    material->pbr.metallic = 0.0f;
+    material->pbr.roughness = 1.0f;
+    material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
+    material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
+
+    resourceHelper->addAABBMesh(transform, false);
+
 }
 
