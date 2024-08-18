@@ -373,11 +373,14 @@ namespace AppKit
             return true;
         }
 
-        void ResourceHelper::addAABBMesh(std::shared_ptr<Transform> element)
+        void ResourceHelper::addAABBMesh(std::shared_ptr<Transform> element, bool recursive)
         {
-            element->traversePreOrder_DepthFirst(
-                EventCore::CallbackWrapper(&ResourceHelper::addAABBMesh_traverser, this)
-            );
+            if (recursive)
+                element->traversePreOrder_DepthFirst(
+                    EventCore::CallbackWrapper(&ResourceHelper::addAABBMesh_traverser, this)
+                );
+            else
+                ResourceHelper::addAABBMesh_traverser(element, nullptr);
         }
 
     }

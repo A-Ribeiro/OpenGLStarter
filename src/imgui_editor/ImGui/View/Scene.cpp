@@ -31,14 +31,14 @@ void Scene::RenderAndLogic()
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
 
-        if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
-        {
-            if (ImGui::IsMouseClicked(0))
-            {
-                // printf("Clicked on begin...\n");
-                ImGuiManager::Instance()->innerViewport->fadeFromBlack();
-            }
-        }
+        // if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
+        // {
+        //     if (ImGui::IsMouseClicked(0))
+        //     {
+        //         // printf("Clicked on begin...\n");
+        //         ImGuiManager::Instance()->innerViewport->fadeFromBlack();
+        //     }
+        // }
         // display_order.push_back(ImGui::GetCurrentWindow());
 
         ImVec2 min = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();

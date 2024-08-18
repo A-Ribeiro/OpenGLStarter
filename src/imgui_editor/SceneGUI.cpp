@@ -171,9 +171,18 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
     fps_transform->setLocalScale(MathCore::vec3f(28.0f / fontBuilder.glFont2.size));
 
 
-    MathCore::vec3f pos3D = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenter * this->renderWindow->windowToCameraScale, 0.0f);
+    //MathCore::vec3f pos3Dnorm = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenterNormalized, 0.0f);
+    //printf("%f %f %f\n", pos3Dnorm.x, pos3Dnorm.y, pos3Dnorm.z);
 
+    MathCore::vec3f pos3D = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenter * this->renderWindow->windowToCameraScale, 0.0f);
     if (cursorTransform != nullptr)
         cursorTransform->setLocalPosition(pos3D);
 
+    // auto window_rect = this->renderWindow->WindowViewport.c_val();
+    // auto mouse_relative_to_window = this->renderWindow->MousePos.c_val();
+    // if (window_rect.isInside(mouse_relative_to_window)){
+    //     printf("inside...\n");
+    // } else {
+    //     printf("not inside...\n");
+    // }
 }

@@ -2,6 +2,8 @@
 
 #include <string.h> //memcmp
 
+#include <InteractiveToolkit/MathCore/MathCore.h>
+
 namespace AppKit
 {
     namespace GLEngine
@@ -53,6 +55,27 @@ namespace AppKit
                 this->w = w;
                 this->h = h;
             }
+
+            template <typename Tx, typename Ty,
+                      typename std::enable_if<
+                          (std::is_integral<Tx>::value || std::is_floating_point<Tx>::value) &&
+                              (std::is_integral<Ty>::value || std::is_floating_point<Ty>::value),
+                          bool>::type = true>
+            bool isInside(Tx x, Ty y) const
+            {
+                return x >= (Tx)0 && x < (Tx)w && y >= (Ty)0 && y < (Ty)h;
+            }
+
+            template <typename Tvec,
+                      typename std::enable_if<
+                          MathCore::MathTypeInfo<Tvec>::_is_vec::value,
+                          bool>::type = true>
+            bool isInside(Tvec vec) const
+            {
+                using _f_type = typename MathCore::MathTypeInfo<Tvec>::_type;
+                return vec.x >= (_f_type)0 && vec.x < (_f_type)w && vec.y >= (_f_type)0 && vec.y < (_f_type)h;
+            }
+
         };
 
     }

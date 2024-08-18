@@ -66,10 +66,13 @@ Scene3D::Scene3D(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion>
 {
     this->app = app;
     this->renderWindow = renderWindow;
+
+    this->renderWindow->OnUpdate.add(&Scene3D::OnUpdate, this);
 }
 
 Scene3D::~Scene3D()
 {
+    this->renderWindow->OnUpdate.remove(&Scene3D::OnUpdate, this);
     unload();
 }
 
@@ -133,4 +136,20 @@ void Scene3D::printHierarchy()
         toVisit.insert(toVisit.begin(), element->getChildren().begin(), element->getChildren().end());
         spaces.insert(spaces.begin(), element->getChildCount(), space);
     }
+}
+
+void Scene3D::OnUpdate(Platform::Time* time) {
+    // MathCore::vec3f pos3D = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenter * this->renderWindow->windowToCameraScale, 0.0f);
+    // if (cursorTransform != nullptr)
+    //     cursorTransform->setLocalPosition(pos3D);
+
+    // auto window_rect = this->renderWindow->WindowViewport.c_val();
+    // auto mouse_relative_to_window = this->renderWindow->MousePos.c_val();
+
+    // if (window_rect.isInside(mouse_relative_to_window)){
+    //     printf("inside...\n");
+    // } else {
+    //     printf("not inside...\n");
+    // }
+
 }
