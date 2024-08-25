@@ -405,6 +405,14 @@ namespace AppKit
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
                 const void *userData = nullptr, int maxLevel = INT_MAX);
 
+            bool traverse_BreadthFirst(
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
+                void *userData = nullptr, int maxLevel = INT_MAX);
+
+            bool traverse_BreadthFirst(
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
+                const void *userData = nullptr, int maxLevel = INT_MAX);
+
             ///////////////////////////////////////////////////////
             //
             //
