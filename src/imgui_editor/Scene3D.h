@@ -4,6 +4,7 @@
 #include <appkit-gl-engine/util/Button.h>
 
 #include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
+#include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
 
 class App;
 
@@ -23,6 +24,11 @@ public:
 
     App *app;
     std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow;
+
+    std::shared_ptr<AppKit::GLEngine::Transform> mainCamera;
+
+    EventCore::PressReleaseDetector m_to_move;
+
 
     Scene3D(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
     ~Scene3D();

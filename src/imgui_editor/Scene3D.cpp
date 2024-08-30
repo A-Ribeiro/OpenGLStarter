@@ -1,5 +1,7 @@
 #include "Scene3D.h"
 
+#include <appkit-gl-engine/Components/ComponentCameraMove.h>
+
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
 using namespace AppKit::OpenGL;
@@ -41,7 +43,7 @@ void Scene3D::bindResourcesToGraph()
 
     // setup camera
     {
-        auto mainCamera = root->addChild(Transform::CreateShared());
+        mainCamera = root->addChild(Transform::CreateShared());
         mainCamera->setName("mainCamera");
         mainCamera->setLocalPosition(vec3f(0, 0, -10.0f));
         camera = mainCamera->addNewComponent<ComponentCameraPerspective>();
@@ -57,6 +59,7 @@ void Scene3D::bindResourcesToGraph()
 // clear all loaded scene
 void Scene3D::unloadAll()
 {
+    mainCamera = nullptr;
     root = nullptr;
     camera = nullptr;
 }
@@ -151,5 +154,15 @@ void Scene3D::OnUpdate(Platform::Time* time) {
     // } else {
     //     printf("not inside...\n");
     // }
+
+    m_to_move.setState(Keyboard::isPressed(KeyCode::M));
+    if (m_to_move.down) {
+        auto cameraMove = mainCamera->findComponent<Components::ComponentCameraMove>();
+        if (cameraMove == nullptr){
+            mainCamera->addComponent(Component::CreateShared<Components::ComponentCameraMove>());
+        } else {
+            mainCamera->removeComponent(cameraMove);
+        }
+    }
 
 }
