@@ -12,6 +12,7 @@ public:
     Editor();
 
     void init();
+    void finalize();
 
     void openFolder(const std::string &path);
 

@@ -16,6 +16,7 @@ class HierarchyOperations : virtual public OperationsCommon
     HierarchyOperations();
 
     void init();
+    void finalize();
 
     void clear_HierarchyOperations();
 

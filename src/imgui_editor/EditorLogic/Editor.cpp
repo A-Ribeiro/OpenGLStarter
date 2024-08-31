@@ -21,6 +21,12 @@ void Editor::init()
     HierarchyOperations::init();
 }
 
+void Editor::finalize() {
+    HierarchyOperations::finalize();
+    FolderFileOperations::finalize();
+    OperationsCommon::finalize();
+}
+
 void Editor::openFolder(const std::string &path)
 {
     openFolder_FolderFileOperations(path);

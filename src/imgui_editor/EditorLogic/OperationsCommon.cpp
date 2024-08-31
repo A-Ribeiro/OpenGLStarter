@@ -18,6 +18,10 @@ void OperationsCommon::init() {
     scene3D = imGuiManager->innerViewport->scene3D;
 }
 
+void OperationsCommon::finalize() {
+    clipboardState = nullptr;
+}
+
 void OperationsCommon::showErrorAndRetry(const std::string &error, EventCore::Callback<void()> retry_callback){
     printf("ERROR: %s\n", error.c_str());
     ImGuiManager::Instance()->dialogs.showInfo_OK(

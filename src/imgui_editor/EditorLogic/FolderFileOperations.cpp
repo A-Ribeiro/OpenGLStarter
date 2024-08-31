@@ -14,6 +14,12 @@ FolderFileOperations::FolderFileOperations() //: OperationsCommon()
 {
 }
 
+void FolderFileOperations::finalize() {
+    selectedDirectoryInfo = nullptr;
+    selectedTreeNode = nullptr;
+    selectedFileInfo = nullptr;
+}
+
 void FolderFileOperations::init()
 {
 

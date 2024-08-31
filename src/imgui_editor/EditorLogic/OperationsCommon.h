@@ -25,6 +25,7 @@ public:
     OperationsCommon();
 
     void init();
+    void finalize();
 
     // shared methods that can be called from any subclass
     virtual void openFolder(const std::string &path) = 0;
