@@ -271,7 +271,8 @@ namespace DPI
 				{
 					Screen* screen = ScreenOfDisplay(dpy, dpyScreen);
 					Window rootWindow = RootWindow(dpy, dpyScreen);
-					XGetWindowAttributes(dpy, rootWindow, &xwa);
+					if (!XGetWindowAttributes(dpy, rootWindow, &xwa))
+                        continue;
 					if (monitor.x != xwa.x || monitor.y != xwa.y)
 						continue;
 
