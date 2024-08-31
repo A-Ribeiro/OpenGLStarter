@@ -96,6 +96,8 @@ void App::load()
 
 App::~App()
 {
+    Editor::Instance()->finalize();
+
     ImGuiManager::Instance()->SaveLayout();
     ImGuiManager::Instance()->Finalize();
 

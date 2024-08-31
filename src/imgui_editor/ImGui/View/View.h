@@ -24,4 +24,7 @@ class View {
 
     virtual View* Init();
     virtual void RenderAndLogic();
+
+    virtual void Finalize() {
+    }
 };

@@ -239,6 +239,11 @@ void ImGuiManager::applyGlobalScale() {
 
 void ImGuiManager::Finalize()
 {
+	for (auto& view : views) {
+		view->Finalize();
+	}
+
+
 	if (innerViewport != nullptr) {
 		delete innerViewport;
 		innerViewport = nullptr;

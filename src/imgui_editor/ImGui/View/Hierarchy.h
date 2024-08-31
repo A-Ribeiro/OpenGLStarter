@@ -88,4 +88,11 @@ public:
         force_tree_selection = uid;
     }
 
+    void Finalize() {
+        /*auto tdt = std::dynamic_pointer_cast<HierarchyTreeData>(root->data);
+        tdt->transform->clearComponents();*/
+
+        root = nullptr;
+    }
+
 };

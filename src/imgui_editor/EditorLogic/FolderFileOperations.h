@@ -24,6 +24,7 @@ class FolderFileOperations : virtual public OperationsCommon
     FolderFileOperations();
 
     void init();
+    void finalize();
 
     std::string removeOSForbiddenPathPattern(const std::string &in);
     bool isUsingOSReservedWords(const std::string &in);

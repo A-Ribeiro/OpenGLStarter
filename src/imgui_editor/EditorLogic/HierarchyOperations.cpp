@@ -8,6 +8,11 @@ HierarchyOperations::HierarchyOperations()
 {
 }
 
+void HierarchyOperations::finalize() {
+    selectedTransformInfo = nullptr;
+    selectedTreeNode = nullptr;
+}
+
 void HierarchyOperations::init()
 {
 
