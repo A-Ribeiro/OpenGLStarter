@@ -117,7 +117,7 @@ namespace DPI
             monitor.mwidth = monitor_info->mwidth;
             monitor.mheight = monitor_info->mheight;
             {
-                const char* gdk_dpi_scale_str = std::getenv("GDK_DPI_SCALE");
+                const char *gdk_dpi_scale_str = std::getenv("GDK_DPI_SCALE");
                 if (!gdk_dpi_scale_str)
                     gdk_dpi_scale_str = std::getenv("GTK_SCALE");
                 if (!gdk_dpi_scale_str)
@@ -125,7 +125,8 @@ namespace DPI
                 if (!gdk_dpi_scale_str)
                     gdk_dpi_scale_str = std::getenv("GDK_SCALE");
 
-                if (gdk_dpi_scale_str){
+                if (gdk_dpi_scale_str)
+                {
                     double gdk_dpi_scale = atof(gdk_dpi_scale_str);
                     gdk_dpi_scale *= 96.0 / 25.4;
                     monitor.mwidth = (int)((double)monitor.width / gdk_dpi_scale);
@@ -161,27 +162,30 @@ namespace DPI
                     Mode &mode = monitor.getOrCreateMode(mode_info->width, mode_info->height);
                     mode.freqs.push_back(rate);
 
-                    //if (k < output_info->npreferred)
+                    // if (k < output_info->npreferred)
                     //{
-                    //    monitor.prefered_freq_index.push_back(mode.freqs.size() - 1);
-                    //    monitor.prefered_mode_index.push_back(monitor.getModeIndex(mode_info->width, mode_info->height));
-                    //}
+                    //     monitor.prefered_freq_index.push_back(mode.freqs.size() - 1);
+                    //     monitor.prefered_mode_index.push_back(monitor.getModeIndex(mode_info->width, mode_info->height));
+                    // }
                 }
 
                 // sort modes and freqs
                 {
                     std::sort(monitor.modes.begin(),
-                        monitor.modes.end(),
-                        [](const Mode& a, const Mode& b) {
-                            return a.width * a.height > b.width * b.height;
-                        });
+                              monitor.modes.end(),
+                              [](const Mode &a, const Mode &b)
+                              {
+                                  return a.width * a.height > b.width * b.height;
+                              });
 
-                    for (auto& mode : monitor.modes) {
+                    for (auto &mode : monitor.modes)
+                    {
                         std::sort(mode.freqs.begin(),
-                            mode.freqs.end(),
-                            [](const float& a, const float& b) {
-                                return a > b;
-                            });
+                                  mode.freqs.end(),
+                                  [](const float &a, const float &b)
+                                  {
+                                      return a > b;
+                                  });
                     }
                 }
 
@@ -256,6 +260,31 @@ namespace DPI
         XRRFreeMonitors(monitor_info_array);
 
         XRRFreeScreenResources(screenResources);
+
+        // compute scale factors using xlib
+        {
+            XWindowAttributes xwa;
+            for (auto &monitor : result)
+            {
+                // search display / screen match
+                for (int dpyScreen = 0; dpyScreen < ScreenCount(dpy); dpyScreen++)
+                {
+                    Screen *screen = ScreenOfDisplay(dpy, dpyScreen);
+                    Window rootWindow = RootWindow(dpy, dpyScreen);
+                    XGetWindowAttributes(dpy, rootWindow, &xwa);
+                    if (monitor.x != xwa.x || monitor.y != xwa.y)
+                        continue;
+                    
+                    double scale_x = (double)screen->width / (double)screen->mwidth * 25.4;
+                    double scale_y = (double)screen->height / (double)screen->mheight * 25.4;
+                    double scale = (scale_x + scale_y) / 2;
+                    scale = MathCore::OP<double>::round(scale);
+                    scale = scale / 96.0;
+
+                    monitor.scaleFactor = scale;
+                }
+            }
+        }
 
         XCloseDisplay(dpy);
         return result;
@@ -334,11 +363,11 @@ namespace DPI
 
         sizeHints.flags |= USPosition;
 
-        //sizeHints.flags |= PMinSize | PMaxSize | USPosition;
+        // sizeHints.flags |= PMinSize | PMaxSize | USPosition;
 
         sizeHints.min_width = sizeHints.max_width = monitorSize.width;
         sizeHints.min_height = sizeHints.max_height = monitorSize.height;
-        
+
         sizeHints.x = monitorPosition.x;
         sizeHints.y = monitorPosition.y;
 
@@ -402,11 +431,11 @@ namespace DPI
                                       DefaultRootWindow(dpy),
                                       False,
                                       SubstructureNotifyMask | SubstructureRedirectMask,
-                                      //ClientMessage,
+                                      // ClientMessage,
                                       &event);
     }
 
-    void Display::setFullscreenAttribute(const NativeWindowHandleType &nativeWindow, const Monitor *monitor )
+    void Display::setFullscreenAttribute(const NativeWindowHandleType &nativeWindow, const Monitor *monitor)
     {
 
         auto dpy = XOpenDisplay(nullptr);
@@ -419,7 +448,6 @@ namespace DPI
         //     // constexpr unsigned long eventMask = FocusChangeMask | ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |
         //     //                         PointerMotionMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask |
         //     //                         EnterWindowMask | LeaveWindowMask | VisibilityChangeMask | PropertyChangeMask;
-
 
         //     XSetWindowAttributes attributes;
         //     //attributes.colormap   = wa.colormap;
@@ -446,7 +474,7 @@ namespace DPI
 
         XMoveWindow(dpy, nativeWindow, pos.x, pos.y);
         XFlush(dpy);
-        //change_compositor_fullscreen(dpy,nativeWindow);
+        // change_compositor_fullscreen(dpy,nativeWindow);
         send_change_fullscreen(dpy, nativeWindow);
         XFlush(dpy);
 
@@ -692,16 +720,16 @@ namespace DPI
 
 namespace DPI
 {
-    //struct _MonitorInfo
+    // struct _MonitorInfo
     //{
-    //    // HMONITOR hMonitor;
-    //    // HDC hdcMonitor;
-    //    // MONITORINFOEX monitorInfoEx;
-    //    // uint32_t dpi_x;
-    //    // uint32_t dpi_y;
-    //    // DEVICE_SCALE_FACTOR deviceScaleFactor;
-    //    // float scaleFactor;
-    //    // DEVMODE devMode;
+    //     // HMONITOR hMonitor;
+    //     // HDC hdcMonitor;
+    //     // MONITORINFOEX monitorInfoEx;
+    //     // uint32_t dpi_x;
+    //     // uint32_t dpi_y;
+    //     // DEVICE_SCALE_FACTOR deviceScaleFactor;
+    //     // float scaleFactor;
+    //     // DEVMODE devMode;
 
     //    int x_pixels;
     //    int y_pixels;
@@ -767,7 +795,7 @@ namespace DPI
                 this_monitor.scaleFactor = (float)this_monitor.width / (float)(width_virtual_pixels);
 
                 this_monitor.name = miex.szDevice;
-                this_monitor.port = (char*)devMode.dmDeviceName;
+                this_monitor.port = (char *)devMode.dmDeviceName;
                 // printf("%f\n", this_monitor.scale_factor);
 
                 // fill modes
@@ -776,18 +804,19 @@ namespace DPI
                     DEVMODE devMode_aux = {};
                     memset(&devMode_aux, 0, sizeof(DEVMODE));
                     devMode_aux.dmSize = sizeof(DEVMODE);
-                    while (EnumDisplaySettings(miex.szDevice, mode_idx, &devMode_aux)) {
-                        if (devMode_aux.dmBitsPerPel != devMode.dmBitsPerPel 
+                    while (EnumDisplaySettings(miex.szDevice, mode_idx, &devMode_aux))
+                    {
+                        if (devMode_aux.dmBitsPerPel != devMode.dmBitsPerPel
                             //||(devMode_aux.dmDisplayFlags & DM_INTERLACED) != 0
-                            || devMode_aux.dmDisplayFixedOutput != DMDFO_DEFAULT
-                            ) {
+                            || devMode_aux.dmDisplayFixedOutput != DMDFO_DEFAULT)
+                        {
                             mode_idx++;
                             memset(&devMode_aux, 0, sizeof(DEVMODE));
                             devMode_aux.dmSize = sizeof(DEVMODE);
                             continue;
                         }
 
-                        Mode& mode = this_monitor.getOrCreateMode(devMode_aux.dmPelsWidth, devMode_aux.dmPelsHeight);
+                        Mode &mode = this_monitor.getOrCreateMode(devMode_aux.dmPelsWidth, devMode_aux.dmPelsHeight);
                         mode.freqs.push_back((float)devMode_aux.dmDisplayFrequency);
 
                         mode_idx++;
@@ -798,22 +827,25 @@ namespace DPI
                     // sort modes and freqs
                     {
                         std::sort(this_monitor.modes.begin(),
-                            this_monitor.modes.end(),
-                            [](const Mode& a, const Mode& b) {
-                                return a.width * a.height > b.width * b.height;
-                            });
+                                  this_monitor.modes.end(),
+                                  [](const Mode &a, const Mode &b)
+                                  {
+                                      return a.width * a.height > b.width * b.height;
+                                  });
 
-                        for (auto& mode : this_monitor.modes) {
+                        for (auto &mode : this_monitor.modes)
+                        {
                             std::sort(mode.freqs.begin(),
-                                mode.freqs.end(),
-                                [](const float& a, const float& b) {
-                                    return a > b;
-                                });
+                                      mode.freqs.end(),
+                                      [](const float &a, const float &b)
+                                      {
+                                          return a > b;
+                                      });
                         }
                     }
 
                     {
-                        Mode& mode = this_monitor.getOrCreateMode(devMode.dmPelsWidth, devMode.dmPelsHeight);
+                        Mode &mode = this_monitor.getOrCreateMode(devMode.dmPelsWidth, devMode.dmPelsHeight);
 
                         this_monitor.current_mode_index = this_monitor.getModeIndex(devMode.dmPelsWidth, devMode.dmPelsHeight);
                         this_monitor.current_freq_index = 0;
@@ -851,19 +883,16 @@ namespace DPI
             }
             else
                 return FALSE;
-
         }
-
 
         return TRUE;
 
+        // std::vector<_MonitorInfo> &allMonitors = *(std::vector<_MonitorInfo> *)dwData;
 
-        //std::vector<_MonitorInfo> &allMonitors = *(std::vector<_MonitorInfo> *)dwData;
-
-        //MONITORINFOEX miex;
-        //memset(&miex, 0, sizeof(MONITORINFOEX));
-        //miex.cbSize = sizeof(MONITORINFOEX);
-        //if (GetMonitorInfo(hMonitor, &miex))
+        // MONITORINFOEX miex;
+        // memset(&miex, 0, sizeof(MONITORINFOEX));
+        // miex.cbSize = sizeof(MONITORINFOEX);
+        // if (GetMonitorInfo(hMonitor, &miex))
         //{
 
         //    _MonitorInfo this_monitor;
@@ -929,15 +958,18 @@ namespace DPI
 
         //    allMonitors.push_back(this_monitor);
         //}
-        //return TRUE;
+        // return TRUE;
     }
 
-    std::vector<Monitor> Display::QueryMonitors(int* monitorDefaultIndex) {
+    std::vector<Monitor> Display::QueryMonitors(int *monitorDefaultIndex)
+    {
         std::vector<Monitor> allMonitors;
         EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
         *monitorDefaultIndex = 0;
-        for (int i = 0; i < (int)allMonitors.size(); i++) {
-            if (allMonitors[i].primary) {
+        for (int i = 0; i < (int)allMonitors.size(); i++)
+        {
+            if (allMonitors[i].primary)
+            {
                 *monitorDefaultIndex = i;
                 break;
             }
@@ -946,25 +978,25 @@ namespace DPI
         return allMonitors;
     }
 
-    void Display::setFullscreenAttribute(const NativeWindowHandleType& nativeWindow, const Monitor* monitor) {
+    void Display::setFullscreenAttribute(const NativeWindowHandleType &nativeWindow, const Monitor *monitor)
+    {
         SetWindowPos(nativeWindow, nullptr, monitor->x, monitor->y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
-        //if (m_cursorGrabbed)
-            //grabCursor(true);
-
+        // if (m_cursorGrabbed)
+        // grabCursor(true);
     }
 
-    //int Display::MonitorCount()
+    // int Display::MonitorCount()
     //{
-    //    std::vector<_MonitorInfo> allMonitors;
-    //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
-    //    return (int)allMonitors.size();
-    //}
+    //     std::vector<_MonitorInfo> allMonitors;
+    //     EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
+    //     return (int)allMonitors.size();
+    // }
 
-    //int Display::MonitorDefault()
+    // int Display::MonitorDefault()
     //{
-    //    std::vector<_MonitorInfo> allMonitors;
-    //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
+    //     std::vector<_MonitorInfo> allMonitors;
+    //     EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
 
     //    for (size_t i = 0; i < allMonitors.size(); i++)
     //    {
@@ -975,10 +1007,10 @@ namespace DPI
     //    return 0;
     //}
 
-    //MathCore::vec2i Display::MonitorPositionPixels(int monitor_num)
+    // MathCore::vec2i Display::MonitorPositionPixels(int monitor_num)
     //{
-    //    if (monitor_num == -1)
-    //        monitor_num = MonitorDefault();
+    //     if (monitor_num == -1)
+    //         monitor_num = MonitorDefault();
 
     //    std::vector<_MonitorInfo> allMonitors;
     //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
@@ -992,10 +1024,10 @@ namespace DPI
     //    return result;
     //}
 
-    //MathCore::vec2i Display::MonitorCurrentResolutionPixels(int monitor_num)
+    // MathCore::vec2i Display::MonitorCurrentResolutionPixels(int monitor_num)
     //{
-    //    if (monitor_num == -1)
-    //        monitor_num = MonitorDefault();
+    //     if (monitor_num == -1)
+    //         monitor_num = MonitorDefault();
 
     //    std::vector<_MonitorInfo> allMonitors;
     //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
@@ -1009,10 +1041,10 @@ namespace DPI
     //    return result;
     //}
 
-    //MathCore::vec2f Display::MonitorRealSizeMillimeters(int monitor_num)
+    // MathCore::vec2f Display::MonitorRealSizeMillimeters(int monitor_num)
     //{
-    //    if (monitor_num == -1)
-    //        monitor_num = MonitorDefault();
+    //     if (monitor_num == -1)
+    //         monitor_num = MonitorDefault();
 
     //    std::vector<_MonitorInfo> allMonitors;
     //    EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
@@ -1026,20 +1058,20 @@ namespace DPI
     //    return result;
     //}
 
-    //MathCore::vec2f Display::MonitorRealSizeInches(int monitor_num)
+    // MathCore::vec2f Display::MonitorRealSizeInches(int monitor_num)
     //{
-    //    return MonitorRealSizeMillimeters(monitor_num) / 25.4f;
-    //}
+    //     return MonitorRealSizeMillimeters(monitor_num) / 25.4f;
+    // }
 
-    //MathCore::vec2f Display::MonitorDPIf(int monitor_num)
+    // MathCore::vec2f Display::MonitorDPIf(int monitor_num)
     //{
-    //    return ComputeDPIf(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
-    //}
+    //     return ComputeDPIf(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
+    // }
 
-    //MathCore::vec2i Display::MonitorDPIi(int monitor_num)
+    // MathCore::vec2i Display::MonitorDPIi(int monitor_num)
     //{
-    //    return ComputeDPIi(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
-    //}
+    //     return ComputeDPIi(MonitorCurrentResolutionPixels(monitor_num), MonitorRealSizeInches(monitor_num));
+    // }
 
     MathCore::vec2f Display::ComputeDPIf(const MathCore::vec2i &resolution, const MathCore::vec2f &realSizeInches)
     {
