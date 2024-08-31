@@ -282,6 +282,8 @@ namespace DPI
                     scale = scale / 96.0;
 
                     monitor.scaleFactor = scale;
+                    
+                    break;
                 }
             }
         }
