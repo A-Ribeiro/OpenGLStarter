@@ -15,8 +15,8 @@ namespace AppKit
                                                   int currentIndex,
                                                   const ITKExtension::Model::Node &node,
                                                   const ITKExtension::Model::ModelContainer *container,
-                                                  std::map<int, std::shared_ptr<Components::ComponentMesh> > &geometryCache,
-                                                  std::map<int, std::shared_ptr<Components::ComponentMaterial> > &materialCache,
+                                                  std::unordered_map<int, std::shared_ptr<Components::ComponentMesh> > &geometryCache,
+                                                  std::unordered_map<int, std::shared_ptr<Components::ComponentMaterial> > &materialCache,
                                                   std::shared_ptr<Transform> root,
                                                   std::shared_ptr<Components::ComponentMaterial> defaultMaterial,
                                                   uint32_t model_dynamic_upload, uint32_t model_static_upload)
@@ -116,7 +116,7 @@ namespace AppKit
 
                                 material->type = Components::MaterialPBR;
 
-                                std::map<std::string, MathCore::vec4f>::const_iterator it = mat->vec4Value.find("diffuse");
+                                std::unordered_map<std::string, MathCore::vec4f>::const_iterator it = mat->vec4Value.find("diffuse");
                                 if (it != mat->vec4Value.end())
                                 {
                                     material->pbr.albedoColor = MathCore::CVT<MathCore::vec4f>::toVec3(it->second);
@@ -200,8 +200,8 @@ namespace AppKit
             uint32_t model_dynamic_upload, uint32_t model_static_upload)
         {
 
-            std::map<int, std::shared_ptr<Components::ComponentMesh>> geometryCache;
-            std::map<int, std::shared_ptr<Components::ComponentMaterial>> materialCache;
+            std::unordered_map<int, std::shared_ptr<Components::ComponentMesh>> geometryCache;
+            std::unordered_map<int, std::shared_ptr<Components::ComponentMaterial>> materialCache;
 
             ITKExtension::Model::ModelContainer *container = new ITKExtension::Model::ModelContainer();
             container->read(filename.c_str());

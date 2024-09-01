@@ -798,7 +798,7 @@ namespace AppKit
 
         bool __compare__particle__system__reverse__(const std::shared_ptr<Components::ComponentParticleSystem> a, const std::shared_ptr<Components::ComponentParticleSystem> b)
         {
-            return (a->distance_to_camera > b->distance_to_camera);
+            return (b->distance_to_camera < a->distance_to_camera);
         }
 
         void RenderPipeline::runSinglePassPipeline(std::shared_ptr<Transform> root, std::shared_ptr<Components::ComponentCamera> camera, bool clear)

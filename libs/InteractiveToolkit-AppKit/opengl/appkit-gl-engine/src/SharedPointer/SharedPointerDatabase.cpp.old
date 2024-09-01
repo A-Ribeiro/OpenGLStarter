@@ -13,7 +13,7 @@ namespace AppKit
 
         void SharedPointerDatabase::notifyDeletion(void *ref)
         {
-            std::map<void *, std::vector<SharedPointerBase *>>::iterator it = refs.find(ref);
+            std::unordered_map<void *, std::vector<SharedPointerBase *>>::iterator it = refs.find(ref);
             if (it != refs.end())
             {
                 std::vector<SharedPointerBase *> &pointers = it->second;
@@ -34,7 +34,7 @@ namespace AppKit
         {
             if (ref == nullptr || pointer == nullptr)
                 return;
-            std::map<void *, std::vector<SharedPointerBase *>>::iterator it = refs.find(ref);
+            std::unordered_map<void *, std::vector<SharedPointerBase *>>::iterator it = refs.find(ref);
             if (it != refs.end())
             {
                 std::vector<SharedPointerBase *> &pointers = it->second;

@@ -78,7 +78,7 @@ namespace AppKit
             AppKit::OpenGL::GLDynamicFBO dynamicFBOSun;
             AppKit::OpenGL::GLTexture dummyColorTextureSun;
 
-            std::map<Components::ComponentLight *, ShadowCache *> shadowCacheDic;
+            std::unordered_map<Components::ComponentLight *, ShadowCache *> shadowCacheDic;
             Platform::ObjectPool<ShadowCache> shadowCachePool;
 
             std::vector<AlgorithmCore::Sorting::SortIndexi> sortResult;

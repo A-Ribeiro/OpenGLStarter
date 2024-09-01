@@ -20,7 +20,7 @@ namespace AppKit
         template <typename T>
         class ReferenceCounter
         {
-            std::map<T, ReferenceCounterElement> map;
+            std::unordered_map<T, ReferenceCounterElement> map;
 
         public:
             T add(T c, bool isArray = false)
@@ -58,7 +58,7 @@ namespace AppKit
                 if (c == nullptr)
                     return;
 
-                typename std::map<T, ReferenceCounterElement>::iterator it = map.find(c);
+                typename std::unordered_map<T, ReferenceCounterElement>::iterator it = map.find(c);
 
                 if (it != map.end())
                 {
@@ -90,7 +90,7 @@ namespace AppKit
 
                 ITK_ABORT(!willDeleteOnRemove(c), "Not the last element to remove error.\n");
 
-                typename std::map<T, ReferenceCounterElement>::iterator it = map.find(c);
+                typename std::unordered_map<T, ReferenceCounterElement>::iterator it = map.find(c);
 
                 if (it != map.end())
                 {
@@ -116,7 +116,7 @@ namespace AppKit
             ~ReferenceCounter()
             {
                 /*
-                typename std::map<T,ReferenceCounterElement>::iterator it = map.begin();
+                typename std::unordered_map<T,ReferenceCounterElement>::iterator it = map.begin();
                 while (it != map.end()){
                     T c = it->first;
                     if (it->second.isArray)

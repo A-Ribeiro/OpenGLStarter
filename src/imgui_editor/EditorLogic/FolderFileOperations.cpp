@@ -908,7 +908,7 @@ void FolderFileOperations::refreshDirectoryStructure(std::shared_ptr<TreeNode> t
     struct _To_insert_struct {
         Directory dir_info;
         std::shared_ptr<TreeNode> insert_where;
-        std::map<std::string, std::shared_ptr<TreeNode> > childrenMap;
+        std::unordered_map<std::string, std::shared_ptr<TreeNode> > childrenMap;
     };
 
     std::vector< _To_insert_struct > _to_insert;

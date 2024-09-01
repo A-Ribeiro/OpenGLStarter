@@ -432,7 +432,7 @@ namespace AppKit
         class AnimationMixer
         {
 
-            std::map<std::string, uint32_t> clips_index;
+            std::unordered_map<std::string, uint32_t> clips_index;
             std::vector<AnimationClip *> clips_array;
             std::vector<AnimationTransitionChannelInformation> transitions;
 

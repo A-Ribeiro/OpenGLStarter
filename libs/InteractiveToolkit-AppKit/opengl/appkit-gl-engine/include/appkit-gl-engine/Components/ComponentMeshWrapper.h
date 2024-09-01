@@ -30,7 +30,7 @@ namespace AppKit
 
                 std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
-                std::map<Component *, bool> visibleFromCameras;
+                std::unordered_map<Component *, bool> visibleFromCameras;
 
                 // sphere shape
                 MathCore::vec3f sphereCenter;

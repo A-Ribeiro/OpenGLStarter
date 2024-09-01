@@ -13,7 +13,7 @@ namespace AppKit
         class FrankenShaderManager : public DefaultEngineShader
         {
 
-            std::map<uint32_t, FrankenShader *> shaderMap;
+            std::unordered_map<uint32_t, FrankenShader *> shaderMap;
 
             // #if defined(PBR_MODE_TEX_LOOKUP)
             // AppKit::OpenGL::GLTexture pbrOptimizationTexture;

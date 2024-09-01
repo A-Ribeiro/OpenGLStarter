@@ -12,7 +12,7 @@ namespace AppKit
 
         class SharedPointerDatabase
         {
-            std::map<void *, std::vector<SharedPointerBase *>> refs;
+            std::unordered_map<void *, std::vector<SharedPointerBase *>> refs;
 
         public:
             static SharedPointerDatabase *Instance();

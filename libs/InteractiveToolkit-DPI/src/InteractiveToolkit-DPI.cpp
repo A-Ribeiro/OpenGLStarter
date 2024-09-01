@@ -175,7 +175,7 @@ namespace DPI
 						monitor.modes.end(),
 						[](const Mode& a, const Mode& b)
 						{
-							return a.width * a.height > b.width * b.height;
+							return b.width * b.height < a.width * a.height;
 						});
 
 					for (auto& mode : monitor.modes)
@@ -184,7 +184,7 @@ namespace DPI
 							mode.freqs.end(),
 							[](const float& a, const float& b)
 							{
-								return a > b;
+								return b < a;
 							});
 					}
 				}
@@ -866,7 +866,7 @@ namespace DPI
 							this_monitor.modes.end(),
 							[](const Mode& a, const Mode& b)
 							{
-								return a.width * a.height > b.width * b.height;
+								return b.width * b.height < a.width * a.height;
 							});
 
 						for (auto& mode : this_monitor.modes)
@@ -875,7 +875,7 @@ namespace DPI
 								mode.freqs.end(),
 								[](const float& a, const float& b)
 								{
-									return a > b;
+									return b < a;
 								});
 						}
 					}

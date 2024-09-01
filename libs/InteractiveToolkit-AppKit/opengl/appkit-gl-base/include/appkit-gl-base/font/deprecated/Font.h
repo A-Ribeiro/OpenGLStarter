@@ -36,7 +36,7 @@ namespace AppKit
         class Font
         {
             FontHeader mHeader;
-            std::map<uint32_t, FontGlyphInfo> mGlyphs;
+            std::unordered_map<uint32_t, FontGlyphInfo> mGlyphs;
             char *luminancePointer;
 
             void release();

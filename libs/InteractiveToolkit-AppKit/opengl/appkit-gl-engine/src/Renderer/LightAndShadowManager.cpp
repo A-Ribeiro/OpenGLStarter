@@ -119,7 +119,7 @@ namespace AppKit
 
         void LightAndShadowManager::clearCache()
         {
-            std::map<Components::ComponentLight *, ShadowCache *>::iterator it = shadowCacheDic.begin();
+            std::unordered_map<Components::ComponentLight *, ShadowCache *>::iterator it = shadowCacheDic.begin();
             while (it != shadowCacheDic.end())
             {
                 shadowCachePool.release(it->second);
@@ -153,7 +153,7 @@ namespace AppKit
                                                                    ShaderShadowAlgorithmEnum shaderShadowAlgorithm)
         {
 
-            std::map<Components::ComponentLight *, ShadowCache *>::iterator it;
+            std::unordered_map<Components::ComponentLight *, ShadowCache *>::iterator it;
 
             noShadowlightList.clear();
             shadowLightList.clear();

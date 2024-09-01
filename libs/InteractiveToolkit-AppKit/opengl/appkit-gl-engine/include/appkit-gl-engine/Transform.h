@@ -255,7 +255,7 @@ namespace AppKit
         private:
             std::vector<std::shared_ptr<Component>> components;
             std::string name;
-            // std::map< std::string, std::vector<Transform*> > name2children;
+            // std::unordered_map< std::string, std::vector<Transform*> > name2children;
 
             // void insertMapName(Transform *t);
             // void removeMapName(Transform *t);

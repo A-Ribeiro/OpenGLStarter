@@ -52,7 +52,7 @@ namespace AppKit
             class ComponentFrustumCulling : public Component
             {
 
-                std::map<Component *, bool> visibleFromCameras;
+                std::unordered_map<Component *, bool> visibleFromCameras;
 
             public:
                 bool debugCollisionShapes;

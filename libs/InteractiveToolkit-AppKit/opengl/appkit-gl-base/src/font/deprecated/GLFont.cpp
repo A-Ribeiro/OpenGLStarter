@@ -46,7 +46,7 @@ namespace AppKit
         //
         //
         GLFont::GLFont(const FontHeader &aHeader,
-                       std::map<uint32_t, FontGlyphInfo> &aGlyphs,
+                       std::unordered_map<uint32_t, FontGlyphInfo> &aGlyphs,
                        const char *luminancePointer)
         {
 
@@ -58,7 +58,7 @@ namespace AppKit
             float w = (float)aHeader.mTexW;
             float h = (float)aHeader.mTexH;
 
-            std::map<uint32_t, FontGlyphInfo>::iterator it = aGlyphs.begin();
+            std::unordered_map<uint32_t, FontGlyphInfo>::iterator it = aGlyphs.begin();
 
             while (it != aGlyphs.end())
             {
@@ -191,7 +191,7 @@ namespace AppKit
 
         CollisionCore::AABB<MathCore::vec3f> GLFont::computeBounds(const wchar_t *string)
         {
-            std::map<uint32_t, GLFontGlyphInfo>::iterator it;
+            std::unordered_map<uint32_t, GLFontGlyphInfo>::iterator it;
 
             bool first = true;
             MathCore::vec2f p;
@@ -261,7 +261,7 @@ namespace AppKit
 
         CollisionCore::AABB<MathCore::vec3f> GLFont::computeBoundsJustBox(const wchar_t *string)
         {
-            std::map<uint32_t, GLFontGlyphInfo>::iterator it;
+            std::unordered_map<uint32_t, GLFontGlyphInfo>::iterator it;
 
             bool first = true;
             MathCore::vec2f p;
@@ -323,7 +323,7 @@ namespace AppKit
             }
 
             // consult the glyphTable
-            std::map<uint32_t, GLFontGlyphInfo>::iterator it = mGlyphs.find(c);
+            std::unordered_map<uint32_t, GLFontGlyphInfo>::iterator it = mGlyphs.find(c);
             if (it != mGlyphs.end())
             {
                 const GLFontGlyphInfo &glyph = it->second;
@@ -358,7 +358,7 @@ namespace AppKit
                     p.y -= mHeader.mGlyphHeight;
                     continue;
                 }
-                std::map<uint32_t, GLFontGlyphInfo>::iterator it = mGlyphs.find(string[i]);
+                std::unordered_map<uint32_t, GLFontGlyphInfo>::iterator it = mGlyphs.find(string[i]);
                 if (it != mGlyphs.end())
                 {
                     const GLFontGlyphInfo &glyph = it->second;
