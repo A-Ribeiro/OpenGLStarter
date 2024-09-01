@@ -86,6 +86,9 @@ namespace AppKit
 
             EventCore::Property<AppKit::GLEngine::iRect> WindowViewport; // before apply viewportScaleFactor
             EventCore::Property<AppKit::GLEngine::iRect> CameraViewport; // after apply viewportScaleFactor
+            
+            EventCore::Property<MathCore::vec2i> iMousePosLocal; // y is in window local coord, increase to bottom (inverted).
+
             EventCore::Property<MathCore::vec2f> MousePos;
             EventCore::Property<MathCore::vec2f> MousePosRelatedToCenter;
             EventCore::Property<MathCore::vec2f> MousePosRelatedToCenterNormalized;

@@ -28,6 +28,10 @@ public:
     std::shared_ptr<AppKit::GLEngine::Transform> mainCamera;
 
     EventCore::PressReleaseDetector m_to_move;
+    EventCore::PressReleaseDetector mouse_right_btn_to_move;
+    EventCore::PressReleaseDetector is_to_hide_mouse;
+
+    MathCore::vec2i savedMouseCoordi;
 
 
     Scene3D(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);

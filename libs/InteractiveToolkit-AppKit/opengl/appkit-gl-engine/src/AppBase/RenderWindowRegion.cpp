@@ -68,6 +68,7 @@ namespace AppKit
             case AppKit::Window::MouseEventType::ButtonReleased:
             case AppKit::Window::MouseEventType::Moved:
             {
+                iMousePosLocal = local_evt.position;
                 MathCore::vec2f appCoord = localCoordToAppCoord(local_evt.position);
                 MousePos = appCoord;
                 appCoord -= screenCenterF;
