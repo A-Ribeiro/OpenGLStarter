@@ -161,6 +161,7 @@ void Scene3D::OnUpdate(Platform::Time* time) {
         if (cameraMove == nullptr){
             mainCamera->addComponent(Component::CreateShared<Components::ComponentCameraMove>());
             is_to_hide_mouse.setState(true);
+            savedMouseCoordi = this->renderWindow->screenCenterI;
         } else {
             mainCamera->removeComponent(cameraMove);
             is_to_hide_mouse.setState(false);
