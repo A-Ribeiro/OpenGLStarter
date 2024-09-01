@@ -1099,6 +1099,8 @@ namespace AppKit
             auto app = AppKit::GLEngine::Engine::Instance()->app;
             if (app != nullptr)
                 renderWindowRegion = app->screenRenderWindow;
+            
+            skip_traversing = false;
         }
 
         Transform::~Transform()
@@ -1140,6 +1142,9 @@ namespace AppKit
             {
                 auto item = to_traverse.back();
                 to_traverse.pop_back();
+
+                if (item.transform->skip_traversing)
+                    continue;
 
                 if (!OnNode(item.transform, userData))
                     return false;
@@ -1231,7 +1236,7 @@ namespace AppKit
                 {
                     stack.push_back(root);
                     int new_lvl = root.level - 1;
-                    if (new_lvl > 0 && root.transform->children.size() > 0)
+                    if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
                         root = {root.transform->children[0], new_lvl, 0};
                     else
                         root = {nullptr, 0, 0};
@@ -1241,6 +1246,8 @@ namespace AppKit
                 // save the current info from it
                 auto item = stack.back();
                 stack.pop_back();
+
+                if (!item.transform->skip_traversing)
                 if (!OnNode(item.transform, userData))
                     return false;
 
@@ -1252,6 +1259,7 @@ namespace AppKit
                 {
                     item = stack.back();
                     stack.pop_back();
+                    if (!item.transform->skip_traversing)
                     if (!OnNode(item.transform, userData))
                         return false;
                 }
@@ -1300,6 +1308,9 @@ namespace AppKit
                 auto item = to_traverse.back();
                 to_traverse.pop_back();
 
+                if (item.transform->skip_traversing)
+                    continue;
+
                 if (!OnNode(item.transform, userData))
                     return false;
 
@@ -1388,7 +1399,7 @@ namespace AppKit
                 {
                     stack.push_back(root);
                     int new_lvl = root.level - 1;
-                    if (new_lvl > 0 && root.transform->children.size() > 0)
+                    if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
                         root = {root.transform->children[0], new_lvl, 0};
                     else
                         root = {nullptr, 0, 0};
@@ -1398,6 +1409,7 @@ namespace AppKit
                 // save the current info from it
                 auto item = stack.back();
                 stack.pop_back();
+                if (!item.transform->skip_traversing)
                 if (!OnNode(item.transform, userData))
                     return false;
 
@@ -1409,6 +1421,7 @@ namespace AppKit
                 {
                     item = stack.back();
                     stack.pop_back();
+                    if (!item.transform->skip_traversing)
                     if (!OnNode(item.transform, userData))
                         return false;
                 }
@@ -1458,6 +1471,9 @@ namespace AppKit
                 auto item = to_traverse.back();
                 to_traverse.pop_back();
 
+                if (item.transform->skip_traversing)
+                    continue;
+
                 if (!OnNode(item.transform, userData))
                     return false;
 
@@ -1489,6 +1505,9 @@ namespace AppKit
             {
                 auto item = to_traverse.back();
                 to_traverse.pop_back();
+
+                if (item.transform->skip_traversing)
+                    continue;
 
                 if (!OnNode(item.transform, userData))
                     return false;
@@ -1545,6 +1564,7 @@ namespace AppKit
                 entry.cloneDst->setLocalPosition(entry.cloneSrc->getLocalPosition());
                 entry.cloneDst->setLocalRotation(entry.cloneSrc->getLocalRotation());
                 entry.cloneDst->setLocalScale(entry.cloneSrc->getLocalScale());
+                entry.cloneDst->skip_traversing = entry.cloneSrc->skip_traversing;
 
                 for (auto &src_transform : entry.cloneSrc->getChildren())
                 {

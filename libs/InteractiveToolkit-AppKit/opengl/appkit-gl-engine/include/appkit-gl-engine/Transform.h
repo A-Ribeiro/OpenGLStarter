@@ -390,6 +390,7 @@ namespace AppKit
             //
             //
             ///////////////////////////////////////////////////////
+            bool skip_traversing;
 
             bool traversePreOrder_DepthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,

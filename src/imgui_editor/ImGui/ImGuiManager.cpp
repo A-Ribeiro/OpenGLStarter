@@ -1,6 +1,7 @@
 #include "ImGuiManager.h"
 #include "../InnerViewport.h"
 #include "../OpenFolderDialog.h"
+#include "../Scene3D.h"
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
@@ -450,6 +451,12 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 
     PostAction();
     PostAction.clear();
+
+    if (innerViewport->scene3D->is_to_hide_mouse.pressed || innerViewport->scene3D->is_to_hide_mouse.up) {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+        if (innerViewport->scene3D->is_to_hide_mouse.up)
+            innerViewport->scene3D->is_to_hide_mouse.setState(false);
+    }
 
 	// Rendering
 	ImGui::Render();

@@ -10,6 +10,10 @@ using namespace MathCore;
 
 #include "App.h"
 
+#include "./ImGui/ImGuiManager.h"
+#include "./InnerViewport.h"
+#include "./Scene3D.h"
+
 //to load skybox, textures, cubemaps, 3DModels and setup materials
 void SceneGUI::loadResources(){
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
@@ -185,4 +189,9 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
     // } else {
     //     printf("not inside...\n");
     // }
+
+
+    cursorTransform->skip_traversing = ImGuiManager::Instance()->innerViewport->scene3D->is_to_hide_mouse.pressed;
+
+
 }
