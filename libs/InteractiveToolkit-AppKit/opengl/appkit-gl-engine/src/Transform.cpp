@@ -769,7 +769,7 @@ namespace AppKit
         }
 
         void Transform::removeMapName(Transform *node){
-            std::map<std::string,std::vector<Transform*> >::iterator it;
+            std::unordered_map<std::string,std::vector<Transform*> >::iterator it;
             it = name2children.find(node->name);
             if (it != name2children.end()){
                 std::vector<Transform*> &vector = it->second;

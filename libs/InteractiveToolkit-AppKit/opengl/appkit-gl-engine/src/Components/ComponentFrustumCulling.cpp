@@ -146,7 +146,7 @@ namespace AppKit
 
             void ComponentFrustumCulling::setVisibilityFromCamera(Component *cameraPerspective, bool visibility)
             {
-                std::map<Component *, bool>::iterator it;
+                std::unordered_map<Component *, bool>::iterator it;
                 it = visibleFromCameras.find(cameraPerspective);
 
                 if (visibility)
@@ -169,7 +169,7 @@ namespace AppKit
 
             void ComponentFrustumCulling::resetVisibility()
             {
-                std::map<Component *, bool>::iterator it;//, aux;
+                std::unordered_map<Component *, bool>::iterator it;//, aux;
                 for (it = visibleFromCameras.begin(); it != visibleFromCameras.end(); )// it++)
                 {
                     Component *cameraComponent = it->first;
@@ -183,7 +183,7 @@ namespace AppKit
 
             bool ComponentFrustumCulling::isVisibleFromCamera(Component *cameraPerspective)
             {
-                std::map<Component *, bool>::iterator it;
+                std::unordered_map<Component *, bool>::iterator it;
                 it = visibleFromCameras.find(cameraPerspective);
                 return it != visibleFromCameras.end();
             }

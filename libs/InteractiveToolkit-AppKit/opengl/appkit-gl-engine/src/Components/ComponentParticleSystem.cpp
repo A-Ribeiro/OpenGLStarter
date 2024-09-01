@@ -280,7 +280,7 @@ namespace AppKit
 
             bool __compare__particle__reverse__(const Particle &a, const Particle &b)
             {
-                return (a.distance_to_camera > b.distance_to_camera);
+                return (b.distance_to_camera < a.distance_to_camera);
             }
 
             void ComponentParticleSystem::sortPositions(const MathCore::vec3f &cameraPos, const MathCore::vec3f &cameraDirection)

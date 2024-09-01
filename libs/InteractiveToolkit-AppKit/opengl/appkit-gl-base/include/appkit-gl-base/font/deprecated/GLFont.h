@@ -37,7 +37,7 @@ namespace AppKit
         class GLFont
         {
             FontHeader mHeader;
-            std::map<uint32_t, GLFontGlyphInfo> mGlyphs;
+            std::unordered_map<uint32_t, GLFontGlyphInfo> mGlyphs;
             // GLuint mTextureID;
 
             GLTexture texture;
@@ -52,7 +52,7 @@ namespace AppKit
             static void releaseSharedResources();
 
             GLFont(const FontHeader &aHeader,
-                   std::map<uint32_t, FontGlyphInfo> &aGlyphs,
+                   std::unordered_map<uint32_t, FontGlyphInfo> &aGlyphs,
                    const char *luminancePointer);
             ~GLFont();
 

@@ -43,7 +43,7 @@ namespace AppKit
         const GLFont2Glyph *GLFont2::getGlyph(uint32_t charcode) const
         {
 
-            std::map<uint32_t, GLFont2Glyph>::const_iterator it;
+            std::unordered_map<uint32_t, GLFont2Glyph>::const_iterator it;
 
             it = glyphs.find(charcode);
             if (it == glyphs.end())

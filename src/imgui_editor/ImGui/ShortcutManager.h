@@ -105,7 +105,7 @@ class ShortCutCategory{
 
 class ShortcutManager : public View
 {
-    std::map<
+    std::unordered_map<
         std::string, 
         ShortCutCategory
     > shortCutMap;

@@ -85,7 +85,7 @@ namespace AppKit
             float new_line_height; ///< the size of a new line character in pixels units
             GLTexture texture;     ///< the texture with the grayscale alphamap bitmap
 
-            std::map<uint32_t, GLFont2Glyph> glyphs; ///< all glyphs exported with the loaded font
+            std::unordered_map<uint32_t, GLFont2Glyph> glyphs; ///< all glyphs exported with the loaded font
 
             GLFont2();
 
