@@ -34,6 +34,24 @@ namespace AppKit
                 }
             }
 
+            switch (evt.type)
+            {
+            case AppKit::Window::WindowEventType::Resized:
+            {
+                auto engine = AppKit::GLEngine::Engine::Instance();
+                auto glContextConfig = engine->window->getGLContextConfig();
+                //if (engine->isIntelCard) 
+                {
+                    if (glContextConfig.sRgbCapable)
+                        glDisable(GL_FRAMEBUFFER_SRGB);
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+                }
+                break;
+            }
+            default:
+                break;
+            }
+
             if (!forward_events)
                 return;
             for (size_t i = 0; i < innerWindowList.size(); i++)
