@@ -11,6 +11,12 @@
 // #include <glad/gl.h> // extensions here
 
 #ifdef _WIN32
+
+// force use the dedicated GPU to open the OpenGL Context on notebooks
+// https://stackoverflow.com/questions/16823372/forcing-machine-to-use-dedicated-graphics-card
+extern "C" __declspec(dllexport) int32_t NvOptimusEnablement = 1;
+extern "C" __declspec(dllexport) int32_t AmdPowerXpressRequestHighPerformance = 1;
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
