@@ -71,9 +71,10 @@ App::App()
         auto screen_size_pixels = selectedMonitor->SizePixels();
         auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
 
-        this->GlobalScale = (float)(dpii.y / 150.0f) * selectedMonitor->scaleFactor;
+        this->GlobalScale = (float)(dpii.y / 150.0f);// *selectedMonitor->scaleFactor;
         if (this->GlobalScale < 1.0f)
             this->GlobalScale = 1.0f;
+        this->GlobalScale *= selectedMonitor->scaleFactor;
 
         mainMonitorCenter = selectedMonitor->Position() + screen_size_pixels / 2;
         windowResolution = window->getSize();
