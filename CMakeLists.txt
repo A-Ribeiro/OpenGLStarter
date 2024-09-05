@@ -140,6 +140,8 @@ add_subdirectory(src/tech-demo-shadow)
 
 add_subdirectory(src/imgui_example)
 
+add_subdirectory(src/imguizmo_example)
+
 add_subdirectory(src/imgui_editor)
 
 add_subdirectory(src/imgui_service_ui)

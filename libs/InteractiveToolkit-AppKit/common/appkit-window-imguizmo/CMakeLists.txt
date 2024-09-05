@@ -56,4 +56,38 @@ ${imguizmo_DOWNLOADED_PATH}
 "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
-# compile examples
+# # compile examples
+# project(appkit-window-imguizmo-example)
+
+# message(STATUS "IMGUIZMO examples at: ${imguizmo_BINARY_PATH}/example")
+# if(NOT EXISTS "${imguizmo_BINARY_PATH}/example/")
+#     # file(MAKE_DIRECTORY "${imguizmo_BINARY_PATH}/example")
+#     # message(STATUS "[${imguizmo_BINARY_PATH}/example] created")
+#     tool_copy_to_dir(
+#         ${imguizmo_BINARY_PATH}/example
+
+#         ${imguizmo_DOWNLOADED_PATH}/example/main.cpp
+#         ${imguizmo_DOWNLOADED_PATH}/example/stb_image.h
+#         ${imguizmo_DOWNLOADED_PATH}/example/ImApp.h
+#     )
+# endif()
+
+# set(SRC
+#     ${imguizmo_BINARY_PATH}/example/main.cpp
+#     ${imguizmo_BINARY_PATH}/example/stb_image.h
+#     ${imguizmo_BINARY_PATH}/example/ImApp.h
+# )
+
+# tool_define_source_group_base_path( "${imguizmo_DOWNLOADED_PATH}/example" ${SRC} )
+
+# add_executable( ${PROJECT_NAME} ${SRC})
+
+# set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "EXAMPLE")
+
+# target_link_libraries(${PROJECT_NAME} PUBLIC 
+#     appkit-window-imguizmo
+# )
+
+
+
+
