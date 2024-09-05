@@ -10,15 +10,21 @@ tool_get_dirs(imgui_DOWNLOADED_PATH imgui_BINARY_PATH imgui)
 
 # FIX mouse off center
 #
-set(StringReplaceSource "const ImVec2 pos = base_pos - offset;")
-set(StringReplaceTarget "const ImVec2 pos = base_pos - offset * base_scale;")
+tool_replace_in_file(
+    ${imgui_DOWNLOADED_PATH}/imgui.cpp
+    "const ImVec2 pos = base_pos - offset;" # Search
+    "const ImVec2 pos = base_pos - offset * base_scale;" # Replace
+)
 
-file(READ "${imgui_DOWNLOADED_PATH}/imgui.cpp" AUX)
-string(FIND "${AUX}" "${StringReplaceTarget}" matchres)
-if(${matchres} EQUAL -1)
-    string(REPLACE "${StringReplaceSource}" "${StringReplaceTarget}" output "${AUX}")
-    file(WRITE "${imgui_DOWNLOADED_PATH}/imgui.cpp" "// Updated By CMake Script:\n// ${CMAKE_CURRENT_LIST_FILE}\n\n${output}")
-endif ()
+# set(StringReplaceSource "const ImVec2 pos = base_pos - offset;")
+# set(StringReplaceTarget "const ImVec2 pos = base_pos - offset * base_scale;")
+
+# file(READ "${imgui_DOWNLOADED_PATH}/imgui.cpp" AUX)
+# string(FIND "${AUX}" "${StringReplaceTarget}" matchres)
+# if(${matchres} EQUAL -1)
+#     string(REPLACE "${StringReplaceSource}" "${StringReplaceTarget}" output "${AUX}")
+#     file(WRITE "${imgui_DOWNLOADED_PATH}/imgui.cpp" "// Updated By CMake Script:\n// ${CMAKE_CURRENT_LIST_FILE}\n\n${output}")
+# endif ()
 
 
 set(IMGUI_SRC
