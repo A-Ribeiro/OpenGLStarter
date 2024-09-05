@@ -47,6 +47,10 @@ ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::LOCAL;
 bool useSnap = false;
 float snap[3] = {1.f, 1.f, 1.f};
 
+ImVec2 GizmoWindowSize = {1,1};
+float GizmoWindowAspect = 1;
+
+
 float objectMatrix[4][16] = {
     {1.f, 0.f, 0.f, 0.f,
      0.f, 1.f, 0.f, 0.f,
@@ -267,19 +271,50 @@ void TransformStart(float *cameraView, float *cameraProjection, float *matrix)
     ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_Appearing);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImVec4)ImColor(0.35f, 0.3f, 0.3f));
     ImGui::Begin("Gizmo", 0, gizmoWindowFlags);
+    
+        ImVec2 min = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
+        ImVec2 max = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
+
+        ImVec2 pos = min;        // ImGui::GetWindowPos();
+        ImVec2 size = max - min; // ImGui::GetWindowSize();
+
+        // ImGuiIO &io = ImGui::GetIO();
+        // pos *= io.DisplayFramebufferScale;
+        // size *= io.DisplayFramebufferScale;
+
+        // check size and the need to recreate projection / camera
+        {
+            {
+                GizmoWindowSize = size;
+                GizmoWindowAspect = GizmoWindowSize.x/GizmoWindowSize.y;
+                if (GizmoWindowAspect <= 0.0000002)
+                    GizmoWindowAspect = 1;
+            }
+        }
+
     ImGuizmo::SetDrawlist();
-    float windowWidth = (float)ImGui::GetWindowWidth();
-    float windowHeight = (float)ImGui::GetWindowHeight();
-    ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-    viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
-    viewManipulateTop = ImGui::GetWindowPos().y;
+    // float windowWidth = (float)ImGui::GetWindowWidth();
+    // float windowHeight = (float)ImGui::GetWindowHeight();
+    // ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+    float windowWidth = size.x;
+    float windowHeight = size.y;
+    ImGuizmo::SetRect(pos.x, pos.y, windowWidth, windowHeight);
+
+
+    // viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
+    // viewManipulateTop = ImGui::GetWindowPos().y;
+
+    viewManipulateRight = pos.x + windowWidth;
+    viewManipulateTop = pos.y;
+
     ImGuiWindow *window = ImGui::GetCurrentWindow();
     gizmoWindowFlags = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max) ? ImGuiWindowFlags_NoMove : 0;
 
     ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
     ImGuizmo::DrawCubes(cameraView, cameraProjection, &objectMatrix[0][0], gizmoCount);
 
-    ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
+    ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 0.3f)));//0x10101010);
 }
 
 void TransformEnd()
@@ -291,9 +326,22 @@ void TransformEnd()
 void EditTransform(float *cameraView, float *cameraProjection, float *matrix)
 {
     ImGuiIO &io = ImGui::GetIO();
-    float windowWidth = (float)ImGui::GetWindowWidth();
-    float windowHeight = (float)ImGui::GetWindowHeight();
-    ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+        ImVec2 min = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
+        ImVec2 max = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
+
+        ImVec2 pos = min;        // ImGui::GetWindowPos();
+        ImVec2 size = max - min; // ImGui::GetWindowSize();
+
+        // ImGuiIO &io = ImGui::GetIO();
+        // pos *= io.DisplayFramebufferScale;
+        // size *= io.DisplayFramebufferScale;
+    
+    // float windowWidth = (float)ImGui::GetWindowWidth();
+    // float windowHeight = (float)ImGui::GetWindowHeight();
+    // ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+    ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
     ImGuizmo::Manipulate(cameraView, cameraProjection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, useSnap ? &snap[0] : NULL);
 }
 
@@ -785,11 +833,13 @@ int main(int argc, char* argv[])
         ImGuiIO &io = ImGui::GetIO();
         if (isPerspective)
         {
-            Perspective(fov, io.DisplaySize.x / io.DisplaySize.y, 0.1f, 100.f, cameraProjection);
+            //Perspective(fov, io.DisplaySize.x / io.DisplaySize.y, 0.1f, 100.f, cameraProjection);
+            Perspective(fov, GizmoWindowAspect, 0.1f, 100.f, cameraProjection);
         }
         else
         {
-            float viewHeight = viewWidth * io.DisplaySize.y / io.DisplaySize.x;
+            //float viewHeight = viewWidth * io.DisplaySize.y / io.DisplaySize.x;
+            float viewHeight = viewWidth / GizmoWindowAspect;
             OrthoGraphic(-viewWidth, viewWidth, -viewHeight, viewHeight, 1000.f, -1000.f, cameraProjection);
         }
         ImGuizmo::SetOrthographic(!isPerspective);
