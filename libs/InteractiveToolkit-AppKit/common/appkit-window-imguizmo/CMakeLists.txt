@@ -7,6 +7,12 @@ endif()
 tool_download_git_package("https://github.com/CedricGuillemet/ImGuizmo.git" imguizmo)
 tool_get_dirs(imguizmo_DOWNLOADED_PATH imguizmo_BINARY_PATH imguizmo)
 
+tool_replace_in_file(
+    ${imguizmo_DOWNLOADED_PATH}/GraphEditor.h
+    "bool mSelected{ false };" # Search
+    "bool mSelected;" # Replace
+)
+
 set(IMGUIZMO_SRC
 
     ${imguizmo_DOWNLOADED_PATH}/GraphEditor.cpp
