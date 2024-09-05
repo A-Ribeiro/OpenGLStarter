@@ -143,6 +143,13 @@ App::~App(){
 }
 
 void App::draw() {
+
+    auto viewport = ImGui::GetMainViewport();
+    if (viewport->PlatformRequestClose){
+        viewport->PlatformRequestClose = false;
+        exitApp();
+        //return;
+    }
     time.update();
 
     //set min delta time (the passed time or the time to render at 24fps)
