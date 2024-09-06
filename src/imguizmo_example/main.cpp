@@ -47,9 +47,10 @@ ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::LOCAL;
 bool useSnap = false;
 float snap[3] = {1.f, 1.f, 1.f};
 
-ImVec2 GizmoWindowSize = {1,1};
+ImVec2 GizmoWindowSize = {1, 1};
 float GizmoWindowAspect = 1;
 
+ImApp::ImApp imApp;
 
 float objectMatrix[4][16] = {
     {1.f, 0.f, 0.f, 0.f,
@@ -267,30 +268,30 @@ void TransformStart(float *cameraView, float *cameraProjection, float *matrix)
     float viewManipulateRight = io.DisplaySize.x;
     float viewManipulateTop = 0;
     static ImGuiWindowFlags gizmoWindowFlags = 0;
-    ImGui::SetNextWindowSize(ImVec2(800, 400), ImGuiCond_Appearing);
-    ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(800, 400) * imApp.GlobalScale, ImGuiCond_Appearing);
+    ImGui::SetNextWindowPos(ImVec2(400, 20) * imApp.GlobalScale, ImGuiCond_Appearing);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImVec4)ImColor(0.35f, 0.3f, 0.3f));
     ImGui::Begin("Gizmo", 0, gizmoWindowFlags);
-    
-        ImVec2 min = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
-        ImVec2 max = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
 
-        ImVec2 pos = min;        // ImGui::GetWindowPos();
-        ImVec2 size = max - min; // ImGui::GetWindowSize();
+    ImVec2 min = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
+    ImVec2 max = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
 
-        // ImGuiIO &io = ImGui::GetIO();
-        // pos *= io.DisplayFramebufferScale;
-        // size *= io.DisplayFramebufferScale;
+    ImVec2 pos = min;        // ImGui::GetWindowPos();
+    ImVec2 size = max - min; // ImGui::GetWindowSize();
 
-        // check size and the need to recreate projection / camera
+    // ImGuiIO &io = ImGui::GetIO();
+    // pos *= io.DisplayFramebufferScale;
+    // size *= io.DisplayFramebufferScale;
+
+    // check size and the need to recreate projection / camera
+    {
         {
-            {
-                GizmoWindowSize = size;
-                GizmoWindowAspect = GizmoWindowSize.x/GizmoWindowSize.y;
-                if (GizmoWindowAspect <= 0.0000002)
-                    GizmoWindowAspect = 1;
-            }
+            GizmoWindowSize = size;
+            GizmoWindowAspect = GizmoWindowSize.x / GizmoWindowSize.y;
+            if (GizmoWindowAspect <= 0.0000002)
+                GizmoWindowAspect = 1;
         }
+    }
 
     ImGuizmo::SetDrawlist();
     // float windowWidth = (float)ImGui::GetWindowWidth();
@@ -300,7 +301,6 @@ void TransformStart(float *cameraView, float *cameraProjection, float *matrix)
     float windowWidth = size.x;
     float windowHeight = size.y;
     ImGuizmo::SetRect(pos.x, pos.y, windowWidth, windowHeight);
-
 
     // viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
     // viewManipulateTop = ImGui::GetWindowPos().y;
@@ -314,7 +314,7 @@ void TransformStart(float *cameraView, float *cameraProjection, float *matrix)
     ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
     ImGuizmo::DrawCubes(cameraView, cameraProjection, &objectMatrix[0][0], gizmoCount);
 
-    ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 0.3f)));//0x10101010);
+    ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128 * imApp.GlobalScale, viewManipulateTop), ImVec2(128, 128) * imApp.GlobalScale, ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 0.3f))); // 0x10101010);
 }
 
 void TransformEnd()
@@ -327,16 +327,16 @@ void EditTransform(float *cameraView, float *cameraProjection, float *matrix)
 {
     ImGuiIO &io = ImGui::GetIO();
 
-        ImVec2 min = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
-        ImVec2 max = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
+    ImVec2 min = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
+    ImVec2 max = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
 
-        ImVec2 pos = min;        // ImGui::GetWindowPos();
-        ImVec2 size = max - min; // ImGui::GetWindowSize();
+    ImVec2 pos = min;        // ImGui::GetWindowPos();
+    ImVec2 size = max - min; // ImGui::GetWindowSize();
 
-        // ImGuiIO &io = ImGui::GetIO();
-        // pos *= io.DisplayFramebufferScale;
-        // size *= io.DisplayFramebufferScale;
-    
+    // ImGuiIO &io = ImGui::GetIO();
+    // pos *= io.DisplayFramebufferScale;
+    // size *= io.DisplayFramebufferScale;
+
     // float windowWidth = (float)ImGui::GetWindowWidth();
     // float windowHeight = (float)ImGui::GetWindowHeight();
     // ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
@@ -582,7 +582,7 @@ public:
 
     operator T *()
     {
-        //return data;
+        // return data;
         T *p = new T[N];
         memcpy(p, data, sizeof(data));
         return p;
@@ -756,13 +756,11 @@ struct GraphEditorDelegate : public GraphEditor::Delegate
     std::vector<GraphEditor::Link> mLinks = {{0, 0, 1, 0}};
 };
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
     // initialize self referencing of the main thread.
     Platform::Thread::staticInitialization();
-
-    ImApp::ImApp imApp;
 
     ImApp::Config config;
     config.mWidth = 1280;
@@ -825,32 +823,61 @@ int main(int argc, char* argv[])
 
     bool firstFrame = true;
 
+    // configure scale
+    auto &guizmoStyle = ImGuizmo::GetStyle();
+
+    guizmoStyle.TranslationLineThickness *= imApp.GlobalScale;   // Thickness of lines for translation gizmo
+    guizmoStyle.TranslationLineArrowSize *= imApp.GlobalScale;   // Size of arrow at the end of lines for translation gizmo
+    guizmoStyle.RotationLineThickness *= imApp.GlobalScale;      // Thickness of lines for rotation gizmo
+    guizmoStyle.RotationOuterLineThickness *= imApp.GlobalScale; // Thickness of line surrounding the rotation gizmo
+    guizmoStyle.ScaleLineThickness *= imApp.GlobalScale;         // Thickness of lines for scale gizmo
+    guizmoStyle.ScaleLineCircleSize *= imApp.GlobalScale;        // Size of circle at the end of lines for scale gizmo
+    guizmoStyle.HatchedAxisLineThickness *= imApp.GlobalScale;   // Thickness of hatched axis lines
+    guizmoStyle.CenterCircleSize *= imApp.GlobalScale;           // Size of circle at the center of the translate/scale gizmo
+
+    ImGuizmo::SetGizmoSizeClipSpace(0.1f * imApp.GlobalScale);
+
     // Main loop
     while (!imApp.Done())
     {
         imApp.NewFrame();
+        
+        // size in px
+        float gizmo_size_px = 80.0f * imApp.GlobalScale;
+        // 10% of the screen
+        float gizmo_size_normalized = 0.1f;
+        // compute the Gizmo final size based on the minimum window size
+        float min_win_size = (GizmoWindowSize.x < GizmoWindowSize.y) ? GizmoWindowSize.x : GizmoWindowSize.y;
+        if (min_win_size > 0.002f)
+            gizmo_size_normalized = gizmo_size_px / min_win_size;
+
+        if (GizmoWindowAspect > 1.0f)
+            ImGuizmo::SetGizmoSizeClipSpace(gizmo_size_normalized / GizmoWindowAspect);
+        else
+            ImGuizmo::SetGizmoSizeClipSpace(gizmo_size_normalized * GizmoWindowAspect);
+
 
         ImGuiIO &io = ImGui::GetIO();
         if (isPerspective)
         {
-            //Perspective(fov, io.DisplaySize.x / io.DisplaySize.y, 0.1f, 100.f, cameraProjection);
+            // Perspective(fov, io.DisplaySize.x / io.DisplaySize.y, 0.1f, 100.f, cameraProjection);
             Perspective(fov, GizmoWindowAspect, 0.1f, 100.f, cameraProjection);
         }
         else
         {
-            //float viewHeight = viewWidth * io.DisplaySize.y / io.DisplaySize.x;
+            // float viewHeight = viewWidth * io.DisplaySize.y / io.DisplaySize.x;
             float viewHeight = viewWidth / GizmoWindowAspect;
             OrthoGraphic(-viewWidth, viewWidth, -viewHeight, viewHeight, 1000.f, -1000.f, cameraProjection);
         }
         ImGuizmo::SetOrthographic(!isPerspective);
         ImGuizmo::BeginFrame();
 
-        ImGui::SetNextWindowPos(ImVec2(1024, 100), ImGuiCond_Appearing);
-        ImGui::SetNextWindowSize(ImVec2(256, 256), ImGuiCond_Appearing);
+        // ImGui::SetNextWindowPos(ImVec2(1024, 100), ImGuiCond_Appearing);
+        // ImGui::SetNextWindowSize(ImVec2(256, 256), ImGuiCond_Appearing);
 
         // create a window and insert the inspector
-        ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Appearing);
-        ImGui::SetNextWindowSize(ImVec2(320, 340), ImGuiCond_Appearing);
+        ImGui::SetNextWindowPos(ImVec2(10, 10) * imApp.GlobalScale, ImGuiCond_Appearing);
+        ImGui::SetNextWindowSize(ImVec2(320, 340) * imApp.GlobalScale, ImGuiCond_Appearing);
         ImGui::Begin("Editor");
         if (ImGui::RadioButton("Full view", !useWindow))
             useWindow = false;
@@ -917,9 +944,9 @@ int main(int argc, char* argv[])
 
         ImGui::End();
 
-        ImGui::SetNextWindowPos(ImVec2(10, 350), ImGuiCond_Appearing);
+        ImGui::SetNextWindowPos(ImVec2(10, 350) * imApp.GlobalScale, ImGuiCond_Appearing);
 
-        ImGui::SetNextWindowSize(ImVec2(940, 480), ImGuiCond_Appearing);
+        ImGui::SetNextWindowSize(ImVec2(940, 480) * imApp.GlobalScale, ImGuiCond_Appearing);
         ImGui::Begin("Other controls");
         if (ImGui::CollapsingHeader("Zoom Slider"))
         {
@@ -981,6 +1008,9 @@ int main(int argc, char* argv[])
 
         if (showGraphEditor)
         {
+            ImGui::SetNextWindowPos(ImVec2(50, 50) * imApp.GlobalScale, ImGuiCond_Appearing);
+            ImGui::SetNextWindowSize(ImVec2(320, 340) * imApp.GlobalScale, ImGuiCond_Appearing);
+
             ImGui::Begin("Graph Editor", NULL, 0);
             if (ImGui::Button("Fit all nodes"))
             {
