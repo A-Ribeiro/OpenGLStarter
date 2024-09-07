@@ -7,7 +7,7 @@
 //#include "Clipboard.h"
 
 
-class FolderFileOperations : virtual public OperationsCommon
+class FolderFileOperations : virtual public OperationsCommon, public EventCore::HandleCallback
 {
     public:
 

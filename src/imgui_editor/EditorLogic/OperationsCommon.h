@@ -7,7 +7,7 @@
 class SceneGUI;
 class Scene3D;
 
-class OperationsCommon: public EventCore::HandleCallback {
+class OperationsCommon { // : public EventCore::HandleCallback {
 
 public:
     ImGuiManager *imGuiManager;

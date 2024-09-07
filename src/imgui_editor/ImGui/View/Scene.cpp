@@ -92,8 +92,11 @@ void Scene::RenderAndLogic()
                 //         ImDrawFlags_None
                 //     );
                 // }
-                
+
                 ImGui::Image(my_tex_id, size / io.DisplayFramebufferScale, uv_min, uv_max, tint_col, border_col);
+
+                if (OnImGuiDrawOverlay != nullptr)
+                    OnImGuiDrawOverlay(pos / io.DisplayFramebufferScale, size / io.DisplayFramebufferScale);
             }
             else
             {

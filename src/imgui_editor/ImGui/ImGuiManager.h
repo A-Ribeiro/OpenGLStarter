@@ -26,6 +26,8 @@ public:
     MathCore::vec2i mainMonitorCenter;
     MathCore::vec2i windowResolution;
 
+    ImGuizmo::Style imGuizmoStyleBackup;
+
     //ImGuiMenu menu;
 
     AppKit::OpenGL::GLTexture* icons[(int)IconType::Count];
