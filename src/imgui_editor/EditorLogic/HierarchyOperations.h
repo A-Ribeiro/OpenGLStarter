@@ -2,10 +2,9 @@
 
 #include "OperationsCommon.h"
 
-class HierarchyOperations : virtual public OperationsCommon
+class HierarchyOperations : virtual public OperationsCommon, public EventCore::HandleCallback
 {
-    public:
-
+public:
     // loaded project directory
     ITKCommon::FileSystem::File opened_file;
 
@@ -37,11 +36,9 @@ class HierarchyOperations : virtual public OperationsCommon
 
     void printHierarchy();
 
-
     // components
     void componentsClear(std::shared_ptr<TreeNode> target);
     void componentsAddCubeAt(std::shared_ptr<TreeNode> target);
 
-
+    void drawImGizmoOverlay(const ImVec2 &pos, const ImVec2 &size);
 };
-

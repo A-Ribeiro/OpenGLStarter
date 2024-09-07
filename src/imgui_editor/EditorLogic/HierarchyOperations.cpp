@@ -4,6 +4,7 @@
 #include "../SceneGUI.h"
 #include "../Scene3D.h"
 
+
 HierarchyOperations::HierarchyOperations()
 {
 }
@@ -455,6 +456,8 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
                 hierarchy.clearTreeSelection(HierarchyClearMethod::ClearNoCallback);
                 this->selectedTreeNode = nullptr;
                 this->selectedTransformInfo = nullptr;
+
+                imGuiManager->scene.OnImGuiDrawOverlay = nullptr;
             }
 
         });
@@ -463,6 +466,16 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
             
             this->selectedTreeNode = node;
             this->selectedTransformInfo = std::dynamic_pointer_cast<HierarchyTreeData>(node->data);
+            
+            
+            // auto methodRef = &HierarchyOperations::drawImGizmoOverlay;
+
+            // auto OperationsCommonRef = (OperationsCommon*)this;
+            // typedef void(OperationsCommon::*refT)(const ImVec2 &pos, const ImVec2 &size);
+
+            imGuiManager->scene.OnImGuiDrawOverlay = EventCore::CallbackWrapper(
+                &HierarchyOperations::drawImGizmoOverlay, this
+            );
 
             imGuiManager->shortcutManager.setActionShortCutByCategory("Action:TransformOps");
 
@@ -783,6 +796,88 @@ void HierarchyOperations::componentsAddCubeAt(std::shared_ptr<TreeNode> target) 
     material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
     resourceHelper->addAABBMesh(transform, false);
+
+}
+
+
+void HierarchyOperations::drawImGizmoOverlay(const ImVec2 &pos, const ImVec2 &size) {
+
+    // available variables:
+    // this->selectedTreeNode;
+    // this->selectedTransformInfo;
+
+    if (this->selectedTreeNode->isRoot)
+        return;
+
+    // ImVec2 min = ImGui::GetWindowContentRegionMin() + ImGui::GetWindowPos();
+    // ImVec2 max = ImGui::GetWindowContentRegionMax() + ImGui::GetWindowPos();
+
+    // ImVec2 pos = min;        // ImGui::GetWindowPos();
+    // ImVec2 size = max - min; // ImGui::GetWindowSize();
+
+    if (size.x <= MathCore::EPSILON<float>::low_precision || size.y  <= MathCore::EPSILON<float>::low_precision)
+        return;
+
+
+    // ImGuiIO &io = ImGui::GetIO();
+    // pos *= io.DisplayFramebufferScale;
+    // size *= io.DisplayFramebufferScale;
+
+    ImGuizmo::SetDrawlist();
+    ImGuizmo::SetOrthographic(false);
+
+    // adjust gizmo size in PX
+    {
+        // size in px
+        float gizmo_size_px = 80.0f * imGuiManager->GlobalScale;
+        // 10% of the screen
+        float gizmo_size_normalized = 0.1f;
+        // compute the Gizmo final size based on the minimum window size
+        float min_win_size = (size.x < size.y) ? size.x : size.y;
+        if (min_win_size > 0.002f)
+            gizmo_size_normalized = gizmo_size_px / min_win_size;
+
+        float aspect = size.x / size.y;
+
+        if (aspect > 1.0f)
+            ImGuizmo::SetGizmoSizeClipSpace(gizmo_size_normalized / aspect);
+        else
+            ImGuizmo::SetGizmoSizeClipSpace(gizmo_size_normalized * aspect);
+    }
+
+    ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+    ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::LOCAL;
+
+    bool useSnap = true;
+    float snap[] = {0.01f,0.01f,0.01f};
+
+    auto camera = imGuiManager->innerViewport->scene3D->getCamera();
+    camera->precomputeViewProjection(false);
+
+    auto obj_transform = this->selectedTransformInfo->transform;
+
+    auto obj_matrix = obj_transform->getMatrix();
+
+    ImGuizmo::SetID(0);
+
+    ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+    ImGuizmo::Manipulate(
+        camera->view.array,
+        camera->projection.array, 
+        mCurrentGizmoOperation, mCurrentGizmoMode, 
+        obj_matrix.array, NULL, useSnap ? &snap[0] : NULL);
+
+    // monitoring translation
+    auto translation_vec3 = MathCore::CVT<MathCore::vec4f>::toVec3(
+        MathCore::OP<MathCore::mat4f>::extractTranslation(obj_matrix)
+    );
+
+    float dst_to_consider_movement = MathCore::EPSILON<float>::high_precision;
+
+    if (MathCore::OP<MathCore::vec3f>::sqrDistance(obj_transform->getPosition(),translation_vec3) > dst_to_consider_movement){
+        obj_transform->setPosition(translation_vec3);
+        printf(".");fflush(stdout);
+    }
 
 }
 

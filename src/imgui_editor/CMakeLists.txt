@@ -26,6 +26,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     appkit-gl-engine
     appkit-window-imgui
     InteractiveToolkit-DPI
+    appkit-window-imguizmo
 )
 
 if (ARIBEIRO_LINUX_LOADER_USE_USR_LOCAL_PATH)

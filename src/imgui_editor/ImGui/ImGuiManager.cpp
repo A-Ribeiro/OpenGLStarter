@@ -6,7 +6,7 @@
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
 #include <InteractiveToolkit/ITKCommon/FileSystem/File.h>
-
+#include <ImGuizmo.h>
 
 ImGuiManager::ImGuiManager()
 {
@@ -153,6 +153,7 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	// //ImGui::PushFont(font);
 
     this->imGuiStyleBackup = style;
+    this->imGuizmoStyleBackup = ImGuizmo::GetStyle();
 	this->applyGlobalScale();
 
     // render a nullptr frame: force load fonts
@@ -160,6 +161,8 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_WindowGL_NewFrame();
 	ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
+
 
 	//
 	// Initialize menus
@@ -237,6 +240,21 @@ void ImGuiManager::applyGlobalScale() {
     // }
     // printf("\n");
 
+
+    auto &guizmoStyle = ImGuizmo::GetStyle();
+
+    guizmoStyle = this->imGuizmoStyleBackup;
+
+    guizmoStyle.TranslationLineThickness *= this->GlobalScale;   // Thickness of lines for translation gizmo
+    guizmoStyle.TranslationLineArrowSize *= this->GlobalScale;   // Size of arrow at the end of lines for translation gizmo
+    guizmoStyle.RotationLineThickness *= this->GlobalScale;      // Thickness of lines for rotation gizmo
+    guizmoStyle.RotationOuterLineThickness *= this->GlobalScale; // Thickness of line surrounding the rotation gizmo
+    guizmoStyle.ScaleLineThickness *= this->GlobalScale;         // Thickness of lines for scale gizmo
+    guizmoStyle.ScaleLineCircleSize *= this->GlobalScale;        // Size of circle at the end of lines for scale gizmo
+    guizmoStyle.HatchedAxisLineThickness *= this->GlobalScale;   // Thickness of hatched axis lines
+    guizmoStyle.CenterCircleSize *= this->GlobalScale;           // Size of circle at the center of the translate/scale gizmo
+
+    // ImGuizmo::SetGizmoSizeClipSpace(0.1f * this->GlobalScale);
 
 }
 
