@@ -5,7 +5,7 @@
 class MenuItemController
 {
 public:
-    std::unordered_map<std::string, MenuItemController> childrenMap;
+    std::map<std::string, MenuItemController> childrenMap;
     std::vector<MenuItemController> childrenSorted;
     std::function<void(void)> callback;
     std::string parentName;
