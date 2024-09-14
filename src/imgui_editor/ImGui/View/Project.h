@@ -87,7 +87,7 @@ public:
         this->file = file;
         //has_files = false;
         iconToUse = IconType::Big_File_Generic;
-        if ( ITKCommon::StringUtil::endsWith(file.name, ".scene"))
+        if ( ITKCommon::StringUtil::endsWith(file.name, ".scene.json"))
             iconToUse = IconType::Big_File_Scene;
     }
 

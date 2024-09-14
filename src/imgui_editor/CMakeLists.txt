@@ -12,10 +12,10 @@ tool_define_source_group(${PUBLIC_HEADERS} ${SRC})
 
 add_executable( ${PROJECT_NAME} ${PUBLIC_HEADERS} ${SRC} )
 
-tool_download_git_package("https://github.com/Tencent/rapidjson" rapidjson)
-tool_get_dirs(rapidjson_DOWNLOADED_PATH rapidjson_BINARY_PATH rapidjson)
+# tool_download_git_package("https://github.com/Tencent/rapidjson" rapidjson)
+# tool_get_dirs(rapidjson_DOWNLOADED_PATH rapidjson_BINARY_PATH rapidjson)
 
-target_include_directories( ${PROJECT_NAME} PUBLIC "${rapidjson_DOWNLOADED_PATH}/include" )
+# target_include_directories( ${PROJECT_NAME} PUBLIC "${rapidjson_DOWNLOADED_PATH}/include" )
 
 # set the target's folder (for IDEs that support it, e.g. Visual Studio)
 set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "TOOL")

@@ -3,6 +3,7 @@
 #include "../InnerViewport.h"
 #include "../SceneGUI.h"
 #include "../Scene3D.h"
+#include <appkit-gl-engine/Serializer/JSONSceneSerializer.h>
 
 
 HierarchyOperations::HierarchyOperations()
@@ -523,14 +524,26 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
         auto &controller = imGuiMenu->getController("File/Save Scene");
         controller.callback = [&]() { 
             printf("new save scene\n");
+
+            if (!opened_file.isFile)
+                return;
+            JSONSceneSerializer serializer;
+            auto bufferObject = serializer.serialize(scene3D->getRoot(), true);
+            std::string error;
+            if (!opened_file.writeContentFromObjectBuffer(&bufferObject, false, &error)){
+                this->showErrorAndRetry( error, nullptr );
+            }
         };
         controller.enabled = true;
         imGuiMenu->UpdateUI();
 
         auto app = (App*)AppKit::GLEngine::Engine::Instance()->app;
         app->CtrlS_Detector.OnDown.clear();
-        app->CtrlS_Detector.OnDown.add([&](){
+        app->CtrlS_Detector.OnDown.add([](){
             printf("new Ctrl+S save scene action\n");
+            auto imGuiMenu = ImGuiMenu::Instance();
+            auto &controller = imGuiMenu->getController("File/Save Scene");
+            controller.callback();
         });
     }
 
