@@ -23,10 +23,12 @@ void OperationsCommon::finalize() {
 }
 
 void OperationsCommon::showErrorAndRetry(const std::string &error, EventCore::Callback<void()> retry_callback){
-    printf("ERROR: %s\n", error.c_str());
-    ImGuiManager::Instance()->dialogs.showInfo_OK(
-        std::string("Error: ") + error,
-        retry_callback,
-        DialogPosition::OpenOnScreenCenter
-    );
+    imGuiManager->PostAction.add([error, retry_callback](){
+        printf("ERROR: %s\n", error.c_str());
+        ImGuiManager::Instance()->dialogs.showInfo_OK(
+            std::string("Error: ") + error,
+            retry_callback,
+            DialogPosition::OpenOnScreenCenter
+        );
+    });
 }

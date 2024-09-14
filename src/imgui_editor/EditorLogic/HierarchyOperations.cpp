@@ -539,7 +539,7 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
 
         auto app = (App*)AppKit::GLEngine::Engine::Instance()->app;
         app->CtrlS_Detector.OnDown.clear();
-        app->CtrlS_Detector.OnDown.add([](){
+        app->CtrlS_Detector.OnDown.add([&](){
             printf("new Ctrl+S save scene action\n");
             auto imGuiMenu = ImGuiMenu::Instance();
             auto &controller = imGuiMenu->getController("File/Save Scene");
