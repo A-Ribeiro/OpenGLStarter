@@ -771,7 +771,7 @@ void FolderFileOperations::createNewSceneOnCurrentDirectory(const std::string &f
             auto aux = removeOSForbiddenPathPattern(new_str);
             std::string file_to_create = aux;
 
-            if ( !ITKCommon::StringUtil::endsWith(aux, ".scene") ){
+            if ( !ITKCommon::StringUtil::endsWith(aux, ".scene.json") ){
                 if (aux.length() == 0){
                     lastError = "Empty file name supplied";
                     _tmp_str = aux;
@@ -780,7 +780,7 @@ void FolderFileOperations::createNewSceneOnCurrentDirectory(const std::string &f
                     if (ITKCommon::StringUtil::endsWith(aux, "."))
                         file_to_create += "scene";
                     else
-                        file_to_create += ".scene";
+                        file_to_create += ".scene.json";
                 }
             }
 

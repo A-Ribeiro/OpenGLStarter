@@ -26,6 +26,14 @@ tool_define_source_group(${PUBLIC_HEADERS} ${SRC})
 
 add_library( ${PROJECT_NAME} STATIC ${PUBLIC_HEADERS} ${SRC} )
 
+#
+# rapidjson for JSON reading/writing support
+#
+tool_download_git_package("https://github.com/Tencent/rapidjson" rapidjson)
+tool_get_dirs(rapidjson_DOWNLOADED_PATH rapidjson_BINARY_PATH rapidjson)
+
+target_include_directories( ${PROJECT_NAME} PUBLIC "${rapidjson_DOWNLOADED_PATH}/include" )
+
 # if(MINI_GL_ENGINE_PBR_MODE STREQUAL LearnOpengl_Com)
 #     target_compile_options(${PROJECT_NAME} PUBLIC -DPBR_MODE_LEARN_OPENGL)
 # elseif(MINI_GL_ENGINE_PBR_MODE STREQUAL Optimized)

@@ -10,6 +10,8 @@ using namespace MathCore;
 
 #include "App.h"
 
+#include "./ImGui/ImGuiManager.h"
+
 static bool ReplaceMaterial(std::shared_ptr<Transform> element, void *userData)
 {
     auto material = element->findComponent<ComponentMaterial>();
@@ -155,7 +157,10 @@ void Scene3D::OnUpdate(Platform::Time* time) {
     //     printf("not inside...\n");
     // }
 
-    m_to_move.setState(Keyboard::isPressed(KeyCode::M));
+    bool inputBlocked = ImGuiManager::Instance()->shortcutManager.input_blocked;
+
+
+    m_to_move.setState(Keyboard::isPressed(KeyCode::M) && !inputBlocked);
     if (m_to_move.down) {
         auto cameraMove = mainCamera->findComponent<Components::ComponentCameraMove>();
         if (cameraMove == nullptr){
@@ -169,7 +174,7 @@ void Scene3D::OnUpdate(Platform::Time* time) {
     }
 
     // right button mouse logic...
-    mouse_right_btn_to_move.setState(Mouse::isPressed(MouseButton::Right));
+    mouse_right_btn_to_move.setState(Mouse::isPressed(MouseButton::Right) && !inputBlocked);
     if (mouse_right_btn_to_move.down) {
         
         auto window_rect = this->renderWindow->WindowViewport.c_val();

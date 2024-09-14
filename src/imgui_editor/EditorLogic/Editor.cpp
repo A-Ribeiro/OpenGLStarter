@@ -35,7 +35,7 @@ void Editor::openFolder(const std::string &path)
 
 void Editor::tryToOpenFile(const ITKCommon::FileSystem::File &file)
 {
-    if (!ITKCommon::StringUtil::endsWith(file.name, ".scene"))
+    if (!ITKCommon::StringUtil::endsWith(file.name, ".scene.json"))
     {
         ImGuiManager::Instance()->dialogs.showInfo_OK(
             ITKCommon::PrintfToStdString("'%s' file type not supported", file.getExtension().c_str()),
