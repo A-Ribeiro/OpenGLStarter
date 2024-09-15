@@ -527,8 +527,29 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
 
             if (!opened_file.isFile)
                 return;
-            JSONSceneSerializer serializer;
-            auto bufferObject = serializer.serialize(scene3D->getRoot(), true);
+
+            auto _3d_root = scene3D->getRoot();
+            auto root_editor = _3d_root->findTransformByName("_editor_root_",1);
+            
+            if (root_editor == nullptr)
+                return;
+
+            auto camera = scene3D->getCamera();
+
+            auto writerSet = JSONSceneSerializer::Begin();
+            writerSet->writer.StartObject();
+
+            writerSet->writer.String("Camera");
+            JSONSceneSerializer::Serialize(writerSet->writer, camera->getTransform(), true);
+
+            writerSet->writer.String("Scene");
+            writerSet->writer.StartArray();
+            JSONSceneSerializer::Serialize(writerSet->writer, root_editor, false);
+            writerSet->writer.EndArray();
+
+            writerSet->writer.EndObject();
+            auto bufferObject = JSONSceneSerializer::End(writerSet);
+            
             std::string error;
             if (!opened_file.writeContentFromObjectBuffer(&bufferObject, false, &error)){
                 this->showErrorAndRetry( error, nullptr );
