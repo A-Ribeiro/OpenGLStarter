@@ -411,6 +411,8 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
 {
     using namespace ITKCommon::FileSystem;
 
+    clear_HierarchyOperations();
+
     opened_file = file;
     printf("opened_file: %s\n", opened_file.name.c_str());
 
@@ -439,6 +441,8 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
         auto root_editor = _3d_root->findTransformByName("_editor_root_",1);
 
         root->data = HierarchyTreeData::CreateShared( root_editor );
+
+        imGuiManager->scene.OnImGuiDrawOverlay = nullptr;
     }
 
     // load file hierarchy from scene file
@@ -593,6 +597,48 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
 
             JSONSceneDeserializer::Deserialize(readSet->document["Camera"], true, camera->getTransform());
             JSONSceneDeserializer::Deserialize(readSet->document["Scene"], false, root_editor);
+
+            // synchronize the scene with the hierarchy view
+            {
+                auto root = imGuiManager->hierarchy.getTreeRoot();
+
+                // check root editor is linked to root
+                auto rootTreeData = std::dynamic_pointer_cast< HierarchyTreeData >(root->data);
+                if (rootTreeData->transform != root_editor) {
+                    this->showErrorAndRetry( "Base hierarchy setup with wrong assignment.", nullptr );
+                    return;
+                }
+
+                struct itemT
+                {
+                    std::shared_ptr<Transform> transform;
+                    std::shared_ptr<TreeNode> treeNode;
+                    std::shared_ptr<TreeNode> parentTreeNode;
+                };
+
+                std::vector<itemT> to_traverse;
+
+                to_traverse.push_back({root_editor, root, nullptr});
+
+                while (to_traverse.size() > 0)
+                {
+                    auto item = to_traverse.back();
+                    to_traverse.pop_back();
+
+                    if (item.parentTreeNode != nullptr) {
+                        item.parentTreeNode->addChild(item.treeNode);
+                    }
+
+                    for (auto &child : STL_Tools::Reversal(item.transform->getChildren())){
+                        auto newTreeNode = imGuiManager->hierarchy.createTreeNode( 
+                            child->getName(), 
+                            HierarchyTreeData::CreateShared( child ) 
+                        );
+                        //item.treeNode->addChild(newTreeNode);
+                        to_traverse.push_back({child, newTreeNode, item.treeNode});
+                    }
+                }
+            }
         }
 
     }
@@ -837,6 +883,8 @@ void HierarchyOperations::componentsClear(std::shared_ptr<TreeNode> target) {
 
 void HierarchyOperations::componentsAddCubeAt(std::shared_ptr<TreeNode> target) {
     if (target == nullptr)
+        return;
+    if (target->isRoot)
         return;
     auto transform = std::dynamic_pointer_cast<HierarchyTreeData>(target->data)->transform;
     if (transform == nullptr)
