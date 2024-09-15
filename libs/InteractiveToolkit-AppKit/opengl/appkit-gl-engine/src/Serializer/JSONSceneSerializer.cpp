@@ -188,7 +188,7 @@ namespace AppKit
                 
             result->document.ParseInsitu((char *)result->objectBuffer.data);
             
-            if (!result->document.HasParseError())
+            if (result->document.HasParseError())
                 return nullptr;
 
             return result;
@@ -203,14 +203,14 @@ namespace AppKit
                 rapidjson::Value &value;
             };
 
-            std::list<itemT> to_traverse;
+            std::vector<itemT> to_traverse;
 
             if (!include_root){
                 // push array
                 if (_value.IsArray()){
-                    for (rapidjson::SizeType i = 0; i < _value.Size(); i++)  {
+                    for (int i = (int)_value.Size()-1; i >= 0; i--)  {
                         auto new_transform = Transform::CreateShared();
-                        target_root->addChild(new_transform);
+                        // target_root->addChild(new_transform);
                         to_traverse.push_back({target_root, new_transform, _value[i]});
                     }
                 }
@@ -219,8 +219,14 @@ namespace AppKit
                 to_traverse.push_back({nullptr,target_root, _value});
 
             while (to_traverse.size() > 0) {
-                auto front = to_traverse.front();
-                to_traverse.pop_front();
+                auto front = to_traverse.back();
+                to_traverse.pop_back();
+                
+                // pre order depth first processing
+                {
+                    if (front.parent != nullptr)
+                        front.parent->addChild(front.to_set);
+                }
 
                 if (front.value.IsObject()){
 
@@ -234,9 +240,9 @@ namespace AppKit
                     
                     auto &children = front.value["C"];
                     if (children.IsArray()){
-                        for (rapidjson::SizeType i = 0; i < children.Size(); i++)  {
+                        for (int i = (int)children.Size()-1; i >= 0; i--)  {
                             auto new_transform = Transform::CreateShared();
-                            front.to_set->addChild(new_transform);
+                            //front.to_set->addChild(new_transform);
                             to_traverse.push_back({front.to_set, new_transform, children[i]});
                         }
                     }
