@@ -11,6 +11,31 @@ namespace AppKit
 
         using RapidJsonWriter = rapidjson::Writer<rapidjson::StringBuffer>;
 
+        template <typename _math_type,
+                  typename std::enable_if<
+                      MathCore::MathTypeInfo<_math_type>::_is_valid::value &&
+                          MathCore::MathTypeInfo<_math_type>::_is_vec::value &&
+                          std::is_floating_point<typename MathCore::MathTypeInfo<_math_type>::_type>::value
+                          ,
+                      bool>::type = true>
+        static ITK_INLINE _math_type read(rapidjson::Value &reader)
+        {
+            if (!reader.IsArray())
+                return _math_type();
+            if ((int)reader.Size() != (int)_math_type::array_count)
+                return _math_type();
+                
+            using float_type = typename MathCore::MathTypeInfo<_math_type>::_type;
+            _math_type result;
+            for (int i = 0; i < (int)_math_type::array_count; i++)
+            {
+                auto &element = reader[i];
+                if (!element.IsDouble())
+                    continue;
+                result[i] = MathCore::CVT<float_type>::toFloat(element.GetDouble());
+            }
+            return result;
+        }
 
         template <typename _math_type,
                   typename std::enable_if<
@@ -52,6 +77,10 @@ namespace AppKit
             return std::make_shared<WriterSet>();
         }
         void JSONSceneSerializer::Serialize(RapidJsonWriter &writer, std::shared_ptr<Transform> transform, bool include_root){
+
+            if (!include_root)
+                writer.StartArray(); // start children
+
             struct itemT
             {
                 std::shared_ptr<Transform> transform;
@@ -134,6 +163,9 @@ namespace AppKit
                     root = {stack.back().transform->getChildAt(next_child_idx), next_child_idx};
                 }
             }
+
+            if (!include_root)
+                writer.EndArray(); // end children
         }
         Platform::ObjectBuffer JSONSceneSerializer::End(std::shared_ptr<WriterSet> writerSet){
             std::string out_str = writerSet->stringBuffer.GetString();
@@ -142,38 +174,78 @@ namespace AppKit
             return Platform::ObjectBuffer();
         }
 
+        std::shared_ptr<ReaderSet> JSONSceneDeserializer::Begin(Platform::ObjectBuffer *src) {
+            auto result = std::make_shared<ReaderSet>();
 
-
-        Platform::ObjectBuffer JSONSceneSerializer::serialize(std::shared_ptr<Transform> transform, bool include_root)
-        {
-            auto writerSet = JSONSceneSerializer::Begin();
-            JSONSceneSerializer::Serialize(writerSet->writer, transform, include_root);
-            return JSONSceneSerializer::End(writerSet);
-        }
-
-        std::shared_ptr<Transform> JSONSceneSerializer::deserialize(const Platform::ObjectBuffer &src)
-        {
-            rapidjson::Document document;
-
-            std::shared_ptr<Transform> result = Transform::CreateShared();
-
-            Platform::ObjectBuffer buffer;
-            if (src.size > 0 && src.data[src.size - 1] != 0x00)
+            if (src->size > 0 && src->data[src->size - 1] != 0x00)
             {
-                buffer.setSize(src.size + 1);
-                memcpy(buffer.data, src.data, src.size * sizeof(uint8_t));
-                buffer.data[src.size] = 0; // add \0 at end
-                document.ParseInsitu((char *)buffer.data);
+                result->objectBuffer.setSize(src->size + 1);
+                memcpy(result->objectBuffer.data, src->data, src->size * sizeof(uint8_t));
+                result->objectBuffer.data[src->size] = 0; // add \0 at end
             }
             else
-                document.ParseInsitu((char *)src.data);
-
-            if (!document.HasParseError())
-            {
-            }
+                result->objectBuffer = src->clone();
+                
+            result->document.ParseInsitu((char *)result->objectBuffer.data);
+            
+            if (!result->document.HasParseError())
+                return nullptr;
 
             return result;
         }
+
+        void JSONSceneDeserializer::Deserialize(rapidjson::Value &_value, bool include_root, std::shared_ptr<Transform> target_root){
+
+            struct itemT
+            {
+                std::shared_ptr<Transform> parent;
+                std::shared_ptr<Transform> to_set;
+                rapidjson::Value &value;
+            };
+
+            std::list<itemT> to_traverse;
+
+            if (!include_root){
+                // push array
+                if (_value.IsArray()){
+                    for (rapidjson::SizeType i = 0; i < _value.Size(); i++)  {
+                        auto new_transform = Transform::CreateShared();
+                        target_root->addChild(new_transform);
+                        to_traverse.push_back({target_root, new_transform, _value[i]});
+                    }
+                }
+            }
+            else // push root
+                to_traverse.push_back({nullptr,target_root, _value});
+
+            while (to_traverse.size() > 0) {
+                auto front = to_traverse.front();
+                to_traverse.pop_front();
+
+                if (front.value.IsObject()){
+
+                    auto &name = front.value["N"];
+                    if (name.IsString())
+                        front.to_set->setName(name.GetString());
+
+                    front.to_set->setLocalPosition( read<MathCore::vec3f>(front.value["T"]) );
+                    front.to_set->setLocalRotation( read<MathCore::quatf>(front.value["R"]) );
+                    front.to_set->setLocalScale( read<MathCore::vec3f>(front.value["S"]) );
+                    
+                    auto &children = front.value["C"];
+                    if (children.IsArray()){
+                        for (rapidjson::SizeType i = 0; i < children.Size(); i++)  {
+                            auto new_transform = Transform::CreateShared();
+                            front.to_set->addChild(new_transform);
+                            to_traverse.push_back({front.to_set, new_transform, children[i]});
+                        }
+                    }
+
+                }
+            }
+
+        }
+
 
     }
 }
