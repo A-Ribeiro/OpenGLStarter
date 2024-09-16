@@ -209,9 +209,9 @@ namespace AppKit
                 // push array
                 if (_value.IsArray()){
                     for (int i = (int)_value.Size()-1; i >= 0; i--)  {
-                        auto new_transform = Transform::CreateShared();
+                        // auto new_transform = Transform::CreateShared();
                         // target_root->addChild(new_transform);
-                        to_traverse.push_back({target_root, new_transform, _value[i]});
+                        to_traverse.push_back({target_root, nullptr, _value[i]});
                     }
                 }
             }
@@ -224,8 +224,10 @@ namespace AppKit
                 
                 // pre order depth first processing
                 {
-                    if (front.parent != nullptr)
+                    if (front.parent != nullptr){
+                        front.to_set = Transform::CreateShared();
                         front.parent->addChild(front.to_set);
+                    }
                 }
 
                 if (front.value.IsObject()){
@@ -241,9 +243,9 @@ namespace AppKit
                     auto &children = front.value["C"];
                     if (children.IsArray()){
                         for (int i = (int)children.Size()-1; i >= 0; i--)  {
-                            auto new_transform = Transform::CreateShared();
+                            // auto new_transform = Transform::CreateShared();
                             //front.to_set->addChild(new_transform);
-                            to_traverse.push_back({front.to_set, new_transform, children[i]});
+                            to_traverse.push_back({front.to_set, nullptr, children[i]});
                         }
                     }
 

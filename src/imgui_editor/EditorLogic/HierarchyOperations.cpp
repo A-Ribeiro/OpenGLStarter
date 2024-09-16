@@ -626,16 +626,20 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
                     to_traverse.pop_back();
 
                     if (item.parentTreeNode != nullptr) {
+                        item.treeNode = imGuiManager->hierarchy.createTreeNode( 
+                            item.transform->getName(), 
+                            HierarchyTreeData::CreateShared( item.transform ) 
+                        );
                         item.parentTreeNode->addChild(item.treeNode);
                     }
 
                     for (auto &child : STL_Tools::Reversal(item.transform->getChildren())){
-                        auto newTreeNode = imGuiManager->hierarchy.createTreeNode( 
-                            child->getName(), 
-                            HierarchyTreeData::CreateShared( child ) 
-                        );
+                        // auto newTreeNode = imGuiManager->hierarchy.createTreeNode( 
+                        //     child->getName(), 
+                        //     HierarchyTreeData::CreateShared( child ) 
+                        // );
                         //item.treeNode->addChild(newTreeNode);
-                        to_traverse.push_back({child, newTreeNode, item.treeNode});
+                        to_traverse.push_back({child, nullptr, item.treeNode});
                     }
                 }
             }
