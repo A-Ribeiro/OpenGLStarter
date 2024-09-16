@@ -391,6 +391,8 @@ void HierarchyOperations::clear_HierarchyOperations(){
 
     clipboardState = nullptr;
 
+    imGuiManager->scene.OnImGuiDrawOverlay = nullptr;
+
     // clear current root transforms and components
     {
         auto _3d_root = scene3D->getRoot();
