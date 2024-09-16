@@ -1547,18 +1547,25 @@ namespace AppKit
             {
                 std::shared_ptr<Transform> cloneSrc;
                 std::shared_ptr<Transform> cloneDst;
+                std::shared_ptr<Transform> parent;
             };
-            std::list<_clone_structT> to_clone;
+            std::vector<_clone_structT> to_clone;
             {
                 auto _self = self();
-                to_clone.push_back(_clone_structT{_self, result});
+                to_clone.push_back(_clone_structT{_self, result, nullptr});
                 transformMap->operator[](_self) = result;
             }
 
             while (to_clone.size() > 0)
             {
-                auto entry = to_clone.front();
-                to_clone.pop_front();
+                auto entry = to_clone.back();
+                to_clone.pop_back();
+
+                if (entry.cloneDst == nullptr) {
+                    auto new_transform = entry.parent->addChild(Transform::CreateShared());
+                    entry.cloneDst = new_transform;
+                    transformMap->operator[](entry.cloneSrc) = new_transform;
+                }
 
                 entry.cloneDst->setName(entry.cloneSrc->getName());
                 entry.cloneDst->setLocalPosition(entry.cloneSrc->getLocalPosition());
@@ -1566,11 +1573,11 @@ namespace AppKit
                 entry.cloneDst->setLocalScale(entry.cloneSrc->getLocalScale());
                 entry.cloneDst->skip_traversing = entry.cloneSrc->skip_traversing;
 
-                for (auto &src_transform : entry.cloneSrc->getChildren())
+                for (auto &src_transform : STL_Tools::Reversal(entry.cloneSrc->getChildren()))
                 {
-                    auto new_transform = entry.cloneDst->addChild(Transform::CreateShared());
-                    to_clone.push_back(_clone_structT{src_transform, new_transform});
-                    transformMap->operator[](src_transform) = new_transform;
+                    //auto new_transform = entry.cloneDst->addChild(Transform::CreateShared());
+                    to_clone.push_back(_clone_structT{src_transform, nullptr, entry.cloneDst});
+                    //transformMap->operator[](src_transform) = new_transform;
                 }
             }
 
