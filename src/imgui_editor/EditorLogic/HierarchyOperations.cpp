@@ -939,6 +939,7 @@ void HierarchyOperations::drawImGizmoOverlay(const ImVec2 &pos, const ImVec2 &si
     // pos *= io.DisplayFramebufferScale;
     // size *= io.DisplayFramebufferScale;
 
+    // ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetOrthographic(false);
 
@@ -974,14 +975,18 @@ void HierarchyOperations::drawImGizmoOverlay(const ImVec2 &pos, const ImVec2 &si
 
     auto obj_matrix = obj_transform->getMatrix();
 
-    ImGuizmo::SetID(0);
-
     ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+
+    ImGuizmo::PushID(0);
+    // ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+    
     ImGuizmo::Manipulate(
         camera->view.array,
         camera->projection.array, 
         mCurrentGizmoOperation, mCurrentGizmoMode, 
         obj_matrix.array, NULL, useSnap ? &snap[0] : NULL);
+    
+    ImGuizmo::PopID();
 
     // monitoring translation
     auto translation_vec3 = MathCore::CVT<MathCore::vec4f>::toVec3(
