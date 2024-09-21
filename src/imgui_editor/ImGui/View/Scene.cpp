@@ -5,7 +5,11 @@
 
 const ViewType Scene::Type = "Scene";
 
-Scene::Scene() : View(Scene::Type)
+Scene::Scene() : View(Scene::Type),
+                 mCurrentGizmoOperation(ImGuizmo::TRANSLATE),
+                 mCurrentGizmoMode(ImGuizmo::LOCAL),
+                 useSnap(true),
+                 snap{0.01f, 0.01f, 0.01f}
 {
 }
 
@@ -28,23 +32,46 @@ void Scene::RenderAndLogic()
     // ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(1, 0, 1, 1.0));
     if (ImGui::Begin("Scene", nullptr, flags))
     {
+        auto &io = ImGui::GetIO();
+
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)*ImGuiManager::Instance()->GlobalScale);
-        ImGui::BeginChild("scene_toolbar", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_AutoResizeY, 0 /*ImGuiWindowFlags_HorizontalScrollbar*/ );
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10) * ImGuiManager::Instance()->GlobalScale);
+        ImGui::BeginChild("scene_toolbar", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_AutoResizeY, 0 /*ImGuiWindowFlags_HorizontalScrollbar*/);
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10)*ImGuiManager::Instance()->GlobalScale);
-        ImGui::Button("T");ImGui::SameLine();
-        ImGui::Button("R");ImGui::SameLine();
-        ImGui::Button("S");//ImGui::SameLine();
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10) * ImGuiManager::Instance()->GlobalScale);
+        if (ImGui::Button("T"))
+            mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+        ImGui::SameLine();
+        if (ImGui::Button("R"))
+            mCurrentGizmoOperation = ImGuizmo::ROTATE;
+        ImGui::SameLine();
+        if (ImGui::Button("S")) // ImGui::SameLine();
+            mCurrentGizmoOperation = ImGuizmo::SCALE;
         ImGui::PopStyleVar();
+
+        // ImGui::Text("X: %f Y: %f", io.MousePos.x, io.MousePos.y);
+        // if (ImGuizmo::IsUsing())
+        // {
+        //     ImGui::Text("Using gizmo");
+        // }
+        // else
+        // {
+        //     ImGui::Text(ImGuizmo::IsOver() ? "Over gizmo" : "");
+        //     ImGui::SameLine();
+        //     ImGui::Text(ImGuizmo::IsOver(ImGuizmo::TRANSLATE) ? "Over translate gizmo" : "");
+        //     ImGui::SameLine();
+        //     ImGui::Text(ImGuizmo::IsOver(ImGuizmo::ROTATE) ? "Over rotate gizmo" : "");
+        //     ImGui::SameLine();
+        //     ImGui::Text(ImGuizmo::IsOver(ImGuizmo::SCALE) ? "Over scale gizmo" : "");
+        // }
 
         ImGui::EndChild();
         ImGui::PopStyleVar();
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::BeginChild("scene_child", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding, 0 /*ImGuiWindowFlags_HorizontalScrollbar*/ );
+        ImGui::BeginChild("scene_child", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding, 0 /*ImGuiWindowFlags_HorizontalScrollbar*/);
 
         // if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
         // {
@@ -62,7 +89,7 @@ void Scene::RenderAndLogic()
         ImVec2 pos = min;        // ImGui::GetWindowPos();
         ImVec2 size = max - min; // ImGui::GetWindowSize();
 
-        ImGuiIO &io = ImGui::GetIO();
+        // ImGuiIO &io = ImGui::GetIO();
 
         pos *= io.DisplayFramebufferScale;
         size *= io.DisplayFramebufferScale;
@@ -123,10 +150,8 @@ void Scene::RenderAndLogic()
             ImGuiManager::Instance()->innerViewport->setVisible(false);
         }
 
-
         ImGui::EndChild();
         ImGui::PopStyleVar();
-
     }
     else
     {
