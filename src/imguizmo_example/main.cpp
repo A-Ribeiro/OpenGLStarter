@@ -932,13 +932,15 @@ int main(int argc, char *argv[])
         TransformStart(cameraView, cameraProjection, objectMatrix[lastUsing]);
         for (int matId = 0; matId < gizmoCount; matId++)
         {
-            ImGuizmo::SetID(matId);
+            //ImGuizmo::SetID(matId);
+            ImGuizmo::PushID(matId);
 
             EditTransform(cameraView, cameraProjection, objectMatrix[matId]);
             if (ImGuizmo::IsUsing())
             {
                 lastUsing = matId;
             }
+            ImGuizmo::PopID();
         }
         TransformEnd();
 

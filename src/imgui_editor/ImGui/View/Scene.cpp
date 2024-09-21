@@ -31,6 +31,21 @@ void Scene::RenderAndLogic()
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
 
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10)*ImGuiManager::Instance()->GlobalScale);
+        ImGui::BeginChild("scene_toolbar", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_AutoResizeY, 0 /*ImGuiWindowFlags_HorizontalScrollbar*/ );
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10)*ImGuiManager::Instance()->GlobalScale);
+        ImGui::Button("T");ImGui::SameLine();
+        ImGui::Button("R");ImGui::SameLine();
+        ImGui::Button("S");//ImGui::SameLine();
+        ImGui::PopStyleVar();
+
+        ImGui::EndChild();
+        ImGui::PopStyleVar();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::BeginChild("scene_child", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding, 0 /*ImGuiWindowFlags_HorizontalScrollbar*/ );
+
         // if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows))
         // {
         //     if (ImGui::IsMouseClicked(0))
@@ -107,6 +122,11 @@ void Scene::RenderAndLogic()
         {
             ImGuiManager::Instance()->innerViewport->setVisible(false);
         }
+
+
+        ImGui::EndChild();
+        ImGui::PopStyleVar();
+
     }
     else
     {
