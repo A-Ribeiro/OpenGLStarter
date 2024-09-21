@@ -384,6 +384,7 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 	//io.DisplayFramebufferScale = ImVec2(1.0f,1.0f) * DPIScale;
 
 	ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
 
 	ImGuiMenu::Instance()->RenderAndLogic();
 

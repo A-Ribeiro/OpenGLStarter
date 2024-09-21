@@ -939,9 +939,9 @@ void HierarchyOperations::drawImGizmoOverlay(const ImVec2 &pos, const ImVec2 &si
     // pos *= io.DisplayFramebufferScale;
     // size *= io.DisplayFramebufferScale;
 
-    // ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetOrthographic(false);
+    // ImGuizmo::Enable(true);
 
     // adjust gizmo size in PX
     {
@@ -962,11 +962,12 @@ void HierarchyOperations::drawImGizmoOverlay(const ImVec2 &pos, const ImVec2 &si
             ImGuizmo::SetGizmoSizeClipSpace(gizmo_size_normalized * aspect);
     }
 
-    ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-    ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::LOCAL;
+    // ImGuizmo::OPERATION mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+    // ImGuizmo::MODE mCurrentGizmoMode = ImGuizmo::LOCAL;
 
-    bool useSnap = true;
-    float snap[] = {0.01f,0.01f,0.01f};
+    // bool useSnap = true;
+    // float snap[] = {0.01f,0.01f,0.01f};
+    auto &scene = imGuiManager->scene;
 
     auto camera = imGuiManager->innerViewport->scene3D->getCamera();
     camera->precomputeViewProjection(false);
@@ -974,6 +975,7 @@ void HierarchyOperations::drawImGizmoOverlay(const ImVec2 &pos, const ImVec2 &si
     auto obj_transform = this->selectedTransformInfo->transform;
 
     auto obj_matrix = obj_transform->getMatrix();
+    MathCore::mat4f delta_matrix;
 
     ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
 
@@ -983,21 +985,63 @@ void HierarchyOperations::drawImGizmoOverlay(const ImVec2 &pos, const ImVec2 &si
     ImGuizmo::Manipulate(
         camera->view.array,
         camera->projection.array, 
-        mCurrentGizmoOperation, mCurrentGizmoMode, 
-        obj_matrix.array, NULL, useSnap ? &snap[0] : NULL);
+        scene.mCurrentGizmoOperation, scene.mCurrentGizmoMode, 
+        obj_matrix.array, delta_matrix.array, scene.useSnap ? &scene.snap[0] : NULL);
     
     ImGuizmo::PopID();
 
+    MathCore::vec3f matrixTranslation, matrixRotation, matrixScale;
+    ImGuizmo::DecomposeMatrixToComponents(delta_matrix.array, matrixTranslation.array, matrixRotation.array, matrixScale.array);
+
     // monitoring translation
-    auto translation_vec3 = MathCore::CVT<MathCore::vec4f>::toVec3(
-        MathCore::OP<MathCore::mat4f>::extractTranslation(obj_matrix)
-    );
+    // auto translation_vec3 = MathCore::CVT<MathCore::vec4f>::toVec3(
+    //     MathCore::OP<MathCore::mat4f>::extractTranslation(obj_matrix)
+    // );
 
     float dst_to_consider_movement = MathCore::EPSILON<float>::high_precision;
 
-    if (MathCore::OP<MathCore::vec3f>::sqrDistance(obj_transform->getPosition(),translation_vec3) > dst_to_consider_movement){
-        obj_transform->setPosition(translation_vec3);
-        printf(".");fflush(stdout);
+    //if (MathCore::OP<MathCore::vec3f>::sqrDistance(obj_transform->getPosition(),translation_vec3) > dst_to_consider_movement){
+    if (MathCore::OP<MathCore::vec3f>::sqrLength(matrixTranslation) > dst_to_consider_movement){
+        obj_transform->setPosition(obj_transform->getPosition() + matrixTranslation);
+        printf("t");fflush(stdout);
+    }    
+
+    // monitoring rotation
+    // auto rotation_quat = MathCore::GEN<MathCore::quatf>::fromMat4(obj_matrix);
+    // printf("rot: %f\n", 
+    // MathCore::OP<float>::rad_2_deg(
+    //     MathCore::OP<MathCore::quatf>::angleBetween(obj_transform->getRotation(),rotation_quat)
+    // )
+    // );
+
+    // if (MathCore::OP<MathCore::quatf>::angleBetween(obj_transform->getRotation(),rotation_quat) > MathCore::OP<float>::deg_2_rad(0.05f)){
+    //     obj_transform->setRotation(rotation_quat);
+    //     printf("r");fflush(stdout);
+    // }
+
+    if (MathCore::OP<MathCore::vec3f>::sqrLength(matrixRotation) > dst_to_consider_movement){
+        obj_transform->setLocalRotation(
+            MathCore::GEN<MathCore::quatf>::fromEuler(
+            MathCore::OP<float>::deg_2_rad(matrixRotation.x),
+            MathCore::OP<float>::deg_2_rad(matrixRotation.y),
+            MathCore::OP<float>::deg_2_rad(matrixRotation.z))
+            *
+            obj_transform->getLocalRotation()
+        );
+        printf("r");fflush(stdout);
+    }
+
+    // monitoring scale
+    // auto scale_vec3 = MathCore::vec3f(
+    //     MathCore::OP<MathCore::vec4f>::length(MathCore::OP<MathCore::mat4f>::extractXaxis(obj_matrix)),
+    //     MathCore::OP<MathCore::vec4f>::length(MathCore::OP<MathCore::mat4f>::extractYaxis(obj_matrix)),
+    //     MathCore::OP<MathCore::vec4f>::length(MathCore::OP<MathCore::mat4f>::extractZaxis(obj_matrix))
+    // );
+    // if (MathCore::OP<MathCore::vec3f>::sqrDistance(obj_transform->getScale(),scale_vec3) > dst_to_consider_movement){
+    if (MathCore::OP<MathCore::vec3f>::sqrDistance(matrixScale, MathCore::vec3f(1)) > dst_to_consider_movement){
+        // obj_transform->setScale(scale_vec3);
+        obj_transform->setScale(obj_transform->getScale() * matrixScale);
+        printf("s");fflush(stdout);
     }
 
 }
