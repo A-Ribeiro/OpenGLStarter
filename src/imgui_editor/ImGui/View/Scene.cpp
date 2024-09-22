@@ -41,13 +41,13 @@ void Scene::RenderAndLogic()
         ImGui::BeginChild("scene_toolbar", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_AutoResizeY, 0 /*ImGuiWindowFlags_HorizontalScrollbar*/);
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10) * ImGuiManager::Instance()->GlobalScale);
-        if (ImGui::Button("T"))
+        if (ImGui::Button("T")||ImGui::IsKeyPressed(ImGuiKey_W))
             mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
         ImGui::SameLine();
-        if (ImGui::Button("R"))
+        if (ImGui::Button("R")||ImGui::IsKeyPressed(ImGuiKey_E))
             mCurrentGizmoOperation = ImGuizmo::ROTATE;
         ImGui::SameLine();
-        if (ImGui::Button("S")) // ImGui::SameLine();
+        if (ImGui::Button("S")||ImGui::IsKeyPressed(ImGuiKey_R)) // ImGui::SameLine();
             mCurrentGizmoOperation = ImGuizmo::SCALE;
         ImGui::PopStyleVar();
 
