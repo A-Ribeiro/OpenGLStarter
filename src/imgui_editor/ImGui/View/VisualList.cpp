@@ -86,8 +86,12 @@ bool VisualList::CustomImGuiCommand_DrawItem(
     }
     itemSelf->hovered.setState(ImGui::IsItemHovered());
 
-    ImRect image_rect = ImRect(pos, pos + ImVec2(size.x, size.y * 0.4f));
-    ImRect text_rect = ImRect(ImVec2(pos.x, image_rect.Max.y), pos + size);
+    auto font = ImGuiManager::Instance()->font_half_size;
+
+    auto style = ImGui::GetStyle();
+    
+    ImRect image_rect = ImRect(pos + style.FramePadding, pos + ImVec2(size.x - style.FramePadding.x, size.y * 0.4f));
+    ImRect text_rect = ImRect(ImVec2(pos.x + style.FramePadding.x, image_rect.Max.y), pos + size - style.FramePadding);
 
     ImVec2 image_size = image_rect.GetSize();
     // ImVec2 text_size = text_rect.GetSize();
@@ -151,7 +155,7 @@ bool VisualList::CustomImGuiCommand_DrawItem(
 
     float text_width = size.x;
 
-    auto font = ImGuiManager::Instance()->font_half_size;
+    
 
     itemSelf->centeredText.drawText(text_rect.GetCenter(), font);
 
@@ -222,7 +226,9 @@ ListElement &ListElement::setName(const char *value)
     lower_no_accents = ITKCommon::StringUtil::toLower(lower_no_accents);
     snprintf(this->name_tolower_no_accent, 64, "%s", lower_no_accents.c_str());
 
-    centeredText.setText(this->name, ImGuiManager::Instance()->font_half_size, visualList->element_rect_size.x);
+    auto style = ImGui::GetStyle();
+
+    centeredText.setText(this->name, ImGuiManager::Instance()->font_half_size, visualList->element_rect_size.x - style.FramePadding.x * 2.0f);
 
     return *this;
 }
