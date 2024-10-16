@@ -38,7 +38,7 @@ void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
 		auto screen_size_pixels = selectedMonitor->SizePixels();
 		auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
 
-		//this->GlobalScale = (float)(dpii.y / 150.0f);// *selectedMonitor->scaleFactor;
+		// this->GlobalScale = (float)(dpii.y / 150.0f);// *selectedMonitor->scaleFactor;
 		this->GlobalScale = ( (float)(dpii.y + dpii.x) * 0.5f) / 96.0f;// *selectedMonitor->scaleFactor;
 		if (this->GlobalScale < 1.0f)
 			this->GlobalScale = 1.0f;
@@ -226,10 +226,10 @@ void ImGuiManager::applyGlobalScale() {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->Clear();
 
-	auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
+	auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 12.0f * this->GlobalScale);
 	IM_ASSERT(font != nullptr);
 
-	font_half_size = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 13.0f * this->GlobalScale);
+	font_half_size = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 10.0f * this->GlobalScale);
 	IM_ASSERT(font_half_size != nullptr);
 
     // io.Fonts->Build();

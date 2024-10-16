@@ -1,4 +1,4 @@
-//#include <glad/gl.h> // extensions here
+// #include <glad/gl.h> // extensions here
 #include <appkit-gl-base/platform/PlatformGL.h>
 
 #include <appkit-gl-engine/Engine.h>
@@ -14,7 +14,7 @@
 
 // force use the dedicated GPU to open the OpenGL Context on notebooks
 // https://stackoverflow.com/questions/16823372/forcing-machine-to-use-dedicated-graphics-card
-extern "C" __declspec(dllexport) int32_t NvOptimusEnablement = 1;
+extern "C" __declspec(dllexport) uint32_t NvOptimusEnablement = 1;
 extern "C" __declspec(dllexport) int32_t AmdPowerXpressRequestHighPerformance = 1;
 
 #define WIN32_LEAN_AND_MEAN
@@ -42,7 +42,7 @@ namespace AppKit
         }
 
         void Engine::initialize(const std::string &_companyName, const std::string &_gameName,
-                            const EventCore::Callback<AppBase *(void)> &_OnCreateInstanceFnc)
+                                const EventCore::Callback<AppBase *(void)> &_OnCreateInstanceFnc)
         {
 
             ITK_ABORT(OnCreateInstanceFnc != nullptr, "Engine Already Initialized.\n");
@@ -59,8 +59,35 @@ namespace AppKit
             return AppKit::Window::Window::getFullScreenVideoModes();
         }
 
+#if defined(__linux__)
+        static std::string execCommand(const char *cmd)
+        {
+            char buffer[1024];
+            std::string result;
+            std::unique_ptr<FILE, int(*)(FILE *)> pipe(popen(cmd, "r"), pclose);
+            if (!pipe)
+                throw std::runtime_error("Falha ao executar comando.");
+            while (fgets(buffer, 1024, pipe.get()) != nullptr)
+                result += buffer;
+            return result;
+        }
+#endif
+
         void Engine::configureWindow(const EngineWindowConfig &windowConfig)
         {
+#if defined(__linux__)
+            auto instaled_videocard = execCommand("lspci | grep VGA");
+            if (ITKCommon::StringUtil::contains(instaled_videocard,"NVIDIA")){
+                // Activate GPU NVIDIA
+                setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 1);
+                setenv("__GLX_VENDOR_LIBRARY_NAME", "nvidia", 1);
+                printf("activating NVIDIA discrete card\n");
+            } else if (ITKCommon::StringUtil::contains(instaled_videocard,"AMD")){
+                // Activate GPU AMD
+                setenv("DRI_PRIME", "1", 1);
+                printf("activating AMD discrete card\n");
+            }
+#endif
 
             if (app != nullptr)
             {
@@ -112,6 +139,18 @@ namespace AppKit
             isNVidiaCard = ITKCommon::StringUtil::contains(vendor, "nvidia");
             isAMDCard = ITKCommon::StringUtil::contains(vendor, "amd") || ITKCommon::StringUtil::contains(vendor, "radeon");
             isIntelCard = ITKCommon::StringUtil::contains(vendor, "intel");
+
+
+#if defined(__linux__)
+            if (ITKCommon::StringUtil::contains(instaled_videocard,"NVIDIA")){
+                // Activate GPU NVIDIA
+                unsetenv("__NV_PRIME_RENDER_OFFLOAD");
+                unsetenv("__GLX_VENDOR_LIBRARY_NAME");
+            } else if (ITKCommon::StringUtil::contains(instaled_videocard,"AMD")){
+                // Activate GPU AMD
+                unsetenv("DRI_PRIME");
+            }
+#endif
 
             app = OnCreateInstanceFnc();
         }
