@@ -25,10 +25,12 @@ App::App()
         auto screen_size_pixels = selectedMonitor->SizePixels();
         auto dpii = DPI::Display::ComputeDPIi(screen_size_pixels, screen_size_in);
 
-        this->GlobalScale = (float)(dpii.y / 150.0f);// *selectedMonitor->scaleFactor;
-        if (this->GlobalScale < 1.0f)
-            this->GlobalScale = 1.0f;
-        this->GlobalScale *= selectedMonitor->scaleFactor;
+        // this->GlobalScale = (float)(dpii.y / 150.0f);// *selectedMonitor->scaleFactor;
+        this->GlobalScale = ( (float)(dpii.y + dpii.x) * 0.5f) / 96.0f;// *selectedMonitor->scaleFactor;
+		if (this->GlobalScale < 1.0f)
+			this->GlobalScale = 1.0f;
+
+		this->GlobalScale *= selectedMonitor->scaleFactor;
 
         mainMonitorCenter = selectedMonitor->Position() + screen_size_pixels / 2;
         windowResolution = window->getSize();
@@ -304,7 +306,7 @@ void App::applyGlobalScale() {
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->Clear();
 
-    auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 16.0f * this->GlobalScale);
+    auto font = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Medium.ttf", 12.0f * this->GlobalScale);
 	IM_ASSERT(font != nullptr);
 
 }
