@@ -9,6 +9,9 @@
 
 #include <unordered_map>
 
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+
 namespace AppKit
 {
     namespace GLEngine
@@ -96,6 +99,10 @@ namespace AppKit
                 result->mSelf = std::weak_ptr<Component>(result);
                 return result;
             }
+
+            // TODO: next steps
+            // virtual void Serialize(rapidjson::Writer<rapidjson::StringBuffer>) = 0;
+            // virtual void Deserialize(rapidjson::Value &_value, std::unordered_map<intptr_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<intptr_t, std::shared_ptr<Component>> &component_map) = 0;
 
             friend class Transform;
         };
