@@ -104,6 +104,9 @@ namespace AppKit
                         // writer.String("transform");
                         writer.StartObject(); // start transform
 
+                        writer.String("id");
+                        writer.Uint64((intptr_t)root.transform->self().get());
+
                         writer.String("N");
                         writer.String(root.transform->getName().c_str());
 
@@ -113,6 +116,14 @@ namespace AppKit
                         write(writer, root.transform->getLocalRotation());
                         writer.String("S");
                         write(writer, root.transform->getLocalScale());
+
+                        // serialize all components
+                        writer.String("co");
+                        writer.StartArray();
+                        for(auto comp: root.transform->getComponents()){
+                            
+                        }
+                        writer.EndArray();
 
                         writer.String("C");
                         writer.StartArray(); // start children
@@ -204,6 +215,7 @@ namespace AppKit
             };
 
             std::vector<itemT> to_traverse;
+            std::unordered_map<intptr_t, std::shared_ptr<Transform>> transform_map;
 
             if (!include_root){
                 // push array
@@ -232,20 +244,35 @@ namespace AppKit
 
                 if (front.value.IsObject()){
 
-                    auto &name = front.value["N"];
-                    if (name.IsString())
-                        front.to_set->setName(name.GetString());
+                    if (front.value.HasMember("id")){
+                        auto &id = front.value["id"];
+                        if (id.IsUint64())
+                            transform_map[(intptr_t)id.GetUint64()] = front.to_set->self();
+                    }
 
-                    front.to_set->setLocalPosition( read<MathCore::vec3f>(front.value["T"]) );
-                    front.to_set->setLocalRotation( read<MathCore::quatf>(front.value["R"]) );
-                    front.to_set->setLocalScale( read<MathCore::vec3f>(front.value["S"]) );
+                    if (front.value.HasMember("N")){
+                        auto &name = front.value["N"];
+                        if (name.IsString())
+                            front.to_set->setName(name.GetString());
+                    }
+
+                    if (front.value.HasMember("T"))
+                        front.to_set->setLocalPosition( read<MathCore::vec3f>(front.value["T"]) );
+                    if (front.value.HasMember("R"))
+                        front.to_set->setLocalRotation( read<MathCore::quatf>(front.value["R"]) );
+                    if (front.value.HasMember("S"))
+                        front.to_set->setLocalScale( read<MathCore::vec3f>(front.value["S"]) );
                     
-                    auto &children = front.value["C"];
-                    if (children.IsArray()){
-                        for (int i = (int)children.Size()-1; i >= 0; i--)  {
-                            // auto new_transform = Transform::CreateShared();
-                            //front.to_set->addChild(new_transform);
-                            to_traverse.push_back({front.to_set, nullptr, children[i]});
+                    // deserialize all components
+
+                    if (front.value.HasMember("C")){
+                        auto &children = front.value["C"];
+                        if (children.IsArray()){
+                            for (int i = (int)children.Size()-1; i >= 0; i--)  {
+                                // auto new_transform = Transform::CreateShared();
+                                //front.to_set->addChild(new_transform);
+                                to_traverse.push_back({front.to_set, nullptr, children[i]});
+                            }
                         }
                     }
 
