@@ -4,6 +4,28 @@
 #include <string>
 #include <InteractiveToolkit/ITKCommon/STL_Tools.h>
 
+// components
+#include <appkit-gl-engine/Components/deprecated/ComponentCameraLookToNode.h>
+#include <appkit-gl-engine/Components/deprecated/ComponentColorLine.h>
+#include <appkit-gl-engine/Components/deprecated/ComponentColorMesh.h>
+
+#include <appkit-gl-engine/Components/ComponentAnimationMotion.h>
+#include <appkit-gl-engine/Components/ComponentCameraMove.h>
+#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/ComponentCameraRotateOnTarget.h>
+#include <appkit-gl-engine/Components/ComponentFontToMesh.h>
+#include <appkit-gl-engine/Components/ComponentFrustumCulling.h>
+#include <appkit-gl-engine/Components/ComponentLight.h>
+#include <appkit-gl-engine/Components/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/ComponentMesh.h>
+#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+#include <appkit-gl-engine/Components/ComponentParticleSystem.h>
+#include <appkit-gl-engine/Components/ComponentSkinnedMesh.h>
+#include <appkit-gl-engine/Components/ComponentThirdPersonCamera.h>
+#include <appkit-gl-engine/Components/ComponentThirdPersonPlayerController.h>
+
+
 namespace AppKit
 {
     namespace GLEngine
@@ -88,6 +110,8 @@ namespace AppKit
             };
             std::vector<itemT> stack;
 
+            std::unordered_map<intptr_t, bool> component_exported;
+
             itemT root = {transform, 0};
 
             while (root.transform != nullptr || stack.size() > 0)
@@ -121,7 +145,15 @@ namespace AppKit
                         writer.String("co");
                         writer.StartArray();
                         for(auto comp: root.transform->getComponents()){
-                            
+                            if ( component_exported.find((uintptr_t)comp.get()) == component_exported.end()){
+                                component_exported[(uintptr_t)comp.get()] = true;
+                                comp->Serialize(writer);
+                            } else {
+                                writer.StartObject();
+                                writer.String("_co_ref_");
+                                writer.Uint64( (uintptr_t)comp.get() );
+                                writer.EndObject();
+                            }
                         }
                         writer.EndArray();
 
@@ -185,6 +217,36 @@ namespace AppKit
             return Platform::ObjectBuffer();
         }
 
+        bool JSONSceneDeserializer::default_registered = false;
+        std::unordered_map<std::string, std::function<std::shared_ptr<Component>(void)>> JSONSceneDeserializer::componentCreator;
+
+        void JSONSceneDeserializer::registerDefaultComponents(){
+            if (default_registered)
+                return;
+            default_registered = true;
+
+            AddComponent<Components::ComponentCameraLookToNode>();
+            AddComponent<Components::ComponentColorLine>();
+            AddComponent<Components::ComponentColorMesh>();
+            
+            AddComponent<Components::ComponentAnimationMotion>();
+            AddComponent<Components::ComponentCameraMove>();
+            AddComponent<Components::ComponentCameraOrthographic>();
+            AddComponent<Components::ComponentCameraPerspective>();
+            AddComponent<Components::ComponentCameraRotateOnTarget>();
+            AddComponent<Components::ComponentFontToMesh>();
+            AddComponent<Components::ComponentFrustumCulling>();
+            AddComponent<Components::ComponentLight>();
+            AddComponent<Components::ComponentMaterial>();
+            AddComponent<Components::ComponentMesh>();
+            AddComponent<Components::ComponentMeshWrapper>();
+            AddComponent<Components::ComponentParticleSystem>();
+            AddComponent<Components::ComponentSkinnedMesh>();
+            AddComponent<Components::ComponentThirdPersonCamera>();
+            AddComponent<Components::ComponentThirdPersonPlayerController>();
+            
+        }
+
         std::shared_ptr<ReaderSet> JSONSceneDeserializer::Begin(Platform::ObjectBuffer *src) {
             auto result = std::make_shared<ReaderSet>();
 
@@ -207,6 +269,8 @@ namespace AppKit
 
         void JSONSceneDeserializer::Deserialize(rapidjson::Value &_value, bool include_root, std::shared_ptr<Transform> target_root){
 
+            registerDefaultComponents();
+
             struct itemT
             {
                 std::shared_ptr<Transform> parent;
@@ -216,15 +280,17 @@ namespace AppKit
 
             std::vector<itemT> to_traverse;
             std::unordered_map<intptr_t, std::shared_ptr<Transform>> transform_map;
+            std::unordered_map<intptr_t, std::shared_ptr<Component>> component_map;
+
+            //
+            // Create all structure on memory (Transform Hierarchy + Components)
+            //
 
             if (!include_root){
                 // push array
                 if (_value.IsArray()){
-                    for (int i = (int)_value.Size()-1; i >= 0; i--)  {
-                        // auto new_transform = Transform::CreateShared();
-                        // target_root->addChild(new_transform);
+                    for (int i = (int)_value.Size()-1; i >= 0; i--)
                         to_traverse.push_back({target_root, nullptr, _value[i]});
-                    }
                 }
             }
             else // push root
@@ -264,19 +330,94 @@ namespace AppKit
                         front.to_set->setLocalScale( read<MathCore::vec3f>(front.value["S"]) );
                     
                     // deserialize all components
+                    if (front.value.HasMember("co")){
+                        auto &components = front.value["co"];
+                        if (components.IsArray()){
+                            for (int i = 0; i < (int)components.Size(); i++)  {
+                                rapidjson::Value &comp = components[i];
 
-                    if (front.value.HasMember("C")){
-                        auto &children = front.value["C"];
-                        if (children.IsArray()){
-                            for (int i = (int)children.Size()-1; i >= 0; i--)  {
-                                // auto new_transform = Transform::CreateShared();
-                                //front.to_set->addChild(new_transform);
-                                to_traverse.push_back({front.to_set, nullptr, children[i]});
+                                if(!comp.IsObject())
+                                    continue;
+                                
+                                if(comp.HasMember("_co_ref_") && comp["_co_ref_"].IsUint64()){
+                                    // a reference to a component already created
+                                    auto _ref_comp = component_map.find((uintptr_t)comp["_co_ref_"].GetUint64());
+                                    ITK_ABORT(_ref_comp == component_map.end(), "component ref in the scene file not found.");
+                                    front.to_set->addComponent(_ref_comp->second);
+                                    continue;
+                                }
+
+                                if(!comp.HasMember("type") || !comp["type"].IsString() ||
+                                !comp.HasMember("id") || !comp["id"].IsUint64() )
+                                    continue;
+                                auto it = componentCreator.find(comp["type"].GetString());
+                                if (it == componentCreator.end())
+                                    continue;
+                                auto &fnc_create_shared = it->second;
+                                auto new_component_created = fnc_create_shared();
+                                component_map[ (intptr_t)comp["id"].GetUint64() ] = new_component_created;
+
+                                front.to_set->addComponent(new_component_created);
                             }
                         }
                     }
 
+                    if (front.value.HasMember("C")){
+                        auto &children = front.value["C"];
+                        if (children.IsArray()){
+                            for (int i = (int)children.Size()-1; i >= 0; i--)
+                                to_traverse.push_back({front.to_set, nullptr, children[i]});
+                        }
+                    }
+
                 }
+            }
+
+            //
+            // Deserialize only the components
+            //
+            if (!include_root){
+                // push array
+                if (_value.IsArray()) {
+                    for (int i = (int)_value.Size()-1; i >= 0; i--)
+                        to_traverse.push_back({target_root, nullptr, _value[i]});
+                }
+            }
+            else // push root
+                to_traverse.push_back({nullptr,target_root, _value});
+
+            while (to_traverse.size() > 0) {
+                auto front = to_traverse.back();
+                to_traverse.pop_back();
+
+                if (front.value.IsObject()){
+
+                    // deserialize all components
+                    if (front.value.HasMember("co")){
+                        auto &components = front.value["co"];
+                        if (components.IsArray()){
+                            for (int i = 0; i < (int)components.Size(); i++)  {
+                                rapidjson::Value &comp = components[i];
+                                if(!comp.IsObject() || !comp.HasMember("type") || !comp["type"].IsString() ||
+                                !comp.HasMember("id") || !comp["id"].IsUint64() )
+                                    continue;
+                                auto it = component_map.find((intptr_t)comp["id"].GetUint64());
+                                if (it == component_map.end())
+                                    continue;
+                                it->second->Deserialize( comp, transform_map, component_map );
+                            }
+                        }
+                    }
+
+                    if (front.value.HasMember("C")){
+                        auto &children = front.value["C"];
+                        if (children.IsArray()){
+                            for (int i = (int)children.Size()-1; i >= 0; i--)
+                                to_traverse.push_back({front.to_set, nullptr, children[i]});
+                        }
+                    }
+                }
+
             }
 
         }

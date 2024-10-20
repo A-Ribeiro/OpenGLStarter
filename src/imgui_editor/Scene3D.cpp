@@ -58,6 +58,18 @@ void Scene3D::bindResourcesToGraph()
     }
 }
 
+void Scene3D::setMainCamera(std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera) {
+    this->camera = camera;
+}
+
+void Scene3D::ensureCameraExists(){
+    auto camera_perspective = mainCamera->findComponent< Components::ComponentCameraPerspective >();
+    auto camera_ortho = mainCamera->findComponent< Components::ComponentCameraOrthographic>();
+    if (camera_perspective == nullptr && camera_ortho == nullptr)
+        bindResourcesToGraph();
+}
+
+
 // clear all loaded scene
 void Scene3D::unloadAll()
 {

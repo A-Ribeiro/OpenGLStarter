@@ -126,6 +126,23 @@ namespace AppKit
                     this->mesh = std::dynamic_pointer_cast<ComponentMesh>(found_mesh->second);
             }
 
+            void ComponentFontToMesh::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer){
+                writer.StartObject();
+                writer.String("type");
+                writer.String(ComponentFontToMesh::Type);
+                writer.String("id");
+                writer.Uint64((intptr_t)self().get());
+                writer.EndObject();
+                
+            }
+            void ComponentFontToMesh::Deserialize(rapidjson::Value &_value, std::unordered_map<intptr_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<intptr_t, std::shared_ptr<Component>> &component_map){
+                if (!_value.HasMember("type") || !_value["type"].IsString())
+                    return;
+                if (!strcmp(_value["type"].GetString(), ComponentFontToMesh::Type) == 0)
+                    return;
+                
+            }
+
 
         }
     }
