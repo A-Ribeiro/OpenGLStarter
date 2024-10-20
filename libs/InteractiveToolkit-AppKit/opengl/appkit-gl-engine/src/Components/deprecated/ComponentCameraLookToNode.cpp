@@ -217,6 +217,24 @@ namespace AppKit
                 }
             }
 
+            void ComponentCameraLookToNode::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer){
+                writer.StartObject();
+                writer.String("type");
+                writer.String(ComponentCameraLookToNode::Type);
+                writer.String("id");
+                writer.Uint64((intptr_t)self().get());
+                writer.EndObject();
+                
+            }
+            void ComponentCameraLookToNode::Deserialize(rapidjson::Value &_value, std::unordered_map<intptr_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<intptr_t, std::shared_ptr<Component>> &component_map){
+                if (!_value.HasMember("type") || !_value["type"].IsString())
+                    return;
+                if (!strcmp(_value["type"].GetString(), ComponentCameraLookToNode::Type) == 0)
+                    return;
+                
+            }
+
+
         }
     }
 

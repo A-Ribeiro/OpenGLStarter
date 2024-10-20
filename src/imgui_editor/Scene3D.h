@@ -4,6 +4,8 @@
 #include <appkit-gl-engine/util/Button.h>
 
 #include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+
 #include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
 
 class App;
@@ -48,6 +50,10 @@ public:
     void printHierarchy();
 
     void OnUpdate(Platform::Time *time);
+
+    void setMainCamera(std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera);
+
+    void ensureCameraExists();
 
 
 };

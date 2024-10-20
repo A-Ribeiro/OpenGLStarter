@@ -588,7 +588,7 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
             if (root_editor == nullptr)
                 return;
 
-            auto camera = scene3D->getCamera();
+            auto camera_transform = scene3D->mainCamera;
 
             auto readSet = JSONSceneDeserializer::Begin(&bufferObject);
 
@@ -597,8 +597,21 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
                 return;
             }
 
-            JSONSceneDeserializer::Deserialize(readSet->document["Camera"], true, camera->getTransform());
-            JSONSceneDeserializer::Deserialize(readSet->document["Scene"], false, root_editor);
+            if (readSet->document.HasMember("Camera")) {
+                camera_transform->clearChildren();
+                camera_transform->clearComponents();
+                JSONSceneDeserializer::Deserialize(readSet->document["Camera"], true, camera_transform);
+                auto camera_perspective = camera_transform->findComponent< Components::ComponentCameraPerspective >();
+                auto camera_ortho = camera_transform->findComponent< Components::ComponentCameraOrthographic>();
+                if (camera_perspective != nullptr)
+                    scene3D->setMainCamera( camera_perspective );
+                else if (camera_ortho != nullptr)
+                    scene3D->setMainCamera( camera_ortho );
+                else
+                    scene3D->ensureCameraExists();
+            }
+            if (readSet->document.HasMember("Scene"))
+                JSONSceneDeserializer::Deserialize(readSet->document["Scene"], false, root_editor);
 
             // synchronize the scene with the hierarchy view
             {
