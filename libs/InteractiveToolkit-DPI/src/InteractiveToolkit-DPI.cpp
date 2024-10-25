@@ -812,7 +812,7 @@ namespace DPI
 								double scale = (scale_x + scale_y) * 0.5;
 								scale = MathCore::OP<double>::round(scale);
 								scale = scale / 96.0;
-								this_monitor.scaleFactor = scale;
+								this_monitor.scaleFactor = (float)scale;
 							}
 						}
 						else if (processDpiAwareness == PROCESS_SYSTEM_DPI_AWARE) {
@@ -823,7 +823,7 @@ namespace DPI
 							double scale = (scale_x + scale_y) * 0.5;
 							scale = MathCore::OP<double>::round(scale);
 							scale = scale / 96.0;
-							this_monitor.scaleFactor = scale;
+							this_monitor.scaleFactor = (float)scale;
 						}
 					}
 
