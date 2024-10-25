@@ -185,6 +185,24 @@ namespace AppKit
                     writer.String(ComponentMaterial::Type);
                     writer.String("id");
                     writer.Uint64((intptr_t)self().get());
+
+                    if (type == MaterialType::MaterialUnlit){                       // implemented
+                        writer.String("type");
+                        writer.String("unlit");
+                    } else if (type == MaterialType::MaterialUnlitTexture) {                // implemented
+                        writer.String("type");
+                        writer.String("unlit_texture");
+                    } else if (type == MaterialType::MaterialUnlitTextureVertexColor) {     // implemented
+                        writer.String("type");
+                        writer.String("unlit_texture_vertex_color");
+                    } else if (type == MaterialType::MaterialUnlitTextureVertexColorFont) { // implemented
+                        writer.String("type");
+                        writer.String("unlit_texture_vertex_color_font");
+                    } else if (type == MaterialType::MaterialPBR){
+                        writer.String("type");
+                        writer.String("pbr");
+                    }
+
                     writer.EndObject();
                     
                 }
