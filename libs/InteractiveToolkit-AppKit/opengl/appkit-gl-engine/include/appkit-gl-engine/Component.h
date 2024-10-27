@@ -9,8 +9,10 @@
 
 #include <unordered_map>
 
-#include <rapidjson/document.h>
-#include <rapidjson/writer.h>
+// #include <rapidjson/document.h>
+// #include <rapidjson/writer.h>
+
+#include <appkit-gl-engine/Serializer/SerializerUtil.h>
 
 namespace AppKit
 {
@@ -101,7 +103,7 @@ namespace AppKit
             }
 
             virtual void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) = 0;
-            virtual void Deserialize(rapidjson::Value &_value, std::unordered_map<intptr_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<intptr_t, std::shared_ptr<Component>> &component_map) = 0;
+            virtual void Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map) = 0;
 
             friend class Transform;
         };

@@ -2,7 +2,7 @@
 
 #include "OperationsCommon.h"
 
-class HierarchyOperations : virtual public OperationsCommon, public EventCore::HandleCallback
+class HierarchyOperations : virtual public OperationsCommon
 {
 public:
     // loaded project directory

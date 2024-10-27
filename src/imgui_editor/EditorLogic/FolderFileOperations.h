@@ -2,15 +2,13 @@
 
 #include "OperationsCommon.h"
 
-//#include "../ImGui/ImGuiManager.h"
+// #include "../ImGui/ImGuiManager.h"
 #include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
-//#include "Clipboard.h"
+// #include "Clipboard.h"
 
-
-class FolderFileOperations : virtual public OperationsCommon, public EventCore::HandleCallback
+class FolderFileOperations : virtual public OperationsCommon
 {
-    public:
-
+public:
     // loaded project directory
     ITKCommon::FileSystem::Directory project_directory;
 
@@ -44,7 +42,6 @@ class FolderFileOperations : virtual public OperationsCommon, public EventCore::
     void renameSelectedFile(const std::string &newfileName);
     void renameSelectedDirectory(const std::string &newdirname);
 
-
     void copyFile(std::shared_ptr<FileListData> inFile, const std::string &outFileName, EventCore::Callback<void()> OnSuccess = nullptr);
     void moveFile(std::shared_ptr<FileListData> inFile, const std::string &outFileName, EventCore::Callback<void()> OnSuccess = nullptr);
 
@@ -53,6 +50,4 @@ class FolderFileOperations : virtual public OperationsCommon, public EventCore::
     void deleteSelectedFile();
 
     void deleteSelectedDirectory();
-
 };
-
