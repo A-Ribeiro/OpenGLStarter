@@ -134,12 +134,23 @@ namespace AppKit
                         writer.String("N");
                         writer.String(root.transform->getName().c_str());
 
-                        writer.String("T");
-                        SerializerUtil::write(writer, root.transform->getLocalPosition());
-                        writer.String("R");
-                        SerializerUtil::write(writer, root.transform->getLocalRotation());
-                        writer.String("S");
-                        SerializerUtil::write(writer, root.transform->getLocalScale());
+                        auto _T = root.transform->getLocalPosition();
+                        if (_T != MathCore::vec3f(0.0f)){
+                            writer.String("T");
+                            SerializerUtil::write(writer, _T);
+                        }
+
+                        auto _R = root.transform->getLocalRotation();
+                        if (_R != MathCore::quatf()){
+                            writer.String("R");
+                            SerializerUtil::write(writer, _R);
+                        }
+
+                        auto _S = root.transform->getLocalScale();
+                        if (_S != MathCore::vec3f(1.0f)){
+                            writer.String("S");
+                            SerializerUtil::write(writer, _S);
+                        }
 
                         // serialize all components
                         writer.String("co");
@@ -324,10 +335,16 @@ namespace AppKit
 
                     if (front.value.HasMember("T"))
                         front.to_set->setLocalPosition( SerializerUtil::read<MathCore::vec3f>(front.value["T"]) );
+                    else
+                        front.to_set->setLocalPosition( MathCore::vec3f(0.0f) );
                     if (front.value.HasMember("R"))
                         front.to_set->setLocalRotation( SerializerUtil::read<MathCore::quatf>(front.value["R"]) );
+                    else
+                        front.to_set->setLocalRotation( MathCore::quatf() );
                     if (front.value.HasMember("S"))
                         front.to_set->setLocalScale( SerializerUtil::read<MathCore::vec3f>(front.value["S"]) );
+                    else
+                        front.to_set->setLocalScale( MathCore::vec3f(1.0f) );
                     
                     // deserialize all components
                     if (front.value.HasMember("co")){
