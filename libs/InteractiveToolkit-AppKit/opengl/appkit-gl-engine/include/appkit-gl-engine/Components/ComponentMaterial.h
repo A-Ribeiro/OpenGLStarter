@@ -62,7 +62,7 @@ namespace AppKit
                 {
                     writer.StartObject();
 
-                    if (color != MathCore::vec4f(0))
+                    if (color != MathCore::vec4f(1.0f))
                     {
                         writer.String("color");
                         SerializerUtil::write(writer, color);
@@ -97,7 +97,7 @@ namespace AppKit
                     if (_value.HasMember("color"))
                         color = SerializerUtil::read<decltype(color)>(_value["color"]);
                     else 
-                        color = MathCore::vec4f(0);
+                        color = MathCore::vec4f(1.0f);
 
                     if (_value.HasMember("tex") && _value["tex"].IsUint64()){
                         printf("needs to query tex resource DB\n");
@@ -188,17 +188,25 @@ namespace AppKit
                 {
                     writer.StartObject();
 
-                    writer.String("albedo_color");
-                    SerializerUtil::write(writer, albedoColor);
+                    if (albedoColor != MathCore::vec3f(1.0f)){
+                        writer.String("albedo_color");
+                        SerializerUtil::write(writer, albedoColor);
+                    }
 
-                    writer.String("emission_color");
-                    SerializerUtil::write(writer, emissionColor);
+                    if (emissionColor != MathCore::vec3f(0.0f)){
+                        writer.String("emission_color");
+                        SerializerUtil::write(writer, emissionColor);
+                    }
 
-                    writer.String("roughness");
-                    writer.Double( MathCore::CVT<float>::toDouble(roughness) );
+                    if (roughness != 1.0f){
+                        writer.String("roughness");
+                        writer.Double( MathCore::CVT<float>::toDouble(roughness) );
+                    }
 
-                    writer.String("metallic");
-                    writer.Double( MathCore::CVT<float>::toDouble(metallic) );
+                    if (metallic != 0.0f){
+                        writer.String("metallic");
+                        writer.Double( MathCore::CVT<float>::toDouble(metallic) );
+                    }
 
                     if (texAlbedo != nullptr)
                     {
@@ -231,15 +239,23 @@ namespace AppKit
                 {
                     if (_value.HasMember("albedo_color"))
                         albedoColor = SerializerUtil::read<decltype(albedoColor)>(_value["albedo_color"]);
+                    else 
+                        albedoColor = MathCore::vec3f(1.0f);
 
                     if (_value.HasMember("emission_color"))
                         emissionColor = SerializerUtil::read<decltype(emissionColor)>(_value["emission_color"]);
+                    else
+                        emissionColor = MathCore::vec3f(0.0f);
 
                     if (_value.HasMember("roughness") && _value["roughness"].IsDouble())
-                        roughness = MathCore::CVT<double>::toFloat(_value["roughness"].GetDouble()); 
+                        roughness = MathCore::CVT<double>::toFloat(_value["roughness"].GetDouble());
+                    else
+                        roughness = 1.0f;
 
                     if (_value.HasMember("metallic") && _value["metallic"].IsDouble())
                         metallic = MathCore::CVT<double>::toFloat(_value["metallic"].GetDouble()); 
+                    else
+                        metallic = 0.0f;
 
                     if (_value.HasMember("tex_albedo") && _value["tex_albedo"].IsUint64()){
                         printf("needs to query tex resource DB\n");
