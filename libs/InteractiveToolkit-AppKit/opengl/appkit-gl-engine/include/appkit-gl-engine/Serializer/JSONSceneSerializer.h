@@ -1,8 +1,9 @@
 #pragma once
 
-#include "SceneSerializer.h"
-#include <rapidjson/document.h>
-#include <rapidjson/prettywriter.h>
+#include "../Transform.h"
+#include "../Component.h"
+
+#include "SerializerUtil.h"
 
 namespace AppKit
 {

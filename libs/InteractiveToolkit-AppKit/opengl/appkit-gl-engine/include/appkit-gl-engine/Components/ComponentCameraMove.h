@@ -50,7 +50,7 @@ namespace AppKit
                 void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
 
                 void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
-                void Deserialize(rapidjson::Value &_value, std::unordered_map<intptr_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<intptr_t, std::shared_ptr<Component>> &component_map);
+                void Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map);
 
             };
 

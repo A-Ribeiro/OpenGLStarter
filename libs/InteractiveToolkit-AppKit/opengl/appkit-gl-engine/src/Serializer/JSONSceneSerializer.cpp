@@ -33,67 +33,67 @@ namespace AppKit
 
         using RapidJsonWriter = rapidjson::Writer<rapidjson::StringBuffer>;
 
-        template <typename _math_type,
-                  typename std::enable_if<
-                      MathCore::MathTypeInfo<_math_type>::_is_valid::value &&
-                          MathCore::MathTypeInfo<_math_type>::_is_vec::value &&
-                          std::is_floating_point<typename MathCore::MathTypeInfo<_math_type>::_type>::value
-                          ,
-                      bool>::type = true>
-        static ITK_INLINE _math_type read(rapidjson::Value &reader)
-        {
-            if (!reader.IsArray())
-                return _math_type();
-            if ((int)reader.Size() != (int)_math_type::array_count)
-                return _math_type();
+        // template <typename _math_type,
+        //           typename std::enable_if<
+        //               MathCore::MathTypeInfo<_math_type>::_is_valid::value &&
+        //                   MathCore::MathTypeInfo<_math_type>::_is_vec::value &&
+        //                   std::is_floating_point<typename MathCore::MathTypeInfo<_math_type>::_type>::value
+        //                   ,
+        //               bool>::type = true>
+        // static ITK_INLINE _math_type read(rapidjson::Value &reader)
+        // {
+        //     if (!reader.IsArray())
+        //         return _math_type();
+        //     if ((int)reader.Size() != (int)_math_type::array_count)
+        //         return _math_type();
                 
-            using float_type = typename MathCore::MathTypeInfo<_math_type>::_type;
-            _math_type result;
-            for (int i = 0; i < (int)_math_type::array_count; i++)
-            {
-                auto &element = reader[i];
-                if (!element.IsDouble())
-                    continue;
-                result[i] = MathCore::CVT<float_type>::toFloat(element.GetDouble());
-            }
-            return result;
-        }
+        //     using float_type = typename MathCore::MathTypeInfo<_math_type>::_type;
+        //     _math_type result;
+        //     for (int i = 0; i < (int)_math_type::array_count; i++)
+        //     {
+        //         auto &element = reader[i];
+        //         if (!element.IsDouble())
+        //             continue;
+        //         result[i] = MathCore::CVT<float_type>::toFloat(element.GetDouble());
+        //     }
+        //     return result;
+        // }
 
-        template <typename _math_type,
-                  typename std::enable_if<
-                      MathCore::MathTypeInfo<_math_type>::_is_valid::value &&
-                          MathCore::MathTypeInfo<_math_type>::_is_vec::value &&
-                          std::is_floating_point<typename MathCore::MathTypeInfo<_math_type>::_type>::value
-                          ,
-                      bool>::type = true>
-        static ITK_INLINE void write(RapidJsonWriter &writer, const _math_type &v)
-        {
-            using float_type = typename MathCore::MathTypeInfo<_math_type>::_type;
-            writer.StartArray();
-            for (int i = 0; i < (int)_math_type::array_count; i++)
-                writer.Double(MathCore::CVT<float_type>::toDouble(v[i]));
-            writer.EndArray();
-        }
+        // template <typename _math_type,
+        //           typename std::enable_if<
+        //               MathCore::MathTypeInfo<_math_type>::_is_valid::value &&
+        //                   MathCore::MathTypeInfo<_math_type>::_is_vec::value &&
+        //                   std::is_floating_point<typename MathCore::MathTypeInfo<_math_type>::_type>::value
+        //                   ,
+        //               bool>::type = true>
+        // static ITK_INLINE void write(RapidJsonWriter &writer, const _math_type &v)
+        // {
+        //     using float_type = typename MathCore::MathTypeInfo<_math_type>::_type;
+        //     writer.StartArray();
+        //     for (int i = 0; i < (int)_math_type::array_count; i++)
+        //         writer.Double(MathCore::CVT<float_type>::toDouble(v[i]));
+        //     writer.EndArray();
+        // }
 
-        template <typename _math_type,
-                  typename std::enable_if<
-                      MathCore::MathTypeInfo<_math_type>::_is_valid::value &&
-                          !MathCore::MathTypeInfo<_math_type>::_is_vec::value &&
-                          std::is_floating_point<typename MathCore::MathTypeInfo<_math_type>::_type>::value,
-                      bool>::type = true>
-        static ITK_INLINE void write(RapidJsonWriter &writer, const _math_type &v)
-        {
-            using float_type = typename MathCore::MathTypeInfo<_math_type>::_type;
-            writer.StartArray();
-            for (int c = 0; c < (int)_math_type::cols; c++)
-            {
-                writer.StartArray();
-                for (int r = 0; r < (int)_math_type::rows; r++)
-                    writer.Double(MathCore::CVT<float_type>::toDouble(v(r, c)));
-                writer.EndArray();
-            }
-            writer.EndArray();
-        }
+        // template <typename _math_type,
+        //           typename std::enable_if<
+        //               MathCore::MathTypeInfo<_math_type>::_is_valid::value &&
+        //                   !MathCore::MathTypeInfo<_math_type>::_is_vec::value &&
+        //                   std::is_floating_point<typename MathCore::MathTypeInfo<_math_type>::_type>::value,
+        //               bool>::type = true>
+        // static ITK_INLINE void write(RapidJsonWriter &writer, const _math_type &v)
+        // {
+        //     using float_type = typename MathCore::MathTypeInfo<_math_type>::_type;
+        //     writer.StartArray();
+        //     for (int c = 0; c < (int)_math_type::cols; c++)
+        //     {
+        //         writer.StartArray();
+        //         for (int r = 0; r < (int)_math_type::rows; r++)
+        //             writer.Double(MathCore::CVT<float_type>::toDouble(v(r, c)));
+        //         writer.EndArray();
+        //     }
+        //     writer.EndArray();
+        // }
 
         std::shared_ptr<WriterSet> JSONSceneSerializer::Begin(){
             return std::make_shared<WriterSet>();
@@ -110,7 +110,7 @@ namespace AppKit
             };
             std::vector<itemT> stack;
 
-            std::unordered_map<intptr_t, bool> component_exported;
+            std::unordered_map<uint64_t, bool> component_exported;
 
             itemT root = {transform, 0};
 
@@ -129,29 +129,29 @@ namespace AppKit
                         writer.StartObject(); // start transform
 
                         writer.String("id");
-                        writer.Uint64((intptr_t)root.transform->self().get());
+                        writer.Uint64((uint64_t)(uintptr_t)root.transform->self().get());
 
                         writer.String("N");
                         writer.String(root.transform->getName().c_str());
 
                         writer.String("T");
-                        write(writer, root.transform->getLocalPosition());
+                        SerializerUtil::write(writer, root.transform->getLocalPosition());
                         writer.String("R");
-                        write(writer, root.transform->getLocalRotation());
+                        SerializerUtil::write(writer, root.transform->getLocalRotation());
                         writer.String("S");
-                        write(writer, root.transform->getLocalScale());
+                        SerializerUtil::write(writer, root.transform->getLocalScale());
 
                         // serialize all components
                         writer.String("co");
                         writer.StartArray();
                         for(auto comp: root.transform->getComponents()){
-                            if ( component_exported.find((uintptr_t)comp.get()) == component_exported.end()){
-                                component_exported[(uintptr_t)comp.get()] = true;
+                            if ( component_exported.find((uint64_t)(uintptr_t)comp.get()) == component_exported.end()){
+                                component_exported[(uint64_t)(uintptr_t)comp.get()] = true;
                                 comp->Serialize(writer);
                             } else {
                                 writer.StartObject();
                                 writer.String("_co_ref_");
-                                writer.Uint64( (uintptr_t)comp.get() );
+                                writer.Uint64( (uint64_t)(uintptr_t)comp.get() );
                                 writer.EndObject();
                             }
                         }
@@ -279,8 +279,8 @@ namespace AppKit
             };
 
             std::vector<itemT> to_traverse;
-            std::unordered_map<intptr_t, std::shared_ptr<Transform>> transform_map;
-            std::unordered_map<intptr_t, std::shared_ptr<Component>> component_map;
+            std::unordered_map<uint64_t, std::shared_ptr<Transform>> transform_map;
+            std::unordered_map<uint64_t, std::shared_ptr<Component>> component_map;
 
             //
             // Create all structure on memory (Transform Hierarchy + Components)
@@ -313,7 +313,7 @@ namespace AppKit
                     if (front.value.HasMember("id")){
                         auto &id = front.value["id"];
                         if (id.IsUint64())
-                            transform_map[(intptr_t)id.GetUint64()] = front.to_set->self();
+                            transform_map[id.GetUint64()] = front.to_set->self();
                     }
 
                     if (front.value.HasMember("N")){
@@ -323,11 +323,11 @@ namespace AppKit
                     }
 
                     if (front.value.HasMember("T"))
-                        front.to_set->setLocalPosition( read<MathCore::vec3f>(front.value["T"]) );
+                        front.to_set->setLocalPosition( SerializerUtil::read<MathCore::vec3f>(front.value["T"]) );
                     if (front.value.HasMember("R"))
-                        front.to_set->setLocalRotation( read<MathCore::quatf>(front.value["R"]) );
+                        front.to_set->setLocalRotation( SerializerUtil::read<MathCore::quatf>(front.value["R"]) );
                     if (front.value.HasMember("S"))
-                        front.to_set->setLocalScale( read<MathCore::vec3f>(front.value["S"]) );
+                        front.to_set->setLocalScale( SerializerUtil::read<MathCore::vec3f>(front.value["S"]) );
                     
                     // deserialize all components
                     if (front.value.HasMember("co")){
@@ -341,7 +341,7 @@ namespace AppKit
                                 
                                 if(comp.HasMember("_co_ref_") && comp["_co_ref_"].IsUint64()){
                                     // a reference to a component already created
-                                    auto _ref_comp = component_map.find((uintptr_t)comp["_co_ref_"].GetUint64());
+                                    auto _ref_comp = component_map.find(comp["_co_ref_"].GetUint64());
                                     ITK_ABORT(_ref_comp == component_map.end(), "component ref in the scene file not found.");
                                     front.to_set->addComponent(_ref_comp->second);
                                     continue;
@@ -355,7 +355,7 @@ namespace AppKit
                                     continue;
                                 auto &fnc_create_shared = it->second;
                                 auto new_component_created = fnc_create_shared();
-                                component_map[ (intptr_t)comp["id"].GetUint64() ] = new_component_created;
+                                component_map[ comp["id"].GetUint64() ] = new_component_created;
 
                                 front.to_set->addComponent(new_component_created);
                             }
@@ -401,7 +401,7 @@ namespace AppKit
                                 if(!comp.IsObject() || !comp.HasMember("type") || !comp["type"].IsString() ||
                                 !comp.HasMember("id") || !comp["id"].IsUint64() )
                                     continue;
-                                auto it = component_map.find((intptr_t)comp["id"].GetUint64());
+                                auto it = component_map.find(comp["id"].GetUint64());
                                 if (it == component_map.end())
                                     continue;
                                 it->second->Deserialize( comp, transform_map, component_map );
