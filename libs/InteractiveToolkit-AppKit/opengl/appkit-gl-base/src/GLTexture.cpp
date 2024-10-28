@@ -109,6 +109,10 @@ namespace AppKit
         // can read rgb(GL_RGB) from framebuffer, or the depth component (GL_DEPTH_COMPONENT24)
         void GLTexture::setSize(int w, int h, GLuint format)
         {
+            GLint maxResolution;
+            OPENGL_CMD(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxResolution));
+
+            ITK_ABORT(w > maxResolution || h > maxResolution, "[GLTexture] Maxsize is: %i. setSize(%i,%i)\n", maxResolution, w, h);
 
             // check and active on texture 0
             GLint activeTexture;
@@ -330,10 +334,137 @@ namespace AppKit
             //     exit(-1);
             // }
 
-            int maxResolution = 8192;
+            GLint maxResolution = 8192;
 #ifdef ITK_RPI
             maxResolution = 1024;
 #endif
+            OPENGL_CMD(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxResolution));
+
+            if (channels == 1 && depth == 8)
+            {
+                GLTexture *result = new GLTexture();
+
+                if (w > maxResolution || h > maxResolution)
+                {
+                    MipMapGenerator *generator = new MipMapGenerator((uint8_t *)buffer, w, h, 1);
+
+                    for (size_t i = 0; i < generator->images.size(); i++)
+                    {
+                        MipMapImage *image = generator->images[i];
+                        if (image->width <= maxResolution && image->height <= maxResolution)
+                        {
+                            result->uploadBufferAlpha8((const void *)image->buffer, image->width, image->height);
+                            break;
+                        }
+                    }
+                    delete generator;
+                }
+                else
+                    result->uploadBufferAlpha8(buffer, w, h);
+                // setnullptrAndDelete(buffer);
+                closeFnc(buffer);
+                return result;
+            }
+            else if (channels == 3 && depth == 8)
+            {
+                GLTexture *result = new GLTexture();
+
+                if (w > maxResolution || h > maxResolution)
+                {
+                    MipMapGenerator *generator = new MipMapGenerator((uint8_t *)buffer, w, h, 3);
+
+                    for (size_t i = 0; i < generator->images.size(); i++)
+                    {
+                        MipMapImage *image = generator->images[i];
+                        if (image->width <= maxResolution && image->height <= maxResolution)
+                        {
+                            result->uploadBufferRGB_888((const void *)image->buffer, image->width, image->height, sRGB);
+                            break;
+                        }
+                    }
+                    delete generator;
+                }
+                else
+                    result->uploadBufferRGB_888(buffer, w, h, sRGB);
+
+                // setnullptrAndDelete(buffer);
+                closeFnc(buffer);
+                return result;
+            }
+            else if (channels == 4 && depth == 8)
+            {
+                GLTexture *result = new GLTexture();
+
+                if (w > maxResolution || h > maxResolution)
+                {
+                    MipMapGenerator *generator = new MipMapGenerator((uint8_t *)buffer, w, h, 4);
+
+                    for (size_t i = 0; i < generator->images.size(); i++)
+                    {
+                        MipMapImage *image = generator->images[i];
+                        if (image->width <= maxResolution && image->height <= maxResolution)
+                        {
+                            result->uploadBufferRGBA_8888((const void *)image->buffer, image->width, image->height, sRGB);
+                            break;
+                        }
+                    }
+                    delete generator;
+                }
+                else
+                    result->uploadBufferRGBA_8888(buffer, w, h, sRGB);
+                // setnullptrAndDelete(buffer);
+                closeFnc(buffer);
+                return result;
+            }
+
+            closeFnc(buffer);
+            // setnullptrAndDeleteArray(buffer);
+
+            ITK_ABORT(
+                true,
+                "invalid image format: %d channels %d depth. Error to load: %s\n", channels, depth, filename);
+
+            // fprintf(stderr, "invalid image format: %d channels %d depth. Error to load: %s\n", channels, depth, filename);
+            // exit(-1);
+
+            return nullptr;
+        }
+
+        GLTexture *GLTexture::loadFromMemory(const char *filename, const char *input_buffer, int input_buffer_size, bool invertY, bool sRGB)
+        {
+            int w, h, channels, depth;
+
+            bool isPNG = ITKExtension::Image::PNG::isPNGFilename(filename);
+            bool isJPG = ITKExtension::Image::JPG::isJPGFilename(filename);
+
+            void (*closeFnc)(char *&) = nullptr;
+
+            char *buffer = nullptr;
+            if (isPNG)
+            {
+                buffer = ITKExtension::Image::PNG::readPNGFromMemory(input_buffer, input_buffer_size, &w, &h, &channels, &depth, invertY);
+                closeFnc = &ITKExtension::Image::PNG::closePNG;
+            }
+            else if (isJPG)
+            {
+                buffer = ITKExtension::Image::JPG::readJPGFromMemory(input_buffer, input_buffer_size, &w, &h, &channels, &depth, invertY);
+                closeFnc = &ITKExtension::Image::JPG::closeJPG;
+            }
+
+            ITK_ABORT(
+                buffer == nullptr,
+                "error to load: %s\n", filename);
+
+            // if (buffer == nullptr) {
+            //     fprintf( stderr, "error to load: %s\n", filename);
+            //     exit(-1);
+            // }
+
+            GLint maxResolution = 8192;
+#ifdef ITK_RPI
+            maxResolution = 1024;
+#endif
+            OPENGL_CMD(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxResolution));
 
             if (channels == 1 && depth == 8)
             {
@@ -557,6 +688,13 @@ namespace AppKit
 #else
             printf("setAsShadowMapFiltering not implemented on RPI.\n");
 #endif
+        }
+
+        GLint GLTexture::QueryMaxSize()
+        {
+            GLint maxResolution;
+            OPENGL_CMD(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxResolution));
+            return maxResolution;
         }
 
     }
