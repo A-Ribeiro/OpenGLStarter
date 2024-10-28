@@ -137,6 +137,12 @@ namespace AppKit
 
         std::shared_ptr<AppKit::OpenGL::GLCubeMap> ResourceHelper::createCubeMap(const std::string &name, bool sRGB, int maxResolution)
         {
+            GLint maxCubeMapSize;
+            glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxCubeMapSize);
+
+            if (maxResolution > maxCubeMapSize)
+                maxResolution = maxCubeMapSize; 
+
             auto cubeMap = std::make_shared<AppKit::OpenGL::GLCubeMap>(0, 0, 0xffffffff, maxResolution);
 
             std::string basePath = std::string("resources/Skyboxes/");
@@ -195,7 +201,7 @@ namespace AppKit
             else
             {
                 AppKit::OpenGL::GLTexture *result1 = AppKit::OpenGL::GLTexture::loadFromFile(path.c_str(), false, sRGB);
-                auto result = std::shared_ptr<AppKit::OpenGL::GLTexture>(result1);
+                auto result = std::shared_ptr<AppKit::OpenGL::GLTexture>(result1, std::default_delete<AppKit::OpenGL::GLTexture>());
                 result->generateMipMap();
                 result->setAnisioLevel(16.0f);
                 return result;

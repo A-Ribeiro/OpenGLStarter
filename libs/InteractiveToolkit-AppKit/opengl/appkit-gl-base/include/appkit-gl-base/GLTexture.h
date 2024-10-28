@@ -183,6 +183,7 @@ namespace AppKit
             /// \param invertY if true then will invert the y-axis from texture
             ///
             static GLTexture *loadFromFile(const char *filename, bool invertY = false, bool sRGB = false);
+            static GLTexture *loadFromMemory(const char *filename, const char *input_buffer, int input_buffer_size, bool invertY = false, bool sRGB = false);
 
             TextureBuffer download(TextureBuffer *output);
 
@@ -223,6 +224,8 @@ namespace AppKit
             /// \param enable enable or disable depth comparison
             ///
             void setAsShadowMapFiltering(bool enable = true, GLint compare_as = GL_LEQUAL);
+
+            static GLint QueryMaxSize();
         };
 
     }
