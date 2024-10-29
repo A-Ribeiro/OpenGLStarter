@@ -7,6 +7,8 @@
 #include <appkit-gl-engine/util/ResourceHelper.h>
 #include <appkit-gl-engine/Renderer/Fade.h>
 
+#include <appkit-gl-engine/ResourceMap.h>
+
 //using namespace aRibeiro;
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
@@ -26,6 +28,8 @@ public:
     RenderPipeline renderPipeline;
     Platform::Time time;
     ResourceHelper resourceHelper;
+    ResourceMap resourceMap;
+    
     Fade *fade;
 
     // EventCore::PressReleaseDetector CtrlO_Detector;

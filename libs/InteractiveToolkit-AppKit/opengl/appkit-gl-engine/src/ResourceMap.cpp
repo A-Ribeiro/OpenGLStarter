@@ -216,8 +216,7 @@ namespace AppKit
             writer.EndObject();
         }
         void ResourceMap::Deserialize(rapidjson::Value &_value,
-                                      std::unordered_map<uint64_t, std::shared_ptr<AppKit::OpenGL::GLTexture>> *texture_map,
-                                      std::unordered_map<uint64_t, std::shared_ptr<AppKit::OpenGL::GLCubeMap>> *cubemap_map)
+                                      ResourceSet *resourceSetOutput)
         {
             if (_value.HasMember("texture_2d") && _value["texture_2d"].IsArray() ){
                 auto &elements = _value["texture_2d"];
@@ -230,7 +229,7 @@ namespace AppKit
                     if (!element.HasMember("is_srgb") || !element["is_srgb"].IsBool())
                         continue;
                     auto tex = getTexture(element["path"].GetString(), element["is_srgb"].GetBool());
-                    (*texture_map)[element["tex_id"].GetUint64()] = tex;
+                    resourceSetOutput->texture_map[element["tex_id"].GetUint64()] = tex;
                 }
             }
 
@@ -247,7 +246,7 @@ namespace AppKit
                     if (!element.HasMember("max_resolution") || !element["max_resolution"].IsInt())
                         continue;
                     auto cubemap = getCubeMap(element["path"].GetString(), element["is_srgb"].GetBool(), element["max_resolution"].GetInt());
-                    (*cubemap_map)[element["cubemap_id"].GetUint64()] = cubemap;
+                    resourceSetOutput->cubemap_map[element["cubemap_id"].GetUint64()] = cubemap;
                 }
             }
         }

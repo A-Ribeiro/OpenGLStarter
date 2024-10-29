@@ -9,6 +9,7 @@
 // #include <aRibeiroCore/aRibeiroCore.h>
 
 #include <InteractiveToolkit/Platform/Time.h>
+#include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
@@ -36,10 +37,13 @@ namespace AppKit
             Platform::Time *time;
             RenderPipeline *renderPipeline;
             ResourceHelper *resourceHelper;
+            ResourceMap *resourceMap;
+            
 
             SceneBase(Platform::Time *_time,
                       RenderPipeline *_renderPipeline,
-                      ResourceHelper *_resourceHelper);
+                      ResourceHelper *_resourceHelper,
+                      ResourceMap *_resourceMap);
 
             void load();
             void unload();
