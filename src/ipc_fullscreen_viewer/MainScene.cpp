@@ -263,8 +263,9 @@ void MainScene::resize(const MathCore::vec2i&size) {
 MainScene::MainScene(
     Platform::Time *_time,
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
-    AppKit::GLEngine::ResourceHelper *_resourceHelper) : 
-        AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper),
+    AppKit::GLEngine::ResourceHelper *_resourceHelper,
+    AppKit::GLEngine::ResourceMap *_resourceMap) : 
+        AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap),
         text_size(0), 
         text_margin(0),
         yuy2_queue( "aRibeiro Cam 01", Platform::IPC::QueueIPC_READ, 8, 1920 * 1080 * 2, false),

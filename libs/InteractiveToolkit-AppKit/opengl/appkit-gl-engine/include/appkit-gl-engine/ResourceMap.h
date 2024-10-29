@@ -1,8 +1,10 @@
 #pragma once
 
 #include <appkit-gl-engine/Transform.h>
+#include <appkit-gl-engine/ToShared.h>
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/GLCubeMap.h>
+#include <appkit-gl-engine/Serializer/SerializerUtil.h>
 
 namespace AppKit
 {

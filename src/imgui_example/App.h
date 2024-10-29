@@ -18,6 +18,7 @@ class App : public AppBase {
     RenderPipeline renderPipeline;
     Platform::Time time;
     ResourceHelper resourceHelper;
+    ResourceMap resourceMap;
 
     Fade *fade;
 

@@ -73,10 +73,10 @@ App::App()
 
 void App::load()
 {
-    // sceneJesusCross = new SceneJesusCross(&time,&renderPipeline,&resourceHelper);
+    // sceneJesusCross = new SceneJesusCross(&time, &renderPipeline, &resourceHelper, &resourceMap);
     // sceneJesusCross->load();
 
-    sceneSplash = new SceneSplash(&time, &renderPipeline, &resourceHelper);
+    sceneSplash = new SceneSplash(&time, &renderPipeline, &resourceHelper, &resourceMap);
     sceneSplash->load();
 }
 
@@ -207,14 +207,14 @@ void App::draw()
             }
 
             /*
-            sceneJesusCross = new SceneJesusCross(&time,&renderPipeline,&resourceHelper);
+            sceneJesusCross = new SceneJesusCross(&time, &renderPipeline, &resourceHelper, &resourceMap);
             sceneJesusCross->load();
 
-            sceneGUI = new SceneGUI(&time,&renderPipeline,&resourceHelper);
+            sceneGUI = new SceneGUI(&time, &renderPipeline, &resourceHelper, &resourceMap);
             sceneGUI->load();
             */
 
-            scenePalace = new ScenePalace(&time, &renderPipeline, &resourceHelper);
+            scenePalace = new ScenePalace(&time, &renderPipeline, &resourceHelper, &resourceMap);
             scenePalace->load();
 
             break;
