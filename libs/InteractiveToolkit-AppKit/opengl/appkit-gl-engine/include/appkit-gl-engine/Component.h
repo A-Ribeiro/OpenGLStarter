@@ -13,7 +13,7 @@
 // #include <rapidjson/writer.h>
 
 #include <appkit-gl-engine/Serializer/SerializerUtil.h>
-#include <appkit-gl-engine/ResourceMap.h>
+// #include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
@@ -22,6 +22,8 @@ namespace AppKit
 
         class Component;
         class Transform;
+        struct ResourceSet;
+        class ResourceMap;
 
         // BEGIN_DECLARE_DELEGATE(VoidEvent)
         // CALL_PATTERN() END_DECLARE_DELEGATE;
@@ -116,3 +118,5 @@ namespace AppKit
     }
 
 }
+
+#include <appkit-gl-engine/ResourceMap.h>

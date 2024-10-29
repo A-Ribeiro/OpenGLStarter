@@ -226,7 +226,11 @@ namespace AppKit
                 writer.EndObject();
                 
             }
-            void ComponentCameraRotateOnTarget::Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map){
+            void ComponentCameraRotateOnTarget::Deserialize(rapidjson::Value &_value,
+                                                  std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                                  std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                                  ResourceSet &resourceSet)
+            {
                 if (!_value.HasMember("type") || !_value["type"].IsString())
                     return;
                 if (!strcmp(_value["type"].GetString(), ComponentCameraRotateOnTarget::Type) == 0)

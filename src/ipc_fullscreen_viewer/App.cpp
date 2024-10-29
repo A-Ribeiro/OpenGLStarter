@@ -49,7 +49,7 @@ App::App()
 }
 
 void App::load() {
-    mainScene = new MainScene(&time,&renderPipeline,&resourceHelper);
+    mainScene = new MainScene(&time, &renderPipeline, &resourceHelper, &resourceMap);
     mainScene->load();
 
     mainScene->setText(
