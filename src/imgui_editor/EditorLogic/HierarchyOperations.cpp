@@ -545,6 +545,9 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
             auto writerSet = JSONSceneSerializer::Begin();
             writerSet->writer.StartObject();
 
+            writerSet->writer.String("ResourceSet");
+            JSONSceneSerializer::Serialize(writerSet->writer, camera->getTransform(), true);
+
             writerSet->writer.String("Camera");
             JSONSceneSerializer::Serialize(writerSet->writer, camera->getTransform(), true);
 

@@ -4,11 +4,17 @@
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/GLCubeMap.h>
 
-
 namespace AppKit
 {
     namespace GLEngine
     {
+
+        struct ResourceSet
+        {
+            std::unordered_map<uint64_t, std::shared_ptr<AppKit::OpenGL::GLTexture>> texture_map;
+            std::unordered_map<uint64_t, std::shared_ptr<AppKit::OpenGL::GLCubeMap>> cubemap_map;
+        };
+
         class ResourceMap
         {
             std::weak_ptr<ResourceMap> mSelf;
@@ -58,13 +64,8 @@ namespace AppKit
 
             std::shared_ptr<AppKit::OpenGL::GLCubeMap> getCubeMap(const std::string &relative_path, bool is_srgb, int maxResolution);
 
-
             void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
-            void Deserialize(rapidjson::Value &_value, 
-                std::unordered_map<uint64_t, std::shared_ptr<AppKit::OpenGL::GLTexture>> *texture_map, 
-                std::unordered_map<uint64_t, std::shared_ptr<AppKit::OpenGL::GLCubeMap>> *cubemap_map);
-
-
+            void Deserialize(rapidjson::Value &_value, ResourceSet *resourceSetOutput);
         };
     }
 }

@@ -14,12 +14,14 @@ namespace AppKit
         SceneBase::SceneBase(
             Platform::Time *_time,
             RenderPipeline *_renderPipeline,
-            ResourceHelper *_resourceHelper)
+            ResourceHelper *_resourceHelper,
+            ResourceMap *_resourceMap)
         {
 
             time = _time;
             renderPipeline = _renderPipeline;
             resourceHelper = _resourceHelper;
+            resourceMap = _resourceMap;
 
             // camera = nullptr;
             // root = nullptr;
