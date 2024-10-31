@@ -921,18 +921,18 @@ void HierarchyOperations::componentsAddCubeAt(std::shared_ptr<TreeNode> target) 
     
     auto resourceHelper = imGuiManager->innerViewport->scene3D->resourceHelper;
 
-    auto material = transform->addNewComponent<ComponentMaterial>();
+    transform->addComponent( scene3D->resourceMap->defaultPBRMaterial );
     transform->addComponent(ComponentMesh::createBox(MathCore::vec3f(1, 1, 1)));
     
     //material->type = MaterialUnlit;
     //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
 
-    material->type = MaterialPBR;
-    material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-    material->pbr.metallic = 0.0f;
-    material->pbr.roughness = 1.0f;
-    material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
-    material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
+    // material->type = MaterialPBR;
+    // material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+    // material->pbr.metallic = 0.0f;
+    // material->pbr.roughness = 1.0f;
+    // material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
+    // material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
     resourceHelper->addAABBMesh(transform, false);
 

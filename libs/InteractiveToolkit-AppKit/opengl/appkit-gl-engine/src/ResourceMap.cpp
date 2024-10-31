@@ -41,12 +41,27 @@ namespace AppKit
         {
             texture2DMap.clear();
             cubemapMap.clear();
+            defaultAlbedoTexture = nullptr;
+            defaultNormalTexture = nullptr;
+            defaultPBRMaterial = nullptr;
         }
 
         void ResourceMap::ensure_default_texture_creation()
         {
-            getTexture("DEFAULT_ALBEDO", true);
-            getTexture("DEFAULT_NORMAL", false);
+            if (defaultPBRMaterial == nullptr)
+            {
+                defaultAlbedoTexture = getTexture("DEFAULT_ALBEDO", true);
+                defaultNormalTexture = getTexture("DEFAULT_NORMAL", false);
+
+                defaultPBRMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultPBRMaterial->type = Components::MaterialPBR;
+                defaultPBRMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+                defaultPBRMaterial->pbr.metallic = 0.0f;
+                defaultPBRMaterial->pbr.roughness = 1.0f;
+                defaultPBRMaterial->pbr.texAlbedo = defaultAlbedoTexture;
+                defaultPBRMaterial->pbr.texNormal = defaultNormalTexture;
+            }
+
         }
 
         std::shared_ptr<AppKit::OpenGL::GLTexture> ResourceMap::getTexture(const std::string &relative_path, bool is_srgb)
@@ -180,7 +195,7 @@ namespace AppKit
 
                 writer.String("tex_id");
                 writer.Uint64((uint64_t)(uintptr_t)item.second.tex.get());
-                
+
                 writer.String("path");
                 writer.String(item.second.relative_path.c_str());
 
@@ -199,7 +214,7 @@ namespace AppKit
 
                 writer.String("cubemap_id");
                 writer.Uint64((uint64_t)(uintptr_t)item.second.cubemap.get());
-                
+
                 writer.String("path");
                 writer.String(item.second.relative_path.c_str());
 
@@ -218,9 +233,11 @@ namespace AppKit
         void ResourceMap::Deserialize(rapidjson::Value &_value,
                                       ResourceSet *resourceSetOutput)
         {
-            if (_value.HasMember("texture_2d") && _value["texture_2d"].IsArray() ){
+            if (_value.HasMember("texture_2d") && _value["texture_2d"].IsArray())
+            {
                 auto &elements = _value["texture_2d"];
-                for (int i = 0; i < (int)elements.Size(); i++){
+                for (int i = 0; i < (int)elements.Size(); i++)
+                {
                     auto &element = elements[i];
                     if (!element.HasMember("tex_id") || !element["tex_id"].IsUint64())
                         continue;
@@ -233,9 +250,11 @@ namespace AppKit
                 }
             }
 
-            if (_value.HasMember("cubemap") && _value["cubemap"].IsArray() ){
+            if (_value.HasMember("cubemap") && _value["cubemap"].IsArray())
+            {
                 auto &elements = _value["cubemap"];
-                for (int i = 0; i < (int)elements.Size(); i++){
+                for (int i = 0; i < (int)elements.Size(); i++)
+                {
                     auto &element = elements[i];
                     if (!element.HasMember("cubemap_id") || !element["cubemap_id"].IsUint64())
                         continue;
