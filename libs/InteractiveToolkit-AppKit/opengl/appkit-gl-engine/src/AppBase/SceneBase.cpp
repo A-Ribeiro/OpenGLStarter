@@ -29,6 +29,7 @@ namespace AppKit
 
         void SceneBase::load()
         {
+            resourceMap->ensure_default_texture_creation();
             loadResources();
             loadGraph();
             bindResourcesToGraph();
@@ -36,11 +37,13 @@ namespace AppKit
 
         void SceneBase::unload()
         {
+            resourceMap->clear_refcount_equals_1();
             unloadAll();
         }
 
         SceneBase::~SceneBase()
         {
+            resourceMap->clear();
         }
 
         void SceneBase::draw()

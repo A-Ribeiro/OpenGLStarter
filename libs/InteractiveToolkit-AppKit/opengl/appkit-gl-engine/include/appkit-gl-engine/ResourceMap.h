@@ -10,6 +10,9 @@ namespace AppKit
 {
     namespace GLEngine
     {
+        namespace Components{
+            class ComponentMaterial;
+        }
 
         struct ResourceSet
         {
@@ -68,6 +71,13 @@ namespace AppKit
 
             void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
             void Deserialize(rapidjson::Value &_value, ResourceSet *resourceSetOutput);
+
+            std::shared_ptr<AppKit::OpenGL::GLTexture> defaultAlbedoTexture;
+            std::shared_ptr<AppKit::OpenGL::GLTexture> defaultNormalTexture;
+            std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial;
+
         };
     }
 }
+
+#include <appkit-gl-engine/Components/ComponentMaterial.h>
