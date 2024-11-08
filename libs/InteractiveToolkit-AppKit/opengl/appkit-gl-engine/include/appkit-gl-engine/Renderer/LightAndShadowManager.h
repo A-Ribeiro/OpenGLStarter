@@ -101,8 +101,8 @@ namespace AppKit
             std::unordered_map<Components::ComponentLight *, ShadowCache *> shadowCacheDic;
             Platform::ObjectPool<ShadowCache> shadowCachePool;
 
-            std::vector<AlgorithmCore::Sorting::SortIndexi> sortResult;
-            std::vector<AlgorithmCore::Sorting::SortIndexi> sortTmpBuffer;
+            std::vector<AlgorithmCore::Sorting::SortIndexu32> sortResult;
+            std::vector<AlgorithmCore::Sorting::SortIndexu32> sortTmpBuffer;
 
             CollisionCore::AABB<MathCore::vec3f> scene_aabb;
             CollisionCore::Sphere<MathCore::vec3f> scene_sphere;

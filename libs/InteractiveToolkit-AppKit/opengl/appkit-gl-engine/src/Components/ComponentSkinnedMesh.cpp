@@ -215,7 +215,7 @@ namespace AppKit
                 skinning_dirty = true;
             }
 
-            void ComponentSkinnedMesh::loadModelBase(const std::string &filename)
+            void ComponentSkinnedMesh::loadModelBase(const std::string &filename, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial)
             {
 
                 printf("[ComponentSkinnedMesh] loadModelBase %s\n", filename.c_str());
@@ -225,6 +225,7 @@ namespace AppKit
                 model_base->setName("__root__");
                 model_base->addChild(resourceHelper->createTransformFromModel(
                     filename,
+                    defaultPBRMaterial,
                     0, 0
                     // SkinnedMesh_VBO_Upload_Bitflag,0xffffffff ^ SkinnedMesh_VBO_Upload_Bitflag
                     ));

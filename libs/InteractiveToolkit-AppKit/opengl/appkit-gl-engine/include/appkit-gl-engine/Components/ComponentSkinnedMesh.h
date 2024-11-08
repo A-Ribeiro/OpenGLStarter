@@ -89,7 +89,7 @@ namespace AppKit
 
                 ComponentSkinnedMesh(ResourceHelper *_resourceHelper = nullptr, bool isGPUSkinning = true);
 
-                void loadModelBase(const std::string &filename);
+                void loadModelBase(const std::string &filename, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial);
 
                 void moveMeshToTransform();
 
