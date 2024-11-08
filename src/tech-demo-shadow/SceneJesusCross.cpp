@@ -35,7 +35,7 @@ void SceneJesusCross::loadResources() {
     JesusTextures[0] = resourceHelper->createTextureFromFile("resources/Jesus/UVJesus.jpg",true && engine->sRGBCapable);
     JesusTextures[1] = nullptr;//resourceHelper->defaultNormalTexture;
         
-    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/JesusOnCross.bams");
+    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/JesusOnCross.bams", resourceMap->defaultPBRMaterial);
     
     //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     
@@ -136,7 +136,7 @@ void SceneJesusCross::bindResourcesToGraph() {
             material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
             material->pbr.metallic = 0.0f;
             material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
+            material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
             material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
         }
@@ -162,7 +162,7 @@ void SceneJesusCross::bindResourcesToGraph() {
             material->pbr.albedoColor = MathCore::vec3f(1, 1, 0);
             material->pbr.metallic = 0.0f;
             material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
+            material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
             material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
         }

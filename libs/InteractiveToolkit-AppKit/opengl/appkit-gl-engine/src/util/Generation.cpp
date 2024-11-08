@@ -42,8 +42,8 @@ namespace AppKit
         void PatternPoints::optimize2DAccess(std::vector<MathCore::vec3f> *points, int texturesize, bool radial)
         {
 
-            std::vector<AlgorithmCore::Sorting::SortIndexi> toSort;
-            std::vector<AlgorithmCore::Sorting::SortIndexi> toSortAux;
+            std::vector<AlgorithmCore::Sorting::SortIndexu32> toSort;
+            std::vector<AlgorithmCore::Sorting::SortIndexu32> toSortAux;
             toSort.resize(points->size());
             toSortAux.resize(points->size());
 
@@ -53,11 +53,11 @@ namespace AppKit
                 for (int i = 0; i < (int)toSort.size(); i++)
                 {
                     toSort[i].toSort = 
-                    AlgorithmCore::Sorting::SortTooli::floatToInt(
+                    AlgorithmCore::Sorting::SortToolu32::floatToInt(
                         MathCore::OP<MathCore::vec3f>::length(points->at(i)));
                     toSort[i].index = i;
                 }
-                AlgorithmCore::Sorting::RadixCountingSorti::sortIndex(&toSort[0], (uint32_t)toSort.size(), &toSortAux[0]);
+                AlgorithmCore::Sorting::RadixCountingSortu32::sortIndex(&toSort[0], (uint32_t)toSort.size(), &toSortAux[0]);
             }
             else
             {
@@ -65,23 +65,23 @@ namespace AppKit
                 // sort x
                 for (int i = 0; i < (int)toSort.size(); i++)
                 {
-                    toSort[i].toSort = AlgorithmCore::Sorting::SortTooli::floatToInt(
+                    toSort[i].toSort = AlgorithmCore::Sorting::SortToolu32::floatToInt(
                         points->at(i).x
                         //+ floor( points->at(i).y * (float)texturesize )
                     );
                     toSort[i].index = i;
                 }
-                AlgorithmCore::Sorting::RadixCountingSorti::sortIndex(&toSort[0], (uint32_t)toSort.size(), &toSortAux[0]);
+                AlgorithmCore::Sorting::RadixCountingSortu32::sortIndex(&toSort[0], (uint32_t)toSort.size(), &toSortAux[0]);
 
                 // sort y
                 for (int i = 0; i < (int)toSort.size(); i++)
                 {
-                    // toSort[i].toSort = AlgorithmCore::Sorting::SortTooli::floatToInt( points->at(toSort[i].index).y );
-                    toSort[i].toSort = AlgorithmCore::Sorting::SortTooli::floatToInt(
+                    // toSort[i].toSort = AlgorithmCore::Sorting::SortToolu32::floatToInt( points->at(toSort[i].index).y );
+                    toSort[i].toSort = AlgorithmCore::Sorting::SortToolu32::floatToInt(
                         MathCore::OP<float>::floor( points->at(toSort[i].index).y * (float)texturesize )
                     );
                 }
-                AlgorithmCore::Sorting::RadixCountingSorti::sortIndex(&toSort[0], (uint32_t)toSort.size(), &toSortAux[0]);
+                AlgorithmCore::Sorting::RadixCountingSortu32::sortIndex(&toSort[0], (uint32_t)toSort.size(), &toSortAux[0]);
             }
 
             // set the final array
