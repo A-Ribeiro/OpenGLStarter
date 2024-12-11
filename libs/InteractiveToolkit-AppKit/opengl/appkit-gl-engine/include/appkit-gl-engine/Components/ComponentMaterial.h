@@ -118,17 +118,17 @@ namespace AppKit
                     {
                         auto blend_mode = _value["blend_mode"].GetString();
                         if (strcmp(blend_mode, "disabled") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeDisabled;
+                            blendMode = AppKit::GLEngine::BlendModeDisabled;
                         else if (strcmp(blend_mode, "alpha") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeAlpha;
+                            blendMode = AppKit::GLEngine::BlendModeAlpha;
                         else if (strcmp(blend_mode, "add") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeAdd;
+                            blendMode = AppKit::GLEngine::BlendModeAdd;
                         else if (strcmp(blend_mode, "add_alpha") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeAddAlpha;
+                            blendMode = AppKit::GLEngine::BlendModeAddAlpha;
                         else if (strcmp(blend_mode, "subtract") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeSubtract;
+                            blendMode = AppKit::GLEngine::BlendModeSubtract;
                         else if (strcmp(blend_mode, "subtract_alpha") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeSubtractAlpha;
+                            blendMode = AppKit::GLEngine::BlendModeSubtractAlpha;
                     }
                 }
             };
