@@ -13,7 +13,7 @@ namespace AppKit
         class FrankenShaderManager : public DefaultEngineShader
         {
 
-            std::unordered_map<uint32_t, FrankenShader *> shaderMap;
+            std::unordered_map<ShaderAlgorithmsBitMask, FrankenShader *> shaderMap;
 
             // #if defined(PBR_MODE_TEX_LOOKUP)
             // AppKit::OpenGL::GLTexture pbrOptimizationTexture;
@@ -34,7 +34,7 @@ namespace AppKit
             // #endif
             FrankenShaderManager();
             ~FrankenShaderManager();
-            FrankenShader *getShader(uint32_t frankenFormat,
+            FrankenShader *getShader(ShaderAlgorithmsBitMask frankenFormat,
                                      ShaderPBRAlgorithmEnum _shaderPBRAlgorithm,
                                      ShaderShadowAlgorithmEnum _shaderShadowAlgorithm);
 

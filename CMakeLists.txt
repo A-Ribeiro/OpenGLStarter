@@ -85,7 +85,7 @@ elseif(UNIX)
         add_compile_options(-O3 -fno-strict-aliasing)
     elseif( CMAKE_BUILD_TYPE STREQUAL Debug)
         add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-        SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -static-libasan")
+        SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address") # -static-libasan
     endif()
 else()
     message(FATAL_ERROR "Cmake not configured for this OS")

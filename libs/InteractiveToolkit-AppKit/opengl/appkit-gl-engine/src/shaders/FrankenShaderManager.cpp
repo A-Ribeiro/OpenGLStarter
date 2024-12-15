@@ -130,7 +130,7 @@ namespace AppKit
             // delete pbrOptimizationTexture);
             // #endif
 
-            std::unordered_map<uint32_t, FrankenShader *>::iterator it;
+            std::unordered_map<ShaderAlgorithmsBitMask, FrankenShader *>::iterator it;
 
             for (it = shaderMap.begin(); it != shaderMap.end(); it++)
             {
@@ -141,11 +141,11 @@ namespace AppKit
             shaderMap.clear();
         }
 
-        FrankenShader *FrankenShaderManager::getShader(uint32_t frankenFormat,
+        FrankenShader *FrankenShaderManager::getShader(ShaderAlgorithmsBitMask frankenFormat,
                                                        ShaderPBRAlgorithmEnum _shaderPBRAlgorithm,
                                                        ShaderShadowAlgorithmEnum _shaderShadowAlgorithm)
         {
-            std::unordered_map<uint32_t, FrankenShader *>::iterator it = shaderMap.find(frankenFormat);
+            std::unordered_map<ShaderAlgorithmsBitMask, FrankenShader *>::iterator it = shaderMap.find(frankenFormat);
             if (it == shaderMap.end())
             {
                 FrankenShader *result = new FrankenShader(frankenFormat, _shaderPBRAlgorithm, _shaderShadowAlgorithm);
