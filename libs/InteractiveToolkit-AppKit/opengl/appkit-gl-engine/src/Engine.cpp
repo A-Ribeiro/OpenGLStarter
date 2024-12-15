@@ -131,6 +131,12 @@ namespace AppKit
             gladLoaderLoadGL();
 #endif
 
+            if (!windowConfig.glContextConfig.sRgbCapable && sRGBCapable){
+                sRGBCapable = false;
+                window->glSetActivate(true);
+                glDisable(GL_FRAMEBUFFER_SRGB);
+            }
+
             GLRenderState::Instance()->initialize(window->getSize().width, window->getSize().height);
 
             std::string vendor = ITKCommon::StringUtil::toLower(std::string((const char *)glGetString(GL_VENDOR)));
