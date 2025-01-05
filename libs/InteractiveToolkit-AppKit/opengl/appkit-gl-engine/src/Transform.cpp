@@ -1099,7 +1099,7 @@ namespace AppKit
             auto app = AppKit::GLEngine::Engine::Instance()->app;
             if (app != nullptr)
                 renderWindowRegion = app->screenRenderWindow;
-            
+
             skip_traversing = false;
         }
 
@@ -1213,7 +1213,6 @@ namespace AppKit
 
             // return true;
 
-
             // implementation with one stack:
 
             struct itemT
@@ -1248,8 +1247,8 @@ namespace AppKit
                 stack.pop_back();
 
                 if (!item.transform->skip_traversing)
-                if (!OnNode(item.transform, userData))
-                    return false;
+                    if (!OnNode(item.transform, userData))
+                        return false;
 
                 // while the removed element is the lastest children,
                 // walk to parent, making it the new child
@@ -1260,8 +1259,8 @@ namespace AppKit
                     item = stack.back();
                     stack.pop_back();
                     if (!item.transform->skip_traversing)
-                    if (!OnNode(item.transform, userData))
-                        return false;
+                        if (!OnNode(item.transform, userData))
+                            return false;
                 }
 
                 // if there is any element in the stack, it means that
@@ -1269,7 +1268,7 @@ namespace AppKit
                 if (stack.size() > 0)
                 {
                     int next_child_idx = item.child_idx + 1;
-                    //if (next_child_idx < (int)stack.back().transform->children.size() - 1)
+                    // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
                     root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
                 }
             }
@@ -1410,8 +1409,8 @@ namespace AppKit
                 auto item = stack.back();
                 stack.pop_back();
                 if (!item.transform->skip_traversing)
-                if (!OnNode(item.transform, userData))
-                    return false;
+                    if (!OnNode(item.transform, userData))
+                        return false;
 
                 // while the removed element is the lastest children,
                 // walk to parent, making it the new child
@@ -1422,8 +1421,8 @@ namespace AppKit
                     item = stack.back();
                     stack.pop_back();
                     if (!item.transform->skip_traversing)
-                    if (!OnNode(item.transform, userData))
-                        return false;
+                        if (!OnNode(item.transform, userData))
+                            return false;
                 }
 
                 // if there is any element in the stack, it means that
@@ -1431,7 +1430,7 @@ namespace AppKit
                 if (stack.size() > 0)
                 {
                     int next_child_idx = item.child_idx + 1;
-                    //if (next_child_idx < (int)stack.back().transform->children.size() - 1)
+                    // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
                     root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
                 }
             }
@@ -1521,6 +1520,154 @@ namespace AppKit
             return true;
         }
 
+        bool Transform::traverse_Generic(
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnPreOrderNode,
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnPostOrderNode,
+            void *userData, int maxLevel)
+        {
+            struct itemT
+            {
+                std::shared_ptr<Transform> transform;
+                int level;
+                int child_idx;
+            };
+            std::vector<itemT> stack;
+
+            itemT root = {self(), maxLevel, 0};
+
+            while (root.transform != nullptr || stack.size() > 0)
+            {
+                // walk down the max possible nodes on left side
+                // after that, the stack will hold the parent -> child relationship only
+                // between each level.
+                // Each place on stack is a parent element.
+                while (root.transform != nullptr)
+                {
+                    // pre-order on root.transform
+                    if (!root.transform->skip_traversing)
+                        if (!OnPreOrderNode(root.transform, userData))
+                            return false;
+
+                    stack.push_back(root);
+                    int new_lvl = root.level - 1;
+                    if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
+                        root = {root.transform->children[0], new_lvl, 0};
+                    else
+                        root = {nullptr, 0, 0};
+                }
+
+                // remove the lowest child node value from stack and
+                // save the current info from it
+                auto item = stack.back();
+                stack.pop_back();
+
+                // post order on item.transform
+                if (!item.transform->skip_traversing)
+                    if (!OnPostOrderNode(item.transform, userData))
+                        return false;
+
+                // while the removed element is the lastest children,
+                // walk to parent, making it the new child
+                while (stack.size() > 0 &&
+                       // stack.back().transform->children.size() > 0 &&
+                       item.transform == stack.back().transform->children.back())
+                {
+                    item = stack.back();
+                    stack.pop_back();
+
+                    // post order on item.transform
+                    if (!item.transform->skip_traversing)
+                        if (!OnPostOrderNode(item.transform, userData))
+                            return false;
+                }
+
+                // if there is any element in the stack, it means that
+                // this is a parent with more children to compute
+                if (stack.size() > 0)
+                {
+                    int next_child_idx = item.child_idx + 1;
+                    // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
+                    root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
+                }
+            }
+
+            return true;
+        }
+
+        bool Transform::traverse_Generic(
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnPreOrderNode,
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnPostOrderNode,
+            const void *userData, int maxLevel)
+        {
+            struct itemT
+            {
+                std::shared_ptr<Transform> transform;
+                int level;
+                int child_idx;
+            };
+            std::vector<itemT> stack;
+
+            itemT root = {self(), maxLevel, 0};
+
+            while (root.transform != nullptr || stack.size() > 0)
+            {
+                // walk down the max possible nodes on left side
+                // after that, the stack will hold the parent -> child relationship only
+                // between each level.
+                // Each place on stack is a parent element.
+                while (root.transform != nullptr)
+                {
+                    // pre-order on root.transform
+                    if (!root.transform->skip_traversing)
+                        if (!OnPreOrderNode(root.transform, userData))
+                            return false;
+
+                    stack.push_back(root);
+                    int new_lvl = root.level - 1;
+                    if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
+                        root = {root.transform->children[0], new_lvl, 0};
+                    else
+                        root = {nullptr, 0, 0};
+                }
+
+                // remove the lowest child node value from stack and
+                // save the current info from it
+                auto item = stack.back();
+                stack.pop_back();
+
+                // post order on item.transform
+                if (!item.transform->skip_traversing)
+                    if (!OnPostOrderNode(item.transform, userData))
+                        return false;
+
+                // while the removed element is the lastest children,
+                // walk to parent, making it the new child
+                while (stack.size() > 0 &&
+                       // stack.back().transform->children.size() > 0 &&
+                       item.transform == stack.back().transform->children.back())
+                {
+                    item = stack.back();
+                    stack.pop_back();
+
+                    // post order on item.transform
+                    if (!item.transform->skip_traversing)
+                        if (!OnPostOrderNode(item.transform, userData))
+                            return false;
+                }
+
+                // if there is any element in the stack, it means that
+                // this is a parent with more children to compute
+                if (stack.size() > 0)
+                {
+                    int next_child_idx = item.child_idx + 1;
+                    // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
+                    root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
+                }
+            }
+
+            return true;
+        }
+
         std::shared_ptr<Transform> Transform::clone(
             bool force_make_component_copy,
             TransformMapT *_transformMap,
@@ -1561,7 +1708,8 @@ namespace AppKit
                 auto entry = to_clone.back();
                 to_clone.pop_back();
 
-                if (entry.cloneDst == nullptr) {
+                if (entry.cloneDst == nullptr)
+                {
                     auto new_transform = entry.parent->addChild(Transform::CreateShared());
                     entry.cloneDst = new_transform;
                     transformMap->operator[](entry.cloneSrc) = new_transform;
@@ -1575,9 +1723,9 @@ namespace AppKit
 
                 for (auto &src_transform : STL_Tools::Reversal(entry.cloneSrc->getChildren()))
                 {
-                    //auto new_transform = entry.cloneDst->addChild(Transform::CreateShared());
+                    // auto new_transform = entry.cloneDst->addChild(Transform::CreateShared());
                     to_clone.push_back(_clone_structT{src_transform, nullptr, entry.cloneDst});
-                    //transformMap->operator[](src_transform) = new_transform;
+                    // transformMap->operator[](src_transform) = new_transform;
                 }
             }
 

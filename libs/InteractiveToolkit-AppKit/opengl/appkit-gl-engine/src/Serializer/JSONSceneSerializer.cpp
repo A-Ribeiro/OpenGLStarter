@@ -104,52 +104,37 @@ namespace AppKit
             if (!include_root)
                 writer.StartArray(); // start children
 
-            struct itemT
-            {
-                std::shared_ptr<Transform> transform;
-                int child_idx;
-            };
-            std::vector<itemT> stack;
-
             std::unordered_map<uint64_t, bool> component_exported;
 
-            itemT root = {transform, 0};
-
-            while (root.transform != nullptr || stack.size() > 0)
-            {
-                // walk down the max possible nodes on left side
-                // after that, the stack will hold the parent -> child relationship only
-                // between each level.
-                // Each place on stack is a parent element.
-                while (root.transform != nullptr)
-                {
-                    // pre order traversing on root.transform
-                    if (include_root || root.transform != transform)
+            transform->traverse_Generic(
+                // pre order
+                [&](std::shared_ptr<Transform> t, void *userData){
+                    if (include_root || t != transform)
                     {
                         // writer.String("transform");
                         writer.StartObject(); // start transform
 
                         writer.String("id");
-                        writer.Uint64((uint64_t)(uintptr_t)root.transform->self().get());
+                        writer.Uint64((uint64_t)(uintptr_t)t->self().get());
 
                         writer.String("N");
-                        writer.String(root.transform->getName().c_str());
+                        writer.String(t->getName().c_str());
 
-                        auto _T = root.transform->getLocalPosition();
+                        auto _T = t->getLocalPosition();
                         if (_T != MathCore::vec3f(0.0f))
                         {
                             writer.String("T");
                             SerializerUtil::write(writer, _T);
                         }
 
-                        auto _R = root.transform->getLocalRotation();
+                        auto _R = t->getLocalRotation();
                         if (_R != MathCore::quatf())
                         {
                             writer.String("R");
                             SerializerUtil::write(writer, _R);
                         }
 
-                        auto _S = root.transform->getLocalScale();
+                        auto _S = t->getLocalScale();
                         if (_S != MathCore::vec3f(1.0f))
                         {
                             writer.String("S");
@@ -159,7 +144,7 @@ namespace AppKit
                         // serialize all components
                         writer.String("co");
                         writer.StartArray();
-                        for (auto comp : root.transform->getComponents())
+                        for (auto comp : t->getComponents())
                         {
                             if (component_exported.find((uint64_t)(uintptr_t)comp.get()) == component_exported.end())
                             {
@@ -179,52 +164,138 @@ namespace AppKit
                         writer.String("C");
                         writer.StartArray(); // start children
                     }
-
-                    stack.push_back(root);
-                    if (root.transform->getChildCount() > 0)
-                        root = {root.transform->getChildAt(0), 0};
-                    else
-                        root = {nullptr, 0};
-                }
-
-                // remove the lowest child node value from stack and
-                // save the current info from it
-                auto item = stack.back();
-                stack.pop_back();
-
-                // post order traversing on item.transform
-                if (include_root || item.transform != transform)
-                {
-                    writer.EndArray();  // end children
-                    writer.EndObject(); // end transform
-                }
-
-                // while the removed element is the lastest children,
-                // walk to parent, making it the new child
-                while (stack.size() > 0 &&
-                       // stack.back().transform->children.size() > 0 &&
-                       item.transform == stack.back().transform->getChildren().back())
-                {
-                    item = stack.back();
-                    stack.pop_back();
-
-                    // post order traversing on item.transform
-                    if (include_root || item.transform != transform)
+                    return true;
+                },
+                // post order
+                [&](std::shared_ptr<Transform> t, void *userData){
+                    if (include_root || t != transform)
                     {
-                        writer.EndArray();
-                        writer.EndObject();
+                        writer.EndArray();  // end children
+                        writer.EndObject(); // end transform
                     }
+                    return true;
                 }
+            );
 
-                // if there is any element in the stack, it means that
-                // this is a parent with more children to compute
-                if (stack.size() > 0)
-                {
-                    int next_child_idx = item.child_idx + 1;
-                    // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
-                    root = {stack.back().transform->getChildAt(next_child_idx), next_child_idx};
-                }
-            }
+            // struct itemT
+            // {
+            //     std::shared_ptr<Transform> transform;
+            //     int child_idx;
+            // };
+            // std::vector<itemT> stack;
+
+            // itemT root = {transform, 0};
+
+            // while (root.transform != nullptr || stack.size() > 0)
+            // {
+            //     // walk down the max possible nodes on left side
+            //     // after that, the stack will hold the parent -> child relationship only
+            //     // between each level.
+            //     // Each place on stack is a parent element.
+            //     while (root.transform != nullptr)
+            //     {
+            //         // pre order traversing on root.transform
+            //         if (include_root || root.transform != transform)
+            //         {
+            //             // writer.String("transform");
+            //             writer.StartObject(); // start transform
+
+            //             writer.String("id");
+            //             writer.Uint64((uint64_t)(uintptr_t)root.transform->self().get());
+
+            //             writer.String("N");
+            //             writer.String(root.transform->getName().c_str());
+
+            //             auto _T = root.transform->getLocalPosition();
+            //             if (_T != MathCore::vec3f(0.0f))
+            //             {
+            //                 writer.String("T");
+            //                 SerializerUtil::write(writer, _T);
+            //             }
+
+            //             auto _R = root.transform->getLocalRotation();
+            //             if (_R != MathCore::quatf())
+            //             {
+            //                 writer.String("R");
+            //                 SerializerUtil::write(writer, _R);
+            //             }
+
+            //             auto _S = root.transform->getLocalScale();
+            //             if (_S != MathCore::vec3f(1.0f))
+            //             {
+            //                 writer.String("S");
+            //                 SerializerUtil::write(writer, _S);
+            //             }
+
+            //             // serialize all components
+            //             writer.String("co");
+            //             writer.StartArray();
+            //             for (auto comp : root.transform->getComponents())
+            //             {
+            //                 if (component_exported.find((uint64_t)(uintptr_t)comp.get()) == component_exported.end())
+            //                 {
+            //                     component_exported[(uint64_t)(uintptr_t)comp.get()] = true;
+            //                     comp->Serialize(writer);
+            //                 }
+            //                 else
+            //                 {
+            //                     writer.StartObject();
+            //                     writer.String("_co_ref_");
+            //                     writer.Uint64((uint64_t)(uintptr_t)comp.get());
+            //                     writer.EndObject();
+            //                 }
+            //             }
+            //             writer.EndArray();
+
+            //             writer.String("C");
+            //             writer.StartArray(); // start children
+            //         }
+
+            //         stack.push_back(root);
+            //         if (root.transform->getChildCount() > 0)
+            //             root = {root.transform->getChildAt(0), 0};
+            //         else
+            //             root = {nullptr, 0};
+            //     }
+
+            //     // remove the lowest child node value from stack and
+            //     // save the current info from it
+            //     auto item = stack.back();
+            //     stack.pop_back();
+
+            //     // post order traversing on item.transform
+            //     if (include_root || item.transform != transform)
+            //     {
+            //         writer.EndArray();  // end children
+            //         writer.EndObject(); // end transform
+            //     }
+
+            //     // while the removed element is the lastest children,
+            //     // walk to parent, making it the new child
+            //     while (stack.size() > 0 &&
+            //            // stack.back().transform->children.size() > 0 &&
+            //            item.transform == stack.back().transform->getChildren().back())
+            //     {
+            //         item = stack.back();
+            //         stack.pop_back();
+
+            //         // post order traversing on item.transform
+            //         if (include_root || item.transform != transform)
+            //         {
+            //             writer.EndArray();
+            //             writer.EndObject();
+            //         }
+            //     }
+
+            //     // if there is any element in the stack, it means that
+            //     // this is a parent with more children to compute
+            //     if (stack.size() > 0)
+            //     {
+            //         int next_child_idx = item.child_idx + 1;
+            //         // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
+            //         root = {stack.back().transform->getChildAt(next_child_idx), next_child_idx};
+            //     }
+            // }
 
             if (!include_root)
                 writer.EndArray(); // end children

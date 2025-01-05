@@ -414,6 +414,16 @@ namespace AppKit
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
                 const void *userData = nullptr, int maxLevel = INT_MAX);
 
+            bool traverse_Generic(
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnPreOrderNode,
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnPostOrderNode,
+                void *userData = nullptr, int maxLevel = INT_MAX);
+
+            bool traverse_Generic(
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnPreOrderNode,
+                const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnPostOrderNode,
+                const void *userData = nullptr, int maxLevel = INT_MAX);
+
             ///////////////////////////////////////////////////////
             //
             //

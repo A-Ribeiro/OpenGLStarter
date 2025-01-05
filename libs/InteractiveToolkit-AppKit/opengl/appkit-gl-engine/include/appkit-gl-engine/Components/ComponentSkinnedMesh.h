@@ -24,7 +24,7 @@ namespace AppKit
         namespace Components
         {
 
-            const uint32_t SkinnedMesh_VBO_Upload_Bitflag = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_NORMAL | ITKExtension::Model::CONTAINS_TANGENT | ITKExtension::Model::CONTAINS_BINORMAL;
+            const ITKExtension::Model::BitMask SkinnedMesh_VBO_Upload_Bitflag = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_NORMAL | ITKExtension::Model::CONTAINS_TANGENT | ITKExtension::Model::CONTAINS_BINORMAL;
 
             struct SkinnedMesh_vertexWeight
             {
