@@ -3,6 +3,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <InteractiveToolkit/MathCore/MathCore.h>
+#include <InteractiveToolkit-Extension/model/Bone.h>
 
 namespace AppKit
 {
@@ -34,7 +35,7 @@ namespace AppKit
                     if (!element.IsDouble())
                         continue;
                     if (std::is_same<float_type, float>::value)
-                        result[i] = MathCore::CVT<float_type>::toFloat(element.GetDouble());
+                        result[i] = MathCore::CVT<double>::toFloat(element.GetDouble());
                     else
                         result[i] = element.GetDouble();
                 }
@@ -71,7 +72,7 @@ namespace AppKit
                         if (!element.IsDouble())
                             continue;
                         if (std::is_same<float_type, float>::value)
-                            result(r,c) = MathCore::CVT<float_type>::toFloat(element.GetDouble());
+                            result(r,c) = MathCore::CVT<double>::toFloat(element.GetDouble());
                         else
                             result(r,c) = element.GetDouble();
                     }
@@ -86,6 +87,41 @@ namespace AppKit
             static ITK_INLINE _primitive_t read(rapidjson::Value &reader)
             {
                 return reader.GetUint();
+            }
+
+            template <typename _primitive_t,
+                        typename std::enable_if<
+                            std::is_same<_primitive_t, ITKExtension::Model::Bone>::value,
+                            bool>::type = true>
+            static ITK_INLINE _primitive_t read(rapidjson::Value &reader)
+            {
+                ITKExtension::Model::Bone result;
+                
+                if (!reader.IsObject())
+                    return result;
+                
+                if (reader.HasMember("name") && reader["name"].IsString())
+                    result.name = reader["name"].GetString();
+
+                if (!reader.HasMember("weights") || !reader["weights"].IsArray())
+                    return result;
+
+                auto &_weights = reader["weights"];
+
+                result.weights.resize((size_t)_weights.Size());
+                for (int i=0;i<(int)_weights.Size();i++){
+                    auto &item = _weights[i];
+                    if (!item.IsObject())
+                        continue;
+                    if (!item.HasMember("v") || !item["v"].IsUint())
+                        continue;
+                    if (!item.HasMember("w") || !item["w"].IsDouble())
+                        continue;
+                    result.weights[i].vertexID = item["v"].GetUint();
+                    result.weights[i].weight = MathCore::CVT<double>::toFloat(item["w"].GetDouble());
+                }
+
+                return result;
             }
 
 
@@ -133,6 +169,36 @@ namespace AppKit
             static ITK_INLINE void write(rapidjson::Writer<rapidjson::StringBuffer> &writer, const _primitive_t &v)
             {
                 writer.Uint(v);
+            }
+
+
+            template <typename _primitive_t,
+                        typename std::enable_if<
+                            std::is_same<_primitive_t, ITKExtension::Model::Bone>::value,
+                            bool>::type = true>
+            static ITK_INLINE void write(rapidjson::Writer<rapidjson::StringBuffer> &writer, const _primitive_t &v)
+            {
+                writer.StartObject();
+
+                writer.String("name");
+                writer.String(v.name.c_str());
+
+                writer.String("weights");
+                writer.StartArray();
+                for(const auto&item:v.weights){
+                    writer.StartObject();
+
+                    writer.String("v");
+                    writer.Uint(item.vertexID);
+
+                    writer.String("w");
+                    writer.Double(MathCore::CVT<float>::toDouble(item.weight));
+
+                    writer.EndObject();
+                }
+                writer.EndArray();
+
+                writer.EndObject();
             }
 
 
