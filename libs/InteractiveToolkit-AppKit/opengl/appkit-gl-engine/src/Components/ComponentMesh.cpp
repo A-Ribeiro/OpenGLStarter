@@ -488,6 +488,11 @@ namespace AppKit
 
                 SerializerUtil::write_vector(writer, "indices", indices);
 
+                SerializerUtil::write_vector(writer, "bones", bones);
+                SerializerUtil::write_vector(writer, "skin_index", skin_index);
+                SerializerUtil::write_vector(writer, "skin_weights", skin_weights);
+
+
                 writer.EndObject();
             }
             void ComponentMesh::Deserialize(rapidjson::Value &_value,
@@ -530,6 +535,11 @@ namespace AppKit
                 }
 
                 SerializerUtil::read_vector(_value, "indices", indices);
+
+                SerializerUtil::read_vector(_value, "bones", bones);
+                SerializerUtil::read_vector(_value, "skin_index", skin_index);
+                SerializerUtil::read_vector(_value, "skin_weights", skin_weights);
+
 
                 if (last_model_dynamic_upload != 0 || last_model_static_upload != 0)
                     syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload);
