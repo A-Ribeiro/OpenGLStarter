@@ -44,7 +44,7 @@ void SceneMary::loadResources() {
     MaryTextures[0] = resourceHelper->createTextureFromFile("resources/VirginMary/Albedo0.jpg",true && engine->sRGBCapable);
     MaryTextures[1] = resourceHelper->createTextureFromFile("resources/VirginMary/NormalMap_2048.jpg",false);
     
-    Mary3DModel = resourceHelper->createTransformFromModel("resources/VirginMary/VirginMary.bams");
+    Mary3DModel = resourceHelper->createTransformFromModel("resources/VirginMary/VirginMary.bams", resourceMap->defaultPBRMaterial);
 
 
     //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
@@ -169,7 +169,7 @@ void SceneMary::bindResourcesToGraph() {
             material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
             material->pbr.metallic = 0.0f;
             material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
+            material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
             material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
         }
@@ -211,7 +211,8 @@ void SceneMary::unloadAll() {
 SceneMary::SceneMary(
     Platform::Time *_time,
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
-    AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper) 
+    AppKit::GLEngine::ResourceHelper *_resourceHelper,
+    AppKit::GLEngine::ResourceMap *_resourceMap) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap) 
 {
     Mary3DModel = nullptr;
 }

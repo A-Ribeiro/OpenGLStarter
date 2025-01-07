@@ -726,15 +726,95 @@ namespace AppKit
                 writer.String(ComponentMeshWrapper::Type);
                 writer.String("id");
                 writer.Uint64((intptr_t)self().get());
+
+
+                writer.String("debugCollisionShapes");
+                writer.Bool(debugCollisionShapes);
+
+                if (wrapShape == WrapShape::WrapShapeSphere) {
+                    writer.String("wrapShape");
+                    writer.String("sphere");
+
+                    writer.String("radius");
+                    writer.Double( MathCore::CVT<float>::toDouble(sphere.radius) );
+
+                    writer.String("center");
+                    SerializerUtil::write(writer, sphere.center);
+
+                } else if (wrapShape == WrapShape::WrapShapeAABB) {
+                    writer.String("wrapShape");
+                    writer.String("aabb");
+
+                    writer.String("min");
+                    SerializerUtil::write(writer, aabb.min_box);
+
+                    writer.String("max");
+                    SerializerUtil::write(writer, aabb.max_box);
+
+
+                } else if (wrapShape == WrapShape::WrapShapeOBB) {
+                    writer.String("wrapShape");
+                    writer.String("obb");
+
+                    writer.String("center");
+                    SerializerUtil::write(writer, obb.center);
+
+                    writer.String("dimension");
+                    SerializerUtil::write(writer, obb.dimension_2 * 2.0f);
+
+                    writer.String("orientation");
+                    SerializerUtil::write(writer, obb.orientation);
+                }
+
                 writer.EndObject();
                 
             }
-            void ComponentMeshWrapper::Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map){
+            void ComponentMeshWrapper::Deserialize(rapidjson::Value &_value,
+                                                  std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                                  std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                                  ResourceSet &resourceSet)
+            {
                 if (!_value.HasMember("type") || !_value["type"].IsString())
                     return;
                 if (!strcmp(_value["type"].GetString(), ComponentMeshWrapper::Type) == 0)
                     return;
                 
+                if (_value.HasMember("debugCollisionShapes") && _value["debugCollisionShapes"].IsBool())
+                    debugCollisionShapes = _value["debugCollisionShapes"].GetBool();
+
+                if (!_value.HasMember("wrapShape") || !_value["wrapShape"].IsString())
+                    return;
+
+                auto _wrapShape = _value["wrapShape"].GetString();
+                if (strcmp(_wrapShape, "sphere") == 0){
+
+                    wrapShape = WrapShape::WrapShapeSphere;
+
+                    if (_value.HasMember("radius") && _value["radius"].IsDouble())
+                        sphere.radius = MathCore::CVT<double>::toFloat(_value["radius"].GetDouble());
+
+                    sphere.center = SerializerUtil::read<MathCore::vec3f>(_value["center"]);
+
+                } else if (strcmp(_wrapShape, "aabb") == 0){
+
+                    wrapShape = WrapShape::WrapShapeAABB;
+
+                    aabb.min_box = SerializerUtil::read<MathCore::vec3f>(_value["min"]);
+                    aabb.max_box = SerializerUtil::read<MathCore::vec3f>(_value["max"]);
+
+                } else if (strcmp(_wrapShape, "obb") == 0){
+
+                    wrapShape = WrapShape::WrapShapeOBB;
+
+                    auto _center = SerializerUtil::read<MathCore::vec3f>(_value["center"]);
+                    auto _dimension = SerializerUtil::read<MathCore::vec3f>(_value["dimension"]);
+                    auto _orientation = SerializerUtil::read<MathCore::quatf>(_value["orientation"]);
+
+                    obb.setOBB(_center, _dimension, _orientation);
+
+                }
+
+
             }
 
         }

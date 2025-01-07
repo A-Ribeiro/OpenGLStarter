@@ -91,7 +91,10 @@ namespace AppKit
                     writer.EndObject();
                 }
 
-                void Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map)
+                void Deserialize(rapidjson::Value &_value,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                 ResourceSet &resourceSet)
                 {
 
                     if (_value.HasMember("color"))
@@ -101,7 +104,12 @@ namespace AppKit
 
                     if (_value.HasMember("tex") && _value["tex"].IsUint64()){
                         printf("needs to query tex resource DB\n");
-                        uint64_t tex_v = _value["tex"].GetUint64();
+                        uint64_t tex_id = _value["tex"].GetUint64();
+                        auto item = resourceSet.texture_map.find(tex_id);
+                        if (item != resourceSet.texture_map.end())
+                            tex = item->second;
+                        else
+                            tex = nullptr;
                     } else {
                         tex = nullptr;
                     }
@@ -110,17 +118,17 @@ namespace AppKit
                     {
                         auto blend_mode = _value["blend_mode"].GetString();
                         if (strcmp(blend_mode, "disabled") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeDisabled;
+                            blendMode = AppKit::GLEngine::BlendModeDisabled;
                         else if (strcmp(blend_mode, "alpha") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeAlpha;
+                            blendMode = AppKit::GLEngine::BlendModeAlpha;
                         else if (strcmp(blend_mode, "add") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeAdd;
+                            blendMode = AppKit::GLEngine::BlendModeAdd;
                         else if (strcmp(blend_mode, "add_alpha") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeAddAlpha;
+                            blendMode = AppKit::GLEngine::BlendModeAddAlpha;
                         else if (strcmp(blend_mode, "subtract") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeSubtract;
+                            blendMode = AppKit::GLEngine::BlendModeSubtract;
                         else if (strcmp(blend_mode, "subtract_alpha") == 0)
-                            blendMode == AppKit::GLEngine::BlendModeSubtractAlpha;
+                            blendMode = AppKit::GLEngine::BlendModeSubtractAlpha;
                     }
                 }
             };
@@ -235,7 +243,10 @@ namespace AppKit
                     writer.EndObject();
                 }
 
-                void Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map)
+                void Deserialize(rapidjson::Value &_value,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                 ResourceSet &resourceSet)
                 {
                     if (_value.HasMember("albedo_color"))
                         albedoColor = SerializerUtil::read<decltype(albedoColor)>(_value["albedo_color"]);
@@ -259,28 +270,48 @@ namespace AppKit
 
                     if (_value.HasMember("tex_albedo") && _value["tex_albedo"].IsUint64()){
                         printf("needs to query tex resource DB\n");
-                        uint64_t tex_v = _value["tex_albedo"].GetUint64();
+                        uint64_t tex_id = _value["tex_albedo"].GetUint64();
+                        auto item = resourceSet.texture_map.find(tex_id);
+                        if (item != resourceSet.texture_map.end())
+                            texAlbedo = item->second;
+                        else
+                            texAlbedo = nullptr;
                     } else {
                         texAlbedo = nullptr;
                     }
 
                     if (_value.HasMember("tex_normal") && _value["tex_normal"].IsUint64()){
                         printf("needs to query tex resource DB\n");
-                        uint64_t tex_v = _value["tex_normal"].GetUint64();
+                        uint64_t tex_id = _value["tex_normal"].GetUint64();
+                        auto item = resourceSet.texture_map.find(tex_id);
+                        if (item != resourceSet.texture_map.end())
+                            texNormal = item->second;
+                        else
+                            texNormal = nullptr;
                     } else {
                         texNormal = nullptr;
                     }
 
                     if (_value.HasMember("tex_specular") && _value["tex_specular"].IsUint64()){
                         printf("needs to query tex resource DB\n");
-                        uint64_t tex_v = _value["tex_specular"].GetUint64();
+                        uint64_t tex_id = _value["tex_specular"].GetUint64();
+                        auto item = resourceSet.texture_map.find(tex_id);
+                        if (item != resourceSet.texture_map.end())
+                            texSpecular = item->second;
+                        else
+                            texSpecular = nullptr;
                     } else {
                         texSpecular = nullptr;
                     }
 
                     if (_value.HasMember("tex_emission") && _value["tex_emission"].IsUint64()){
                         printf("needs to query tex resource DB\n");
-                        uint64_t tex_v = _value["tex_emission"].GetUint64();
+                        uint64_t tex_id = _value["tex_emission"].GetUint64();
+                        auto item = resourceSet.texture_map.find(tex_id);
+                        if (item != resourceSet.texture_map.end())
+                            texEmission = item->second;
+                        else
+                            texEmission = nullptr;
                     } else {
                         texEmission = nullptr;
                     }
@@ -395,7 +426,10 @@ namespace AppKit
 
                     writer.EndObject();
                 }
-                void Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map)
+                void Deserialize(rapidjson::Value &_value,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                 ResourceSet &resourceSet)
                 {
                     if (!_value.HasMember("type") || !_value["type"].IsString())
                         return;
@@ -411,27 +445,27 @@ namespace AppKit
                     if (strcmp(data_type, "unlit") == 0)
                     {
                         type = MaterialType::MaterialUnlit;
-                        unlit.Deserialize(_value["data"], transform_map, component_map);
+                        unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
                     }
                     else if (strcmp(data_type, "unlit_texture") == 0)
                     {
                         type = MaterialType::MaterialUnlitTexture;
-                        unlit.Deserialize(_value["data"], transform_map, component_map);
+                        unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
                     }
                     else if (strcmp(data_type, "unlit_texture_vertex_color") == 0)
                     {
                         type = MaterialType::MaterialUnlitTextureVertexColor;
-                        unlit.Deserialize(_value["data"], transform_map, component_map);
+                        unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
                     }
                     else if (strcmp(data_type, "unlit_texture_vertex_color_font") == 0)
                     {
                         type = MaterialType::MaterialUnlitTextureVertexColorFont;
-                        unlit.Deserialize(_value["data"], transform_map, component_map);
+                        unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
                     }
                     else if (strcmp(data_type, "pbr") == 0)
                     {
                         type = MaterialType::MaterialPBR;
-                        pbr.Deserialize(_value["data"], transform_map, component_map);
+                        pbr.Deserialize(_value["data"], transform_map, component_map, resourceSet);
                     }
                 }
             };

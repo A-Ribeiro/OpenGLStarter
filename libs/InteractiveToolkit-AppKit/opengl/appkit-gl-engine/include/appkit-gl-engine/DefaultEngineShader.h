@@ -18,7 +18,7 @@ namespace AppKit
         class DefaultEngineShader : public AppKit::OpenGL::GLShader
         {
         public:
-            uint32_t format;
+            ITKExtension::Model::BitMask format;
 
             /*
             static const int aPos = 0;

@@ -215,7 +215,7 @@ namespace AppKit
                 skinning_dirty = true;
             }
 
-            void ComponentSkinnedMesh::loadModelBase(const std::string &filename)
+            void ComponentSkinnedMesh::loadModelBase(const std::string &filename, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial)
             {
 
                 printf("[ComponentSkinnedMesh] loadModelBase %s\n", filename.c_str());
@@ -225,6 +225,7 @@ namespace AppKit
                 model_base->setName("__root__");
                 model_base->addChild(resourceHelper->createTransformFromModel(
                     filename,
+                    defaultPBRMaterial,
                     0, 0
                     // SkinnedMesh_VBO_Upload_Bitflag,0xffffffff ^ SkinnedMesh_VBO_Upload_Bitflag
                     ));
@@ -613,7 +614,11 @@ namespace AppKit
                 writer.EndObject();
                 
             }
-            void ComponentSkinnedMesh::Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map){
+            void ComponentSkinnedMesh::Deserialize(rapidjson::Value &_value,
+                                                  std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                                  std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                                  ResourceSet &resourceSet)
+            {
                 if (!_value.HasMember("type") || !_value["type"].IsString())
                     return;
                 if (!strcmp(_value["type"].GetString(), ComponentSkinnedMesh::Type) == 0)

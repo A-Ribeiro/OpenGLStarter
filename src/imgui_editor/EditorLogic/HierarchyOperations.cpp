@@ -545,6 +545,9 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
             auto writerSet = JSONSceneSerializer::Begin();
             writerSet->writer.StartObject();
 
+            writerSet->writer.String("ResourceSet");
+            scene3D->app->resourceMap.Serialize(writerSet->writer);
+
             writerSet->writer.String("Camera");
             JSONSceneSerializer::Serialize(writerSet->writer, camera->getTransform(), true);
 
@@ -597,10 +600,17 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
                 return;
             }
 
+            ResourceSet resourceSet;
+
+            if (readSet->document.HasMember("ResourceSet")) {
+                scene3D->app->resourceMap.clear_refcount_equals_1();
+                scene3D->app->resourceMap.Deserialize(readSet->document["ResourceSet"], &resourceSet);
+            }
+
             if (readSet->document.HasMember("Camera")) {
                 camera_transform->clearChildren();
                 camera_transform->clearComponents();
-                JSONSceneDeserializer::Deserialize(readSet->document["Camera"], true, camera_transform);
+                JSONSceneDeserializer::Deserialize(readSet->document["Camera"], true, camera_transform, resourceSet);
                 auto camera_perspective = camera_transform->findComponent< Components::ComponentCameraPerspective >();
                 auto camera_ortho = camera_transform->findComponent< Components::ComponentCameraOrthographic>();
                 if (camera_perspective != nullptr)
@@ -611,7 +621,7 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
                     scene3D->ensureCameraExists();
             }
             if (readSet->document.HasMember("Scene"))
-                JSONSceneDeserializer::Deserialize(readSet->document["Scene"], false, root_editor);
+                JSONSceneDeserializer::Deserialize(readSet->document["Scene"], false, root_editor, resourceSet);
 
             // synchronize the scene with the hierarchy view
             {
@@ -911,18 +921,18 @@ void HierarchyOperations::componentsAddCubeAt(std::shared_ptr<TreeNode> target) 
     
     auto resourceHelper = imGuiManager->innerViewport->scene3D->resourceHelper;
 
-    auto material = transform->addNewComponent<ComponentMaterial>();
+    transform->addComponent( scene3D->resourceMap->defaultPBRMaterial );
     transform->addComponent(ComponentMesh::createBox(MathCore::vec3f(1, 1, 1)));
     
     //material->type = MaterialUnlit;
     //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
 
-    material->type = MaterialPBR;
-    material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-    material->pbr.metallic = 0.0f;
-    material->pbr.roughness = 1.0f;
-    material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
-    material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
+    // material->type = MaterialPBR;
+    // material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+    // material->pbr.metallic = 0.0f;
+    // material->pbr.roughness = 1.0f;
+    // material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
+    // material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
     resourceHelper->addAABBMesh(transform, false);
 

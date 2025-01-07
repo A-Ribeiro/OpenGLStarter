@@ -13,9 +13,9 @@ namespace AppKit
         ResourceHelper::ResourceHelper()
         {
             cubeMapHelper = nullptr;
-            defaultAlbedoTexture = nullptr;
-            defaultNormalTexture = nullptr;
-            defaultPBRMaterial = nullptr;
+            // defaultAlbedoTexture = nullptr;
+            // defaultNormalTexture = nullptr;
+            // defaultPBRMaterial = nullptr;
         }
 
         void ResourceHelper::initialize()
@@ -25,23 +25,23 @@ namespace AppKit
 
             cubeMapHelper = new CubeMapHelper();
 
-            defaultAlbedoTexture = createTextureFromFile("DEFAULT_ALBEDO", true && engine->sRGBCapable);
-            defaultNormalTexture = createTextureFromFile("DEFAULT_NORMAL", false);
+            // defaultAlbedoTexture = createTextureFromFile("DEFAULT_ALBEDO", true && engine->sRGBCapable);
+            // defaultNormalTexture = createTextureFromFile("DEFAULT_NORMAL", false);
 
-            defaultPBRMaterial = Component::CreateShared<Components::ComponentMaterial>();
+            // defaultPBRMaterial = Component::CreateShared<Components::ComponentMaterial>();
 
-            defaultPBRMaterial->type = Components::MaterialPBR;
-            defaultPBRMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-            defaultPBRMaterial->pbr.metallic = 0.0f;
-            defaultPBRMaterial->pbr.roughness = 1.0f;
+            // defaultPBRMaterial->type = Components::MaterialPBR;
+            // defaultPBRMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+            // defaultPBRMaterial->pbr.metallic = 0.0f;
+            // defaultPBRMaterial->pbr.roughness = 1.0f;
 
-            // ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+            // // ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-            // texRefCount->add(defaultAlbedoTexture);
-            // texRefCount->add(defaultNormalTexture);
+            // // texRefCount->add(defaultAlbedoTexture);
+            // // texRefCount->add(defaultNormalTexture);
 
-            defaultPBRMaterial->pbr.texAlbedo = defaultAlbedoTexture;
-            defaultPBRMaterial->pbr.texNormal = defaultNormalTexture;
+            // defaultPBRMaterial->pbr.texAlbedo = defaultAlbedoTexture;
+            // defaultPBRMaterial->pbr.texNormal = defaultNormalTexture;
 
             // ReferenceCounter<Component *> *compRefCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
             // compRefCount->add(defaultPBRMaterial);
@@ -58,7 +58,7 @@ namespace AppKit
             //     delete defaultPBRMaterial;
             //     defaultPBRMaterial = nullptr;
             // }
-            defaultPBRMaterial = nullptr;
+            // defaultPBRMaterial = nullptr;
 
             // ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
@@ -76,8 +76,8 @@ namespace AppKit
             //     defaultNormalTexture = nullptr;
             // }
 
-            defaultAlbedoTexture = nullptr;
-            defaultNormalTexture = nullptr;
+            // defaultAlbedoTexture = nullptr;
+            // defaultNormalTexture = nullptr;
 
             if (cubeMapHelper != nullptr)
             {
@@ -209,7 +209,7 @@ namespace AppKit
             return nullptr;
         }
 
-        std::shared_ptr<Transform> ResourceHelper::createTransformFromModel(const std::string &path, uint32_t model_dynamic_upload, uint32_t model_static_upload)
+        std::shared_ptr<Transform> ResourceHelper::createTransformFromModel(const std::string &path, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial, uint32_t model_dynamic_upload, uint32_t model_static_upload)
         {
             return Basof2ToResource::loadAndConvert(path.c_str(), defaultPBRMaterial, nullptr, model_dynamic_upload, model_static_upload);
         }

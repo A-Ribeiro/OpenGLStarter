@@ -51,7 +51,11 @@ namespace AppKit
 
             static std::shared_ptr<ReaderSet> Begin(Platform::ObjectBuffer *src);
 
-            static void Deserialize(rapidjson::Value &reader, bool include_root, std::shared_ptr<Transform> target_root);
+            static void Deserialize(
+                rapidjson::Value &reader, 
+                bool include_root, 
+                std::shared_ptr<Transform> target_root,
+                ResourceSet &resourceSet);
 
         };
 

@@ -82,6 +82,7 @@ class App : public AppBase {
     RenderPipeline renderPipeline;
     Platform::Time time;
     ResourceHelper resourceHelper;
+    ResourceMap resourceMap;
 
     Fade *fade;
     
@@ -162,7 +163,7 @@ public:
 
     // occures after new operator... to guarantee app access to all events on engine...
     void load() {
-        activeScene = new SceneSplash(&time,&renderPipeline,&resourceHelper);
+        activeScene = new SceneSplash(&time, &renderPipeline, &resourceHelper, &resourceMap);
         sceneSplash->load();
     }
 
@@ -219,7 +220,8 @@ public:
     SceneSplash(
         Platform::Time *_time,
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
-        AppKit::GLEngine::ResourceHelper *_resourceHelper);
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap);
     ~SceneSplash();
 };
 ```
@@ -303,7 +305,8 @@ void SceneSplash::unloadAll(){
 SceneSplash::SceneSplash(
     Platform::Time *_time,
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
-    AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper) {
+    AppKit::GLEngine::ResourceHelper *_resourceHelper,
+    AppKit::GLEngine::ResourceMap *_resourceMap) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap) {
     
     Milky_512_512 = nullptr;
 
