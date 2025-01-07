@@ -788,6 +788,8 @@ namespace AppKit
                 auto _wrapShape = _value["wrapShape"].GetString();
                 if (strcmp(_wrapShape, "sphere") == 0){
 
+                    wrapShape = WrapShape::WrapShapeSphere;
+
                     if (_value.HasMember("radius") && _value["radius"].IsDouble())
                         sphere.radius = MathCore::CVT<double>::toFloat(_value["radius"].GetDouble());
 
@@ -795,10 +797,14 @@ namespace AppKit
 
                 } else if (strcmp(_wrapShape, "aabb") == 0){
 
+                    wrapShape = WrapShape::WrapShapeAABB;
+
                     aabb.min_box = SerializerUtil::read<MathCore::vec3f>(_value["min"]);
                     aabb.max_box = SerializerUtil::read<MathCore::vec3f>(_value["max"]);
 
                 } else if (strcmp(_wrapShape, "obb") == 0){
+
+                    wrapShape = WrapShape::WrapShapeOBB;
 
                     auto _center = SerializerUtil::read<MathCore::vec3f>(_value["center"]);
                     auto _dimension = SerializerUtil::read<MathCore::vec3f>(_value["dimension"]);
