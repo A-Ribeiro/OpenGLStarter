@@ -46,7 +46,8 @@ public:
     ScenePalace(
         Platform::Time *_time,
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
-        AppKit::GLEngine::ResourceHelper *_resourceHelper);
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap);
     ~ScenePalace();
     
     virtual void draw();

@@ -13,6 +13,7 @@
 // #include <rapidjson/writer.h>
 
 #include <appkit-gl-engine/Serializer/SerializerUtil.h>
+// #include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
@@ -21,6 +22,8 @@ namespace AppKit
 
         class Component;
         class Transform;
+        struct ResourceSet;
+        class ResourceMap;
 
         // BEGIN_DECLARE_DELEGATE(VoidEvent)
         // CALL_PATTERN() END_DECLARE_DELEGATE;
@@ -103,7 +106,11 @@ namespace AppKit
             }
 
             virtual void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) = 0;
-            virtual void Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map) = 0;
+            virtual void Deserialize(rapidjson::Value &_value, 
+                std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, 
+                std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                ResourceSet &resourceSet
+            ) = 0;
 
             friend class Transform;
         };
@@ -111,3 +118,5 @@ namespace AppKit
     }
 
 }
+
+#include <appkit-gl-engine/ResourceMap.h>

@@ -24,7 +24,7 @@ namespace AppKit
         namespace Components
         {
 
-            const uint32_t SkinnedMesh_VBO_Upload_Bitflag = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_NORMAL | ITKExtension::Model::CONTAINS_TANGENT | ITKExtension::Model::CONTAINS_BINORMAL;
+            const ITKExtension::Model::BitMask SkinnedMesh_VBO_Upload_Bitflag = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_NORMAL | ITKExtension::Model::CONTAINS_TANGENT | ITKExtension::Model::CONTAINS_BINORMAL;
 
             struct SkinnedMesh_vertexWeight
             {
@@ -89,7 +89,7 @@ namespace AppKit
 
                 ComponentSkinnedMesh(ResourceHelper *_resourceHelper = nullptr, bool isGPUSkinning = true);
 
-                void loadModelBase(const std::string &filename);
+                void loadModelBase(const std::string &filename, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial);
 
                 void moveMeshToTransform();
 
@@ -107,7 +107,10 @@ namespace AppKit
                 void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
 
                 void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
-                void Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map);
+                void Deserialize(rapidjson::Value &_value,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                 ResourceSet &resourceSet);
 
             };
 

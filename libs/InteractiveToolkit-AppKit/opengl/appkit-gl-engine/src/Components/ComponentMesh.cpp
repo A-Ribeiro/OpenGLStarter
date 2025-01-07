@@ -43,7 +43,7 @@ namespace AppKit
                 vbo_index = new AppKit::OpenGL::GLVertexBufferObject();
             }
 
-            void ComponentMesh::uploadVBO(uint32_t model_dynamic_upload, uint32_t model_static_upload)
+            void ComponentMesh::uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload)
             {
                 last_model_dynamic_upload = model_dynamic_upload;
                 last_model_static_upload = model_static_upload;
@@ -236,7 +236,7 @@ namespace AppKit
                 uploadVBO(0xffffffff, 0);
             }
 
-            void ComponentMesh::syncVBO(uint32_t model_dynamic_upload, uint32_t model_static_upload)
+            void ComponentMesh::syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload)
             {
                 ComputeFormat();
                 if (pos.size() == 0 || indices.size() == 0)
@@ -252,7 +252,7 @@ namespace AppKit
 
             void ComponentMesh::setLayoutPointers(const DefaultEngineShader *shader)
             {
-                uint32_t shaderFormat = shader->format;
+                ITKExtension::Model::BitMask shaderFormat = shader->format;
                 ComputeFormat();
                 if (!format)
                     return;
@@ -352,7 +352,7 @@ namespace AppKit
 
             void ComponentMesh::unsetLayoutPointers(const DefaultEngineShader *shader)
             {
-                uint32_t shaderFormat = shader->format;
+                ITKExtension::Model::BitMask shaderFormat = shader->format;
 
                 ComputeFormat();
                 if (!format)
@@ -442,7 +442,8 @@ namespace AppKit
                 result->always_clone = this->always_clone;
 
                 // check VBO
-                if(this->vbo_indexCount > 0){
+                if (this->vbo_indexCount > 0)
+                {
                     result->syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload);
                 }
 
@@ -452,21 +453,96 @@ namespace AppKit
             {
             }
 
-            void ComponentMesh::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer){
+            void ComponentMesh::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
+            {
                 writer.StartObject();
                 writer.String("type");
                 writer.String(ComponentMesh::Type);
                 writer.String("id");
                 writer.Uint64((intptr_t)self().get());
+
+                writer.String("format");
+                writer.Uint(this->format);
+
+                writer.String("always_clone");
+                writer.Bool(this->always_clone);
+
+                writer.String("last_model_dynamic_upload");
+                writer.Uint(last_model_dynamic_upload);
+
+                writer.String("last_model_static_upload");
+                writer.Uint(last_model_static_upload);
+
+                SerializerUtil::write_vector(writer, "pos", pos);
+                SerializerUtil::write_vector(writer, "normals", normals);
+                SerializerUtil::write_vector(writer, "tangent", tangent);
+                SerializerUtil::write_vector(writer, "binormal", binormal);
+                char field_name[64];
+                for (int i = 0; i < 8; i++)
+                {
+                    snprintf(field_name, 64, "uv_%i", i);
+                    SerializerUtil::write_vector(writer, field_name, uv[i]);
+                    snprintf(field_name, 64, "color_%i", i);
+                    SerializerUtil::write_vector(writer, field_name, color[i]);
+                }
+
+                SerializerUtil::write_vector(writer, "indices", indices);
+
+                SerializerUtil::write_vector(writer, "bones", bones);
+                SerializerUtil::write_vector(writer, "skin_index", skin_index);
+                SerializerUtil::write_vector(writer, "skin_weights", skin_weights);
+
+
                 writer.EndObject();
-                
             }
-            void ComponentMesh::Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map){
+            void ComponentMesh::Deserialize(rapidjson::Value &_value,
+                                            std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                            std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                            ResourceSet &resourceSet)
+            {
                 if (!_value.HasMember("type") || !_value["type"].IsString())
                     return;
                 if (!strcmp(_value["type"].GetString(), ComponentMesh::Type) == 0)
                     return;
-                
+
+                if (!_value.HasMember("format") || !_value["format"].IsUint())
+                    return;
+                this->format = _value["format"].GetUint();
+
+                if (!_value.HasMember("always_clone") || !_value["always_clone"].IsBool())
+                    return;
+                this->always_clone = _value["always_clone"].GetBool();
+
+                if (!_value.HasMember("last_model_dynamic_upload") || !_value["last_model_dynamic_upload"].IsUint())
+                    return;
+                this->last_model_dynamic_upload = _value["last_model_dynamic_upload"].GetUint();
+
+                if (!_value.HasMember("last_model_static_upload") || !_value["last_model_static_upload"].IsUint())
+                    return;
+                this->last_model_static_upload = _value["last_model_static_upload"].GetUint();
+
+                SerializerUtil::read_vector(_value, "pos", pos);
+                SerializerUtil::read_vector(_value, "normals", normals);
+                SerializerUtil::read_vector(_value, "tangent", tangent);
+                SerializerUtil::read_vector(_value, "binormal", binormal);
+                char field_name[64];
+                for (int i = 0; i < 8; i++)
+                {
+                    snprintf(field_name, 64, "uv_%i", i);
+                    SerializerUtil::read_vector(_value, field_name, uv[i]);
+                    snprintf(field_name, 64, "color_%i", i);
+                    SerializerUtil::read_vector(_value, field_name, color[i]);
+                }
+
+                SerializerUtil::read_vector(_value, "indices", indices);
+
+                SerializerUtil::read_vector(_value, "bones", bones);
+                SerializerUtil::read_vector(_value, "skin_index", skin_index);
+                SerializerUtil::read_vector(_value, "skin_weights", skin_weights);
+
+
+                if (last_model_dynamic_upload != 0 || last_model_static_upload != 0)
+                    syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload);
             }
 
             //

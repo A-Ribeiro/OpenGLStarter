@@ -44,7 +44,7 @@ void SceneJesus::loadResources() {
     JesusTextures[0] = nullptr;
     JesusTextures[1] = resourceHelper->createTextureFromFile("resources/Jesus/NormalMap_jesus.jpg",false);
     
-    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/Jesus.bams");
+    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/Jesus.bams", resourceMap->defaultPBRMaterial);
 
 
     // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
@@ -56,7 +56,7 @@ void SceneJesus::loadResources() {
     newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
     newMaterial->pbr.metallic = 0.0f;
     newMaterial->pbr.roughness = 1.0f;
-    newMaterial->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
+    newMaterial->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
     newMaterial->pbr.texNormal = JesusTextures[1];
     
     Jesus3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
@@ -152,7 +152,7 @@ void SceneJesus::bindResourcesToGraph() {
             material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
             material->pbr.metallic = 0.0f;
             material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = resourceHelper->defaultAlbedoTexture;
+            material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
             material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
         }
@@ -193,7 +193,8 @@ void SceneJesus::unloadAll() {
 SceneJesus::SceneJesus(
     Platform::Time *_time,
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
-    AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper) 
+    AppKit::GLEngine::ResourceHelper *_resourceHelper,
+    AppKit::GLEngine::ResourceMap *_resourceMap) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap) 
 {
     Jesus3DModel = nullptr;
 }

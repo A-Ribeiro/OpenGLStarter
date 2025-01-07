@@ -42,8 +42,8 @@ void ScenePalace::loadResources() {
 	Texture_Guard[1] = resourceHelper->createTextureFromFile("resources/castle_guard/Guard_02__normal.jpg",false);
     Texture_Guard[2] = resourceHelper->createTextureFromFile("resources/castle_guard/Guard_02__specular.jpg", false);
 
-	Model_Palace = resourceHelper->createTransformFromModel("resources/palace/colonnato.min.bams");
-    Model_Cross = resourceHelper->createTransformFromModel("resources/palace/cross.bams");
+	Model_Palace = resourceHelper->createTransformFromModel("resources/palace/colonnato.min.bams", resourceMap->defaultPBRMaterial);
+    Model_Cross = resourceHelper->createTransformFromModel("resources/palace/cross.bams", resourceMap->defaultPBRMaterial);
     //Model_Guard = resourceHelper->createTransformFromModel("resources/castle_guard/castle_guard_01.bams");
 
     bool use_gpu = true;
@@ -52,7 +52,7 @@ void ScenePalace::loadResources() {
     #endif
 
     skinnedMesh = Component::CreateShared<AppKit::GLEngine::Components::ComponentSkinnedMesh>(resourceHelper, use_gpu);
-    skinnedMesh->loadModelBase("resources/castle_guard/castle_guard_01.bams");
+    skinnedMesh->loadModelBase("resources/castle_guard/castle_guard_01.bams", resourceMap->defaultPBRMaterial);
 
     skinnedMesh->loadAnimation("idle","resources/castle_guard/castle_guard_01@Idle.bams");
     skinnedMesh->loadAnimation("walk", "resources/castle_guard/castle_guard_01@Walking.bams");
@@ -260,7 +260,8 @@ void ScenePalace::unloadAll() {
 ScenePalace::ScenePalace(
     Platform::Time *_time,
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
-    AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper)
+    AppKit::GLEngine::ResourceHelper *_resourceHelper,
+    AppKit::GLEngine::ResourceMap *_resourceMap) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap)
 {
     Model_Palace = nullptr;
     Model_Cross = nullptr;

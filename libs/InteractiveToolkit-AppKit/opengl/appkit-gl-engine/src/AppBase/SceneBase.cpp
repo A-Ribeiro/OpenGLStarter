@@ -14,12 +14,14 @@ namespace AppKit
         SceneBase::SceneBase(
             Platform::Time *_time,
             RenderPipeline *_renderPipeline,
-            ResourceHelper *_resourceHelper)
+            ResourceHelper *_resourceHelper,
+            ResourceMap *_resourceMap)
         {
 
             time = _time;
             renderPipeline = _renderPipeline;
             resourceHelper = _resourceHelper;
+            resourceMap = _resourceMap;
 
             // camera = nullptr;
             // root = nullptr;
@@ -27,6 +29,7 @@ namespace AppKit
 
         void SceneBase::load()
         {
+            resourceMap->ensure_default_texture_creation();
             loadResources();
             loadGraph();
             bindResourcesToGraph();
@@ -34,11 +37,13 @@ namespace AppKit
 
         void SceneBase::unload()
         {
+            resourceMap->clear_refcount_equals_1();
             unloadAll();
         }
 
         SceneBase::~SceneBase()
         {
+            resourceMap->clear();
         }
 
         void SceneBase::draw()

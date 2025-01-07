@@ -39,18 +39,18 @@ namespace AppKit
 
                 int vbo_indexCount;
 
-                uint32_t last_model_dynamic_upload;
-                uint32_t last_model_static_upload;
+                ITKExtension::Model::BitMask last_model_dynamic_upload;
+                ITKExtension::Model::BitMask last_model_static_upload;
 
                 void allocateVBO();
 
-                void uploadVBO(uint32_t model_dynamic_upload, uint32_t model_static_upload);
+                void uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload);
 
             public:
                 static const ComponentType Type;
 
                 // Model::VertexFormat
-                uint32_t format;
+                ITKExtension::Model::BitMask format;
 
                 std::vector<MathCore::vec3f> pos;
                 std::vector<MathCore::vec3f> normals;
@@ -79,7 +79,7 @@ namespace AppKit
 
                 void syncVBODynamic();
 
-                void syncVBO(uint32_t model_dynamic_upload, uint32_t model_static_upload);
+                void syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload);
 
                 void setLayoutPointers(const DefaultEngineShader *shader);
 
@@ -93,7 +93,10 @@ namespace AppKit
                 void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
 
                 void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
-                void Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map);
+                void Deserialize(rapidjson::Value &_value,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                 ResourceSet &resourceSet);
 
 
                 //

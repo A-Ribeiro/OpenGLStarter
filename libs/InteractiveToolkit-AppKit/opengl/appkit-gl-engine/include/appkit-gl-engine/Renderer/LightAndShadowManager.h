@@ -75,7 +75,10 @@ namespace AppKit
                 // writer.EndObject();
                 
             }
-            void Deserialize(rapidjson::Value &_value, std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map, std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map){
+            void Deserialize(rapidjson::Value &_value,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                 ResourceSet &resourceSet){
                 // if (!_value.HasMember("type") || !_value["type"].IsString())
                 //     return;
                 // if (!strcmp(_value["type"].GetString(), ShadowCache::Type) == 0)
@@ -98,8 +101,8 @@ namespace AppKit
             std::unordered_map<Components::ComponentLight *, ShadowCache *> shadowCacheDic;
             Platform::ObjectPool<ShadowCache> shadowCachePool;
 
-            std::vector<AlgorithmCore::Sorting::SortIndexi> sortResult;
-            std::vector<AlgorithmCore::Sorting::SortIndexi> sortTmpBuffer;
+            std::vector<AlgorithmCore::Sorting::SortIndexu32> sortResult;
+            std::vector<AlgorithmCore::Sorting::SortIndexu32> sortTmpBuffer;
 
             CollisionCore::AABB<MathCore::vec3f> scene_aabb;
             CollisionCore::Sphere<MathCore::vec3f> scene_sphere;

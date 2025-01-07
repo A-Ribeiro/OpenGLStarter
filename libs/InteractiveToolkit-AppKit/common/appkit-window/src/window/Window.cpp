@@ -76,6 +76,9 @@ namespace AppKit
             glContextConfig.minorVersion = contextSettings.minorVersion;
             glContextConfig.coreAttribute = (contextSettings.attributeFlags & sf::ContextSettings::Attribute::Core) != 0;
 
+            if (glContextConfig.majorVersion >= 3)
+                glContextConfig.sRgbCapable = true;
+
             window->setVerticalSyncEnabled(glContextConfig.vSync);
             window->setFramerateLimit(0);
             window->setMouseCursorVisible(true);

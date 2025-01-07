@@ -44,10 +44,10 @@ void SceneJesusCross::loadResources() {
     Rock03Textures[0] = resourceHelper->createTextureFromFile("resources/Rocks/rock03_diffuse.jpg",true && engine->sRGBCapable);
     Rock03Textures[1] = resourceHelper->createTextureFromFile("resources/Rocks/rock03_normal.jpg",false);
     
-    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/JesusOnCross.bams");
+    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/JesusOnCross.bams", resourceMap->defaultPBRMaterial);
     
-    Rocks02_3DModel = resourceHelper->createTransformFromModel("resources/Rocks/Rocks02.bams");
-    Rocks03_3DModel = resourceHelper->createTransformFromModel("resources/Rocks/Rocks03.bams");
+    Rocks02_3DModel = resourceHelper->createTransformFromModel("resources/Rocks/Rocks02.bams", resourceMap->defaultPBRMaterial);
+    Rocks03_3DModel = resourceHelper->createTransformFromModel("resources/Rocks/Rocks03.bams", resourceMap->defaultPBRMaterial);
     
     //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     
@@ -301,7 +301,8 @@ void SceneJesusCross::unloadAll() {
 SceneJesusCross::SceneJesusCross(
     Platform::Time *_time,
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
-    AppKit::GLEngine::ResourceHelper *_resourceHelper) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper) 
+    AppKit::GLEngine::ResourceHelper *_resourceHelper,
+    AppKit::GLEngine::ResourceMap *_resourceMap) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap) 
 {
     Jesus3DModel = nullptr;
 	Rocks02_3DModel = nullptr;

@@ -460,13 +460,13 @@ namespace AppKit
 
                 findAndReplaceAll(&fragmentShader,
                                   "FUNCTIONS",
-                                  "vec3 gammaToLinear(vec3 gamma){"
-                                  "  return pow(gamma, vec3(2.2));"
-                                  "}"
-                                  "vec3 linearToGamma(vec3 linear){"
-                                  //"  return pow( linear / (linear + vec3(1)) , vec3( 1.0 / 2.2 ) );"
-                                  "  return pow( linear , vec3( 1.0 / 2.2 ) );"
-                                  "}"
+                                  "vec3 gammaToLinear(vec3 gamma){\n"
+                                  "  return pow(gamma, vec3(2.2));\n"
+                                  "}\n"
+                                  "vec3 linearToGamma(vec3 linear){\n"
+                                  //"  return pow( linear / (linear + vec3(1)) , vec3( 1.0 / 2.2 ) );\n"
+                                  "  return pow( linear , vec3( 1.0 / 2.2 ) );\n"
+                                  "}\n"
                                   "FUNCTIONS");
 
                 findAndReplaceAll(&fragmentShader,
