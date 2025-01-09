@@ -5,7 +5,9 @@
 
 #include "VisualTree.h"
 #include "VisualList.h"
-#include "InspectorImGuiComponent.h"
+
+#include "Inspector/InspectorImGuiComponent.h"
+#include "Inspector/InspectorImGuiComponent_Transform.h"
 
 //#include "../ImGuiMenu.h"
 

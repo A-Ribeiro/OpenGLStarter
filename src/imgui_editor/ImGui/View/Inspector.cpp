@@ -12,11 +12,11 @@ Inspector::~Inspector()
     clearComponents();
 }
 
-void Inspector::addComponent(InspectorImGuiComponent *v)
+void Inspector::addComponent(std::shared_ptr<InspectorImGuiComponent> v)
 {
     components.push_back(v);
 }
-void Inspector::removeComponent(InspectorImGuiComponent *v)
+void Inspector::removeComponent(std::shared_ptr<InspectorImGuiComponent> v)
 {
     for (auto it = components.begin(); it != components.end(); it++)
     {
@@ -29,16 +29,30 @@ void Inspector::removeComponent(InspectorImGuiComponent *v)
 }
 void Inspector::clearComponents()
 {
-    for (auto &v : components)
-        if (v != nullptr)
-            delete v;
+    // for (auto &v : components)
+    //     if (v != nullptr)
+    //         delete v;
     components.clear();
+}
+
+void Inspector::setSelectedNode(std::shared_ptr<AppKit::GLEngine::Transform> t) {
+    if (selectedNode == t)
+        return;
+    selectedNode = t;
+
+    clearComponents();
+    
+    if (selectedNode == nullptr)
+        return;
+    
+    addComponent(InspectorImGuiComponent::CreateShared<InspectorImGuiComponent_Transform>(selectedNode));
+
 }
 
 View *Inspector::Init()
 {
-    addComponent(new InspectorImGuiComponent_Transform());
-    addComponent(new InspectorImGuiComponent_Transform());
+    // addComponent(new InspectorImGuiComponent_Transform());
+    // addComponent(new InspectorImGuiComponent_Transform());
 
     ImGuiMenu::Instance()->AddMenu(
         0,
