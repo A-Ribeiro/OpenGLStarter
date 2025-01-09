@@ -5,17 +5,22 @@
 
 class Inspector : public View
 {
-    std::vector< InspectorImGuiComponent* > components;
+protected:
+
+    std::vector< std::shared_ptr<InspectorImGuiComponent> > components;
+    std::shared_ptr<AppKit::GLEngine::Transform> selectedNode;
+
 public:
     static const ViewType Type;
 
-    void addComponent(InspectorImGuiComponent*);
-    void removeComponent(InspectorImGuiComponent*);
+    void addComponent(std::shared_ptr<InspectorImGuiComponent> v);
+    void removeComponent(std::shared_ptr<InspectorImGuiComponent> v);
     void clearComponents();
+
+    void setSelectedNode(std::shared_ptr<AppKit::GLEngine::Transform> t);
 
     Inspector();
     ~Inspector();
-
 
     View* Init();
 

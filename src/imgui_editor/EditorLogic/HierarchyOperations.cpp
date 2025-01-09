@@ -465,6 +465,8 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
                 this->selectedTransformInfo = nullptr;
 
                 imGuiManager->scene.OnImGuiDrawOverlay = nullptr;
+
+                imGuiManager->inspector.setSelectedNode(nullptr);
             }
 
         });
@@ -474,6 +476,7 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
             this->selectedTreeNode = node;
             this->selectedTransformInfo = std::dynamic_pointer_cast<HierarchyTreeData>(node->data);
             
+            imGuiManager->inspector.setSelectedNode(this->selectedTransformInfo->transform);
             
             // auto methodRef = &HierarchyOperations::drawImGizmoOverlay;
 
