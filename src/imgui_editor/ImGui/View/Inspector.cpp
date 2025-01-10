@@ -2,10 +2,29 @@
 #include "../ImGuiMenu.h"
 #include "../ImGuiManager.h"
 
+#include <appkit-gl-engine/Component.h>
+#include <appkit-gl-engine/Components/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/ComponentMesh.h>
+#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+
 const ViewType Inspector::Type = "Inspector";
 
 Inspector::Inspector() : View(Inspector::Type)
 {
+
+    componentCreator[ AppKit::GLEngine::Components::ComponentMaterial::Type ] = [](std::shared_ptr<AppKit::GLEngine::Component> _comp){
+        return InspectorImGuiComponent::CreateShared<InspectorImGuiComponent_Material>( std::dynamic_pointer_cast<AppKit::GLEngine::Components::ComponentMaterial>(_comp) );
+    };
+
+    componentCreator[ AppKit::GLEngine::Components::ComponentMesh::Type ] = [](std::shared_ptr<AppKit::GLEngine::Component> _comp){
+        return InspectorImGuiComponent::CreateShared<InspectorImGuiComponent_Mesh>( std::dynamic_pointer_cast<AppKit::GLEngine::Components::ComponentMesh>(_comp) );
+    };
+
+    componentCreator[ AppKit::GLEngine::Components::ComponentMeshWrapper::Type ] = [](std::shared_ptr<AppKit::GLEngine::Component> _comp){
+        return InspectorImGuiComponent::CreateShared<InspectorImGuiComponent_MeshWrapper>( std::dynamic_pointer_cast<AppKit::GLEngine::Components::ComponentMeshWrapper>(_comp) );
+    };
+
+
 }
 Inspector::~Inspector()
 {
@@ -47,6 +66,17 @@ void Inspector::setSelectedNode(std::shared_ptr<AppKit::GLEngine::Transform> t) 
     
     addComponent(InspectorImGuiComponent::CreateShared<InspectorImGuiComponent_Transform>(selectedNode));
 
+    for (auto &item: selectedNode->getComponents()){
+        auto it = componentCreator.find(item->getType());
+        if (it == componentCreator.end()){
+            auto gui_component = InspectorImGuiComponent::CreateShared<InspectorImGuiComponent_Unknown>( item );
+            addComponent(gui_component);
+        } else {
+            addComponent(it->second(item));
+        }
+    }
+
+
 }
 
 View *Inspector::Init()
@@ -72,6 +102,9 @@ void Inspector::RenderAndLogic()
     {
         on_hover_detector.setState(ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem));
         on_focus_detector.setState(ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows));
+
+        // check component state update
+
         for (int i = 0; i < (int)components.size(); i++)
             components[i]->renderAndLogic(i);
     }

@@ -4,32 +4,32 @@
 
 #include <appkit-gl-engine/Transform.h>
 
-InspectorImGuiComponent_Transform::InspectorImGuiComponent_Transform(std::shared_ptr<AppKit::GLEngine::Transform> transform):
+InspectorImGuiComponent_Transform::InspectorImGuiComponent_Transform(std::shared_ptr<AppKit::GLEngine::Transform> _transform):
     InspectorImGuiComponent("transform") {
 
-    transform_to_monitor = transform;
+    transform = _transform;
 }
 
 void InspectorImGuiComponent_Transform::childRenderAndLogic() {
 
     //ImGui::BeginGroup();
 
-    pos = transform_to_monitor->getLocalPosition();
-    quat = transform_to_monitor->getLocalRotation();
-    scale = transform_to_monitor->getLocalScale();
+    pos = transform->getLocalPosition();
+    quat = transform->getLocalRotation();
+    scale = transform->getLocalScale();
 
     if (ImGui::DragFloat3Inverted("Pos", pos.array, 0.001f, 0, 0, "%.3f")) {
         //printf("Value Pos Changed...\n");
-        transform_to_monitor->setLocalPosition(pos);
+        transform->setLocalPosition(pos);
     }
 
     if (ImGui::DragFloat4Inverted("Quat", quat.array, 0.001f, 0, 0, "%.3f")) {
         //printf("Value Quat Changed...\n");
-        transform_to_monitor->setLocalRotation(quat);
+        transform->setLocalRotation(quat);
     }
     if (ImGui::DragFloat3Inverted("Scale", scale.array, 0.001f, 0, 0, "%.3f")) {
         //printf("Value Scale Changed...\n");
-        transform_to_monitor->setLocalScale(scale);
+        transform->setLocalScale(scale);
     }
 
     //ImGui::EndGroup();
@@ -40,5 +40,5 @@ void InspectorImGuiComponent_Transform::childRenderAndLogic() {
 }
 
 InspectorImGuiComponent_Transform::~InspectorImGuiComponent_Transform(){
-    transform_to_monitor = nullptr;
+    transform = nullptr;
 }
