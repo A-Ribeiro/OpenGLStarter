@@ -12,7 +12,42 @@ InspectorImGuiComponent_Mesh::InspectorImGuiComponent_Mesh(std::shared_ptr<AppKi
 
 void InspectorImGuiComponent_Mesh::childRenderAndLogic() {
 
-    ImGui::Text("[Mesh]");
+    ImGui::PushTextWrapPos();
+    ImGui::Text("[%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s]",
+        (mesh->pos.size())?"aPosition":"",
+        (mesh->normals.size())?", aNormal":"",
+        (mesh->tangent.size())?", aTangent":"",
+        (mesh->binormal.size())?", aBinormal":"",
+
+        (mesh->uv[0].size())?", aUV0":"",
+        (mesh->uv[1].size())?", aUV1":"",
+        (mesh->uv[2].size())?", aUV2":"",
+        (mesh->uv[3].size())?", aUV3":"",
+        (mesh->uv[4].size())?", aUV4":"",
+        (mesh->uv[5].size())?", aUV5":"",
+        (mesh->uv[6].size())?", aUV6":"",
+        (mesh->uv[7].size())?", aUV7":"",
+
+        (mesh->color[0].size())?", aColor0":"",
+        (mesh->color[1].size())?", aColor1":"",
+        (mesh->color[2].size())?", aColor2":"",
+        (mesh->color[3].size())?", aColor3":"",
+        (mesh->color[4].size())?", aColor4":"",
+        (mesh->color[5].size())?", aColor5":"",
+        (mesh->color[6].size())?", aColor6":"",
+        (mesh->color[7].size())?", aColor7":"",
+
+        (mesh->skin_index.size())?", aSkinIndex":"",
+        (mesh->skin_weights.size())?", aSkinWeight":""
+    );
+    ImGui::PopTextWrapPos();
+
+    ImGui::Text("Vertices count: %u", (uint32_t)mesh->pos.size());
+    ImGui::Text("Indices count: %u", (uint32_t)mesh->indices.size());
+    ImGui::Text("Bones count: %u", (uint32_t)mesh->bones.size());
+    ImGui::Text("always_clone: %u", (uint32_t)mesh->always_clone);
+
+    
 
     //ImGui::BeginGroup();
 
