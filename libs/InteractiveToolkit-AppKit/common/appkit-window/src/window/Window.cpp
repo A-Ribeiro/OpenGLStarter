@@ -35,7 +35,7 @@ namespace AppKit
             sf::ContextSettings contextSettings;
             contextSettings.depthBits = glContextConfig.depthBits;
             contextSettings.stencilBits = glContextConfig.stencilBits;
-            contextSettings.antialiasingLevel = glContextConfig.antialiasingLevel;
+            contextSettings.antiAliasingLevel = glContextConfig.antialiasingLevel;
             contextSettings.sRgbCapable = glContextConfig.sRgbCapable;
             contextSettings.majorVersion = glContextConfig.majorVersion;
             contextSettings.minorVersion = glContextConfig.minorVersion;
@@ -70,7 +70,7 @@ namespace AppKit
             // query the created context info
             glContextConfig.depthBits = contextSettings.depthBits;
             glContextConfig.stencilBits = contextSettings.stencilBits;
-            glContextConfig.antialiasingLevel = contextSettings.antialiasingLevel;
+            glContextConfig.antialiasingLevel = contextSettings.antiAliasingLevel;
             glContextConfig.sRgbCapable = contextSettings.sRgbCapable;
             glContextConfig.majorVersion = contextSettings.majorVersion;
             glContextConfig.minorVersion = contextSettings.minorVersion;
