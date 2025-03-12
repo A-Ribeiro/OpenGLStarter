@@ -7,8 +7,14 @@
 // #include <SFML/Window.hpp>
 // #include <SFML/Graphics.hpp>
 
+#include "wayland_query_monitors.h"
+
 int main(int argc, char *argv[])
 {
+    main_2();
+    return 0;
+
+
     ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
     Platform::Thread::staticInitialization();
 
