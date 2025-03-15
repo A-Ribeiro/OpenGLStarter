@@ -1,6 +1,15 @@
 project (test-open-window)
 
 find_package(PkgConfig REQUIRED)
+
+message(STATUS "")
+message(STATUS " BUILDING DPI USING WAYLAND")
+message(STATUS "")
+message(STATUS " You need to run the following code:")
+message(STATUS "")
+message(STATUS "     sudo apt install libwayland-dev")
+message(STATUS "")
+
 pkg_check_modules(WAYLAND REQUIRED wayland-client)
 
 # include(${CMAKE_SOURCE_DIR}/libs/InteractiveToolkit-Extension/cmake/libLinkOpenGL.cmake)
