@@ -26,7 +26,7 @@ namespace AppKit
 
         // private copy constructores, to avoid copy...
         GLDynamicFBO::GLDynamicFBO(const GLDynamicFBO &v) {}
-        void GLDynamicFBO::operator=(const GLDynamicFBO &v) {}
+        GLDynamicFBO& GLDynamicFBO::operator=(const GLDynamicFBO &v) { return *this; }
 
         void GLDynamicFBO::setSize(int w, int h)
         {

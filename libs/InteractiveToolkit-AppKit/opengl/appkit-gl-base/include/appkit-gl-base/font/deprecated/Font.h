@@ -42,7 +42,7 @@ namespace AppKit
             void release();
 
         public:
-            void operator=(const Font &v);
+            Font& operator=(const Font &v);
             Font(const Font &font);
             Font();
             ~Font();

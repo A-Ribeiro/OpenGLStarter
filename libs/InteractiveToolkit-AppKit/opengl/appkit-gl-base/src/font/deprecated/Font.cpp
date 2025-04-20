@@ -35,7 +35,7 @@ namespace AppKit
             memset(&mHeader, 0, sizeof(FontHeader));
         }
         //--------------------------------------------------------------------------
-        void Font::operator=(const Font &v)
+        Font& Font::operator=(const Font &v)
         {
             release();
             mHeader = v.mHeader;
@@ -45,6 +45,7 @@ namespace AppKit
                 luminancePointer = new char[mHeader.mTexW * mHeader.mTexH];
                 memcpy(luminancePointer, v.luminancePointer, mHeader.mTexW * mHeader.mTexH * sizeof(char));
             }
+            return *this;
         }
         //--------------------------------------------------------------------------
         Font::Font(const Font &font)

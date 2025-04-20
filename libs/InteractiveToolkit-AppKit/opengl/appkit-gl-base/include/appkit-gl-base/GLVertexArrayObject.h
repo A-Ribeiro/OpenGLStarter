@@ -94,7 +94,7 @@ namespace AppKit
         {
             // private copy constructores, to avoid copy...
             GLVertexArrayObject(const GLVertexArrayObject &v);
-            void operator=(const GLVertexArrayObject &v);
+            GLVertexArrayObject& operator=(const GLVertexArrayObject &v);
 
             GLuint mVAO;
 

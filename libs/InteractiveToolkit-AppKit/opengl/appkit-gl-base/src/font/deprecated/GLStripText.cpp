@@ -26,7 +26,7 @@ namespace AppKit
 
         GLStripText::GLStripText(const GLStripText &v) {}
 
-        void GLStripText::operator=(const GLStripText &v) {}
+        GLStripText& GLStripText::operator=(const GLStripText &v) {return *this;}
 
         GLStripText::GLStripText(int buffSize, GLTexture *texture, GLShaderFont *shader)
         {

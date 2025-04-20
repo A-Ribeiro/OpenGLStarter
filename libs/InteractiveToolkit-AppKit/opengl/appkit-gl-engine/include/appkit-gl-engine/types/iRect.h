@@ -19,12 +19,13 @@ namespace AppKit
                 (*this) = v;
             }
 
-            void operator=(const iRect &v)
+            iRect& operator=(const iRect &v)
             {
                 x = v.x;
                 y = v.y;
                 w = v.w;
                 h = v.h;
+                return *this;
             }
 
             bool operator==(const iRect &v) const

@@ -24,7 +24,7 @@ namespace AppKit
         class Transform : public EventCore::HandleCallback
         {
             Transform(const Transform &v);
-            void operator=(const Transform &v);
+            Transform& operator=(const Transform &v);
 
             ///////////////////////////////////////////////////////
             //

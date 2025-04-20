@@ -74,7 +74,7 @@ namespace AppKit
 
             // private copy constructores, to avoid copy...
             GLFramebufferObject(const GLFramebufferObject &v);
-            void operator=(const GLFramebufferObject &v);
+            GLFramebufferObject& operator=(const GLFramebufferObject &v);
 
         public:
             std::vector<GLTexture *> color;   ///< Color textures to setup color attachments

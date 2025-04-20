@@ -84,7 +84,7 @@ namespace AppKit
         {
             // private copy constructores, to avoid copy...
             GLVertexBufferObject(const GLVertexBufferObject &v);
-            void operator=(const GLVertexBufferObject &v);
+            GLVertexBufferObject& operator=(const GLVertexBufferObject &v);
 
             GLuint mVBO;
             bool mIsLastUploadDynamic;

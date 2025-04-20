@@ -19,7 +19,7 @@ namespace AppKit
 
         // private copy constructores, to avoid copy...
         GLVertexBufferObject::GLVertexBufferObject(const GLVertexBufferObject &v) {}
-        void GLVertexBufferObject::operator=(const GLVertexBufferObject &v) {}
+        GLVertexBufferObject& GLVertexBufferObject::operator=(const GLVertexBufferObject &v) {return *this;}
 
         GLVertexBufferObject::GLVertexBufferObject()
         {

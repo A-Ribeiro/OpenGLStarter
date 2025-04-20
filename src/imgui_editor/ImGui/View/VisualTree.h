@@ -61,7 +61,7 @@ class TreeNode
 {
     // avoid copy, using copy constructors
     TreeNode(const TreeNode &) {}
-    void operator=(const TreeNode &) {}
+    TreeNode& operator=(const TreeNode &) {return *this;}
 
     TreeNode();
 

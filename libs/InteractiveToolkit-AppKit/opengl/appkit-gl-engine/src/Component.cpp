@@ -12,7 +12,7 @@ namespace AppKit
     {
 
         Component::Component(const Component &v) {}
-        void Component::operator=(const Component &v) {}
+        Component& Component::operator=(const Component &v) {return *this;}
 
         Component::Component(ComponentType type)
         {

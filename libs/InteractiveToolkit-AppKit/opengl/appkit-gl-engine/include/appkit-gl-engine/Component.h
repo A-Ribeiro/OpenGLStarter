@@ -36,7 +36,7 @@ namespace AppKit
         {
         private:
             Component(const Component &v);
-            void operator=(const Component &v);
+            Component& operator=(const Component &v);
             // bool mStartCalled;
         protected:
             // all subclasses need to provide a const char* ref in the constructor
