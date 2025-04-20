@@ -13,7 +13,7 @@ namespace AppKit
 
         // private copy constructores, to avoid copy...
         GLPostProcess::GLPostProcess(const GLPostProcess &v) {}
-        void GLPostProcess::operator=(const GLPostProcess &v) {}
+        GLPostProcess& GLPostProcess::operator=(const GLPostProcess &v) {return *this;}
 
         GLPostProcess::GLPostProcess()
         {

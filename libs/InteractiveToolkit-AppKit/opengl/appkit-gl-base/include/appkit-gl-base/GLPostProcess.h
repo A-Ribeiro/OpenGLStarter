@@ -111,7 +111,7 @@ namespace AppKit
 
             // private copy constructores, to avoid copy...
             GLPostProcess(const GLPostProcess &v);
-            void operator=(const GLPostProcess &v);
+            GLPostProcess& operator=(const GLPostProcess &v);
 
         public:
             std::vector<iPostProcess *> pipeline; ///< The post-fx pipeline sequence

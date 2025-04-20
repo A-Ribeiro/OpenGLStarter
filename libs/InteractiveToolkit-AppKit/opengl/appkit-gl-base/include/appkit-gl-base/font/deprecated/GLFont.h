@@ -46,7 +46,7 @@ namespace AppKit
         private:
             // private copy constructores, to avoid copy...
             GLFont(const GLFont &v);
-            void operator=(const GLFont &v);
+            GLFont& operator=(const GLFont &v);
 
         public:
             static void releaseSharedResources();

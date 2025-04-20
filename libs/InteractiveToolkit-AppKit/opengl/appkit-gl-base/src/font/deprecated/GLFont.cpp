@@ -31,7 +31,7 @@ namespace AppKit
         // private constructors, avoid copy construct
         //
         GLFont::GLFont(const GLFont &v) {}
-        void GLFont::operator=(const GLFont &v) {}
+        GLFont& GLFont::operator=(const GLFont &v) {return *this;}
         //
         //
         //

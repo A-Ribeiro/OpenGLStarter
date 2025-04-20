@@ -53,7 +53,7 @@ namespace AppKit
 
             userData = nullptr;
         }
-        void Transform::operator=(const Transform &v) {}
+        Transform& Transform::operator=(const Transform &v) {return *this;}
 
         ///////////////////////////////////////////////////////
         //

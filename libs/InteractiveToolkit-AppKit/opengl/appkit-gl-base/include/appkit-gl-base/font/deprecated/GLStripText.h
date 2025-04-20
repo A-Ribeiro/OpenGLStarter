@@ -38,7 +38,7 @@ namespace AppKit
         private:
             // avoid copy
             GLStripText(const GLStripText &v);
-            void operator=(const GLStripText &v);
+            GLStripText& operator=(const GLStripText &v);
 
         public:
             void setSize(int s);

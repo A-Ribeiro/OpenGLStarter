@@ -11,7 +11,7 @@ namespace AppKit
 
         // private copy constructores, to avoid copy...
         GLFont2::GLFont2(const GLFont2 &v) {}
-        void GLFont2::operator=(const GLFont2 &v) {}
+        GLFont2& GLFont2::operator=(const GLFont2 &v) {return *this;}
 
         GLFont2Triangles GLFont2::AtlasRectToTriangles(const ITKExtension::Atlas::AtlasRect &rect, const ITKExtension::Font::FontReaderSize &textureRes)
         {

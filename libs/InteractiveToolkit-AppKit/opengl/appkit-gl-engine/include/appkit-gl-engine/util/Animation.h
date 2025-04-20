@@ -74,7 +74,7 @@ namespace AppKit
         {
             // avoid copy, using copy constructors
             RootMotionAnalyser(const RootMotionAnalyser &) {}
-            void operator=(const RootMotionAnalyser &) {}
+            RootMotionAnalyser& operator=(const RootMotionAnalyser &) {return *this;}
         public:
 
             EventCore::Callback<void(RootMotionAnalyserData *data)> method;
@@ -450,7 +450,7 @@ namespace AppKit
 
             // avoid copy, using copy constructors
             AnimationMixer(const AnimationMixer &) {}
-            void operator=(const AnimationMixer &) {}
+            AnimationMixer& operator=(const AnimationMixer &) {return *this;}
 
             void clear();
         public:

@@ -60,7 +60,7 @@ class ListElement
 {
     // avoid copy, using copy constructors
     ListElement(const ListElement &) {}
-    void operator=(const ListElement &) {}
+    ListElement& operator=(const ListElement &) {return *this;}
 
     ListElement();
 

@@ -93,7 +93,7 @@ namespace AppKit
         {
             // private copy constructores, to avoid copy...
             GLFont2Builder(const GLFont2Builder &v);
-            void operator=(const GLFont2Builder &v);
+            GLFont2Builder& operator=(const GLFont2Builder &v);
 
             // std::vector<char> char_buffer;
             // std::vector<wchar_t> wchar_buffer;

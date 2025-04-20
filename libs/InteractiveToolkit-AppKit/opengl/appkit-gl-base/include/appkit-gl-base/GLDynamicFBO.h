@@ -29,7 +29,7 @@ namespace AppKit
         
         //private copy constructores, to avoid copy...
         GLDynamicFBO(const GLDynamicFBO& v);
-        void operator=(const GLDynamicFBO& v);
+        GLDynamicFBO& operator=(const GLDynamicFBO& v);
 
     public:
         int width;///< current width of this FBO

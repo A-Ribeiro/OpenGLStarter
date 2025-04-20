@@ -21,7 +21,7 @@ namespace AppKit
 
         // private copy constructores, to avoid copy...
         GLVertexArrayObject::GLVertexArrayObject(const GLVertexArrayObject &v) {}
-        void GLVertexArrayObject::operator=(const GLVertexArrayObject &v) {}
+        GLVertexArrayObject& GLVertexArrayObject::operator=(const GLVertexArrayObject &v) {return *this;}
 
         GLVertexArrayObject::GLVertexArrayObject()
         {
