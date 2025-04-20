@@ -43,12 +43,12 @@ namespace AppKit
             GLTexture texture;
             static GLShaderFont *globalShader;
 
-        private:
-            // private copy constructores, to avoid copy...
-            GLFont(const GLFont &v);
-            GLFont& operator=(const GLFont &v);
-
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            GLFont(const GLFont &v) = delete;
+            GLFont& operator=(const GLFont &v) = delete;
+
             static void releaseSharedResources();
 
             GLFont(const FontHeader &aHeader,

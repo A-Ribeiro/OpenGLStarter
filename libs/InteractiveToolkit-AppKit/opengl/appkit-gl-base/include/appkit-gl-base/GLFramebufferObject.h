@@ -72,11 +72,12 @@ namespace AppKit
 
             GLuint mDepthRenderbuffer;
 
-            // private copy constructores, to avoid copy...
-            GLFramebufferObject(const GLFramebufferObject &v);
-            GLFramebufferObject& operator=(const GLFramebufferObject &v);
-
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            GLFramebufferObject(const GLFramebufferObject &v) = delete;
+            GLFramebufferObject& operator=(const GLFramebufferObject &v) = delete;
+
             std::vector<GLTexture *> color;   ///< Color textures to setup color attachments
             GLTexture *depth;                 ///< if set, tries to setup depth texture as attachment
             bool useRenderbufferDepth;        ///< generate a depth render buffer and attach to this framebuffer object

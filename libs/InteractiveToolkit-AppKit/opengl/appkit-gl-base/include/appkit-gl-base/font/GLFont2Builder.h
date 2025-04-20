@@ -91,10 +91,6 @@ namespace AppKit
         ///
         class GLFont2Builder
         {
-            // private copy constructores, to avoid copy...
-            GLFont2Builder(const GLFont2Builder &v);
-            GLFont2Builder& operator=(const GLFont2Builder &v);
-
             // std::vector<char> char_buffer;
             // std::vector<wchar_t> wchar_buffer;
 
@@ -106,6 +102,11 @@ namespace AppKit
             float computeStringLengthUntilNewLine(const char32_t *str, int size, int offset);
 
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            GLFont2Builder(const GLFont2Builder &v) = delete;
+            GLFont2Builder& operator=(const GLFont2Builder &v) = delete;
+
             GLFont2 glFont2; ///< loaded font glyph set
 
             std::vector<GLFont2Builder_VertexAttrib> vertexAttrib; ///< last generated OpenGL vertex buffer data

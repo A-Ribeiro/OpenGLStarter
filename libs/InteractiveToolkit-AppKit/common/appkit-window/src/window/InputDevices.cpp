@@ -341,7 +341,7 @@ namespace windowGLWrapper
             set(m_fd, m_restore, false);
         }
 
-        //deleted copy constructores, to avoid copy...
+        //deleted copy constructor and assign operator, to avoid copy...
         Terminal(const Terminal &) = delete;
         const Terminal &operator=(const Terminal &) = delete;
 

@@ -15,45 +15,45 @@ namespace AppKit
     namespace GLEngine
     {
 
-        Transform::Transform(const Transform &v) :
+        // Transform::Transform(const Transform &v) :
 
-                                                   // Parent(
-                                                   //    EventCore::CallbackWrapper(&Transform::getParent, this),
-                                                   //    EventCore::CallbackWrapper(&Transform::setParent, this)),
+        //                                            // Parent(
+        //                                            //    EventCore::CallbackWrapper(&Transform::getParent, this),
+        //                                            //    EventCore::CallbackWrapper(&Transform::setParent, this)),
 
-                                                   LocalPosition(
-                                                       EventCore::CallbackWrapper(&Transform::getLocalPosition, this),
-                                                       EventCore::CallbackWrapper(&Transform::setLocalPosition, this)),
-                                                   // LocalEuler(this, &Transform::getLocalEuler, &Transform::setLocalEuler),
-                                                   LocalRotation(
-                                                       EventCore::CallbackWrapper(&Transform::getLocalRotation, this),
-                                                       EventCore::CallbackWrapper(&Transform::setLocalRotation, this)),
-                                                   LocalScale(
-                                                       EventCore::CallbackWrapper(&Transform::getLocalScale, this),
-                                                       EventCore::CallbackWrapper(&Transform::setLocalScale, this)),
+        //                                            LocalPosition(
+        //                                                EventCore::CallbackWrapper(&Transform::getLocalPosition, this),
+        //                                                EventCore::CallbackWrapper(&Transform::setLocalPosition, this)),
+        //                                            // LocalEuler(this, &Transform::getLocalEuler, &Transform::setLocalEuler),
+        //                                            LocalRotation(
+        //                                                EventCore::CallbackWrapper(&Transform::getLocalRotation, this),
+        //                                                EventCore::CallbackWrapper(&Transform::setLocalRotation, this)),
+        //                                            LocalScale(
+        //                                                EventCore::CallbackWrapper(&Transform::getLocalScale, this),
+        //                                                EventCore::CallbackWrapper(&Transform::setLocalScale, this)),
 
-                                                   Position(
-                                                       // EventCore::CallbackWrapper(&Transform::getPosition, this),
-                                                       EventCore::Callback<MathCore::vec3f()>(&Transform::getPosition, this),
-                                                       EventCore::CallbackWrapper(&Transform::setPosition, this)),
-                                                   // Euler(this, &Transform::getEuler, &Transform::setEuler),
-                                                   Rotation(
-                                                       // EventCore::CallbackWrapper(&Transform::getRotation, this),
-                                                       EventCore::Callback<MathCore::quatf()>(&Transform::getRotation, this),
-                                                       EventCore::CallbackWrapper(&Transform::setRotation, this)),
-                                                   Scale(
-                                                       // EventCore::CallbackWrapper(&Transform::getScale, this),
-                                                       EventCore::Callback<MathCore::vec3f()>(&Transform::getScale, this),
-                                                       EventCore::CallbackWrapper(&Transform::setScale, this)),
+        //                                            Position(
+        //                                                // EventCore::CallbackWrapper(&Transform::getPosition, this),
+        //                                                EventCore::Callback<MathCore::vec3f()>(&Transform::getPosition, this),
+        //                                                EventCore::CallbackWrapper(&Transform::setPosition, this)),
+        //                                            // Euler(this, &Transform::getEuler, &Transform::setEuler),
+        //                                            Rotation(
+        //                                                // EventCore::CallbackWrapper(&Transform::getRotation, this),
+        //                                                EventCore::Callback<MathCore::quatf()>(&Transform::getRotation, this),
+        //                                                EventCore::CallbackWrapper(&Transform::setRotation, this)),
+        //                                            Scale(
+        //                                                // EventCore::CallbackWrapper(&Transform::getScale, this),
+        //                                                EventCore::Callback<MathCore::vec3f()>(&Transform::getScale, this),
+        //                                                EventCore::CallbackWrapper(&Transform::setScale, this)),
 
-                                                   Name(
-                                                       EventCore::CallbackWrapper(&Transform::getName, this),
-                                                       EventCore::CallbackWrapper(&Transform::setName, this))
-        {
+        //                                            Name(
+        //                                                EventCore::CallbackWrapper(&Transform::getName, this),
+        //                                                EventCore::CallbackWrapper(&Transform::setName, this))
+        // {
 
-            userData = nullptr;
-        }
-        Transform& Transform::operator=(const Transform &v) {return *this;}
+        //     userData = nullptr;
+        // }
+        // Transform& Transform::operator=(const Transform &v) {return *this;}
 
         ///////////////////////////////////////////////////////
         //

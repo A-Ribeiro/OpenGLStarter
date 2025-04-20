@@ -73,13 +73,14 @@ namespace AppKit
         ///
         class GLFont2
         {
-            // private copy constructores, to avoid copy...
-            GLFont2(const GLFont2 &v);
-            GLFont2& operator=(const GLFont2 &v);
-
             GLFont2Triangles AtlasRectToTriangles(const ITKExtension::Atlas::AtlasRect &rect, const ITKExtension::Font::FontReaderSize &textureRes);
 
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            GLFont2(const GLFont2 &v) = delete;
+            GLFont2& operator=(const GLFont2 &v) = delete;
+
             float size;            ///< the size of the loaded font in pixels units
             float space_width;     ///< the advance x when calculating space character ' '
             float new_line_height; ///< the size of a new line character in pixels units

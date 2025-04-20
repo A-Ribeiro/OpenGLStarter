@@ -109,11 +109,12 @@ namespace AppKit
             GLFramebufferObject *fbo[2];
             int current;
 
-            // private copy constructores, to avoid copy...
-            GLPostProcess(const GLPostProcess &v);
-            GLPostProcess& operator=(const GLPostProcess &v);
-
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            GLPostProcess(const GLPostProcess &v) = delete;
+            GLPostProcess& operator=(const GLPostProcess &v) = delete;
+
             std::vector<iPostProcess *> pipeline; ///< The post-fx pipeline sequence
             int width;                            ///< the internal texture width
             int height;                           ///< the internal texture height

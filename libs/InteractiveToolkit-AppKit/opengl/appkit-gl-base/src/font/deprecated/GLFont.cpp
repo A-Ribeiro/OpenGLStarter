@@ -28,11 +28,6 @@ namespace AppKit
         GLShaderFont *GLFont::globalShader = nullptr;
 
         //
-        // private constructors, avoid copy construct
-        //
-        GLFont::GLFont(const GLFont &v) {}
-        GLFont& GLFont::operator=(const GLFont &v) {return *this;}
-        //
         //
         //
         void GLFont::releaseSharedResources()

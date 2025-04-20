@@ -58,9 +58,6 @@ public:
 
 class ListElement
 {
-    // avoid copy, using copy constructors
-    ListElement(const ListElement &) {}
-    ListElement& operator=(const ListElement &) {return *this;}
 
     ListElement();
 
@@ -79,6 +76,11 @@ protected:
     bool scroll_to_this_item;
 
 public:
+
+    //deleted copy constructor and assign operator, to avoid copy...
+    ListElement(const ListElement &) = delete;
+    ListElement& operator=(const ListElement &) = delete;
+
     ListElement(int32_t uid, VisualList *visualList, const char *name, std::shared_ptr<ListData> data);
 
     ListElement &setName(const char *value);

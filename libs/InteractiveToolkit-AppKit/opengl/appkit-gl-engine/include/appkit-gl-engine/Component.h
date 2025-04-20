@@ -35,8 +35,6 @@ namespace AppKit
         class Component : public EventCore::HandleCallback
         {
         private:
-            Component(const Component &v);
-            Component& operator=(const Component &v);
             // bool mStartCalled;
         protected:
             // all subclasses need to provide a const char* ref in the constructor
@@ -47,6 +45,11 @@ namespace AppKit
             std::vector<std::weak_ptr<Transform>> mTransform;
 
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            Component(const Component &v) = delete;
+            Component& operator=(const Component &v) = delete;
+        
             std::shared_ptr<Transform> getTransform(int i = 0)
             {
                 if (i >= (int)mTransform.size())
