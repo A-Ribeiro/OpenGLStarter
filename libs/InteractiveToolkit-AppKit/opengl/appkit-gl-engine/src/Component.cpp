@@ -11,9 +11,6 @@ namespace AppKit
     namespace GLEngine
     {
 
-        Component::Component(const Component &v) {}
-        Component& Component::operator=(const Component &v) {return *this;}
-
         Component::Component(ComponentType type)
         {
             this->type_const_ref = type;

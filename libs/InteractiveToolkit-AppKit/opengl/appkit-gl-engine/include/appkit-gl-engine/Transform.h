@@ -23,9 +23,6 @@ namespace AppKit
 
         class Transform : public EventCore::HandleCallback
         {
-            Transform(const Transform &v);
-            Transform& operator=(const Transform &v);
-
             ///////////////////////////////////////////////////////
             //
             //
@@ -41,6 +38,11 @@ namespace AppKit
             std::weak_ptr<Transform> mSelf;
 
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            Transform(const Transform &v) = delete;
+            Transform& operator=(const Transform &v) = delete;
+
             static inline std::shared_ptr<Transform> CreateShared()
             {
                 auto result = std::make_shared<Transform>();

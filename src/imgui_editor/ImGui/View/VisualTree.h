@@ -59,9 +59,6 @@ public:
 
 class TreeNode
 {
-    // avoid copy, using copy constructors
-    TreeNode(const TreeNode &) {}
-    TreeNode& operator=(const TreeNode &) {return *this;}
 
     TreeNode();
 
@@ -84,6 +81,11 @@ protected:
 
     void renderRecursive(TreeHolder *treeHolder, std::shared_ptr<TreeNode> &self, ImGuiID id_sel, int32_t selected_UID, bool *any_click_occured); // , Platform::Time* time);
 public:
+
+    //deleted copy constructor and assign operator, to avoid copy...
+    TreeNode(const TreeNode &) = delete;
+    TreeNode& operator=(const TreeNode &) = delete;
+
     TreeNode(int32_t uid, std::shared_ptr<TreeData> data, const char *name);
 
     TreeNode &setIsRoot(bool is_root);

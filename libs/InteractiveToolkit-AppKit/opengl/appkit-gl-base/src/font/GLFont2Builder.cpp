@@ -20,10 +20,6 @@ namespace AppKit
             this->color = color;
         }
 
-        // private copy constructores, to avoid copy...
-        GLFont2Builder::GLFont2Builder(const GLFont2Builder &v) {}
-        GLFont2Builder& GLFont2Builder::operator=(const GLFont2Builder &v) {return *this;}
-
         void GLFont2Builder::GLFont2BitmapRef_to_VertexAttrib(const MathCore::vec3f &pos, const MathCore::vec4f &color, const GLFont2BitmapRef &bitmapRef)
         {
             MathCore::vec3f pos_new = pos + bitmapRef.move_before_draw;

@@ -35,12 +35,12 @@ namespace AppKit
             GLTexture *texture;
             GLShaderFont *shader;
 
-        private:
-            // avoid copy
-            GLStripText(const GLStripText &v);
-            GLStripText& operator=(const GLStripText &v);
-
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            GLStripText(const GLStripText &v) = delete;
+            GLStripText& operator=(const GLStripText &v) = delete;
+
             void setSize(int s);
 
             GLStripText(int buffSize, GLTexture *texture, GLShaderFont *shader);

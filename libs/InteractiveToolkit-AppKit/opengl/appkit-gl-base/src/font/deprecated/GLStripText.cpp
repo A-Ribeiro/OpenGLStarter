@@ -24,10 +24,6 @@ namespace AppKit
     namespace OpenGL
     {
 
-        GLStripText::GLStripText(const GLStripText &v) {}
-
-        GLStripText& GLStripText::operator=(const GLStripText &v) {return *this;}
-
         GLStripText::GLStripText(int buffSize, GLTexture *texture, GLShaderFont *shader)
         {
             mStripInfo = new StripInfoVertexAttrib[buffSize];

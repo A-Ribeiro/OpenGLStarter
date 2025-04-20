@@ -17,10 +17,6 @@ namespace AppKit
     namespace OpenGL
     {
 
-        // private copy constructores, to avoid copy...
-        GLVertexBufferObject::GLVertexBufferObject(const GLVertexBufferObject &v) {}
-        GLVertexBufferObject& GLVertexBufferObject::operator=(const GLVertexBufferObject &v) {return *this;}
-
         GLVertexBufferObject::GLVertexBufferObject()
         {
 #if !defined(GLAD_GLES2)

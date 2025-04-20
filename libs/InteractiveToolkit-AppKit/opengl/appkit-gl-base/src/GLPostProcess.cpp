@@ -11,10 +11,6 @@ namespace AppKit
     namespace OpenGL
     {
 
-        // private copy constructores, to avoid copy...
-        GLPostProcess::GLPostProcess(const GLPostProcess &v) {}
-        GLPostProcess& GLPostProcess::operator=(const GLPostProcess &v) {return *this;}
-
         GLPostProcess::GLPostProcess()
         {
             width = -1;

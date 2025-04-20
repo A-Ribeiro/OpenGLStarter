@@ -27,11 +27,12 @@ namespace AppKit
     class GLDynamicFBO {
 
         
-        //private copy constructores, to avoid copy...
-        GLDynamicFBO(const GLDynamicFBO& v);
-        GLDynamicFBO& operator=(const GLDynamicFBO& v);
-
     public:
+
+        //deleted copy constructor and assign operator, to avoid copy...
+        GLDynamicFBO(const GLDynamicFBO& v) = delete;
+        GLDynamicFBO& operator=(const GLDynamicFBO& v) = delete;
+
         int width;///< current width of this FBO
         int height;///< current height of this FBO
         GLuint mFBO;

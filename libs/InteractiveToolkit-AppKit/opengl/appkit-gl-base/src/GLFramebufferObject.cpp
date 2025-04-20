@@ -35,9 +35,6 @@ namespace AppKit
             GL_COLOR_ATTACHMENT14,
             GL_COLOR_ATTACHMENT15};
 
-        GLFramebufferObject::GLFramebufferObject(const GLFramebufferObject &v) {}
-        GLFramebufferObject& GLFramebufferObject::operator=(const GLFramebufferObject &v) {return *this;}
-
         GLFramebufferObject::GLFramebufferObject()
         {
 

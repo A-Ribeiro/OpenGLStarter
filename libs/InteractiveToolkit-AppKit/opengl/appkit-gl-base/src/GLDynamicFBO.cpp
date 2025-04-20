@@ -24,10 +24,6 @@ namespace AppKit
             GL_COLOR_ATTACHMENT14,
             GL_COLOR_ATTACHMENT15};
 
-        // private copy constructores, to avoid copy...
-        GLDynamicFBO::GLDynamicFBO(const GLDynamicFBO &v) {}
-        GLDynamicFBO& GLDynamicFBO::operator=(const GLDynamicFBO &v) { return *this; }
-
         void GLDynamicFBO::setSize(int w, int h)
         {
             width = w;

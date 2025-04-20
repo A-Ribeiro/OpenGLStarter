@@ -72,10 +72,11 @@ namespace AppKit
 
         class RootMotionAnalyser
         {
-            // avoid copy, using copy constructors
-            RootMotionAnalyser(const RootMotionAnalyser &) {}
-            RootMotionAnalyser& operator=(const RootMotionAnalyser &) {return *this;}
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            RootMotionAnalyser(const RootMotionAnalyser &) = delete;
+            RootMotionAnalyser& operator=(const RootMotionAnalyser &) = delete;
 
             EventCore::Callback<void(RootMotionAnalyserData *data)> method;
             RootMotionAnalyserData data;
@@ -448,12 +449,13 @@ namespace AppKit
 
             AnimationTransitionChannelInformation &getTransition(uint32_t x, uint32_t y);
 
-            // avoid copy, using copy constructors
-            AnimationMixer(const AnimationMixer &) {}
-            AnimationMixer& operator=(const AnimationMixer &) {return *this;}
-
             void clear();
         public:
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            AnimationMixer(const AnimationMixer &) = delete;
+            AnimationMixer& operator=(const AnimationMixer &) = delete;
+
             AnimationMixer();
             ~AnimationMixer();
 
