@@ -4,6 +4,7 @@
 #include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
 
 #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+#include <InteractiveToolkit/EaseCore/EaseCore.h>
 
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
@@ -312,7 +313,12 @@ void MainScene::update(Platform::Time *elapsed)
         // float screen_width = (float)screenRenderWindow->CameraViewport.c_val().w;
 
         float lrp = MathCore::OP<float>::clamp(this->time_sec / this->complete_time_sec, 0.0f, 1.0f);
-        setTextWithWidth(max_text_width * lrp);
+        lrp = MathCore::OP<float>::pow(lrp, 1.3f);
+        float aux = max_text_width * lrp * 1.025f;
+
+        printf("%f\n", aux);
+
+        setTextWithWidth(aux);
 
         float lrp_fade = MathCore::OP<float>::clamp(this->time_sec / this->fade_time_sec, 0.0f, 1.0f);
 
