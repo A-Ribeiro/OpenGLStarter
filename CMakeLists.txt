@@ -157,3 +157,5 @@ add_subdirectory(src/ipc_fullscreen_viewer)
 # endif()
 
 add_subdirectory(src/test-pbr-coefs)
+
+add_subdirectory(src/vignette)
