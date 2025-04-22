@@ -166,6 +166,9 @@ namespace AppKit
                 if (c == U' ')
                 {
                     position.x += glFont2.space_width;
+
+                    *xmax = MathCore::OP<float>::maximum(*xmax, position.x);
+                    
                 }
                 else if (c == U'\n')
                 {
