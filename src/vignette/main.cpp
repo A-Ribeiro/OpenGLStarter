@@ -32,15 +32,15 @@ int main(int argc, char* argv[]) {
     engineConfig.glContextConfig.majorVersion = 2;
     engineConfig.glContextConfig.minorVersion = 1;
 
-#if (!defined(__APPLE__)) && (defined(ITK_RPI) || defined(NDEBUG))
-    engineConfig.windowConfig.windowStyle = AppKit::Window::WindowStyle::FullScreen;
-    engineConfig.windowConfig.videoMode = AppKit::Window::Window::getDesktopVideoMode();//AppKit::Window::VideoMode(1280, 720);
+// #if (!defined(__APPLE__)) && (defined(ITK_RPI) || defined(NDEBUG))
+//     engineConfig.windowConfig.windowStyle = AppKit::Window::WindowStyle::FullScreen;
+//     engineConfig.windowConfig.videoMode = AppKit::Window::Window::getDesktopVideoMode();//AppKit::Window::VideoMode(1280, 720);
 
-    engineConfig.glContextConfig.antialiasingLevel = 0;
-    engineConfig.glContextConfig.sRgbCapable = false;
+//     engineConfig.glContextConfig.antialiasingLevel = 0;
+//     engineConfig.glContextConfig.sRgbCapable = false;
 
-    engine->configureWindow(engineConfig);
-#else
+//     engine->configureWindow(engineConfig);
+// #else
     engineConfig.windowConfig.windowStyle = AppKit::Window::WindowStyle::Default;
     engineConfig.windowConfig.videoMode = AppKit::Window::VideoMode(1920, 1080);
 
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
         - engine->window->getSize()) / 2
     );
 
-#endif
+// #endif
 
     engine->mainLoop();
 
