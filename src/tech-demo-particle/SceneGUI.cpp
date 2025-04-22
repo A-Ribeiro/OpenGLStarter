@@ -8,50 +8,50 @@ using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
-
-//to load skybox, textures, cubemaps, 3DModels and setup materials
-void SceneGUI::loadResources(){
-    AppKit::GLEngine::Engine* engine = AppKit::GLEngine::Engine::Instance();
+// to load skybox, textures, cubemaps, 3DModels and setup materials
+void SceneGUI::loadResources()
+{
+    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
 
     cursorTexture = resourceHelper->createTextureFromFile("resources/cursor.png", true && engine->sRGBCapable);
 
     fontBuilder.load("resources/Roboto-Regular-32.basof2");
 
-    button_SoftParticles = new Button( 
-        0,// _position, 
-        true,// _left, 
-        "button_SoftParticles",//_id, 
-        "Soft Particles ON",//_text, 
-        &fontBuilder//_fontBuilder 
+    button_SoftParticles = new Button(
+        0,                      // _position,
+        true,                   // _left,
+        "button_SoftParticles", //_id,
+        "Soft Particles ON",    //_text,
+        &fontBuilder            //_fontBuilder
     );
-
 }
-//to load the scene graph
-void SceneGUI::loadGraph(){
+// to load the scene graph
+void SceneGUI::loadGraph()
+{
     root = Transform::CreateShared();
 
-    auto t = root->addChild( Transform::CreateShared() );
+    auto t = root->addChild(Transform::CreateShared());
     t->Name = "Main Camera";
 
-    t = root->addChild( button_SoftParticles->getTransform() );
+    t = root->addChild(button_SoftParticles->getTransform());
 
     {
         cursorTransform = root->addChild(Transform::CreateShared());
     }
-    
 }
-//to bind the resources to the current graph
-void SceneGUI::bindResourcesToGraph(){
+// to bind the resources to the current graph
+void SceneGUI::bindResourcesToGraph()
+{
 
     GLRenderState *renderState = GLRenderState::Instance();
 
-    //setup renderstate
+    // setup renderstate
 
     auto mainCamera = root->findTransformByName("Main Camera");
     std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
     camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
 
-    //ReferenceCounter<AppKit::OpenGL::GLTexture*>* texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    // ReferenceCounter<AppKit::OpenGL::GLTexture*>* texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
     {
         auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
@@ -62,66 +62,67 @@ void SceneGUI::bindResourcesToGraph(){
         cursorMaterial->unlit.tex = cursorTexture;
     }
 
-    //texRefCount->add(&fontBuilder.glFont2.texture);
-    
-    //texRefCount->add(cursorTexture);
+    // texRefCount->add(&fontBuilder.glFont2.texture);
 
-    //Add AABB for all meshs...
+    // texRefCount->add(cursorTexture);
+
+    // Add AABB for all meshs...
     {
-        //root->traversePreOrder_DepthFirst( AddAABBMesh );
+        // root->traversePreOrder_DepthFirst( AddAABBMesh );
         resourceHelper->addAABBMesh(root);
     }
 }
 
-//clear all loaded scene
-void SceneGUI::unloadAll(){
+// clear all loaded scene
+void SceneGUI::unloadAll()
+{
 
-    //ResourceHelper::releaseTransformRecursive(&root);
+    // ResourceHelper::releaseTransformRecursive(&root);
     root = nullptr;
     camera = nullptr;
 
-    if (button_SoftParticles != nullptr){
+    if (button_SoftParticles != nullptr)
+    {
         delete button_SoftParticles;
         button_SoftParticles = nullptr;
     }
 
-    //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    //texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
-    //texRefCount->remove(cursorTexture);
+    // texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
+    // texRefCount->remove(cursorTexture);
     cursorTexture = nullptr;
     cursorTransform = nullptr;
-
 }
 
-void SceneGUI::draw(){
-    AppKit::GLEngine::Engine* engine = AppKit::GLEngine::Engine::Instance();
+void SceneGUI::draw()
+{
+    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
 
     if (cursorTransform != nullptr)
         cursorTransform->setLocalPosition(
-            MathCore::vec3f(engine->app->screenRenderWindow->MousePosRelatedToCenter, 0.0f)
-        );
+            MathCore::vec3f(engine->app->screenRenderWindow->MousePosRelatedToCenter, 0.0f));
 
     if (button_SoftParticles != nullptr)
         button_SoftParticles->update(
             MathCore::vec3f(engine->app->screenRenderWindow->MousePosRelatedToCenter, 0.0f)
 
-            //Button::App2MousePosition()
+            // Button::App2MousePosition()
         );
 
-    
     if (engine->sRGBCapable)
         glDisable(GL_FRAMEBUFFER_SRGB);
-    
+
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
     renderPipeline->runSinglePassPipeline(root, camera, false);
-        
+
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
-void SceneGUI::resize(const MathCore::vec2i&size) {
+void SceneGUI::resize(const MathCore::vec2i &size)
+{
     if (button_SoftParticles != nullptr)
         button_SoftParticles->resize(size);
 }
@@ -130,14 +131,16 @@ SceneGUI::SceneGUI(
     Platform::Time *_time,
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
-    AppKit::GLEngine::ResourceMap *_resourceMap) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap) {
-    
+    AppKit::GLEngine::ResourceMap *_resourceMap,
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
+{
     button_SoftParticles = nullptr;
 
     cursorTexture = nullptr;
     cursorTransform = nullptr;
 }
 
-SceneGUI::~SceneGUI() {
+SceneGUI::~SceneGUI()
+{
     unload();
 }

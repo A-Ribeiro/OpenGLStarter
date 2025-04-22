@@ -59,10 +59,10 @@ App::App()
 
 void App::load()
 {
-    // sceneJesusCross = new SceneJesusCross(&time, &renderPipeline, &resourceHelper, &resourceMap);
+    // sceneJesusCross = new SceneJesusCross(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
     // sceneJesusCross->load();
 
-    sceneSplash = new SceneSplash(&time, &renderPipeline, &resourceHelper, &resourceMap);
+    sceneSplash = new SceneSplash(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
     sceneSplash->load();
 }
 
@@ -173,7 +173,7 @@ void App::draw()
                 sceneSplash = nullptr;
             }
 
-            sceneGUI = new SceneGUI(&time, &renderPipeline, &resourceHelper, &resourceMap);
+            sceneGUI = new SceneGUI(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
             sceneGUI->load();
 
             break;
@@ -193,7 +193,7 @@ void App::draw()
                 activeScene = nullptr;
             }
 
-            activeScene = new SceneMary(&time, &renderPipeline, &resourceHelper, &resourceMap);
+            activeScene = new SceneMary(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
             activeScene->load();
 
             sceneGUI->setText(((SceneMary *)activeScene)->getDescription());
@@ -217,7 +217,7 @@ void App::draw()
                 activeScene = nullptr;
             }
 
-            activeScene = new SceneJesus(&time, &renderPipeline, &resourceHelper, &resourceMap);
+            activeScene = new SceneJesus(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
             activeScene->load();
 
             sceneGUI->setText(((SceneJesus *)activeScene)->getDescription());

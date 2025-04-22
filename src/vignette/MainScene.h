@@ -4,7 +4,9 @@
 #include <appkit-gl-engine/util/Button.h>
 
 #include <InteractiveToolkit-Extension/image/PNG.h>
+#include <InteractiveToolkit/Platform/Platform.h>
 
+class App;
 
 class MainScene : public AppKit::GLEngine::SceneBase
 {
@@ -19,7 +21,12 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
+    Platform::ThreadPool mThreadPool;
+
 public:
+
+    App *app;
+
     AppKit::OpenGL::GLFont2Builder fontBuilder;
 
     std::shared_ptr<AppKit::GLEngine::Transform> scaleNode;
@@ -29,17 +36,27 @@ public:
     
     AppKit::OpenGL::GLDynamicFBO fbo;
     AppKit::OpenGL::GLTexture colorTexture;
-    AppKit::OpenGL::TextureBuffer texBuffer;
+    
+    struct Task {
+        std::string out_filename;
+        AppKit::OpenGL::TextureBuffer texBuffer;
+    };
+    Platform::ObjectQueue<Task> queue;
+
+    // AppKit::OpenGL::TextureBuffer texBuffer;
 
     // std::string text;
     // float text_size;
     // float text_margin;
 
     MainScene(
+        App *app,
         Platform::Time *_time,
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
         AppKit::GLEngine::ResourceHelper *_resourceHelper,
-        AppKit::GLEngine::ResourceMap *_resourceMap);
+        AppKit::GLEngine::ResourceMap *_resourceMap,
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
+    );
     ~MainScene();
 
     virtual void draw();
@@ -56,7 +73,13 @@ public:
 
     void setTextWithWidth(float width);
 
-    bool recording;
+    enum class RecordingState: uint8_t {
+        NONE,
+        CLEAR_SCREEN,
+        RECORDING
+    };
+
+    RecordingState recording;
 
     const float fade_time_sec = 4;
     const float complete_time_sec = 7;

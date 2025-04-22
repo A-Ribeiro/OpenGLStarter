@@ -133,7 +133,9 @@ SceneGUI::SceneGUI(
     Platform::Time *_time,
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
-    AppKit::GLEngine::ResourceMap *_resourceMap) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap) {
+    AppKit::GLEngine::ResourceMap *_resourceMap,
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
+{
     
     button_SoftParticles = nullptr;
 

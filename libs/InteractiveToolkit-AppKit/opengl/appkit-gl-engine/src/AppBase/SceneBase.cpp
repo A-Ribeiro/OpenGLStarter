@@ -15,13 +15,15 @@ namespace AppKit
             Platform::Time *_time,
             RenderPipeline *_renderPipeline,
             ResourceHelper *_resourceHelper,
-            ResourceMap *_resourceMap)
+            ResourceMap *_resourceMap,
+            std::shared_ptr<RenderWindowRegion> renderWindow)
         {
 
-            time = _time;
-            renderPipeline = _renderPipeline;
-            resourceHelper = _resourceHelper;
-            resourceMap = _resourceMap;
+            this->time = _time;
+            this->renderPipeline = _renderPipeline;
+            this->resourceHelper = _resourceHelper;
+            this->resourceMap = _resourceMap;
+            this->renderWindow = renderWindow;
 
             // camera = nullptr;
             // root = nullptr;
@@ -44,6 +46,7 @@ namespace AppKit
         SceneBase::~SceneBase()
         {
             resourceMap->clear();
+            renderWindow.reset();
         }
 
         void SceneBase::draw()

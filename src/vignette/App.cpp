@@ -49,7 +49,7 @@ App::App()
 }
 
 void App::load() {
-    mainScene = new MainScene(&time, &renderPipeline, &resourceHelper, &resourceMap);
+    mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     mainScene->load();
 }
 

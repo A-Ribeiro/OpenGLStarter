@@ -38,12 +38,14 @@ namespace AppKit
             RenderPipeline *renderPipeline;
             ResourceHelper *resourceHelper;
             ResourceMap *resourceMap;
+            std::shared_ptr<RenderWindowRegion> renderWindow;
             
 
             SceneBase(Platform::Time *_time,
                       RenderPipeline *_renderPipeline,
                       ResourceHelper *_resourceHelper,
-                      ResourceMap *_resourceMap);
+                      ResourceMap *_resourceMap,
+                      std::shared_ptr<RenderWindowRegion> renderWindow);
 
             void load();
             void unload();

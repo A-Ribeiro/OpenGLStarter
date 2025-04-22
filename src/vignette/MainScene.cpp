@@ -15,7 +15,7 @@ using namespace MathCore;
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources()
 {
-    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+    // AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
     fontBuilder.load("resources/SansMono-80.basof2");
 }
 // to load the scene graph
@@ -244,8 +244,10 @@ void MainScene::bindResourcesToGraph()
     // texRefCount->add(texture);
 
     // call resize
-    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
-    resize(engine->app->window->getSize());
+    // AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+
+    auto rect = renderWindow->CameraViewport.c_ptr();
+    resize(MathCore::vec2i(rect->w, rect->h));
 
     // Add AABB for all meshs...
     {
@@ -253,27 +255,30 @@ void MainScene::bindResourcesToGraph()
         resourceHelper->addAABBMesh(root);
     }
 
-    auto screenRenderWindow = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+    // auto screenRenderWindow = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
 
-    screenRenderWindow->inputManager.onKeyboardEvent.add([&](const AppKit::Window::KeyboardEvent &evt)
-                                                         {
+    renderWindow->inputManager.onKeyboardEvent.add([&](const AppKit::Window::KeyboardEvent &evt)
+                                                   {
         if (evt.type == AppKit::Window::KeyboardEventType::KeyPressed &&
             evt.code == AppKit::Window::Devices::KeyCode::Space){
             printf("space pressed...\n");
 
-            if (this->font_line1->material->unlit.color.a != 0.f){
+            if (recording == RecordingState::NONE){
+
                 this->font_line1->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
                 this->font_line1->material->unlit.color.a = 0.f;
     
                 this->font_line2->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
                 this->font_line2->material->unlit.color.a = 0.f;
 
-                auto screenRenderWindow = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+                recording = RecordingState::CLEAR_SCREEN;
 
             } else {
-                this->recording = true;
                 this->time_sec = 0;
                 this->video_image_count = 0;
+                recording = RecordingState::RECORDING;
+
+                AppKit::GLEngine::Engine::Instance()->window->glSetVSync(false);
             }
         } });
 
@@ -286,13 +291,13 @@ void MainScene::bindResourcesToGraph()
     fbo.checkAttachment();
     fbo.disable();
 
-    screenRenderWindow->OnUpdate.add(&MainScene::update, this);
-
+    renderWindow->OnUpdate.add(&MainScene::update, this);
 }
 
 // clear all loaded scene
 void MainScene::unloadAll()
 {
+    renderWindow->OnUpdate.remove(&MainScene::update, this);
 
     // ResourceHelper::releaseTransformRecursive(&root);
     root = nullptr;
@@ -301,22 +306,22 @@ void MainScene::unloadAll()
     font_line2 = nullptr;
     scaleNode = nullptr;
 
-    texBuffer.dispose();
+    // texBuffer.dispose();
 }
 
 void MainScene::update(Platform::Time *elapsed)
 {
 
-    if (recording)
+    if (recording == RecordingState::RECORDING)
     {
-        auto screenRenderWindow = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
-        // float screen_width = (float)screenRenderWindow->CameraViewport.c_val().w;
+        // auto screenRenderWindow = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+        //  float screen_width = (float)screenRenderWindow->CameraViewport.c_val().w;
 
         float lrp = MathCore::OP<float>::clamp(this->time_sec / this->complete_time_sec, 0.0f, 1.0f);
         lrp = MathCore::OP<float>::pow(lrp, 1.3f);
         float aux = max_text_width * lrp * 1.025f;
 
-        printf("%f\n", aux);
+        //printf("%f\n", aux);
 
         setTextWithWidth(aux);
 
@@ -341,40 +346,55 @@ void MainScene::draw()
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 
-    if (recording)
+    if (recording == RecordingState::RECORDING)
     {
         // write png
 
         auto out_filename = ITKCommon::PrintfToStdString("video_%04i.png", this->video_image_count);
 
-        printf("%s\n", out_filename.c_str());
+        //printf("%s\n", out_filename.c_str());
 
-        auto screenRenderWindow = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
-        fbo.setSize(screenRenderWindow->CameraViewport.c_val().w, screenRenderWindow->CameraViewport.c_val().h);
+        // auto screenRenderWindow = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+        fbo.setSize(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h);
         fbo.blitFromBackBuffer(0, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-        this->colorTexture.download(&texBuffer);
+        while (queue.size() > 10){
+            printf(".\n");
+            Platform::Sleep::millis(100);
+        }
 
-        ITKExtension::Image::PNG::writePNG(
-            out_filename.c_str(),
-            texBuffer.width, texBuffer.height,
-            texBuffer.input_component_count,
-            (char *)texBuffer.data
-        );
+        AppKit::OpenGL::TextureBuffer texBufferAux = this->colorTexture.download(nullptr);
+        queue.enqueue(Task{
+            out_filename,
+            texBufferAux});
+
+        mThreadPool.postTask([&]()
+                             {
+            auto task = queue.dequeue(nullptr, true);
+            ITKExtension::Image::PNG::writePNG(
+                task.out_filename.c_str(),
+                task.texBuffer.width, task.texBuffer.height,
+                task.texBuffer.input_component_count,
+                (char *)task.texBuffer.data
+            );
+
+            task.texBuffer.dispose(); });
 
         this->video_image_count++;
 
         if (this->time_sec > this->total_time_sec)
         {
-            recording = false;
+            recording = RecordingState::NONE;
+            AppKit::GLEngine::Engine::Instance()->window->glSetVSync(true);
 
-            //system("rm output.mp4");
+            printf("done");
+            // system("rm output.mp4");
             printf("%s",
-                "now you can run:\n\n"
-                "ffmpeg -framerate 30 -i video_%04d.png -i Vinheta.wav -vf 'vflip' -c:v h264_nvenc -preset slow -rc vbr -cq 19 -b:v 5M -c:a aac -b:a 192k -ar 48000 -shortest output.mp4"
-                "\n\n");
-            //system("ffmpeg -framerate 30 -i video_%04d.png -i Vinheta.wav -vf 'vflip' -c:v h264_nvenc -preset slow -rc vbr -cq 19 -b:v 5M -c:a aac -b:a 192k -ar 48000 -shortest output.mp4");
-            //system("rm *.png");
+                   "now you can run:\n\n"
+                   "ffmpeg -framerate 30 -i video_%04d.png -i Vinheta.wav -vf 'vflip' -c:v h264_nvenc -preset slow -rc vbr -cq 19 -b:v 5M -c:a aac -b:a 192k -ar 48000 -shortest output.mp4"
+                   "\n\n");
+            // system("ffmpeg -framerate 30 -i video_%04d.png -i Vinheta.wav -vf 'vflip' -c:v h264_nvenc -preset slow -rc vbr -cq 19 -b:v 5M -c:a aac -b:a 192k -ar 48000 -shortest output.mp4");
+            // system("rm *.png");
         }
         else
         {
@@ -410,16 +430,21 @@ void MainScene::resize(const MathCore::vec2i &size)
 }
 
 MainScene::MainScene(
+    App *app,
     Platform::Time *_time,
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
-    AppKit::GLEngine::ResourceMap *_resourceMap) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap)
+    AppKit::GLEngine::ResourceMap *_resourceMap,
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
 {
+    this->app = app;
+
     font_line1 = nullptr;
     font_line2 = nullptr;
     scaleNode = nullptr;
 
-    recording = false;
+    recording = RecordingState::NONE;
+    max_text_width = 0.0f;
 }
 
 MainScene::~MainScene()
