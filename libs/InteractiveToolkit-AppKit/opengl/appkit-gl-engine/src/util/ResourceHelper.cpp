@@ -371,7 +371,7 @@ namespace AppKit
                 meshWrapper->updateMeshAABB();
                 // meshWrapper->updateMeshSphere();
                 // meshWrapper->computeFinalPositions(false);
-                meshWrapper->debugCollisionShapes = true;
+                // meshWrapper->debugCollisionShapes = true;
 
                 element->makeFirstComponent(meshWrapper);
             }

@@ -79,7 +79,7 @@ void Scene3D::unloadAll()
 }
 
 Scene3D::Scene3D(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow)
-    : AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelper, &app->resourceMap)
+    : AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelper, &app->resourceMap, renderWindow)
 {
     this->app = app;
     this->renderWindow = renderWindow;
