@@ -23,11 +23,11 @@ int main(int argc, char* argv[]) {
 
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
 
-    engine->initialize("Alessandro Ribeiro", "Vignette", &CreateAppInstance);
+    engine->initialize("Alessandro Ribeiro", "Opening", &CreateAppInstance);
 
     AppKit::GLEngine::EngineWindowConfig engineConfig = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
 
-    strcpy(engineConfig.windowConfig.windowName, "Vignette");
+    strcpy(engineConfig.windowConfig.windowName, "Opening");
 
     engineConfig.glContextConfig.majorVersion = 2;
     engineConfig.glContextConfig.minorVersion = 1;
