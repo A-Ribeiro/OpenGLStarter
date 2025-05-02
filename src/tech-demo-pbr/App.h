@@ -35,6 +35,8 @@ class App : public AppBase {
 
     LoadActionsEnum currentScene;
     
+    const float fps_time_sec = 0.5f;
+    float fps_accumulator;
 public:
 
     SceneGUI *sceneGUI;

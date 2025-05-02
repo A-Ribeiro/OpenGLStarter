@@ -64,7 +64,7 @@ namespace AppKit
         {
             char buffer[1024];
             std::string result;
-            std::unique_ptr<FILE, int(*)(FILE *)> pipe(popen(cmd, "r"), pclose);
+            std::unique_ptr<FILE, int (*)(FILE *)> pipe(popen(cmd, "r"), pclose);
             if (!pipe)
                 throw std::runtime_error("Falha ao executar comando.");
             while (fgets(buffer, 1024, pipe.get()) != nullptr)
@@ -76,16 +76,42 @@ namespace AppKit
         void Engine::configureWindow(const EngineWindowConfig &windowConfig)
         {
 #if defined(__linux__)
+
+            {
+                auto test_config = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
+                test_config.windowConfig.videoMode = AppKit::Window::VideoMode(32, 32);
+
+                auto test_window_ext = STL_Tools::make_unique<AppKit::Window::GLWindow>(test_config.windowConfig, test_config.glContextConfig);
+
+#if defined(GLAD_GLES2)
+                gladLoaderUnloadGLES2();
+                gladLoaderLoadGLES2();
+#else
+                gladLoaderUnloadGL();
+                gladLoaderLoadGL();
+#endif
+                std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)glGetString(GL_VENDOR)));
+                isNVidiaCard = ITKCommon::StringUtil::contains(vendor_aux, "nvidia");
+                isAMDCard = ITKCommon::StringUtil::contains(vendor_aux, "amd") || ITKCommon::StringUtil::contains(vendor_aux, "radeon");
+                isIntelCard = ITKCommon::StringUtil::contains(vendor_aux, "intel");
+            }
+
             auto instaled_videocard = execCommand("lspci | grep VGA");
-            if (ITKCommon::StringUtil::contains(instaled_videocard,"NVIDIA")){
-                // Activate GPU NVIDIA
-                setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 1);
-                setenv("__GLX_VENDOR_LIBRARY_NAME", "nvidia", 1);
-                printf("activating NVIDIA discrete card\n");
-            } else if (ITKCommon::StringUtil::contains(instaled_videocard,"AMD")){
-                // Activate GPU AMD
-                setenv("DRI_PRIME", "1", 1);
-                printf("activating AMD discrete card\n");
+            if (!isNVidiaCard && !isAMDCard)
+            {
+                if (ITKCommon::StringUtil::contains(instaled_videocard, "NVIDIA"))
+                {
+                    // Activate GPU NVIDIA
+                    setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 1);
+                    setenv("__GLX_VENDOR_LIBRARY_NAME", "nvidia", 1);
+                    printf("activating NVIDIA discrete card\n");
+                }
+                else if (ITKCommon::StringUtil::contains(instaled_videocard, "AMD"))
+                {
+                    // Activate GPU AMD
+                    setenv("DRI_PRIME", "1", 1);
+                    printf("activating AMD discrete card\n");
+                }
             }
 #endif
 
@@ -131,7 +157,8 @@ namespace AppKit
             gladLoaderLoadGL();
 #endif
 
-            if (!windowConfig.glContextConfig.sRgbCapable && sRGBCapable){
+            if (!windowConfig.glContextConfig.sRgbCapable && sRGBCapable)
+            {
                 sRGBCapable = false;
                 window->glSetActivate(true);
                 glDisable(GL_FRAMEBUFFER_SRGB);
@@ -146,15 +173,20 @@ namespace AppKit
             isAMDCard = ITKCommon::StringUtil::contains(vendor, "amd") || ITKCommon::StringUtil::contains(vendor, "radeon");
             isIntelCard = ITKCommon::StringUtil::contains(vendor, "intel");
 
-
 #if defined(__linux__)
-            if (ITKCommon::StringUtil::contains(instaled_videocard,"NVIDIA")){
-                // Activate GPU NVIDIA
-                unsetenv("__NV_PRIME_RENDER_OFFLOAD");
-                unsetenv("__GLX_VENDOR_LIBRARY_NAME");
-            } else if (ITKCommon::StringUtil::contains(instaled_videocard,"AMD")){
-                // Activate GPU AMD
-                unsetenv("DRI_PRIME");
+            if (!isNVidiaCard && !isAMDCard)
+            {
+                if (ITKCommon::StringUtil::contains(instaled_videocard, "NVIDIA"))
+                {
+                    // Activate GPU NVIDIA
+                    unsetenv("__NV_PRIME_RENDER_OFFLOAD");
+                    unsetenv("__GLX_VENDOR_LIBRARY_NAME");
+                }
+                else if (ITKCommon::StringUtil::contains(instaled_videocard, "AMD"))
+                {
+                    // Activate GPU AMD
+                    unsetenv("DRI_PRIME");
+                }
             }
 #endif
 
