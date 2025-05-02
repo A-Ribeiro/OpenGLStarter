@@ -24,6 +24,8 @@ class App : public AppBase
     float timer;
     int state;
 
+    const float fps_time_sec = 0.5f;
+    float fps_accumulator;
 public:
     SceneJesusCross *sceneJesusCross;
     SceneGUI *sceneGUI;
