@@ -21,6 +21,62 @@ extern "C" __declspec(dllexport) int32_t AmdPowerXpressRequestHighPerformance = 
 #include <windows.h>
 #endif
 
+#if defined(__linux__)
+
+#include <X11/Xlib.h>
+#include <GL/gl.h>
+#include <GL/glx.h>
+#include <unistd.h>
+
+bool check_is_nvidia_or_amd_opengl()
+{
+    bool result = false;
+
+    Display* dpy = XOpenDisplay(nullptr);
+    int attribs[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+    XVisualInfo* vi = glXChooseVisual(dpy, 0, attribs);
+    Colormap cmap = XCreateColormap(dpy, RootWindow(dpy, vi->screen), vi->visual, AllocNone);
+    XSetWindowAttributes swa;
+    swa.colormap = cmap;
+    swa.event_mask = ExposureMask | KeyPressMask;
+    Window win = XCreateWindow(dpy, RootWindow(dpy, vi->screen), 0, 0, 32, 32, 0,
+                               vi->depth, InputOutput, vi->visual,
+                               CWColormap | CWEventMask, &swa);
+    // XMapWindow(dpy, win); // invisible window
+    GLXContext glc = glXCreateContext(dpy, vi, nullptr, GL_TRUE);
+    glXMakeCurrent(dpy, win, glc);
+
+#if defined(GLAD_GLES2)
+                gladLoaderUnloadGLES2();
+                gladLoaderLoadGLES2();
+#else
+                gladLoaderUnloadGL();
+                gladLoaderLoadGL();
+#endif
+
+
+// while (true) {
+//     glClear(GL_COLOR_BUFFER_BIT);
+//     glXSwapBuffers(dpy, win);
+//     usleep(16000); // ~60 FPS
+// }
+
+    std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)glGetString(GL_VENDOR)));
+    bool isNVidiaCard = ITKCommon::StringUtil::contains(vendor_aux, "nvidia");
+    bool isAMDCard = ITKCommon::StringUtil::contains(vendor_aux, "amd") || ITKCommon::StringUtil::contains(vendor_aux, "radeon");
+    // bool isIntelCard = ITKCommon::StringUtil::contains(vendor_aux, "intel");
+    
+
+    glXDestroyContext(dpy, glc);
+    XFree(vi);
+    XDestroyWindow(dpy, win);
+    XCloseDisplay(dpy);
+
+    return isNVidiaCard || isAMDCard;
+}
+
+#endif
+
 namespace AppKit
 {
     namespace GLEngine
@@ -77,27 +133,27 @@ namespace AppKit
         {
 #if defined(__linux__)
 
-            {
-                auto test_config = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
-                test_config.windowConfig.videoMode = AppKit::Window::VideoMode(32, 32);
+//             {
+//                 auto test_config = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
+//                 test_config.windowConfig.videoMode = AppKit::Window::VideoMode(32, 32);
 
-                auto test_window_ext = STL_Tools::make_unique<AppKit::Window::GLWindow>(test_config.windowConfig, test_config.glContextConfig);
+//                 auto test_window_ext = STL_Tools::make_unique<AppKit::Window::GLWindow>(test_config.windowConfig, test_config.glContextConfig);
 
-#if defined(GLAD_GLES2)
-                gladLoaderUnloadGLES2();
-                gladLoaderLoadGLES2();
-#else
-                gladLoaderUnloadGL();
-                gladLoaderLoadGL();
-#endif
-                std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)glGetString(GL_VENDOR)));
-                isNVidiaCard = ITKCommon::StringUtil::contains(vendor_aux, "nvidia");
-                isAMDCard = ITKCommon::StringUtil::contains(vendor_aux, "amd") || ITKCommon::StringUtil::contains(vendor_aux, "radeon");
-                isIntelCard = ITKCommon::StringUtil::contains(vendor_aux, "intel");
-            }
+// #if defined(GLAD_GLES2)
+//                 gladLoaderUnloadGLES2();
+//                 gladLoaderLoadGLES2();
+// #else
+//                 gladLoaderUnloadGL();
+//                 gladLoaderLoadGL();
+// #endif
+//                 std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)glGetString(GL_VENDOR)));
+//                 isNVidiaCard = ITKCommon::StringUtil::contains(vendor_aux, "nvidia");
+//                 isAMDCard = ITKCommon::StringUtil::contains(vendor_aux, "amd") || ITKCommon::StringUtil::contains(vendor_aux, "radeon");
+//                 isIntelCard = ITKCommon::StringUtil::contains(vendor_aux, "intel");
+//             }
 
             auto instaled_videocard = execCommand("lspci | grep VGA");
-            if (!isNVidiaCard && !isAMDCard)
+            if (!check_is_nvidia_or_amd_opengl())
             {
                 if (ITKCommon::StringUtil::contains(instaled_videocard, "NVIDIA"))
                 {
