@@ -16,11 +16,11 @@ using namespace MathCore;
 
 //to load skybox, textures, cubemaps, 3DModels and setup materials
 void SceneGUI::loadResources(){
-    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+    auto engine = AppKit::GLEngine::Engine::Instance();
 
     cursorTexture = resourceHelper->createTextureFromFile("resources/cursor.png", true && engine->sRGBCapable);
 
-    fontBuilder.load("resources/Roboto-Regular-32.basof2");
+    fontBuilder.load("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
 }
 //to load the scene graph
 void SceneGUI::loadGraph(){
@@ -158,8 +158,10 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
     if (time->unscaledDeltaTime > 1.0 / 10000.0f)
         f_fps = MathCore::OP<float>::move(f_fps, 1.0f / time->unscaledDeltaTime, time->unscaledDeltaTime * 100.0f);
 
-    fontBuilder.faceColor = MathCore::vec4f(1, 1, 1, 1);
-    fontBuilder.strokeColor = MathCore::vec4f(0.3f, 0.3f, 0.3f, 1);
+    //fontBuilder.faceColor = MathCore::vec4f(1, 1, 1, 1);
+    fontBuilder.faceColor = MathCore::vec4f(0.f, 0.f, 0.f, 1);
+    //fontBuilder.strokeColor = MathCore::vec4f(0.3f, 0.3f, 0.3f, 1);
+    fontBuilder.strokeColor = MathCore::vec4f(0.2f, 0.2f, 0.2f, 1);
     fontBuilder.horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_left;
     fontBuilder.verticalAlign = AppKit::OpenGL::GLFont2VerticalAlign_bottom;
     fontBuilder.strokeOffset = MathCore::vec3f(0, 0, -0.001f);
@@ -172,7 +174,7 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
     fps->toMesh(fontBuilder, true);
     
     auto fps_transform = fps->getTransform();
-    fps_transform->setLocalScale(MathCore::vec3f(28.0f / fontBuilder.glFont2.size));
+    fps_transform->setLocalScale(MathCore::vec3f(40.0f / fontBuilder.glFont2.size));
 
 
     //MathCore::vec3f pos3Dnorm = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenterNormalized, 0.0f);

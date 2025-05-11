@@ -107,9 +107,9 @@ namespace AppKit
             verticalAlign = GLFont2VerticalAlign_none;
         }
 
-        void GLFont2Builder::load(const std::string &filename)
+        void GLFont2Builder::load(const std::string &filename, bool force_srgb)
         {
-            glFont2.loadFromBasof2(filename);
+            glFont2.loadFromBasof2(filename, force_srgb);
         }
 
         void GLFont2Builder::u32ComputeBox(const char32_t *str, float *xmin, float *xmax, float *ymin, float *ymax)

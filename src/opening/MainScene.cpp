@@ -15,8 +15,8 @@ using namespace MathCore;
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources()
 {
-    // AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
-    fontBuilder.load("resources/SansMono-80.basof2");
+    auto engine = AppKit::GLEngine::Engine::Instance();
+    fontBuilder.load("resources/SansMono-100.basof2", engine->sRGBCapable);
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -151,7 +151,7 @@ void MainScene::centerAllMesh()
         to_center.y = -to_center.y;
         to_center.z = 0;
 
-        font_line1_transform->setLocalPosition(to_center);
+        font_line1_transform->setPosition(to_center);
 
         max_text_width = MathCore::OP<float>::maximum(max_text_width, to_center.x * -2.0f + MathCore::EPSILON<float>::low_precision);
     }
@@ -171,7 +171,7 @@ void MainScene::centerAllMesh()
         to_center.y = to_center.y;
         to_center.z = 0;
 
-        font_line2_transform->setLocalPosition(to_center);
+        font_line2_transform->setPosition(to_center);
 
         max_text_width = MathCore::OP<float>::maximum(max_text_width, to_center.x * -2.0f + MathCore::EPSILON<float>::low_precision);
     }

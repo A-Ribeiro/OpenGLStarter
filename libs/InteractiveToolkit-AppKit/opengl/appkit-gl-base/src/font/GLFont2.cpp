@@ -47,7 +47,7 @@ namespace AppKit
             return &(it->second);
         }
 
-        void GLFont2::loadFromBasof2(const std::string &filename)
+        void GLFont2::loadFromBasof2(const std::string &filename, bool force_srgb)
         {
             ITKExtension::Font::FontReader reader;
             reader.readFromFile(filename);
@@ -81,7 +81,7 @@ namespace AppKit
                 glyphs[fontGlyph->charcode] = glyph;
             }
 
-            texture.uploadBufferAlpha8(reader.bitmap, reader.bitmapSize.w, reader.bitmapSize.h);
+            texture.uploadBufferRGBA_8888(reader.bitmap_rgba, reader.bitmapSize.w, reader.bitmapSize.h, force_srgb);
         }
 
     }

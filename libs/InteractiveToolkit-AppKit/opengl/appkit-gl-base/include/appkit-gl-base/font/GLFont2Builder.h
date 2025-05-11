@@ -131,8 +131,9 @@ namespace AppKit
             ///
             /// \author Alessandro Ribeiro
             /// \param filename file to load
+            /// \param force_srgb use sRGB as input
             ///
-            void load(const std::string &filename);
+            void load(const std::string &filename, bool force_srgb);
 
             /// \brief Compute the information about render limits
             ///
