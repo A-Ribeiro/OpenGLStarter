@@ -47,6 +47,8 @@ namespace AppKit
             MathCore::vec3f move_before_draw;
             GLFont2Triangles triangles;
             float height;
+
+            ITKExtension::Atlas::AtlasRect bitmapBounds;
         };
 
         /// \brief A complete definition for a font face or font stroke

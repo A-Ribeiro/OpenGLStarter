@@ -22,6 +22,8 @@ namespace AppKit
 
         void GLFont2Builder::GLFont2BitmapRef_to_VertexAttrib(const MathCore::vec3f &pos, const MathCore::vec4f &color, const GLFont2BitmapRef &bitmapRef)
         {
+            if (bitmapRef.bitmapBounds.w == 0 || bitmapRef.bitmapBounds.h == 0)
+                return;
             MathCore::vec3f pos_new = pos + bitmapRef.move_before_draw;
             for (int i = 0; i < 6; i++)
             {
@@ -105,6 +107,8 @@ namespace AppKit
 
             horizontalAlign = GLFont2HorizontalAlign_left;
             verticalAlign = GLFont2VerticalAlign_none;
+
+            lineHeight = 1.0;
         }
 
         void GLFont2Builder::load(const std::string &filename, bool force_srgb)
@@ -135,13 +139,13 @@ namespace AppKit
             else if (verticalAlign == GLFont2VerticalAlign_middle)
             {
                 // countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                float totalSize = (float)_newLineCount * glFont2.new_line_height;
+                float totalSize = (float)_newLineCount * glFont2.new_line_height * lineHeight;
                 position.y = -_1stLineMaxHeight * 0.5f + totalSize * 0.5f;
             }
             else if (verticalAlign == GLFont2VerticalAlign_bottom)
             {
                 // countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                float totalSize = (float)_newLineCount * glFont2.new_line_height;
+                float totalSize = (float)_newLineCount * glFont2.new_line_height * lineHeight;
                 position.y = totalSize;
             }
 
@@ -188,7 +192,7 @@ namespace AppKit
                         *xmin = MathCore::OP<float>::minimum(*xmin, position.x);
                         //*xmax = maximum( *xmax, position.x );
                     }
-                    position.y -= glFont2.new_line_height;
+                    position.y -= glFont2.new_line_height * lineHeight;
 
                     *ymin = MathCore::OP<float>::minimum(*ymin, position.y);
                     //*ymax = maximum( *ymin, position.y );
@@ -236,13 +240,13 @@ namespace AppKit
             else if (verticalAlign == GLFont2VerticalAlign_middle)
             {
                 countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                float totalSize = (float)_newLineCount * glFont2.new_line_height;
+                float totalSize = (float)_newLineCount * glFont2.new_line_height * lineHeight;
                 position.y = -_1stLineMaxHeight * 0.5f + totalSize * 0.5f;
             }
             else if (verticalAlign == GLFont2VerticalAlign_bottom)
             {
                 countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                float totalSize = (float)_newLineCount * glFont2.new_line_height;
+                float totalSize = (float)_newLineCount * glFont2.new_line_height * lineHeight;
                 position.y = totalSize;
             }
 
@@ -277,7 +281,7 @@ namespace AppKit
                     {
                         position.x = -computeStringLengthUntilNewLine(str, count, i + 1);
                     }
-                    position.y -= glFont2.new_line_height;
+                    position.y -= glFont2.new_line_height * lineHeight;
                 }
                 else
                 {

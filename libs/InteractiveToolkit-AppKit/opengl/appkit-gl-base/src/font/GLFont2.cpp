@@ -70,6 +70,7 @@ namespace AppKit
                     0);
                 glyph.face.height = glyph.face.move_before_draw.y + (float)fontGlyph->face.bitmapBounds.h;
                 glyph.face.triangles = AtlasRectToTriangles(fontGlyph->face.bitmapBounds, reader.bitmapSize);
+                glyph.face.bitmapBounds = fontGlyph->face.bitmapBounds;
 
                 glyph.stroke.move_before_draw = MathCore::vec3f(
                     fontGlyph->stroke.left,
@@ -77,6 +78,7 @@ namespace AppKit
                     0);
                 glyph.stroke.height = glyph.stroke.move_before_draw.y + (float)fontGlyph->stroke.bitmapBounds.h;
                 glyph.stroke.triangles = AtlasRectToTriangles(fontGlyph->stroke.bitmapBounds, reader.bitmapSize);
+                glyph.stroke.bitmapBounds = fontGlyph->stroke.bitmapBounds;
 
                 glyphs[fontGlyph->charcode] = glyph;
             }
