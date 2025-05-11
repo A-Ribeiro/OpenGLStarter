@@ -119,6 +119,7 @@ namespace AppKit
             MathCore::vec3f strokeOffset;           ///< current state stroke offset
             GLFont2HorizontalAlign horizontalAlign; ///< current state of the horizontal alignment
             GLFont2VerticalAlign verticalAlign;     ///< current state of the vertical alignment
+            float lineHeight;        ///< current state of the line height
 
             GLFont2Builder();
 
