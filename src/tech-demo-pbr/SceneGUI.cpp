@@ -11,11 +11,11 @@ using namespace MathCore;
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void SceneGUI::loadResources()
 {
-    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+    auto engine = AppKit::GLEngine::Engine::Instance();
 
     cursorTexture = resourceHelper->createTextureFromFile("resources/cursor.png", true && engine->sRGBCapable);
 
-    fontBuilder.load("resources/Roboto-Regular-32.basof2");
+    fontBuilder.load("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
 
     button_NormalMap = new Button(
         0,                  // _position,
@@ -253,11 +253,15 @@ void SceneGUI::resize(const MathCore::vec2i &size)
     int center_y = size.height >> 1;
     int margin = 32 - 9;
 
+    float font_size = 32.0f / fontBuilder.glFont2.size;
+
     auto textNode = componentFontToMesh->getTransform();
     textNode->setLocalPosition(MathCore::vec3f(center_x - margin, -center_y + margin, 0));
+    textNode->setLocalScale(MathCore::vec3f(font_size, font_size, 1));
 
     textNode = fps->getTransform();
     textNode->setLocalPosition(MathCore::vec3f(-center_x + margin, -center_y + margin, 0));
+    textNode->setLocalScale(MathCore::vec3f(font_size, font_size, 1));
 }
 
 bool SceneGUI::anyButtonSelected()

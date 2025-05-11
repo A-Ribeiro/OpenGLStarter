@@ -159,3 +159,6 @@ add_subdirectory(src/ipc_fullscreen_viewer)
 add_subdirectory(src/test-pbr-coefs)
 
 add_subdirectory(src/opening)
+
+add_subdirectory(src/font-with-bitmap)
+

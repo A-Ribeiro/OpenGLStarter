@@ -107,8 +107,9 @@ namespace AppKit
             ///
             /// \author Alessandro Ribeiro
             /// \param filename The basof2 file.
+            /// \param force_srgb Loads texture as sRGB.
             ///
-            void loadFromBasof2(const std::string &filename);
+            void loadFromBasof2(const std::string &filename, bool force_srgb);
         };
 
     }

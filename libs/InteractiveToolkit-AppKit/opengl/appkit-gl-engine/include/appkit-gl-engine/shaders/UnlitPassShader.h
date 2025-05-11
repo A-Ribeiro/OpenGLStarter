@@ -199,7 +199,8 @@ namespace AppKit
                     "uniform vec4 uColor;"
                     "uniform sampler2D uTexture;"
                     "void main() {"
-                    "  vec4 texel = vec4( 1.0,1.0,1.0, texture2D(uTexture, uv).a);"
+                    //"  vec4 texel = vec4( 1.0,1.0,1.0, texture2D(uTexture, uv).a);"
+                    "  vec4 texel = texture2D(uTexture, uv);"
                     "  vec4 result = texel * color * uColor;"
                     "  gl_FragColor = result;"
                     "}"};

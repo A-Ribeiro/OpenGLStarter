@@ -11,11 +11,11 @@ using namespace MathCore;
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void SceneGUI::loadResources()
 {
-    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+    auto engine = AppKit::GLEngine::Engine::Instance();
 
     cursorTexture = resourceHelper->createTextureFromFile("resources/cursor.png", true && engine->sRGBCapable);
 
-    fontBuilder.load("resources/Roboto-Regular-32.basof2");
+    fontBuilder.load("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
 
     button_SoftParticles = new Button(
         0,                      // _position,

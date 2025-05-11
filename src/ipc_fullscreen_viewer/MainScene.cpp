@@ -10,11 +10,11 @@ using namespace MathCore;
 
 //to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources(){
-    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+    auto engine = AppKit::GLEngine::Engine::Instance();
 #if defined(ARIBEIRO_LINUX_LOADER_USE_USR_LOCAL_PATH)
-    fontBuilder.load("/usr/local/etc/OpenMultimedia/Roboto-Regular-80.basof2");
+    fontBuilder.load("/usr/local/etc/OpenMultimedia/Roboto-Regular-100.basof2", engine->sRGBCapable);
 #else
-    fontBuilder.load("resources/Roboto-Regular-80.basof2");
+    fontBuilder.load("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
 #endif
 }
 //to load the scene graph
