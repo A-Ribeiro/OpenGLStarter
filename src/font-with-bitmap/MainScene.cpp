@@ -148,23 +148,19 @@ void MainScene::setTextWithWidth(float width)
         u8"Use " Font_L_stick u8" para andar e " Font_xbox_a " para pular.\n"
         u8"\n"
 
-        u8"Use " Font_R_stick u8" para andar e " Font_xbox_x " para pular.\n"
+        u8"Use " Font_R_stick u8" para andar e " Font_ps_square_white " para pular.\n"
         u8"\n"
-
-        u8"Pressione o botão" Font_xbox_b u8"para pular.\n"
+         
+        u8"Use " Font_Key_arrows u8" para andar e " Font_Key_z " para pular.\n"
         u8"\n"
-        u8"botões Xbox:" 
-        Font_xbox_a Font_xbox_b Font_xbox_x Font_xbox_y
-        u8"\n"
-        u8"\nbotões PS(color):"
-        Font_ps_circle_color Font_ps_cross_color Font_ps_square_color Font_ps_triangle_color
-        u8"\n"
-        u8"\nbotões PS(white):"
-        Font_ps_circle_white Font_ps_cross_white Font_ps_square_white Font_ps_triangle_white
         
+        u8"botões Xbox:" Font_xbox_a Font_xbox_b Font_xbox_x Font_xbox_y u8"\n"
+        u8"\nbotões PS(color):" Font_ps_circle_color Font_ps_cross_color Font_ps_square_color Font_ps_triangle_color u8"\n"
+        u8"\nbotões PS(white):" Font_ps_circle_white Font_ps_cross_white Font_ps_square_white Font_ps_triangle_white u8"\n"
+        u8"\nteclado:" Font_Key_z Font_Key_x Font_Key_c
         
         ,
-        90.0f, // px
+        60.0f, // px
         width, // width
         this->font_line1);
 

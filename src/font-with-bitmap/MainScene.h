@@ -25,6 +25,10 @@ class App;
 #define  Font_ps_triangle_white u8"\U0001000b"
 #define  Font_L_stick u8"\U0001000c"
 #define  Font_R_stick u8"\U0001000d"
+#define  Font_Key_arrows u8"\U0001000e"
+#define  Font_Key_z u8"\U0001000f"
+#define  Font_Key_x u8"\U00010010"
+#define  Font_Key_c u8"\U00010011"
 
 class MainScene : public AppKit::GLEngine::SceneBase
 {
