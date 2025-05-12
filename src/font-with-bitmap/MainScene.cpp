@@ -25,6 +25,22 @@ void MainScene::loadGraph()
 
     root->addChild(scaleNode = Transform::CreateShared());
 
+    // box background
+    {
+        bgNode = scaleNode->addChild(Transform::CreateShared());
+        auto materialBackground = bgNode->addNewComponent<Components::ComponentMaterial>();
+        bgNode->addComponent(Components::ComponentMesh::createPlaneXY(1, 1));
+        // bgNode->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 0);
+
+        materialBackground->type = Components::MaterialUnlit;
+        materialBackground->unlit.blendMode = BlendModeAlpha;
+        materialBackground->unlit.color = MathCore::vec4f(1, 1, 1, 0.2);
+        auto engine = AppKit::GLEngine::Engine::Instance();
+        if (engine->sRGBCapable)
+            materialBackground->unlit.color = CVT<vec4f>::sRGBToLinear(materialBackground->unlit.color);
+
+    }
+
     // text transform
     {
         auto textNode = scaleNode->addChild(Transform::CreateShared());
@@ -33,6 +49,7 @@ void MainScene::loadGraph()
 
         font_line1 = textNode->addNewComponent<AppKit::GLEngine::Components::ComponentFontToMesh>();
     }
+
 }
 
 void MainScene::setText(
@@ -47,7 +64,7 @@ void MainScene::setText(
 
     float text_scale_factor = _size / fontBuilder.glFont2.size;
 
-    //fontBuilder.faceColor = MathCore::vec4f(0.758f, 0.754f, 0.752f, 1);
+    // fontBuilder.faceColor = MathCore::vec4f(0.758f, 0.754f, 0.752f, 1);
     fontBuilder.faceColor = MathCore::vec4f(1, 1, 1, 1);
     fontBuilder.strokeColor = MathCore::vec4f(0.75f, 0.75f, 0.75f, 1);
     fontBuilder.horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_center;
@@ -115,7 +132,6 @@ void MainScene::setText(
 
 void MainScene::centerAllMesh()
 {
-    
 
     {
         auto font_line1_transform = this->font_line1->getTransform();
@@ -129,7 +145,7 @@ void MainScene::centerAllMesh()
         MathCore::vec3f to_center;
         to_center = (mesh_wrapper->aabb.max_box + mesh_wrapper->aabb.min_box) * -0.5f;
 
-        //to_center.y = -to_center.y;
+        // to_center.y = -to_center.y;
         to_center.z = 0;
 
         font_line1_transform->setPosition(to_center);
@@ -142,47 +158,41 @@ void MainScene::setTextWithWidth(float width)
 {
 
     fontBuilder.lineHeight = 1.5f;
-    
-    setText( 
-        
+    fontBuilder.size = 40.0f;
+    fontBuilder.horizontalAlign = GLFont2HorizontalAlign_center;
+    fontBuilder.verticalAlign = GLFont2VerticalAlign_middle;
 
-        u8"Use " Font_L_stick u8" para andar e " Font_xbox_a " para pular.\n"
-        u8"Use " Font_R_stick u8" para andar e " Font_ps_square_white " para pular.\n"         
+
+    // setText(
+    //     ,
+    //     60.0f, // px
+    //     width, // width
+    //     this->font_line1);
+
+    auto txt = 
+        u8"Use " Font_L_stick u8" para {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}andar{pop;} e " Font_xbox_a " para pular.\n"
+        u8"Use " Font_R_stick u8" para andar e " Font_ps_square_white " para pular.\n"
         u8"Use " Font_Key_arrows u8" para andar e " Font_Key_z " para pular.\n"
         u8"\n"
-        
+
         u8"botões Xbox:" Font_xbox_a Font_xbox_b Font_xbox_x Font_xbox_y u8"\n"
         u8"botões PS(color):" Font_ps_circle_color Font_ps_cross_color Font_ps_square_color Font_ps_triangle_color u8"\n"
         u8"botões PS(white):" Font_ps_circle_white Font_ps_cross_white Font_ps_square_white Font_ps_triangle_white u8"\n"
-        u8"teclado:" Font_Key_z Font_Key_x Font_Key_c
-        
-        ,
-        60.0f, // px
-        width, // width
-        this->font_line1);
+        u8"teclado:" Font_Key_z Font_Key_x Font_Key_c ;
 
-    //char32_t aux[2] = { 0,0 };
-    //aux[0] = 65536;
 
-    //auto utf_8_str = ITKCommon::StringUtil::utf32_to_utf8(aux);
-    //for (auto v : utf_8_str) {
-    //    printf("%.0x ", v);
-    //}
-    //printf("\n");
+    fontBuilder.richBuild(txt, false);
+    font_line1->toMesh(fontBuilder, true);
+    font_line1->getTransform()->setLocalScale(1.0f);
 
-    ////utf_8_str = "\xF0\x90\x80\x80";
-    //utf_8_str = Font_xbox_a;
+    auto txt_aabb = fontBuilder.richComputeBox(txt);
+    auto aabb_size = txt_aabb.max_box - txt_aabb.min_box;
+    auto aabb_center = (txt_aabb.max_box + txt_aabb.min_box) * 0.5f;
 
-    //for (auto v : utf_8_str) {
-    //    printf("%.0x ", v);
-    //}
-    //printf("\n");
-    //
-    //fontBuilder.build(utf_8_str.c_str());
+    bgNode->setLocalScale(MathCore::vec3f(aabb_size.x,aabb_size.y,1));
+    bgNode->setLocalPosition(MathCore::vec3f(aabb_center.x, aabb_center.y, 0.0f));
 
-    //font_line1->toMesh(fontBuilder, true);
-
-    centerAllMesh();
+    // centerAllMesh();
 }
 
 // to bind the resources to the current graph
@@ -224,6 +234,7 @@ void MainScene::unloadAll()
     camera = nullptr;
     font_line1 = nullptr;
     scaleNode = nullptr;
+    bgNode = nullptr;
 }
 
 void MainScene::update(Platform::Time *elapsed)
@@ -232,7 +243,7 @@ void MainScene::update(Platform::Time *elapsed)
 
 void MainScene::draw()
 {
-    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+    auto engine = AppKit::GLEngine::Engine::Instance();
     if (engine->sRGBCapable)
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
@@ -257,7 +268,7 @@ void MainScene::resize(const MathCore::vec2i &size)
 
     scaleNode->setLocalScale(new_scale);
 
-    setTextWithWidth(size.width);
+    setTextWithWidth(size.width * new_scale);
 }
 
 MainScene::MainScene(

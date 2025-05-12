@@ -52,6 +52,8 @@ public:
     AppKit::OpenGL::GLFont2Builder fontBuilder;
     std::shared_ptr<AppKit::GLEngine::Components::ComponentFontToMesh> font_line1;
     std::shared_ptr<AppKit::GLEngine::Transform> scaleNode;
+
+    std::shared_ptr<AppKit::GLEngine::Transform> bgNode;
     
     MainScene(
         App *app,
