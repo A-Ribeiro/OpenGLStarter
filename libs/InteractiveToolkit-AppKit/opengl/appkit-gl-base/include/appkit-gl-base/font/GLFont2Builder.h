@@ -3,6 +3,8 @@
 #include <appkit-gl-base/platform/PlatformGL.h>
 #include <appkit-gl-base/font/GLFont2.h>
 
+#include <InteractiveToolkit/CollisionCore/AABB.h>
+
 namespace AppKit
 {
 
@@ -31,7 +33,7 @@ namespace AppKit
 
         enum GLFont2VerticalAlign
         {
-            GLFont2VerticalAlign_none = 0,
+            GLFont2VerticalAlign_baseline = 0,
             GLFont2VerticalAlign_top,
             GLFont2VerticalAlign_middle,
             GLFont2VerticalAlign_bottom,
@@ -95,17 +97,16 @@ namespace AppKit
             // std::vector<wchar_t> wchar_buffer;
 
             // ITK_INLINE
-            void GLFont2BitmapRef_to_VertexAttrib(const MathCore::vec3f &pos, const MathCore::vec4f &color, const GLFont2BitmapRef &bitmapRef);
+            void GLFont2BitmapRef_to_VertexAttrib(const MathCore::vec3f &pos, const MathCore::vec4f &color, const GLFont2BitmapRef &bitmapRef, float scale = 1.0f);
 
             void countNewLines_1stlineHeight_1stlineLength(const char32_t *str, int size, int *count, float *_1stLineMaxHeight, float *_1stLinelength);
 
             float computeStringLengthUntilNewLine(const char32_t *str, int size, int offset);
 
         public:
-
-            //deleted copy constructor and assign operator, to avoid copy...
+            // deleted copy constructor and assign operator, to avoid copy...
             GLFont2Builder(const GLFont2Builder &v) = delete;
-            GLFont2Builder& operator=(const GLFont2Builder &v) = delete;
+            GLFont2Builder &operator=(const GLFont2Builder &v) = delete;
 
             GLFont2 glFont2; ///< loaded font glyph set
 
@@ -119,7 +120,8 @@ namespace AppKit
             MathCore::vec3f strokeOffset;           ///< current state stroke offset
             GLFont2HorizontalAlign horizontalAlign; ///< current state of the horizontal alignment
             GLFont2VerticalAlign verticalAlign;     ///< current state of the vertical alignment
-            float lineHeight;        ///< current state of the line height
+            float lineHeight;                       ///< current state of the line height
+            float size;                             ///< current state of the font size
 
             GLFont2Builder();
 
@@ -165,6 +167,13 @@ namespace AppKit
             /// \return #GLFont2Builder this instance information
             ///
             GLFont2Builder *build(const char *str);
+
+
+            CollisionCore::AABB<MathCore::vec3f> u32RichComputeBox(const char32_t *str);
+            CollisionCore::AABB<MathCore::vec3f> richComputeBox(const char *str);
+
+            GLFont2Builder *u32richBuild(const char32_t *utf32_str, bool use_srgb);
+            GLFont2Builder *richBuild(const char *utf8_str, bool use_srgb);
         };
 
     }
