@@ -58,6 +58,7 @@ void MainScene::setTextWithWidth(float width)
     fontBuilder.horizontalAlign = GLFont2HorizontalAlign_center;
     fontBuilder.verticalAlign = GLFont2VerticalAlign_middle;
     fontBuilder.wrapMode = GLFont2WrapMode_Word;
+    fontBuilder.firstLineHeightMode = GLFont2FirstLineHeightMode_UseCharacterMaxHeight;
     fontBuilder.wordSeparatorChar = U' ';
 
     // setText(
