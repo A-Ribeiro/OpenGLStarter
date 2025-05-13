@@ -441,14 +441,14 @@ namespace AppKit
                     flag |= RichFontVarBitFlag::new_line_at_end;
                 else
                     flag &= ~RichFontVarBitFlag::new_line_at_end;
-                computeLength(glFont2);
+                computeLength(this->str, glFont2);
             }
 
-            void computeLength(const GLFont2 &glFont2)
+            void computeLength(const std::u32string &strp, const GLFont2 &glFont2)
             {
                 float length = 0;
                 float max_height = 0;
-                for (auto c : str)
+                for (auto c : strp)
                 {
                     if (c == U' ')
                         length += glFont2.space_width;
@@ -571,6 +571,8 @@ namespace AppKit
 
             bool use_srgb;
 
+            float current_line_width;
+
         public:
             RichTokenizer(const char32_t *str, const GLFont2Builder &initial_state, bool use_srgb) : fontState(initial_state, use_srgb),
                                                                                                      m_initial_state(initial_state)
@@ -580,9 +582,10 @@ namespace AppKit
                 this->brace_count = 0;
                 this->use_srgb = use_srgb;
                 this->latest_insert_new_line = false;
+                this->current_line_width = 0;
             }
 
-            RichFontState *next()
+            RichFontState *next(float max_width = -1)
             {
 
                 // force reset state on after new line case
@@ -637,11 +640,40 @@ namespace AppKit
                         // raw string processing
                         if (*current == U'\n')
                         {
+                            this->current_line_width = 0;
                             latest_insert_new_line = true;
                             // new line in the raw text content
                             fontState.setText(std::u32string(start, current), true, glFont2);
                             to_return = &fontState;
                             start = current + 1;
+                        }
+                        else if (max_width >= 0)
+                        {
+                            float char_size_x_scaled = 0;
+                            if (*current == U' ')
+                                char_size_x_scaled = glFont2.space_width * fontState.style.size_scaler;
+                            else if (auto glyph = glFont2.getGlyph((uint32_t)*current))
+                                char_size_x_scaled = glyph->advancex.x * fontState.style.size_scaler;
+
+                            // test max width with one character mode
+                            if (char_size_x_scaled > 0)
+                            {
+                                bool guarantee_more_than_one_char = (this->current_line_width > 0);
+                                this->current_line_width += char_size_x_scaled;
+                                if (guarantee_more_than_one_char && this->current_line_width > max_width)
+                                {
+                                    this->current_line_width = 0;
+                                    // force -> new line break
+                                    latest_insert_new_line = true;
+                                    // new line in the raw text content
+                                    fontState.setText(std::u32string(start, current), true, glFont2);
+                                    to_return = &fontState;
+
+                                    // back one char to reinsert it in the next iteration
+                                    current--; 
+                                    start = current + 1;
+                                }
+                            }
                         }
                     }
                     current++;
@@ -673,7 +705,7 @@ namespace AppKit
             }
         };
 
-        CollisionCore::AABB<MathCore::vec3f> GLFont2Builder::u32RichComputeBox(const char32_t *str)
+        CollisionCore::AABB<MathCore::vec3f> GLFont2Builder::u32RichComputeBox(const char32_t *str, float max_width)
         {
             CollisionCore::AABB<MathCore::vec3f> result;
 
@@ -689,7 +721,7 @@ namespace AppKit
                 bool token_readed_but_not_used = false;
 
                 float total_length = 0;
-                while (auto token = tokenizer.next())
+                while (auto token = tokenizer.next(max_width))
                 {
                     if (_1st_line_processing)
                     {
@@ -697,9 +729,7 @@ namespace AppKit
                         max_line_height_1stline_scaled = MathCore::OP<float>::maximum(max_line_height_1stline_scaled, token->style.lineHeight_scaled);
                     }
                     else
-                    {
                         max_lineHeight_scaled = MathCore::OP<float>::maximum(max_lineHeight_scaled, token->style.lineHeight_scaled);
-                    }
                     // line.push_back(*token);
                     token_readed_but_not_used = true;
                     total_length += token->bounds_with_size_applied.x;
@@ -712,6 +742,9 @@ namespace AppKit
                         // lines.push_back(std::move(line));
                         // line.clear();
                         token_readed_but_not_used = false;
+
+                        if (max_width >= 0)
+                            total_length = max_width;
 
                         // make x axis processing
                         if (horizontalAlign == GLFont2HorizontalAlign_left)
@@ -740,6 +773,9 @@ namespace AppKit
                     max_line_height_others_scaled += max_lineHeight_scaled;
                     max_lineHeight_scaled = 0;
                     // lines.push_back(std::move(line));
+
+                    if (max_width >= 0)
+                        total_length = max_width;
 
                     // make x axis processing
                     if (horizontalAlign == GLFont2HorizontalAlign_left)
@@ -785,12 +821,12 @@ namespace AppKit
 
             return result;
         }
-        CollisionCore::AABB<MathCore::vec3f> GLFont2Builder::richComputeBox(const char *str)
+        CollisionCore::AABB<MathCore::vec3f> GLFont2Builder::richComputeBox(const char *str, float max_width)
         {
-            return u32RichComputeBox(ITKCommon::StringUtil::utf8_to_utf32(str).c_str());
+            return u32RichComputeBox(ITKCommon::StringUtil::utf8_to_utf32(str).c_str(), max_width);
         }
 
-        GLFont2Builder *GLFont2Builder::u32richBuild(const char32_t *str, bool use_srgb)
+        GLFont2Builder *GLFont2Builder::u32richBuild(const char32_t *str, bool use_srgb, float max_width)
         {
             vertexAttrib.clear();
 
@@ -804,7 +840,7 @@ namespace AppKit
                 RichTokenizer tokenizer(str, *this, use_srgb);
                 std::vector<RichFontState> line;
                 float max_lineHeight_scaled = 0;
-                while (auto token = tokenizer.next())
+                while (auto token = tokenizer.next(max_width))
                 {
                     if (_1st_line_processing)
                     {
@@ -812,9 +848,7 @@ namespace AppKit
                         max_line_height_1stline_scaled = MathCore::OP<float>::maximum(max_line_height_1stline_scaled, token->style.lineHeight_scaled);
                     }
                     else
-                    {
                         max_lineHeight_scaled = MathCore::OP<float>::maximum(max_lineHeight_scaled, token->style.lineHeight_scaled);
-                    }
                     line.push_back(*token);
                     if ((token->flag & RichFontVarBitFlag::new_line_at_end) != RichFontVarBitFlag::none)
                     {
@@ -899,9 +933,9 @@ namespace AppKit
             return this;
         }
 
-        GLFont2Builder *GLFont2Builder::richBuild(const char *utf8_str, bool use_srgb)
+        GLFont2Builder *GLFont2Builder::richBuild(const char *utf8_str, bool use_srgb, float max_width)
         {
-            u32richBuild(ITKCommon::StringUtil::utf8_to_utf32(utf8_str).c_str(), use_srgb);
+            u32richBuild(ITKCommon::StringUtil::utf8_to_utf32(utf8_str).c_str(), use_srgb, max_width);
             return this;
         }
 

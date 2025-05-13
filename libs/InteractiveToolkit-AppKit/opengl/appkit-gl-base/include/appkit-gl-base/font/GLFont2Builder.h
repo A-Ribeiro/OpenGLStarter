@@ -169,11 +169,11 @@ namespace AppKit
             GLFont2Builder *build(const char *str);
 
 
-            CollisionCore::AABB<MathCore::vec3f> u32RichComputeBox(const char32_t *str);
-            CollisionCore::AABB<MathCore::vec3f> richComputeBox(const char *str);
+            CollisionCore::AABB<MathCore::vec3f> u32RichComputeBox(const char32_t *str, float max_width = -1);
+            CollisionCore::AABB<MathCore::vec3f> richComputeBox(const char *str, float max_width = -1);
 
-            GLFont2Builder *u32richBuild(const char32_t *utf32_str, bool use_srgb);
-            GLFont2Builder *richBuild(const char *utf8_str, bool use_srgb);
+            GLFont2Builder *u32richBuild(const char32_t *utf32_str, bool use_srgb, float max_width = -1);
+            GLFont2Builder *richBuild(const char *utf8_str, bool use_srgb, float max_width = -1);
         };
 
     }
