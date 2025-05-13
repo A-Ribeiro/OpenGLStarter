@@ -309,15 +309,15 @@ class ServiceController: public EventCore::HandleCallback
                             //type
                             auxEntry.type = ServiceType::Service;
                             //name
-                            rapidjson::SizeType name_size = strlen(name.GetString());
+                            rapidjson::SizeType name_size = (rapidjson::SizeType)strlen(name.GetString());
                             if (name_size >= NAME_MAX_SIZE) name_size = NAME_MAX_SIZE-1;
                             strncpy(auxEntry.service.name, name.GetString(), name_size);
                             //command
-                            rapidjson::SizeType command_size = strlen(command.GetString());
+                            rapidjson::SizeType command_size = (rapidjson::SizeType)strlen(command.GetString());
                             if (command_size >= COMMAND_MAX_SIZE) command_size = COMMAND_MAX_SIZE-1;
                             strncpy(auxEntry.service.command, command.GetString(), command_size);
                             //args
-                            rapidjson::SizeType args_size = strlen(args.GetString());
+                            rapidjson::SizeType args_size = (rapidjson::SizeType)strlen(args.GetString());
                             if (args_size >= COMMAND_MAX_SIZE) args_size = COMMAND_MAX_SIZE - 1;
                             strncpy(auxEntry.service.args, args.GetString(), args_size);
                             //has_windows_special_signal
@@ -338,31 +338,31 @@ class ServiceController: public EventCore::HandleCallback
                             //type
                             auxEntry.type = ServiceType::InstallUninstall;
                             //name
-                            rapidjson::SizeType name_size = strlen(name.GetString());
+                            rapidjson::SizeType name_size = (rapidjson::SizeType)strlen(name.GetString());
                             if (name_size >= NAME_MAX_SIZE) name_size = NAME_MAX_SIZE-1;
                             strncpy(auxEntry.install_uninstall.name, name.GetString(), name_size);
                             //command_install
-                            rapidjson::SizeType command_size = strlen(command_install.GetString());
+                            rapidjson::SizeType command_size = (rapidjson::SizeType)strlen(command_install.GetString());
                             if (command_size >= COMMAND_MAX_SIZE) command_size = COMMAND_MAX_SIZE-1;
                             strncpy(auxEntry.install_uninstall.install.command, command_install.GetString(), command_size);
                             //args
-                            rapidjson::SizeType args_size = strlen(command_install_args.GetString());
+                            rapidjson::SizeType args_size = (rapidjson::SizeType)strlen(command_install_args.GetString());
                             if (args_size >= COMMAND_MAX_SIZE) args_size = COMMAND_MAX_SIZE - 1;
                             strncpy(auxEntry.install_uninstall.install.args, command_install_args.GetString(), args_size);
                             //command_uninstall
-                            command_size = strlen(command_uninstall.GetString());
+                            command_size = (rapidjson::SizeType)strlen(command_uninstall.GetString());
                             if (command_size >= COMMAND_MAX_SIZE) command_size = COMMAND_MAX_SIZE-1;
                             strncpy(auxEntry.install_uninstall.uninstall.command, command_uninstall.GetString(), command_size);
                             //args
-                            args_size = strlen(command_uninstall_args.GetString());
+                            args_size = (rapidjson::SizeType)strlen(command_uninstall_args.GetString());
                             if (args_size >= COMMAND_MAX_SIZE) args_size = COMMAND_MAX_SIZE - 1;
                             strncpy(auxEntry.install_uninstall.uninstall.args, command_uninstall_args.GetString(), args_size);
                             //command_check_installed
-                            command_size = strlen(command_check_installed.GetString());
+                            command_size = (rapidjson::SizeType)strlen(command_check_installed.GetString());
                             if (command_size >= COMMAND_MAX_SIZE) command_size = COMMAND_MAX_SIZE-1;
                             strncpy(auxEntry.install_uninstall.check_installed.command, command_check_installed.GetString(), command_size);
                             //args
-                            args_size = strlen(command_check_installed_args.GetString());
+                            args_size = (rapidjson::SizeType)strlen(command_check_installed_args.GetString());
                             if (args_size >= COMMAND_MAX_SIZE) args_size = COMMAND_MAX_SIZE - 1;
                             strncpy(auxEntry.install_uninstall.check_installed.args, command_check_installed_args.GetString(), args_size);
 
@@ -378,15 +378,15 @@ class ServiceController: public EventCore::HandleCallback
                             //type
                             auxEntry.type = ServiceType::RunOnce;
                             //name
-                            rapidjson::SizeType name_size = strlen(name.GetString());
+                            rapidjson::SizeType name_size = (rapidjson::SizeType)strlen(name.GetString());
                             if (name_size >= NAME_MAX_SIZE) name_size = NAME_MAX_SIZE-1;
                             strncpy(auxEntry.run_once.name, name.GetString(), name_size);
                             //command
-                            rapidjson::SizeType command_size = strlen(command.GetString());
+                            rapidjson::SizeType command_size = (rapidjson::SizeType)strlen(command.GetString());
                             if (command_size >= COMMAND_MAX_SIZE) command_size = COMMAND_MAX_SIZE-1;
                             strncpy(auxEntry.run_once.command, command.GetString(), command_size);
                             //args
-                            rapidjson::SizeType args_size = strlen(args.GetString());
+                            rapidjson::SizeType args_size = (rapidjson::SizeType)strlen(args.GetString());
                             if (args_size >= COMMAND_MAX_SIZE) args_size = COMMAND_MAX_SIZE - 1;
                             strncpy(auxEntry.run_once.args, args.GetString(), args_size);
                             //timeout_ms

@@ -75,62 +75,13 @@ void MainScene::setText(
     fontBuilder.strokeOffset = MathCore::vec3f(0, 0, -0.001f);
     fontBuilder.drawFace = true;
     fontBuilder.drawStroke = false;
+    fontBuilder.size = _size;
 
-    // split by lines
-    std::vector<std::string> lines = ITKCommon::StringUtil::tokenizer(text, "\n");
-    std::vector<std::string> result;
-
-    float screen_scale = scaleNode->getLocalScale().x;
-    // float window_width = (float)AppKit::GLEngine::Engine::Instance()->window->getSize().width;
-    float valid_width = window_width / screen_scale; // - text_margin * 2.0f;
-    valid_width /= text_scale_factor;
-
-    for (auto line : lines)
-    {
-        std::vector<std::string> words = ITKCommon::StringUtil::tokenizer(line, " ");
-        std::string aux = "";
-        bool first = true;
-        for (auto word : words)
-        {
-            std::string aux_with_word = aux;
-            if (first)
-                aux_with_word += word;
-            else
-                aux_with_word += " " + word;
-            float xmin, xmax, ymin, ymax;
-            fontBuilder.computeBox(aux_with_word.c_str(), &xmin, &xmax, &ymin, &ymax);
-            float width = xmax - xmin;
-            if (!first && width > valid_width)
-            {
-                result.push_back(aux);
-                aux = word;
-            }
-            else
-            {
-                aux = aux_with_word;
-            }
-            first = false;
-        }
-        result.push_back(aux);
-    }
-
-    std::string breakLinedTest = "";
-    bool first = true;
-    for (auto line : result)
-    {
-        if (first)
-        {
-            breakLinedTest += line;
-            first = false;
-        }
-        else
-            breakLinedTest += "\n" + line;
-    }
-
-    fontBuilder.build(breakLinedTest.c_str());
+    fontBuilder.richBuild(text.c_str(), false, window_width);
     toMesh->toMesh(fontBuilder, true);
-    auto componentFontToMesh_transform = toMesh->getTransform();
-    componentFontToMesh_transform->setLocalScale(text_scale_factor);
+
+    // auto componentFontToMesh_transform = toMesh->getTransform();
+    // componentFontToMesh_transform->setLocalScale(text_scale_factor);
 }
 
 void MainScene::centerAllMesh()
@@ -321,7 +272,7 @@ void MainScene::update(Platform::Time *elapsed)
         lrp = MathCore::OP<float>::pow(lrp, 1.3f);
         float aux = max_text_width * lrp * 1.025f;
 
-        //printf("%f\n", aux);
+        // printf("%f\n", aux);
 
         setTextWithWidth(aux);
 
@@ -352,14 +303,16 @@ void MainScene::draw()
 
         auto out_filename = ITKCommon::PrintfToStdString("video_%04i.png", this->video_image_count);
 
-        //printf("%s\n", out_filename.c_str());
+        // printf("%s\n", out_filename.c_str());
 
         // auto screenRenderWindow = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
         fbo.setSize(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h);
         fbo.blitFromBackBuffer(0, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-        while (queue.size() > 10){
-            printf(".\n");
+        while ((int)queue.size() > mThreadPool.threadCount() * 2)
+        {
+            printf(".");
+            fflush(stdout);
             Platform::Sleep::millis(100);
         }
 
@@ -387,7 +340,7 @@ void MainScene::draw()
             recording = RecordingState::NONE;
             AppKit::GLEngine::Engine::Instance()->window->glSetVSync(true);
 
-            printf("done");
+            printf("\ndone!\n");
             // system("rm output.mp4");
             printf("%s",
                    "now you can run:\n\n"

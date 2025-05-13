@@ -7,23 +7,23 @@ using namespace MathCore;
 
 App::App()
 {
-    //forward app reference that could be used by newly created components
+    // forward app reference that could be used by newly created components
     Engine::Instance()->app = this;
 
     resourceHelper.initialize();
 
 #if (!defined(__APPLE__))
-    Engine::Instance()->window->setMouseCursorVisible(false);
+    Engine::Instance()->window->setMouseCursorVisible(true);
 #endif
 
     GLRenderState *renderState = GLRenderState::Instance();
 
-    //setup renderstate
-    renderState->ClearColor = vec4f(0.129f,0.129f,0.129f,1.0f);
+    // setup renderstate
+    renderState->ClearColor = vec4f(0.129f, 0.129f, 0.129f, 1.0f);
     renderState->FrontFace = FrontFaceCW;
 #ifndef ITK_RPI
-    //renderState->Wireframe = WireframeBack;
-    //renderState->CullFace = CullFaceNone;
+    // renderState->Wireframe = WireframeBack;
+    // renderState->CullFace = CullFaceNone;
 
     renderState->Wireframe = WireframeDisabled;
     renderState->CullFace = CullFaceBack;
@@ -36,7 +36,7 @@ App::App()
 
     fade = new Fade(&time);
 
-    //fade->fadeOut(5.0f, nullptr);
+    // fade->fadeOut(5.0f, nullptr);
     time.update();
 
     mainScene = nullptr;
@@ -48,29 +48,34 @@ App::App()
     // screenRenderWindow.setEventForwardingEnabled(true);
 }
 
-void App::load() {
+void App::load()
+{
     mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     mainScene->load();
 }
 
-App::~App(){
-    if (mainScene != nullptr){
+App::~App()
+{
+    if (mainScene != nullptr)
+    {
         mainScene->unload();
         delete mainScene;
         mainScene = nullptr;
     }
-    if (fade != nullptr){
+    if (fade != nullptr)
+    {
         delete fade;
         fade = nullptr;
     }
     resourceHelper.finalize();
 }
 
-void App::draw() {
+void App::draw()
+{
     time.update();
 
-    //set min delta time (the passed time or the time to render at 24fps)
-    //time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
+    // set min delta time (the passed time or the time to render at 24fps)
+    // time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
 
     StartEventManager::Instance()->processAllComponentsWithTransform();
 
@@ -96,11 +101,13 @@ void App::draw() {
         return;
 }
 
-void App::onGainFocus() {
+void App::onGainFocus()
+{
     time.update();
 }
 
-void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue) {
+void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue)
+{
     GLRenderState *renderState = GLRenderState::Instance();
     renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
     if (mainScene != nullptr)

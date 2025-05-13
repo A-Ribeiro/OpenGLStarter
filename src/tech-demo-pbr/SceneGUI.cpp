@@ -105,7 +105,7 @@ void SceneGUI::setText(const std::string &text)
     fontBuilder.drawFace = true;
     fontBuilder.drawStroke = true;
 
-    fontBuilder.build(text.c_str());
+    fontBuilder.richBuild(text.c_str(), false);
     componentFontToMesh->toMesh(fontBuilder, true);
 }
 
@@ -214,7 +214,7 @@ void SceneGUI::draw()
 
     char txt[64];
     sprintf(txt, "%i fps", (int)(f_fps + 0.5f));
-    fontBuilder.build(txt);
+    fontBuilder.richBuild(txt, false);
     fps->toMesh(fontBuilder, true);
 
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();

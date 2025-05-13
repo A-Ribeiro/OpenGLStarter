@@ -1,3 +1,8 @@
+
+#if defined(_WIN32)
+#pragma warning( disable : 4996)
+#endif
+
 // #include <appkit-gl-engine/Engine.h>
 
 #include <InteractiveToolkit/ITKCommon/Path.h>
@@ -85,7 +90,7 @@ int main(int argc, char *argv[])
     //      printf("t: %" PRIi64 "\n", t);
     //  }
 
-    float v = 1234567e-10;
+    float v = 1234567e-10f;
     printf("%.6e\n", v);
 
     double vd = smartToDouble(v);//1234567.891234567e-10;

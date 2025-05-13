@@ -7,7 +7,7 @@ using namespace MathCore;
 
 float fresnelSchlick(float cosTheta, float F0)
 {
-    return F0 + (1.0 - F0) * OP<float>::pow(1.0 - cosTheta, 5.0);
+    return F0 + (1.0f - F0) * OP<float>::pow(1.0f - cosTheta, 5.0f);
 }
 
 float DistributionGGX(float NdotH, float roughness) {
@@ -18,16 +18,16 @@ float DistributionGGX(float NdotH, float roughness) {
     //float NdotH  = max(dot(N, H), 0.0);
     float NdotH2 = NdotH * NdotH;
     float num = a2;
-    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-    denom = 3.14159265358 * denom * denom; //PI = 3.14159265358
+    float denom = (NdotH2 * (a2 - 1.0f) + 1.0f);
+    denom = 3.14159265358f * denom * denom; //PI = 3.14159265358
     return OP<float>::clamp(num / denom, 0.0f, 1.0f);
 }
 
 float GeometrySchlickGGX(float NdotV, float roughness) {
-    float r = (roughness + 1.0);
-    float k = (r * r) / 8.0;
+    float r = (roughness + 1.0f);
+    float k = (r * r) / 8.0f;
     float num = NdotV;
-    float denom = NdotV * (1.0 - k) + k;
+    float denom = NdotV * (1.0f - k) + k;
     return num / denom;
 }
 
@@ -94,10 +94,10 @@ float decode_2el(vec2f v) {
     //return dot(v, MathCore::vec2f(1.0, 1.0f / 255.0f));
     uint8_t byte = float2byte(v.x);
     if (byte % 2) {
-        v.y = 1.0 - v.y;
+        v.y = 1.0f - v.y;
     }
 
-    return v.x + v.y * 3.9215686275e-03;
+    return v.x + v.y * 3.9215686275e-03f;
 }
 
 

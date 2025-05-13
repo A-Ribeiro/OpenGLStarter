@@ -39,65 +39,6 @@ namespace AppKit
             }
         }
 
-        void GLFont2Builder::countNewLines_1stlineHeight_1stlineLength(const char32_t *str, int size, int *_newLineCount, float *_1stLineMaxHeight, float *_1stLinelength)
-        {
-            float length = 0;
-            float height = 0;
-            int new_line_count = 0;
-            char32_t c;
-            int i;
-            for (i = 0; i < size; i++)
-            {
-                c = str[i];
-                if (c == U' ')
-                    length += glFont2.space_width;
-                else if (c == U'\n')
-                    break;
-                else
-                {
-                    const GLFont2Glyph *glyph = glFont2.getGlyph(str[i]);
-                    if (glyph != nullptr)
-                    {
-                        length += glyph->advancex.x;
-                        if (glyph->face.height > height)
-                            height = glyph->face.height;
-                    }
-                }
-            }
-            *_1stLineMaxHeight = height;
-            *_1stLinelength = length;
-
-            for (; i < size; i++)
-            {
-                c = str[i];
-                if (c == U'\n')
-                    new_line_count++;
-            }
-
-            *_newLineCount = new_line_count;
-        }
-
-        float GLFont2Builder::computeStringLengthUntilNewLine(const char32_t *str, int size, int offset)
-        {
-            float length = 0;
-            char32_t c;
-            for (int i = offset; i < size; i++)
-            {
-                c = str[i];
-                if (c == U' ')
-                    length += glFont2.space_width;
-                else if (c == U'\n')
-                    break;
-                else
-                {
-                    const GLFont2Glyph *glyph = glFont2.getGlyph(str[i]);
-                    if (glyph != nullptr)
-                        length += glyph->advancex.x;
-                }
-            }
-            return length;
-        }
-
         GLFont2Builder::GLFont2Builder()
         {
             faceColor = MathCore::vec4f(1, 1, 1, 1);
@@ -115,203 +56,17 @@ namespace AppKit
             lineHeight = 1.0;
 
             size = 32.0;
+
+            wrapMode = GLFont2WrapMode::GLFont2WrapMode_Character;
+            wordSeparatorChar = U' ';
+
+            firstLineHeightMode = GLFont2FirstLineHeightMode_UseLineHeight;
         }
 
         void GLFont2Builder::load(const std::string &filename, bool force_srgb)
         {
             glFont2.loadFromBasof2(filename, force_srgb);
             size = glFont2.size;
-        }
-
-        void GLFont2Builder::u32ComputeBox(const char32_t *str, float *xmin, float *xmax, float *ymin, float *ymax)
-        {
-            // size_t count = wcslen(str);
-
-            int count = (int)std::char_traits<char32_t>::length(str);
-
-            char32_t c;
-            MathCore::vec3f position = MathCore::vec3f(0);
-
-            int _newLineCount = 0;
-            float _1stLineMaxHeight = 0;
-            float _1stLinelength = 0;
-
-            countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-
-            if (verticalAlign == GLFont2VerticalAlign_top)
-            {
-                // countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                position.y = -_1stLineMaxHeight;
-            }
-            else if (verticalAlign == GLFont2VerticalAlign_middle)
-            {
-                // countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                float totalSize = (float)_newLineCount * glFont2.new_line_height * lineHeight;
-                position.y = -_1stLineMaxHeight * 0.5f + totalSize * 0.5f;
-            }
-            else if (verticalAlign == GLFont2VerticalAlign_bottom)
-            {
-                // countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                float totalSize = (float)_newLineCount * glFont2.new_line_height * lineHeight;
-                position.y = totalSize;
-            }
-
-            if (horizontalAlign == GLFont2HorizontalAlign_center)
-            {
-                position.x = (_1stLinelength != 0) ? (-_1stLinelength * 0.5f) : (-computeStringLengthUntilNewLine(str, count, 0) * 0.5f);
-            }
-            else if (horizontalAlign == GLFont2HorizontalAlign_right)
-            {
-                position.x = (_1stLinelength != 0) ? (-_1stLinelength) : (-computeStringLengthUntilNewLine(str, count, 0));
-            }
-
-            *xmin = position.x;
-            *xmax = position.x;
-            *ymin = position.y;
-            *ymax = position.y + _1stLineMaxHeight;
-
-            for (int i = 0; i < count; i++)
-            {
-                c = str[i];
-
-                if (c == U' ')
-                {
-                    position.x += glFont2.space_width;
-
-                    *xmax = MathCore::OP<float>::maximum(*xmax, position.x);
-                }
-                else if (c == U'\n')
-                {
-                    if (horizontalAlign == GLFont2HorizontalAlign_left)
-                    {
-                        position.x = 0;
-                    }
-                    else if (horizontalAlign == GLFont2HorizontalAlign_center)
-                    {
-                        position.x = -computeStringLengthUntilNewLine(str, count, i + 1) * 0.5f;
-                        *xmin = MathCore::OP<float>::minimum(*xmin, position.x);
-                        //*xmax = maximum( *xmax, position.x );
-                    }
-                    else if (horizontalAlign == GLFont2HorizontalAlign_right)
-                    {
-                        position.x = -computeStringLengthUntilNewLine(str, count, i + 1);
-                        *xmin = MathCore::OP<float>::minimum(*xmin, position.x);
-                        //*xmax = maximum( *xmax, position.x );
-                    }
-                    position.y -= glFont2.new_line_height * lineHeight;
-
-                    *ymin = MathCore::OP<float>::minimum(*ymin, position.y);
-                    //*ymax = maximum( *ymin, position.y );
-                }
-                else
-                {
-                    const GLFont2Glyph *glyph = glFont2.getGlyph(c);
-                    if (glyph != nullptr)
-                    {
-                        position.x += glyph->advancex.x;
-
-                        //*xmin = minimum( *xmin, position.x );
-                        *xmax = MathCore::OP<float>::maximum(*xmax, position.x);
-                    }
-                }
-            }
-        }
-
-        void GLFont2Builder::computeBox(const char *str, float *xmin, float *xmax, float *ymin, float *ymax)
-        {
-            u32ComputeBox(
-                ITKCommon::StringUtil::utf8_to_utf32(str).c_str(), xmin, xmax, ymin, ymax);
-        }
-
-        GLFont2Builder *GLFont2Builder::u32build(const char32_t *str)
-        {
-            // size_t count = wcslen(str);
-            int count = (int)std::char_traits<char32_t>::length(str);
-
-            vertexAttrib.clear();
-
-            char32_t c;
-            MathCore::vec3f position = MathCore::vec3f(0);
-
-            int _newLineCount = 0;
-            float _1stLineMaxHeight = 0;
-            float _1stLinelength = 0;
-
-            if (verticalAlign == GLFont2VerticalAlign_top)
-            {
-                countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                position.y = -_1stLineMaxHeight;
-            }
-            else if (verticalAlign == GLFont2VerticalAlign_middle)
-            {
-                countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                float totalSize = (float)_newLineCount * glFont2.new_line_height * lineHeight;
-                position.y = -_1stLineMaxHeight * 0.5f + totalSize * 0.5f;
-            }
-            else if (verticalAlign == GLFont2VerticalAlign_bottom)
-            {
-                countNewLines_1stlineHeight_1stlineLength(str, count, &_newLineCount, &_1stLineMaxHeight, &_1stLinelength);
-                float totalSize = (float)_newLineCount * glFont2.new_line_height * lineHeight;
-                position.y = totalSize;
-            }
-
-            if (horizontalAlign == GLFont2HorizontalAlign_center)
-            {
-                position.x = (_1stLinelength != 0) ? (-_1stLinelength * 0.5f) : (-computeStringLengthUntilNewLine(str, count, 0) * 0.5f);
-            }
-            else if (horizontalAlign == GLFont2HorizontalAlign_right)
-            {
-                position.x = (_1stLinelength != 0) ? (-_1stLinelength) : (-computeStringLengthUntilNewLine(str, count, 0));
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                c = str[i];
-
-                if (c == U' ')
-                {
-                    position.x += glFont2.space_width;
-                }
-                else if (c == U'\n')
-                {
-                    if (horizontalAlign == GLFont2HorizontalAlign_left)
-                    {
-                        position.x = 0;
-                    }
-                    else if (horizontalAlign == GLFont2HorizontalAlign_center)
-                    {
-                        position.x = -computeStringLengthUntilNewLine(str, count, i + 1) * 0.5f;
-                    }
-                    else if (horizontalAlign == GLFont2HorizontalAlign_right)
-                    {
-                        position.x = -computeStringLengthUntilNewLine(str, count, i + 1);
-                    }
-                    position.y -= glFont2.new_line_height * lineHeight;
-                }
-                else
-                {
-                    const GLFont2Glyph *glyph = glFont2.getGlyph(c);
-                    if (glyph != nullptr)
-                    {
-
-                        if (drawFace)
-                            GLFont2BitmapRef_to_VertexAttrib(position, faceColor, glyph->face);
-                        if (drawStroke)
-                            GLFont2BitmapRef_to_VertexAttrib(position + strokeOffset, strokeColor, glyph->stroke);
-
-                        position.x += glyph->advancex.x;
-                    }
-                }
-            }
-
-            return this;
-        }
-
-        GLFont2Builder *GLFont2Builder::build(const char *utf8_str)
-        {
-            u32build(
-                ITKCommon::StringUtil::utf8_to_utf32(utf8_str).c_str());
-            return this;
         }
 
         enum class RichFontVarBitFlag : uint32_t
@@ -369,30 +124,38 @@ namespace AppKit
             // text string only attribute
             MathCore::vec2f bounds_with_size_applied;
 
-            const GLFont2Builder &builder;
+            const GLFont2Builder *builder;
 
-            RichFontState(const GLFont2Builder &initial_state, bool use_srgb) : builder(initial_state)
+            static RichFontState Create(const GLFont2Builder *initial_state, bool use_srgb)
             {
-                style.faceColor = initial_state.faceColor;
-                style.strokeColor = initial_state.strokeColor;
+                RichFontState rc;
+
+                rc.builder = initial_state;
+
+                rc.style.faceColor = initial_state->faceColor;
+                rc.style.strokeColor = initial_state->strokeColor;
 
                 if (use_srgb)
                 {
-                    style.faceColor = MathCore::CVT<MathCore::vec4f>::sRGBToLinear(style.faceColor);
-                    style.strokeColor = MathCore::CVT<MathCore::vec4f>::sRGBToLinear(style.strokeColor);
+                    rc.style.faceColor = MathCore::CVT<MathCore::vec4f>::sRGBToLinear(rc.style.faceColor);
+                    rc.style.strokeColor = MathCore::CVT<MathCore::vec4f>::sRGBToLinear(rc.style.strokeColor);
                 }
 
-                style.drawFace = initial_state.drawFace;
-                style.drawStroke = initial_state.drawStroke;
+                rc.style.drawFace = initial_state->drawFace;
+                rc.style.drawStroke = initial_state->drawStroke;
 
-                style.lineHeight = initial_state.lineHeight;
-                style.size = initial_state.size;
+                rc.style.lineHeight = initial_state->lineHeight;
+                rc.style.size = initial_state->size;
 
-                flag = RichFontVarBitFlag::none;
+                rc.flag = RichFontVarBitFlag::none;
 
-                style.size_scaler = style.size / initial_state.glFont2.size;
-                style.lineHeight_scaled = initial_state.glFont2.new_line_height * style.size_scaler * style.lineHeight;
-                style.render_size_space_width = style.size_scaler * initial_state.glFont2.space_width;
+                rc.style.size_scaler = rc.style.size / initial_state->glFont2.size;
+                rc.style.lineHeight_scaled = initial_state->glFont2.new_line_height * rc.style.size_scaler * rc.style.lineHeight;
+                rc.style.render_size_space_width = rc.style.size_scaler * initial_state->glFont2.space_width;
+
+                rc.saved_style = rc.style;
+
+                return rc;
             }
 
             void push()
@@ -539,7 +302,7 @@ namespace AppKit
                             if (sscanf(value.c_str(), "%f", &style.lineHeight) == 1)
                             {
                                 flag |= RichFontVarBitFlag::lineHeight;
-                                style.lineHeight_scaled = builder.glFont2.new_line_height * style.size_scaler * style.lineHeight;
+                                style.lineHeight_scaled = builder->glFont2.new_line_height * style.size_scaler * style.lineHeight;
                             }
                         }
                         else if (cmd.compare("size") == 0)
@@ -548,9 +311,9 @@ namespace AppKit
                             {
                                 flag |= RichFontVarBitFlag::size;
 
-                                style.size_scaler = style.size / builder.glFont2.size;
-                                style.lineHeight_scaled = builder.glFont2.new_line_height * style.size_scaler * style.lineHeight;
-                                style.render_size_space_width = style.size_scaler * builder.glFont2.space_width;
+                                style.size_scaler = style.size / builder->glFont2.size;
+                                style.lineHeight_scaled = builder->glFont2.new_line_height * style.size_scaler * style.lineHeight;
+                                style.render_size_space_width = style.size_scaler * builder->glFont2.space_width;
                             }
                         }
                     }
@@ -567,48 +330,143 @@ namespace AppKit
             bool latest_insert_new_line;
             RichFontState fontState;
 
-            const GLFont2Builder &m_initial_state;
+            const GLFont2Builder *builder;
 
             bool use_srgb;
 
             float current_line_width;
 
-        public:
-            RichTokenizer(const char32_t *str, const GLFont2Builder &initial_state, bool use_srgb) : fontState(initial_state, use_srgb),
-                                                                                                     m_initial_state(initial_state)
+            std::vector<RichFontState> fontStateBuffer;
+            int fontStateBuffer_read_idx;
+            int latest_inserted_word_index;
+
+            void word_wrap_add_current_glyph(float max_width, char32_t wordSeparatorChar, const GLFont2 &glFont2, const GLFont2WrapMode &wrapMode, RichFontState *&to_return)
             {
-                this->current = str;
-                this->start = current;
-                this->brace_count = 0;
-                this->use_srgb = use_srgb;
-                this->latest_insert_new_line = false;
-                this->current_line_width = 0;
+                float char_size_x_scaled = 0;
+                if (*current == U' ')
+                    char_size_x_scaled = glFont2.space_width * fontState.style.size_scaler;
+                else if (auto glyph = glFont2.getGlyph((uint32_t)*current))
+                    char_size_x_scaled = glyph->advancex.x * fontState.style.size_scaler;
+
+                // test max width with one character mode
+                if (char_size_x_scaled > 0)
+                {
+                    float current_line_width_before_insert = this->current_line_width;
+
+                    bool guarantee_more_than_one_char = (this->current_line_width > 0);
+                    this->current_line_width += char_size_x_scaled;
+
+                    // wordSeparatorChar
+                    if (wrapMode == GLFont2WrapMode::GLFont2WrapMode_Character)
+                    {
+                        if (guarantee_more_than_one_char && this->current_line_width > max_width)
+                        {
+                            this->current_line_width = 0;
+                            // force -> new line break
+                            latest_insert_new_line = true;
+                            // new line in the raw text content
+                            fontState.setText(std::u32string(start, current), true, glFont2);
+                            to_return = &fontState;
+
+                            // back one char to reinsert it in the next iteration
+                            current--;
+                            start = current + 1;
+                        }
+                    }
+                    else if (wrapMode == GLFont2WrapMode::GLFont2WrapMode_Word)
+                    {
+                        float width_to_check = (*current == wordSeparatorChar) ? current_line_width_before_insert : this->current_line_width;
+                        // float width_to_check = this->current_line_width;
+
+                        if (latest_inserted_word_index >= 0 && width_to_check > max_width)
+                        {
+                            // mark new_line in the latest word already breaked
+                            auto &element = fontStateBuffer[latest_inserted_word_index];
+                            element.setText(std::u32string(element.str.begin(), element.str.end() - 1), true, builder->glFont2);
+
+                            // recompute the current_line_width
+                            int new_latest_idx = -1;
+                            this->current_line_width = 0;
+                            for (int j = latest_inserted_word_index + 1; j < (int)fontStateBuffer.size(); j++)
+                            {
+                                auto &item = fontStateBuffer[j];
+                                this->current_line_width += item.bounds_with_size_applied.x;
+                                if (item.str.length() > 0 && item.str[item.str.length() - 1] == wordSeparatorChar)
+                                    new_latest_idx = j;
+                            }
+                            auto aux = start;
+                            while (aux <= current)
+                            {
+                                if (*aux == U' ')
+                                    this->current_line_width += glFont2.space_width * fontState.style.size_scaler;
+                                else if (auto glyph = glFont2.getGlyph((uint32_t)*aux))
+                                    this->current_line_width += glyph->advancex.x * fontState.style.size_scaler;
+                                aux++;
+                            }
+                            latest_inserted_word_index = new_latest_idx;
+                        }
+
+                        if (*current == wordSeparatorChar)
+                        {
+                            // break each word
+                            // new line in the raw text content
+                            latest_insert_new_line = false;
+                            fontState.setText(std::u32string(start, current + 1), false, glFont2);
+                            to_return = &fontState;
+                            start = current + 1;
+
+                            latest_inserted_word_index = (int)fontStateBuffer.size();
+                        }
+                    }
+                }
             }
 
-            RichFontState *next(float max_width = -1)
+            RichFontState *raw_next(float max_width = -1)
             {
-
                 // force reset state on after new line case
                 // if ((fontState.flag & RichFontVarBitFlag::new_line_at_end) != RichFontVarBitFlag::none)
                 fontState.ReadStyleCodeString(std::u32string(U""), use_srgb);
 
                 RichFontState *to_return = nullptr;
 
-                const GLFont2 &glFont2 = m_initial_state.glFont2;
+                const GLFont2 &glFont2 = builder->glFont2;
+                const GLFont2WrapMode &wrapMode = builder->wrapMode;
+                char32_t wordSeparatorChar = builder->wordSeparatorChar;
                 while (*current && to_return == nullptr)
                 {
                     if (brace_count == 0 &&
                         ((*current == U'{' && *(current + 1) == U'{') ||
                          (*current == U'}' && *(current + 1) == U'}')))
                     {
+
+                        if (max_width >= 0)
+                        {
+                            if (wrapMode == GLFont2WrapMode::GLFont2WrapMode_Word)
+                            {
+                                word_wrap_add_current_glyph(max_width, wordSeparatorChar, glFont2, wrapMode, to_return);
+                            }
+                            else if (wrapMode == GLFont2WrapMode::GLFont2WrapMode_Character)
+                            {
+                                // to check if a character was back_inserted...
+                                //  in this case, we need to back the pointer twice.
+                                auto current_before = current;
+                                word_wrap_add_current_glyph(max_width, wordSeparatorChar, glFont2, wrapMode, to_return);
+                                if (current < current_before)
+                                    current--;
+                            }
+                        }
+
                         // skip this char
                         current++;
                         // two consecutives braces... not a style modifier
                         if (current > start)
                         {
-                            latest_insert_new_line = false;
-                            fontState.setText(std::u32string(start, current), false, glFont2);
-                            to_return = &fontState;
+                            if (to_return == nullptr)
+                            {
+                                latest_insert_new_line = false;
+                                fontState.setText(std::u32string(start, current), false, glFont2);
+                                to_return = &fontState;
+                            }
                             start = current + 1;
                         }
                     }
@@ -647,33 +505,10 @@ namespace AppKit
                             to_return = &fontState;
                             start = current + 1;
                         }
-                        else if (max_width >= 0)
+                        else if ((max_width >= 0) && (wrapMode == GLFont2WrapMode::GLFont2WrapMode_Character ||
+                                                      wrapMode == GLFont2WrapMode::GLFont2WrapMode_Word))
                         {
-                            float char_size_x_scaled = 0;
-                            if (*current == U' ')
-                                char_size_x_scaled = glFont2.space_width * fontState.style.size_scaler;
-                            else if (auto glyph = glFont2.getGlyph((uint32_t)*current))
-                                char_size_x_scaled = glyph->advancex.x * fontState.style.size_scaler;
-
-                            // test max width with one character mode
-                            if (char_size_x_scaled > 0)
-                            {
-                                bool guarantee_more_than_one_char = (this->current_line_width > 0);
-                                this->current_line_width += char_size_x_scaled;
-                                if (guarantee_more_than_one_char && this->current_line_width > max_width)
-                                {
-                                    this->current_line_width = 0;
-                                    // force -> new line break
-                                    latest_insert_new_line = true;
-                                    // new line in the raw text content
-                                    fontState.setText(std::u32string(start, current), true, glFont2);
-                                    to_return = &fontState;
-
-                                    // back one char to reinsert it in the next iteration
-                                    current--; 
-                                    start = current + 1;
-                                }
-                            }
+                            word_wrap_add_current_glyph(max_width, wordSeparatorChar, glFont2, wrapMode, to_return);
                         }
                     }
                     current++;
@@ -692,7 +527,7 @@ namespace AppKit
                 }
 
                 // put last part of the string
-                if (current > start)
+                if (!to_return && current > start)
                 {
                     // raw text content
                     fontState.setText(std::u32string(start, current), false, glFont2);
@@ -702,6 +537,62 @@ namespace AppKit
                 }
 
                 return to_return;
+            }
+
+        public:
+            RichTokenizer(const char32_t *str, const GLFont2Builder *initial_state, bool use_srgb) : builder(initial_state)
+            {
+                this->fontState = RichFontState::Create(initial_state, use_srgb);
+                this->current = str;
+                this->start = current;
+                this->brace_count = 0;
+                this->use_srgb = use_srgb;
+                this->latest_insert_new_line = false;
+                this->current_line_width = 0;
+                latest_inserted_word_index = -1;
+                fontStateBuffer_read_idx = 0;
+            }
+
+            // need this for the m_initial_state.wrapMode == GLFont2WrapMode_Word
+            RichFontState *next(float max_width = -1)
+            {
+                if (max_width >= 0 && builder->wrapMode == GLFont2WrapMode_Word)
+                {
+                    if (fontStateBuffer_read_idx >= fontStateBuffer.size())
+                    {
+                        fontStateBuffer_read_idx = 0;
+                        fontStateBuffer.clear();
+                    }
+
+                    if (fontStateBuffer.size() > 0)
+                    {
+                        auto result = &fontStateBuffer[fontStateBuffer_read_idx];
+                        fontStateBuffer_read_idx++;
+                        return result;
+                    }
+                    else
+                    {
+                        latest_inserted_word_index = -1;
+                        // read entire line
+                        while (auto next_token = raw_next(max_width))
+                        {
+                            fontStateBuffer.push_back(*next_token);
+                            if ((next_token->flag & RichFontVarBitFlag::new_line_at_end) != RichFontVarBitFlag::none)
+                                break;
+                        }
+                        // return the first token
+                        if (fontStateBuffer.size() > 0)
+                        {
+                            auto result = &fontStateBuffer[fontStateBuffer_read_idx];
+                            fontStateBuffer_read_idx++;
+                            return result;
+                        }
+                        else
+                            return nullptr;
+                    }
+                }
+                else
+                    return raw_next(max_width);
             }
         };
 
@@ -715,7 +606,7 @@ namespace AppKit
             float max_line_height_others_scaled = 0;
             bool _1st_line_processing = true;
             {
-                RichTokenizer tokenizer(str, *this, false);
+                RichTokenizer tokenizer(str, this, false);
                 // std::vector<RichFontState> line;
                 float max_lineHeight_scaled = 0;
                 bool token_readed_but_not_used = false;
@@ -797,6 +688,9 @@ namespace AppKit
                 }
             }
 
+            if (firstLineHeightMode == GLFont2FirstLineHeightMode_UseCharacterMaxHeight)
+                max_line_height_1stline_scaled = max_height_1stline_scaled;
+
             if (verticalAlign == GLFont2VerticalAlign_baseline)
             {
                 result.max_box.y = max_line_height_1stline_scaled;
@@ -837,7 +731,7 @@ namespace AppKit
             float max_line_height_others_scaled = 0;
             bool _1st_line_processing = true;
             {
-                RichTokenizer tokenizer(str, *this, use_srgb);
+                RichTokenizer tokenizer(str, this, use_srgb);
                 std::vector<RichFontState> line;
                 float max_lineHeight_scaled = 0;
                 while (auto token = tokenizer.next(max_width))
@@ -869,8 +763,11 @@ namespace AppKit
 
             // each line processing
             MathCore::vec3f position = MathCore::vec3f(0);
-            RichFontState state(*this, use_srgb);
+            RichFontState state = RichFontState::Create(this, use_srgb);
 
+            if (firstLineHeightMode == GLFont2FirstLineHeightMode_UseCharacterMaxHeight)
+                max_line_height_1stline_scaled = max_height_1stline_scaled;
+                
             if (verticalAlign == GLFont2VerticalAlign_top)
                 position.y = -max_line_height_1stline_scaled; // position.y = -max_height_1stline_scaled;
             else if (verticalAlign == GLFont2VerticalAlign_middle)
