@@ -6,8 +6,8 @@ using namespace MathCore;
 
 
 float DepthToWorld(float n, float f, float z) {
-    z = z * 2.0 - 1.0;
-    return (2.0 * n * f) / (f + n - z * (f - n));
+    z = z * 2.0f - 1.0f;
+    return (2.0f * n * f) / (f + n - z * (f - n));
 }
 
 static void linear_depth_Values() {

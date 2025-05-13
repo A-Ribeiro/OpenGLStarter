@@ -38,7 +38,6 @@ void MainScene::loadGraph()
         auto engine = AppKit::GLEngine::Engine::Instance();
         if (engine->sRGBCapable)
             materialBackground->unlit.color = CVT<vec4f>::sRGBToLinear(materialBackground->unlit.color);
-
     }
 
     // text transform
@@ -49,119 +48,17 @@ void MainScene::loadGraph()
 
         font_line1 = textNode->addNewComponent<AppKit::GLEngine::Components::ComponentFontToMesh>();
     }
-
-}
-
-void MainScene::setText(
-    const std::string &text,
-    float _size,
-    float window_width,
-    std::shared_ptr<AppKit::GLEngine::Components::ComponentFontToMesh> toMesh)
-{
-
-    if (toMesh == nullptr)
-        return;
-
-    float text_scale_factor = _size / fontBuilder.glFont2.size;
-
-    // fontBuilder.faceColor = MathCore::vec4f(0.758f, 0.754f, 0.752f, 1);
-    fontBuilder.faceColor = MathCore::vec4f(1, 1, 1, 1);
-    fontBuilder.strokeColor = MathCore::vec4f(0.75f, 0.75f, 0.75f, 1);
-    fontBuilder.horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_center;
-    fontBuilder.verticalAlign = AppKit::OpenGL::GLFont2VerticalAlign_middle;
-    fontBuilder.strokeOffset = MathCore::vec3f(0, 0, -0.001f);
-    fontBuilder.drawFace = true;
-    fontBuilder.drawStroke = false;
-
-    // split by lines
-    std::vector<std::string> lines = ITKCommon::StringUtil::tokenizer(text, "\n");
-    std::vector<std::string> result;
-
-    float screen_scale = scaleNode->getLocalScale().x;
-    // float window_width = (float)AppKit::GLEngine::Engine::Instance()->window->getSize().width;
-    float valid_width = window_width / screen_scale; // - text_margin * 2.0f;
-    valid_width /= text_scale_factor;
-
-    for (auto line : lines)
-    {
-        std::vector<std::string> words = ITKCommon::StringUtil::tokenizer(line, " ");
-        std::string aux = "";
-        bool first = true;
-        for (auto word : words)
-        {
-            std::string aux_with_word = aux;
-            if (first)
-                aux_with_word += word;
-            else
-                aux_with_word += " " + word;
-            float xmin, xmax, ymin, ymax;
-            fontBuilder.computeBox(aux_with_word.c_str(), &xmin, &xmax, &ymin, &ymax);
-            float width = xmax - xmin;
-            if (!first && width > valid_width)
-            {
-                result.push_back(aux);
-                aux = word;
-            }
-            else
-            {
-                aux = aux_with_word;
-            }
-            first = false;
-        }
-        result.push_back(aux);
-    }
-
-    std::string breakLinedTest = "";
-    bool first = true;
-    for (auto line : result)
-    {
-        if (first)
-        {
-            breakLinedTest += line;
-            first = false;
-        }
-        else
-            breakLinedTest += "\n" + line;
-    }
-
-    fontBuilder.build(breakLinedTest.c_str());
-    toMesh->toMesh(fontBuilder, true);
-    auto componentFontToMesh_transform = toMesh->getTransform();
-    componentFontToMesh_transform->setLocalScale(text_scale_factor);
-}
-
-void MainScene::centerAllMesh()
-{
-
-    {
-        auto font_line1_transform = this->font_line1->getTransform();
-        auto mesh_wrapper = font_line1_transform->findComponent<ComponentMeshWrapper>();
-
-        if (mesh_wrapper == nullptr)
-            return;
-
-        mesh_wrapper->computeFinalPositions(false);
-
-        MathCore::vec3f to_center;
-        to_center = (mesh_wrapper->aabb.max_box + mesh_wrapper->aabb.min_box) * -0.5f;
-
-        // to_center.y = -to_center.y;
-        to_center.z = 0;
-
-        font_line1_transform->setPosition(to_center);
-
-        // max_text_width = MathCore::OP<float>::maximum(max_text_width, to_center.x * -2.0f + MathCore::EPSILON<float>::low_precision);
-    }
 }
 
 void MainScene::setTextWithWidth(float width)
 {
 
     fontBuilder.lineHeight = 1.5f;
-    fontBuilder.size = 40.0f;
+    fontBuilder.size = 60.0f;
     fontBuilder.horizontalAlign = GLFont2HorizontalAlign_center;
     fontBuilder.verticalAlign = GLFont2VerticalAlign_middle;
-
+    fontBuilder.wrapMode = GLFont2WrapMode_Word;
+    fontBuilder.wordSeparatorChar = U' ';
 
     // setText(
     //     ,
@@ -169,7 +66,7 @@ void MainScene::setTextWithWidth(float width)
     //     width, // width
     //     this->font_line1);
 
-    auto txt = 
+    std::string txt =
         u8"Use " Font_L_stick u8" para {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}andar{pop;} e " Font_xbox_a " para pular.\n"
         u8"Use " Font_R_stick u8" para andar e " Font_ps_square_white " para pular.\n"
         u8"Use " Font_Key_arrows u8" para andar e " Font_Key_z " para pular.\n"
@@ -178,18 +75,18 @@ void MainScene::setTextWithWidth(float width)
         u8"botões Xbox:" Font_xbox_a Font_xbox_b Font_xbox_x Font_xbox_y u8"\n"
         u8"botões PS(color):" Font_ps_circle_color Font_ps_cross_color Font_ps_square_color Font_ps_triangle_color u8"\n"
         u8"botões PS(white):" Font_ps_circle_white Font_ps_cross_white Font_ps_square_white Font_ps_triangle_white u8"\n"
-        u8"teclado:" Font_Key_z Font_Key_x Font_Key_c ;
+        u8"teclado:" Font_Key_z Font_Key_x Font_Key_c;
 
-
-    fontBuilder.richBuild(txt, false);
+    fontBuilder.richBuild(txt.c_str(), false, width);
     font_line1->toMesh(fontBuilder, true);
     font_line1->getTransform()->setLocalScale(1.0f);
 
-    auto txt_aabb = fontBuilder.richComputeBox(txt);
+    //printf("[starting]\n");
+    auto txt_aabb = fontBuilder.richComputeBox(txt.c_str(), width);
     auto aabb_size = txt_aabb.max_box - txt_aabb.min_box;
     auto aabb_center = (txt_aabb.max_box + txt_aabb.min_box) * 0.5f;
 
-    bgNode->setLocalScale(MathCore::vec3f(aabb_size.x,aabb_size.y,1));
+    bgNode->setLocalScale(MathCore::vec3f(aabb_size.x, aabb_size.y, 1));
     bgNode->setLocalPosition(MathCore::vec3f(aabb_center.x, aabb_center.y, 0.0f));
 
     // centerAllMesh();
@@ -256,7 +153,7 @@ void MainScene::draw()
 void MainScene::resize(const MathCore::vec2i &size)
 {
     // fixed height of 1080 pixels
-    float new_scale = size.height / 1080.0f;
+    float new_scale = (float)size.height / 1080.0f;
 
     // float aspect_window = (float)size.width / (float)size.height;
     // float aspect_image = (float)texture->width / (float)texture->height;
@@ -268,7 +165,7 @@ void MainScene::resize(const MathCore::vec2i &size)
 
     scaleNode->setLocalScale(new_scale);
 
-    setTextWithWidth(size.width * new_scale);
+    setTextWithWidth((float)size.width / new_scale);
 }
 
 MainScene::MainScene(

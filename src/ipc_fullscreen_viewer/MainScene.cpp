@@ -59,6 +59,8 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
     fontBuilder.strokeOffset = MathCore::vec3f(0, 0, -0.001f);
     fontBuilder.drawFace = true;
     fontBuilder.drawStroke = false;
+    fontBuilder.lineHeight = 1.3f;
+    fontBuilder.firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight;
 
     //split by lines
     std::vector<std::string> lines = ITKCommon::StringUtil::tokenizer(text, "\n");
@@ -80,7 +82,13 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
             else 
                 aux_with_word += " " + word;
             float xmin, xmax, ymin, ymax;
-            fontBuilder.computeBox(aux_with_word.c_str(), &xmin, &xmax, &ymin, &ymax);
+            
+            auto aabb = fontBuilder.richComputeBox(aux_with_word.c_str());
+            xmin = aabb.min_box.x;
+            xmax = aabb.max_box.x;
+            ymin = aabb.min_box.y;
+            ymax = aabb.max_box.y;
+
             float width = xmax - xmin;
             if (!first && width > valid_width) {
                 result.push_back(aux);
@@ -105,7 +113,7 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
             breakLinedTest += "\n" + line;
     }
 
-    fontBuilder.build(breakLinedTest.c_str());
+    fontBuilder.richBuild(breakLinedTest.c_str(), false);
     componentFontToMesh->toMesh(fontBuilder, true);
     auto componentFontToMesh_transform = componentFontToMesh->getTransform();
     componentFontToMesh_transform->setLocalScale(text_scale_factor);

@@ -86,7 +86,12 @@ namespace AppKit
 					fontBuilder->strokeOffset = MathCore::vec3f(0, 0, -0.001f);
 					fontBuilder->drawFace = true;
 					fontBuilder->drawStroke = false;
-					fontBuilder->computeBox(rendered_text.c_str(), &xmin, &xmax, &ymin, &ymax);
+                    fontBuilder->firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight;
+					auto aabb = fontBuilder->richComputeBox(rendered_text.c_str());
+                    xmin = aabb.min_box.x;
+                    xmax = aabb.max_box.x;
+                    ymin = aabb.min_box.y;
+                    ymax = aabb.max_box.y;
 				}
 				else
 				{
@@ -97,7 +102,12 @@ namespace AppKit
 					fontBuilder->strokeOffset = MathCore::vec3f(0, 0, -0.001f);
 					fontBuilder->drawFace = true;
 					fontBuilder->drawStroke = false;
-					fontBuilder->computeBox(rendered_text.c_str(), &xmin, &xmax, &ymin, &ymax);
+                    fontBuilder->firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight;
+                    auto aabb = fontBuilder->richComputeBox(rendered_text.c_str());
+                    xmin = aabb.min_box.x;
+                    xmax = aabb.max_box.x;
+                    ymin = aabb.min_box.y;
+                    ymax = aabb.max_box.y;
 				}
 				float size = 32.0f / fontBuilder->glFont2.size;
 				xmin *= size;
@@ -149,7 +159,7 @@ namespace AppKit
 					componentFontToMesh = textTransform->addNewComponent<Components::ComponentFontToMesh>();
 					textTransform->setLocalScale(MathCore::vec3f(size, size, 1));
 				}
-				fontBuilder->build(rendered_text.c_str());
+				fontBuilder->richBuild(rendered_text.c_str(), false);
 				componentFontToMesh->toMesh(*fontBuilder, true);
 			}
 		}

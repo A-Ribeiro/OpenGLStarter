@@ -69,13 +69,6 @@ public:
 
     void resize(const MathCore::vec2i &size);
 
-    void setText(
-        const std::string &text, 
-        float _size, 
-        float window_width,
-        std::shared_ptr<AppKit::GLEngine::Components::ComponentFontToMesh> toMesh);
-    
-    void centerAllMesh();
     void setTextWithWidth(float width);
 
     void update(Platform::Time *elapsed);

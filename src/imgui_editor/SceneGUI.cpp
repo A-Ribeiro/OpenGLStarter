@@ -170,7 +170,7 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
 
     char txt[64];
     sprintf(txt, "%i fps", (int)(f_fps + 0.5f));
-    fontBuilder.build(txt);
+    fontBuilder.richBuild(txt, false);
     fps->toMesh(fontBuilder, true);
     
     auto fps_transform = fps->getTransform();

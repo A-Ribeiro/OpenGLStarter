@@ -3,7 +3,7 @@
 #include <appkit-gl-base/platform/PlatformGL.h>
 #include <appkit-gl-base/font/GLFont2.h>
 
-#include <InteractiveToolkit/CollisionCore/AABB.h>
+#include <InteractiveToolkit/CollisionCore/CollisionCore.h>
 
 namespace AppKit
 {
@@ -37,6 +37,19 @@ namespace AppKit
             GLFont2VerticalAlign_top,
             GLFont2VerticalAlign_middle,
             GLFont2VerticalAlign_bottom,
+        };
+
+        enum GLFont2WrapMode
+        {
+            GLFont2WrapMode_NoWrap = 0,
+            GLFont2WrapMode_Character,
+            GLFont2WrapMode_Word,
+        };
+
+        enum GLFont2FirstLineHeightMode
+        {
+            GLFont2FirstLineHeightMode_UseLineHeight = 0,
+            GLFont2FirstLineHeightMode_UseCharacterMaxHeight,
         };
 
         /// \brief Construct an OpenGL compatible vertex information about the font to be rendered.
@@ -93,15 +106,9 @@ namespace AppKit
         ///
         class GLFont2Builder
         {
-            // std::vector<char> char_buffer;
-            // std::vector<wchar_t> wchar_buffer;
 
             // ITK_INLINE
             void GLFont2BitmapRef_to_VertexAttrib(const MathCore::vec3f &pos, const MathCore::vec4f &color, const GLFont2BitmapRef &bitmapRef, float scale = 1.0f);
-
-            void countNewLines_1stlineHeight_1stlineLength(const char32_t *str, int size, int *count, float *_1stLineMaxHeight, float *_1stLinelength);
-
-            float computeStringLengthUntilNewLine(const char32_t *str, int size, int offset);
 
         public:
             // deleted copy constructor and assign operator, to avoid copy...
@@ -122,6 +129,9 @@ namespace AppKit
             GLFont2VerticalAlign verticalAlign;     ///< current state of the vertical alignment
             float lineHeight;                       ///< current state of the line height
             float size;                             ///< current state of the font size
+            GLFont2WrapMode wrapMode;
+            GLFont2FirstLineHeightMode firstLineHeightMode;
+            char32_t wordSeparatorChar;
 
             GLFont2Builder();
 
@@ -143,36 +153,29 @@ namespace AppKit
             /// \author Alessandro Ribeiro
             /// \param str The string to compute bounds
             ///
-            void u32ComputeBox(const char32_t *str, float *xmin, float *xmax, float *ymin, float *ymax);
+            CollisionCore::AABB<MathCore::vec3f> u32RichComputeBox(const char32_t *str, float max_width = -1);
 
             /// \brief Compute the information about render limits
             ///
             /// \author Alessandro Ribeiro
             /// \param str The string to compute bounds
             ///
-            void computeBox(const char *str, float *xmin, float *xmax, float *ymin, float *ymax);
-
-            /// \brief Build OpenGL vertex information to render the text parameter
-            ///
-            /// \author Alessandro Ribeiro
-            /// \param str The string to be rendered
-            /// \return #GLFont2Builder this instance information
-            ///
-            GLFont2Builder *u32build(const char32_t *str);
-
-            /// \brief Build OpenGL vertex information to render the text parameter
-            ///
-            /// \author Alessandro Ribeiro
-            /// \param str The string to be rendered
-            /// \return #GLFont2Builder this instance information
-            ///
-            GLFont2Builder *build(const char *str);
-
-
-            CollisionCore::AABB<MathCore::vec3f> u32RichComputeBox(const char32_t *str, float max_width = -1);
             CollisionCore::AABB<MathCore::vec3f> richComputeBox(const char *str, float max_width = -1);
 
+            /// \brief Build OpenGL vertex information to render the text parameter
+            ///
+            /// \author Alessandro Ribeiro
+            /// \param str The string to be rendered
+            /// \return #GLFont2Builder this instance information
+            ///
             GLFont2Builder *u32richBuild(const char32_t *utf32_str, bool use_srgb, float max_width = -1);
+
+            /// \brief Build OpenGL vertex information to render the text parameter
+            ///
+            /// \author Alessandro Ribeiro
+            /// \param str The string to be rendered
+            /// \return #GLFont2Builder this instance information
+            ///
             GLFont2Builder *richBuild(const char *utf8_str, bool use_srgb, float max_width = -1);
         };
 
