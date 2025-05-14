@@ -263,7 +263,7 @@ namespace AppKit
                         auto cmd = ITKCommon::StringUtil::trim(var_set[0]);
                         // auto value = ITKCommon::StringUtil::toLower( ITKCommon::StringUtil::trim(var_set[1]) );
                         std::string value = ITKCommon::StringUtil::trim(var_set[1]);
-                        std::transform(value.begin(), value.end(), value.begin(), std::tolower);
+                        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 
                         if (cmd.compare("faceColor") == 0)
                         {
