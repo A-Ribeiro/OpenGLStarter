@@ -1,7 +1,7 @@
 #include <appkit-gl-base/font/GLFont2.h>
 
 #include <InteractiveToolkit-Extension/font/FontReader.h>
-//using namespace aRibeiro;
+// using namespace aRibeiro;
 
 namespace AppKit
 {
@@ -56,31 +56,42 @@ namespace AppKit
             space_width = reader.space_width;
             new_line_height = reader.new_line_height;
 
-            glyphs.clear();
+            polygonGlyphSrc.resize(reader.glyphs.size());
             for (size_t i = 0; i < reader.glyphs.size(); i++)
             {
-                ITKExtension::Font::FontReaderGlyph *fontGlyph = &reader.glyphs[i];
+                auto &polygonGlyph = this->polygonGlyphSrc[i];
+                auto &glyph = reader.glyphs[i];
+                
+                polygonGlyph.charcode = glyph.charcode;
+                polygonGlyph.advancex = MathCore::vec3f(glyph.advancex, 0, 0);
+                polygonGlyph.contour = std::move(glyph.contour);
+            }
+
+            glyphs.clear();
+            for (const auto &fontGlyph : reader.glyphs)
+            {
                 GLFont2Glyph glyph;
 
-                glyph.advancex = MathCore::vec3f(fontGlyph->advancex, 0, 0);
+                glyph.advancex = MathCore::vec3f(fontGlyph.advancex, 0, 0);
 
                 glyph.face.move_before_draw = MathCore::vec3f(
-                    fontGlyph->face.left,
-                    -(fontGlyph->face.bitmapBounds.h - fontGlyph->face.top),
+                    fontGlyph.face.left,
+                    -(fontGlyph.face.bitmapBounds.h - fontGlyph.face.top),
                     0);
-                glyph.face.height = glyph.face.move_before_draw.y + (float)fontGlyph->face.bitmapBounds.h;
-                glyph.face.triangles = AtlasRectToTriangles(fontGlyph->face.bitmapBounds, reader.bitmapSize);
-                glyph.face.bitmapBounds = fontGlyph->face.bitmapBounds;
+                glyph.face.height = glyph.face.move_before_draw.y + (float)fontGlyph.face.bitmapBounds.h;
+                glyph.face.triangles = AtlasRectToTriangles(fontGlyph.face.bitmapBounds, reader.bitmapSize);
+                glyph.face.bitmapBounds = fontGlyph.face.bitmapBounds;
 
                 glyph.stroke.move_before_draw = MathCore::vec3f(
-                    fontGlyph->stroke.left,
-                    -(fontGlyph->stroke.bitmapBounds.h - fontGlyph->stroke.top),
+                    fontGlyph.stroke.left,
+                    -(fontGlyph.stroke.bitmapBounds.h - fontGlyph.stroke.top),
                     0);
-                glyph.stroke.height = glyph.stroke.move_before_draw.y + (float)fontGlyph->stroke.bitmapBounds.h;
-                glyph.stroke.triangles = AtlasRectToTriangles(fontGlyph->stroke.bitmapBounds, reader.bitmapSize);
-                glyph.stroke.bitmapBounds = fontGlyph->stroke.bitmapBounds;
+                glyph.stroke.height = glyph.stroke.move_before_draw.y + (float)fontGlyph.stroke.bitmapBounds.h;
+                glyph.stroke.triangles = AtlasRectToTriangles(fontGlyph.stroke.bitmapBounds, reader.bitmapSize);
+                glyph.stroke.bitmapBounds = fontGlyph.stroke.bitmapBounds;
 
-                glyphs[fontGlyph->charcode] = glyph;
+                glyphs[fontGlyph.charcode] = glyph;
+
             }
 
             texture.uploadBufferRGBA_8888(reader.bitmap_rgba, reader.bitmapSize.w, reader.bitmapSize.h, force_srgb);
