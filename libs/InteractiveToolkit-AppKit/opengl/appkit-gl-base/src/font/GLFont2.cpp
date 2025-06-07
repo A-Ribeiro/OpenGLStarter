@@ -59,7 +59,7 @@ namespace AppKit
             glyphs.clear();
             for (size_t i = 0; i < reader.glyphs.size(); i++)
             {
-                ITKExtension::Font::FontReaderGlyph *fontGlyph = reader.glyphs[i];
+                ITKExtension::Font::FontReaderGlyph *fontGlyph = &reader.glyphs[i];
                 GLFont2Glyph glyph;
 
                 glyph.advancex = MathCore::vec3f(fontGlyph->advancex, 0, 0);
