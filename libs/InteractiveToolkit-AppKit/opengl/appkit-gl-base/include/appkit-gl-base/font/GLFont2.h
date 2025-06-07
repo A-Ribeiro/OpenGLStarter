@@ -19,6 +19,8 @@
 #include <InteractiveToolkit-Extension/font/FontReaderSize.h>
 
 #include <wchar.h> // to define swprintf(...);
+#include <InteractiveToolkit/AlgorithmCore/Polygon/Polygon2D.h>
+
 
 namespace AppKit
 {
@@ -65,6 +67,14 @@ namespace AppKit
             GLFont2BitmapRef stroke;
         };
 
+        struct GLFont2PolygonGlyph
+        {
+            uint32_t charcode; ///< UTF32 character code
+            MathCore::vec3f advancex;
+            std::vector<AlgorithmCore::Polygon::Polygon2D<MathCore::vec2f>> contour; ///< The glyph contour polygon representation
+        };
+
+
         /// \brief A complete definition for a font
         ///
         /// The font could be seen as a set of faces and strokes related to a char code (uint32_t).
@@ -89,6 +99,8 @@ namespace AppKit
             GLTexture texture;     ///< the texture with the grayscale alphamap bitmap
 
             std::unordered_map<uint32_t, GLFont2Glyph> glyphs; ///< all glyphs exported with the loaded font
+
+            std::vector<GLFont2PolygonGlyph> polygonGlyphSrc; ///< all polygon glyphs exported with the loaded font
 
             GLFont2();
 
