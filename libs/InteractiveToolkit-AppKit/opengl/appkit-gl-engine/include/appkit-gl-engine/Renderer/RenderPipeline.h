@@ -82,6 +82,7 @@ namespace AppKit
         public:
             DepthPassShader depthShader;
             UnlitPassShader unlitShader;
+            Unlit_vertcolor_Shader unlit_vertcolor_Shader;
             Unlit_tex_vertcolor_font_PassShader unlit_tex_vertcolor_font_Shader;
             Unlit_tex_PassShader unlit_tex_Shader;
 

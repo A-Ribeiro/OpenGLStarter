@@ -60,8 +60,8 @@ namespace AppKit
                 for (int i = 0; i < vertices->size(); i += 3)
                 {
                     indices->push_back(i);
-                    indices->push_back(i + 1);
                     indices->push_back(i + 2);
+                    indices->push_back(i + 1);
                 }
             }
 
@@ -101,12 +101,12 @@ namespace AppKit
                 for (int i = 0; i < vertices->size(); i += 4)
                 {
                     indices->push_back(i);
-                    indices->push_back(i + 1);
                     indices->push_back(i + 2);
+                    indices->push_back(i + 1);
 
                     indices->push_back(i);
-                    indices->push_back(i + 2);
                     indices->push_back(i + 3);
+                    indices->push_back(i + 2);
                 }
 
                 if (uv != nullptr)
@@ -349,12 +349,12 @@ namespace AppKit
                 for (int i = 0; i < vertices->size(); i += 4)
                 {
                     indices->push_back(i);
-                    indices->push_back(i + 1);
                     indices->push_back(i + 2);
+                    indices->push_back(i + 1);
 
                     indices->push_back(i);
-                    indices->push_back(i + 2);
                     indices->push_back(i + 3);
+                    indices->push_back(i + 2);
                 }
             }
 
@@ -501,16 +501,16 @@ namespace AppKit
                         if (i != 0)
                         {
                             indices->push_back(k1);
-                            indices->push_back(k2);
                             indices->push_back(k1 + 1);
+                            indices->push_back(k2);
                         }
 
                         // k1+1 => k2 => k2+1
                         if (i != (stackCount - 1))
                         {
                             indices->push_back(k1 + 1);
-                            indices->push_back(k2);
                             indices->push_back(k2 + 1);
+                            indices->push_back(k2);
                         }
                     }
                 }

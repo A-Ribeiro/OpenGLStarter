@@ -10,6 +10,7 @@ namespace AppKit
 
         void GLFont2PolygonCache::setFromGLFont2(const GLFont2 &glFont2, float size, float max_distance_tolerance)
         {
+            this->size = size;
             float size_to_apply = size / glFont2.size;
             if (size_to_apply <= 0.0f)
                 return;
@@ -24,7 +25,7 @@ namespace AppKit
             for (const auto &glyph : glFont2.polygonGlyphSrc)
             {
                 GLFont2TriangulatedGlyph triangulated_glyph;
-                triangulated_glyph.advancex = glyph.advancex;
+                triangulated_glyph.advancex = glyph.advancex * size_to_apply; // Scale the advance x according to the font size
 
                 std::vector<AlgorithmCore::Polygon::EarClipping::ContourSampled> sampled_contours;
                 sampled_contours.reserve(glyph.contour.size());

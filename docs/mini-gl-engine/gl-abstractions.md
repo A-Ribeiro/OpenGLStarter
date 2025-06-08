@@ -84,7 +84,7 @@ using namespace AppKit::OpenGL;
 GLRenderState *renderState = GLRenderState::Instance();
 
 renderState->ClearColor = vec4(1.0f,1.0f,250.0f/255.0f,1.0f);
-renderState->FrontFace = FrontFaceCW;
+renderState->FrontFace = FrontFaceCCW;
 renderState->CullFace = CullFaceBack;
 renderState->DepthWrite = true;
 renderState->DepthTest = DepthTestLessEqual;

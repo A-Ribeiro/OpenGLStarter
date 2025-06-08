@@ -205,8 +205,9 @@ namespace AppKit
 
             // render code
             const MathCore::vec3f vertex[] = {
-                MathCore::vec3f(-1, -1, 0), MathCore::vec3f(-1, 1, 0), MathCore::vec3f(1, 1, 0),
-                MathCore::vec3f(-1, -1, 0), MathCore::vec3f(1, 1, 0), MathCore::vec3f(1, -1, 0)};
+                MathCore::vec3f(-1, -1, 0), MathCore::vec3f(1, 1, 0), MathCore::vec3f(-1, 1, 0),
+                MathCore::vec3f(-1, -1, 0), MathCore::vec3f(1, -1, 0), MathCore::vec3f(1, 1, 0)
+            };
 
             OPENGL_CMD(glEnableVertexAttribArray(ShaderRender1x1CubeMap::vPosition));
             OPENGL_CMD(glVertexAttribPointer(ShaderRender1x1CubeMap::vPosition, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertex[0]));

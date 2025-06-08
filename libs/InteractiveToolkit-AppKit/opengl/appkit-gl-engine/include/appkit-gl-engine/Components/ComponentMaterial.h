@@ -28,6 +28,7 @@ namespace AppKit
                 MaterialNone,
 
                 MaterialUnlit,                       // implemented
+                MaterialUnlitVertexColor,            // implemented
                 MaterialUnlitTexture,                // implemented
                 MaterialUnlitTextureVertexColor,     // implemented
                 MaterialUnlitTextureVertexColorFont, // implemented
@@ -87,7 +88,7 @@ namespace AppKit
                         writer.String("subtract");
                     else if (blendMode == AppKit::GLEngine::BlendModeSubtractAlpha)
                         writer.String("subtract_alpha");
-                    
+
                     writer.EndObject();
                 }
 
@@ -99,10 +100,11 @@ namespace AppKit
 
                     if (_value.HasMember("color"))
                         color = SerializerUtil::read<decltype(color)>(_value["color"]);
-                    else 
+                    else
                         color = MathCore::vec4f(1.0f);
 
-                    if (_value.HasMember("tex") && _value["tex"].IsUint64()){
+                    if (_value.HasMember("tex") && _value["tex"].IsUint64())
+                    {
                         printf("needs to query tex resource DB\n");
                         uint64_t tex_id = _value["tex"].GetUint64();
                         auto item = resourceSet.texture_map.find(tex_id);
@@ -110,7 +112,9 @@ namespace AppKit
                             tex = item->second;
                         else
                             tex = nullptr;
-                    } else {
+                    }
+                    else
+                    {
                         tex = nullptr;
                     }
 
@@ -196,24 +200,28 @@ namespace AppKit
                 {
                     writer.StartObject();
 
-                    if (albedoColor != MathCore::vec3f(1.0f)){
+                    if (albedoColor != MathCore::vec3f(1.0f))
+                    {
                         writer.String("albedo_color");
                         SerializerUtil::write(writer, albedoColor);
                     }
 
-                    if (emissionColor != MathCore::vec3f(0.0f)){
+                    if (emissionColor != MathCore::vec3f(0.0f))
+                    {
                         writer.String("emission_color");
                         SerializerUtil::write(writer, emissionColor);
                     }
 
-                    if (roughness != 1.0f){
+                    if (roughness != 1.0f)
+                    {
                         writer.String("roughness");
-                        writer.Double( MathCore::CVT<float>::toDouble(roughness) );
+                        writer.Double(MathCore::CVT<float>::toDouble(roughness));
                     }
 
-                    if (metallic != 0.0f){
+                    if (metallic != 0.0f)
+                    {
                         writer.String("metallic");
-                        writer.Double( MathCore::CVT<float>::toDouble(metallic) );
+                        writer.Double(MathCore::CVT<float>::toDouble(metallic));
                     }
 
                     if (texAlbedo != nullptr)
@@ -250,7 +258,7 @@ namespace AppKit
                 {
                     if (_value.HasMember("albedo_color"))
                         albedoColor = SerializerUtil::read<decltype(albedoColor)>(_value["albedo_color"]);
-                    else 
+                    else
                         albedoColor = MathCore::vec3f(1.0f);
 
                     if (_value.HasMember("emission_color"))
@@ -264,11 +272,12 @@ namespace AppKit
                         roughness = 1.0f;
 
                     if (_value.HasMember("metallic") && _value["metallic"].IsDouble())
-                        metallic = MathCore::CVT<double>::toFloat(_value["metallic"].GetDouble()); 
+                        metallic = MathCore::CVT<double>::toFloat(_value["metallic"].GetDouble());
                     else
                         metallic = 0.0f;
 
-                    if (_value.HasMember("tex_albedo") && _value["tex_albedo"].IsUint64()){
+                    if (_value.HasMember("tex_albedo") && _value["tex_albedo"].IsUint64())
+                    {
                         printf("needs to query tex resource DB\n");
                         uint64_t tex_id = _value["tex_albedo"].GetUint64();
                         auto item = resourceSet.texture_map.find(tex_id);
@@ -276,11 +285,14 @@ namespace AppKit
                             texAlbedo = item->second;
                         else
                             texAlbedo = nullptr;
-                    } else {
+                    }
+                    else
+                    {
                         texAlbedo = nullptr;
                     }
 
-                    if (_value.HasMember("tex_normal") && _value["tex_normal"].IsUint64()){
+                    if (_value.HasMember("tex_normal") && _value["tex_normal"].IsUint64())
+                    {
                         printf("needs to query tex resource DB\n");
                         uint64_t tex_id = _value["tex_normal"].GetUint64();
                         auto item = resourceSet.texture_map.find(tex_id);
@@ -288,11 +300,14 @@ namespace AppKit
                             texNormal = item->second;
                         else
                             texNormal = nullptr;
-                    } else {
+                    }
+                    else
+                    {
                         texNormal = nullptr;
                     }
 
-                    if (_value.HasMember("tex_specular") && _value["tex_specular"].IsUint64()){
+                    if (_value.HasMember("tex_specular") && _value["tex_specular"].IsUint64())
+                    {
                         printf("needs to query tex resource DB\n");
                         uint64_t tex_id = _value["tex_specular"].GetUint64();
                         auto item = resourceSet.texture_map.find(tex_id);
@@ -300,11 +315,14 @@ namespace AppKit
                             texSpecular = item->second;
                         else
                             texSpecular = nullptr;
-                    } else {
+                    }
+                    else
+                    {
                         texSpecular = nullptr;
                     }
 
-                    if (_value.HasMember("tex_emission") && _value["tex_emission"].IsUint64()){
+                    if (_value.HasMember("tex_emission") && _value["tex_emission"].IsUint64())
+                    {
                         printf("needs to query tex resource DB\n");
                         uint64_t tex_id = _value["tex_emission"].GetUint64();
                         auto item = resourceSet.texture_map.find(tex_id);
@@ -312,10 +330,11 @@ namespace AppKit
                             texEmission = item->second;
                         else
                             texEmission = nullptr;
-                    } else {
+                    }
+                    else
+                    {
                         texEmission = nullptr;
                     }
-
                 }
             };
 

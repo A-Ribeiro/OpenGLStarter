@@ -32,4 +32,6 @@
 *.apk binary
 *.jar binary
 *.pptx binary
+*.bams binary
+*.basof2 binary
 

@@ -41,105 +41,105 @@ namespace AppKit
 
             // front (+z)
             vertex.push_back(MathCore::vec3f(-d, -d, d));
-            vertex.push_back(MathCore::vec3f(d, d, d));
             vertex.push_back(MathCore::vec3f(d, -d, d));
+            vertex.push_back(MathCore::vec3f(d, d, d));
 
             vertex.push_back(MathCore::vec3f(-d, -d, d));
-            vertex.push_back(MathCore::vec3f(-d, d, d));
             vertex.push_back(MathCore::vec3f(d, d, d));
+            vertex.push_back(MathCore::vec3f(-d, d, d));
 
             uv.push_back(MathCore::vec2f(0, 1));
-            uv.push_back(MathCore::vec2f(1, 0));
             uv.push_back(MathCore::vec2f(1, 1));
+            uv.push_back(MathCore::vec2f(1, 0));
 
             uv.push_back(MathCore::vec2f(0, 1));
-            uv.push_back(MathCore::vec2f(0, 0));
             uv.push_back(MathCore::vec2f(1, 0));
+            uv.push_back(MathCore::vec2f(0, 0));
 
             // back (-z)
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, -d, -d));
             vertex.push_back(MathCore::vec3f(d, d, -d));
+            vertex.push_back(MathCore::vec3f(d, -d, -d));
 
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, d, -d));
             vertex.push_back(MathCore::vec3f(-d, d, -d));
+            vertex.push_back(MathCore::vec3f(d, d, -d));
 
             uv.push_back(MathCore::vec2f(1, 1));
+            uv.push_back(MathCore::vec2f(0, 0));
             uv.push_back(MathCore::vec2f(0, 1));
-            uv.push_back(MathCore::vec2f(0, 0));
 
             uv.push_back(MathCore::vec2f(1, 1));
-            uv.push_back(MathCore::vec2f(0, 0));
             uv.push_back(MathCore::vec2f(1, 0));
+            uv.push_back(MathCore::vec2f(0, 0));
 
             // left (+x)
             vertex.push_back(MathCore::vec3f(d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, d, d));
             vertex.push_back(MathCore::vec3f(d, d, -d));
+            vertex.push_back(MathCore::vec3f(d, d, d));
 
             vertex.push_back(MathCore::vec3f(d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, -d, d));
             vertex.push_back(MathCore::vec3f(d, d, d));
+            vertex.push_back(MathCore::vec3f(d, -d, d));
 
             uv.push_back(MathCore::vec2f(1, 1));
-            uv.push_back(MathCore::vec2f(0, 0));
             uv.push_back(MathCore::vec2f(1, 0));
+            uv.push_back(MathCore::vec2f(0, 0));
 
             uv.push_back(MathCore::vec2f(1, 1));
-            uv.push_back(MathCore::vec2f(0, 1));
             uv.push_back(MathCore::vec2f(0, 0));
+            uv.push_back(MathCore::vec2f(0, 1));
 
             // right (-x)
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(-d, d, -d));
             vertex.push_back(MathCore::vec3f(-d, d, d));
+            vertex.push_back(MathCore::vec3f(-d, d, -d));
 
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(-d, d, d));
             vertex.push_back(MathCore::vec3f(-d, -d, d));
+            vertex.push_back(MathCore::vec3f(-d, d, d));
 
             uv.push_back(MathCore::vec2f(0, 1));
+            uv.push_back(MathCore::vec2f(1, 0));
             uv.push_back(MathCore::vec2f(0, 0));
-            uv.push_back(MathCore::vec2f(1, 0));
 
             uv.push_back(MathCore::vec2f(0, 1));
-            uv.push_back(MathCore::vec2f(1, 0));
             uv.push_back(MathCore::vec2f(1, 1));
+            uv.push_back(MathCore::vec2f(1, 0));
 
             // up (+y)
             vertex.push_back(MathCore::vec3f(-d, d, -d));
-            vertex.push_back(MathCore::vec3f(d, d, -d));
             vertex.push_back(MathCore::vec3f(d, d, d));
+            vertex.push_back(MathCore::vec3f(d, d, -d));
 
             vertex.push_back(MathCore::vec3f(-d, d, -d));
-            vertex.push_back(MathCore::vec3f(d, d, d));
             vertex.push_back(MathCore::vec3f(-d, d, d));
+            vertex.push_back(MathCore::vec3f(d, d, d));
 
             uv.push_back(MathCore::vec2f(0, 0));
+            uv.push_back(MathCore::vec2f(1, 1));
             uv.push_back(MathCore::vec2f(1, 0));
-            uv.push_back(MathCore::vec2f(1, 1));
 
             uv.push_back(MathCore::vec2f(0, 0));
-            uv.push_back(MathCore::vec2f(1, 1));
             uv.push_back(MathCore::vec2f(0, 1));
+            uv.push_back(MathCore::vec2f(1, 1));
 
             // down (-y)
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, -d, d));
             vertex.push_back(MathCore::vec3f(d, -d, -d));
+            vertex.push_back(MathCore::vec3f(d, -d, d));
 
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(-d, -d, d));
             vertex.push_back(MathCore::vec3f(d, -d, d));
+            vertex.push_back(MathCore::vec3f(-d, -d, d));
 
             uv.push_back(MathCore::vec2f(0, 1));
-            uv.push_back(MathCore::vec2f(1, 0));
             uv.push_back(MathCore::vec2f(1, 1));
+            uv.push_back(MathCore::vec2f(1, 0));
 
             uv.push_back(MathCore::vec2f(0, 1));
-            uv.push_back(MathCore::vec2f(0, 0));
             uv.push_back(MathCore::vec2f(1, 0));
+            uv.push_back(MathCore::vec2f(0, 0));
 
             MathCore::quatf rot = MathCore::GEN<MathCore::quatf>::fromEuler(0, -MathCore::OP<float>::deg_2_rad(rotation), 0);
             for (size_t i = 0; i < vertex.size(); i++)

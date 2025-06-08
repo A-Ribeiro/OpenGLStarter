@@ -116,7 +116,7 @@ void InnerViewport::OnUpdate(Platform::Time *time){
     DepthTestType old_depth_test = renderState->DepthTest;
     iRect old_viewport = renderState->Viewport;
     
-    renderState->FrontFace = FrontFaceCW;
+    renderState->FrontFace = FrontFaceCCW;
     renderState->DepthTest = DepthTestLess;
 
     if (isFBO) {

@@ -123,6 +123,17 @@ namespace AppKit
                 allMeshRender_Range(element, &unlitShader, start_index, end_index);
                 break;
 
+            case Components::MaterialUnlitVertexColor:
+                state->BlendMode = material->unlit.blendMode;
+                state->CurrentShader = &unlit_vertcolor_Shader;
+
+                unlit_vertcolor_Shader.setColor(material->unlit.color);
+                unlit_vertcolor_Shader.setMVP(*mvp);
+
+                allMeshRender_Range(element, &unlit_vertcolor_Shader, start_index, end_index);
+                break;
+            break;
+
             case Components::MaterialUnlitTexture:
                 state->BlendMode = material->unlit.blendMode;
                 state->CurrentShader = &unlit_tex_Shader;

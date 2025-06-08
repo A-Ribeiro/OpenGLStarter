@@ -45,7 +45,7 @@ App::App()
 
     //setup renderstate
     renderState->ClearColor = vec4f(0.0f,0.0f,0.0f,1.0f);
-    renderState->FrontFace = FrontFaceCW;
+    renderState->FrontFace = FrontFaceCCW;
 #ifndef ITK_RPI
     //renderState->Wireframe = WireframeBack;
     //renderState->CullFace = CullFaceNone;
@@ -256,7 +256,7 @@ void App::draw() {
         window->glSetActivate(true);
     }
 
-    renderState->FrontFace = FrontFaceCW;
+    renderState->FrontFace = FrontFaceCCW;
     renderState->DepthTest = DepthTestLessEqual;
 
     fade->draw();

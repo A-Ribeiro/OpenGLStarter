@@ -232,7 +232,7 @@ namespace AppKit
                 iRect old_viewport = state->Viewport;
                 state->Viewport = shadowCache->viewport;
 
-                state->FrontFace = FrontFaceCCW;
+                state->FrontFace = FrontFaceCW;
 
                 // vec4 old_clear_color = state->ClearColor;
                 // state->ClearColor = vec4(1);
@@ -250,7 +250,7 @@ namespace AppKit
                 state->ColorWrite = ColorWriteAll;
                 state->Viewport = old_viewport;
 
-                state->FrontFace = FrontFaceCW;
+                state->FrontFace = FrontFaceCCW;
                 // state->ClearColor = old_clear_color;
 
                 // read the data

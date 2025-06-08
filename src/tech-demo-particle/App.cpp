@@ -21,7 +21,7 @@ App::App()
 
     // setup renderstate
     renderState->ClearColor = vec4f(1.0f, 1.0f, 250.0f / 255.0f, 1.0f);
-    renderState->FrontFace = FrontFaceCW;
+    renderState->FrontFace = FrontFaceCCW;
 #ifndef ITK_RPI
     // renderState->Wireframe = WireframeBack;
     // renderState->CullFace = CullFaceNone;

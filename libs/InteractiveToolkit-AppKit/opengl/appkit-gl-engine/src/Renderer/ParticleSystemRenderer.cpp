@@ -92,16 +92,16 @@ namespace AppKit
 
                 aux.uv = MathCore::vec2f(0, 0);
                 normalVertex.push_back(aux);
-                aux.uv = MathCore::vec2f(0, 1);
-                normalVertex.push_back(aux);
                 aux.uv = MathCore::vec2f(1, 1);
+                normalVertex.push_back(aux);
+                aux.uv = MathCore::vec2f(0, 1);
                 normalVertex.push_back(aux);
 
                 aux.uv = MathCore::vec2f(0, 0);
                 normalVertex.push_back(aux);
-                aux.uv = MathCore::vec2f(1, 1);
-                normalVertex.push_back(aux);
                 aux.uv = MathCore::vec2f(1, 0);
+                normalVertex.push_back(aux);
+                aux.uv = MathCore::vec2f(1, 1);
                 normalVertex.push_back(aux);
             }
 
@@ -176,16 +176,16 @@ namespace AppKit
 
                 aux.uv = MathCore::vec2f(0, 0);
                 normalVertex.push_back(aux);
-                aux.uv = MathCore::vec2f(0, 1);
-                normalVertex.push_back(aux);
                 aux.uv = MathCore::vec2f(1, 1);
+                normalVertex.push_back(aux);
+                aux.uv = MathCore::vec2f(0, 1);
                 normalVertex.push_back(aux);
 
                 aux.uv = MathCore::vec2f(0, 0);
                 normalVertex.push_back(aux);
-                aux.uv = MathCore::vec2f(1, 1);
-                normalVertex.push_back(aux);
                 aux.uv = MathCore::vec2f(1, 0);
+                normalVertex.push_back(aux);
+                aux.uv = MathCore::vec2f(1, 1);
                 normalVertex.push_back(aux);
             }
 
