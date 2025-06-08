@@ -32,7 +32,9 @@ namespace AppKit
             GLFont2PolygonCache &operator=(const GLFont2PolygonCache &other) = default;
             GLFont2PolygonCache &operator=(GLFont2PolygonCache &&other) noexcept = default;
 
-            void setFromGLFont2(GLFont2 &glFont2, float size, float max_distance_tolerance);
+            void setFromGLFont2(const GLFont2 &glFont2, float size, float max_distance_tolerance);
+
+            const GLFont2TriangulatedGlyph *getGlyph(uint32_t charcode) const;
         };
 
     } // namespace OpenGL

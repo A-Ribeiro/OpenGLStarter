@@ -720,9 +720,12 @@ namespace AppKit
             return u32RichComputeBox(ITKCommon::StringUtil::utf8_to_utf32(str).c_str(), max_width);
         }
 
-        GLFont2Builder *GLFont2Builder::u32richBuild(const char32_t *str, bool use_srgb, float max_width)
+        GLFont2Builder *GLFont2Builder::u32richBuild(const char32_t *str, bool use_srgb, float max_width, std::shared_ptr<GLFont2PolygonCache> useThisPolygons)
         {
             vertexAttrib.clear();
+            triangles.clear();
+            if (str == nullptr || *str == U'\0')
+                return this;
 
             // organize lines
             std::vector<std::vector<RichFontState>> lines;
@@ -767,7 +770,7 @@ namespace AppKit
 
             if (firstLineHeightMode == GLFont2FirstLineHeightMode_UseCharacterMaxHeight)
                 max_line_height_1stline_scaled = max_height_1stline_scaled;
-                
+
             if (verticalAlign == GLFont2VerticalAlign_top)
                 position.y = -max_line_height_1stline_scaled; // position.y = -max_height_1stline_scaled;
             else if (verticalAlign == GLFont2VerticalAlign_middle)
@@ -815,6 +818,19 @@ namespace AppKit
                     {
                         if (c == U' ')
                             position.x += state.style.render_size_space_width;
+                        else if (useThisPolygons != nullptr)
+                        {
+                            if (auto glyph = useThisPolygons->getGlyph((uint32_t)c))
+                            {
+                                if (glyph->triangles.size() < 3 || glyph->vertices.size() < 3)
+                                    continue; // not a valid polygon
+                                uint32_t base_offset = (uint32_t)vertexAttrib.size();
+                                for (const auto &v : glyph->vertices)
+                                    vertexAttrib.push_back(GLFont2Builder_VertexAttrib(v + position, MathCore::vec2f(0), state.style.faceColor));
+                                for (const auto &t : glyph->triangles)
+                                    triangles.push_back(t + base_offset);
+                            }
+                        }
                         else if (auto glyph = glFont2.getGlyph((uint32_t)c))
                         {
                             if (state.style.drawFace)
@@ -830,10 +846,22 @@ namespace AppKit
             return this;
         }
 
-        GLFont2Builder *GLFont2Builder::richBuild(const char *utf8_str, bool use_srgb, float max_width)
+        GLFont2Builder *GLFont2Builder::richBuild(const char *utf8_str, bool use_srgb, float max_width, std::shared_ptr<GLFont2PolygonCache> useThisPolygons)
         {
-            u32richBuild(ITKCommon::StringUtil::utf8_to_utf32(utf8_str).c_str(), use_srgb, max_width);
+            u32richBuild(ITKCommon::StringUtil::utf8_to_utf32(utf8_str).c_str(), use_srgb, max_width, useThisPolygons);
             return this;
+        }
+
+        std::shared_ptr<GLFont2PolygonCache> GLFont2Builder::createPolygonCache(float size, float max_distance_tolerance) const
+        {
+            auto polygonCache = std::make_shared<GLFont2PolygonCache>();
+            polygonCache->setFromGLFont2(glFont2, size, max_distance_tolerance);
+            return polygonCache;
+        }
+
+        bool GLFont2Builder::isConstructedFromPolygonCache() const
+        {
+            return triangles.size() > 0 && vertexAttrib.size() > 0;
         }
 
     }

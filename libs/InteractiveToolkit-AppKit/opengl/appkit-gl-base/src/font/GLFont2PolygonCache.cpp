@@ -8,7 +8,7 @@ namespace AppKit
     namespace OpenGL
     {
 
-        void GLFont2PolygonCache::setFromGLFont2(GLFont2 &glFont2, float size, float max_distance_tolerance)
+        void GLFont2PolygonCache::setFromGLFont2(const GLFont2 &glFont2, float size, float max_distance_tolerance)
         {
             float size_to_apply = size / glFont2.size;
             if (size_to_apply <= 0.0f)
@@ -46,6 +46,14 @@ namespace AppKit
 
                 triangulated_glyphs[glyph.charcode] = std::move(triangulated_glyph);
             }
+        }
+
+        const GLFont2TriangulatedGlyph *GLFont2PolygonCache::getGlyph(uint32_t charcode) const
+        {
+            auto it = triangulated_glyphs.find(charcode);
+            if (it == triangulated_glyphs.end())
+                return nullptr;
+            return &(it->second);
         }
 
     } // namespace OpenGL
