@@ -15,7 +15,7 @@ namespace AppKit
             void ComponentFontToMesh::toMesh(AppKit::OpenGL::GLFont2Builder &builder, bool dynamic)
             {
                 ITK_ABORT(getTransformCount() == 0, "Transform cannot be 0.\n");
-                
+
                 auto transform = getTransform();
 
                 start();
@@ -25,25 +25,42 @@ namespace AppKit
                 mesh->color[0].clear();
                 mesh->indices.clear();
 
-                //ReferenceCounter<AppKit::OpenGL::GLTexture *> *refCounter = &Engine::Instance()->textureReferenceCounter;
+                bool is_polygon_font = builder.isConstructedFromPolygonCache();
 
-                material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
-                //refCounter->remove(material->unlit.tex);
-                material->unlit.tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&builder.glFont2.texture, [](AppKit::OpenGL::GLTexture *v) { } );
-
-                for (size_t i = 0; i < builder.vertexAttrib.size(); i++)
+                if (is_polygon_font)
                 {
-                    mesh->pos.push_back(builder.vertexAttrib[i].pos);
-                    mesh->uv[0].push_back(MathCore::vec3f(builder.vertexAttrib[i].uv, 0.0f));
-                    // mesh->color[0].push_back( vecToColor( builder.vertexAttrib[i].color ) );
-                    mesh->color[0].push_back(builder.vertexAttrib[i].color);
+                    material->type = AppKit::GLEngine::Components::MaterialUnlitVertexColor;
+                    material->unlit.tex = nullptr;
 
-                    // flip to CW orientation
-                    if ((i % 3) == 0)
+                    for (size_t i = 0; i < builder.vertexAttrib.size(); i++)
                     {
-                        mesh->indices.push_back((uint16_t)i);
-                        mesh->indices.push_back((uint16_t)(i + 2));
-                        mesh->indices.push_back((uint16_t)(i + 1));
+                        mesh->pos.push_back(builder.vertexAttrib[i].pos);
+                        mesh->color[0].push_back(builder.vertexAttrib[i].color);
+                    }
+
+                    mesh->indices.insert(mesh->indices.end(),
+                                         builder.triangles.begin(),
+                                         builder.triangles.end());
+                }
+                else
+                {
+                    // texture font
+                    material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
+                    material->unlit.tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&builder.glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
+
+                    for (size_t i = 0; i < builder.vertexAttrib.size(); i++)
+                    {
+                        mesh->pos.push_back(builder.vertexAttrib[i].pos);
+                        mesh->uv[0].push_back(MathCore::vec3f(builder.vertexAttrib[i].uv, 0.0f));
+                        mesh->color[0].push_back(builder.vertexAttrib[i].color);
+
+                        // keep CCW orientation
+                        if ((i % 3) == 0)
+                        {
+                            mesh->indices.push_back((uint16_t)i);
+                            mesh->indices.push_back((uint16_t)(i + 1));
+                            mesh->indices.push_back((uint16_t)(i + 2));
+                        }
                     }
                 }
 
@@ -99,8 +116,8 @@ namespace AppKit
                 createAuxiliaryComponents();
             }
 
-            void ComponentFontToMesh::detachFromTransform(std::shared_ptr<Transform> t) {
-
+            void ComponentFontToMesh::detachFromTransform(std::shared_ptr<Transform> t)
+            {
             }
 
             void ComponentFontToMesh::start()
@@ -108,7 +125,8 @@ namespace AppKit
                 createAuxiliaryComponents();
             }
 
-            std::shared_ptr<Component> ComponentFontToMesh::duplicate_ref_or_clone(bool force_clone){
+            std::shared_ptr<Component> ComponentFontToMesh::duplicate_ref_or_clone(bool force_clone)
+            {
                 auto result = Component::CreateShared<ComponentFontToMesh>();
 
                 result->material = this->material;
@@ -116,24 +134,25 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentFontToMesh::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+            void ComponentFontToMesh::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            {
                 auto found_material = componentMap.find(this->material);
                 if (found_material != componentMap.end())
                     this->material = std::dynamic_pointer_cast<ComponentMaterial>(found_material->second);
-                
+
                 auto found_mesh = componentMap.find(this->mesh);
                 if (found_mesh != componentMap.end())
                     this->mesh = std::dynamic_pointer_cast<ComponentMesh>(found_mesh->second);
             }
 
-            void ComponentFontToMesh::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer){
+            void ComponentFontToMesh::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
+            {
                 writer.StartObject();
                 writer.String("type");
                 writer.String(ComponentFontToMesh::Type);
                 writer.String("id");
                 writer.Uint64((intptr_t)self().get());
                 writer.EndObject();
-                
             }
             void ComponentFontToMesh::Deserialize(rapidjson::Value &_value,
                                                   std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
@@ -144,9 +163,7 @@ namespace AppKit
                     return;
                 if (!strcmp(_value["type"].GetString(), ComponentFontToMesh::Type) == 0)
                     return;
-                
             }
-
 
         }
     }

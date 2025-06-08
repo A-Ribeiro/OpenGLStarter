@@ -43,7 +43,7 @@ void ScenePalace::loadResources() {
     Texture_Guard[2] = resourceHelper->createTextureFromFile("resources/castle_guard/Guard_02__specular.jpg", false);
 
 	Model_Palace = resourceHelper->createTransformFromModel("resources/palace/colonnato.min.bams", resourceMap->defaultPBRMaterial);
-    Model_Cross = resourceHelper->createTransformFromModel("resources/palace/cross.bams", resourceMap->defaultPBRMaterial);
+    // Model_Cross = resourceHelper->createTransformFromModel("resources/palace/cross.bams", resourceMap->defaultPBRMaterial);
     //Model_Guard = resourceHelper->createTransformFromModel("resources/castle_guard/castle_guard_01.bams");
 
     bool use_gpu = true;
@@ -75,28 +75,28 @@ void ScenePalace::loadResources() {
 
     skinnedMesh->model_base->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
 
-    newMaterial = Component::CreateShared<ComponentMaterial>();
-    newMaterial->type = Components::MaterialPBR;
-    newMaterial->pbr.albedoColor = MathCore::vec3f(1, 0.9814019f, 0.7490196f);
-    newMaterial->pbr.metallic = 0.0f;
-    newMaterial->pbr.roughness = 1.0f;
-    //newMaterial->pbr.texAlbedo = texRefCount->add(Rock02Textures[0]);
-    //newMaterial->pbr.texNormal = texRefCount->add(Rock02Textures[1]);
-    newMaterial->pbr.albedoColor = ResourceHelper::vec3ColorGammaToLinear(newMaterial->pbr.albedoColor);
-    newMaterial->pbr.emissionColor = ResourceHelper::vec3ColorGammaToLinear(MathCore::vec3f(1.0f, 1.0f, 0.5f)) * 8.0f;
+    // newMaterial = Component::CreateShared<ComponentMaterial>();
+    // newMaterial->type = Components::MaterialPBR;
+    // newMaterial->pbr.albedoColor = MathCore::vec3f(1, 0.9814019f, 0.7490196f);
+    // newMaterial->pbr.metallic = 0.0f;
+    // newMaterial->pbr.roughness = 1.0f;
+    // //newMaterial->pbr.texAlbedo = texRefCount->add(Rock02Textures[0]);
+    // //newMaterial->pbr.texNormal = texRefCount->add(Rock02Textures[1]);
+    // newMaterial->pbr.albedoColor = ResourceHelper::vec3ColorGammaToLinear(newMaterial->pbr.albedoColor);
+    // newMaterial->pbr.emissionColor = ResourceHelper::vec3ColorGammaToLinear(MathCore::vec3f(1.0f, 1.0f, 0.5f)) * 8.0f;
 
-    Model_Cross->findTransformByName("circle")->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
+    // //Model_Cross->findTransformByName("circle")->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
 
-    newMaterial = Component::CreateShared<ComponentMaterial>();
-    newMaterial->type = Components::MaterialPBR;
-    newMaterial->pbr.albedoColor = MathCore::vec3f(1, 0.8521127f, 0.7464789f);
-    newMaterial->pbr.metallic = 0.0f;
-    newMaterial->pbr.roughness = 1.0f;
-    //newMaterial->pbr.texAlbedo = texRefCount->add(Rock03Textures[0]);
-    //newMaterial->pbr.texNormal = texRefCount->add(Rock03Textures[1]);
-    newMaterial->pbr.albedoColor = ResourceHelper::vec3ColorGammaToLinear(newMaterial->pbr.albedoColor);
+    // newMaterial = Component::CreateShared<ComponentMaterial>();
+    // newMaterial->type = Components::MaterialPBR;
+    // newMaterial->pbr.albedoColor = MathCore::vec3f(1, 0.8521127f, 0.7464789f);
+    // newMaterial->pbr.metallic = 0.0f;
+    // newMaterial->pbr.roughness = 1.0f;
+    // //newMaterial->pbr.texAlbedo = texRefCount->add(Rock03Textures[0]);
+    // //newMaterial->pbr.texNormal = texRefCount->add(Rock03Textures[1]);
+    // newMaterial->pbr.albedoColor = ResourceHelper::vec3ColorGammaToLinear(newMaterial->pbr.albedoColor);
 
-    Model_Cross->findTransformByName("cross")->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
+    // //Model_Cross->findTransformByName("cross")->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
 
 }
 
@@ -189,9 +189,9 @@ void ScenePalace::bindResourcesToGraph() {
 		node = root->findTransformByName("static_model");
         node->addChild(ResourceHelper::cloneTransformRecursive(Model_Palace));
 
-		node = root->findTransformByName("RotatingCross");
-        node->addChild(ResourceHelper::cloneTransformRecursive(Model_Cross));
-        node->addComponent(Component::CreateShared<RotatingCross>());
+		// node = root->findTransformByName("RotatingCross");
+        // node->addChild(ResourceHelper::cloneTransformRecursive(Model_Cross));
+        // node->addComponent(Component::CreateShared<RotatingCross>());
 
         node = root->findTransformByName("player side");
         //node->addChild(ResourceHelper::removeEmptyTransforms(ResourceHelper::cloneTransformRecursive(Model_Guard)));
@@ -244,7 +244,7 @@ void ScenePalace::unloadAll() {
     camera = nullptr;
 
     Model_Palace = nullptr;
-    Model_Cross = nullptr;
+    //Model_Cross = nullptr;
     //AppKit::GLEngine::Transform* Model_Guard;
     Texture_Guard[0] = nullptr;
     Texture_Guard[1] = nullptr;
@@ -265,7 +265,7 @@ ScenePalace::ScenePalace(
     std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
 {
     Model_Palace = nullptr;
-    Model_Cross = nullptr;
+    //Model_Cross = nullptr;
     //Model_Guard = nullptr;
     skinnedMesh = nullptr;
     animationMotion = nullptr;
@@ -429,12 +429,12 @@ std::shared_ptr<Transform> loadSceneroot()
 			_11->LocalScale = MathCore::vec3f(1,1,1);
 		}
 	}
-	{
-		auto _12 = _0->addChild(Transform::CreateShared());
-		_12->Name = std::string("RotatingCross");
-		_12->LocalPosition = MathCore::vec3f(0,0,5.1);
-		_12->LocalRotation = quatf(0,1,0,0);
-		_12->LocalScale = MathCore::vec3f(0.7,0.7,0.7);
-	}
+	// {
+	// 	auto _12 = _0->addChild(Transform::CreateShared());
+	// 	_12->Name = std::string("RotatingCross");
+	// 	_12->LocalPosition = MathCore::vec3f(0,0,5.1);
+	// 	_12->LocalRotation = quatf(0,1,0,0);
+	// 	_12->LocalScale = MathCore::vec3f(0.7,0.7,0.7);
+	// }
 	return _0;
 }

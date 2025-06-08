@@ -822,13 +822,19 @@ namespace AppKit
                         {
                             if (auto glyph = useThisPolygons->getGlyph((uint32_t)c))
                             {
-                                if (glyph->triangles.size() < 3 || glyph->vertices.size() < 3)
-                                    continue; // not a valid polygon
-                                uint32_t base_offset = (uint32_t)vertexAttrib.size();
-                                for (const auto &v : glyph->vertices)
-                                    vertexAttrib.push_back(GLFont2Builder_VertexAttrib(v + position, MathCore::vec2f(0), state.style.faceColor));
-                                for (const auto &t : glyph->triangles)
-                                    triangles.push_back(t + base_offset);
+                                float scaler = state.style.size / useThisPolygons->size;
+                                if (glyph->triangles.size() >= 3 && glyph->vertices.size() >= 3)
+                                {
+                                    uint32_t base_offset = (uint32_t)vertexAttrib.size();
+                                    for (const auto &v : glyph->vertices)
+                                        vertexAttrib.push_back(GLFont2Builder_VertexAttrib(
+                                            v * scaler + position,
+                                            MathCore::vec2f(0),
+                                            state.style.faceColor));
+                                    for (const auto &t : glyph->triangles)
+                                        triangles.push_back(t + base_offset);
+                                }
+                                position.x += scaler * glyph->advancex.x;
                             }
                         }
                         else if (auto glyph = glFont2.getGlyph((uint32_t)c))

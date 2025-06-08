@@ -16,6 +16,11 @@ void MainScene::loadResources()
 {
     auto engine = AppKit::GLEngine::Engine::Instance();
     fontBuilder.load("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
+
+    // polygonFontCache = fontBuilder.createPolygonCache(
+    //     60.0f,  // size
+    //     600.0f   // max_distance_tolerance
+    // );
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -78,7 +83,7 @@ void MainScene::setTextWithWidth(float width)
         u8"botões PS(white):" Font_ps_circle_white Font_ps_cross_white Font_ps_square_white Font_ps_triangle_white u8"\n"
         u8"teclado:" Font_Key_z Font_Key_x Font_Key_c;
 
-    fontBuilder.richBuild(txt.c_str(), false, width);
+    fontBuilder.richBuild(txt.c_str(), false, width, polygonFontCache);
     font_line1->toMesh(fontBuilder, true);
     font_line1->getTransform()->setLocalScale(1.0f);
 
@@ -117,7 +122,16 @@ void MainScene::bindResourcesToGraph()
                                                    {
         if (evt.type == AppKit::Window::KeyboardEventType::KeyPressed &&
             evt.code == AppKit::Window::Devices::KeyCode::Space){
-            
+            if (polygonFontCache != nullptr)
+                polygonFontCache = nullptr;
+            else {
+                polygonFontCache = fontBuilder.createPolygonCache(
+                    60.0f,  // size
+                    5.0f   // max_distance_tolerance
+                );
+            }
+            auto rect = renderWindow->CameraViewport.c_ptr();
+            resize(MathCore::vec2i(rect->w, rect->h));
         } });
 
     renderWindow->OnUpdate.add(&MainScene::update, this);

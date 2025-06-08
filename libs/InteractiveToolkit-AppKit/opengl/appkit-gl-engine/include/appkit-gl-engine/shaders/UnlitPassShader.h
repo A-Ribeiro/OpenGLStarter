@@ -57,6 +57,52 @@ namespace AppKit
             }
         };
 
+        class Unlit_vertcolor_Shader : public DefaultEngineShader
+        {
+            int u_mvp;
+            int u_color;
+
+        public:
+            Unlit_vertcolor_Shader()
+            {
+                format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_COLOR0;
+
+                const char vertexShaderCode[] = {
+                    "attribute vec4 aPosition;"
+                    "attribute vec4 aColor0;"
+                    "uniform mat4 uMVP;"
+                    "varying vec4 color;"
+                    "void main() {"
+                    "  color = aColor0;"
+                    "  gl_Position = uMVP * aPosition;"
+                    "}"};
+
+                const char fragmentShaderCode[] = {
+                    "varying vec4 color;"
+                    "uniform vec4 uColor;"
+                    "void main() {"
+                    "  vec4 result = color * uColor;"
+                    "  gl_FragColor = result;"
+                    "}"};
+
+                compile(vertexShaderCode, fragmentShaderCode, __FILE__, __LINE__);
+                DefaultEngineShader::setupAttribLocation();
+                link(__FILE__, __LINE__);
+
+                u_mvp = getUniformLocation("uMVP");
+                u_color = getUniformLocation("uColor");
+            }
+
+            void setMVP(const MathCore::mat4f &mvp)
+            {
+                setUniform(u_mvp, mvp);
+            }
+            void setColor(const MathCore::vec4f &color)
+            {
+                setUniform(u_color, color);
+            }
+        };
+
         class Unlit_tex_PassShader : public DefaultEngineShader
         {
             int u_mvp;

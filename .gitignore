@@ -28,3 +28,5 @@ Thumbs.db
 buildFlags.h
 
 /valgrind-out.txt
+
+*:Zone.Identifier

@@ -17,57 +17,57 @@ namespace AppKit
 
             // front (+z)
             vertex.push_back(MathCore::vec3f(-d, -d, d));
-            vertex.push_back(MathCore::vec3f(d, d, d));
             vertex.push_back(MathCore::vec3f(d, -d, d));
+            vertex.push_back(MathCore::vec3f(d, d, d));
 
             vertex.push_back(MathCore::vec3f(-d, -d, d));
-            vertex.push_back(MathCore::vec3f(-d, d, d));
             vertex.push_back(MathCore::vec3f(d, d, d));
+            vertex.push_back(MathCore::vec3f(-d, d, d));
 
             // back (-z)
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, -d, -d));
             vertex.push_back(MathCore::vec3f(d, d, -d));
+            vertex.push_back(MathCore::vec3f(d, -d, -d));
 
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, d, -d));
             vertex.push_back(MathCore::vec3f(-d, d, -d));
+            vertex.push_back(MathCore::vec3f(d, d, -d));
 
             // left (+x)
             vertex.push_back(MathCore::vec3f(d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, d, d));
             vertex.push_back(MathCore::vec3f(d, d, -d));
+            vertex.push_back(MathCore::vec3f(d, d, d));
 
             vertex.push_back(MathCore::vec3f(d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, -d, d));
             vertex.push_back(MathCore::vec3f(d, d, d));
+            vertex.push_back(MathCore::vec3f(d, -d, d));
 
             // right (-x)
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(-d, d, -d));
             vertex.push_back(MathCore::vec3f(-d, d, d));
+            vertex.push_back(MathCore::vec3f(-d, d, -d));
 
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(-d, d, d));
             vertex.push_back(MathCore::vec3f(-d, -d, d));
+            vertex.push_back(MathCore::vec3f(-d, d, d));
 
             // up (+y)
             vertex.push_back(MathCore::vec3f(-d, d, -d));
-            vertex.push_back(MathCore::vec3f(d, d, -d));
             vertex.push_back(MathCore::vec3f(d, d, d));
+            vertex.push_back(MathCore::vec3f(d, d, -d));
 
             vertex.push_back(MathCore::vec3f(-d, d, -d));
-            vertex.push_back(MathCore::vec3f(d, d, d));
             vertex.push_back(MathCore::vec3f(-d, d, d));
+            vertex.push_back(MathCore::vec3f(d, d, d));
 
             // down (-y)
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(d, -d, d));
             vertex.push_back(MathCore::vec3f(d, -d, -d));
+            vertex.push_back(MathCore::vec3f(d, -d, d));
 
             vertex.push_back(MathCore::vec3f(-d, -d, -d));
-            vertex.push_back(MathCore::vec3f(-d, -d, d));
             vertex.push_back(MathCore::vec3f(d, -d, d));
+            vertex.push_back(MathCore::vec3f(-d, -d, d));
         }
 
         GLCubeMapSkyBox::GLCubeMapSkyBox(bool sRGB,

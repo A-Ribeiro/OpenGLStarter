@@ -503,7 +503,7 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 		window->glSetActivate(true);
 	}
 
-	renderState->FrontFace = AppKit::GLEngine::FrontFaceCW;
+	renderState->FrontFace = AppKit::GLEngine::FrontFaceCCW;
 	renderState->DepthTest = AppKit::GLEngine::DepthTestLessEqual;
 
 }

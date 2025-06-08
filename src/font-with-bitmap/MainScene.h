@@ -50,6 +50,8 @@ public:
     App *app;
 
     AppKit::OpenGL::GLFont2Builder fontBuilder;
+    std::shared_ptr<AppKit::OpenGL::GLFont2PolygonCache> polygonFontCache;
+
     std::shared_ptr<AppKit::GLEngine::Components::ComponentFontToMesh> font_line1;
     std::shared_ptr<AppKit::GLEngine::Transform> scaleNode;
 

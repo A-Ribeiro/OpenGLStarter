@@ -47,12 +47,12 @@ namespace AppKit
             vertex.clear();
 
             vertex.push_back(MathCore::vec3f(-1, -1, 0));
-            vertex.push_back(MathCore::vec3f(1, 1, 0));
             vertex.push_back(MathCore::vec3f(1, -1, 0));
+            vertex.push_back(MathCore::vec3f(1, 1, 0));
 
             vertex.push_back(MathCore::vec3f(-1, -1, 0));
-            vertex.push_back(MathCore::vec3f(-1, 1, 0));
             vertex.push_back(MathCore::vec3f(1, 1, 0));
+            vertex.push_back(MathCore::vec3f(-1, 1, 0));
         }
 
         Fade::Fade(Platform::Time *_time, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindowRegion)

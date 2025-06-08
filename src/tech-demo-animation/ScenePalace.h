@@ -33,7 +33,7 @@ protected:
     
     
     std::shared_ptr<AppKit::GLEngine::Transform> Model_Palace;
-    std::shared_ptr<AppKit::GLEngine::Transform> Model_Cross;
+    //std::shared_ptr<AppKit::GLEngine::Transform> Model_Cross;
     //AppKit::GLEngine::Transform* Model_Guard;
     std::shared_ptr<AppKit::OpenGL::GLTexture> Texture_Guard[3];//diffuse + normal + specular
 
