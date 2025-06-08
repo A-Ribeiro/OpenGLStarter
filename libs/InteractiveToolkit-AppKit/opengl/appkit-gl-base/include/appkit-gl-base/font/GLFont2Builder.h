@@ -2,6 +2,7 @@
 
 #include <appkit-gl-base/platform/PlatformGL.h>
 #include <appkit-gl-base/font/GLFont2.h>
+#include <appkit-gl-base/font/GLFont2PolygonCache.h>
 
 #include <InteractiveToolkit/CollisionCore/CollisionCore.h>
 
@@ -118,6 +119,7 @@ namespace AppKit
             GLFont2 glFont2; ///< loaded font glyph set
 
             std::vector<GLFont2Builder_VertexAttrib> vertexAttrib; ///< last generated OpenGL vertex buffer data
+            std::vector<uint32_t> triangles; ///< indices used when generates from polygonCache
 
             // state variables
             MathCore::vec4f faceColor;              ///< current state of the face color
@@ -165,18 +167,35 @@ namespace AppKit
             /// \brief Build OpenGL vertex information to render the text parameter
             ///
             /// \author Alessandro Ribeiro
-            /// \param str The string to be rendered
+            /// \param utf32_str The string to be rendered
+            /// \param use_srgb Use sRGB color space for the face and stroke colors
+            /// \param max_width The maximum width of the text to be rendered, if -1 it will not limit the width
+            /// \param useThisPolygons Use this polygon cache instead of rendering texture based glyphs
             /// \return #GLFont2Builder this instance information
             ///
-            GLFont2Builder *u32richBuild(const char32_t *utf32_str, bool use_srgb, float max_width = -1);
+            GLFont2Builder *u32richBuild(const char32_t *utf32_str, bool use_srgb, float max_width = -1, std::shared_ptr<GLFont2PolygonCache> useThisPolygons = nullptr);
 
             /// \brief Build OpenGL vertex information to render the text parameter
             ///
             /// \author Alessandro Ribeiro
-            /// \param str The string to be rendered
+            /// \param utf8_str The string to be rendered
+            /// \param use_srgb Use sRGB color space for the face and stroke colors
+            /// \param max_width The maximum width of the text to be rendered, if -1 it will not limit the width
+            /// \param useThisPolygons Use this polygon cache instead of rendering texture based glyphs
             /// \return #GLFont2Builder this instance information
             ///
-            GLFont2Builder *richBuild(const char *utf8_str, bool use_srgb, float max_width = -1);
+            GLFont2Builder *richBuild(const char *utf8_str, bool use_srgb, float max_width = -1, std::shared_ptr<GLFont2PolygonCache> useThisPolygons = nullptr);
+
+            /// \brief Build triangles vertex information to render the glyphs
+            ///
+            /// \author Alessandro Ribeiro
+            /// \param size The size of the font to be rendered
+            /// \param max_distance_tolerance The maximum distance tolerance for the triangulation
+            /// \return #GLFont2PolygonCache with the triangulated glyphs
+            ///
+            std::shared_ptr<GLFont2PolygonCache> createPolygonCache(float size, float max_distance_tolerance) const;
+
+            bool isConstructedFromPolygonCache() const;
         };
 
     }
