@@ -13,6 +13,9 @@ namespace AppKit
             float size_to_apply = size / glFont2.size;
             if (size_to_apply <= 0.0f)
                 return;
+            float max_distance_tolerance_to_apply = max_distance_tolerance / size_to_apply;
+            if (max_distance_tolerance_to_apply <= 0.0f)
+                return;
 
             triangulated_glyphs.clear();
             if (glFont2.polygonGlyphSrc.empty())
@@ -28,7 +31,7 @@ namespace AppKit
                 for (const auto &contour : glyph.contour)
                 {
                     sampled_points.clear();
-                    contour.samplePoints(&sampled_points, max_distance_tolerance);
+                    contour.samplePoints(&sampled_points, max_distance_tolerance_to_apply);
                     for (auto &point : sampled_points)
                         point *= size_to_apply; // Scale the points according to the font size
                     sampled_contours.push_back({sampled_points,
