@@ -64,7 +64,7 @@ namespace AppKit
                     }
                 }
 
-                mesh->ComputeFormat();
+                mesh->ComputeFormat(false);
 
                 if (dynamic)
                     mesh->syncVBODynamic();

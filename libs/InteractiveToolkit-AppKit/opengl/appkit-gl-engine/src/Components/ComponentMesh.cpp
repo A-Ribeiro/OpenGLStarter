@@ -128,10 +128,12 @@ namespace AppKit
                 vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), false);
             }
 
-            void ComponentMesh::ComputeFormat()
+            void ComponentMesh::ComputeFormat(bool skip_if_already_set)
             {
-                if (format != 0)
+                if (skip_if_already_set && format != 0)
                     return;
+                
+                format = 0;
 
                 if (pos.size() > 0)
                     format |= ITKExtension::Model::CONTAINS_POS;
