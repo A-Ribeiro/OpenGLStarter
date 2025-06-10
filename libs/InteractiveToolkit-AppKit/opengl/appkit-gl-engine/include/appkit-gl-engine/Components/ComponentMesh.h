@@ -69,7 +69,7 @@ namespace AppKit
 
                 bool always_clone;
 
-                void ComputeFormat();
+                void ComputeFormat(bool skip_if_already_set = true);
 
                 ComponentMesh();
 
