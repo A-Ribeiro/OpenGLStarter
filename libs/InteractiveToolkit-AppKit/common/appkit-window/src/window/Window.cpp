@@ -366,15 +366,9 @@ namespace AppKit
             {
                 const sf::Event &event = event_reader.value();
 
-                // check if need to sleep and wait for other window events
-                if (!alwaysDraw)
-                {
-                    if (!window->hasFocus() && !event.is<sf::Event::Closed>() && !event.is<sf::Event::Resized>())
-                    {
-                        Platform::Sleep::millis(100);
-                        continue;
-                    }
-                }
+                // in case of window is not focused, we still need to process the events
+                if (!alwaysDraw && !window->hasFocus() && !event.is<sf::Event::Closed>() && !event.is<sf::Event::Resized>())
+                    continue;
 
                 if (event.is<sf::Event::Closed>())
                 { //!< The window requested to be closed (no data)
