@@ -858,10 +858,10 @@ namespace AppKit
             return this;
         }
 
-        std::shared_ptr<GLFont2PolygonCache> GLFont2Builder::createPolygonCache(float size, float max_distance_tolerance) const
+        std::shared_ptr<GLFont2PolygonCache> GLFont2Builder::createPolygonCache(float size, float max_distance_tolerance, Platform::ThreadPool *threadPool) const
         {
             auto polygonCache = std::make_shared<GLFont2PolygonCache>();
-            polygonCache->setFromGLFont2(glFont2, size, max_distance_tolerance);
+            polygonCache->setFromGLFont2(glFont2, size, max_distance_tolerance, threadPool);
             return polygonCache;
         }
 

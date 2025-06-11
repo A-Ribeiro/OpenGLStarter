@@ -193,7 +193,7 @@ namespace AppKit
             /// \param max_distance_tolerance The maximum distance tolerance for the triangulation
             /// \return #GLFont2PolygonCache with the triangulated glyphs
             ///
-            std::shared_ptr<GLFont2PolygonCache> createPolygonCache(float size, float max_distance_tolerance) const;
+            std::shared_ptr<GLFont2PolygonCache> createPolygonCache(float size, float max_distance_tolerance, Platform::ThreadPool *threadPool = nullptr) const;
 
             bool isConstructedFromPolygonCache() const;
         };

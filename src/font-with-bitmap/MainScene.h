@@ -43,8 +43,6 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
-    Platform::ThreadPool mThreadPool;
-
 public:
 
     App *app;

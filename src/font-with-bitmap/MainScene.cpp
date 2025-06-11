@@ -126,8 +126,9 @@ void MainScene::bindResourcesToGraph()
                 polygonFontCache = nullptr;
             else {
                 polygonFontCache = fontBuilder.createPolygonCache(
-                    60.0f,  // size
-                    5.0f   // max_distance_tolerance
+                    60.0f  // size
+                    ,5.0f   // max_distance_tolerance
+                    ,&app->threadPool
                 );
             }
             auto rect = renderWindow->CameraViewport.c_ptr();
