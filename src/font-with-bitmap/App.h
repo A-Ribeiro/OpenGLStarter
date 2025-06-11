@@ -21,6 +21,7 @@ class App : public AppBase {
 public:
     Fade *fade;
     MainScene *mainScene;
+    Platform::ThreadPool threadPool;
 
     App();
     ~App();

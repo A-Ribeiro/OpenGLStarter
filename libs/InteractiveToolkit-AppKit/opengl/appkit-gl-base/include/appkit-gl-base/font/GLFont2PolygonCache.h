@@ -3,6 +3,7 @@
 #include "GLFont2.h"
 #include <InteractiveToolkit/AlgorithmCore/Polygon/Polygon2D.h>
 #include <InteractiveToolkit/AlgorithmCore/Polygon/TriangulatorEarClipping.h>
+#include <InteractiveToolkit/Platform/ThreadPool.h>
 
 namespace AppKit
 {
@@ -73,7 +74,7 @@ namespace AppKit
                 return *this;
             }
 
-            void setFromGLFont2(const GLFont2 &glFont2, float size, float max_distance_tolerance);
+            void setFromGLFont2(const GLFont2 &glFont2, float size, float max_distance_tolerance, Platform::ThreadPool *threadPool = nullptr);
 
             const GLFont2TriangulatedGlyph *getGlyph(uint32_t charcode) const;
         };
