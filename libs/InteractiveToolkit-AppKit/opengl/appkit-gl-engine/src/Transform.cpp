@@ -1127,57 +1127,6 @@ namespace AppKit
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
             void *userData, int maxLevel)
         {
-            struct itemT
-            {
-                std::shared_ptr<Transform> transform;
-                int level;
-            };
-
-            std::vector<itemT> to_traverse;
-            // std::list<itemT> to_traverse;
-
-            to_traverse.push_back({self(), maxLevel});
-
-            while (to_traverse.size() > 0)
-            {
-                auto item = to_traverse.back();
-                to_traverse.pop_back();
-
-                if (item.transform->skip_traversing)
-                    continue;
-
-                if (!OnNode(item.transform, userData))
-                    return false;
-
-                item.level--;
-                if (item.level > 0)
-                    for (auto &child : STL_Tools::Reversal(item.transform->children))
-                        to_traverse.push_back({child, item.level});
-            }
-
-            return true;
-
-            // if (!OnNode(this->self(), userData))
-            //     return false;
-            // maxLevel--;
-            // if (maxLevel > 0)
-            // {
-            //     for (auto &chld : children)
-            //     {
-            //         if (!chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel))
-            //             return false;
-            //     }
-            // }
-            // return true;
-        }
-
-        bool Transform::traversePostOrder_DepthFirst(
-            const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
-            void *userData, int maxLevel)
-        {
-
-            // implementation with two stacks:
-
             // struct itemT
             // {
             //     std::shared_ptr<Transform> transform;
@@ -1186,7 +1135,6 @@ namespace AppKit
 
             // std::vector<itemT> to_traverse;
             // // std::list<itemT> to_traverse;
-            // std::vector<itemT> stack;
 
             // to_traverse.push_back({self(), maxLevel});
 
@@ -1195,152 +1143,119 @@ namespace AppKit
             //     auto item = to_traverse.back();
             //     to_traverse.pop_back();
 
-            //     stack.push_back(item);
-
-            //     int new_lvl = item.level-1;
-            //     if (new_lvl > 0)
-            //         for (auto &child : item.transform->children)
-            //             to_traverse.push_back({child, new_lvl});
-            // }
-
-            // while (stack.size() > 0){
-            //     auto item = stack.back();
-            //     stack.pop_back();
+            //     if (item.transform->skip_traversing)
+            //         continue;
 
             //     if (!OnNode(item.transform, userData))
             //         return false;
+
+            //     item.level--;
+            //     if (item.level > 0)
+            //         for (auto &child : STL_Tools::Reversal(item.transform->children))
+            //             to_traverse.push_back({child, item.level});
             // }
 
             // return true;
 
-            // implementation with one stack:
+            if (skip_traversing)
+                return true;
 
-            struct itemT
+            if (!OnNode(this->self(), userData))
+                return false;
+            maxLevel--;
+            if (maxLevel > 0)
             {
-                std::shared_ptr<Transform> transform;
-                int level;
-                int child_idx;
-            };
-            std::vector<itemT> stack;
-
-            itemT root = {self(), maxLevel, 0};
-
-            while (root.transform != nullptr || stack.size() > 0)
-            {
-                // walk down the max possible nodes on left side
-                // after that, the stack will hold the parent -> child relationship only
-                // between each level.
-                // Each place on stack is a parent element.
-                while (root.transform != nullptr)
-                {
-                    stack.push_back(root);
-                    int new_lvl = root.level - 1;
-                    if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
-                        root = {root.transform->children[0], new_lvl, 0};
-                    else
-                        root = {nullptr, 0, 0};
-                }
-
-                // remove the lowest child node value from stack and
-                // save the current info from it
-                auto item = stack.back();
-                stack.pop_back();
-
-                if (!item.transform->skip_traversing)
-                    if (!OnNode(item.transform, userData))
+                for (auto &chld : children)
+                    if (!chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel))
                         return false;
-
-                // while the removed element is the lastest children,
-                // walk to parent, making it the new child
-                while (stack.size() > 0 &&
-                       // stack.back().transform->children.size() > 0 &&
-                       item.transform == stack.back().transform->children.back())
-                {
-                    item = stack.back();
-                    stack.pop_back();
-                    if (!item.transform->skip_traversing)
-                        if (!OnNode(item.transform, userData))
-                            return false;
-                }
-
-                // if there is any element in the stack, it means that
-                // this is a parent with more children to compute
-                if (stack.size() > 0)
-                {
-                    int next_child_idx = item.child_idx + 1;
-                    // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
-                    root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
-                }
             }
-
             return true;
+        }
 
-            // maxLevel--;
-            // if (maxLevel > 0)
+        bool Transform::traversePostOrder_DepthFirst(
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
+            void *userData, int maxLevel)
+        {
+
+            // // implementation with one stack:
+
+            // struct itemT
             // {
-            //     for (auto &chld : children)
+            //     std::shared_ptr<Transform> transform;
+            //     int level;
+            //     int child_idx;
+            // };
+            // std::vector<itemT> stack;
+
+            // itemT root = {self(), maxLevel, 0};
+
+            // while (root.transform != nullptr || stack.size() > 0)
+            // {
+            //     // walk down the max possible nodes on left side
+            //     // after that, the stack will hold the parent -> child relationship only
+            //     // between each level.
+            //     // Each place on stack is a parent element.
+            //     while (root.transform != nullptr)
             //     {
-            //         if (!chld->traversePostOrder_DepthFirst(OnNode, userData, maxLevel))
+            //         stack.push_back(root);
+            //         int new_lvl = root.level - 1;
+            //         if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
+            //             root = {root.transform->children[0], new_lvl, 0};
+            //         else
+            //             root = {nullptr, 0, 0};
+            //     }
+
+            //     // remove the lowest child node value from stack and
+            //     // save the current info from it
+            //     auto item = stack.back();
+            //     stack.pop_back();
+
+            //     if (!item.transform->skip_traversing)
+            //         if (!OnNode(item.transform, userData))
             //             return false;
+
+            //     // while the removed element is the lastest children,
+            //     // walk to parent, making it the new child
+            //     while (stack.size() > 0 &&
+            //            // stack.back().transform->children.size() > 0 &&
+            //            item.transform == stack.back().transform->children.back())
+            //     {
+            //         item = stack.back();
+            //         stack.pop_back();
+            //         if (!item.transform->skip_traversing)
+            //             if (!OnNode(item.transform, userData))
+            //                 return false;
+            //     }
+
+            //     // if there is any element in the stack, it means that
+            //     // this is a parent with more children to compute
+            //     if (stack.size() > 0)
+            //     {
+            //         int next_child_idx = item.child_idx + 1;
+            //         // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
+            //         root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
             //     }
             // }
-            // return OnNode(this->self(), userData);
+
+            // return true;
+
+            if (skip_traversing)
+                return true;
+
+            maxLevel--;
+            if (maxLevel > 0)
+            {
+                for (auto &chld : children)
+                    if (!chld->traversePostOrder_DepthFirst(OnNode, userData, maxLevel))
+                        return false;
+            }
+            return OnNode(this->self(), userData);
         }
 
         bool Transform::traversePreOrder_DepthFirst(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
             const void *userData, int maxLevel)
         {
-            struct itemT
-            {
-                std::shared_ptr<Transform> transform;
-                int level;
-            };
-
-            std::vector<itemT> to_traverse;
-            // std::list<itemT> to_traverse;
-
-            to_traverse.push_back({self(), maxLevel});
-
-            while (to_traverse.size() > 0)
-            {
-                auto item = to_traverse.back();
-                to_traverse.pop_back();
-
-                if (item.transform->skip_traversing)
-                    continue;
-
-                if (!OnNode(item.transform, userData))
-                    return false;
-
-                item.level--;
-                if (item.level > 0)
-                    for (auto &child : STL_Tools::Reversal(item.transform->children))
-                        to_traverse.push_back({child, item.level});
-            }
-
-            return true;
-
-            // if (!OnNode(this->self(), userData))
-            //     return false;
-            // maxLevel--;
-            // if (maxLevel > 0)
-            // {
-            //     for (auto &chld : children)
-            //     {
-            //         if (!chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel))
-            //             return false;
-            //     }
-            // }
-            // return true;
-        }
-
-        bool Transform::traversePostOrder_DepthFirst(
-            const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
-            const void *userData, int maxLevel)
-        {
-            // implementation with two stacks:
-
             // struct itemT
             // {
             //     std::shared_ptr<Transform> transform;
@@ -1349,7 +1264,6 @@ namespace AppKit
 
             // std::vector<itemT> to_traverse;
             // // std::list<itemT> to_traverse;
-            // std::vector<itemT> stack;
 
             // to_traverse.push_back({self(), maxLevel});
 
@@ -1358,130 +1272,164 @@ namespace AppKit
             //     auto item = to_traverse.back();
             //     to_traverse.pop_back();
 
-            //     stack.push_back(item);
-
-            //     int new_lvl = item.level-1;
-            //     if (new_lvl > 0)
-            //         for (auto &child : item.transform->children)
-            //             to_traverse.push_back({child, new_lvl});
-            // }
-
-            // while (stack.size() > 0){
-            //     auto item = stack.back();
-            //     stack.pop_back();
+            //     if (item.transform->skip_traversing)
+            //         continue;
 
             //     if (!OnNode(item.transform, userData))
             //         return false;
+
+            //     item.level--;
+            //     if (item.level > 0)
+            //         for (auto &child : STL_Tools::Reversal(item.transform->children))
+            //             to_traverse.push_back({child, item.level});
             // }
 
             // return true;
 
-            // implementation with one stack:
+            if (skip_traversing)
+                return true;
 
-            struct itemT
+            if (!OnNode(this->self(), userData))
+                return false;
+            maxLevel--;
+            if (maxLevel > 0)
             {
-                std::shared_ptr<Transform> transform;
-                int level;
-                int child_idx;
-            };
-            std::vector<itemT> stack;
-
-            itemT root = {self(), maxLevel, 0};
-
-            while (root.transform != nullptr || stack.size() > 0)
-            {
-                // walk down the max possible nodes on left side
-                // after that, the stack will hold the parent -> child relationship only
-                // between each level.
-                // Each place on stack is a parent element.
-                while (root.transform != nullptr)
-                {
-                    stack.push_back(root);
-                    int new_lvl = root.level - 1;
-                    if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
-                        root = {root.transform->children[0], new_lvl, 0};
-                    else
-                        root = {nullptr, 0, 0};
-                }
-
-                // remove the lowest child node value from stack and
-                // save the current info from it
-                auto item = stack.back();
-                stack.pop_back();
-                if (!item.transform->skip_traversing)
-                    if (!OnNode(item.transform, userData))
+                for (auto &chld : children)
+                    if (!chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel))
                         return false;
-
-                // while the removed element is the lastest children,
-                // walk to parent, making it the new child
-                while (stack.size() > 0 &&
-                       // stack.back().transform->children.size() > 0 &&
-                       item.transform == stack.back().transform->children.back())
-                {
-                    item = stack.back();
-                    stack.pop_back();
-                    if (!item.transform->skip_traversing)
-                        if (!OnNode(item.transform, userData))
-                            return false;
-                }
-
-                // if there is any element in the stack, it means that
-                // this is a parent with more children to compute
-                if (stack.size() > 0)
-                {
-                    int next_child_idx = item.child_idx + 1;
-                    // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
-                    root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
-                }
             }
-
             return true;
+        }
 
-            // // recursive
-            // maxLevel--;
-            // if (maxLevel > 0)
+        bool Transform::traversePostOrder_DepthFirst(
+            const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
+            const void *userData, int maxLevel)
+        {
+            // // implementation with one stack:
+
+            // struct itemT
             // {
-            //     for (auto &chld : children)
+            //     std::shared_ptr<Transform> transform;
+            //     int level;
+            //     int child_idx;
+            // };
+            // std::vector<itemT> stack;
+
+            // itemT root = {self(), maxLevel, 0};
+
+            // while (root.transform != nullptr || stack.size() > 0)
+            // {
+            //     // walk down the max possible nodes on left side
+            //     // after that, the stack will hold the parent -> child relationship only
+            //     // between each level.
+            //     // Each place on stack is a parent element.
+            //     while (root.transform != nullptr)
             //     {
-            //         if (!chld->traversePostOrder_DepthFirst(OnNode, userData, maxLevel))
+            //         stack.push_back(root);
+            //         int new_lvl = root.level - 1;
+            //         if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
+            //             root = {root.transform->children[0], new_lvl, 0};
+            //         else
+            //             root = {nullptr, 0, 0};
+            //     }
+
+            //     // remove the lowest child node value from stack and
+            //     // save the current info from it
+            //     auto item = stack.back();
+            //     stack.pop_back();
+            //     if (!item.transform->skip_traversing)
+            //         if (!OnNode(item.transform, userData))
             //             return false;
+
+            //     // while the removed element is the lastest children,
+            //     // walk to parent, making it the new child
+            //     while (stack.size() > 0 &&
+            //            // stack.back().transform->children.size() > 0 &&
+            //            item.transform == stack.back().transform->children.back())
+            //     {
+            //         item = stack.back();
+            //         stack.pop_back();
+            //         if (!item.transform->skip_traversing)
+            //             if (!OnNode(item.transform, userData))
+            //                 return false;
+            //     }
+
+            //     // if there is any element in the stack, it means that
+            //     // this is a parent with more children to compute
+            //     if (stack.size() > 0)
+            //     {
+            //         int next_child_idx = item.child_idx + 1;
+            //         // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
+            //         root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
             //     }
             // }
-            // return OnNode(this->self(), userData);
+
+            // return true;
+
+            if (skip_traversing)
+                return true;
+
+            maxLevel--;
+            if (maxLevel > 0)
+            {
+                for (auto &chld : children)
+                    if (!chld->traversePostOrder_DepthFirst(OnNode, userData, maxLevel))
+                        return false;
+            }
+            return OnNode(this->self(), userData);
         }
 
         bool Transform::traverse_BreadthFirst(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
             void *userData, int maxLevel)
         {
-            struct itemT
+            // struct itemT
+            // {
+            //     std::shared_ptr<Transform> transform;
+            //     int level;
+            // };
+
+            // // std::vector<itemT> to_traverse;
+            // std::list<itemT> to_traverse;
+
+            // to_traverse.push_back({self(), maxLevel});
+
+            // while (to_traverse.size() > 0)
+            // {
+            //     auto item = to_traverse.back();
+            //     to_traverse.pop_back();
+
+            //     if (item.transform->skip_traversing)
+            //         continue;
+
+            //     if (!OnNode(item.transform, userData))
+            //         return false;
+
+            //     item.level--;
+            //     if (item.level > 0)
+            //         for (auto &child : item.transform->children)
+            //             to_traverse.push_front({child, item.level});
+            // }
+
+            // return true;
+
+            std::vector<std::shared_ptr<Transform>> currentLevel;
+            currentLevel.push_back(self());
+            while (!currentLevel.empty() && maxLevel > 0)
             {
-                std::shared_ptr<Transform> transform;
-                int level;
-            };
-
-            // std::vector<itemT> to_traverse;
-            std::list<itemT> to_traverse;
-
-            to_traverse.push_back({self(), maxLevel});
-
-            while (to_traverse.size() > 0)
-            {
-                auto item = to_traverse.back();
-                to_traverse.pop_back();
-
-                if (item.transform->skip_traversing)
-                    continue;
-
-                if (!OnNode(item.transform, userData))
-                    return false;
-
-                item.level--;
-                if (item.level > 0)
-                    for (auto &child : item.transform->children)
-                        to_traverse.push_front({child, item.level});
+                std::vector<std::shared_ptr<Transform>> nextLevel;
+                for (auto &node : currentLevel)
+                {
+                    if (node->skip_traversing)
+                        continue;
+                    if (!OnNode(node, userData))
+                        return false;
+                    for (auto &child : node->children)
+                        nextLevel.push_back(child);
+                }
+                currentLevel = std::move(nextLevel);
+                maxLevel--;
             }
-
             return true;
         }
 
@@ -1489,34 +1437,53 @@ namespace AppKit
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
             const void *userData, int maxLevel)
         {
-            struct itemT
+            // struct itemT
+            // {
+            //     std::shared_ptr<Transform> transform;
+            //     int level;
+            // };
+
+            // // std::vector<itemT> to_traverse;
+            // std::list<itemT> to_traverse;
+
+            // to_traverse.push_back({self(), maxLevel});
+
+            // while (to_traverse.size() > 0)
+            // {
+            //     auto item = to_traverse.back();
+            //     to_traverse.pop_back();
+
+            //     if (item.transform->skip_traversing)
+            //         continue;
+
+            //     if (!OnNode(item.transform, userData))
+            //         return false;
+
+            //     item.level--;
+            //     if (item.level > 0)
+            //         for (auto &child : item.transform->children)
+            //             to_traverse.push_front({child, item.level});
+            // }
+
+            // return true;
+
+            std::vector<std::shared_ptr<Transform>> currentLevel;
+            currentLevel.push_back(self());
+            while (!currentLevel.empty() && maxLevel > 0)
             {
-                std::shared_ptr<Transform> transform;
-                int level;
-            };
-
-            // std::vector<itemT> to_traverse;
-            std::list<itemT> to_traverse;
-
-            to_traverse.push_back({self(), maxLevel});
-
-            while (to_traverse.size() > 0)
-            {
-                auto item = to_traverse.back();
-                to_traverse.pop_back();
-
-                if (item.transform->skip_traversing)
-                    continue;
-
-                if (!OnNode(item.transform, userData))
-                    return false;
-
-                item.level--;
-                if (item.level > 0)
-                    for (auto &child : item.transform->children)
-                        to_traverse.push_front({child, item.level});
+                std::vector<std::shared_ptr<Transform>> nextLevel;
+                for (auto &node : currentLevel)
+                {
+                    if (node->skip_traversing)
+                        continue;
+                    if (!OnNode(node, userData))
+                        return false;
+                    for (auto &child : node->children)
+                        nextLevel.push_back(child);
+                }
+                currentLevel = std::move(nextLevel);
+                maxLevel--;
             }
-
             return true;
         }
 
@@ -1525,73 +1492,90 @@ namespace AppKit
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnPostOrderNode,
             void *userData, int maxLevel)
         {
-            struct itemT
+            // struct itemT
+            // {
+            //     std::shared_ptr<Transform> transform;
+            //     int level;
+            //     int child_idx;
+            // };
+            // std::vector<itemT> stack;
+
+            // itemT root = {self(), maxLevel, 0};
+
+            // while (root.transform != nullptr || stack.size() > 0)
+            // {
+            //     // walk down the max possible nodes on left side
+            //     // after that, the stack will hold the parent -> child relationship only
+            //     // between each level.
+            //     // Each place on stack is a parent element.
+            //     while (root.transform != nullptr)
+            //     {
+            //         // pre-order on root.transform
+            //         if (!root.transform->skip_traversing)
+            //             if (!OnPreOrderNode(root.transform, userData))
+            //                 return false;
+
+            //         stack.push_back(root);
+            //         int new_lvl = root.level - 1;
+            //         if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
+            //             root = {root.transform->children[0], new_lvl, 0};
+            //         else
+            //             root = {nullptr, 0, 0};
+            //     }
+
+            //     // remove the lowest child node value from stack and
+            //     // save the current info from it
+            //     auto item = stack.back();
+            //     stack.pop_back();
+
+            //     // post order on item.transform
+            //     if (!item.transform->skip_traversing)
+            //         if (!OnPostOrderNode(item.transform, userData))
+            //             return false;
+
+            //     // while the removed element is the lastest children,
+            //     // walk to parent, making it the new child
+            //     while (stack.size() > 0 &&
+            //            // stack.back().transform->children.size() > 0 &&
+            //            item.transform == stack.back().transform->children.back())
+            //     {
+            //         item = stack.back();
+            //         stack.pop_back();
+
+            //         // post order on item.transform
+            //         if (!item.transform->skip_traversing)
+            //             if (!OnPostOrderNode(item.transform, userData))
+            //                 return false;
+            //     }
+
+            //     // if there is any element in the stack, it means that
+            //     // this is a parent with more children to compute
+            //     if (stack.size() > 0)
+            //     {
+            //         int next_child_idx = item.child_idx + 1;
+            //         // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
+            //         root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
+            //     }
+            // }
+
+            // return true;
+
+            if (skip_traversing)
+                return true;
+
+            auto _self = this->self();
+
+            if (!OnPreOrderNode(_self, userData))
+                return false;
+
+            maxLevel--;
+            if (maxLevel > 0)
             {
-                std::shared_ptr<Transform> transform;
-                int level;
-                int child_idx;
-            };
-            std::vector<itemT> stack;
-
-            itemT root = {self(), maxLevel, 0};
-
-            while (root.transform != nullptr || stack.size() > 0)
-            {
-                // walk down the max possible nodes on left side
-                // after that, the stack will hold the parent -> child relationship only
-                // between each level.
-                // Each place on stack is a parent element.
-                while (root.transform != nullptr)
-                {
-                    // pre-order on root.transform
-                    if (!root.transform->skip_traversing)
-                        if (!OnPreOrderNode(root.transform, userData))
-                            return false;
-
-                    stack.push_back(root);
-                    int new_lvl = root.level - 1;
-                    if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
-                        root = {root.transform->children[0], new_lvl, 0};
-                    else
-                        root = {nullptr, 0, 0};
-                }
-
-                // remove the lowest child node value from stack and
-                // save the current info from it
-                auto item = stack.back();
-                stack.pop_back();
-
-                // post order on item.transform
-                if (!item.transform->skip_traversing)
-                    if (!OnPostOrderNode(item.transform, userData))
+                for (auto &chld : children)
+                    if (!chld->traverse_Generic(OnPreOrderNode, OnPostOrderNode, userData, maxLevel))
                         return false;
-
-                // while the removed element is the lastest children,
-                // walk to parent, making it the new child
-                while (stack.size() > 0 &&
-                       // stack.back().transform->children.size() > 0 &&
-                       item.transform == stack.back().transform->children.back())
-                {
-                    item = stack.back();
-                    stack.pop_back();
-
-                    // post order on item.transform
-                    if (!item.transform->skip_traversing)
-                        if (!OnPostOrderNode(item.transform, userData))
-                            return false;
-                }
-
-                // if there is any element in the stack, it means that
-                // this is a parent with more children to compute
-                if (stack.size() > 0)
-                {
-                    int next_child_idx = item.child_idx + 1;
-                    // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
-                    root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
-                }
             }
-
-            return true;
+            return OnPostOrderNode(_self, userData);
         }
 
         bool Transform::traverse_Generic(
@@ -1599,73 +1583,121 @@ namespace AppKit
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnPostOrderNode,
             const void *userData, int maxLevel)
         {
-            struct itemT
+            // struct itemT
+            // {
+            //     std::shared_ptr<Transform> transform;
+            //     int level;
+            //     int child_idx;
+            // };
+            // std::vector<itemT> stack;
+
+            // itemT root = {self(), maxLevel, 0};
+
+            // while (root.transform != nullptr || stack.size() > 0)
+            // {
+            //     // walk down the max possible nodes on left side
+            //     // after that, the stack will hold the parent -> child relationship only
+            //     // between each level.
+            //     // Each place on stack is a parent element.
+            //     while (root.transform != nullptr)
+            //     {
+            //         // pre-order on root.transform
+            //         if (!root.transform->skip_traversing)
+            //             if (!OnPreOrderNode(root.transform, userData))
+            //                 return false;
+
+            //         stack.push_back(root);
+            //         int new_lvl = root.level - 1;
+            //         if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
+            //             root = {root.transform->children[0], new_lvl, 0};
+            //         else
+            //             root = {nullptr, 0, 0};
+            //     }
+
+            //     // remove the lowest child node value from stack and
+            //     // save the current info from it
+            //     auto item = stack.back();
+            //     stack.pop_back();
+
+            //     // post order on item.transform
+            //     if (!item.transform->skip_traversing)
+            //         if (!OnPostOrderNode(item.transform, userData))
+            //             return false;
+
+            //     // while the removed element is the lastest children,
+            //     // walk to parent, making it the new child
+            //     while (stack.size() > 0 &&
+            //            // stack.back().transform->children.size() > 0 &&
+            //            item.transform == stack.back().transform->children.back())
+            //     {
+            //         item = stack.back();
+            //         stack.pop_back();
+
+            //         // post order on item.transform
+            //         if (!item.transform->skip_traversing)
+            //             if (!OnPostOrderNode(item.transform, userData))
+            //                 return false;
+            //     }
+
+            //     // if there is any element in the stack, it means that
+            //     // this is a parent with more children to compute
+            //     if (stack.size() > 0)
+            //     {
+            //         int next_child_idx = item.child_idx + 1;
+            //         // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
+            //         root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
+            //     }
+            // }
+
+            // return true;
+
+            if (skip_traversing)
+                return true;
+
+            auto _self = this->self();
+
+            if (!OnPreOrderNode(_self, userData))
+                return false;
+
+            maxLevel--;
+            if (maxLevel > 0)
             {
-                std::shared_ptr<Transform> transform;
-                int level;
-                int child_idx;
-            };
-            std::vector<itemT> stack;
-
-            itemT root = {self(), maxLevel, 0};
-
-            while (root.transform != nullptr || stack.size() > 0)
-            {
-                // walk down the max possible nodes on left side
-                // after that, the stack will hold the parent -> child relationship only
-                // between each level.
-                // Each place on stack is a parent element.
-                while (root.transform != nullptr)
-                {
-                    // pre-order on root.transform
-                    if (!root.transform->skip_traversing)
-                        if (!OnPreOrderNode(root.transform, userData))
-                            return false;
-
-                    stack.push_back(root);
-                    int new_lvl = root.level - 1;
-                    if (new_lvl > 0 && root.transform->children.size() > 0 && !root.transform->children[0]->skip_traversing)
-                        root = {root.transform->children[0], new_lvl, 0};
-                    else
-                        root = {nullptr, 0, 0};
-                }
-
-                // remove the lowest child node value from stack and
-                // save the current info from it
-                auto item = stack.back();
-                stack.pop_back();
-
-                // post order on item.transform
-                if (!item.transform->skip_traversing)
-                    if (!OnPostOrderNode(item.transform, userData))
+                for (auto &chld : children)
+                    if (!chld->traverse_Generic(OnPreOrderNode, OnPostOrderNode, userData, maxLevel))
                         return false;
+            }
+            return OnPostOrderNode(_self, userData);
+        }
 
-                // while the removed element is the lastest children,
-                // walk to parent, making it the new child
-                while (stack.size() > 0 &&
-                       // stack.back().transform->children.size() > 0 &&
-                       item.transform == stack.back().transform->children.back())
+        std::shared_ptr<Transform> Transform::internal_clone(bool force_make_component_copy,
+                                                             std::shared_ptr<TransformMapT> transformMap,
+                                                             std::shared_ptr<ComponentMapT> componentMap)
+        {
+            std::shared_ptr<Transform> result = Transform::CreateShared();
+
+            transformMap->operator[](this->self()) = result;
+
+            result->setName(getName());
+            result->setLocalPosition(getLocalPosition());
+            result->setLocalRotation(getLocalRotation());
+            result->setLocalScale(getLocalScale());
+            result->skip_traversing = skip_traversing;
+
+            for (auto &src_component : getComponents())
+            {
+                auto new_component = result->addComponent(src_component->duplicate_ref_or_clone(force_make_component_copy));
+                if (src_component != new_component)
                 {
-                    item = stack.back();
-                    stack.pop_back();
-
-                    // post order on item.transform
-                    if (!item.transform->skip_traversing)
-                        if (!OnPostOrderNode(item.transform, userData))
-                            return false;
-                }
-
-                // if there is any element in the stack, it means that
-                // this is a parent with more children to compute
-                if (stack.size() > 0)
-                {
-                    int next_child_idx = item.child_idx + 1;
-                    // if (next_child_idx < (int)stack.back().transform->children.size() - 1)
-                    root = {stack.back().transform->children[next_child_idx], item.level, next_child_idx};
+                    // the component was fully cloned, so it needs
+                    // to update its references
+                    componentMap->operator[](src_component) = new_component;
                 }
             }
 
-            return true;
+            for (auto &child : getChildren())
+                result->addChild(child->internal_clone(force_make_component_copy, transformMap, componentMap));
+
+            return result;
         }
 
         std::shared_ptr<Transform> Transform::clone(
@@ -1685,66 +1717,68 @@ namespace AppKit
             else
                 componentMap = std::shared_ptr<ComponentMapT>(_componentMap, [](ComponentMapT *v) {});
 
-            // transformMap->clear();
-            // componentMap->clear();
+            // // transformMap->clear();
+            // // componentMap->clear();
 
-            auto result = Transform::CreateShared();
+            auto result = internal_clone(force_make_component_copy, transformMap, componentMap);
 
-            struct _clone_structT
-            {
-                std::shared_ptr<Transform> cloneSrc;
-                std::shared_ptr<Transform> cloneDst;
-                std::shared_ptr<Transform> parent;
-            };
-            std::vector<_clone_structT> to_clone;
-            {
-                auto _self = self();
-                to_clone.push_back(_clone_structT{_self, result, nullptr});
-                transformMap->operator[](_self) = result;
-            }
+            // auto result = Transform::CreateShared();
 
-            while (to_clone.size() > 0)
-            {
-                auto entry = to_clone.back();
-                to_clone.pop_back();
+            // struct _clone_structT
+            // {
+            //     std::shared_ptr<Transform> cloneSrc;
+            //     std::shared_ptr<Transform> cloneDst;
+            //     std::shared_ptr<Transform> parent;
+            // };
+            // std::vector<_clone_structT> to_clone;
+            // {
+            //     auto _self = self();
+            //     to_clone.push_back(_clone_structT{_self, result, nullptr});
+            //     transformMap->operator[](_self) = result;
+            // }
 
-                if (entry.cloneDst == nullptr)
-                {
-                    auto new_transform = entry.parent->addChild(Transform::CreateShared());
-                    entry.cloneDst = new_transform;
-                    transformMap->operator[](entry.cloneSrc) = new_transform;
-                }
+            // while (to_clone.size() > 0)
+            // {
+            //     auto entry = to_clone.back();
+            //     to_clone.pop_back();
 
-                entry.cloneDst->setName(entry.cloneSrc->getName());
-                entry.cloneDst->setLocalPosition(entry.cloneSrc->getLocalPosition());
-                entry.cloneDst->setLocalRotation(entry.cloneSrc->getLocalRotation());
-                entry.cloneDst->setLocalScale(entry.cloneSrc->getLocalScale());
-                entry.cloneDst->skip_traversing = entry.cloneSrc->skip_traversing;
+            //     if (entry.cloneDst == nullptr)
+            //     {
+            //         auto new_transform = entry.parent->addChild(Transform::CreateShared());
+            //         entry.cloneDst = new_transform;
+            //         transformMap->operator[](entry.cloneSrc) = new_transform;
+            //     }
 
-                for (auto &src_transform : STL_Tools::Reversal(entry.cloneSrc->getChildren()))
-                {
-                    // auto new_transform = entry.cloneDst->addChild(Transform::CreateShared());
-                    to_clone.push_back(_clone_structT{src_transform, nullptr, entry.cloneDst});
-                    // transformMap->operator[](src_transform) = new_transform;
-                }
-            }
+            //     entry.cloneDst->setName(entry.cloneSrc->getName());
+            //     entry.cloneDst->setLocalPosition(entry.cloneSrc->getLocalPosition());
+            //     entry.cloneDst->setLocalRotation(entry.cloneSrc->getLocalRotation());
+            //     entry.cloneDst->setLocalScale(entry.cloneSrc->getLocalScale());
+            //     entry.cloneDst->skip_traversing = entry.cloneSrc->skip_traversing;
 
-            // clone components
-            for (auto &pair : *transformMap)
-            {
-                auto &src = pair.first;
-                auto &dst = pair.second;
-                for (auto &src_component : src->getComponents())
-                {
-                    auto new_component = dst->addComponent(src_component->duplicate_ref_or_clone(force_make_component_copy));
-                    if (src_component != new_component)
-                    {
-                        // the component was fully cloned, so it needs
-                        // to update its references
-                        componentMap->operator[](src_component) = new_component;
-                    }
-                }
-            }
+            //     for (auto &src_transform : STL_Tools::Reversal(entry.cloneSrc->getChildren()))
+            //     {
+            //         // auto new_transform = entry.cloneDst->addChild(Transform::CreateShared());
+            //         to_clone.push_back(_clone_structT{src_transform, nullptr, entry.cloneDst});
+            //         // transformMap->operator[](src_transform) = new_transform;
+            //     }
+            // }
+
+            // // clone components
+            // for (auto &pair : *transformMap)
+            // {
+            //     auto &src = pair.first;
+            //     auto &dst = pair.second;
+            //     for (auto &src_component : src->getComponents())
+            //     {
+            //         auto new_component = dst->addComponent(src_component->duplicate_ref_or_clone(force_make_component_copy));
+            //         if (src_component != new_component)
+            //         {
+            //             // the component was fully cloned, so it needs
+            //             // to update its references
+            //             componentMap->operator[](src_component) = new_component;
+            //         }
+            //     }
+            // }
 
             // fix fully cloned components references
             for (auto &pair : *componentMap)
