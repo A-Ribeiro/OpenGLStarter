@@ -444,6 +444,12 @@ namespace AppKit
             std::shared_ptr<Transform> clone(bool force_make_component_copy,
                                              TransformMapT *transformMap = nullptr,
                                              ComponentMapT *componentMap = nullptr);
+
+            private:
+
+            std::shared_ptr<Transform> internal_clone(bool force_make_component_copy,
+                                             std::shared_ptr<TransformMapT> transformMap,
+                                             std::shared_ptr<ComponentMapT> componentMap);
         };
 
     }
