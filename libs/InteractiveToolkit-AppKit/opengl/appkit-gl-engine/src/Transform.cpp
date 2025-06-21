@@ -137,6 +137,8 @@ namespace AppKit
 
             transform->renderWindowRegion = this->renderWindowRegion;
 
+            transform->localMatrixDirty = true;
+
             // insertMapName(transform);
 
             return transform;
