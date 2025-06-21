@@ -892,7 +892,15 @@ void HierarchyOperations::hierarchyDragMove(std::shared_ptr<TreeNode> src, std::
     auto src_transform = std::dynamic_pointer_cast<HierarchyTreeData>(src->data)->transform;
     auto target_transform = std::dynamic_pointer_cast<HierarchyTreeData>(target->data)->transform;
 
+    auto pos = src_transform->getPosition();
+    auto rot = src_transform->getRotation();
+    auto scale = src_transform->getScale();
+
     target_transform->addChild(src_transform);
+
+    src_transform->setPosition(pos);
+    src_transform->setRotation(rot);
+    src_transform->setScale(scale);
 
     this->printHierarchy();
 }
