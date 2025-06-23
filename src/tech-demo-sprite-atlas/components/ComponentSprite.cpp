@@ -11,6 +11,60 @@ namespace AppKit
         {
             const ComponentType ComponentSprite::Type = "ComponentSprite";
 
+            void ComponentSprite::checkOrCreateAuxiliaryComponents()
+            {
+                if (material != nullptr || mesh != nullptr || meshWrapper != nullptr)
+                    return;
+                auto transform = getTransform();
+                if (material == nullptr)
+                {
+                    material = transform->addNewComponent<ComponentMaterial>();
+                    material->type = MaterialUnlitTexture;
+                    material->unlit.tex = directTexture.texture;
+                    material->unlit.color = directTexture.color;
+                }
+                if (mesh == nullptr)
+                {
+                    mesh = transform->addNewComponent<ComponentMesh>();
+                    mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0;
+                }
+                if (meshWrapper == nullptr)
+                {
+                    meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
+                    transform->makeFirstComponent(meshWrapper);
+                    //meshWrapper->updateMeshAABB();
+                }
+            }
+
+            void ComponentSprite::setTexture(
+                std::shared_ptr<AppKit::OpenGL::GLTexture> &texture,
+                const MathCore::vec2f &pivot,
+                const MathCore::vec4f &color,
+                bool staticMesh)
+            {
+                checkOrCreateAuxiliaryComponents();
+            }
+
+            void ComponentSprite::setTextureFromAtlas(
+                std::shared_ptr<SpriteAtlas> &atlas,
+                const std::string &name,
+                const MathCore::vec2f &pivot,
+                const MathCore::vec4f &color,
+                bool staticMesh)
+            {
+                checkOrCreateAuxiliaryComponents();
+            }
+
+            void ComponentSprite::setTextureFromAtlas(
+                std::shared_ptr<AppKit::OpenGL::GLTexture> &altas_texture,
+                const SpriteAtlas::Entry &altas_entry,
+                const MathCore::vec2f &pivot,
+                const MathCore::vec4f &color,
+                bool staticMesh)
+            {
+                checkOrCreateAuxiliaryComponents();
+            }
+
             ComponentSprite::ComponentSprite() : Component(ComponentSprite::Type)
             {
                 type = SpriteSourceNone;

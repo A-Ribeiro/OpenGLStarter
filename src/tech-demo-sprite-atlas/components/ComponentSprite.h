@@ -16,6 +16,10 @@
 // #include <appkit-gl-engine/DefaultEngineShader.h>
 #include "SpriteAtlas.h"
 
+#include <appkit-gl-engine/Components/ComponentMesh.h>
+#include <appkit-gl-engine/Components/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+
 namespace AppKit
 {
     namespace GLEngine
@@ -67,6 +71,35 @@ namespace AppKit
                 TextureFromAtlasSetup textureFromAtlas;
 
                 bool always_clone;
+
+                std::shared_ptr<ComponentMaterial> material;
+                std::shared_ptr<ComponentMesh> mesh;
+                std::shared_ptr<ComponentMeshWrapper> meshWrapper;
+
+                void checkOrCreateAuxiliaryComponents();
+
+                void setTexture(
+                    std::shared_ptr<AppKit::OpenGL::GLTexture> &texture,
+                    const MathCore::vec2f &pivot,
+                    const MathCore::vec4f &color,
+                    bool staticMesh
+                );
+
+                void setTextureFromAtlas(
+                    std::shared_ptr<SpriteAtlas> &atlas,
+                    const std::string &name,
+                    const MathCore::vec2f &pivot,
+                    const MathCore::vec4f &color,
+                    bool staticMesh
+                );
+
+                void setTextureFromAtlas(
+                    std::shared_ptr<AppKit::OpenGL::GLTexture> &altas_texture,
+                    const SpriteAtlas::Entry &altas_entry,
+                    const MathCore::vec2f &pivot,
+                    const MathCore::vec4f &color,
+                    bool staticMesh
+                );
 
                 ComponentSprite();
 
