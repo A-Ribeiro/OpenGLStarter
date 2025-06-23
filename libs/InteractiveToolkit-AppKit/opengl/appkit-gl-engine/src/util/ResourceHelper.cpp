@@ -359,6 +359,10 @@ namespace AppKit
 
         bool ResourceHelper::addAABBMesh_traverser(std::shared_ptr<Transform> element, void *userData)
         {
+            // skip if the element has a mesh wrapper already
+            auto meshWrapper = element->findComponent<Components::ComponentMeshWrapper>();
+            if (meshWrapper != nullptr)
+                return true;
 
             auto material = element->findComponent<Components::ComponentMaterial>();
             auto mesh = element->findComponent<Components::ComponentMesh>();
@@ -366,7 +370,7 @@ namespace AppKit
             if (material != nullptr && mesh != nullptr)
             {
 
-                auto meshWrapper = element->addNewComponent<Components::ComponentMeshWrapper>();
+                meshWrapper = element->addNewComponent<Components::ComponentMeshWrapper>();
                 // meshWrapper->updateMeshOBB();
                 meshWrapper->updateMeshAABB();
                 // meshWrapper->updateMeshSphere();
