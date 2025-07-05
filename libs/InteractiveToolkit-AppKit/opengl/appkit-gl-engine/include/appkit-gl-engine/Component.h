@@ -9,8 +9,8 @@
 
 #include <unordered_map>
 
-// #include <rapidjson/document.h>
-// #include <rapidjson/writer.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
 
 #include <appkit-gl-engine/Serializer/SerializerUtil.h>
 // #include <appkit-gl-engine/ResourceMap.h>

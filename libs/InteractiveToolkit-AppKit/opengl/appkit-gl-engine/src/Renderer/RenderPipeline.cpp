@@ -132,7 +132,7 @@ namespace AppKit
 
                 allMeshRender_Range(element, &unlit_vertcolor_Shader, start_index, end_index);
                 break;
-            break;
+                break;
 
             case Components::MaterialUnlitTexture:
                 state->BlendMode = material->unlit.blendMode;
@@ -343,6 +343,20 @@ namespace AppKit
                 */
 
                 frankenShader->frankenUniformManager.deactiveTexUnit();
+
+                break;
+            case Components::MaterialCustomShader:
+
+                if (material->custom_shader == nullptr)
+                    break;
+
+                material->custom_shader->activateShaderAndSetPropertiesFromBag(
+                    camera, mvp, 
+                    element, state, 
+                    material->custom_shader_property_bag
+                );
+                allMeshRender_Range(element, &unlit_tex_vertcolor_font_Shader, start_index, end_index);
+                material->custom_shader->deactivateShader(state);
 
                 break;
             default:
@@ -730,10 +744,10 @@ namespace AppKit
                 1.0f, 32, 32, // radius, sectorCount, stackCount,
                 &sunIndex,    //&result->indices,
                 &sunVertex,   //&result->pos,
-                nullptr,         //&result->uv[0],
-                nullptr,         //&result->normals,
-                nullptr,         //&result->tangent,
-                nullptr          //&result->binormal
+                nullptr,      //&result->uv[0],
+                nullptr,      //&result->normals,
+                nullptr,      //&result->tangent,
+                nullptr       //&result->binormal
             );
         }
 
@@ -748,7 +762,8 @@ namespace AppKit
                 cubeAmbientLight_1x1 = nullptr;
             if (sphereAmbientLight != nullptr)
                 sphereAmbientLight = nullptr;
-            if (depthRenderer != nullptr){
+            if (depthRenderer != nullptr)
+            {
                 delete depthRenderer;
                 depthRenderer = nullptr;
             }
