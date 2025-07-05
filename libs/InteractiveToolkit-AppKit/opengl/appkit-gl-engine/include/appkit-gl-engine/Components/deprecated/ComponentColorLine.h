@@ -7,6 +7,7 @@
 #include <appkit-gl-engine/Component.h>
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
+// #include <appkit-gl-engine/GL/GLRenderState.h>
 
 namespace AppKit
 {
@@ -80,6 +81,9 @@ namespace AppKit
 
                 virtual void draw()
                 {
+                    // GLRenderState *renderState = GLRenderState::Instance();
+                    // renderState->LineWidth = width;
+
                     if (vbo_vertexCount > 0)
                         vbo_data->drawArrays(GL_LINES, vbo_vertexCount);
                     else if (vertices.size() > 0)
