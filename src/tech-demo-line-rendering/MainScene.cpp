@@ -17,7 +17,7 @@ using namespace AppKit::GLEngine::Components;
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources()
 {
-
+    lineShader = std::make_shared<LineShader>();
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -67,10 +67,25 @@ void MainScene::unloadAll()
     camera = nullptr;
     deprecated_lines = nullptr;
     line_middle_to_half = nullptr;
+    lineShader = nullptr;
 }
 
 void MainScene::update(Platform::Time *elapsed)
 {
+    static float angle = 0.0f;
+    angle = MathCore::OP<float>::fmod(angle + elapsed->deltaTime * 0.125f, 2.0f * MathCore::CONSTANT<float>::PI);
+    auto rot = MathCore::GEN< MathCore::quatf>::fromEuler(0, 0, angle);
+    //line_middle_to_half->setLocalRotation(MathCore::GEN< MathCore::quatf>::fromEuler(0, 0, angle));
+
+    auto size = MathCore::vec2i(this->camera->viewport.w, this->camera->viewport.h);
+
+    deprecated_lines->vertices.clear();
+    deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));
+    deprecated_lines->vertices.push_back(rot * MathCore::vec3f(size.width, size.height, 0) * 0.25f);
+
+    deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));
+    deprecated_lines->vertices.push_back(rot * MathCore::vec3f(size.height, -size.width, 0) * 0.25f);
+    // deprecated_lines->syncVBODynamic();
 }
 
 void MainScene::draw()
@@ -87,10 +102,10 @@ void MainScene::draw()
 
 void MainScene::resize(const MathCore::vec2i &size)
 {
-    deprecated_lines->vertices.clear();
+    /*deprecated_lines->vertices.clear();
     deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));
     deprecated_lines->vertices.push_back(MathCore::vec3f(size.width, size.height, 0) * 0.25f);
-    deprecated_lines->syncVBODynamic();
+    deprecated_lines->syncVBODynamic();*/
 }
 
 MainScene::MainScene(

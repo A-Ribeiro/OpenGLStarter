@@ -7,6 +7,8 @@
 #include <InteractiveToolkit/Platform/Platform.h>
 #include <appkit-gl-engine/Components/deprecated/ComponentColorLine.h>
 
+#include "shaders/LineShader.h"
+
 class App;
 
 //
@@ -50,6 +52,7 @@ public:
 
     std::shared_ptr<AppKit::GLEngine::Transform> line_middle_to_half;
     std::shared_ptr<AppKit::GLEngine::Components::ComponentColorLine> deprecated_lines;
+    std::shared_ptr<AppKit::GLEngine::LineShader> lineShader;
     
     MainScene(
         App *app,
