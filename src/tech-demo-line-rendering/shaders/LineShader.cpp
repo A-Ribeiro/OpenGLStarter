@@ -9,7 +9,7 @@ namespace AppKit
 {
     namespace GLEngine
     {
-        ShaderSmartLine::ShaderSmartLine()
+        LineShader::LineShader()
         {
             format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
 
@@ -40,8 +40,8 @@ namespace AppKit
                 "}"
 
                 "void main() {"
-                "  vec2 line_p1_ndc = uMVP * aUV1;"
-                "  vec2 line_p2_ndc = uMVP * aUV2;"
+                "  vec4 line_p1_ndc = uMVP * aUV1;"
+                "  vec4 line_p2_ndc = uMVP * aUV2;"
 
                 "  float line_lrp = aUV3.x;"
                 "  float line_width_px = aUV3.y;"
@@ -59,7 +59,7 @@ namespace AppKit
                 "  vec2 p1p2_px = (line_p2_ndc.xy - line_p1_ndc.xy) * 0.5 + 0.5;"
                 "  p1p2_px *= uScreenSizePx;"
 
-                "  float angle = atan2(p1p2_px.y, p1p2_px.x);"
+                "  float angle = atan(p1p2_px.y, p1p2_px.x);"
                 "  mat2 rotation_matrix = rotation(angle);"
                 "  p1p2_dir_normalized = rotation_matrix[0];"
 
@@ -76,13 +76,13 @@ namespace AppKit
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
-                "uniform vec4 uColor;"
+                "uniform vec4 uColor = vec4(1.0,0.0,1.0,1.0);"
 
                 "varying vec4 color;"
                 "varying vec2 p1_px;"
                 "varying float p1p2_length;"
                 "varying vec2 p1p2_dir_normalized;"
-                "varying float line_width_px_inv_half;"
+                "varying float line_width_px_half;"
 
                 "void main() {"
                 "  vec2 pixel_pos_window = gl_FragCoord.xy;"
@@ -91,7 +91,7 @@ namespace AppKit
                 "  vec2 closest_point_on_line = p1_px + aux * p1p2_dir_normalized;"
                 "  float distance_to_line = distance(closest_point_on_line, pixel_pos_window);"
                 "  float px_aa_px = 1.0;"
-                "  float lrp_distance = smoothstep(half_dst_line - px_aa_px, half_dst_line + px_aa_px, distance_to_line);"
+                "  float lrp_distance = smoothstep(line_width_px_half - px_aa_px, line_width_px_half + px_aa_px, distance_to_line);"
                 "  if (lrp_distance > 1.0) {"
                 "    discard;"
                 "  }"
@@ -116,7 +116,7 @@ namespace AppKit
             uColor = getUniformVec4(u_color);
         }
 
-        void ShaderSmartLine::setMVP(const MathCore::mat4f &mvp)
+        void LineShader::setMVP(const MathCore::mat4f &mvp)
         {
             if (uMVP != mvp)
             {
@@ -125,7 +125,7 @@ namespace AppKit
             }
         }
 
-        void ShaderSmartLine::setColor(const MathCore::vec4f &color)
+        void LineShader::setColor(const MathCore::vec4f &color)
         {
             if (uColor != color)
             {
@@ -134,7 +134,7 @@ namespace AppKit
             }
         }
 
-        void ShaderSmartLine::setScreenSizePx(const MathCore::vec2f &screenSizePx)
+        void LineShader::setScreenSizePx(const MathCore::vec2f &screenSizePx)
         {
             if (uScreenSizePx != screenSizePx)
             {
@@ -145,7 +145,7 @@ namespace AppKit
             }
         }
 
-        void ShaderSmartLine::activateShaderAndSetPropertiesFromBag(
+        void LineShader::activateShaderAndSetPropertiesFromBag(
             Components::ComponentCamera *camera,
             const MathCore::mat4f *mvp,
             const Transform *element, // for localToWorld, localToWorld_IT, worldToLocal, 
@@ -157,15 +157,15 @@ namespace AppKit
             setMVP(*mvp);
             setScreenSizePx(MathCore::vec2f(camera->viewport.w, camera->viewport.h));
             setColor(bag.getProperty<MathCore::vec4f>("uColor"));
-            
+
 
         }
 
-        void ShaderSmartLine::deactivateShader(GLRenderState *state) {
+        void LineShader::deactivateShader(GLRenderState *state) {
 
         }
 
-        Utils::ShaderPropertyBag ShaderSmartLine::createDefaultBag() const {
+        Utils::ShaderPropertyBag LineShader::createDefaultBag() const {
             Utils::ShaderPropertyBag bag;
             // bag.addProperty("uScreenSizePx", uScreenSizePx);
             // bag.addProperty("uScreenSizePx_inv", uScreenSizePx_inv);

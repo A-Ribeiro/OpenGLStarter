@@ -7,7 +7,7 @@ namespace AppKit
     namespace GLEngine
     {
 
-        class ShaderSmartLine : public DefaultEngineShader
+        class LineShader : public DefaultEngineShader
         {
         private:
             int u_screenSizePx;
@@ -21,7 +21,7 @@ namespace AppKit
             MathCore::vec4f uColor;
 
         public:
-            ShaderSmartLine();
+            LineShader();
 
             void setMVP(const MathCore::mat4f &mvp);
             void setColor(const MathCore::vec4f &color);
