@@ -114,6 +114,9 @@ namespace AppKit
                 // Assignment operator
                 ShaderProperty &operator=(const ShaderProperty &other);
 
+                template <typename T>
+                void set(const T &v);
+
                 // Getter methods
                 template <typename T>
                 const T &get() const;
@@ -129,6 +132,49 @@ namespace AppKit
 
                 std::string toString() const;
             };
+
+
+            template <>
+            inline void ShaderProperty::set<int>(const int &v)
+            {
+                type_ = TYPE_INT;
+                int_value = v;
+            }
+
+            template <>
+            inline void ShaderProperty::set<float>(const float &v)
+            {
+                type_ = TYPE_FLOAT;
+                float_value = v;
+            }
+
+            template <>
+            inline void ShaderProperty::set<MathCore::vec2f>(const MathCore::vec2f &v)
+            {
+                type_ = TYPE_VEC2F;
+                vec2f_value = v;
+            }
+
+            template <>
+            inline void ShaderProperty::set<MathCore::vec3f>(const MathCore::vec3f &v)
+            {
+                type_ = TYPE_VEC3F;
+                vec3f_value = v;
+            }
+
+            template <>
+            inline void ShaderProperty::set<MathCore::vec4f>(const MathCore::vec4f &v)
+            {
+                type_ = TYPE_VEC4F;
+                vec4f_value = v;
+            }
+
+            template <>
+            inline void ShaderProperty::set<MathCore::mat4f>(const MathCore::mat4f &v)
+            {
+                type_ = TYPE_MAT4F;
+                mat4f_value = v;
+            }
 
             // Template specializations for get() method
             template <>

@@ -20,6 +20,8 @@
 #include <appkit-gl-engine/Components/ComponentMaterial.h>
 #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
 
+#include "../shaders/LineShader.h"
+
 namespace AppKit
 {
     namespace GLEngine
@@ -27,94 +29,41 @@ namespace AppKit
         namespace Components
         {
 
-            // enum SpriteSourceType
-            // {
-            //     SpriteSourceNone,
-            //     SpriteSourceDirectTexture,
-            //     SpriteSourceAtlas,
-            // };
+            class ComponentLineMounter : public Component
+            {
+            public:
+                static const ComponentType Type;
 
-            // class DirectTextureSetup
-            // {
-            // public:
-            //     MathCore::vec4f color;
-            //     MathCore::vec2f pivot;
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
-            // };
+                bool always_clone;
 
-            // class TextureFromAtlasSetup
-            // {
-            // public:
-            //     MathCore::vec4f color;
-            //     SpriteAtlas::Entry entry;
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
+                std::shared_ptr<ComponentMaterial> material;
+                std::shared_ptr<ComponentMesh> mesh;
+                std::shared_ptr<ComponentMeshWrapper> meshWrapper;
+                std::shared_ptr<LineShader> lineShader;
 
-            //     void setFromAtlas(const std::shared_ptr<SpriteAtlas> &atlas, const std::string &name)
-            //     {
-            //         if (!atlas->hasSprite(name))
-            //             return;
-            //         entry = atlas->getSprite(name);
-            //         texture = atlas->texture;
-            //     }
-            // };
+                void checkOrCreateAuxiliaryComponents();
 
-            // class ComponentSprite : public Component
-            // {
-            // public:
-            //     static const ComponentType Type;
+                void setLineShader(std::shared_ptr<LineShader> lineShader);
 
-            //     // material type
-            //     SpriteSourceType type;
+                ComponentLineMounter();
 
-            //     // parameters
-            //     DirectTextureSetup directTexture;
-            //     TextureFromAtlasSetup textureFromAtlas;
+                ~ComponentLineMounter();
 
-            //     bool always_clone;
+                void clear();
 
-            //     std::shared_ptr<ComponentMaterial> material;
-            //     std::shared_ptr<ComponentMesh> mesh;
-            //     std::shared_ptr<ComponentMeshWrapper> meshWrapper;
+                void addLine(const MathCore::vec3f &a, const MathCore::vec3f &b,
+                             float thickness,
+                             const MathCore::vec4f &color);
+                // always clone
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone) { return nullptr; }
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap) {}
 
-            //     void checkOrCreateAuxiliaryComponents();
-
-            //     void setTexture(
-            //         std::shared_ptr<AppKit::OpenGL::GLTexture> &texture,
-            //         const MathCore::vec2f &pivot,
-            //         const MathCore::vec4f &color,
-            //         bool staticMesh
-            //     );
-
-            //     void setTextureFromAtlas(
-            //         std::shared_ptr<SpriteAtlas> &atlas,
-            //         const std::string &name,
-            //         const MathCore::vec2f &pivot,
-            //         const MathCore::vec4f &color,
-            //         bool staticMesh
-            //     );
-
-            //     void setTextureFromAtlas(
-            //         std::shared_ptr<AppKit::OpenGL::GLTexture> &altas_texture,
-            //         const SpriteAtlas::Entry &altas_entry,
-            //         const MathCore::vec2f &pivot,
-            //         const MathCore::vec4f &color,
-            //         bool staticMesh
-            //     );
-
-            //     ComponentSprite();
-
-            //     ~ComponentSprite();
-
-            //     // always clone
-            //     std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone);
-            //     void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
-
-            //     void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
-            //     void Deserialize(rapidjson::Value &_value,
-            //                      std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-            //                      std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-            //                      ResourceSet &resourceSet);
-            // };
+                void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) {}
+                void Deserialize(rapidjson::Value &_value,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                 ResourceSet &resourceSet) {}
+            };
         }
     }
 }

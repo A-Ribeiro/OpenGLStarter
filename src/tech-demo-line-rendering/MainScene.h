@@ -9,6 +9,8 @@
 
 #include "shaders/LineShader.h"
 
+#include "components/ComponentLineMounter.h"
+
 class App;
 
 //
@@ -50,9 +52,13 @@ public:
 
     App *app;
 
-    std::shared_ptr<AppKit::GLEngine::Transform> line_middle_to_half;
+    std::shared_ptr<AppKit::GLEngine::Transform> deprecated_lines_transform;
     std::shared_ptr<AppKit::GLEngine::Components::ComponentColorLine> deprecated_lines;
     std::shared_ptr<AppKit::GLEngine::LineShader> lineShader;
+
+
+    std::shared_ptr<AppKit::GLEngine::Transform> new_line_algorithm_transform;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentLineMounter> line_mounter;
     
     MainScene(
         App *app,

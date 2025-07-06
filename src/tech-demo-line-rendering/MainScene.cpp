@@ -25,13 +25,11 @@ void MainScene::loadGraph()
     root = Transform::CreateShared();
     root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
-    line_middle_to_half = root->addChild(Transform::CreateShared());
-    line_middle_to_half->Name = "line_middle_to_half";
+    deprecated_lines_transform = root->addChild(Transform::CreateShared());
+    deprecated_lines_transform->Name = "deprecated_lines_transform";
 
-    deprecated_lines = line_middle_to_half->addNewComponent<ComponentColorLine>();
-    deprecated_lines->color = MathCore::vec4f(1.0f, 0.0f, 1.0f, 1.0f);
-    deprecated_lines->width = 100.0f;
-
+    new_line_algorithm_transform = root->addChild(Transform::CreateShared());
+    new_line_algorithm_transform->Name = "new line transform";
 
 }
 
@@ -41,7 +39,15 @@ void MainScene::bindResourcesToGraph()
 
     GLRenderState *renderState = GLRenderState::Instance();
 
-    // setup renderstate
+    deprecated_lines = deprecated_lines_transform->addNewComponent<ComponentColorLine>();
+    deprecated_lines->color = MathCore::vec4f(1.0f, 0.0f, 1.0f, 1.0f);
+    deprecated_lines->width = 100.0f;
+
+    line_mounter = new_line_algorithm_transform->addNewComponent<ComponentLineMounter>();
+    line_mounter->setLineShader(lineShader);
+
+    auto &bag = line_mounter->material->custom_shader_property_bag;
+    // bag.getProperty("uAntialias").set(1.0f);
 
     auto mainCamera = root->findTransformByName("Main Camera");
     std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
@@ -66,7 +72,11 @@ void MainScene::unloadAll()
     root = nullptr;
     camera = nullptr;
     deprecated_lines = nullptr;
-    line_middle_to_half = nullptr;
+    deprecated_lines_transform = nullptr;
+
+    new_line_algorithm_transform = nullptr;
+    line_mounter = nullptr;
+
     lineShader = nullptr;
 }
 
@@ -86,6 +96,9 @@ void MainScene::update(Platform::Time *elapsed)
     deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));
     deprecated_lines->vertices.push_back(rot * MathCore::vec3f(size.height, -size.width, 0) * 0.25f);
     // deprecated_lines->syncVBODynamic();
+
+
+    new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
 }
 
 void MainScene::draw()
@@ -106,6 +119,16 @@ void MainScene::resize(const MathCore::vec2i &size)
     deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));
     deprecated_lines->vertices.push_back(MathCore::vec3f(size.width, size.height, 0) * 0.25f);
     deprecated_lines->syncVBODynamic();*/
+
+    line_mounter->clear();
+
+    line_mounter->addLine(
+        MathCore::vec3f(0, 0, 0),
+        MathCore::vec3f(0, size.height, 0) * 0.25f,
+        2.0f,
+        MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f)
+    );
+
 }
 
 MainScene::MainScene(
