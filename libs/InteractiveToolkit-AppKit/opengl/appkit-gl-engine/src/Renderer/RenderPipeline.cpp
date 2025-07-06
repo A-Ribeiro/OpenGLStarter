@@ -355,7 +355,7 @@ namespace AppKit
                     element, state, 
                     material->custom_shader_property_bag
                 );
-                allMeshRender_Range(element, &unlit_tex_vertcolor_font_Shader, start_index, end_index);
+                allMeshRender_Range(element, material->custom_shader.get(), start_index, end_index);
                 material->custom_shader->deactivateShader(state);
 
                 break;

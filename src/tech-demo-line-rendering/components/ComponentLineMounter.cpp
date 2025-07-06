@@ -9,107 +9,219 @@ namespace AppKit
     {
         namespace Components
         {
-            // const ComponentType ComponentSprite::Type = "ComponentSprite";
+            const ComponentType ComponentLineMounter::Type = "ComponentLineMounter";
 
-            // void ComponentSprite::checkOrCreateAuxiliaryComponents()
-            // {
-            //     if (material != nullptr || mesh != nullptr || meshWrapper != nullptr)
-            //         return;
-            //     auto transform = getTransform();
-            //     if (material == nullptr)
-            //     {
-            //         material = transform->addNewComponent<ComponentMaterial>();
-            //         material->type = MaterialUnlitTexture;
-            //         material->unlit.tex = directTexture.texture;
-            //         material->unlit.color = directTexture.color;
-            //     }
-            //     if (mesh == nullptr)
-            //     {
-            //         mesh = transform->addNewComponent<ComponentMesh>();
-            //         mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0;
-            //     }
-            //     if (meshWrapper == nullptr)
-            //     {
-            //         meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
-            //         transform->makeFirstComponent(meshWrapper);
-            //         //meshWrapper->updateMeshAABB();
-            //     }
-            // }
+            void ComponentLineMounter::checkOrCreateAuxiliaryComponents()
+            {
+                auto transform = getTransform();
+                if (material == nullptr)
+                {
+                    material = transform->addNewComponent<ComponentMaterial>();
+                    // material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
+                    material->type = AppKit::GLEngine::Components::MaterialNone;
+                }
+                if (mesh == nullptr)
+                {
+                    mesh = transform->addNewComponent<ComponentMesh>();
+                    mesh->always_clone = true;
+                }
+                if (meshWrapper == nullptr)
+                {
+                    meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
+                    transform->makeFirstComponent(meshWrapper);
+                    // meshWrapper->updateMeshAABB();
+                }
+                transform->makeLastComponent(self());
+            }
 
-            // void ComponentSprite::setTexture(
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> &texture,
-            //     const MathCore::vec2f &pivot,
-            //     const MathCore::vec4f &color,
-            //     bool staticMesh)
-            // {
-            //     checkOrCreateAuxiliaryComponents();
-            // }
+            void ComponentLineMounter::setLineShader(std::shared_ptr<LineShader> lineShader)
+            {
+                checkOrCreateAuxiliaryComponents();
 
-            // void ComponentSprite::setTextureFromAtlas(
-            //     std::shared_ptr<SpriteAtlas> &atlas,
-            //     const std::string &name,
-            //     const MathCore::vec2f &pivot,
-            //     const MathCore::vec4f &color,
-            //     bool staticMesh)
-            // {
-            //     checkOrCreateAuxiliaryComponents();
-            // }
+                this->lineShader = lineShader;
+                if (lineShader == nullptr)
+                {
+                    material->type = AppKit::GLEngine::Components::MaterialNone;
+                    return;
+                }
 
-            // void ComponentSprite::setTextureFromAtlas(
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> &altas_texture,
-            //     const SpriteAtlas::Entry &altas_entry,
-            //     const MathCore::vec2f &pivot,
-            //     const MathCore::vec4f &color,
-            //     bool staticMesh)
-            // {
-            //     checkOrCreateAuxiliaryComponents();
-            // }
+                material->type = AppKit::GLEngine::Components::MaterialCustomShader;
+                material->custom_shader = lineShader;
+                material->custom_shader_property_bag = lineShader->createDefaultBag();
+            }
 
-            // ComponentSprite::ComponentSprite() : Component(ComponentSprite::Type)
-            // {
-            //     type = SpriteSourceNone;
-            //     directTexture.color = MathCore::vec4f(1.0f);
-            //     directTexture.pivot = MathCore::vec2f(0.5f, 0.5f);
-            //     directTexture.texture = nullptr;
+            ComponentLineMounter::ComponentLineMounter() : Component(ComponentLineMounter::Type)
+            {
+                always_clone = false;
+            }
 
-            //     textureFromAtlas.color = MathCore::vec4f(1.0f);
-            //     textureFromAtlas.entry = SpriteAtlas::Entry();
-            //     textureFromAtlas.texture = nullptr;
+            ComponentLineMounter::~ComponentLineMounter()
+            {
+            }
 
-            //     always_clone = false;
-            // }
+            void ComponentLineMounter::clear()
+            {
+                mesh->pos.clear();
+                mesh->uv[1].clear();
+                mesh->uv[2].clear();
+                mesh->uv[3].clear();
+                mesh->color[0].clear();
 
-            // ComponentSprite::~ComponentSprite()
-            // {
-            // }
+                mesh->indices.clear();
+            }
 
-            // // always clone
-            // std::shared_ptr<Component> ComponentSprite::duplicate_ref_or_clone(bool force_clone)
-            // {
-            //     if (!always_clone && !force_clone)
-            //         return self();
-            //     auto result = Component::CreateShared<ComponentSprite>();
+            void ComponentLineMounter::addLine(const MathCore::vec3f &a, const MathCore::vec3f &b,
+                                               float thickness,
+                                               const MathCore::vec4f &color)
+            {
 
-            //     result->type = this->type;
-            //     result->directTexture = this->directTexture;
-            //     result->textureFromAtlas = this->textureFromAtlas;
-            //     result->always_clone = this->always_clone;
+                // "attribute vec2 aPosition;" // 2d square position
+                // "attribute vec4 aUV1;"      // line point 1
+                // "attribute vec4 aUV2;"      // line point 2
+                // // x = current position lrp in line [0..1]
+                // // y = line_thickness_px
+                // "attribute vec2 aUV3;"
+                // "attribute vec4 aColor0;"
 
-            //     return result;
-            // }
-            // void ComponentSprite::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
-            // {
-            // }
+                //
+                //(-1,1)  (0,1)         (1,1) (2,1)
+                //         *--------------*
+                //         |              |
+                //        A|              |B
+                //         |              |
+                //         *--------------*
+                //(-1,-1) (0,-1)        (1,-1) (2,-1)
+                uint32_t start_index;
+                start_index = (uint32_t)mesh->pos.size();
 
-            // void ComponentSprite::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
-            // {
-            // }
-            // void ComponentSprite::Deserialize(rapidjson::Value &_value,
-            //                                   std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-            //                                   std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-            //                                   ResourceSet &resourceSet)
-            // {
-            // }
+                mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->indices.push_back(start_index);
+                mesh->indices.push_back(start_index + 1);
+                mesh->indices.push_back(start_index + 2);
+
+                mesh->indices.push_back(start_index);
+                mesh->indices.push_back(start_index + 2);
+                mesh->indices.push_back(start_index + 3);
+
+
+                // // a ear
+                // //
+                // //(-1,1)  (0,1)         (1,1) (2,1)
+                // //         *--------------*
+                // //         |              |
+                // //        A|              |B
+                // //         |              |
+                // //         *--------------*
+                // //(-1,-1) (0,-1)        (1,-1) (2,-1)
+                start_index = (uint32_t)mesh->pos.size();
+
+                mesh->pos.push_back(MathCore::vec3f(-1, -1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->pos.push_back(MathCore::vec3f(-1, 1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->indices.push_back(start_index);
+                mesh->indices.push_back(start_index + 1);
+                mesh->indices.push_back(start_index + 2);
+
+                mesh->indices.push_back(start_index);
+                mesh->indices.push_back(start_index + 2);
+                mesh->indices.push_back(start_index + 3);
+
+
+                // b ear
+                //
+                //(-1,1)  (0,1)         (1,1) (2,1)
+                //         *--------------*
+                //         |              |
+                //        A|              |B
+                //         |              |
+                //         *--------------*
+                //(-1,-1) (0,-1)        (1,-1) (2,-1)
+                start_index = (uint32_t)mesh->pos.size();
+
+                mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->pos.push_back(MathCore::vec3f(1, -1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->pos.push_back(MathCore::vec3f(1, 1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
+                mesh->uv[1].push_back(a);                            // line point 1
+                mesh->uv[2].push_back(b);                            // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
+                mesh->indices.push_back(start_index);
+                mesh->indices.push_back(start_index + 1);
+                mesh->indices.push_back(start_index + 2);
+
+                mesh->indices.push_back(start_index);
+                mesh->indices.push_back(start_index + 2);
+                mesh->indices.push_back(start_index + 3);
+
+
+
+                mesh->format = ITKExtension::Model::CONTAINS_POS |
+                               ITKExtension::Model::CONTAINS_UV1 | ITKExtension::Model::CONTAINS_UV2 | ITKExtension::Model::CONTAINS_UV3 |
+                               ITKExtension::Model::CONTAINS_COLOR0;
+
+                meshWrapper->updateMeshAABB();
+            }
 
         }
     }
