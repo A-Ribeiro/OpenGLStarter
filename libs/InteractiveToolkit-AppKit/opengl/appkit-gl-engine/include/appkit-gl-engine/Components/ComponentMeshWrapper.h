@@ -42,13 +42,18 @@ namespace AppKit
 
                 void createCollisionLines();
 
+                void OnAfterGraphComputeFinalPositionsDirty(Platform::Time *time);
+
+                void makeDirtyToComputeFinalPositions(bool only_remove);
+
+            public:
+
                 void setShapeSphere(const MathCore::vec3f &sphereCenter, float sphereRadius);
                 void setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &aabb);
                 void setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &aabb);
 
-                void OnAfterGraphComputeFinalPositionsDirty(Platform::Time *time);
+                void clearShape();
 
-            public:
                 bool debugCollisionShapes;
 
                 WrapShape wrapShape;

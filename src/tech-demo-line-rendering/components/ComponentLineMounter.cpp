@@ -68,12 +68,21 @@ namespace AppKit
                 mesh->color[0].clear();
 
                 mesh->indices.clear();
+
+                aabb.makeEmpty();
+                meshWrapper->clearShape();
             }
 
             void ComponentLineMounter::addLine(const MathCore::vec3f &a, const MathCore::vec3f &b,
                                                float thickness,
                                                const MathCore::vec4f &color)
             {
+
+                aabb = AABBType::joinAABB( aabb, AABBType::fromLineSegment(a,b) );
+
+                aabb = AABBType::joinAABB( aabb, AABBType::fromSphere(a, thickness * 0.5) );
+                aabb = AABBType::joinAABB( aabb, AABBType::fromSphere(b, thickness * 0.5) );
+
 
                 // "attribute vec2 aPosition;" // 2d square position
                 // "attribute vec4 aUV1;"      // line point 1
@@ -220,7 +229,8 @@ namespace AppKit
                                ITKExtension::Model::CONTAINS_UV1 | ITKExtension::Model::CONTAINS_UV2 | ITKExtension::Model::CONTAINS_UV3 |
                                ITKExtension::Model::CONTAINS_COLOR0;
 
-                meshWrapper->updateMeshAABB();
+                meshWrapper->debugCollisionShapes = true;
+                meshWrapper->setShapeAABB(aabb);
             }
 
         }

@@ -206,19 +206,25 @@ namespace AppKit
                 computeFinalPositions(true);
             }
 
+            void ComponentMeshWrapper::makeDirtyToComputeFinalPositions(bool only_remove) {
+                auto transform = getTransform();
+
+                renderWindowRegionRef = transform->renderWindowRegion;
+                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+
+                renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                if (only_remove)
+                    return;
+                renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+            }
+
             void ComponentMeshWrapper::setShapeSphere(const MathCore::vec3f &_sphereCenter, float _sphereRadius)
             {
                 wrapShape = WrapShapeSphere;
                 sphereCenter = _sphereCenter;
                 sphereRadius = _sphereRadius;
 
-                // computeFinalPositions(false);
-                // AppKit::GLEngine::Engine::Instance()->app->OnAfterGraphPrecompute.remove(this, &ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty);
-                auto transform = getTransform();
-
-                renderWindowRegionRef = transform->renderWindowRegion;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                makeDirtyToComputeFinalPositions(false);
             }
 
             void ComponentMeshWrapper::setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &_aabb)
@@ -227,13 +233,7 @@ namespace AppKit
                 aabbCenter = (_aabb.min_box + _aabb.max_box) * 0.5f;
                 aabbDimension_2_or_aabbDimension = (_aabb.max_box - _aabb.min_box) * 0.5f;
 
-                // computeFinalPositions(false);
-
-                // AppKit::GLEngine::Engine::Instance()->app->OnAfterGraphPrecompute.remove(this, &ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty);
-                auto transform = getTransform();
-                renderWindowRegionRef = transform->renderWindowRegion;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                makeDirtyToComputeFinalPositions(false);
             }
 
             void ComponentMeshWrapper::setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &_aabb)
@@ -243,13 +243,13 @@ namespace AppKit
                 aabbCenter = (_aabb.min_box + _aabb.max_box) * 0.5f;
                 aabbDimension_2_or_aabbDimension = (_aabb.max_box - _aabb.min_box); // * 0.5f;
 
-                // computeFinalPositions(false);
+                makeDirtyToComputeFinalPositions(false);
+            }
 
-                // AppKit::GLEngine::Engine::Instance()->app->OnAfterGraphPrecompute.remove(this, &ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty);
-                auto transform = getTransform();
-                renderWindowRegionRef = transform->renderWindowRegion;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+            void ComponentMeshWrapper::clearShape()
+            {
+                wrapShape = WrapShapeNone;
+                makeDirtyToComputeFinalPositions(true);
             }
 
             void ComponentMeshWrapper::updateMeshSphere()
@@ -304,7 +304,7 @@ namespace AppKit
 
                     radius = sqrt(radius);
 
-                    setShapeAABB(_aabb);
+                    // setShapeAABB(_aabb);
                     setShapeSphere(center, radius);
                 }
             }

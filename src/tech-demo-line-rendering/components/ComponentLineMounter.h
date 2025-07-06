@@ -41,6 +41,10 @@ namespace AppKit
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
                 std::shared_ptr<LineShader> lineShader;
 
+                using AABBType = CollisionCore::AABB<MathCore::vec3f>;
+
+                AABBType aabb;
+
                 void checkOrCreateAuxiliaryComponents();
 
                 void setLineShader(std::shared_ptr<LineShader> lineShader);

@@ -41,7 +41,7 @@ void MainScene::bindResourcesToGraph()
 
     deprecated_lines = deprecated_lines_transform->addNewComponent<ComponentColorLine>();
     deprecated_lines->color = MathCore::vec4f(1.0f, 0.0f, 1.0f, 1.0f);
-    deprecated_lines->width = 100.0f;
+    deprecated_lines->width = 5.0f;
 
     line_mounter = new_line_algorithm_transform->addNewComponent<ComponentLineMounter>();
     line_mounter->setLineShader(lineShader);
@@ -98,7 +98,31 @@ void MainScene::update(Platform::Time *elapsed)
     // deprecated_lines->syncVBODynamic();
 
 
-    new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
+    // new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
+
+    bool keyPressed = false;
+
+    auto cameraTransform = camera->getTransform();
+    const float speed = 500.0f;
+    if (Keyboard::isPressed(KeyCode::Left)){
+        cameraTransform->setLocalPosition(
+            cameraTransform->getLocalPosition() + MathCore::vec3f(-1.0f, 0.0f, 0.0f) * elapsed->deltaTime * speed
+        );
+    } else if (Keyboard::isPressed(KeyCode::Right)){
+        cameraTransform->setLocalPosition(
+            cameraTransform->getLocalPosition() + MathCore::vec3f(1.0f, 0.0f, 0.0f) * elapsed->deltaTime * speed
+        );
+    }
+    if (Keyboard::isPressed(KeyCode::Up)){
+        cameraTransform->setLocalPosition(
+            cameraTransform->getLocalPosition() + MathCore::vec3f(0.0f, 1.0f, 0.0f) * elapsed->deltaTime * speed
+        );
+    } else if (Keyboard::isPressed(KeyCode::Down)){
+        cameraTransform->setLocalPosition(
+            cameraTransform->getLocalPosition() + MathCore::vec3f(0.0f, -1.0f, 0.0f) * elapsed->deltaTime * speed
+        );
+    }
+        
 }
 
 void MainScene::draw()
@@ -125,7 +149,7 @@ void MainScene::resize(const MathCore::vec2i &size)
     line_mounter->addLine(
         MathCore::vec3f(0, 0, 0),
         MathCore::vec3f(0, size.height, 0) * 0.25f,
-        2.0f,
+        500.0f,
         MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f)
     );
 
