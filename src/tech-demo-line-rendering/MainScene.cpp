@@ -31,6 +31,8 @@ void MainScene::loadGraph()
     new_line_algorithm_transform = root->addChild(Transform::CreateShared());
     new_line_algorithm_transform->Name = "new line transform";
 
+    new_line_algorithm_transform->setLocalScale(MathCore::vec3f(0.5f, 0.5f, 0.5f));
+
 }
 
 // to bind the resources to the current graph
@@ -45,6 +47,7 @@ void MainScene::bindResourcesToGraph()
 
     line_mounter = new_line_algorithm_transform->addNewComponent<ComponentLineMounter>();
     line_mounter->setLineShader(lineShader);
+    line_mounter->setCamera(camera);
 
     auto &bag = line_mounter->material->custom_shader_property_bag;
     // bag.getProperty("uAntialias").set(1.0f);
@@ -98,7 +101,7 @@ void MainScene::update(Platform::Time *elapsed)
     // deprecated_lines->syncVBODynamic();
 
 
-    // new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
+    new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
 
     bool keyPressed = false;
 
@@ -149,8 +152,28 @@ void MainScene::resize(const MathCore::vec2i &size)
     line_mounter->addLine(
         MathCore::vec3f(0, 0, 0),
         MathCore::vec3f(0, size.height, 0) * 0.25f,
-        500.0f,
-        MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f)
+        5.0f,
+        MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
+            MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f)
+        )
+    );
+
+    line_mounter->addLine(
+        MathCore::vec3f(0, 0, 0),
+        MathCore::vec3f(size.width, size.height, 0) * 0.25f,
+        15.0f,
+        MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
+            MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f)
+        )
+    );
+
+    line_mounter->addLine(
+        MathCore::vec3f(0, 0, 0),
+        MathCore::vec3f(size.width, 0, 0) * 0.25f,
+        10.0f,
+        MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
+            MathCore::vec4f(0.0f, 0.0f, 1.0f, 1.0f)
+        )
     );
 
 }

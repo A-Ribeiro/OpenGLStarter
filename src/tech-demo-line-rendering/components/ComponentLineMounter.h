@@ -31,6 +31,10 @@ namespace AppKit
 
             class ComponentLineMounter : public Component
             {
+                // make possible to the component to fiz the aabb according the pixel size of the 
+                // line segments and the camera projection type
+                void OnBeforeComputeFinalPositions(ComponentMeshWrapper* meshWrapper);
+
             public:
                 static const ComponentType Type;
 
@@ -40,6 +44,7 @@ namespace AppKit
                 std::shared_ptr<ComponentMesh> mesh;
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
                 std::shared_ptr<LineShader> lineShader;
+                std::shared_ptr<ComponentCamera> camera;
 
                 using AABBType = CollisionCore::AABB<MathCore::vec3f>;
 
@@ -48,6 +53,8 @@ namespace AppKit
                 void checkOrCreateAuxiliaryComponents();
 
                 void setLineShader(std::shared_ptr<LineShader> lineShader);
+                void setCamera(std::shared_ptr<ComponentCamera> camera);
+
 
                 ComponentLineMounter();
 
