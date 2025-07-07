@@ -81,7 +81,7 @@ namespace AppKit
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
-                "uniform vec4 uColor = vec4(1.0,0.0,1.0,1.0);"
+                "uniform vec4 uColor = vec4(1.0,1.0,1.0,1.0);"
 
                 "varying vec4 color;"
                 "varying vec2 p1_px;"

@@ -48,6 +48,9 @@ namespace AppKit
 
             void ComponentMeshWrapper::computeFinalPositions(bool visitedFlag)
             {
+                if (this->OnBeforeComputeFinalPositions!= nullptr)
+                    this->OnBeforeComputeFinalPositions(this);
+
                 if (wrapShape == WrapShapeSphere)
                 {
                     auto transform = getTransform();
@@ -218,32 +221,34 @@ namespace AppKit
                 renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
-            void ComponentMeshWrapper::setShapeSphere(const MathCore::vec3f &_sphereCenter, float _sphereRadius)
+            void ComponentMeshWrapper::setShapeSphere(const MathCore::vec3f &_sphereCenter, float _sphereRadius, float ignore_after_graph_precompute_call)
             {
                 wrapShape = WrapShapeSphere;
                 sphereCenter = _sphereCenter;
                 sphereRadius = _sphereRadius;
 
-                makeDirtyToComputeFinalPositions(false);
+                if (!ignore_after_graph_precompute_call)
+                    makeDirtyToComputeFinalPositions(false);
             }
 
-            void ComponentMeshWrapper::setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &_aabb)
+            void ComponentMeshWrapper::setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, float ignore_after_graph_precompute_call)
             {
                 wrapShape = WrapShapeAABB;
                 aabbCenter = (_aabb.min_box + _aabb.max_box) * 0.5f;
                 aabbDimension_2_or_aabbDimension = (_aabb.max_box - _aabb.min_box) * 0.5f;
 
-                makeDirtyToComputeFinalPositions(false);
+                if (!ignore_after_graph_precompute_call)
+                    makeDirtyToComputeFinalPositions(false);
             }
 
-            void ComponentMeshWrapper::setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &_aabb)
+            void ComponentMeshWrapper::setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, float ignore_after_graph_precompute_call)
             {
-
                 wrapShape = WrapShapeOBB;
                 aabbCenter = (_aabb.min_box + _aabb.max_box) * 0.5f;
                 aabbDimension_2_or_aabbDimension = (_aabb.max_box - _aabb.min_box); // * 0.5f;
 
-                makeDirtyToComputeFinalPositions(false);
+                if (!ignore_after_graph_precompute_call)
+                    makeDirtyToComputeFinalPositions(false);
             }
 
             void ComponentMeshWrapper::clearShape()

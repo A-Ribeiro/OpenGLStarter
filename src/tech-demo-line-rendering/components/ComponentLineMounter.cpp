@@ -1,5 +1,8 @@
 // #include <appkit-gl-engine/Components/ComponentSprite.h>
 #include "ComponentLineMounter.h"
+#include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+
 
 using namespace AppKit::GLEngine;
 
@@ -10,6 +13,38 @@ namespace AppKit
         namespace Components
         {
             const ComponentType ComponentLineMounter::Type = "ComponentLineMounter";
+
+            void ComponentLineMounter::OnBeforeComputeFinalPositions(ComponentMeshWrapper* meshWrapper){
+
+                const auto &world_to_local = getTransform()->getMatrixInverse(true);
+                MathCore::vec3f world_Scale_inv(world_to_local.a1,world_to_local.b2,world_to_local.c3);
+                MathCore::vec3f thick_scaled;
+                
+                // MathCore::vec3f camera_px_scale(1.0f);
+                // if (camera->compareType(Components::ComponentCameraOrthographic::Type)){
+                //     auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(camera);
+                //     camera_px_scale = 0.5f / MathCore::vec3f(ortho->projection.a1, ortho->projection.b2, 0.5f);
+                // }
+
+                AABBType finalAABB = aabb;
+
+                AABBType aux;
+
+                for (size_t i=0; i < mesh->pos.size(); i += 12)
+                {
+                    const auto& a = mesh->uv[1][i];
+                    const auto& b = mesh->uv[2][i];
+                    float thickness = mesh->uv[3][i].y;
+
+                    thick_scaled = world_Scale_inv * thickness * 0.5f;
+                    float max_scaled = MathCore::OP<MathCore::vec3f>::maximum(thick_scaled);
+
+                    finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, max_scaled));
+                    finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, max_scaled));
+                }
+
+                meshWrapper->setShapeAABB(finalAABB, true);
+            }
 
             void ComponentLineMounter::checkOrCreateAuxiliaryComponents()
             {
@@ -28,6 +63,7 @@ namespace AppKit
                 if (meshWrapper == nullptr)
                 {
                     meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
+                    meshWrapper->OnBeforeComputeFinalPositions = EventCore::CallbackWrapper( &ComponentLineMounter::OnBeforeComputeFinalPositions, this );
                     transform->makeFirstComponent(meshWrapper);
                     // meshWrapper->updateMeshAABB();
                 }
@@ -49,6 +85,12 @@ namespace AppKit
                 material->custom_shader = lineShader;
                 material->custom_shader_property_bag = lineShader->createDefaultBag();
             }
+
+            void ComponentLineMounter::setCamera(std::shared_ptr<ComponentCamera> camera)
+            {
+                this->camera = camera;
+            }
+
 
             ComponentLineMounter::ComponentLineMounter() : Component(ComponentLineMounter::Type)
             {
