@@ -80,8 +80,8 @@ namespace AppKit
 
                 aabb = AABBType::joinAABB( aabb, AABBType::fromLineSegment(a,b) );
 
-                aabb = AABBType::joinAABB( aabb, AABBType::fromSphere(a, thickness * 0.5) );
-                aabb = AABBType::joinAABB( aabb, AABBType::fromSphere(b, thickness * 0.5) );
+                //aabb = AABBType::joinAABB( aabb, AABBType::fromSphere(a, thickness * 0.5) );
+                //aabb = AABBType::joinAABB( aabb, AABBType::fromSphere(b, thickness * 0.5) );
 
 
                 // "attribute vec2 aPosition;" // 2d square position
