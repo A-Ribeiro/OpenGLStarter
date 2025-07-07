@@ -351,10 +351,9 @@ namespace AppKit
                     break;
 
                 material->custom_shader->activateShaderAndSetPropertiesFromBag(
-                    camera, mvp, 
-                    element, state, 
-                    material->custom_shader_property_bag
-                );
+                    camera, mvp,
+                    element, state,
+                    material->custom_shader_property_bag);
                 allMeshRender_Range(element, material->custom_shader.get(), start_index, end_index);
                 material->custom_shader->deactivateShader(state);
 
@@ -906,37 +905,62 @@ namespace AppKit
             {
                 auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(camera);
 
-                MathCore::vec3f translation = ortho->getTransform()->getPosition();// MathCore::CVT<MathCore::vec4f>::toVec3(ortho->projection[3]);
+                MathCore::vec3f center = ortho->getTransform()->getPosition(true); // MathCore::CVT<MathCore::vec4f>::toVec3(ortho->projection[3]);
                 MathCore::vec3f size = 1.0f / MathCore::vec3f(ortho->projection.a1, ortho->projection.b2, ortho->projection.c3);
+
+                MathCore::quatf rotation = MathCore::OP<MathCore::quatf>::conjugate( ortho->getTransform()->getRotation(true) );
+
+                MathCore::vec3f right = rotation * MathCore::vec3f(size.x, 0, 0);
+                MathCore::vec3f top = rotation * MathCore::vec3f(0, size.y, 0);
+                MathCore::vec3f depth = rotation * MathCore::vec3f(0, 0, size.z);
+
+                MathCore::vec3f vertices[8] = {
+                    center - right - top - depth, // 000
+                    center - right - top + depth, // 001
+                    center - right + top - depth, // 010
+                    center - right + top + depth, // 011
+                    center + right - top - depth, // 100
+                    center + right - top + depth, // 101
+                    center + right + top - depth, // 110
+                    center + right + top + depth  // 111
+                };
+
+                auto aabb = CollisionCore::AABB<MathCore::vec3f>(vertices[0], vertices[1]);
+                for (int i = 2; i < 8; i++)
+                {
+                    aabb.min_box = MathCore::OP<MathCore::vec3f>::minimum(aabb.min_box, vertices[i]);
+                    aabb.max_box = MathCore::OP<MathCore::vec3f>::maximum(aabb.max_box, vertices[i]);
+                }
+
+                // size = MathCore::OP<MathCore::quatf>::conjugate( rotation ) * size; // apply rotation to size
+
                 // translation *= size * 2.0f;
                 // OOBB basis not implemented yet...
                 // camera->view;
-                CollisionCore::AABB<MathCore::vec3f> aabb =
-                    CollisionCore::AABB<MathCore::vec3f>(
-                        translation - size,
-                        translation + size);
-                
-                //printf("aabb\n");
-                //printf("  near: %f\n", ortho->nearPlane.c_val());
-                //printf("  far: %f\n", ortho->farPlane.c_val());
-                //printf("  translation: %f %f %f\n", translation.x,translation.y,translation.z);
-                //printf("  size: %f %f %f\n", size.x,size.y,size.z);
-                //printf("  min: %f %f %f\n", aabb.min_box.x,aabb.min_box.y,aabb.min_box.z);
-                //printf("  max: %f %f %f\n", aabb.max_box.x,aabb.max_box.y,aabb.max_box.z);
-                //printf("projection\n");
-                //printf("  %f %f %f %f\n", ortho->projection.a1, ortho->projection.b1, ortho->projection.c1, ortho->projection.d1);
-                //printf("  %f %f %f %f\n", ortho->projection.a2, ortho->projection.b2, ortho->projection.c2, ortho->projection.d2);
-                //printf("  %f %f %f %f\n", ortho->projection.a3, ortho->projection.b3, ortho->projection.c3, ortho->projection.d3);
-                //printf("  %f %f %f %f\n", ortho->projection.a4, ortho->projection.b4, ortho->projection.c4, ortho->projection.d4);
+                // CollisionCore::AABB<MathCore::vec3f> aabb =
+                //     CollisionCore::AABB<MathCore::vec3f>(
+                //         translation - size,
+                //         translation + size);
 
+                // printf("aabb\n");
+                // printf("  near: %f\n", ortho->nearPlane.c_val());
+                // printf("  far: %f\n", ortho->farPlane.c_val());
+                // printf("  translation: %f %f %f\n", translation.x,translation.y,translation.z);
+                printf("  size: %f %f %f\n", size.x,size.y,size.z);
+                // printf("  min: %f %f %f\n", aabb.min_box.x,aabb.min_box.y,aabb.min_box.z);
+                // printf("  max: %f %f %f\n", aabb.max_box.x,aabb.max_box.y,aabb.max_box.z);
+                // printf("projection\n");
+                // printf("  %f %f %f %f\n", ortho->projection.a1, ortho->projection.b1, ortho->projection.c1, ortho->projection.d1);
+                // printf("  %f %f %f %f\n", ortho->projection.a2, ortho->projection.b2, ortho->projection.c2, ortho->projection.d2);
+                // printf("  %f %f %f %f\n", ortho->projection.a3, ortho->projection.b3, ortho->projection.c3, ortho->projection.d3);
+                // printf("  %f %f %f %f\n", ortho->projection.a4, ortho->projection.b4, ortho->projection.c4, ortho->projection.d4);
 
-                //printf("  screen: %i %i\n", camera->viewport.w, camera->viewport.h);
-
+                // printf("  screen: %i %i\n", camera->viewport.w, camera->viewport.h);
 
                 // filter only objects visible to camera...
                 objectPlaces.filterObjectsAABB(root, aabb);
-                
-                //printf("Objects count %zu\n", objectPlaces.filteredMeshWrappers.size());
+
+                printf("Objects count %zu\n", objectPlaces.filteredMeshWrappers.size());
             }
 
             // draw all sphere suns
