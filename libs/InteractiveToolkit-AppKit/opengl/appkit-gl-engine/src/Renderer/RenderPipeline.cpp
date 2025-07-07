@@ -906,32 +906,37 @@ namespace AppKit
             {
                 auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(camera);
 
-                MathCore::vec3f translation = MathCore::CVT<MathCore::vec4f>::toVec3(ortho->projection[3]);
+                MathCore::vec3f translation = ortho->getTransform()->getPosition();// MathCore::CVT<MathCore::vec4f>::toVec3(ortho->projection[3]);
                 MathCore::vec3f size = 1.0f / MathCore::vec3f(ortho->projection.a1, ortho->projection.b2, ortho->projection.c3);
-                translation *= size * 2.0f;
+                // translation *= size * 2.0f;
                 // OOBB basis not implemented yet...
                 // camera->view;
                 CollisionCore::AABB<MathCore::vec3f> aabb =
                     CollisionCore::AABB<MathCore::vec3f>(
                         translation - size,
                         translation + size);
-                /*
-                printf("aabb\n");
-                printf("  near: %f\n", ortho->nearPlane.value);
-                printf("  far: %f\n", ortho->farPlane.value);
-                printf("  translation: %f %f %f\n", translation.x,translation.y,translation.z);
-                printf("  size: %f %f %f\n", size.x,size.y,size.z);
-                printf("  min: %f %f %f\n", aabb.min_box.x,aabb.min_box.y,aabb.min_box.z);
-                printf("  max: %f %f %f\n", aabb.max_box.x,aabb.max_box.y,aabb.max_box.z);
-                printf("projection\n");
-                printf("  %f %f %f %f\n", ortho->projection.a1, ortho->projection.b1, ortho->projection.c1, ortho->projection.d1);
-                printf("  %f %f %f %f\n", ortho->projection.a2, ortho->projection.b2, ortho->projection.c2, ortho->projection.d2);
-                printf("  %f %f %f %f\n", ortho->projection.a3, ortho->projection.b3, ortho->projection.c3, ortho->projection.d3);
-                printf("  %f %f %f %f\n", ortho->projection.a4, ortho->projection.b4, ortho->projection.c4, ortho->projection.d4);
-                */
+                
+                //printf("aabb\n");
+                //printf("  near: %f\n", ortho->nearPlane.c_val());
+                //printf("  far: %f\n", ortho->farPlane.c_val());
+                //printf("  translation: %f %f %f\n", translation.x,translation.y,translation.z);
+                //printf("  size: %f %f %f\n", size.x,size.y,size.z);
+                //printf("  min: %f %f %f\n", aabb.min_box.x,aabb.min_box.y,aabb.min_box.z);
+                //printf("  max: %f %f %f\n", aabb.max_box.x,aabb.max_box.y,aabb.max_box.z);
+                //printf("projection\n");
+                //printf("  %f %f %f %f\n", ortho->projection.a1, ortho->projection.b1, ortho->projection.c1, ortho->projection.d1);
+                //printf("  %f %f %f %f\n", ortho->projection.a2, ortho->projection.b2, ortho->projection.c2, ortho->projection.d2);
+                //printf("  %f %f %f %f\n", ortho->projection.a3, ortho->projection.b3, ortho->projection.c3, ortho->projection.d3);
+                //printf("  %f %f %f %f\n", ortho->projection.a4, ortho->projection.b4, ortho->projection.c4, ortho->projection.d4);
+
+
+                //printf("  screen: %i %i\n", camera->viewport.w, camera->viewport.h);
+
 
                 // filter only objects visible to camera...
                 objectPlaces.filterObjectsAABB(root, aabb);
+                
+                //printf("Objects count %zu\n", objectPlaces.filteredMeshWrappers.size());
             }
 
             // draw all sphere suns
