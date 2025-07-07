@@ -28,9 +28,11 @@ namespace AppKit
             ComponentMeshWrapper::~ComponentMeshWrapper()
             {
                 // precisa de evento de attach to transform e detach from transform para lidar com essas situações
-                if (getTransformCount() > 0){
+                if (getTransformCount() > 0)
+                {
                     auto transform = getTransform();
-                    if (transform != nullptr) {
+                    if (transform != nullptr)
+                    {
                         transform->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
                     }
                 }
@@ -48,7 +50,7 @@ namespace AppKit
 
             void ComponentMeshWrapper::computeFinalPositions(bool visitedFlag)
             {
-                if (this->OnBeforeComputeFinalPositions!= nullptr)
+                if (this->OnBeforeComputeFinalPositions != nullptr)
                     this->OnBeforeComputeFinalPositions(this);
 
                 if (wrapShape == WrapShapeSphere)
@@ -116,7 +118,7 @@ namespace AppKit
                     MathCore::vec3f vertices = right + top + depth; // 111
 
                     sphere = CollisionCore::Sphere<MathCore::vec3f>(
-                        center,          // MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(sphereCenter)),
+                        center,                                         // MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(sphereCenter)),
                         MathCore::OP<MathCore::vec3f>::length(vertices) // sphereRadius * maximum(scale)
                     );
                 }
@@ -201,7 +203,6 @@ namespace AppKit
                 if (renderWindowRegion != nullptr)
                     renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
                 renderWindowRegionRef.reset();
-
             }
 
             void ComponentMeshWrapper::OnTransformVisited(std::shared_ptr<Transform> t)
@@ -209,7 +210,8 @@ namespace AppKit
                 computeFinalPositions(true);
             }
 
-            void ComponentMeshWrapper::makeDirtyToComputeFinalPositions(bool only_remove) {
+            void ComponentMeshWrapper::makeDirtyToComputeFinalPositions(bool only_remove)
+            {
                 auto transform = getTransform();
 
                 renderWindowRegionRef = transform->renderWindowRegion;
@@ -644,6 +646,61 @@ namespace AppKit
 
                     lines->vertices.push_back(array[4 + 2]);
                     lines->vertices.push_back(array[4 + 0]);
+
+                    {
+                        MathCore::vec3f array2[8] = {
+                            aabbCenter - aabbDimension_2_or_aabbDimension * MathCore::vec3f(1, 1, 1) + aabbDimension_2_or_aabbDimension * MathCore::vec3f(0, 0, 0), // 000 0
+                            aabbCenter - aabbDimension_2_or_aabbDimension * MathCore::vec3f(1, 1, 0) + aabbDimension_2_or_aabbDimension * MathCore::vec3f(0, 0, 1), // 001 1
+                            aabbCenter - aabbDimension_2_or_aabbDimension * MathCore::vec3f(1, 0, 1) + aabbDimension_2_or_aabbDimension * MathCore::vec3f(0, 1, 0), // 010 2
+                            aabbCenter - aabbDimension_2_or_aabbDimension * MathCore::vec3f(1, 0, 0) + aabbDimension_2_or_aabbDimension * MathCore::vec3f(0, 1, 1), // 011 3
+                            aabbCenter - aabbDimension_2_or_aabbDimension * MathCore::vec3f(0, 1, 1) + aabbDimension_2_or_aabbDimension * MathCore::vec3f(1, 0, 0), // 100 4
+                            aabbCenter - aabbDimension_2_or_aabbDimension * MathCore::vec3f(0, 1, 0) + aabbDimension_2_or_aabbDimension * MathCore::vec3f(1, 0, 1), // 101 5
+                            aabbCenter - aabbDimension_2_or_aabbDimension * MathCore::vec3f(0, 0, 1) + aabbDimension_2_or_aabbDimension * MathCore::vec3f(1, 1, 0), // 110 6
+                            aabbCenter - aabbDimension_2_or_aabbDimension * MathCore::vec3f(0, 0, 0) + aabbDimension_2_or_aabbDimension * MathCore::vec3f(1, 1, 1)  // 111 7
+                        };
+
+                        MathCore::mat4f &m = getTransform()->localToWorldMatrix();
+                        for (auto &v : array2)
+                        {
+                            v = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(v));
+                        }
+
+                        lines->vertices.push_back(array2[0]);
+                        lines->vertices.push_back(array2[4]);
+
+                        lines->vertices.push_back(array2[0 + 1]);
+                        lines->vertices.push_back(array2[4 + 1]);
+
+                        lines->vertices.push_back(array2[0 + 2]);
+                        lines->vertices.push_back(array2[4 + 2]);
+
+                        lines->vertices.push_back(array2[0 + 3]);
+                        lines->vertices.push_back(array2[4 + 3]);
+
+                        lines->vertices.push_back(array2[0]);
+                        lines->vertices.push_back(array2[1]);
+
+                        lines->vertices.push_back(array2[1]);
+                        lines->vertices.push_back(array2[3]);
+
+                        lines->vertices.push_back(array2[3]);
+                        lines->vertices.push_back(array2[2]);
+
+                        lines->vertices.push_back(array2[2]);
+                        lines->vertices.push_back(array2[0]);
+
+                        lines->vertices.push_back(array2[4 + 0]);
+                        lines->vertices.push_back(array2[4 + 1]);
+
+                        lines->vertices.push_back(array2[4 + 1]);
+                        lines->vertices.push_back(array2[4 + 3]);
+
+                        lines->vertices.push_back(array2[4 + 3]);
+                        lines->vertices.push_back(array2[4 + 2]);
+
+                        lines->vertices.push_back(array2[4 + 2]);
+                        lines->vertices.push_back(array2[4 + 0]);
+                    }
                 }
                 else if (wrapShape == WrapShapeOBB)
                 {
@@ -700,8 +757,8 @@ namespace AppKit
                 lines->syncVBODynamic();
             }
 
-
-            std::shared_ptr<Component> ComponentMeshWrapper::duplicate_ref_or_clone(bool force_clone){
+            std::shared_ptr<Component> ComponentMeshWrapper::duplicate_ref_or_clone(bool force_clone)
+            {
                 auto result = Component::CreateShared<ComponentMeshWrapper>();
 
                 result->debugCollisionShapes = this->debugCollisionShapes;
@@ -721,32 +778,34 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentMeshWrapper::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
-
+            void ComponentMeshWrapper::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            {
             }
 
-            void ComponentMeshWrapper::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer){
+            void ComponentMeshWrapper::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
+            {
                 writer.StartObject();
                 writer.String("type");
                 writer.String(ComponentMeshWrapper::Type);
                 writer.String("id");
                 writer.Uint64((intptr_t)self().get());
 
-
                 writer.String("debugCollisionShapes");
                 writer.Bool(debugCollisionShapes);
 
-                if (wrapShape == WrapShape::WrapShapeSphere) {
+                if (wrapShape == WrapShape::WrapShapeSphere)
+                {
                     writer.String("wrapShape");
                     writer.String("sphere");
 
                     writer.String("radius");
-                    writer.Double( MathCore::CVT<float>::toDouble(sphere.radius) );
+                    writer.Double(MathCore::CVT<float>::toDouble(sphere.radius));
 
                     writer.String("center");
                     SerializerUtil::write(writer, sphere.center);
-
-                } else if (wrapShape == WrapShape::WrapShapeAABB) {
+                }
+                else if (wrapShape == WrapShape::WrapShapeAABB)
+                {
                     writer.String("wrapShape");
                     writer.String("aabb");
 
@@ -755,9 +814,9 @@ namespace AppKit
 
                     writer.String("max");
                     SerializerUtil::write(writer, aabb.max_box);
-
-
-                } else if (wrapShape == WrapShape::WrapShapeOBB) {
+                }
+                else if (wrapShape == WrapShape::WrapShapeOBB)
+                {
                     writer.String("wrapShape");
                     writer.String("obb");
 
@@ -772,18 +831,17 @@ namespace AppKit
                 }
 
                 writer.EndObject();
-                
             }
             void ComponentMeshWrapper::Deserialize(rapidjson::Value &_value,
-                                                  std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                                                  std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                                                  ResourceSet &resourceSet)
+                                                   std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                                   std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                                   ResourceSet &resourceSet)
             {
                 if (!_value.HasMember("type") || !_value["type"].IsString())
                     return;
                 if (!strcmp(_value["type"].GetString(), ComponentMeshWrapper::Type) == 0)
                     return;
-                
+
                 if (_value.HasMember("debugCollisionShapes") && _value["debugCollisionShapes"].IsBool())
                     debugCollisionShapes = _value["debugCollisionShapes"].GetBool();
 
@@ -791,7 +849,8 @@ namespace AppKit
                     return;
 
                 auto _wrapShape = _value["wrapShape"].GetString();
-                if (strcmp(_wrapShape, "sphere") == 0){
+                if (strcmp(_wrapShape, "sphere") == 0)
+                {
 
                     wrapShape = WrapShape::WrapShapeSphere;
 
@@ -799,15 +858,17 @@ namespace AppKit
                         sphere.radius = MathCore::CVT<double>::toFloat(_value["radius"].GetDouble());
 
                     sphere.center = SerializerUtil::read<MathCore::vec3f>(_value["center"]);
-
-                } else if (strcmp(_wrapShape, "aabb") == 0){
+                }
+                else if (strcmp(_wrapShape, "aabb") == 0)
+                {
 
                     wrapShape = WrapShape::WrapShapeAABB;
 
                     aabb.min_box = SerializerUtil::read<MathCore::vec3f>(_value["min"]);
                     aabb.max_box = SerializerUtil::read<MathCore::vec3f>(_value["max"]);
-
-                } else if (strcmp(_wrapShape, "obb") == 0){
+                }
+                else if (strcmp(_wrapShape, "obb") == 0)
+                {
 
                     wrapShape = WrapShape::WrapShapeOBB;
 
@@ -816,10 +877,7 @@ namespace AppKit
                     auto _orientation = SerializerUtil::read<MathCore::quatf>(_value["orientation"]);
 
                     obb.setOBB(_center, _dimension, _orientation);
-
                 }
-
-
             }
 
         }
