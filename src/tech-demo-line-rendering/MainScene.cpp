@@ -46,6 +46,7 @@ void MainScene::bindResourcesToGraph()
     camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
     componentCameraOrthographic->useSizeY = true;
     componentCameraOrthographic->sizeY = 1080.0f * 0.5f;
+    camera->getTransform()->setLocalPosition(MathCore::vec3f(0.0f, 0.0f, -100.0f));
 
     deprecated_lines = deprecated_lines_transform->addNewComponent<ComponentColorLine>();
     deprecated_lines->color = MathCore::vec4f(1.0f, 0.0f, 1.0f, 1.0f);
@@ -105,7 +106,7 @@ void MainScene::update(Platform::Time *elapsed)
     // deprecated_lines->syncVBODynamic();
 
 
-    new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
+    // new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
 
     bool keyPressed = false;
 
@@ -115,11 +116,39 @@ void MainScene::update(Platform::Time *elapsed)
         cameraTransform->setLocalPosition(
             cameraTransform->getLocalPosition() + MathCore::vec3f(-1.0f, 0.0f, 0.0f) * elapsed->deltaTime * speed
         );
+
+        cameraTransform->lookAtLeftHanded( new_line_algorithm_transform, 
+            MathCore::vec3f(0.0f, 1.0f, 0.0f) // up vector
+        );
+
     } else if (Keyboard::isPressed(KeyCode::Right)){
         cameraTransform->setLocalPosition(
             cameraTransform->getLocalPosition() + MathCore::vec3f(1.0f, 0.0f, 0.0f) * elapsed->deltaTime * speed
         );
+
+        cameraTransform->lookAtLeftHanded( new_line_algorithm_transform, 
+            MathCore::vec3f(0.0f, 1.0f, 0.0f) // up vector
+        );
     }
+
+    const float angle_speed = MathCore::OP<float>::deg_2_rad(30.0f);
+    static float s_angle = 0;
+    if (Keyboard::isPressed(KeyCode::A)){
+        s_angle = MathCore::OP<float>::fmod(s_angle-angle_speed * elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
+        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0,s_angle,0);
+
+        cameraTransform->setLocalPosition(Rotation * MathCore::vec3f(0,0,- MathCore::OP<MathCore::vec3f>::length(cameraTransform->getLocalPosition())));
+        cameraTransform->setLocalRotation(Rotation );
+
+
+    } else if (Keyboard::isPressed(KeyCode::D)){
+        s_angle = MathCore::OP<float>::fmod(s_angle+elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
+        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0,s_angle,0);
+
+        cameraTransform->setLocalPosition(Rotation * MathCore::vec3f(0,0,- MathCore::OP<MathCore::vec3f>::length(cameraTransform->getLocalPosition())));
+        cameraTransform->setLocalRotation(Rotation );
+    }
+
     if (Keyboard::isPressed(KeyCode::Up)){
         cameraTransform->setLocalPosition(
             cameraTransform->getLocalPosition() + MathCore::vec3f(0.0f, 1.0f, 0.0f) * elapsed->deltaTime * speed
