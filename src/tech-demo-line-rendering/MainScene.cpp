@@ -39,7 +39,13 @@ void MainScene::loadGraph()
 void MainScene::bindResourcesToGraph()
 {
 
-    GLRenderState *renderState = GLRenderState::Instance();
+    // GLRenderState *renderState = GLRenderState::Instance();
+
+    auto mainCamera = root->findTransformByName("Main Camera");
+    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+    camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
+    componentCameraOrthographic->useSizeY = true;
+    componentCameraOrthographic->sizeY = 1080.0f * 0.5f;
 
     deprecated_lines = deprecated_lines_transform->addNewComponent<ComponentColorLine>();
     deprecated_lines->color = MathCore::vec4f(1.0f, 0.0f, 1.0f, 1.0f);
@@ -48,13 +54,11 @@ void MainScene::bindResourcesToGraph()
     line_mounter = new_line_algorithm_transform->addNewComponent<ComponentLineMounter>();
     line_mounter->setLineShader(lineShader);
     line_mounter->setCamera(camera);
+    line_mounter->meshWrapper->debugCollisionShapes = true;
 
     auto &bag = line_mounter->material->custom_shader_property_bag;
-    // bag.getProperty("uAntialias").set(1.0f);
-
-    auto mainCamera = root->findTransformByName("Main Camera");
-    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
-    camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
+    // bag.getProperty("uColor").set(MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
+    bag.getProperty("uAntialias").set(1.0f);
 
     auto rect = renderWindow->CameraViewport.c_ptr();
     resize(MathCore::vec2i(rect->w, rect->h));
