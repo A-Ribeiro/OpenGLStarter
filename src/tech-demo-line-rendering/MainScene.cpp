@@ -46,6 +46,9 @@ void MainScene::bindResourcesToGraph()
     camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
     componentCameraOrthographic->useSizeY = true;
     componentCameraOrthographic->sizeY = 1080.0f * 0.5f;
+    componentCameraOrthographic->nearPlane = 50.0f;
+    componentCameraOrthographic->farPlane = 150.0f;
+
     camera->getTransform()->setLocalPosition(MathCore::vec3f(0.0f, 0.0f, -100.0f));
 
     deprecated_lines = deprecated_lines_transform->addNewComponent<ComponentColorLine>();
