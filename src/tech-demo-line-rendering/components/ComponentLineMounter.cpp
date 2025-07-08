@@ -27,7 +27,11 @@ namespace AppKit
                     camera_px_scale = 1.0f / camera_px_scale;
 
                     const auto &world_to_local = getTransform()->getMatrixInverse(true);
-                    MathCore::vec3f world_Scale_inv(world_to_local.a1, world_to_local.b2, world_to_local.c3);
+                    MathCore::vec3f world_Scale_inv(
+                        MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[0])),
+                        MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[1])),
+                        MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[2]))
+                    );
 
                     float max_scaled = MathCore::OP<MathCore::vec3f>::maximum(world_Scale_inv) * MathCore::OP<MathCore::vec3f>::maximum(camera_px_scale);
 

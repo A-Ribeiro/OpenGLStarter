@@ -109,7 +109,7 @@ void MainScene::update(Platform::Time *elapsed)
     // deprecated_lines->syncVBODynamic();
 
 
-    // new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
+    new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
 
     bool keyPressed = false;
 
@@ -170,7 +170,7 @@ void MainScene::draw()
     if (engine->sRGBCapable)
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
-    state->DepthTest = DepthTestDisabled;
+    state->DepthTest = DepthTestLessEqual;
     renderPipeline->runSinglePassPipeline(root, camera, true);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
