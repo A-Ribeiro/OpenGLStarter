@@ -44,6 +44,28 @@ namespace AppKit
                 "  return mat2(c, s, -s, c);"
                 "}"
 
+                // "void barsky_clip_test(float p, float q, inout float u1, inout float u2) {"
+                // "  if (p < 0.0) {"
+                // "    float r = q / p;"
+                // "    if (r > u1 && r < u2)"
+                // "      u1 = r;"
+                // "  } else if (p > 0.0) {"
+                // "    float r = q / p;"
+                // "    if (r < u2 && r > u1)"
+                // "      u2 = r;"
+                // "  }"
+                // "}"
+
+                // liang barsky clip test no branching
+                "void barsky_clip_test(float p, float q, inout float u1, inout float u2) {"
+                "  float r = q / p;"
+                "  float is_p_negative = step(p, -0.0);"// p > -0 = 0 -> p <= -0 -> 1
+                "  float is_p_positive = step(0.0, p);"// p < 0 = 0 -> p >= 0 -> 1
+                "  float r_in_range = step(u1, r) * step(r, u2);" // r >= u1 && r <= u2
+                "  u1 = mix(u1, r, is_p_negative * r_in_range);"
+                "  u2 = mix(u2, r, is_p_positive * r_in_range);"
+                "}"
+
                 "void main() {"
                 "  vec4 line_p1_ndc = uMVP * aUV1;"
                 "  vec4 line_p2_ndc = uMVP * aUV2;"
@@ -56,12 +78,22 @@ namespace AppKit
                 "  line_p1_ndc /= line_p1_ndc.w;"
                 "  line_p2_ndc /= line_p2_ndc.w;"
 
+                // clip test - liang barsky
+                "  vec3 p1p2_dir = line_p2_ndc.xyz - line_p1_ndc.xyz;"
+                "  float u1 = 0;"
+                "  float u2 = 1;"
+                "  barsky_clip_test(-p1p2_dir.z, line_p1_ndc.z - (-1.0), u1, u2);"
+                "  barsky_clip_test(p1p2_dir.z, (1.0) - line_p1_ndc.z, u1, u2);"
+                "  line_p2_ndc.xyz = line_p1_ndc.xyz + p1p2_dir * u2;"
+                "  line_p1_ndc.xyz = line_p1_ndc.xyz + p1p2_dir * u1;"
+                "  p1p2_dir = line_p2_ndc.xyz - line_p1_ndc.xyz;"
+
                 "  p1_px = line_p1_ndc.xy * 0.5 + 0.5;"
                 "  p1_px *= uScreenSizePx;"
 
                 "  vec4 vert_ndc = mix(line_p1_ndc, line_p2_ndc, line_lrp);"
 
-                "  vec2 p1p2_px = (line_p2_ndc.xy - line_p1_ndc.xy) * 0.5 * uScreenSizePx;"
+                "  vec2 p1p2_px = p1p2_dir.xy * 0.5 * uScreenSizePx;"
 
                 "  float angle = atan(p1p2_px.y, p1p2_px.x);"
                 "  mat2 rotation_matrix = rotation(angle);"
