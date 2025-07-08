@@ -905,10 +905,25 @@ namespace AppKit
             {
                 auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(camera);
 
-                MathCore::vec3f center = ortho->getTransform()->getPosition(true); // MathCore::CVT<MathCore::vec4f>::toVec3(ortho->projection[3]);
+                // auto projection_offset = MathCore::CVT<MathCore::vec4f>::toVec3(ortho->projection[3]);
+                // auto projection_offset = MathCore::vec3f(
+                //     0, 
+                //     0, 
+                //     (ortho->nearPlane + ortho->farPlane) * 0.5f);
+
                 MathCore::vec3f size = 1.0f / MathCore::vec3f(ortho->projection.a1, ortho->projection.b2, ortho->projection.c3);
 
-                MathCore::quatf rotation = MathCore::OP<MathCore::quatf>::conjugate( ortho->getTransform()->getRotation(true) );
+                // MathCore::quatf rotation = MathCore::OP<MathCore::quatf>::conjugate( ortho->getTransform()->getRotation(true) );
+                MathCore::quatf rotation = ortho->getTransform()->getRotation(true);
+
+                auto projection_offset = 
+                rotation * (MathCore::vec3f(
+                    ortho->projection.d1, 
+                    ortho->projection.d2, 
+                    ortho->projection.d3) * size);
+                MathCore::vec3f center = -ortho->getTransform()->getPosition(true) + projection_offset;
+
+                
 
                 MathCore::vec3f right = rotation * MathCore::vec3f(size.x, 0, 0);
                 MathCore::vec3f top = rotation * MathCore::vec3f(0, size.y, 0);
@@ -946,7 +961,9 @@ namespace AppKit
                 // printf("  near: %f\n", ortho->nearPlane.c_val());
                 // printf("  far: %f\n", ortho->farPlane.c_val());
                 // printf("  translation: %f %f %f\n", translation.x,translation.y,translation.z);
-                printf("  size: %f %f %f\n", size.x,size.y,size.z);
+                // printf("  size: %f %f %f\n", size.x, size.y, size.z);
+                // printf("  projection_offset: %f %f %f\n", projection_offset.x, projection_offset.y, projection_offset.z);
+
                 // printf("  min: %f %f %f\n", aabb.min_box.x,aabb.min_box.y,aabb.min_box.z);
                 // printf("  max: %f %f %f\n", aabb.max_box.x,aabb.max_box.y,aabb.max_box.z);
                 // printf("projection\n");
@@ -960,7 +977,7 @@ namespace AppKit
                 // filter only objects visible to camera...
                 objectPlaces.filterObjectsAABB(root, aabb);
 
-                printf("Objects count %zu\n", objectPlaces.filteredMeshWrappers.size());
+                // printf("Objects count %zu\n", objectPlaces.filteredMeshWrappers.size());
             }
 
             // draw all sphere suns
