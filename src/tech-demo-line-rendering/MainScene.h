@@ -50,6 +50,12 @@ protected:
 
 public:
 
+    bool use3DSet;
+
+    float angle;
+    float camera_angle;
+
+
     App *app;
 
     std::shared_ptr<AppKit::GLEngine::Transform> deprecated_lines_transform;
@@ -66,7 +72,8 @@ public:
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
         AppKit::GLEngine::ResourceHelper *_resourceHelper,
         AppKit::GLEngine::ResourceMap *_resourceMap,
-        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow,
+        bool _3d
     );
     ~MainScene();
 

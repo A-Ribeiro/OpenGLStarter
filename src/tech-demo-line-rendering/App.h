@@ -7,6 +7,8 @@
 #include "MainScene.h"
 #include "SceneGUI.h"
 
+#include <InteractiveToolkit/Platform/Core/ObjectQueue.h>
+
 //using namespace aRibeiro;
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
@@ -24,6 +26,7 @@ public:
     MainScene *mainScene;
     Platform::ThreadPool threadPool;
     SceneGUI *sceneGUI;
+    Platform::ObjectQueue<EventCore::Callback<void(void)>> executeOnMainThread;
 
 
     App();

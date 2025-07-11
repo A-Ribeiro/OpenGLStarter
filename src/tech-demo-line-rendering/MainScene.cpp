@@ -72,28 +72,11 @@ void MainScene::bindResourcesToGraph()
     }
 
     renderWindow->OnUpdate.add(&MainScene::update, this);
-
-    app->screenRenderWindow->inputManager.onMouseEvent.add(
-        [this](const AppKit::Window::MouseEvent &evt)
-        {
-            if (evt.type == AppKit::Window::MouseEventType::ButtonPressed &&
-                evt.button == AppKit::Window::Devices::MouseButton::Left)
-            {
-                if (app->sceneGUI->button->selected)
-                {
-                    if (app->sceneGUI->button->rendered_text.compare("View in 2D") == 0)
-                        app->sceneGUI->button->updateText("View in 3D");
-                    else
-                        app->sceneGUI->button->updateText("View in 2D");
-                }
-            }
-        });
 }
 
 // clear all loaded scene
 void MainScene::unloadAll()
 {
-    app->screenRenderWindow->inputManager.onMouseEvent.clear();
     renderWindow->OnUpdate.remove(&MainScene::update, this);
 
     root = nullptr;
@@ -109,7 +92,6 @@ void MainScene::unloadAll()
 
 void MainScene::update(Platform::Time *elapsed)
 {
-    static float angle = 0.0f;
     angle = MathCore::OP<float>::fmod(angle + elapsed->deltaTime * 0.125f, 2.0f * MathCore::CONSTANT<float>::PI);
     auto rot = MathCore::GEN<MathCore::quatf>::fromEuler(0, 0, angle);
     // line_middle_to_half->setLocalRotation(MathCore::GEN< MathCore::quatf>::fromEuler(0, 0, angle));
@@ -150,19 +132,18 @@ void MainScene::update(Platform::Time *elapsed)
     }
 
     const float angle_speed = MathCore::OP<float>::deg_2_rad(30.0f);
-    static float s_angle = 0;
     if (Keyboard::isPressed(KeyCode::A))
     {
-        s_angle = MathCore::OP<float>::fmod(s_angle - angle_speed * elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
-        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0, s_angle, 0);
+        camera_angle = MathCore::OP<float>::fmod(camera_angle - angle_speed * elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
+        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0, camera_angle, 0);
 
         cameraTransform->setLocalPosition(Rotation * MathCore::vec3f(0, 0, -MathCore::OP<MathCore::vec3f>::length(cameraTransform->getLocalPosition())));
         cameraTransform->setLocalRotation(Rotation);
     }
     else if (Keyboard::isPressed(KeyCode::D))
     {
-        s_angle = MathCore::OP<float>::fmod(s_angle + elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
-        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0, s_angle, 0);
+        camera_angle = MathCore::OP<float>::fmod(camera_angle + elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
+        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0, camera_angle, 0);
 
         cameraTransform->setLocalPosition(Rotation * MathCore::vec3f(0, 0, -MathCore::OP<MathCore::vec3f>::length(cameraTransform->getLocalPosition())));
         cameraTransform->setLocalRotation(Rotation);
@@ -229,9 +210,14 @@ MainScene::MainScene(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
-    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow,
+    bool _3d) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
 {
     this->app = app;
+    this->use3DSet = _3d;
+
+    angle = 0.0f;
+    camera_angle = 0.0f;
 }
 
 MainScene::~MainScene()
