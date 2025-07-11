@@ -13,17 +13,7 @@ void SceneGUI::loadResources()
 {
     auto engine = AppKit::GLEngine::Engine::Instance();
 
-    cursorTexture = resourceHelper->createTextureFromFile("resources/cursor.png", true && engine->sRGBCapable);
-
     fontBuilder.load("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
-
-    button = new Button(
-        0,                      // _position,
-        true,                   // _left,
-        "button_SoftParticles", //_id,
-        "Soft Particles ON",    //_text,
-        &fontBuilder            //_fontBuilder
-    );
 }
 // to load the scene graph
 void SceneGUI::loadGraph()
@@ -33,11 +23,6 @@ void SceneGUI::loadGraph()
     auto t = root->addChild(Transform::CreateShared());
     t->Name = "Main Camera";
 
-    t = root->addChild(button->getTransform());
-
-    {
-        cursorTransform = root->addChild(Transform::CreateShared());
-    }
 }
 // to bind the resources to the current graph
 void SceneGUI::bindResourcesToGraph()
@@ -50,21 +35,20 @@ void SceneGUI::bindResourcesToGraph()
     auto mainCamera = root->findTransformByName("Main Camera");
     std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
     camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
+    componentCameraOrthographic->useSizeY = true;
+    componentCameraOrthographic->sizeY = 720.0f;
 
-    // ReferenceCounter<AppKit::OpenGL::GLTexture*>* texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    button = new Button(
+        0,                           // _position,
+        false,                       // _left,
+        "button_change_scene",       //_id,
+        "View in 3D",                //_text,
+        componentCameraOrthographic, // camera,
+        &fontBuilder                 //_fontBuilder
+    );
 
-    {
-        auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
-        cursorTransform->addComponent(ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height));
+    root->addChild(button->getTransform());
 
-        cursorMaterial->type = MaterialUnlitTexture;
-        cursorMaterial->unlit.blendMode = BlendModeAlpha;
-        cursorMaterial->unlit.tex = cursorTexture;
-    }
-
-    // texRefCount->add(&fontBuilder.glFont2.texture);
-
-    // texRefCount->add(cursorTexture);
 
     // Add AABB for all meshs...
     {
@@ -86,29 +70,27 @@ void SceneGUI::unloadAll()
         delete button;
         button = nullptr;
     }
-
-    // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
-
-    // texRefCount->removeNoDelete(&fontBuilder.glFont2.texture);
-    // texRefCount->remove(cursorTexture);
-    cursorTexture = nullptr;
-    cursorTransform = nullptr;
 }
 
 void SceneGUI::draw()
 {
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
 
-    if (cursorTransform != nullptr)
-        cursorTransform->setLocalPosition(
-            MathCore::vec3f(engine->app->screenRenderWindow->MousePosRelatedToCenter, 0.0f));
-
     if (button != nullptr)
-        button->update(
-            MathCore::vec3f(engine->app->screenRenderWindow->MousePosRelatedToCenter, 0.0f)
+    {
+        auto pos = MathCore::vec3f(engine->app->screenRenderWindow->MousePosRelatedToCenter, 0.0f);
 
-            // Button::App2MousePosition()
-        );
+        if (this->camera != nullptr)
+        {
+            auto ortho = std::dynamic_pointer_cast<ComponentCameraOrthographic>(camera);
+            if (ortho->useSizeY)
+            {
+                float factor = ortho->sizeY / (float)ortho->viewport.h;
+                pos *= factor;
+            }
+        }
+        button->update(pos);
+    }
 
     if (engine->sRGBCapable)
         glDisable(GL_FRAMEBUFFER_SRGB);
@@ -135,9 +117,6 @@ SceneGUI::SceneGUI(
     std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
 {
     button = nullptr;
-
-    cursorTexture = nullptr;
-    cursorTransform = nullptr;
 }
 
 SceneGUI::~SceneGUI()

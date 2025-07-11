@@ -15,16 +15,10 @@ protected:
     //clear all loaded scene
     virtual void unloadAll();
     
-    //AppKit::OpenGL::GLTexture *Milky_512_512;
-
-    std::shared_ptr<AppKit::OpenGL::GLTexture> cursorTexture;
-
     AppKit::OpenGL::GLFont2Builder fontBuilder;
 
 public:
     AppKit::GLEngine::Button* button;
-
-    std::shared_ptr<AppKit::GLEngine::Transform> cursorTransform;
 
     SceneGUI(
         Platform::Time *_time,

@@ -6,6 +6,7 @@
 #include <InteractiveToolkit/MathCore/MathCore.h>
 
 #include <InteractiveToolkit/CollisionCore/CollisionCore.h>
+#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
 
 namespace AppKit
 {
@@ -24,6 +25,8 @@ namespace AppKit
 
             CollisionCore::AABB<MathCore::vec3f> aabb;
 
+            std::shared_ptr<Components::ComponentCameraOrthographic> camera;
+
             // alignment
             int position;
             bool left;
@@ -34,6 +37,12 @@ namespace AppKit
                    const std::string &_id,
                    const std::string &_text,
                    AppKit::OpenGL::GLFont2Builder *_fontBuilder);
+
+            Button(int _position, bool _left,
+                   const std::string &_id,
+                   const std::string &_text,
+                   std::shared_ptr<Components::ComponentCameraOrthographic> camera,
+                   AppKit::OpenGL::GLFont2Builder * _fontBuilder);
 
             void update(const MathCore::vec3f &mousePosition);
 

@@ -5,6 +5,7 @@
 #include <appkit-gl-engine/Renderer/Fade.h>
 
 #include "MainScene.h"
+#include "SceneGUI.h"
 
 //using namespace aRibeiro;
 using namespace AppKit::GLEngine;
@@ -22,6 +23,8 @@ public:
     Fade *fade;
     MainScene *mainScene;
     Platform::ThreadPool threadPool;
+    SceneGUI *sceneGUI;
+
 
     App();
     ~App();

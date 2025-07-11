@@ -333,7 +333,7 @@ void SceneJesusCross::draw(){
 	mouseBtn1.setState(app->mousePressed);
 
     if (mouseBtn1.down) {
-        if (app->sceneGUI->button_SoftParticles->selected) {
+        if (app->sceneGUI->button->selected) {
 
 			componentCameraRotateOnTarget->enabled = false;
 
@@ -342,9 +342,9 @@ void SceneJesusCross::draw(){
 			
 			particleSystem->soft = !particleSystem->soft;
             if (particleSystem->soft)
-                app->sceneGUI->button_SoftParticles->updateText("Soft Particles ON");
+                app->sceneGUI->button->updateText("Soft Particles ON");
             else
-                app->sceneGUI->button_SoftParticles->updateText("Soft Particles OFF");
+                app->sceneGUI->button->updateText("Soft Particles OFF");
         }
         else {
 			componentCameraRotateOnTarget->enabled = true;

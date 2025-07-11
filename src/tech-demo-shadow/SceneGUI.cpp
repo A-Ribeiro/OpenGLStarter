@@ -25,7 +25,7 @@ void SceneGUI::loadResources(){
         &fontBuilder//_fontBuilder 
     ); */
 
-    button_SoftParticles = nullptr;
+    button = nullptr;
 
 }
 //to load the scene graph
@@ -83,9 +83,9 @@ void SceneGUI::unloadAll(){
     root = nullptr;
     camera = nullptr;
 
-    if (button_SoftParticles != nullptr){
-        delete button_SoftParticles;
-        button_SoftParticles = nullptr;
+    if (button != nullptr){
+        delete button;
+        button = nullptr;
     }
 
     //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
@@ -108,8 +108,8 @@ void SceneGUI::draw(){
     if (cursorTransform != nullptr)
         cursorTransform->setLocalPosition(pos3D);
 
-    if (button_SoftParticles != nullptr)
-        button_SoftParticles->update(pos3D);
+    if (button != nullptr)
+        button->update(pos3D);
         //button_SoftParticles->update(Button::App2MousePosition());
 
     
@@ -125,8 +125,8 @@ void SceneGUI::draw(){
 }
 
 void SceneGUI::resize(const MathCore::vec2i&size) {
-    if (button_SoftParticles != nullptr)
-        button_SoftParticles->resize(size);
+    if (button != nullptr)
+        button->resize(size);
 }
 
 SceneGUI::SceneGUI(
@@ -137,7 +137,7 @@ SceneGUI::SceneGUI(
     std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
 {
     
-    button_SoftParticles = nullptr;
+    button = nullptr;
 
     cursorTexture = nullptr;
     cursorTransform = nullptr;
