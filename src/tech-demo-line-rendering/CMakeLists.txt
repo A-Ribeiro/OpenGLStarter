@@ -17,4 +17,4 @@ target_link_libraries(${PROJECT_NAME}
     appkit-gl-engine
 )
 
-# tool_copy_directory_after_build( ${PROJECT_NAME} resources )
+tool_copy_directory_after_build( ${PROJECT_NAME} resources )

@@ -22,7 +22,7 @@ protected:
     AppKit::OpenGL::GLFont2Builder fontBuilder;
 
 public:
-    AppKit::GLEngine::Button* button_SoftParticles;
+    AppKit::GLEngine::Button* button;
 
     std::shared_ptr<AppKit::GLEngine::Transform> cursorTransform;
 

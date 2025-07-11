@@ -32,7 +32,6 @@ void MainScene::loadGraph()
     new_line_algorithm_transform->Name = "new line transform";
 
     new_line_algorithm_transform->setLocalScale(MathCore::vec3f(0.5f, 0.5f, 0.5f));
-
 }
 
 // to bind the resources to the current graph
@@ -73,11 +72,28 @@ void MainScene::bindResourcesToGraph()
     }
 
     renderWindow->OnUpdate.add(&MainScene::update, this);
+
+    app->screenRenderWindow->inputManager.onMouseEvent.add(
+        [this](const AppKit::Window::MouseEvent &evt)
+        {
+            if (evt.type == AppKit::Window::MouseEventType::ButtonPressed &&
+                evt.button == AppKit::Window::Devices::MouseButton::Left)
+            {
+                if (app->sceneGUI->button->selected)
+                {
+                    if (app->sceneGUI->button->rendered_text.compare("View in 2D") == 0)
+                        app->sceneGUI->button->updateText("View in 3D");
+                    else
+                        app->sceneGUI->button->updateText("View in 2D");
+                }
+            }
+        });
 }
 
 // clear all loaded scene
 void MainScene::unloadAll()
 {
+    app->screenRenderWindow->inputManager.onMouseEvent.clear();
     renderWindow->OnUpdate.remove(&MainScene::update, this);
 
     root = nullptr;
@@ -95,8 +111,8 @@ void MainScene::update(Platform::Time *elapsed)
 {
     static float angle = 0.0f;
     angle = MathCore::OP<float>::fmod(angle + elapsed->deltaTime * 0.125f, 2.0f * MathCore::CONSTANT<float>::PI);
-    auto rot = MathCore::GEN< MathCore::quatf>::fromEuler(0, 0, angle);
-    //line_middle_to_half->setLocalRotation(MathCore::GEN< MathCore::quatf>::fromEuler(0, 0, angle));
+    auto rot = MathCore::GEN<MathCore::quatf>::fromEuler(0, 0, angle);
+    // line_middle_to_half->setLocalRotation(MathCore::GEN< MathCore::quatf>::fromEuler(0, 0, angle));
 
     auto size = MathCore::vec2i(this->camera->viewport.w, this->camera->viewport.h);
 
@@ -108,60 +124,60 @@ void MainScene::update(Platform::Time *elapsed)
     deprecated_lines->vertices.push_back(rot * MathCore::vec3f(size.height, -size.width, 0) * 0.25f);
     // deprecated_lines->syncVBODynamic();
 
-
-    new_line_algorithm_transform->setLocalRotation( MathCore::OP<MathCore::quatf>::conjugate(rot));
+    new_line_algorithm_transform->setLocalRotation(MathCore::OP<MathCore::quatf>::conjugate(rot));
 
     bool keyPressed = false;
 
     auto cameraTransform = camera->getTransform();
     const float speed = 500.0f;
-    if (Keyboard::isPressed(KeyCode::Left)){
+    if (Keyboard::isPressed(KeyCode::Left))
+    {
         cameraTransform->setLocalPosition(
-            cameraTransform->getLocalPosition() + MathCore::vec3f(-1.0f, 0.0f, 0.0f) * elapsed->deltaTime * speed
-        );
+            cameraTransform->getLocalPosition() + MathCore::vec3f(-1.0f, 0.0f, 0.0f) * elapsed->deltaTime * speed);
 
-        cameraTransform->lookAtLeftHanded( new_line_algorithm_transform, 
-            MathCore::vec3f(0.0f, 1.0f, 0.0f) // up vector
+        cameraTransform->lookAtLeftHanded(new_line_algorithm_transform,
+                                          MathCore::vec3f(0.0f, 1.0f, 0.0f) // up vector
         );
-
-    } else if (Keyboard::isPressed(KeyCode::Right)){
+    }
+    else if (Keyboard::isPressed(KeyCode::Right))
+    {
         cameraTransform->setLocalPosition(
-            cameraTransform->getLocalPosition() + MathCore::vec3f(1.0f, 0.0f, 0.0f) * elapsed->deltaTime * speed
-        );
+            cameraTransform->getLocalPosition() + MathCore::vec3f(1.0f, 0.0f, 0.0f) * elapsed->deltaTime * speed);
 
-        cameraTransform->lookAtLeftHanded( new_line_algorithm_transform, 
-            MathCore::vec3f(0.0f, 1.0f, 0.0f) // up vector
+        cameraTransform->lookAtLeftHanded(new_line_algorithm_transform,
+                                          MathCore::vec3f(0.0f, 1.0f, 0.0f) // up vector
         );
     }
 
     const float angle_speed = MathCore::OP<float>::deg_2_rad(30.0f);
     static float s_angle = 0;
-    if (Keyboard::isPressed(KeyCode::A)){
-        s_angle = MathCore::OP<float>::fmod(s_angle-angle_speed * elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
-        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0,s_angle,0);
+    if (Keyboard::isPressed(KeyCode::A))
+    {
+        s_angle = MathCore::OP<float>::fmod(s_angle - angle_speed * elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
+        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0, s_angle, 0);
 
-        cameraTransform->setLocalPosition(Rotation * MathCore::vec3f(0,0,- MathCore::OP<MathCore::vec3f>::length(cameraTransform->getLocalPosition())));
-        cameraTransform->setLocalRotation(Rotation );
+        cameraTransform->setLocalPosition(Rotation * MathCore::vec3f(0, 0, -MathCore::OP<MathCore::vec3f>::length(cameraTransform->getLocalPosition())));
+        cameraTransform->setLocalRotation(Rotation);
+    }
+    else if (Keyboard::isPressed(KeyCode::D))
+    {
+        s_angle = MathCore::OP<float>::fmod(s_angle + elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
+        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0, s_angle, 0);
 
-
-    } else if (Keyboard::isPressed(KeyCode::D)){
-        s_angle = MathCore::OP<float>::fmod(s_angle+elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
-        auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0,s_angle,0);
-
-        cameraTransform->setLocalPosition(Rotation * MathCore::vec3f(0,0,- MathCore::OP<MathCore::vec3f>::length(cameraTransform->getLocalPosition())));
-        cameraTransform->setLocalRotation(Rotation );
+        cameraTransform->setLocalPosition(Rotation * MathCore::vec3f(0, 0, -MathCore::OP<MathCore::vec3f>::length(cameraTransform->getLocalPosition())));
+        cameraTransform->setLocalRotation(Rotation);
     }
 
-    if (Keyboard::isPressed(KeyCode::Up)){
+    if (Keyboard::isPressed(KeyCode::Up))
+    {
         cameraTransform->setLocalPosition(
-            cameraTransform->getLocalPosition() + MathCore::vec3f(0.0f, 1.0f, 0.0f) * elapsed->deltaTime * speed
-        );
-    } else if (Keyboard::isPressed(KeyCode::Down)){
-        cameraTransform->setLocalPosition(
-            cameraTransform->getLocalPosition() + MathCore::vec3f(0.0f, -1.0f, 0.0f) * elapsed->deltaTime * speed
-        );
+            cameraTransform->getLocalPosition() + MathCore::vec3f(0.0f, 1.0f, 0.0f) * elapsed->deltaTime * speed);
     }
-        
+    else if (Keyboard::isPressed(KeyCode::Down))
+    {
+        cameraTransform->setLocalPosition(
+            cameraTransform->getLocalPosition() + MathCore::vec3f(0.0f, -1.0f, 0.0f) * elapsed->deltaTime * speed);
+    }
 }
 
 void MainScene::draw()
@@ -190,28 +206,21 @@ void MainScene::resize(const MathCore::vec2i &size)
         MathCore::vec3f(0, size.height, 0) * 0.25f,
         5.0f,
         MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
-            MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f)
-        )
-    );
+            MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f)));
 
     line_mounter->addLine(
         MathCore::vec3f(0, 0, 0),
         MathCore::vec3f(size.width, size.height, 0) * 0.25f,
         15.0f,
         MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
-            MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f)
-        )
-    );
+            MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f)));
 
     line_mounter->addLine(
         MathCore::vec3f(0, 0, 0),
         MathCore::vec3f(size.width, 0, 0) * 0.25f,
         10.0f,
         MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
-            MathCore::vec4f(0.0f, 0.0f, 1.0f, 1.0f)
-        )
-    );
-
+            MathCore::vec4f(0.0f, 0.0f, 1.0f, 1.0f)));
 }
 
 MainScene::MainScene(
