@@ -5,7 +5,7 @@
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
-App::App()
+App::App() : executeOnMainThread(false)
 {
     // forward app reference that could be used by newly created components
     Engine::Instance()->app = this;
@@ -51,14 +51,51 @@ App::App()
 
 void App::load()
 {
-    mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+    mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow, false);
     mainScene->load();
     sceneGUI = new SceneGUI(&time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     sceneGUI->load();
+
+    screenRenderWindow->inputManager.onMouseEvent.add(
+        [this](const AppKit::Window::MouseEvent &evt)
+        {
+            if (sceneGUI == nullptr)
+                return;
+            if (evt.type == AppKit::Window::MouseEventType::ButtonPressed &&
+                evt.button == AppKit::Window::Devices::MouseButton::Left)
+            {
+                executeOnMainThread.enqueue( //
+                    [this]()
+                    {
+                        if (sceneGUI->button->selected)
+                        {
+                            if (mainScene != nullptr)
+                            {
+                                mainScene->unload();
+                                delete mainScene;
+                                mainScene = nullptr;
+                            }
+                            if (sceneGUI->button->rendered_text.compare("View in 2D") == 0)
+                            {
+                                mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow, false);
+                                mainScene->load();
+                                sceneGUI->button->updateText("View in 3D");
+                            }
+                            else
+                            {
+                                mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow, true);
+                                mainScene->load();
+                                sceneGUI->button->updateText("View in 2D");
+                            }
+                        }
+                    });
+            }
+        });
 }
 
 App::~App()
 {
+    screenRenderWindow->inputManager.onMouseEvent.clear();
     if (mainScene != nullptr)
     {
         mainScene->unload();
@@ -81,6 +118,11 @@ App::~App()
 
 void App::draw()
 {
+    while (executeOnMainThread.size() > 0)
+    {
+        auto callback = executeOnMainThread.dequeue(nullptr, true);
+        callback();
+    }
     time.update();
 
     // set min delta time (the passed time or the time to render at 24fps)
