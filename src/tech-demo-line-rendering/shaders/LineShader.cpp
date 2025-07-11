@@ -58,7 +58,8 @@ namespace AppKit
 
                 // liang barsky clip test no branching
                 "void barsky_clip_test(float p, float q, inout float u1, inout float u2) {"
-                "  float r = q / p;"
+                // avoid -inf, +inf due to division by zero, clamping to a valid range
+                "  float r = clamp(q / p, -1e20, 1e20);"
                 "  float is_p_negative = step(p, -0.0);"// p > -0 = 0 -> p <= -0 -> 1
                 "  float is_p_positive = step(0.0, p);"// p < 0 = 0 -> p >= 0 -> 1
                 "  float r_in_range = step(u1, r) * step(r, u2);" // r >= u1 && r <= u2
@@ -82,7 +83,7 @@ namespace AppKit
                 "  vec3 p1p2_dir = line_p2_ndc.xyz - line_p1_ndc.xyz;"
                 "  float u1 = 0;"
                 "  float u2 = 1;"
-                "  const float epsilon = 0.000001;"
+                "  const float epsilon = 1e-6;"
                 "  barsky_clip_test(-p1p2_dir.z, line_p1_ndc.z - (-1.0 + epsilon), u1, u2);"
                 "  barsky_clip_test(p1p2_dir.z, (1.0 - epsilon) - line_p1_ndc.z, u1, u2);"
                 "  line_p2_ndc.xyz = line_p1_ndc.xyz + p1p2_dir * u2;"
