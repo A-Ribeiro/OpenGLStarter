@@ -13,6 +13,11 @@ namespace AppKit
         {
             const ComponentType ComponentLineMounter::Type = "ComponentLineMounter";
 
+            void ComponentLineMounter::OnCameraTransformVisit(std::shared_ptr<Transform> transform)
+            {
+                force_refresh();
+            }
+
             void ComponentLineMounter::OnBeforeComputeFinalPositions(ComponentMeshWrapper *meshWrapper)
             {
                 if (camera == nullptr)
@@ -35,9 +40,16 @@ namespace AppKit
 
                     float max_scaled = word_to_local_scale * MathCore::OP<MathCore::vec3f>::maximum(camera_px_scale);
 
-                    AABBType finalAABB = aabb;
+                    // check if the AABB is dirty or if the max scaled value changed
+                    if (!dirty && MathCore::OP<float>::compare_almost_equal(last_max_scaled, max_scaled))
+                        return;
 
-                    AABBType aux;
+                    dirty = false;
+                    last_max_scaled = max_scaled;
+
+                    // printf(".");fflush(stdout);
+
+                    AABBType finalAABB = aabb;
 
                     for (size_t i = 0; i < mesh->pos.size(); i += 12)
                     {
@@ -65,8 +77,27 @@ namespace AppKit
                     float tan_over_viewport_height = tan_half_fov / (float)perspective->viewport.h;
 
                     const auto &local_to_world = getTransform()->getMatrix(true);
+
+                    // check if the AABB is dirty or if the max scaled value changed
+                    if (!dirty &&
+                        last_dir == dir &&
+                        last_cam_pos == cam_pos &&
+                        MathCore::OP<float>::compare_almost_equal(last_near_plane, near_plane) &&
+                        MathCore::OP<float>::compare_almost_equal(last_tan_over_viewport_height, tan_over_viewport_height) &&
+                        last_local_to_world == local_to_world)
+                        return;
+
+                    dirty = false;
+                    last_dir = dir;
+                    last_cam_pos = cam_pos;
+                    last_near_plane = near_plane;
+                    last_tan_over_viewport_height = tan_over_viewport_height;
+                    last_local_to_world = local_to_world;
+
+                    // printf(".");fflush(stdout);
+
                     const auto &world_to_local = getTransform()->getMatrixInverse(true);
-                    
+
                     // Calculate the uniform scale factor for converting world space thickness to local space
                     MathCore::vec3f scale_vec(
                         MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[0])),
@@ -97,26 +128,26 @@ namespace AppKit
                         {
                             // Convert pixel thickness to world space thickness at this distance
                             // At distance d, the world space size per pixel is: (2 * d * tan_half_fov) / viewport_height
-                            //float world_thickness_a = thickness_pixels * (2.0f * dist_a * tan_half_fov) / viewport_height;
+                            // float world_thickness_a = thickness_pixels * (2.0f * dist_a * tan_half_fov) / viewport_height;
                             float world_thickness_a = dist_a * thickness_factor;
                             float local_thickness_a = world_thickness_a * world_to_local_scale;
-                            //finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_a * 0.5f));
+                            // finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_a * 0.5f));
                             finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_a));
                         }
                         else
                         {
                             // Point is behind or at near plane, use near plane thickness
-                            //float world_thickness_near = thickness_pixels * (2.0f * near_plane * tan_half_fov) / viewport_height;
+                            // float world_thickness_near = thickness_pixels * (2.0f * near_plane * tan_half_fov) / viewport_height;
                             float world_thickness_near = near_plane * thickness_factor;
                             float local_thickness_near = world_thickness_near * world_to_local_scale;
-                            //finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_near * 0.5f));
+                            // finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_near * 0.5f));
                             finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_near));
                         }
 
                         // Process point B
                         if (dist_b > near_plane)
                         {
-                            //float world_thickness_b = thickness_pixels * (2.0f * dist_b * tan_half_fov) / viewport_height;
+                            // float world_thickness_b = thickness_pixels * (2.0f * dist_b * tan_half_fov) / viewport_height;
                             float world_thickness_b = dist_b * thickness_factor;
                             float local_thickness_b = world_thickness_b * world_to_local_scale;
                             // finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, local_thickness_b * 0.5f));
@@ -124,7 +155,7 @@ namespace AppKit
                         }
                         else
                         {
-                            //float world_thickness_near = thickness_pixels * (2.0f * near_plane * tan_half_fov) / viewport_height;
+                            // float world_thickness_near = thickness_pixels * (2.0f * near_plane * tan_half_fov) / viewport_height;
                             float world_thickness_near = near_plane * thickness_factor;
                             float local_thickness_near = world_thickness_near * world_to_local_scale;
                             // finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, local_thickness_near * 0.5f));
@@ -134,6 +165,15 @@ namespace AppKit
 
                     meshWrapper->setShapeAABB(finalAABB, true);
                 }
+            }
+
+            void ComponentLineMounter::force_refresh() {
+                // one way
+                // meshWrapper->getTransform()->visited = false; // force the transform to be visited again
+
+                // another way
+                meshWrapper->forceComputeFinalPositions();
+
             }
 
             void ComponentLineMounter::checkOrCreateAuxiliaryComponents()
@@ -178,16 +218,30 @@ namespace AppKit
 
             void ComponentLineMounter::setCamera(std::shared_ptr<ComponentCamera> camera)
             {
+                if (this->camera != nullptr && this->camera->getTransform() != nullptr)
+                    this->camera->getTransform()->OnVisited.remove(
+                        EventCore::CallbackWrapper(&ComponentLineMounter::OnCameraTransformVisit, this));
                 this->camera = camera;
+                if (camera->compareType(Components::ComponentCameraPerspective::Type))
+                {
+                    camera->getTransform()->OnVisited.add(
+                        EventCore::CallbackWrapper(&ComponentLineMounter::OnCameraTransformVisit, this));
+                }
             }
 
             ComponentLineMounter::ComponentLineMounter() : Component(ComponentLineMounter::Type)
             {
                 always_clone = false;
+
+                dirty = true;
+                last_max_scaled = -1.0f;
             }
 
             ComponentLineMounter::~ComponentLineMounter()
             {
+                if (this->camera != nullptr && this->camera->getTransform() != nullptr)
+                    this->camera->getTransform()->OnVisited.remove(
+                        EventCore::CallbackWrapper(&ComponentLineMounter::OnCameraTransformVisit, this));
             }
 
             void ComponentLineMounter::clear()
@@ -202,6 +256,8 @@ namespace AppKit
 
                 aabb.makeEmpty();
                 meshWrapper->clearShape();
+
+                dirty = true;
             }
 
             void ComponentLineMounter::addLine(const MathCore::vec3f &a, const MathCore::vec3f &b,
@@ -356,6 +412,8 @@ namespace AppKit
                                ITKExtension::Model::CONTAINS_COLOR0;
 
                 meshWrapper->setShapeAABB(aabb);
+
+                dirty = true;
             }
 
         }
