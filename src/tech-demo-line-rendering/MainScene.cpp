@@ -2,8 +2,10 @@
 #include "App.h"
 
 #include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
 #include <appkit-gl-engine/Components/deprecated/ComponentColorLine.h>
+#include <InteractiveToolkit/ITKCommon/Random.h>
 
 // #include <InteractiveToolkit/EaseCore/EaseCore.h>
 
@@ -31,7 +33,10 @@ void MainScene::loadGraph()
     new_line_algorithm_transform = root->addChild(Transform::CreateShared());
     new_line_algorithm_transform->Name = "new line transform";
 
-    new_line_algorithm_transform->setLocalScale(MathCore::vec3f(0.5f, 0.5f, 0.5f));
+    if (this->use3DSet)
+        new_line_algorithm_transform->setLocalScale(MathCore::vec3f(50.0f, 50.0f, 50.0f));
+    else
+        new_line_algorithm_transform->setLocalScale(MathCore::vec3f(0.5f, 0.5f, 0.5f));
 }
 
 // to bind the resources to the current graph
@@ -41,12 +46,23 @@ void MainScene::bindResourcesToGraph()
     // GLRenderState *renderState = GLRenderState::Instance();
 
     auto mainCamera = root->findTransformByName("Main Camera");
-    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
-    camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
-    componentCameraOrthographic->useSizeY = true;
-    componentCameraOrthographic->sizeY = 1080.0f * 0.5f;
-    componentCameraOrthographic->nearPlane = 50.0f;
-    componentCameraOrthographic->farPlane = 150.0f;
+    if (this->use3DSet)
+    {
+        std::shared_ptr<ComponentCameraPerspective> componentCameraOrthographic;
+        camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraPerspective>();
+        componentCameraOrthographic->fovDegrees = 90.0f;
+        componentCameraOrthographic->nearPlane = 50.0f;
+        componentCameraOrthographic->farPlane = 150.0f;
+    }
+    else
+    {
+        std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+        camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
+        componentCameraOrthographic->useSizeY = true;
+        componentCameraOrthographic->sizeY = 1080.0f * 0.5f;
+        componentCameraOrthographic->nearPlane = 50.0f;
+        componentCameraOrthographic->farPlane = 150.0f;
+    }
 
     camera->getTransform()->setLocalPosition(MathCore::vec3f(0.0f, 0.0f, -100.0f));
 
@@ -99,11 +115,48 @@ void MainScene::update(Platform::Time *elapsed)
     auto size = MathCore::vec2i(this->camera->viewport.w, this->camera->viewport.h);
 
     deprecated_lines->vertices.clear();
-    deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));
-    deprecated_lines->vertices.push_back(rot * MathCore::vec3f(size.width, size.height, 0) * 0.25f);
+    if (this->use3DSet)
+    {
+        const MathCore::vec3f lines[24] = {
+            MathCore::vec3f(-1, -1, -1),
+            MathCore::vec3f(1, -1, -1),
+            MathCore::vec3f(-1, -1, 1),
+            MathCore::vec3f(1, -1, 1),
+            MathCore::vec3f(-1, 1, -1),
+            MathCore::vec3f(1, 1, -1),
+            MathCore::vec3f(-1, 1, 1),
+            MathCore::vec3f(1, 1, 1),
+            MathCore::vec3f(-1, -1, -1),
+            MathCore::vec3f(-1, 1, -1),
+            MathCore::vec3f(-1, -1, 1),
+            MathCore::vec3f(-1, 1, 1),
+            MathCore::vec3f(1, -1, -1),
+            MathCore::vec3f(1, 1, -1),
+            MathCore::vec3f(1, -1, 1),
+            MathCore::vec3f(1, 1, 1),
+            MathCore::vec3f(-1, -1, -1),
+            MathCore::vec3f(-1, -1, 1),
+            MathCore::vec3f(-1, 1, -1),
+            MathCore::vec3f(-1, 1, 1),
+            MathCore::vec3f(1, -1, -1),
+            MathCore::vec3f(1, -1, 1),
+            MathCore::vec3f(1, 1, -1),
+            MathCore::vec3f(1, 1, 1)};
 
-    deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));
-    deprecated_lines->vertices.push_back(rot * MathCore::vec3f(size.height, -size.width, 0) * 0.25f);
+        for (int i = 0; i < 24; i += 2)
+        {
+            deprecated_lines->vertices.push_back(rot * lines[i] * 50.0f);
+            deprecated_lines->vertices.push_back(rot * lines[i + 1] * 50.0f);
+        }
+    }
+    else
+    {
+        deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));
+        deprecated_lines->vertices.push_back(rot * MathCore::vec3f(size.width, size.height, 0) * 0.25f);
+
+        deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));
+        deprecated_lines->vertices.push_back(rot * MathCore::vec3f(size.height, -size.width, 0) * 0.25f);
+    }
     // deprecated_lines->syncVBODynamic();
 
     new_line_algorithm_transform->setLocalRotation(MathCore::OP<MathCore::quatf>::conjugate(rot));
@@ -142,7 +195,7 @@ void MainScene::update(Platform::Time *elapsed)
     }
     else if (Keyboard::isPressed(KeyCode::D))
     {
-        camera_angle = MathCore::OP<float>::fmod(camera_angle + elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
+        camera_angle = MathCore::OP<float>::fmod(camera_angle + angle_speed * elapsed->deltaTime, MathCore::CONSTANT<float>::PI * 2.0f);
         auto Rotation = MathCore::GEN<MathCore::quatf>::fromEuler(0, camera_angle, 0);
 
         cameraTransform->setLocalPosition(Rotation * MathCore::vec3f(0, 0, -MathCore::OP<MathCore::vec3f>::length(cameraTransform->getLocalPosition())));
@@ -182,26 +235,70 @@ void MainScene::resize(const MathCore::vec2i &size)
 
     line_mounter->clear();
 
-    line_mounter->addLine(
-        MathCore::vec3f(0, 0, 0),
-        MathCore::vec3f(0, size.height, 0) * 0.25f,
-        5.0f,
-        MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
-            MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f)));
+    if (this->use3DSet)
+    {
 
-    line_mounter->addLine(
-        MathCore::vec3f(0, 0, 0),
-        MathCore::vec3f(size.width, size.height, 0) * 0.25f,
-        15.0f,
-        MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
-            MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f)));
+        auto color = MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
+            MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f));
 
-    line_mounter->addLine(
-        MathCore::vec3f(0, 0, 0),
-        MathCore::vec3f(size.width, 0, 0) * 0.25f,
-        10.0f,
-        MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
-            MathCore::vec4f(0.0f, 0.0f, 1.0f, 1.0f)));
+        const MathCore::vec3f lines[24] = {
+            MathCore::vec3f(-1, -1, -1),
+            MathCore::vec3f(1, -1, -1),
+            MathCore::vec3f(-1, -1, 1),
+            MathCore::vec3f(1, -1, 1),
+            MathCore::vec3f(-1, 1, -1),
+            MathCore::vec3f(1, 1, -1),
+            MathCore::vec3f(-1, 1, 1),
+            MathCore::vec3f(1, 1, 1),
+            MathCore::vec3f(-1, -1, -1),
+            MathCore::vec3f(-1, 1, -1),
+            MathCore::vec3f(-1, -1, 1),
+            MathCore::vec3f(-1, 1, 1),
+            MathCore::vec3f(1, -1, -1),
+            MathCore::vec3f(1, 1, -1),
+            MathCore::vec3f(1, -1, 1),
+            MathCore::vec3f(1, 1, 1),
+            MathCore::vec3f(-1, -1, -1),
+            MathCore::vec3f(-1, -1, 1),
+            MathCore::vec3f(-1, 1, -1),
+            MathCore::vec3f(-1, 1, 1),
+            MathCore::vec3f(1, -1, -1),
+            MathCore::vec3f(1, -1, 1),
+            MathCore::vec3f(1, 1, -1),
+            MathCore::vec3f(1, 1, 1)};
+
+        for (int i = 0; i < 24; i += 2)
+        {
+            line_mounter->addLine(
+                lines[i],
+                lines[i + 1],
+                50.0f,
+                color);
+        }
+    }
+    else
+    {
+        line_mounter->addLine(
+            MathCore::vec3f(0, 0, 0),
+            MathCore::vec3f(0, size.height, 0) * 0.25f,
+            5.0f,
+            MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
+                MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f)));
+
+        line_mounter->addLine(
+            MathCore::vec3f(0, 0, 0),
+            MathCore::vec3f(size.width, size.height, 0) * 0.25f,
+            15.0f,
+            MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
+                MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f)));
+
+        line_mounter->addLine(
+            MathCore::vec3f(0, 0, 0),
+            MathCore::vec3f(size.width, 0, 0) * 0.25f,
+            10.0f,
+            MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
+                MathCore::vec4f(0.0f, 0.0f, 1.0f, 1.0f)));
+    }
 }
 
 MainScene::MainScene(
