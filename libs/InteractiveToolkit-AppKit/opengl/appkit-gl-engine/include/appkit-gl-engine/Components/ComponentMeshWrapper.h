@@ -56,6 +56,8 @@ namespace AppKit
 
                 void clearShape();
 
+                void forceComputeFinalPositions();
+
                 bool debugCollisionShapes;
 
                 WrapShape wrapShape;

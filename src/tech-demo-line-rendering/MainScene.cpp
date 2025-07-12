@@ -143,10 +143,11 @@ void MainScene::update(Platform::Time *elapsed)
             MathCore::vec3f(1, 1, -1),
             MathCore::vec3f(1, 1, 1)};
 
+        const auto &local_scale = new_line_algorithm_transform->getLocalScale();
         for (int i = 0; i < 24; i += 2)
         {
-            deprecated_lines->vertices.push_back(rot * lines[i] * 50.0f);
-            deprecated_lines->vertices.push_back(rot * lines[i + 1] * 50.0f);
+            deprecated_lines->vertices.push_back(rot * lines[i] * local_scale);
+            deprecated_lines->vertices.push_back(rot * lines[i + 1] * local_scale);
         }
     }
     else
@@ -159,12 +160,14 @@ void MainScene::update(Platform::Time *elapsed)
     }
     // deprecated_lines->syncVBODynamic();
 
-    new_line_algorithm_transform->setLocalRotation(MathCore::OP<MathCore::quatf>::conjugate(rot));
+    new_line_algorithm_transform->setLocalRotation(rot);
 
     bool keyPressed = false;
 
     auto cameraTransform = camera->getTransform();
-    const float speed = 500.0f;
+    float speed = 500.0f;
+    if (this->use3DSet)
+        speed = 200.0f;
     if (Keyboard::isPressed(KeyCode::Left))
     {
         cameraTransform->setLocalPosition(
@@ -211,6 +214,21 @@ void MainScene::update(Platform::Time *elapsed)
     {
         cameraTransform->setLocalPosition(
             cameraTransform->getLocalPosition() + MathCore::vec3f(0.0f, -1.0f, 0.0f) * elapsed->deltaTime * speed);
+    }
+
+    float scale_speed = 1.0f;
+    if (this->use3DSet)
+        scale_speed = 10.0f;
+
+    if (Keyboard::isPressed(KeyCode::W))
+    {
+        new_line_algorithm_transform->setLocalScale(
+            new_line_algorithm_transform->getLocalScale() - elapsed->deltaTime * scale_speed);
+    }
+    else if (Keyboard::isPressed(KeyCode::S))
+    {
+        new_line_algorithm_transform->setLocalScale(
+            new_line_algorithm_transform->getLocalScale() + elapsed->deltaTime * scale_speed);
     }
 }
 

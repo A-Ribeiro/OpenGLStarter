@@ -259,6 +259,11 @@ namespace AppKit
                 makeDirtyToComputeFinalPositions(true);
             }
 
+            void ComponentMeshWrapper::forceComputeFinalPositions()
+            {
+                makeDirtyToComputeFinalPositions(false);
+            }
+
             void ComponentMeshWrapper::updateMeshSphere()
             {
                 auto transform = getTransform();

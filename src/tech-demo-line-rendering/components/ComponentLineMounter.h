@@ -35,6 +35,24 @@ namespace AppKit
                 // line segments and the camera projection type
                 void OnBeforeComputeFinalPositions(ComponentMeshWrapper* meshWrapper);
 
+                void OnCameraTransformVisit(std::shared_ptr<Transform> transform);
+
+                
+
+                bool dirty;
+                // for orthographic camera, the last max scaled value
+                float last_max_scaled;
+
+
+                // for perspective camera, the last camera projection matrix
+                MathCore::vec3f last_dir;
+                MathCore::vec3f last_cam_pos;
+                float last_near_plane;
+                float last_tan_over_viewport_height;
+                MathCore::mat4f last_local_to_world;
+
+                std::shared_ptr<ComponentCamera> camera;
+
             public:
                 static const ComponentType Type;
 
@@ -44,7 +62,7 @@ namespace AppKit
                 std::shared_ptr<ComponentMesh> mesh;
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
                 std::shared_ptr<LineShader> lineShader;
-                std::shared_ptr<ComponentCamera> camera;
+                
 
                 using AABBType = CollisionCore::AABB<MathCore::vec3f>;
 
@@ -55,6 +73,7 @@ namespace AppKit
                 void setLineShader(std::shared_ptr<LineShader> lineShader);
                 void setCamera(std::shared_ptr<ComponentCamera> camera);
 
+                void force_refresh();
 
                 ComponentLineMounter();
 
