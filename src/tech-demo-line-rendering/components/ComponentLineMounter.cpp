@@ -20,20 +20,20 @@ namespace AppKit
                 if (camera->compareType(Components::ComponentCameraOrthographic::Type))
                 {
                     auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(camera);
-                    MathCore::vec3f camera_px_scale = 
-                        (MathCore::vec3f(ortho->viewport.w,ortho->viewport.h, -1.0f)) *
+                    MathCore::vec3f camera_px_scale =
+                        (MathCore::vec3f(ortho->viewport.w, ortho->viewport.h, -1.0f)) *
                         (MathCore::vec3f(ortho->projection.a1, ortho->projection.b2, 1.0f));
-                    //camera_px_scale *= 0.5f;
+                    // camera_px_scale *= 0.5f;
                     camera_px_scale = 1.0f / camera_px_scale;
 
                     const auto &world_to_local = getTransform()->getMatrixInverse(true);
-                    MathCore::vec3f world_Scale_inv(
+                    MathCore::vec3f aux_vec3(
                         MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[0])),
                         MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[1])),
-                        MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[2]))
-                    );
+                        MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[2])));
+                    float word_to_local_scale = MathCore::OP<MathCore::vec3f>::minimum(aux_vec3);
 
-                    float max_scaled = MathCore::OP<MathCore::vec3f>::maximum(world_Scale_inv) * MathCore::OP<MathCore::vec3f>::maximum(camera_px_scale);
+                    float max_scaled = word_to_local_scale * MathCore::OP<MathCore::vec3f>::maximum(camera_px_scale);
 
                     AABBType finalAABB = aabb;
 
@@ -47,6 +47,89 @@ namespace AppKit
 
                         finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, max_scaled * thickness));
                         finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, max_scaled * thickness));
+                    }
+
+                    meshWrapper->setShapeAABB(finalAABB, true);
+                }
+                else if (camera->compareType(Components::ComponentCameraPerspective::Type))
+                {
+                    auto perspective = std::dynamic_pointer_cast<Components::ComponentCameraPerspective>(camera);
+
+                    auto dir = perspective->getTransform()->getRotation(true) * MathCore::vec3f(0, 0, 1);
+                    auto cam_pos = perspective->getTransform()->getPosition(true);
+                    float tan_half_fov = MathCore::OP<float>::tan(MathCore::OP<float>::deg_2_rad(perspective->fovDegrees) * 0.5f);
+                    float near_plane = perspective->nearPlane;
+                    // Pre-calculate the conversion factor: 2 * tan_half_fov / viewport_height
+                    // after that multiply by 0.5 to pass as radius to the sphere parameter
+                    // final factor: tan_half_fov / viewport_height
+                    float tan_over_viewport_height = tan_half_fov / (float)perspective->viewport.h;
+
+                    const auto &local_to_world = getTransform()->getMatrix(true);
+                    const auto &world_to_local = getTransform()->getMatrixInverse(true);
+                    
+                    // Calculate the uniform scale factor for converting world space thickness to local space
+                    MathCore::vec3f scale_vec(
+                        MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[0])),
+                        MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[1])),
+                        MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[2])));
+                    float world_to_local_scale = MathCore::OP<MathCore::vec3f>::minimum(scale_vec);
+
+                    AABBType finalAABB = aabb;
+
+                    for (size_t i = 0; i < mesh->pos.size(); i += 12)
+                    {
+                        const auto &a = mesh->uv[1][i];
+                        const auto &b = mesh->uv[2][i];
+                        const float &thickness_pixels = mesh->uv[3][i].y;
+
+                        float thickness_factor = thickness_pixels * tan_over_viewport_height;
+
+                        // Transform line endpoints to world space
+                        auto world_a = MathCore::CVT<MathCore::vec4f>::toVec3(local_to_world * MathCore::CVT<MathCore::vec3f>::toPtn4(a));
+                        auto world_b = MathCore::CVT<MathCore::vec4f>::toVec3(local_to_world * MathCore::CVT<MathCore::vec3f>::toPtn4(b));
+
+                        // Calculate distance from camera for both endpoints
+                        float dist_a = MathCore::OP<MathCore::vec3f>::dot(world_a - cam_pos, dir);
+                        float dist_b = MathCore::OP<MathCore::vec3f>::dot(world_b - cam_pos, dir);
+
+                        // Process point A
+                        if (dist_a > near_plane)
+                        {
+                            // Convert pixel thickness to world space thickness at this distance
+                            // At distance d, the world space size per pixel is: (2 * d * tan_half_fov) / viewport_height
+                            //float world_thickness_a = thickness_pixels * (2.0f * dist_a * tan_half_fov) / viewport_height;
+                            float world_thickness_a = dist_a * thickness_factor;
+                            float local_thickness_a = world_thickness_a * world_to_local_scale;
+                            //finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_a * 0.5f));
+                            finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_a));
+                        }
+                        else
+                        {
+                            // Point is behind or at near plane, use near plane thickness
+                            //float world_thickness_near = thickness_pixels * (2.0f * near_plane * tan_half_fov) / viewport_height;
+                            float world_thickness_near = near_plane * thickness_factor;
+                            float local_thickness_near = world_thickness_near * world_to_local_scale;
+                            //finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_near * 0.5f));
+                            finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, local_thickness_near));
+                        }
+
+                        // Process point B
+                        if (dist_b > near_plane)
+                        {
+                            //float world_thickness_b = thickness_pixels * (2.0f * dist_b * tan_half_fov) / viewport_height;
+                            float world_thickness_b = dist_b * thickness_factor;
+                            float local_thickness_b = world_thickness_b * world_to_local_scale;
+                            // finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, local_thickness_b * 0.5f));
+                            finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, local_thickness_b));
+                        }
+                        else
+                        {
+                            //float world_thickness_near = thickness_pixels * (2.0f * near_plane * tan_half_fov) / viewport_height;
+                            float world_thickness_near = near_plane * thickness_factor;
+                            float local_thickness_near = world_thickness_near * world_to_local_scale;
+                            // finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, local_thickness_near * 0.5f));
+                            finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, local_thickness_near));
+                        }
                     }
 
                     meshWrapper->setShapeAABB(finalAABB, true);
