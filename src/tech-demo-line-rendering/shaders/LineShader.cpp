@@ -68,34 +68,44 @@ namespace AppKit
                 "}"
 
                 "void main() {"
-                "  vec4 line_p1_ndc = uMVP * aUV1;"
-                "  vec4 line_p2_ndc = uMVP * aUV2;"
+                "  vec4 line_p1_clip = uMVP * aUV1;"
+                "  vec4 line_p2_clip = uMVP * aUV2;"
 
                 "  float line_lrp = aUV3.x;"
                 "  float line_thickness_px = aUV3.y;"
 
                 "  line_thickness_px_half = line_thickness_px * 0.5;"
 
-                "  line_p1_ndc /= line_p1_ndc.w;"
-                "  line_p2_ndc /= line_p2_ndc.w;"
+                // clip test in clip space - liang barsky
+                "  vec4 p1p2_clip_dir = line_p2_clip - line_p1_clip;"
 
-                // clip test - liang barsky
-                "  vec3 p1p2_dir = line_p2_ndc.xyz - line_p1_ndc.xyz;"
                 "  float u1 = 0;"
                 "  float u2 = 1;"
-                "  const float epsilon = 1e-6;"
-                "  barsky_clip_test(-p1p2_dir.z, line_p1_ndc.z - (-1.0 + epsilon), u1, u2);"
-                "  barsky_clip_test(p1p2_dir.z, (1.0 - epsilon) - line_p1_ndc.z, u1, u2);"
-                "  line_p2_ndc.xyz = line_p1_ndc.xyz + p1p2_dir * u2;"
-                "  line_p1_ndc.xyz = line_p1_ndc.xyz + p1p2_dir * u1;"
-                "  p1p2_dir = line_p2_ndc.xyz - line_p1_ndc.xyz;"
+                "  const float epsilon = 1e-4;"
+
+                // Near plane clipping: -w <= z <= w, so z >= -w means z + w >= 0
+                // min test on lim_min = -(-line_p1_clip.w + epsilon)
+                "  barsky_clip_test(-p1p2_clip_dir.z - p1p2_clip_dir.w, line_p1_clip.z - (-line_p1_clip.w + epsilon), u1, u2);"
+                // Far plane clipping: z <= w means w - z >= 0  
+                // max test on lim_max = (line_p1_clip.w - epsilon)
+                "  barsky_clip_test(p1p2_clip_dir.z - p1p2_clip_dir.w, (line_p1_clip.w - epsilon) - line_p1_clip.z, u1, u2);"
+
+                "  line_p2_clip = line_p1_clip + p1p2_clip_dir * u2;"
+                "  line_p1_clip = line_p1_clip + p1p2_clip_dir * u1;"
+
+                // Now perform perspective division on the clipped points
+                "  vec4 line_p1_ndc = line_p1_clip / line_p1_clip.w;"
+                "  vec4 line_p2_ndc = line_p2_clip / line_p2_clip.w;"
+
+                // Recalculate direction in NDC space for screen space calculations
+                "  vec3 p1p2_ndc_dir = line_p2_ndc.xyz - line_p1_ndc.xyz;"
 
                 "  p1_px = line_p1_ndc.xy * 0.5 + 0.5;"
                 "  p1_px *= uScreenSizePx;"
 
                 "  vec4 vert_ndc = mix(line_p1_ndc, line_p2_ndc, line_lrp);"
 
-                "  vec2 p1p2_px = p1p2_dir.xy * 0.5 * uScreenSizePx;"
+                "  vec2 p1p2_px = p1p2_ndc_dir.xy * 0.5 * uScreenSizePx;"
 
                 "  float angle = atan(p1p2_px.y, p1p2_px.x);"
                 "  mat2 rotation_matrix = rotation(angle);"
