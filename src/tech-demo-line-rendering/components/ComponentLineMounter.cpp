@@ -289,48 +289,11 @@ namespace AppKit
                 uint32_t start_index;
                 start_index = (uint32_t)mesh->pos.size();
 
-                mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
+                mesh->pos.push_back(MathCore::vec3f(-1, 1, 0));
                 mesh->uv[1].push_back(a);                                // line point 1
                 mesh->uv[2].push_back(b);                                // line point 2
                 mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
                 mesh->color[0].push_back(color);
-
-                mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
-                mesh->uv[1].push_back(a);                                // line point 1
-                mesh->uv[2].push_back(b);                                // line point 2
-                mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
-                mesh->color[0].push_back(color);
-
-                mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
-                mesh->uv[1].push_back(a);                                // line point 1
-                mesh->uv[2].push_back(b);                                // line point 2
-                mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
-                mesh->color[0].push_back(color);
-
-                mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
-                mesh->uv[1].push_back(a);                                // line point 1
-                mesh->uv[2].push_back(b);                                // line point 2
-                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
-                mesh->color[0].push_back(color);
-
-                mesh->indices.push_back(start_index);
-                mesh->indices.push_back(start_index + 1);
-                mesh->indices.push_back(start_index + 2);
-
-                mesh->indices.push_back(start_index);
-                mesh->indices.push_back(start_index + 2);
-                mesh->indices.push_back(start_index + 3);
-
-                // // a ear
-                // //
-                // //(-1,1)  (0,1)         (1,1) (2,1)
-                // //         *--------------*
-                // //         |              |
-                // //        A|              |B
-                // //         |              |
-                // //         *--------------*
-                // //(-1,-1) (0,-1)        (1,-1) (2,-1)
-                start_index = (uint32_t)mesh->pos.size();
 
                 mesh->pos.push_back(MathCore::vec3f(-1, -1, 0));
                 mesh->uv[1].push_back(a);                                // line point 1
@@ -338,6 +301,12 @@ namespace AppKit
                 mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
                 mesh->color[0].push_back(color);
 
+                mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
+                mesh->uv[1].push_back(a);                                // line point 1
+                mesh->uv[2].push_back(b);                                // line point 2
+                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                mesh->color[0].push_back(color);
+
                 mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
                 mesh->uv[1].push_back(a);                                // line point 1
                 mesh->uv[2].push_back(b);                                // line point 2
@@ -347,41 +316,10 @@ namespace AppKit
                 mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
                 mesh->uv[1].push_back(a);                                // line point 1
                 mesh->uv[2].push_back(b);                                // line point 2
-                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
-                mesh->color[0].push_back(color);
-
-                mesh->pos.push_back(MathCore::vec3f(-1, 1, 0));
-                mesh->uv[1].push_back(a);                                // line point 1
-                mesh->uv[2].push_back(b);                                // line point 2
-                mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
-                mesh->color[0].push_back(color);
-
-                mesh->indices.push_back(start_index);
-                mesh->indices.push_back(start_index + 1);
-                mesh->indices.push_back(start_index + 2);
-
-                mesh->indices.push_back(start_index);
-                mesh->indices.push_back(start_index + 2);
-                mesh->indices.push_back(start_index + 3);
-
-                // b ear
-                //
-                //(-1,1)  (0,1)         (1,1) (2,1)
-                //         *--------------*
-                //         |              |
-                //        A|              |B
-                //         |              |
-                //         *--------------*
-                //(-1,-1) (0,-1)        (1,-1) (2,-1)
-                start_index = (uint32_t)mesh->pos.size();
-
-                mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
-                mesh->uv[1].push_back(a);                                // line point 1
-                mesh->uv[2].push_back(b);                                // line point 2
                 mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
                 mesh->color[0].push_back(color);
 
-                mesh->pos.push_back(MathCore::vec3f(1, -1, 0));
+                mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
                 mesh->uv[1].push_back(a);                                // line point 1
                 mesh->uv[2].push_back(b);                                // line point 2
                 mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
@@ -393,19 +331,126 @@ namespace AppKit
                 mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
                 mesh->color[0].push_back(color);
 
-                mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
+                mesh->pos.push_back(MathCore::vec3f(1, -1, 0));
                 mesh->uv[1].push_back(a);                                // line point 1
                 mesh->uv[2].push_back(b);                                // line point 2
                 mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
                 mesh->color[0].push_back(color);
 
+
+                // quad 1
                 mesh->indices.push_back(start_index);
                 mesh->indices.push_back(start_index + 1);
                 mesh->indices.push_back(start_index + 2);
 
-                mesh->indices.push_back(start_index);
+                mesh->indices.push_back(start_index + 2);
+                mesh->indices.push_back(start_index + 1);
+                mesh->indices.push_back(start_index + 3);
+
+                // quad 2
                 mesh->indices.push_back(start_index + 2);
                 mesh->indices.push_back(start_index + 3);
+                mesh->indices.push_back(start_index + 4);
+
+                mesh->indices.push_back(start_index + 4);
+                mesh->indices.push_back(start_index + 3);
+                mesh->indices.push_back(start_index + 5);
+
+                // quad 3
+                mesh->indices.push_back(start_index + 4);
+                mesh->indices.push_back(start_index + 5);
+                mesh->indices.push_back(start_index + 6);
+
+                mesh->indices.push_back(start_index + 6);
+                mesh->indices.push_back(start_index + 5);
+                mesh->indices.push_back(start_index + 7);
+
+                
+                // // a ear
+                // //
+                // //(-1,1)  (0,1)         (1,1) (2,1)
+                // //         *--------------*
+                // //         |              |
+                // //        A|              |B
+                // //         |              |
+                // //         *--------------*
+                // //(-1,-1) (0,-1)        (1,-1) (2,-1)
+                // start_index = (uint32_t)mesh->pos.size();
+
+                // mesh->pos.push_back(MathCore::vec3f(-1, -1, 0));
+                // mesh->uv[1].push_back(a);                                // line point 1
+                // mesh->uv[2].push_back(b);                                // line point 2
+                // mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                // mesh->color[0].push_back(color);
+
+                // mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
+                // mesh->uv[1].push_back(a);                                // line point 1
+                // mesh->uv[2].push_back(b);                                // line point 2
+                // mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                // mesh->color[0].push_back(color);
+
+                // mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
+                // mesh->uv[1].push_back(a);                                // line point 1
+                // mesh->uv[2].push_back(b);                                // line point 2
+                // mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                // mesh->color[0].push_back(color);
+
+                // mesh->pos.push_back(MathCore::vec3f(-1, 1, 0));
+                // mesh->uv[1].push_back(a);                                // line point 1
+                // mesh->uv[2].push_back(b);                                // line point 2
+                // mesh->uv[3].push_back(MathCore::vec3f(0, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                // mesh->color[0].push_back(color);
+
+                // mesh->indices.push_back(start_index);
+                // mesh->indices.push_back(start_index + 1);
+                // mesh->indices.push_back(start_index + 2);
+
+                // mesh->indices.push_back(start_index);
+                // mesh->indices.push_back(start_index + 2);
+                // mesh->indices.push_back(start_index + 3);
+
+                // // b ear
+                // //
+                // //(-1,1)  (0,1)         (1,1) (2,1)
+                // //         *--------------*
+                // //         |              |
+                // //        A|              |B
+                // //         |              |
+                // //         *--------------*
+                // //(-1,-1) (0,-1)        (1,-1) (2,-1)
+                // start_index = (uint32_t)mesh->pos.size();
+
+                // mesh->pos.push_back(MathCore::vec3f(0, -1, 0));
+                // mesh->uv[1].push_back(a);                                // line point 1
+                // mesh->uv[2].push_back(b);                                // line point 2
+                // mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                // mesh->color[0].push_back(color);
+
+                // mesh->pos.push_back(MathCore::vec3f(1, -1, 0));
+                // mesh->uv[1].push_back(a);                                // line point 1
+                // mesh->uv[2].push_back(b);                                // line point 2
+                // mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                // mesh->color[0].push_back(color);
+
+                // mesh->pos.push_back(MathCore::vec3f(1, 1, 0));
+                // mesh->uv[1].push_back(a);                                // line point 1
+                // mesh->uv[2].push_back(b);                                // line point 2
+                // mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                // mesh->color[0].push_back(color);
+
+                // mesh->pos.push_back(MathCore::vec3f(0, 1, 0));
+                // mesh->uv[1].push_back(a);                                // line point 1
+                // mesh->uv[2].push_back(b);                                // line point 2
+                // mesh->uv[3].push_back(MathCore::vec3f(1, thickness, 0)); // x = current position lrp in line [0..1], y = line_thickness_px
+                // mesh->color[0].push_back(color);
+
+                // mesh->indices.push_back(start_index);
+                // mesh->indices.push_back(start_index + 1);
+                // mesh->indices.push_back(start_index + 2);
+
+                // mesh->indices.push_back(start_index);
+                // mesh->indices.push_back(start_index + 2);
+                // mesh->indices.push_back(start_index + 3);
 
                 mesh->format = ITKExtension::Model::CONTAINS_POS |
                                ITKExtension::Model::CONTAINS_UV1 | ITKExtension::Model::CONTAINS_UV2 | ITKExtension::Model::CONTAINS_UV3 |
