@@ -44,27 +44,57 @@ namespace AppKit
                 "  return mat2(c, s, -s, c);"
                 "}"
 
-                // "void barsky_clip_test(float p, float q, inout float u1, inout float u2) {"
-                // "  if (p < 0.0) {"
-                // "    float r = q / p;"
-                // "    if (r > u1 && r < u2)"
-                // "      u1 = r;"
-                // "  } else if (p > 0.0) {"
-                // "    float r = q / p;"
-                // "    if (r < u2 && r > u1)"
-                // "      u2 = r;"
+                // // Liang-Barsky line clipping algorithm (with branch version)
+                // "bool barsky_clip_test(float p, float q, inout float u1, inout float u2) {"
+                // "  const float epsilon = 1e-10;"
+                // "  bool is_p_zero = abs(p) < epsilon;"
+                // "  bool is_p_negative = p < -epsilon;"
+                // "  bool is_p_positive = p > epsilon;"
+                // // If p is essentially zero, check if q is negative (line is outside plane)
+                // "  if (is_p_zero) {"
+                // "    return q >= 0.0;" // if q < 0, line is completely outside
                 // "  }"
+                // "  float r = q / p;"
+                // // If p < 0 (entering), update u1 if r is valid
+                // "  if (is_p_negative) {"
+                // "    if (r > u2) return false;" // line starts after exit point
+                // "    if (r > u1) u1 = r;"
+                // "  }"
+                // // If p > 0 (exiting), update u2 if r is valid  
+                // "  else if (is_p_positive) {"
+                // "    if (r < u1) return false;" // line ends before entry point
+                // "    if (r < u2) u2 = r;"
+                // "  }"
+                // "  return u1 <= u2;" // return true if not completely clipped
                 // "}"
 
-                // liang barsky clip test no branching
-                "void barsky_clip_test(float p, float q, inout float u1, inout float u2) {"
-                // avoid -inf, +inf due to division by zero, clamping to a valid range
-                "  float r = clamp(q / p, -1e20, 1e20);"
-                "  float is_p_negative = step(p, -0.0);"// p > -0 = 0 -> p <= -0 -> 1
-                "  float is_p_positive = step(0.0, p);"// p < 0 = 0 -> p >= 0 -> 1
-                "  float r_in_range = step(u1, r) * step(r, u2);" // r >= u1 && r <= u2
-                "  u1 = mix(u1, r, is_p_negative * r_in_range);"
-                "  u2 = mix(u2, r, is_p_positive * r_in_range);"
+                // Liang-Barsky line clipping algorithm (simplified branch-less version)
+                "bool barsky_clip_test(float p, float q, inout float u1, inout float u2) {"
+                "  const float epsilon = 1e-10;"
+                
+                // Handle p ≈ 0 case: line is parallel to clipping plane
+                "  float is_p_zero = step(abs(p), epsilon);"
+                "  float parallel_reject = is_p_zero * step(q, -epsilon);" // reject if q < 0
+                
+                // Calculate intersection parameter r, avoiding division by zero
+                "  float safe_p = p + epsilon * sign(p + epsilon);" // ensure non-zero with correct sign
+                "  float r = q / safe_p;"
+                
+                // Determine which parameter to update based on sign of p
+                "  float is_entering = step(p, -epsilon);" // p < 0 (entering region)
+                "  float is_exiting = step(epsilon, p);"   // p > 0 (exiting region)
+                
+                // Update u1 (entry) if entering and r > u1
+                "  float update_u1 = is_entering * step(u1, r);"
+                "  u1 = mix(u1, r, update_u1);"
+                
+                // Update u2 (exit) if exiting and r < u2  
+                "  float update_u2 = is_exiting * step(r, u2);"
+                "  u2 = mix(u2, r, update_u2);"
+                
+                // Check validity: not parallel-rejected AND u1 <= u2
+                "  float is_valid = (1.0 - parallel_reject) * step(u1, u2);"
+                "  return is_valid > 0.5;"
                 "}"
 
                 "void main() {"
@@ -79,16 +109,23 @@ namespace AppKit
                 // clip test in clip space - liang barsky
                 "  vec4 p1p2_clip_dir = line_p2_clip - line_p1_clip;"
 
-                "  float u1 = 0;"
-                "  float u2 = 1;"
+                "  float u1 = 0.0;"
+                "  float u2 = 1.0;"
                 "  const float epsilon = 1e-4;"
 
                 // Near plane clipping: -w <= z <= w, so z >= -w means z + w >= 0
                 // min test on lim_min = -(-line_p1_clip.w + epsilon)
-                "  barsky_clip_test(-p1p2_clip_dir.z - p1p2_clip_dir.w, line_p1_clip.z - (-line_p1_clip.w + epsilon), u1, u2);"
+                "  bool near_clipped = barsky_clip_test(-p1p2_clip_dir.z - p1p2_clip_dir.w, line_p1_clip.z - (-line_p1_clip.w + epsilon), u1, u2);"
                 // Far plane clipping: z <= w means w - z >= 0  
                 // max test on lim_max = (line_p1_clip.w - epsilon)
-                "  barsky_clip_test(p1p2_clip_dir.z - p1p2_clip_dir.w, (line_p1_clip.w - epsilon) - line_p1_clip.z, u1, u2);"
+                "  bool far_clipped = barsky_clip_test(p1p2_clip_dir.z - p1p2_clip_dir.w, (line_p1_clip.w - epsilon) - line_p1_clip.z, u1, u2);"
+
+                // Check if the line segment is completely clipped
+                // early discard vertex by putting it out of the NDC view
+                "  if (!near_clipped || !far_clipped) {"
+                "    gl_Position = vec4(0.0, 0.0, -2.0, 1.0);"
+                "    return;"
+                "  }"
 
                 "  line_p2_clip = line_p1_clip + p1p2_clip_dir * u2;"
                 "  line_p1_clip = line_p1_clip + p1p2_clip_dir * u1;"
@@ -103,6 +140,7 @@ namespace AppKit
                 "  p1_px = line_p1_ndc.xy * 0.5 + 0.5;"
                 "  p1_px *= uScreenSizePx;"
 
+                "  vec4 vert_clip = mix(line_p1_clip, line_p2_clip, line_lrp);"
                 "  vec4 vert_ndc = mix(line_p1_ndc, line_p2_ndc, line_lrp);"
 
                 "  vec2 p1p2_px = p1p2_ndc_dir.xy * 0.5 * uScreenSizePx;"
@@ -118,9 +156,12 @@ namespace AppKit
 
                 "  vert_ndc.xy = (vert_pos_px * uScreenSizePx_inv - 0.5) * 2.0;"
 
+                // Convert the modified NDC back to clip space
+                "  vert_clip.xy = vert_ndc.xy * vert_clip.w;"
+
                 "  color = aColor0;"
                 "  aa_px = uAntialias;"
-                "  gl_Position = vert_ndc;"
+                "  gl_Position = vert_clip;"
                 "}"};
 
             const char fragmentShaderCode[] = {
