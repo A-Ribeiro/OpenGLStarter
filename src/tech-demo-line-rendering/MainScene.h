@@ -65,6 +65,8 @@ public:
 
     std::shared_ptr<AppKit::GLEngine::Transform> new_line_algorithm_transform;
     std::shared_ptr<AppKit::GLEngine::Components::ComponentLineMounter> line_mounter;
+
+    MathCore::MathRandomExt<ITKCommon::Random> mathRnd;
     
     MainScene(
         App *app,

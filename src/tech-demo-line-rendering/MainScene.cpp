@@ -34,7 +34,7 @@ void MainScene::loadGraph()
     new_line_algorithm_transform->Name = "new line transform";
 
     if (this->use3DSet)
-        new_line_algorithm_transform->setLocalScale(MathCore::vec3f(50.0f, 50.0f, 50.0f));
+        new_line_algorithm_transform->setLocalScale(MathCore::vec3f(50.0f, 50.0f, 50.0f) * 2.0f);
     else
         new_line_algorithm_transform->setLocalScale(MathCore::vec3f(0.5f, 0.5f, 0.5f));
 }
@@ -51,8 +51,10 @@ void MainScene::bindResourcesToGraph()
         std::shared_ptr<ComponentCameraPerspective> componentCameraOrthographic;
         camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraPerspective>();
         componentCameraOrthographic->fovDegrees = 90.0f;
-        componentCameraOrthographic->nearPlane = 50.0f;
-        componentCameraOrthographic->farPlane = 150.0f;
+        componentCameraOrthographic->nearPlane = 1.0f;
+        componentCameraOrthographic->farPlane = 1500.0f;
+
+        camera->getTransform()->setLocalPosition(MathCore::vec3f(0.0f, 0.0f, -1.0f));
     }
     else
     {
@@ -62,9 +64,11 @@ void MainScene::bindResourcesToGraph()
         componentCameraOrthographic->sizeY = 1080.0f * 0.5f;
         componentCameraOrthographic->nearPlane = 50.0f;
         componentCameraOrthographic->farPlane = 150.0f;
+
+        camera->getTransform()->setLocalPosition(MathCore::vec3f(0.0f, 0.0f, -100.0f));
     }
 
-    camera->getTransform()->setLocalPosition(MathCore::vec3f(0.0f, 0.0f, -100.0f));
+    
 
     deprecated_lines = deprecated_lines_transform->addNewComponent<ComponentColorLine>();
     deprecated_lines->color = MathCore::vec4f(1.0f, 0.0f, 1.0f, 1.0f);
@@ -72,7 +76,7 @@ void MainScene::bindResourcesToGraph()
 
     line_mounter = new_line_algorithm_transform->addNewComponent<ComponentLineMounter>();
     line_mounter->setLineShader(lineShader);
-    line_mounter->setCamera(camera);
+    line_mounter->setCamera(camera, true);
     line_mounter->meshWrapper->debugCollisionShapes = true;
 
     auto &bag = line_mounter->material->custom_shader_property_bag;
@@ -109,7 +113,7 @@ void MainScene::unloadAll()
 void MainScene::update(Platform::Time *elapsed)
 {
     angle = MathCore::OP<float>::fmod(angle + elapsed->deltaTime * 0.125f, 2.0f * MathCore::CONSTANT<float>::PI);
-    auto rot = MathCore::GEN<MathCore::quatf>::fromEuler(0, 0, angle);
+    auto rot = (this->use3DSet)?MathCore::GEN<MathCore::quatf>::fromEuler(angle, 0, 0):MathCore::GEN<MathCore::quatf>::fromEuler(0, 0, angle);
     // line_middle_to_half->setLocalRotation(MathCore::GEN< MathCore::quatf>::fromEuler(0, 0, angle));
 
     auto size = MathCore::vec2i(this->camera->viewport.w, this->camera->viewport.h);
@@ -144,10 +148,25 @@ void MainScene::update(Platform::Time *elapsed)
             MathCore::vec3f(1, 1, 1)};
 
         const auto &local_scale = new_line_algorithm_transform->getLocalScale();
-        for (int i = 0; i < 24; i += 2)
+
+        MathCore::vec3f x_offset = MathCore::vec3f(3.0f, 0.0f, 0.0f) * local_scale;
+        //MathCore::vec3f z_offset = MathCore::vec3f(0.0f, 0.0f, -1.0f) * local_scale;
+        MathCore::vec3f y_offset = MathCore::vec3f(0.0f, 3.0f, 0.0f) * local_scale;
+
+        for (int x = -5; x <= 5; x++)
         {
-            deprecated_lines->vertices.push_back(rot * lines[i] * local_scale);
-            deprecated_lines->vertices.push_back(rot * lines[i + 1] * local_scale);
+            for (int i = 0; i < 24; i += 2)
+            {
+                deprecated_lines->vertices.push_back( rot * ( lines[i] * local_scale + x_offset * (float)x));
+                deprecated_lines->vertices.push_back( rot * ( lines[i + 1] * local_scale + x_offset * (float)x));
+            }
+
+            if (x)
+                for (int i = 0; i < 24; i += 2)
+                {
+                    deprecated_lines->vertices.push_back( rot * ( lines[i] * local_scale + y_offset * (float)x));
+                    deprecated_lines->vertices.push_back( rot * ( lines[i + 1] * local_scale + y_offset * (float)x));
+                }
         }
     }
     else
@@ -285,13 +304,28 @@ void MainScene::resize(const MathCore::vec2i &size)
             MathCore::vec3f(1, 1, -1),
             MathCore::vec3f(1, 1, 1)};
 
-        for (int i = 0; i < 24; i += 2)
+        MathCore::vec3f x_offset = MathCore::vec3f(3.0f, 0.0f, 0.0f);
+        MathCore::vec3f y_offset = MathCore::vec3f(0.0f, 3.0f, 0.0f);
+        // MathCore::vec3f z_offset = MathCore::vec3f(0.0f, 0.0f, -1.0f);
+        for (int x = -5; x <= 5; x++)
         {
-            line_mounter->addLine(
-                lines[i],
-                lines[i + 1],
-                50.0f,
-                color);
+            color = mathRnd.next<MathCore::vec4f>();
+            color.a = 1.0f;
+            for (int i = 0; i < 24; i += 2)
+            {
+                line_mounter->addLine(
+                    lines[i] + x_offset * (float)x,
+                    lines[i + 1] + x_offset * (float)x,
+                    50.0f,
+                    color);
+
+                if (x)
+                    line_mounter->addLine(
+                        lines[i] + y_offset * (float)x,
+                        lines[i + 1] + y_offset * (float)x,
+                        50.0f,
+                        color);
+            }
         }
     }
     else
@@ -326,7 +360,9 @@ MainScene::MainScene(
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
     std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow,
-    bool _3d) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
+    bool _3d) : 
+    AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
+    mathRnd(ITKCommon::Random::Instance())
 {
     this->app = app;
     this->use3DSet = _3d;
