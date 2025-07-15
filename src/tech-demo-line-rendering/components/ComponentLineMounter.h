@@ -48,10 +48,20 @@ namespace AppKit
                 MathCore::vec3f last_dir;
                 MathCore::vec3f last_cam_pos;
                 float last_near_plane;
+                float last_far_plane;
                 float last_tan_over_viewport_height;
                 MathCore::mat4f last_local_to_world;
 
                 std::shared_ptr<ComponentCamera> camera;
+
+                // this calculates the max size the point can be in any projection.
+                // for orthographic camera, it is the max scaled value
+                // for perspective camera, it is the max scaled value at the far plane
+                bool use_max_scale_update_on_change_self_scale;
+                float one_time_set_scale;
+                float one_time_word_to_local_scale;
+                float one_time_camera_scale;
+                void one_time_set(std::shared_ptr<ComponentCamera> camera);
 
             public:
                 static const ComponentType Type;
@@ -71,7 +81,7 @@ namespace AppKit
                 void checkOrCreateAuxiliaryComponents();
 
                 void setLineShader(std::shared_ptr<LineShader> lineShader);
-                void setCamera(std::shared_ptr<ComponentCamera> camera);
+                void setCamera(std::shared_ptr<ComponentCamera> camera, bool one_time_set);
 
                 void force_refresh();
 
