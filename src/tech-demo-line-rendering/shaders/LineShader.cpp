@@ -36,7 +36,7 @@ namespace AppKit
                 "varying float line_thickness_px_half;"
                 "varying float aa_px;"
 
-                "uniform float uAntialias = 0.0;"
+                "uniform float uAntialias;"
 
                 "mat2 rotation(float angle) {"
                 "  float c = cos(angle);"
@@ -166,7 +166,7 @@ namespace AppKit
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
-                "uniform vec4 uColor = vec4(1.0,1.0,1.0,1.0);"
+                "uniform vec4 uColor;"
 
                 "varying vec4 color;"
                 "varying vec2 p1_px;"
@@ -204,11 +204,31 @@ namespace AppKit
             u_antialias = getUniformLocation("uAntialias");
 
             // query values
-            uScreenSizePx = getUniformVec2(u_screenSizePx);
-            uScreenSizePx_inv = getUniformVec2(u_screenSizePx_inv);
-            uMVP = getUniformMat4(u_mvp);
-            uColor = getUniformVec4(u_color);
-            uAntialias = getUniformFloat(u_antialias);
+            // uScreenSizePx = getUniformVec2(u_screenSizePx);
+            // uScreenSizePx_inv = getUniformVec2(u_screenSizePx_inv);
+            // uMVP = getUniformMat4(u_mvp);
+            // uColor = getUniformVec4(u_color);
+            // uAntialias = getUniformFloat(u_antialias);
+
+            // initialize uniforms
+
+            uScreenSizePx = MathCore::vec2f(1.0f, 1.0f);
+            uScreenSizePx_inv = MathCore::vec2f(1.0f, 1.0f);
+            uMVP = MathCore::mat4f();
+            uColor = MathCore::vec4f(1.0,1.0,1.0,1.0);
+            uAntialias = 0.0f;
+
+            GLRenderState *state = GLRenderState::Instance();
+            GLShader* old_shader = state->CurrentShader;
+            state->CurrentShader = this;
+
+            setUniform(u_screenSizePx, uScreenSizePx);
+            setUniform(u_screenSizePx_inv, uScreenSizePx_inv);
+            setUniform(u_mvp, uMVP);
+            setUniform(u_color, uColor);
+            setUniform(u_antialias, uAntialias);
+
+            state->CurrentShader = old_shader;
         }
 
         void LineShader::setMVP(const MathCore::mat4f &mvp)
