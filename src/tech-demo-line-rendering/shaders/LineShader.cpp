@@ -152,7 +152,7 @@ namespace AppKit
                 // use the point that is near the screen center as reference of the line
                 // this will keep the numbers, and line distance calculation
                 // with a non-artifact range in screen space.
-                "  float choose_pt = step(dot(line_p1_ndc.xy,line_p1_ndc.xy), dot(line_p2_ndc.xy,line_p2_ndc.xy));"
+                "  float choose_pt = step(dot(line_p2_ndc.xy,line_p2_ndc.xy), dot(line_p1_ndc.xy,line_p1_ndc.xy));"
                 "  p1_px = (mix(line_p1_ndc.xy, line_p2_ndc.xy, choose_pt) * 0.5 + 0.5) * uScreenSizePx;"
                 "  p1p2_dir_normalized = mix(rotation_matrix[0], -rotation_matrix[0], choose_pt);"
 
