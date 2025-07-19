@@ -111,7 +111,7 @@ namespace AppKit
 
                 "  float u1 = 0.0;"
                 "  float u2 = 1.0;"
-                "  const float epsilon = 1e-4;"
+                "  const float epsilon = 1e-3;"
 
                 // Near plane clipping: -w <= z <= w, so z >= -w means z + w >= 0
                 // min test on lim_min = -(-line_p1_clip.w + epsilon)
@@ -135,10 +135,7 @@ namespace AppKit
                 "  vec4 line_p2_ndc = line_p2_clip / line_p2_clip.w;"
 
                 // Recalculate direction in NDC space for screen space calculations
-                "  vec3 p1p2_ndc_dir = line_p2_ndc.xyz - line_p1_ndc.xyz;"
-
-                "  p1_px = line_p1_ndc.xy * 0.5 + 0.5;"
-                "  p1_px *= uScreenSizePx;"
+                "  vec2 p1p2_ndc_dir = line_p2_ndc.xy - line_p1_ndc.xy;"
 
                 "  vec4 vert_clip = mix(line_p1_clip, line_p2_clip, line_lrp);"
                 "  vec4 vert_ndc = mix(line_p1_ndc, line_p2_ndc, line_lrp);"
@@ -150,6 +147,18 @@ namespace AppKit
                 "  p1p2_dir_normalized = rotation_matrix[0];"
 
                 "  p1p2_length_px = dot(p1p2_px, p1p2_dir_normalized);"
+
+                // intel HD3000 hack... 
+                // avoid artifacts due to 16bit float on fragment shader
+                // use the point that is near the screen center as reference of the line
+                // this will keep the numbers, and line distance calculation
+                // with a non-artifact range.
+                "  if ( dot(line_p1_ndc.xy,line_p1_ndc.xy) <= dot(line_p2_ndc.xy,line_p2_ndc.xy) ) {"
+                "    p1_px = (line_p1_ndc.xy * 0.5 + 0.5) * uScreenSizePx;"
+                "  } else {"
+                "    p1p2_dir_normalized = -p1p2_dir_normalized;"
+                "    p1_px = (line_p2_ndc.xy * 0.5 + 0.5) * uScreenSizePx;"
+                "  }"
 
                 "  vec2 vert_pos_px = (vert_ndc.xy * 0.5 + 0.5) * uScreenSizePx;"
                 "  vert_pos_px += rotation_matrix * aPosition * (line_thickness_px_half + uAntialias);"
