@@ -144,21 +144,17 @@ namespace AppKit
 
                 "  float angle = atan(p1p2_px.y, p1p2_px.x);"
                 "  mat2 rotation_matrix = rotation(angle);"
-                "  p1p2_dir_normalized = rotation_matrix[0];"
 
-                "  p1p2_length_px = dot(p1p2_px, p1p2_dir_normalized);"
+                "  p1p2_length_px = dot(p1p2_px, rotation_matrix[0]);"
 
                 // intel HD3000 hack... 
                 // avoid artifacts due to 16bit float on fragment shader
                 // use the point that is near the screen center as reference of the line
                 // this will keep the numbers, and line distance calculation
-                // with a non-artifact range.
-                "  if ( dot(line_p1_ndc.xy,line_p1_ndc.xy) <= dot(line_p2_ndc.xy,line_p2_ndc.xy) ) {"
-                "    p1_px = (line_p1_ndc.xy * 0.5 + 0.5) * uScreenSizePx;"
-                "  } else {"
-                "    p1p2_dir_normalized = -p1p2_dir_normalized;"
-                "    p1_px = (line_p2_ndc.xy * 0.5 + 0.5) * uScreenSizePx;"
-                "  }"
+                // with a non-artifact range in screen space.
+                "  float choose_pt = step(dot(line_p1_ndc.xy,line_p1_ndc.xy), dot(line_p2_ndc.xy,line_p2_ndc.xy));"
+                "  p1_px = (mix(line_p1_ndc.xy, line_p2_ndc.xy, choose_pt) * 0.5 + 0.5) * uScreenSizePx;"
+                "  p1p2_dir_normalized = mix(rotation_matrix[0], -rotation_matrix[0], choose_pt);"
 
                 "  vec2 vert_pos_px = (vert_ndc.xy * 0.5 + 0.5) * uScreenSizePx;"
                 "  vert_pos_px += rotation_matrix * aPosition * (line_thickness_px_half + uAntialias);"
