@@ -188,13 +188,13 @@ namespace AppKit
                 "  float distance_to_line = distance(closest_point_on_line, pixel_pos_window);"
                 "  float lrp_distance;"
                 "  if (aa_px < 0.001)"
-                "    lrp_distance = step(line_thickness_px_half, distance_to_line);"
+                "    lrp_distance = step(distance_to_line, line_thickness_px_half);"
                 "  else"
-                "    lrp_distance = smoothstep(line_thickness_px_half - aa_px, line_thickness_px_half + aa_px, distance_to_line);"
-                "  if (lrp_distance >= 1.0)"
+                "    lrp_distance = smoothstep(line_thickness_px_half + aa_px, line_thickness_px_half - aa_px, distance_to_line);"
+                "  if (lrp_distance <= 0.0)"
                 "    discard;"
                 "  vec4 result = color * uColor;"
-                "  result.a *= 1.0 - lrp_distance;"
+                "  result.a *= lrp_distance;"
                 "  gl_FragColor = result;"
                 "}"};
 
