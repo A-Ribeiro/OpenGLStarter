@@ -1,7 +1,7 @@
 #include <appkit-gl-engine/util/ShaderPropertyBag.h>
 
 // Check for C++17 support using standard macros
-#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+#if false && (__cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L))
 
 namespace AppKit
 {
@@ -66,6 +66,8 @@ namespace AppKit
 
             ShaderProperty::ShaderProperty(const MathCore::mat4f &value) : type_(TYPE_MAT4F), mat4f_value(value) {}
 
+            ShaderProperty::ShaderProperty(std::shared_ptr<OpenGL::VirtualTexture> value) : type_(TYPE_VTEX), virtual_texture_value(value) {}
+
             ShaderProperty::ShaderProperty(const ShaderProperty &other) : type_(other.type_)
             {
                 switch (type_)
@@ -88,6 +90,9 @@ namespace AppKit
                 case TYPE_MAT4F:
                     mat4f_value = other.mat4f_value;
                     break;
+                case TYPE_VTEX:
+                    virtual_texture_value = other.virtual_texture_value;
+                    break;
                 }
             }
 
@@ -95,6 +100,8 @@ namespace AppKit
             {
                 if (this != &other)
                 {
+                    if (type_ == TYPE_VTEX && other.type_ != TYPE_VTEX)
+                        virtual_texture_value.reset();
                     type_ = other.type_;
                     switch (type_)
                     {
@@ -115,6 +122,9 @@ namespace AppKit
                         break;
                     case TYPE_MAT4F:
                         mat4f_value = other.mat4f_value;
+                        break;
+                    case TYPE_VTEX:
+                        virtual_texture_value = other.virtual_texture_value;
                         break;
                     }
                 }
@@ -146,6 +156,9 @@ namespace AppKit
                         mat4f_value.a2, mat4f_value.b2, mat4f_value.c2, mat4f_value.d2,
                         mat4f_value.a3, mat4f_value.b3, mat4f_value.c3, mat4f_value.d3,
                         mat4f_value.a4, mat4f_value.b4, mat4f_value.c4, mat4f_value.d4);
+
+                case TYPE_VTEX:
+                    return virtual_texture_value ? "VTEX<valid>" : "VTEX<null>";
                 default:
                     return "<unknown type>";
                 }

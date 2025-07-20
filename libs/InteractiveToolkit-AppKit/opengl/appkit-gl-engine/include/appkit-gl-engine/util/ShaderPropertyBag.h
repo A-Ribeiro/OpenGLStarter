@@ -3,8 +3,10 @@
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <InteractiveToolkit/common.h>
 
+#include <appkit-gl-base/VirtualTexture.h>
+
 // Check for C++17 support using standard macros
-#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+#if false && (__cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L))
 #include <variant>
 
 namespace AppKit
@@ -84,7 +86,9 @@ namespace AppKit
                     TYPE_VEC2F,
                     TYPE_VEC3F,
                     TYPE_VEC4F,
-                    TYPE_MAT4F
+                    TYPE_MAT4F,
+                    
+                    TYPE_VTEX,
                 };
 
             private:
@@ -99,6 +103,14 @@ namespace AppKit
                     MathCore::mat4f mat4f_value;
                 };
 
+                std::shared_ptr<OpenGL::VirtualTexture> virtual_texture_value;
+
+                inline void clearSharedPtr()
+                {
+                    if (type_ == TYPE_VTEX)
+                        virtual_texture_value.reset();
+                }
+
             public:
                 ShaderProperty();
                 ShaderProperty(int value);
@@ -107,6 +119,8 @@ namespace AppKit
                 ShaderProperty(const MathCore::vec3f &value);
                 ShaderProperty(const MathCore::vec4f &value);
                 ShaderProperty(const MathCore::mat4f &value);
+                
+                ShaderProperty(std::shared_ptr<OpenGL::VirtualTexture> value);
 
                 // Copy constructor
                 ShaderProperty(const ShaderProperty &other);
@@ -137,6 +151,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<int>(const int &v)
             {
+                clearSharedPtr();
                 type_ = TYPE_INT;
                 int_value = v;
             }
@@ -144,6 +159,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<float>(const float &v)
             {
+                clearSharedPtr();
                 type_ = TYPE_FLOAT;
                 float_value = v;
             }
@@ -151,6 +167,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<MathCore::vec2f>(const MathCore::vec2f &v)
             {
+                clearSharedPtr();
                 type_ = TYPE_VEC2F;
                 vec2f_value = v;
             }
@@ -158,6 +175,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<MathCore::vec3f>(const MathCore::vec3f &v)
             {
+                clearSharedPtr();
                 type_ = TYPE_VEC3F;
                 vec3f_value = v;
             }
@@ -165,6 +183,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<MathCore::vec4f>(const MathCore::vec4f &v)
             {
+                clearSharedPtr();
                 type_ = TYPE_VEC4F;
                 vec4f_value = v;
             }
@@ -172,8 +191,16 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<MathCore::mat4f>(const MathCore::mat4f &v)
             {
+                clearSharedPtr();
                 type_ = TYPE_MAT4F;
                 mat4f_value = v;
+            }
+
+            template <>
+            inline void ShaderProperty::set<std::shared_ptr<OpenGL::VirtualTexture>>(const std::shared_ptr<OpenGL::VirtualTexture> &v)
+            {
+                type_ = TYPE_VTEX;
+                virtual_texture_value = v;
             }
 
             // Template specializations for get() method
@@ -273,6 +300,22 @@ namespace AppKit
                 return mat4f_value;
             }
 
+            template <>
+            inline const std::shared_ptr<OpenGL::VirtualTexture> &ShaderProperty::get<std::shared_ptr<OpenGL::VirtualTexture>>() const
+            {
+                if (type_ != TYPE_VTEX)
+                    throw std::runtime_error("Property type mismatch");
+                return virtual_texture_value;
+            }
+
+            template <>
+            inline std::shared_ptr<OpenGL::VirtualTexture> &ShaderProperty::get<std::shared_ptr<OpenGL::VirtualTexture>>()
+            {
+                if (type_ != TYPE_VTEX)
+                    throw std::runtime_error("Property type mismatch");
+                return virtual_texture_value;
+            }
+
             // Template specializations for holds() method
             template <>
             inline bool ShaderProperty::holds<int>() const
@@ -308,6 +351,12 @@ namespace AppKit
             inline bool ShaderProperty::holds<MathCore::mat4f>() const
             {
                 return type_ == TYPE_MAT4F;
+            }
+
+            template <>
+            inline bool ShaderProperty::holds<std::shared_ptr<OpenGL::VirtualTexture>>() const
+            {
+                return type_ == TYPE_VTEX;
             }
         }
     }
