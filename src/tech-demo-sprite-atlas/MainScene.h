@@ -6,6 +6,8 @@
 #include <InteractiveToolkit-Extension/image/PNG.h>
 #include <InteractiveToolkit/Platform/Platform.h>
 
+#include "components/ComponentSprite.h"
+
 class App;
 
 //
@@ -47,12 +49,12 @@ public:
 
     App *app;
 
-    AppKit::OpenGL::GLFont2Builder fontBuilder;
-    std::shared_ptr<AppKit::OpenGL::GLFont2PolygonCache> polygonFontCache;
+    std::shared_ptr<AppKit::GLEngine::SpriteShader> spriteShader;
 
-    std::shared_ptr<AppKit::GLEngine::Components::ComponentFontToMesh> font_line1;
-    std::shared_ptr<AppKit::GLEngine::Transform> scaleNode;
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentSprite> componentSprite;
+    std::shared_ptr<AppKit::GLEngine::Transform> spriteNode;
 
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentSprite> bgComponentSprite;
     std::shared_ptr<AppKit::GLEngine::Transform> bgNode;
     
     MainScene(
@@ -68,8 +70,6 @@ public:
     virtual void draw();
 
     void resize(const MathCore::vec2i &size);
-
-    void setTextWithWidth(float width);
 
     void update(Platform::Time *elapsed);
 };

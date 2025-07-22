@@ -81,6 +81,7 @@ namespace AppKit
             public:
                 enum PropertyType
                 {
+                    TYPE_BOOL,
                     TYPE_INT,
                     TYPE_FLOAT,
                     TYPE_VEC2F,
@@ -95,6 +96,7 @@ namespace AppKit
                 PropertyType type_;
                 union
                 {
+                    bool bool_value;
                     int int_value;
                     float float_value;
                     MathCore::vec2f vec2f_value;
@@ -113,6 +115,7 @@ namespace AppKit
 
             public:
                 ShaderProperty();
+                ShaderProperty(bool value);
                 ShaderProperty(int value);
                 ShaderProperty(float value);
                 ShaderProperty(const MathCore::vec2f &value);
@@ -147,6 +150,14 @@ namespace AppKit
                 std::string toString() const;
             };
 
+
+            template <>
+            inline void ShaderProperty::set<bool>(const bool &v)
+            {
+                clearSharedPtr();
+                type_ = TYPE_BOOL;
+                bool_value = v;
+            }
 
             template <>
             inline void ShaderProperty::set<int>(const int &v)
@@ -204,6 +215,21 @@ namespace AppKit
             }
 
             // Template specializations for get() method
+            template <>
+            inline const bool &ShaderProperty::get<bool>() const
+            {
+                if (type_ != TYPE_BOOL)
+                    throw std::runtime_error("Property type mismatch");
+                return bool_value;
+            }
+
+            template <>
+            inline bool &ShaderProperty::get<bool>()
+            {
+                if (type_ != TYPE_BOOL)
+                    throw std::runtime_error("Property type mismatch");
+                return bool_value;
+            }
             template <>
             inline const int &ShaderProperty::get<int>() const
             {
@@ -318,6 +344,11 @@ namespace AppKit
 
             // Template specializations for holds() method
             template <>
+            inline bool ShaderProperty::holds<bool>() const
+            {
+                return type_ == TYPE_BOOL;
+            }
+            template <>
             inline bool ShaderProperty::holds<int>() const
             {
                 return type_ == TYPE_INT;
@@ -380,7 +411,13 @@ namespace AppKit
                 const ShaderProperty &getProperty(const std::string &key) const;
 
                 template <typename T>
-                T getProperty(const std::string &key) const
+                const T& getProperty(const std::string &key) const
+                {
+                    return getProperty(key).get<T>();
+                }
+
+                template <typename T>
+                T& getProperty(const std::string &key)
                 {
                     return getProperty(key).get<T>();
                 }

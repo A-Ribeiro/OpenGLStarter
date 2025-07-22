@@ -163,3 +163,5 @@ add_subdirectory(src/opening)
 add_subdirectory(src/font-with-bitmap)
 
 add_subdirectory(src/tech-demo-line-rendering)
+
+add_subdirectory(src/tech-demo-sprite-atlas)

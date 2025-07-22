@@ -14,13 +14,9 @@ using namespace MathCore;
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources()
 {
-    auto engine = AppKit::GLEngine::Engine::Instance();
-    fontBuilder.load("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
+    // auto engine = AppKit::GLEngine::Engine::Instance();
+    spriteShader = std::make_shared<SpriteShader>(resourceMap);
 
-    // polygonFontCache = fontBuilder.createPolygonCache(
-    //     60.0f,  // size
-    //     600.0f   // max_distance_tolerance
-    // );
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -28,83 +24,43 @@ void MainScene::loadGraph()
     root = Transform::CreateShared();
     root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
-    root->addChild(scaleNode = Transform::CreateShared());
+    root->addChild(Transform::CreateShared())->Name = "bg";
 
-    // box background
-    {
-        bgNode = scaleNode->addChild(Transform::CreateShared());
-        auto materialBackground = bgNode->addNewComponent<Components::ComponentMaterial>();
-        bgNode->addComponent(Components::ComponentMesh::createPlaneXY(1, 1));
-        // bgNode->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 0);
+    root->addChild(Transform::CreateShared())->Name = "Smoke";
 
-        materialBackground->type = Components::MaterialUnlit;
-        materialBackground->unlit.blendMode = BlendModeAlpha;
-        materialBackground->unlit.color = MathCore::vec4f(1, 1, 1, 0.2);
-        auto engine = AppKit::GLEngine::Engine::Instance();
-        if (engine->sRGBCapable)
-            materialBackground->unlit.color = CVT<vec4f>::sRGBToLinear(materialBackground->unlit.color);
-    }
-
-    // text transform
-    {
-        auto textNode = scaleNode->addChild(Transform::CreateShared());
-        textNode->Name = "text1";
-        textNode->setLocalPosition(MathCore::vec3f(0, 0, -0.1f));
-
-        font_line1 = textNode->addNewComponent<AppKit::GLEngine::Components::ComponentFontToMesh>();
-    }
-}
-
-void MainScene::setTextWithWidth(float width)
-{
-
-    fontBuilder.lineHeight = 1.5f;
-    fontBuilder.size = 600.0f*2;
-    fontBuilder.horizontalAlign = GLFont2HorizontalAlign_center;
-    fontBuilder.verticalAlign = GLFont2VerticalAlign_middle;
-    fontBuilder.wrapMode = GLFont2WrapMode_Word;
-    fontBuilder.firstLineHeightMode = GLFont2FirstLineHeightMode_UseCharacterMaxHeight;
-    fontBuilder.wordSeparatorChar = U' ';
-
-    // setText(
-    //     ,
-    //     60.0f, // px
-    //     width, // width
-    //     this->font_line1);
-
-    std::string txt =
-        u8"Use " Font_L_stick u8" para {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}andar{pop;} e " Font_xbox_a " para pular.\n"
-        u8"Use " Font_R_stick u8" para andar e " Font_ps_square_white " para pular.\n"
-        u8"Use " Font_Key_arrows u8" para andar e " Font_Key_z " para pular.\n"
-        u8"\n"
-
-        u8"botões Xbox:" Font_xbox_a Font_xbox_b Font_xbox_x Font_xbox_y u8"\n"
-        u8"botões PS(color):" Font_ps_circle_color Font_ps_cross_color Font_ps_square_color Font_ps_triangle_color u8"\n"
-        u8"botões PS(white):" Font_ps_circle_white Font_ps_cross_white Font_ps_square_white Font_ps_triangle_white u8"\n"
-        u8"teclado:" Font_Key_z Font_Key_x Font_Key_c;
-
-    txt = "aba"; // for testing
-
-    fontBuilder.richBuild(txt.c_str(), false, width, polygonFontCache);
-    font_line1->toMesh(fontBuilder, true);
-    font_line1->getTransform()->setLocalScale(1.0f);
-
-    //printf("[starting]\n");
-    auto txt_aabb = fontBuilder.richComputeBox(txt.c_str(), width);
-    auto aabb_size = txt_aabb.max_box - txt_aabb.min_box;
-    auto aabb_center = (txt_aabb.max_box + txt_aabb.min_box) * 0.5f;
-
-    bgNode->setLocalScale(MathCore::vec3f(aabb_size.x, aabb_size.y, 1));
-    bgNode->setLocalPosition(MathCore::vec3f(aabb_center.x, aabb_center.y, 0.0f));
-
-    // centerAllMesh();
 }
 
 // to bind the resources to the current graph
 void MainScene::bindResourcesToGraph()
 {
+    auto engine = AppKit::GLEngine::Engine::Instance();
 
     GLRenderState *renderState = GLRenderState::Instance();
+
+    spriteNode = root->findTransformByName("Smoke");
+    componentSprite = spriteNode->addNewComponent<ComponentSprite>();
+    componentSprite->setSpriteShader(spriteShader);
+    componentSprite->setTexture(
+        resourceMap->getTexture("resources/smoke.png", engine->sRGBCapable),
+        MathCore::vec2f(0.5f, 0.5f), // pivot
+        MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
+        MathCore::vec2f(-1, -1), // size constraint
+        true // static mesh
+    );
+    // componentSprite->meshWrapper->debugCollisionShapes = true;
+    spriteNode->skip_traversing = true;
+    // componentSprite->material->custom_shader_property_bag.getProperty("UseDiscard").set(true);
+
+    bgNode = root->findTransformByName("bg");
+    bgComponentSprite = bgNode->addNewComponent<ComponentSprite>();
+    bgComponentSprite->setSpriteShader(spriteShader);
+    bgComponentSprite->setTexture(
+        resourceMap->getTexture("resources/Skyboxes/SanFrancisco4/posy.jpg", engine->sRGBCapable),
+        MathCore::vec2f(0.5f, 0.5f), // pivot
+        MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
+        MathCore::vec2f(-1, 1024), // size constraint
+        true // static mesh
+    );
 
     // setup renderstate
 
@@ -124,21 +80,11 @@ void MainScene::bindResourcesToGraph()
                                                    {
         if (evt.type == AppKit::Window::KeyboardEventType::KeyPressed &&
             evt.code == AppKit::Window::Devices::KeyCode::Space){
-            if (polygonFontCache != nullptr)
-                polygonFontCache = nullptr;
-            else {
-                Platform::Time timer;
-                timer.update();
-                polygonFontCache = fontBuilder.createPolygonCache(
-                    600.0f*2,  // size
-                    1.0f,   // max_distance_tolerance
-                    &app->threadPool
-                );
-                timer.update();
-                printf("Font cache created in %.3f ms\n", timer.deltaTime * 1000.0f);
-            }
-            auto rect = renderWindow->CameraViewport.c_ptr();
-            resize(MathCore::vec2i(rect->w, rect->h));
+            //
+            spriteNode->setLocalScale(MathCore::vec3f(0));
+            spriteNode->skip_traversing = false;
+
+
         } });
 
     renderWindow->OnUpdate.add(&MainScene::update, this);
@@ -151,13 +97,32 @@ void MainScene::unloadAll()
 
     root = nullptr;
     camera = nullptr;
-    font_line1 = nullptr;
-    scaleNode = nullptr;
+    
+    spriteShader = nullptr;
+
+    componentSprite = nullptr;
+    spriteNode = nullptr;
+
+    bgComponentSprite = nullptr;
     bgNode = nullptr;
 }
 
 void MainScene::update(Platform::Time *elapsed)
 {
+    if (spriteNode->getLocalScale().x >= 1.0f)
+        spriteNode->skip_traversing = true;
+    else {
+
+        if (!spriteNode->skip_traversing){
+            spriteNode->setLocalScale(
+                MathCore::OP<MathCore::vec3f>::move(
+                    spriteNode->getLocalScale(),
+                    MathCore::vec3f(1.0f, 1.0f, 1.0f),
+                    elapsed->deltaTime * 5.0f
+                )
+            );
+        }
+    }
 }
 
 void MainScene::draw()
@@ -175,19 +140,7 @@ void MainScene::draw()
 void MainScene::resize(const MathCore::vec2i &size)
 {
     // fixed height of 1080 pixels
-    float new_scale = (float)size.height / 1080.0f;
-
-    // float aspect_window = (float)size.width / (float)size.height;
-    // float aspect_image = (float)texture->width / (float)texture->height;
-
-    // bool fit_width = (aspect_window < aspect_image);
-    // if (fit_width) {
-    //     new_scale /= aspect_image / aspect_window;
-    // }
-
-    scaleNode->setLocalScale(new_scale);
-
-    setTextWithWidth((float)size.width / new_scale);
+    // float new_scale = (float)size.height / 1080.0f;
 }
 
 MainScene::MainScene(
@@ -200,8 +153,13 @@ MainScene::MainScene(
 {
     this->app = app;
 
-    font_line1 = nullptr;
-    scaleNode = nullptr;
+    spriteShader = nullptr;
+
+    componentSprite = nullptr;
+    spriteNode = nullptr;
+
+    bgComponentSprite = nullptr;
+    bgNode = nullptr;
 }
 
 MainScene::~MainScene()

@@ -22,6 +22,8 @@ public:
     Fade *fade;
     MainScene *mainScene;
     Platform::ThreadPool threadPool;
+    Platform::ObjectQueue<EventCore::Callback<void(void)>> executeOnMainThread;
+
 
     App();
     ~App();

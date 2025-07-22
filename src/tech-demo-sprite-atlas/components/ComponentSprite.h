@@ -20,6 +20,8 @@
 #include <appkit-gl-engine/Components/ComponentMaterial.h>
 #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
 
+#include "../shaders/SpriteShader.h"
+
 namespace AppKit
 {
     namespace GLEngine
@@ -75,18 +77,20 @@ namespace AppKit
                 std::shared_ptr<ComponentMaterial> material;
                 std::shared_ptr<ComponentMesh> mesh;
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
+                std::shared_ptr<SpriteShader> spriteShader;
 
                 void checkOrCreateAuxiliaryComponents();
 
                 void setTexture(
-                    std::shared_ptr<AppKit::OpenGL::GLTexture> &texture,
+                    std::shared_ptr<AppKit::OpenGL::GLTexture> texture,
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
-                    bool staticMesh
+                    const MathCore::vec2f &size_constraint = MathCore::vec2f(-1, -1),
+                    bool staticMesh = false
                 );
 
                 void setTextureFromAtlas(
-                    std::shared_ptr<SpriteAtlas> &atlas,
+                    std::shared_ptr<SpriteAtlas> atlas,
                     const std::string &name,
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
@@ -94,12 +98,15 @@ namespace AppKit
                 );
 
                 void setTextureFromAtlas(
-                    std::shared_ptr<AppKit::OpenGL::GLTexture> &altas_texture,
+                    std::shared_ptr<AppKit::OpenGL::GLTexture> altas_texture,
                     const SpriteAtlas::Entry &altas_entry,
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
                     bool staticMesh
                 );
+
+                void setSpriteShader(std::shared_ptr<SpriteShader> spriteShader);
+
 
                 ComponentSprite();
 
