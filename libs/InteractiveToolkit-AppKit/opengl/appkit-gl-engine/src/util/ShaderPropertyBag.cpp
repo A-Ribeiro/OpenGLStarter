@@ -54,6 +54,8 @@ namespace AppKit
         {
             ShaderProperty::ShaderProperty() : type_(TYPE_INT), int_value(0) {}
 
+            ShaderProperty::ShaderProperty(bool value) : type_(TYPE_BOOL), bool_value(value) {}
+
             ShaderProperty::ShaderProperty(int value) : type_(TYPE_INT), int_value(value) {}
 
             ShaderProperty::ShaderProperty(float value) : type_(TYPE_FLOAT), float_value(value) {}
@@ -72,6 +74,9 @@ namespace AppKit
             {
                 switch (type_)
                 {
+                case TYPE_BOOL:
+                    bool_value = other.bool_value;
+                    break;
                 case TYPE_INT:
                     int_value = other.int_value;
                     break;
@@ -105,6 +110,9 @@ namespace AppKit
                     type_ = other.type_;
                     switch (type_)
                     {
+                    case TYPE_BOOL:
+                        bool_value = other.bool_value;
+                        break;
                     case TYPE_INT:
                         int_value = other.int_value;
                         break;
@@ -135,6 +143,8 @@ namespace AppKit
             {
                 switch (type_)
                 {
+                case TYPE_BOOL:
+                    return bool_value ? "true" : "false";
                 case TYPE_INT:
                     return ITKCommon::PrintfToStdString("%d", int_value);
                 case TYPE_FLOAT:

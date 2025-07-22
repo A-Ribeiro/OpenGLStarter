@@ -20,21 +20,28 @@ namespace AppKit
 
         void ResourceMap::clear_refcount_equals_1()
         {
+            std::vector<std::string> to_remove;
+
             for (auto &item : texture2DMap)
             {
                 if (item.second.tex.use_count() > 1 ||
                     item.second.relative_path.compare("DEFAULT_ALBEDO") == 0 ||
                     item.second.relative_path.compare("DEFAULT_NORMAL") == 0)
                     continue;
-                texture2DMap.erase(item.first);
+                to_remove.push_back(item.first);
             }
+            for(const auto &key : to_remove)
+                texture2DMap.erase(key);
 
+            to_remove.clear();
             for (auto &item : cubemapMap)
             {
                 if (item.second.cubemap.use_count() > 1)
                     continue;
-                cubemapMap.erase(item.first);
+                to_remove.push_back(item.first);
             }
+            for(const auto &key : to_remove)
+                cubemapMap.erase(key);
         }
 
         void ResourceMap::clear()

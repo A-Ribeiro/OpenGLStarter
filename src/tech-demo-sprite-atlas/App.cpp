@@ -67,6 +67,12 @@ App::~App(){
 }
 
 void App::draw() {
+    while (executeOnMainThread.size() > 0)
+    {
+        auto callback = executeOnMainThread.dequeue(nullptr, true);
+        callback();
+    }
+    
     time.update();
 
     //set min delta time (the passed time or the time to render at 24fps)

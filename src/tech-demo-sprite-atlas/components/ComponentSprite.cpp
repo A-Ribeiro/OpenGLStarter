@@ -19,9 +19,9 @@ namespace AppKit
                 if (material == nullptr)
                 {
                     material = transform->addNewComponent<ComponentMaterial>();
-                    material->type = MaterialUnlitTexture;
-                    material->unlit.tex = directTexture.texture;
-                    material->unlit.color = directTexture.color;
+                    material->type = MaterialNone;
+                    // material->unlit.tex = directTexture.texture;
+                    // material->unlit.color = directTexture.color;
                 }
                 if (mesh == nullptr)
                 {
@@ -37,16 +37,90 @@ namespace AppKit
             }
 
             void ComponentSprite::setTexture(
-                std::shared_ptr<AppKit::OpenGL::GLTexture> &texture,
+                std::shared_ptr<AppKit::OpenGL::GLTexture> texture,
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
+                const MathCore::vec2f &size_constraint,
                 bool staticMesh)
             {
+                directTexture.texture = texture;
+                directTexture.pivot = pivot;
+                directTexture.color = color;
+                type = SpriteSourceDirectTexture;
                 checkOrCreateAuxiliaryComponents();
+
+                MathCore::vec3f size((float)texture->width, (float)texture->height, 0.0f);
+                if (size_constraint.x > 0.0f && size_constraint.y > 0.0f)
+                    size = MathCore::vec3f(size_constraint.x, size_constraint.y, 0.0f);
+                else if (size_constraint.x > 0.0f)
+                    size = MathCore::vec3f(size_constraint.x, (size.y * size_constraint.x) / size.x , 0.0f);
+                else if (size_constraint.y > 0.0f)
+                    size = MathCore::vec3f((size.x * size_constraint.y) / size.y, size_constraint.y, 0.0f);
+
+                float xmin = -pivot.x;
+                float xmax = 1.0f - pivot.x;
+
+                float ymin = -pivot.y;
+                float ymax = 1.0f - pivot.y;
+
+                mesh->pos.clear();
+                mesh->pos.push_back(size * MathCore::vec3f(xmax,ymax, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(xmax,ymin, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(xmin,ymin, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(xmin,ymax, 0.0f));
+
+                mesh->uv[0].clear();
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(1.0f, 0.0f), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(1.0f, 1.0f), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(0.0f, 1.0f), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(0.0f, 0.0f), 0));
+
+                // mesh->normals.clear();
+                // mesh->normals.push_back(MathCore::vec3f(0.0f, 1.0f, 0.0f));
+                // mesh->normals.push_back(MathCore::vec3f(0.0f, 1.0f, 0.0f));
+                // mesh->normals.push_back(MathCore::vec3f(0.0f, 1.0f, 0.0f));
+                // mesh->normals.push_back(MathCore::vec3f(0.0f, 1.0f, 0.0f));
+
+                // mesh->tangent.clear();
+                // mesh->tangent.push_back(MathCore::vec3f(1.0f, 0.0f, 0.0f));
+                // mesh->tangent.push_back(MathCore::vec3f(1.0f, 0.0f, 0.0f));
+                // mesh->tangent.push_back(MathCore::vec3f(1.0f, 0.0f, 0.0f));
+                // mesh->tangent.push_back(MathCore::vec3f(1.0f, 0.0f, 0.0f));
+
+                // mesh->binormal.clear();
+                // mesh->binormal.push_back(MathCore::vec3f(0.0f, 0.0f, 1.0f));
+                // mesh->binormal.push_back(MathCore::vec3f(0.0f, 0.0f, 1.0f));
+                // mesh->binormal.push_back(MathCore::vec3f(0.0f, 0.0f, 1.0f));
+                // mesh->binormal.push_back(MathCore::vec3f(0.0f, 0.0f, 1.0f));
+
+                mesh->indices.clear();
+                mesh->indices.push_back(0);
+                mesh->indices.push_back(2);
+                mesh->indices.push_back(1);
+
+                mesh->indices.push_back(0);
+                mesh->indices.push_back(3);
+                mesh->indices.push_back(2);
+
+                if (staticMesh)
+                    mesh->syncVBO(0, 0xffffffff);
+                else
+                    mesh->syncVBO(0xffffffff, 0);
+
+                material->custom_shader_property_bag.getProperty("uTexture").set(
+                    (std::shared_ptr<AppKit::OpenGL::VirtualTexture>)texture
+                );
+                material->custom_shader_property_bag.getProperty("uColor").set(color);
+
+                meshWrapper->setShapeAABB( CollisionCore::AABB<MathCore::vec3f>(
+                    mesh->pos[0],
+                    mesh->pos[2]
+                ), true);
+
             }
 
             void ComponentSprite::setTextureFromAtlas(
-                std::shared_ptr<SpriteAtlas> &atlas,
+                std::shared_ptr<SpriteAtlas> atlas,
                 const std::string &name,
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
@@ -56,7 +130,7 @@ namespace AppKit
             }
 
             void ComponentSprite::setTextureFromAtlas(
-                std::shared_ptr<AppKit::OpenGL::GLTexture> &altas_texture,
+                std::shared_ptr<AppKit::OpenGL::GLTexture> altas_texture,
                 const SpriteAtlas::Entry &altas_entry,
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
@@ -64,6 +138,24 @@ namespace AppKit
             {
                 checkOrCreateAuxiliaryComponents();
             }
+
+            void ComponentSprite::setSpriteShader(std::shared_ptr<SpriteShader> spriteShader) 
+            {
+                checkOrCreateAuxiliaryComponents();
+                
+                this->spriteShader = spriteShader;
+                if (spriteShader == nullptr)
+                {
+                    material->type = AppKit::GLEngine::Components::MaterialNone;
+                    return;
+                }
+
+                material->type = AppKit::GLEngine::Components::MaterialCustomShader;
+                material->custom_shader = spriteShader;
+                material->custom_shader_property_bag = spriteShader->createDefaultBag();
+
+            }
+
 
             ComponentSprite::ComponentSprite() : Component(ComponentSprite::Type)
             {
