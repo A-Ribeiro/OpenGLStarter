@@ -223,9 +223,9 @@ namespace AppKit
 
 #if !defined(GLAD_GLES2)
             ITK_ABORT(!GLAD_GL_ARB_shading_language_100, "ARB_shading_language_100 not supported.");
-            ITK_ABORT(!GLAD_GL_ARB_shader_objects, "ARB_shader_objects not supported.");
-            ITK_ABORT(!GLAD_GL_ARB_vertex_shader, "ARB_vertex_shader not supported.");
-            ITK_ABORT(!GLAD_GL_ARB_fragment_shader, "ARB_fragment_shader not supported.");
+            // ITK_ABORT(!GLAD_GL_ARB_shader_objects, "ARB_shader_objects not supported.");
+            // ITK_ABORT(!GLAD_GL_ARB_vertex_shader, "ARB_vertex_shader not supported.");
+            // ITK_ABORT(!GLAD_GL_ARB_fragment_shader, "ARB_fragment_shader not supported.");
 #endif
             mProgram = 0;
             mVertShader = 0;

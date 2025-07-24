@@ -118,44 +118,43 @@ namespace AppKit
         }
 
 #ifndef ITK_RPI
-        void GLRenderState::OnAlphaTestChange(const AlphaTestType &value, const AlphaTestType &oldValue)
-        {
-
-            switch (value)
-            {
-            case AlphaTestDisabled:
-                glDisable(GL_ALPHA_TEST);
-                break;
-            case AlphaTestEqual:
-                glEnable(GL_ALPHA_TEST);
-                glAlphaFunc(GL_EQUAL, AlphaRef.c_val());
-                break;
-            case AlphaTestLess:
-                glEnable(GL_ALPHA_TEST);
-                glAlphaFunc(GL_LESS, AlphaRef.c_val());
-                break;
-            case AlphaTestLessEqual:
-                glEnable(GL_ALPHA_TEST);
-                glAlphaFunc(GL_LEQUAL, AlphaRef.c_val());
-                break;
-            case AlphaTestGreater:
-                glEnable(GL_ALPHA_TEST);
-                glAlphaFunc(GL_GREATER, AlphaRef.c_val());
-                break;
-            case AlphaTestGreaterEqual:
-                glEnable(GL_ALPHA_TEST);
-                glAlphaFunc(GL_GEQUAL, AlphaRef.c_val());
-                break;
-            }
-        }
+        // void GLRenderState::OnAlphaTestChange(const AlphaTestType &value, const AlphaTestType &oldValue)
+        // {
+        //     switch (value)
+        //     {
+        //     case AlphaTestDisabled:
+        //         glDisable(GL_ALPHA_TEST);
+        //         break;
+        //     case AlphaTestEqual:
+        //         glEnable(GL_ALPHA_TEST);
+        //         glAlphaFunc(GL_EQUAL, AlphaRef.c_val());
+        //         break;
+        //     case AlphaTestLess:
+        //         glEnable(GL_ALPHA_TEST);
+        //         glAlphaFunc(GL_LESS, AlphaRef.c_val());
+        //         break;
+        //     case AlphaTestLessEqual:
+        //         glEnable(GL_ALPHA_TEST);
+        //         glAlphaFunc(GL_LEQUAL, AlphaRef.c_val());
+        //         break;
+        //     case AlphaTestGreater:
+        //         glEnable(GL_ALPHA_TEST);
+        //         glAlphaFunc(GL_GREATER, AlphaRef.c_val());
+        //         break;
+        //     case AlphaTestGreaterEqual:
+        //         glEnable(GL_ALPHA_TEST);
+        //         glAlphaFunc(GL_GEQUAL, AlphaRef.c_val());
+        //         break;
+        //     }
+        // }
 #endif
 
 #ifndef ITK_RPI
-        void GLRenderState::OnAlphaRefChange(const float &value, const float &oldValue)
-        {
-            // forward the alpha ref change to another processor
-            OnAlphaTestChange(AlphaTest,AlphaTest);
-        }
+        // void GLRenderState::OnAlphaRefChange(const float &value, const float &oldValue)
+        // {
+        //     // forward the alpha ref change to another processor
+        //     OnAlphaTestChange(AlphaTest,AlphaTest);
+        // }
 #endif
 
 #ifndef ITK_RPI
@@ -303,8 +302,8 @@ namespace AppKit
             DepthWrite.OnChange.add( &GLRenderState::OnDepthWriteChange, this);
             BlendMode.OnChange.add( &GLRenderState::OnBlendModeChange, this);
 #ifndef ITK_RPI
-            AlphaTest.OnChange.add( &GLRenderState::OnAlphaTestChange, this);
-            AlphaRef.OnChange.add( &GLRenderState::OnAlphaRefChange, this);
+            // AlphaTest.OnChange.add( &GLRenderState::OnAlphaTestChange, this);
+            // AlphaRef.OnChange.add( &GLRenderState::OnAlphaRefChange, this);
             LineSmoothHint.OnChange.add( &GLRenderState::OnLineSmoothHintChange, this);
             PointSize.OnChange.add( &GLRenderState::OnPointSizeChange, this);
             Wireframe.OnChange.add( &GLRenderState::OnWireframeChange, this);
