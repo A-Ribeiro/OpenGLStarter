@@ -94,8 +94,8 @@ namespace AppKit
             void OnDepthWriteChange(const bool &value, const bool &oldValue);
             void OnBlendModeChange(const BlendModeType &value, const BlendModeType &oldValue);
 #ifndef ITK_RPI
-            void OnAlphaTestChange(const AlphaTestType &value, const AlphaTestType &oldValue);
-            void OnAlphaRefChange(const float &value, const float &oldValue);
+            // void OnAlphaTestChange(const AlphaTestType &value, const AlphaTestType &oldValue);
+            // void OnAlphaRefChange(const float &value, const float &oldValue);
             void OnLineSmoothHintChange(const HintType &value, const HintType &oldValue);
             void OnPointSizeChange(const float &value, const float &oldValue);
             void OnWireframeChange(const WireframeType &value, const WireframeType &oldValue);
