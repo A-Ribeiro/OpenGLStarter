@@ -42,7 +42,7 @@ namespace AppKit
         {
             if (entries.find(texture_path) != entries.end())
                 throw std::runtime_error("Entry already exists: " + texture_path);
-            entries[texture_path] = (SpriteAtlasGenerator::GeneratorEntry){texture_path, pivot};
+            entries[texture_path] = {texture_path, pivot};
         }
 
         void SpriteAtlasGenerator::removeEntry(const std::string &name)
