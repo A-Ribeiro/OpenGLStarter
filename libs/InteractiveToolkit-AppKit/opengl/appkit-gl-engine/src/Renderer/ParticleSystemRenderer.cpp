@@ -2,6 +2,7 @@
 
 #include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Renderer/SortingHelper.h>
 
 namespace AppKit
 {
@@ -73,17 +74,22 @@ namespace AppKit
         }
 
         void ParticleSystemRenderer::draw(Components::ComponentCamera *camera,
-                                          Components::ComponentParticleSystem *particleSystem)
+                                          const MathCore::vec3f &cameraDirection,
+                                          Components::ComponentParticleSystem *particleSystem,
+                                          SortingHelper *sortingHelper)
         {
 
             if (particleSystem->texture == nullptr)
                 return;
 
+            const auto &sorted_idx = sortingHelper->sort_by_direction(particleSystem->particles, cameraDirection, SortingMode_Desc);
+
             NormalAttributes aux;
             normalVertex.clear();
-            for (int i = 0; i < particleSystem->particles.size(); i++)
+            // for (int i = 0; i < particleSystem->particles.size(); i++)
+            for (auto &idx : sorted_idx)
             {
-                const Components::Particle &p = particleSystem->particles[i];
+                const Components::Particle &p = particleSystem->particles[idx.index];
 
                 aux.pos = p.pos;
                 aux.color = p.color;
@@ -156,18 +162,23 @@ namespace AppKit
         }
 
         void ParticleSystemRenderer::drawSoftDepthComponent24(Components::ComponentCamera *camera,
+                                                              const MathCore::vec3f &cameraDirection,
                                                               Components::ComponentParticleSystem *particleSystem,
-                                                              AppKit::OpenGL::GLTexture *depthComponent24)
+                                                              AppKit::OpenGL::GLTexture *depthComponent24,
+                                                              SortingHelper *sortingHelper)
         {
 
             if (particleSystem->texture == nullptr)
                 return;
 
+            const auto &sorted_idx = sortingHelper->sort_by_direction(particleSystem->particles, cameraDirection, SortingMode_Desc);
+
             NormalAttributes aux;
             normalVertex.clear();
-            for (int i = 0; i < particleSystem->particles.size(); i++)
+
+            for (auto &idx : sorted_idx)
             {
-                const Components::Particle &p = particleSystem->particles[i];
+                const Components::Particle &p = particleSystem->particles[idx.index];
 
                 aux.pos = p.pos;
                 aux.color = p.color;

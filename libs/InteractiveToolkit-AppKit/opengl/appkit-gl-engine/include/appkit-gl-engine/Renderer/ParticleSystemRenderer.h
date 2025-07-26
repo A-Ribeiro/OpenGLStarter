@@ -12,11 +12,12 @@
 
 #include <appkit-gl-engine/Components/ComponentCamera.h>
 
-
 namespace AppKit
 {
     namespace GLEngine
     {
+
+        class SortingHelper;
 
         class NormalAttributes
         {
@@ -61,11 +62,15 @@ namespace AppKit
                 float size);
 
             void draw(Components::ComponentCamera *camera,
-                      Components::ComponentParticleSystem *particleSystem);
+                      const MathCore::vec3f &cameraDirection,
+                      Components::ComponentParticleSystem *particleSystem,
+                      SortingHelper *sortingHelper);
 
             void drawSoftDepthComponent24(Components::ComponentCamera *camera,
+                                          const MathCore::vec3f &cameraDirection,
                                           Components::ComponentParticleSystem *particleSystem,
-                                          AppKit::OpenGL::GLTexture *depthComponent24);
+                                          AppKit::OpenGL::GLTexture *depthComponent24,
+                                          SortingHelper *sortingHelper);
         };
 
     }

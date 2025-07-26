@@ -137,7 +137,7 @@ namespace AppKit
 
             transform->renderWindowRegion = this->renderWindowRegion;
 
-            //force recalculate the transform matrix on next update.
+            // force recalculate the transform matrix on next update.
             transform->renderDirty = true;
             transform->visited = false;
 
@@ -912,11 +912,11 @@ namespace AppKit
         {
             return (int)components.size();
         }
-        std::shared_ptr<Component> Transform::getComponentAt(int i)
+        std::shared_ptr<Component> &Transform::getComponentAt(int i)
         {
-            if (i >= 0 && i < components.size())
-                return components[i];
-            return nullptr;
+            // if (i >= 0 && i < components.size())
+            return components[i];
+            // return nullptr;
         }
 
         // std::shared_ptr<Component> Transform::findComponentInChildren(ComponentType t)

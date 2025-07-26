@@ -409,15 +409,19 @@ namespace AppKit
             }
         }
 
-        bool __compare__particle__system__reverse__(const Components::ComponentParticleSystem *a, const Components::ComponentParticleSystem *b)
-        {
-            return (b->distance_to_camera < a->distance_to_camera);
-        }
+        // bool __compare__particle__system__reverse__(const Components::ComponentParticleSystem *a, const Components::ComponentParticleSystem *b)
+        // {
+        //     return (b->distance_to_camera < a->distance_to_camera);
+        // }
 
-        void RenderPipeline::runSinglePassPipeline(std::shared_ptr<Transform> rootp, std::shared_ptr<Components::ComponentCamera> camerap, bool clear)
+        void RenderPipeline::runSinglePassPipeline(
+            std::shared_ptr<Transform> rootp,
+            std::shared_ptr<Components::ComponentCamera> camerap,
+            bool clear,
+            OrthographicFilterEnum orthoFilter)
         {
-            Transform * root = rootp.get();
-            Components::ComponentCamera * camera = camerap.get();
+            Transform *root = rootp.get();
+            Components::ComponentCamera *camera = camerap.get();
 
             if (clear)
             {
@@ -473,14 +477,9 @@ namespace AppKit
                                 size);
                 MathCore::vec3f center = ortho->getTransform()->getPosition(true) - projection_offset;
 
-                // // filtering using obb
-                // {
-                //     auto obb = CollisionCore::OBB<MathCore::vec3f>( center, size * 2.0f, rotation);
-                //     objectPlaces.filterObjectsOBB(root, obb);
-                // }
-
-                // filtering using aabb
+                if (orthoFilter == OrthographicFilter_UsingAABB)
                 {
+                    // filtering using aabb
                     MathCore::vec3f right = rotation * MathCore::vec3f(size.x, 0, 0);
                     MathCore::vec3f top = rotation * MathCore::vec3f(0, size.y, 0);
                     MathCore::vec3f depth = rotation * MathCore::vec3f(0, 0, size.z);
@@ -505,14 +504,25 @@ namespace AppKit
 
                     sceneTraverseHelper.filterByAABB(root, aabb, FilterFlags_All);
                 }
+                else if (orthoFilter == OrthographicFilter_UsingOBB)
+                {
+                    // filtering using obb
+                    auto obb = CollisionCore::OBB<MathCore::vec3f>(center, size * 2.0f, rotation);
+                    sceneTraverseHelper.filterByOBB(root, obb, FilterFlags_All);
+                }
+
+                auto z_axis_lh = rotation * MathCore::vec3f(0, 0, 1);
+
+                if (MathCore::OP<MathCore::vec3f>::angleBetween(z_axis_lh, MathCore::vec3f(0, 0, 1)) < MathCore::OP<float>::deg_2_rad(5.0f))
+                    sortingHelper.sort_by_z(sceneTraverseHelper.transformList, SortingMode_Desc);
             }
             else
             {
                 ITK_ABORT(true, "Needs at least one camera in the scene to render.");
             }
 
-            for (size_t i = 0; i < sceneTraverseHelper.sunLightList.size(); i++)
-                sceneTraverseHelper.sunLightList[i]->postProcessing_computeLightParameters();
+            for (auto &sunLight : sceneTraverseHelper.sunLightList)
+                sunLight->postProcessing_computeLightParameters();
 
             // draw all sphere suns
             if (perspective && clear && sceneTraverseHelper.sunLightList.size() > 0)
@@ -581,7 +591,7 @@ namespace AppKit
                 lightAndShadowManager.computeShadowParametersForMesh(nullptr, shaderShadowAlgorithm != ShaderShadowAlgorithm_None, shaderShadowAlgorithm);
             }
 
-            for(auto &transform : sceneTraverseHelper.transformList)
+            for (auto &transform : sceneTraverseHelper.transformList)
             {
                 traverse_singlepass_render(transform, camera);
             }
@@ -648,19 +658,25 @@ namespace AppKit
                 MathCore::vec3f cameraPosition = camera_transform->getPosition(true);
                 MathCore::vec3f cameraDirection = camera_transform->getRotation(true) * MathCore::vec3f(0, 0, 1);
 
-                for (int i = 0; i < sceneTraverseHelper.particleSystemList.size(); i++)
-                {
-                    auto particleSystem = sceneTraverseHelper.particleSystemList[i];
-                    particleSystem->distance_to_camera = MathCore::OP<MathCore::vec3f>::sqrDistance(particleSystem->aabb_center, cameraPosition);
-                }
+                sortingHelper.sort_by_direction(sceneTraverseHelper.particleSystemList, cameraDirection, SortingMode_Desc);
 
-                std::sort(sceneTraverseHelper.particleSystemList.begin(), sceneTraverseHelper.particleSystemList.end(), __compare__particle__system__reverse__);
+                // for (int i = 0; i < sceneTraverseHelper.particleSystemList.size(); i++)
+                // {
+                //     auto particleSystem = sceneTraverseHelper.particleSystemList[i];
+                //     particleSystem->distance_to_camera = MathCore::OP<MathCore::vec3f>::sqrDistance(particleSystem->aabb_center, cameraPosition);
+                // }
 
-                for (int i = 0; i < sceneTraverseHelper.particleSystemList.size(); i++)
-                {
-                    auto particleSystem = sceneTraverseHelper.particleSystemList[i];
-                    particleSystem->sortPositions(cameraPosition, cameraDirection);
-                }
+                // std::sort(sceneTraverseHelper.particleSystemList.begin(), sceneTraverseHelper.particleSystemList.end(), __compare__particle__system__reverse__);
+
+                // for (int i = 0; i < sceneTraverseHelper.particleSystemList.size(); i++)
+                // {
+                //     auto particleSystem = sceneTraverseHelper.particleSystemList[i];
+                //     particleSystem->sortPositions(cameraPosition, cameraDirection);
+                // }
+                // for(auto particleSystem : sceneTraverseHelper.particleSystemList)
+                // {
+                //     particleSystem->sortPositions(cameraPosition, cameraDirection);
+                // }
 
                 // printf("------------------PARTICLES SYSTEM DISTANCES------------------\n");
                 // for(int i=0;i<sceneParticleSystem.size();i++)
@@ -673,10 +689,10 @@ namespace AppKit
 
                     if (particleSystem->soft)
                         particleSystemRenderer.drawSoftDepthComponent24(
-                            camera, particleSystem,
-                            &depthRenderer->depthTexture);
+                            camera, cameraDirection, particleSystem,
+                            &depthRenderer->depthTexture, &sortingHelper);
                     else
-                        particleSystemRenderer.draw(camera, particleSystem);
+                        particleSystemRenderer.draw(camera, cameraDirection, particleSystem, &sortingHelper);
 
                     // particleSystemRenderer.drawDebugPoints( camera, sceneParticleSystem[i], 0.25f );
                 }
