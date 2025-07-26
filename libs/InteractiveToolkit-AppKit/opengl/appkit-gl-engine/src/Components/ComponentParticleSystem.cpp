@@ -346,7 +346,7 @@ namespace AppKit
 
                 result->aabb = this->aabb;
                 result->aabb_center = this->aabb_center;
-                result->distance_to_camera = this->distance_to_camera;
+                // result->distance_to_camera = this->distance_to_camera;
 
                 result->textureColor = this->textureColor;
                 result->texture = this->texture;

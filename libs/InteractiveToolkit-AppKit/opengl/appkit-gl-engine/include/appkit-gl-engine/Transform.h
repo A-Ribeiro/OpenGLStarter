@@ -38,10 +38,9 @@ namespace AppKit
             std::weak_ptr<Transform> mSelf;
 
         public:
-
-            //deleted copy constructor and assign operator, to avoid copy...
+            // deleted copy constructor and assign operator, to avoid copy...
             Transform(const Transform &v) = delete;
-            Transform& operator=(const Transform &v) = delete;
+            Transform &operator=(const Transform &v) = delete;
 
             static inline std::shared_ptr<Transform> CreateShared()
             {
@@ -310,7 +309,7 @@ namespace AppKit
             // std::vector<std::shared_ptr<Component>> findComponents(ComponentType);
 
             int getComponentCount() const;
-            std::shared_ptr<Component> getComponentAt(int);
+            std::shared_ptr<Component> &getComponentAt(int);
 
             template <typename _ComponentType,
                       typename std::enable_if<
@@ -445,11 +444,10 @@ namespace AppKit
                                              TransformMapT *transformMap = nullptr,
                                              ComponentMapT *componentMap = nullptr);
 
-            private:
-
+        private:
             std::shared_ptr<Transform> internal_clone(bool force_make_component_copy,
-                                             std::shared_ptr<TransformMapT> transformMap,
-                                             std::shared_ptr<ComponentMapT> componentMap);
+                                                      std::shared_ptr<TransformMapT> transformMap,
+                                                      std::shared_ptr<ComponentMapT> componentMap);
         };
 
     }

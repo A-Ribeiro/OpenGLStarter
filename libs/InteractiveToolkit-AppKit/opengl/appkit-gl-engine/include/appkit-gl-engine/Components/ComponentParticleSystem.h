@@ -90,7 +90,7 @@ namespace AppKit
 
                 CollisionCore::AABB<MathCore::vec3f> aabb;
                 MathCore::vec3f aabb_center;
-                float distance_to_camera;
+                // float distance_to_camera;
 
                 MathCore::vec4f textureColor;
                 std::shared_ptr<AppKit::OpenGL::GLTexture> texture;

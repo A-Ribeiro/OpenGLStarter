@@ -28,6 +28,7 @@
 #include <appkit-gl-engine/Components/deprecated/ComponentColorLine.h>
 
 #include <appkit-gl-engine/Renderer/SceneTraverseHelper.h>
+#include <appkit-gl-engine/Renderer/SortingHelper.h>
 
 #include <appkit-gl-engine/Renderer/LightAndShadowManager.h>
 
@@ -35,6 +36,12 @@ namespace AppKit
 {
     namespace GLEngine
     {
+
+        enum OrthographicFilterEnum
+        {
+            OrthographicFilter_UsingAABB, /// AABB filter, faster, when using orthographic camera aligned with axes
+            OrthographicFilter_UsingOBB /// OBB filter, slower, when using orthographic camera not aligned with axes, with any rotation
+        };
 
         enum AmbientLightModeEnum
         {
@@ -70,6 +77,7 @@ namespace AppKit
             MathCore::vec3f ambientLightColorVec3;
 
             SceneTraverseHelper sceneTraverseHelper;
+            SortingHelper sortingHelper;
 
             // supported shaders in this Render Pipeline
         public:
@@ -138,7 +146,11 @@ namespace AppKit
 
             ~RenderPipeline();
 
-            void runSinglePassPipeline(std::shared_ptr<Transform> root, std::shared_ptr<Components::ComponentCamera> camera, bool clear = true);
+            void runSinglePassPipeline(
+                std::shared_ptr<Transform> root, 
+                std::shared_ptr<Components::ComponentCamera> camera, 
+                bool clear = true,
+                OrthographicFilterEnum orthoFilter = OrthographicFilter_UsingAABB);
 
             void renderDepth(Transform  *root, Components::ComponentCamera *camera);
         };

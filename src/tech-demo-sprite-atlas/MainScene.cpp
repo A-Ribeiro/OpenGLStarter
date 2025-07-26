@@ -24,9 +24,10 @@ void MainScene::loadGraph()
     root = Transform::CreateShared();
     root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
+    root->addChild(Transform::CreateShared())->Name = "Smoke";
+
     root->addChild(Transform::CreateShared())->Name = "bg";
 
-    root->addChild(Transform::CreateShared())->Name = "Smoke";
 
 }
 
@@ -52,6 +53,7 @@ void MainScene::bindResourcesToGraph()
     // componentSprite->material->custom_shader_property_bag.getProperty("UseDiscard").set(true);
 
     bgNode = root->findTransformByName("bg");
+    bgNode->setLocalPosition(MathCore::vec3f(0, 0, 10));
     bgComponentSprite = bgNode->addNewComponent<ComponentSprite>();
     bgComponentSprite->setSpriteShader(spriteShader);
     bgComponentSprite->setTexture(
@@ -109,6 +111,11 @@ void MainScene::unloadAll()
 
 void MainScene::update(Platform::Time *elapsed)
 {
+    camera->getTransform()->setLocalRotation(
+        camera->getTransform()->getLocalRotation() *
+        MathCore::GEN<MathCore::quatf>::fromAxisAngle(MathCore::vec3f(0, 0, 1), elapsed->deltaTime * 0.5f)
+    );
+
     if (spriteNode->getLocalScale().x >= 1.0f)
         spriteNode->skip_traversing = true;
     else {
