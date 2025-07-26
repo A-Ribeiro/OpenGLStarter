@@ -26,8 +26,8 @@ namespace AppKit
         }
 
         void ParticleSystemRenderer::drawDebugPoints(
-            std::shared_ptr<Components::ComponentCamera> camera,
-            std::shared_ptr<Components::ComponentParticleSystem> particleSystem,
+            Components::ComponentCamera *camera,
+            Components::ComponentParticleSystem *particleSystem,
             float size)
         {
 
@@ -72,8 +72,8 @@ namespace AppKit
             OPENGL_CMD(glDisableVertexAttribArray(debugLinesShader_AttribLocation_Pos));
         }
 
-        void ParticleSystemRenderer::draw(std::shared_ptr<Components::ComponentCamera> camera,
-                                          std::shared_ptr<Components::ComponentParticleSystem> particleSystem)
+        void ParticleSystemRenderer::draw(Components::ComponentCamera *camera,
+                                          Components::ComponentParticleSystem *particleSystem)
         {
 
             if (particleSystem->texture == nullptr)
@@ -155,8 +155,8 @@ namespace AppKit
             state->DepthWrite = true;
         }
 
-        void ParticleSystemRenderer::drawSoftDepthComponent24(std::shared_ptr<Components::ComponentCamera> camera,
-                                                              std::shared_ptr<Components::ComponentParticleSystem> particleSystem,
+        void ParticleSystemRenderer::drawSoftDepthComponent24(Components::ComponentCamera *camera,
+                                                              Components::ComponentParticleSystem *particleSystem,
                                                               AppKit::OpenGL::GLTexture *depthComponent24)
         {
 
@@ -223,7 +223,7 @@ namespace AppKit
 
             if (camera->compareType(Components::ComponentCameraPerspective::Type))
             {
-                auto perspect = std::dynamic_pointer_cast<Components::ComponentCameraPerspective>(camera);
+                auto perspect = (Components::ComponentCameraPerspective *)camera;
                 softShader.setCamera_FMinusN_FPlusN_FTimesNTimes2_N(MathCore::vec4f(
                     perspect->farPlane - perspect->nearPlane,
                     perspect->farPlane + perspect->nearPlane,
@@ -232,7 +232,7 @@ namespace AppKit
             }
             else if (camera->compareType(Components::ComponentCameraOrthographic::Type))
             {
-                auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(camera);
+                auto ortho = (Components::ComponentCameraOrthographic *)camera;
                 softShader.setCamera_FMinusN_FPlusN_FTimesNTimes2_N(MathCore::vec4f(
                     ortho->farPlane - ortho->nearPlane,
                     ortho->farPlane + ortho->nearPlane,

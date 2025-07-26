@@ -56,15 +56,15 @@ namespace AppKit
             ParticleSystemRenderer();
 
             void drawDebugPoints(
-                std::shared_ptr<Components::ComponentCamera> camera,
-                std::shared_ptr<Components::ComponentParticleSystem> particleSystem,
+                Components::ComponentCamera *camera,
+                Components::ComponentParticleSystem *particleSystem,
                 float size);
 
-            void draw(std::shared_ptr<Components::ComponentCamera> camera,
-                      std::shared_ptr<Components::ComponentParticleSystem> particleSystem);
+            void draw(Components::ComponentCamera *camera,
+                      Components::ComponentParticleSystem *particleSystem);
 
-            void drawSoftDepthComponent24(std::shared_ptr<Components::ComponentCamera> camera,
-                                          std::shared_ptr<Components::ComponentParticleSystem> particleSystem,
+            void drawSoftDepthComponent24(Components::ComponentCamera *camera,
+                                          Components::ComponentParticleSystem *particleSystem,
                                           AppKit::OpenGL::GLTexture *depthComponent24);
         };
 

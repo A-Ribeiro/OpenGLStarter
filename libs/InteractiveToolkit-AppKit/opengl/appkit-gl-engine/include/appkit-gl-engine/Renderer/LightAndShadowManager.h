@@ -8,7 +8,7 @@
 
 #include <appkit-gl-engine/Transform.h>
 
-#include <appkit-gl-engine/Renderer/ObjectPlaces.h>
+#include <appkit-gl-engine/Renderer/SceneTraverseHelper.h>
 
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/GLDynamicFBO.h>
@@ -109,33 +109,33 @@ namespace AppKit
             CollisionCore::Frustum<MathCore::vec3f> camera_frustum;
             CollisionCore::Sphere<MathCore::vec3f> camera_sphere;
             
-            std::shared_ptr<Transform> scene_root;
+            Transform *scene_root;
 
-            ObjectPlaces *visibleObjects;
+            SceneTraverseHelper *visibleObjects;
 
             RenderPipeline *renderPipeline;
 
-            ObjectPlaces auxObjPlaces;
+            SceneTraverseHelper auxObjPlaces;
 
             LightAndShadowManager();
 
             void setSceneAABB(const CollisionCore::AABB<MathCore::vec3f> &_aabb);
             void setMainCameraFrustum(const CollisionCore::Frustum<MathCore::vec3f> &_frustum);
-            void setSceneRoot(std::shared_ptr<Transform> root);
-            void setVisibleObjects(ObjectPlaces *_visibleObjects);
+            void setSceneRoot(Transform *root);
+            void setVisibleObjectsFromSceneTraverse(SceneTraverseHelper *_visibleObjects);
             void setRenderPipeline(RenderPipeline *_renderPipeline);
 
             void clearCache();
 
             void createLightAssociations(
-                std::shared_ptr<Transform> root,
-                ObjectPlaces *visibleObjects,
+                Transform *root,
+                SceneTraverseHelper *visibleObjects,
                 int maxLightPerObject);
 
             // output light information after processing...
-            std::vector<std::shared_ptr<Components::ComponentLight> > noShadowlightList; // filled with all near lights
+            std::vector<Components::ComponentLight *> noShadowlightList; // filled with all near lights
             std::vector<ShadowCache *> shadowLightList;                  // can be nullptr...
-            void computeShadowParametersForMesh(std::shared_ptr<Components::ComponentMeshWrapper> meshWrapper,
+            void computeShadowParametersForMesh(Components::ComponentMeshWrapper *meshWrapper,
                                                 bool use_shadow,
                                                 ShaderShadowAlgorithmEnum shaderShadowAlgorithm);
         };
