@@ -102,12 +102,12 @@ namespace AppKit
             camera_sphere = CollisionCore::Sphere<MathCore::vec3f>::fromOBB(camera_frustum.obb);
         }
 
-        void LightAndShadowManager::setSceneRoot(std::shared_ptr<Transform> root)
+        void LightAndShadowManager::setSceneRoot(Transform *root)
         {
             scene_root = root;
         }
 
-        void LightAndShadowManager::setVisibleObjects(ObjectPlaces *_visibleObjects)
+        void LightAndShadowManager::setVisibleObjectsFromSceneTraverse(SceneTraverseHelper *_visibleObjects)
         {
             visibleObjects = _visibleObjects;
         }
@@ -129,26 +129,26 @@ namespace AppKit
         }
 
         void LightAndShadowManager::createLightAssociations(
-            std::shared_ptr<Transform> root,
-            ObjectPlaces *visibleObjects,
+            Transform *root,
+            SceneTraverseHelper *visibleObjects,
             int maxLightPerObject)
         {
             // visibleObjects->sunLights.size()+
             // visibleObjects->pointLights.size()+
             // visibleObjects->spotLights.size();
 
-            sortResult.resize(visibleObjects->sunLights.size());
-            sortTmpBuffer.resize(visibleObjects->sunLights.size());
+            sortResult.resize(visibleObjects->sunLightList.size());
+            sortTmpBuffer.resize(visibleObjects->sunLightList.size());
 
             MathCore::vec3f center;
-            for (size_t i = 0; i < visibleObjects->filteredMeshWrappers.size(); i++)
+            for (size_t i = 0; i < visibleObjects->meshWrapperList.size(); i++)
             {
-                auto meshWrapper = visibleObjects->filteredMeshWrappers[i];
+                auto meshWrapper = visibleObjects->meshWrapperList[i];
                 //...
             }
         }
 
-        void LightAndShadowManager::computeShadowParametersForMesh(std::shared_ptr<Components::ComponentMeshWrapper> meshWrapper,
+        void LightAndShadowManager::computeShadowParametersForMesh(Components::ComponentMeshWrapper *meshWrapper,
                                                                    bool use_shadow,
                                                                    ShaderShadowAlgorithmEnum shaderShadowAlgorithm)
         {
@@ -158,12 +158,12 @@ namespace AppKit
             noShadowlightList.clear();
             shadowLightList.clear();
 
-            MathCore::vec3f center = meshWrapper->getCenter();
+            // MathCore::vec3f center = meshWrapper->getCenter();
 
             // add all sun lights
-            for (size_t j = 0; j < visibleObjects->sunLights.size(); j++)
+            for (size_t j = 0; j < visibleObjects->sunLightList.size(); j++)
             {
-                auto sunLight = visibleObjects->sunLights[j];
+                auto sunLight = visibleObjects->sunLightList[j];
 
                 if (!sunLight->cast_shadow || !use_shadow)
                 {
@@ -171,7 +171,7 @@ namespace AppKit
                     continue;
                 }
 
-                it = shadowCacheDic.find(sunLight.get());
+                it = shadowCacheDic.find(sunLight);
 
                 if (it != shadowCacheDic.end())
                 {
@@ -180,8 +180,8 @@ namespace AppKit
                 }
 
                 ShadowCache *shadowCache = shadowCachePool.create(true);
-                shadowCacheDic[sunLight.get()] = shadowCache;
-                shadowCache->setFromLight(sunLight, scene_sphere, camera_sphere);
+                shadowCacheDic[sunLight] = shadowCache;
+                shadowCache->setFromLight(sunLight->self<Components::ComponentLight>(), scene_sphere, camera_sphere);
 
                 // render the depth map...
                 shadowCache->viewport = iRect(sunShadowResolution, sunShadowResolution);
@@ -220,7 +220,7 @@ namespace AppKit
                 dynamicFBOSun.enable();
                 dynamicFBOSun.setDepthTextureAttachment(&shadowCache->depthTexture);
 
-                auxObjPlaces.filterObjectsOBB(scene_root, shadowCache->obb);
+                auxObjPlaces.filterByOBB(scene_root, shadowCache->obb, FilterFlags_None);
 
                 GLRenderState *state = GLRenderState::Instance();
 
@@ -241,11 +241,8 @@ namespace AppKit
                 glClear(GL_DEPTH_BUFFER_BIT);
 
                 // render the depth buffer
-                for (size_t k = 0; k < auxObjPlaces.filteredMeshWrappers.size(); k++)
-                {
-                    auto meshWrapper = auxObjPlaces.filteredMeshWrappers[k];
-                    renderPipeline->traverse_depth_render(meshWrapper->getTransform(), shadowCache);
-                }
+                for(auto &transform: auxObjPlaces.transformList)
+                    renderPipeline->traverse_depth_render(transform, shadowCache);
 
                 state->ColorWrite = ColorWriteAll;
                 state->Viewport = old_viewport;

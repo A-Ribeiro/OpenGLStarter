@@ -27,7 +27,7 @@
 
 #include <appkit-gl-engine/Components/deprecated/ComponentColorLine.h>
 
-#include <appkit-gl-engine/Renderer/ObjectPlaces.h>
+#include <appkit-gl-engine/Renderer/SceneTraverseHelper.h>
 
 #include <appkit-gl-engine/Renderer/LightAndShadowManager.h>
 
@@ -64,19 +64,12 @@ namespace AppKit
 
             std::vector<uint32_t> sunIndex;
             std::vector<MathCore::vec3f> sunVertex;
-
-            ObjectPlaces objectPlaces;
-
-            // std::vector<Components::ComponentColorLine *> debugLines;
-
+            // ObjectPlaces objectPlaces;
             DepthRenderer *depthRenderer;
-
-            // std::vector<Components::ComponentParticleSystem *> sceneParticleSystem;
             ParticleSystemRenderer particleSystemRenderer;
-
-            // std::vector<Components::ComponentLight *> sceneSunLights;
-            // MathCore::vec4f ambientLightColor;
             MathCore::vec3f ambientLightColorVec3;
+
+            SceneTraverseHelper sceneTraverseHelper;
 
             // supported shaders in this Render Pipeline
         public:
@@ -93,10 +86,6 @@ namespace AppKit
 
             // PBR single pass frankenshader
             FrankenShaderManager frankenShaderManager;
-
-            // search lights and particle systems
-            // bool traverse_search_elements(Transform *element, void* userData);
-            // void SearchSpecialObjects(Transform *root);
 
             void allMeshRender(Transform *element, const DefaultEngineShader *shader) const;
             void allMeshRender_Range(Transform *element, const DefaultEngineShader *shader, int start_index, int end_index) const;
@@ -120,12 +109,10 @@ namespace AppKit
                 const MathCore::mat4f *mvIT,
                 const MathCore::mat4f *mvInv);
 
-            // bool traverse_multipass_render(Transform *element, void *userData);
-
-            bool traverse_singlepass_render(std::shared_ptr<Transform> element, void *userData);
+            void traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera);
 
         public:
-            bool traverse_depth_render(std::shared_ptr<Transform> element, void *userData);
+            void traverse_depth_render(Transform *element, Components::ComponentCamera *camera);
 
         public:
             // public skybox setup variables...
@@ -151,11 +138,9 @@ namespace AppKit
 
             ~RenderPipeline();
 
-            // void runMultiPassPipeline(Transform *root, Components::ComponentCamera *camera, bool clear = true);
-
             void runSinglePassPipeline(std::shared_ptr<Transform> root, std::shared_ptr<Components::ComponentCamera> camera, bool clear = true);
 
-            void renderDepth(std::shared_ptr<Transform> root, std::shared_ptr<Components::ComponentCamera> camera);
+            void renderDepth(Transform  *root, Components::ComponentCamera *camera);
         };
 
     }
