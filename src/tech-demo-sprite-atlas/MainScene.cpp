@@ -4,6 +4,7 @@
 #include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
 #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
 // #include <InteractiveToolkit/EaseCore/EaseCore.h>
+#include "components/ComponentGrow.h"
 
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
@@ -16,7 +17,6 @@ void MainScene::loadResources()
 {
     // auto engine = AppKit::GLEngine::Engine::Instance();
     spriteShader = std::make_shared<SpriteShader>(resourceMap);
-
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -24,11 +24,9 @@ void MainScene::loadGraph()
     root = Transform::CreateShared();
     root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
-    root->addChild(Transform::CreateShared())->Name = "Smoke";
+    // root->addChild(Transform::CreateShared())->Name = "Smoke";
 
     root->addChild(Transform::CreateShared())->Name = "bg";
-
-
 }
 
 // to bind the resources to the current graph
@@ -38,30 +36,33 @@ void MainScene::bindResourcesToGraph()
 
     GLRenderState *renderState = GLRenderState::Instance();
 
-    spriteNode = root->findTransformByName("Smoke");
+    spriteNode = Transform::CreateShared("smoke");
+    spriteNode->setLocalScale(MathCore::vec3f(0));
     componentSprite = spriteNode->addNewComponent<ComponentSprite>();
-    componentSprite->setSpriteShader(spriteShader);
     componentSprite->setTexture(
+        resourceMap, spriteShader,
         resourceMap->getTexture("resources/smoke.png", engine->sRGBCapable),
-        MathCore::vec2f(0.5f, 0.5f), // pivot
+        MathCore::vec2f(0.5f, 0.5f),             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
-        MathCore::vec2f(-1, -1), // size constraint
-        true // static mesh
+        MathCore::vec2f(-1, 256),                // size constraint
+        false                                     // static mesh
     );
+    componentSprite->mesh->always_clone = true;
+
     // componentSprite->meshWrapper->debugCollisionShapes = true;
-    spriteNode->skip_traversing = true;
+    // spriteNode->skip_traversing = true;
     // componentSprite->material->custom_shader_property_bag.getProperty("UseDiscard").set(true);
 
     bgNode = root->findTransformByName("bg");
     bgNode->setLocalPosition(MathCore::vec3f(0, 0, 10));
     bgComponentSprite = bgNode->addNewComponent<ComponentSprite>();
-    bgComponentSprite->setSpriteShader(spriteShader);
     bgComponentSprite->setTexture(
+        resourceMap, spriteShader,
         resourceMap->getTexture("resources/Skyboxes/SanFrancisco4/posy.jpg", engine->sRGBCapable),
-        MathCore::vec2f(0.5f, 0.5f), // pivot
+        MathCore::vec2f(0.5f, 0.5f),             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
-        MathCore::vec2f(-1, 1024), // size constraint
-        true // static mesh
+        MathCore::vec2f(-1, 1024),               // size constraint
+        true                                     // static mesh
     );
 
     // setup renderstate
@@ -82,11 +83,8 @@ void MainScene::bindResourcesToGraph()
                                                    {
         if (evt.type == AppKit::Window::KeyboardEventType::KeyPressed &&
             evt.code == AppKit::Window::Devices::KeyCode::Space){
-            //
-            spriteNode->setLocalScale(MathCore::vec3f(0));
-            spriteNode->skip_traversing = false;
-
-
+            auto new_element = root->addChild(spriteNode->clone(false));
+            new_element->addNewComponent<ComponentGrow>();
         } });
 
     renderWindow->OnUpdate.add(&MainScene::update, this);
@@ -99,7 +97,7 @@ void MainScene::unloadAll()
 
     root = nullptr;
     camera = nullptr;
-    
+
     spriteShader = nullptr;
 
     componentSprite = nullptr;
@@ -113,21 +111,22 @@ void MainScene::update(Platform::Time *elapsed)
 {
     camera->getTransform()->setLocalRotation(
         camera->getTransform()->getLocalRotation() *
-        MathCore::GEN<MathCore::quatf>::fromAxisAngle(MathCore::vec3f(0, 0, 1), elapsed->deltaTime * 0.5f)
-    );
+        MathCore::GEN<MathCore::quatf>::fromAxisAngle(MathCore::vec3f(0, 0, 1), elapsed->deltaTime * 0.5f));
 
-    if (spriteNode->getLocalScale().x >= 1.0f)
-        spriteNode->skip_traversing = true;
-    else {
+    randomNext -= elapsed->deltaTime;
 
-        if (!spriteNode->skip_traversing){
-            spriteNode->setLocalScale(
-                MathCore::OP<MathCore::vec3f>::move(
-                    spriteNode->getLocalScale(),
-                    MathCore::vec3f(1.0f, 1.0f, 1.0f),
-                    elapsed->deltaTime * 5.0f
-                )
-            );
+    if (randomNext <= 0.0f)
+    {
+        randomNext = mathRandom.nextRange(0.1f, 0.3f);
+
+        for (int i = 0; i < random32.getRange<int>(10, 50); i++)
+        {
+            auto new_element = root->addChild(spriteNode->clone(false));
+            new_element->setLocalPosition(MathCore::vec3f(
+                mathRandom.nextRange(-512.0f, 512.0f),
+                mathRandom.nextRange(-512.0f, 512.0f),
+                0));
+            new_element->addNewComponent<ComponentGrow>();
         }
     }
 }
@@ -156,7 +155,9 @@ MainScene::MainScene(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
-    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
+                                                                          random32(ITKCommon::RandomDefinition<uint32_t>::randomSeed()),
+                                                                          mathRandom(&random32)
 {
     this->app = app;
 
@@ -167,6 +168,8 @@ MainScene::MainScene(
 
     bgComponentSprite = nullptr;
     bgNode = nullptr;
+
+    randomNext = 0.0f;
 }
 
 MainScene::~MainScene()

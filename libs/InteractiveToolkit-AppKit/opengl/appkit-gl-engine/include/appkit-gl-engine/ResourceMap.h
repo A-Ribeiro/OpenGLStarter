@@ -76,6 +76,8 @@ namespace AppKit
             std::shared_ptr<AppKit::OpenGL::GLTexture> defaultNormalTexture;
             std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial;
 
+            std::unordered_map<uint64_t, std::shared_ptr<Components::ComponentMaterial>> spriteMaterialMap;
+
         };
     }
 }
