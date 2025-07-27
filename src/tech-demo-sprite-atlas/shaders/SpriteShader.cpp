@@ -15,27 +15,31 @@ namespace AppKit
         SpriteShader::SpriteShader(ResourceMap *resourceMap)
         {
             this->resourceMap = resourceMap;
-            format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0;
+            format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
 
             const char vertexShaderCode[] = {
                 SHADER_HEADER_120
                 "attribute vec4 aPosition;"
                 "attribute vec3 aUV0;"
+                "attribute vec4 aColor0;"
                 "uniform mat4 uMVP;"
                 "varying vec2 uv;"
+                "varying vec4 color;"
                 "void main() {"
                 "  uv = aUV0.xy;"
+                "  color = aColor0;"
                 "  gl_Position = uMVP * aPosition;"
                 "}"};
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
                 "varying vec2 uv;"
+                "varying vec4 color;"
                 "uniform vec4 uColor;"
                 "uniform sampler2D uTexture;"
                 "void main() {"
                 "  vec4 texel = texture2D(uTexture, uv);"
-                "  vec4 result = texel * uColor;"
+                "  vec4 result = texel * color * uColor;"
                 "  if (result.a <= 0.0) {"
                 "    discard;"
                 "  }"
@@ -118,7 +122,8 @@ namespace AppKit
 
             if (texture_activated == nullptr){
                 bool srgb = GLEngine::Engine::Instance()->sRGBCapable;
-                texture_activated = this->resourceMap->getTexture("DEFAULT_ALBEDO",srgb);
+                //texture_activated = this->resourceMap->getTexture("DEFAULT_ALBEDO",srgb);
+                texture_activated = this->resourceMap->defaultAlbedoTexture;
             }
 
             texture_activated->active(0);

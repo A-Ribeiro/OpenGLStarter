@@ -42,10 +42,11 @@ namespace AppKit
             Transform(const Transform &v) = delete;
             Transform &operator=(const Transform &v) = delete;
 
-            static inline std::shared_ptr<Transform> CreateShared()
+            static inline std::shared_ptr<Transform> CreateShared(const std::string &name = "")
             {
                 auto result = std::make_shared<Transform>();
                 result->mSelf = std::weak_ptr<Transform>(result);
+                result->Name = name;
                 return result;
             }
 

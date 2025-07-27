@@ -22,6 +22,8 @@ namespace AppKit
         {
             std::vector<std::string> to_remove;
 
+            spriteMaterialMap.clear();
+
             for (auto &item : texture2DMap)
             {
                 if (item.second.tex.use_count() > 1 ||
@@ -41,13 +43,15 @@ namespace AppKit
                 to_remove.push_back(item.first);
             }
             for(const auto &key : to_remove)
-                cubemapMap.erase(key);
+                cubemapMap.erase(key);            
         }
 
         void ResourceMap::clear()
         {
+            spriteMaterialMap.clear();
             texture2DMap.clear();
             cubemapMap.clear();
+            
             defaultAlbedoTexture = nullptr;
             defaultNormalTexture = nullptr;
             defaultPBRMaterial = nullptr;

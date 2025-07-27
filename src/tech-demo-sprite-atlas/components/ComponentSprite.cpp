@@ -11,32 +11,47 @@ namespace AppKit
         {
             const ComponentType ComponentSprite::Type = "ComponentSprite";
 
-            void ComponentSprite::checkOrCreateAuxiliaryComponents()
+            void ComponentSprite::checkOrCreateAuxiliaryComponents(
+                AppKit::GLEngine::ResourceMap *resourceMap,
+                std::shared_ptr<SpriteShader> spriteShader,
+                std::shared_ptr<AppKit::OpenGL::GLTexture> texture)
             {
                 if (material != nullptr || mesh != nullptr || meshWrapper != nullptr)
                     return;
                 auto transform = getTransform();
-                if (material == nullptr)
+
+                uint64_t spriteMaterialId = (uint64_t)texture.get();
+
+                if (resourceMap->spriteMaterialMap.find(spriteMaterialId) != resourceMap->spriteMaterialMap.end())
+                {
+                    material = resourceMap->spriteMaterialMap[spriteMaterialId];
+                }
+                else
                 {
                     material = transform->addNewComponent<ComponentMaterial>();
-                    material->type = MaterialNone;
-                    // material->unlit.tex = directTexture.texture;
-                    // material->unlit.color = directTexture.color;
+                    material->type = AppKit::GLEngine::Components::MaterialCustomShader;
+                    material->custom_shader = spriteShader;
+                    material->custom_shader_property_bag = spriteShader->createDefaultBag();
+                    material->custom_shader_property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)texture);
+                    resourceMap->spriteMaterialMap[spriteMaterialId] = material;
                 }
+
                 if (mesh == nullptr)
                 {
                     mesh = transform->addNewComponent<ComponentMesh>();
-                    mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0;
+                    mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
                 }
                 if (meshWrapper == nullptr)
                 {
                     meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
                     transform->makeFirstComponent(meshWrapper);
-                    //meshWrapper->updateMeshAABB();
+                    // meshWrapper->updateMeshAABB();
                 }
             }
 
             void ComponentSprite::setTexture(
+                AppKit::GLEngine::ResourceMap *resourceMap,
+                std::shared_ptr<SpriteShader> spriteShader,
                 std::shared_ptr<AppKit::OpenGL::GLTexture> texture,
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
@@ -47,13 +62,13 @@ namespace AppKit
                 directTexture.pivot = pivot;
                 directTexture.color = color;
                 type = SpriteSourceDirectTexture;
-                checkOrCreateAuxiliaryComponents();
+                checkOrCreateAuxiliaryComponents(resourceMap, spriteShader, texture);
 
                 MathCore::vec3f size((float)texture->width, (float)texture->height, 0.0f);
                 if (size_constraint.x > 0.0f && size_constraint.y > 0.0f)
                     size = MathCore::vec3f(size_constraint.x, size_constraint.y, 0.0f);
                 else if (size_constraint.x > 0.0f)
-                    size = MathCore::vec3f(size_constraint.x, (size.y * size_constraint.x) / size.x , 0.0f);
+                    size = MathCore::vec3f(size_constraint.x, (size.y * size_constraint.x) / size.x, 0.0f);
                 else if (size_constraint.y > 0.0f)
                     size = MathCore::vec3f((size.x * size_constraint.y) / size.y, size_constraint.y, 0.0f);
 
@@ -64,16 +79,22 @@ namespace AppKit
                 float ymax = 1.0f - pivot.y;
 
                 mesh->pos.clear();
-                mesh->pos.push_back(size * MathCore::vec3f(xmax,ymax, 0.0f));
-                mesh->pos.push_back(size * MathCore::vec3f(xmax,ymin, 0.0f));
-                mesh->pos.push_back(size * MathCore::vec3f(xmin,ymin, 0.0f));
-                mesh->pos.push_back(size * MathCore::vec3f(xmin,ymax, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(xmax, ymax, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(xmax, ymin, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(xmin, ymin, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(xmin, ymax, 0.0f));
 
                 mesh->uv[0].clear();
                 mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(1.0f, 0.0f), 0));
                 mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(1.0f, 1.0f), 0));
                 mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(0.0f, 1.0f), 0));
                 mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(0.0f, 0.0f), 0));
+
+                mesh->color[0].clear();
+                mesh->color[0].push_back(color);
+                mesh->color[0].push_back(color);
+                mesh->color[0].push_back(color);
+                mesh->color[0].push_back(color);
 
                 // mesh->normals.clear();
                 // mesh->normals.push_back(MathCore::vec3f(0.0f, 1.0f, 0.0f));
@@ -107,16 +128,10 @@ namespace AppKit
                 else
                     mesh->syncVBO(0xffffffff, 0);
 
-                material->custom_shader_property_bag.getProperty("uTexture").set(
-                    (std::shared_ptr<AppKit::OpenGL::VirtualTexture>)texture
-                );
-                material->custom_shader_property_bag.getProperty("uColor").set(color);
-
-                meshWrapper->setShapeAABB( CollisionCore::AABB<MathCore::vec3f>(
-                    mesh->pos[0],
-                    mesh->pos[2]
-                ), true);
-
+                meshWrapper->setShapeAABB(CollisionCore::AABB<MathCore::vec3f>(
+                                              mesh->pos[0],
+                                              mesh->pos[2]),
+                                          true);
             }
 
             void ComponentSprite::setTextureFromAtlas(
@@ -126,7 +141,7 @@ namespace AppKit
                 const MathCore::vec4f &color,
                 bool staticMesh)
             {
-                checkOrCreateAuxiliaryComponents();
+                // checkOrCreateAuxiliaryComponents();
             }
 
             void ComponentSprite::setTextureFromAtlas(
@@ -136,26 +151,8 @@ namespace AppKit
                 const MathCore::vec4f &color,
                 bool staticMesh)
             {
-                checkOrCreateAuxiliaryComponents();
+                // checkOrCreateAuxiliaryComponents();
             }
-
-            void ComponentSprite::setSpriteShader(std::shared_ptr<SpriteShader> spriteShader) 
-            {
-                checkOrCreateAuxiliaryComponents();
-                
-                this->spriteShader = spriteShader;
-                if (spriteShader == nullptr)
-                {
-                    material->type = AppKit::GLEngine::Components::MaterialNone;
-                    return;
-                }
-
-                material->type = AppKit::GLEngine::Components::MaterialCustomShader;
-                material->custom_shader = spriteShader;
-                material->custom_shader_property_bag = spriteShader->createDefaultBag();
-
-            }
-
 
             ComponentSprite::ComponentSprite() : Component(ComponentSprite::Type)
             {

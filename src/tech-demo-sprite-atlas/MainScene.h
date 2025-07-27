@@ -57,6 +57,11 @@ public:
     std::shared_ptr<AppKit::GLEngine::Components::ComponentSprite> bgComponentSprite;
     std::shared_ptr<AppKit::GLEngine::Transform> bgNode;
     
+
+    float randomNext;
+    ITKCommon::Random32 random32;
+    MathCore::MathRandomExt<ITKCommon::Random32> mathRandom;
+
     MainScene(
         App *app,
         Platform::Time *_time,
