@@ -36,6 +36,13 @@ namespace AppKit
                 SpriteSourceAtlas,
             };
 
+            enum MeshUploadMode
+            {
+                MeshUploadMode_Direct,
+                MeshUploadMode_Dynamic,
+                MeshUploadMode_Static,
+            };
+
             class DirectTextureSetup
             {
             public:
@@ -91,7 +98,7 @@ namespace AppKit
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
                     const MathCore::vec2f &size_constraint = MathCore::vec2f(-1, -1),
-                    bool staticMesh = false
+                    MeshUploadMode meshUploadMode = MeshUploadMode_Direct
                 );
 
                 void setTextureFromAtlas(

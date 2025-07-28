@@ -37,12 +37,23 @@ namespace AppKit
         private:
             // bool mStartCalled;
         protected:
+
+            struct Entry {
+                std::weak_ptr<Transform> weak_ptr;
+                Transform* ptr;
+            };
+
             // all subclasses need to provide a const char* ref in the constructor
             ComponentType type_const_ref;
             Component(ComponentType type);
 
             std::weak_ptr<Component> mSelf;
-            std::vector<std::weak_ptr<Transform>> mTransform;
+            std::vector<Entry> mTransform;
+
+            bool start_registered;
+
+            void registerStart();
+            void unregisterStart();
 
         public:
 
@@ -54,7 +65,7 @@ namespace AppKit
             {
                 if (i >= (int)mTransform.size())
                     return nullptr;
-                return ToShared(mTransform[i]);
+                return ToShared(mTransform[i].weak_ptr);
             }
             int getTransformCount() const
             {

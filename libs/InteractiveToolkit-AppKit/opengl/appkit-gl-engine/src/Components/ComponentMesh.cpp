@@ -48,9 +48,12 @@ namespace AppKit
                 last_model_dynamic_upload = model_dynamic_upload;
                 last_model_static_upload = model_static_upload;
 
+                // printf("uploadVBO getTransformCount(): %i\n", getTransformCount());
                 for (int i = 0; i < getTransformCount(); i++)
                 {
                     auto transform = getTransform(i);
+                    // if (transform == nullptr)
+                    //     continue;
 
                     auto meshWrapper = transform->findComponent<Components::ComponentMeshWrapper>();
                     if (meshWrapper != nullptr)

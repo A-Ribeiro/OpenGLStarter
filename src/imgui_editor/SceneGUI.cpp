@@ -25,6 +25,7 @@ void SceneGUI::loadResources(){
 //to load the scene graph
 void SceneGUI::loadGraph(){
     root = Transform::CreateShared();
+    root->affectComponentStart = true;
     root->setRenderWindowRegion(this->renderWindow);
 
     auto t = root->addChild( Transform::CreateShared() );

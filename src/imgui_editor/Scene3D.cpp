@@ -35,6 +35,7 @@ void Scene3D::loadResources()
 void Scene3D::loadGraph()
 {
     root = Transform::CreateShared();
+    root->affectComponentStart = true;
     root->setRenderWindowRegion(this->renderWindow);
     root->setName("realRoot");
 }

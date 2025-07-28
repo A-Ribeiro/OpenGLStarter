@@ -22,6 +22,8 @@ void MainScene::loadResources()
 void MainScene::loadGraph()
 {
     root = Transform::CreateShared();
+    root->affectComponentStart = true;
+
     root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
     // root->addChild(Transform::CreateShared())->Name = "Smoke";
@@ -45,8 +47,10 @@ void MainScene::bindResourcesToGraph()
         MathCore::vec2f(0.5f, 0.5f),             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
         MathCore::vec2f(-1, 256),                // size constraint
-        false                                     // static mesh
+        MeshUploadMode_Direct                    // static mesh
     );
+    spriteNode->addNewComponent<ComponentGrow>()->app = app;
+
     componentSprite->mesh->always_clone = true;
 
     // componentSprite->meshWrapper->debugCollisionShapes = true;
@@ -62,7 +66,7 @@ void MainScene::bindResourcesToGraph()
         MathCore::vec2f(0.5f, 0.5f),             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
         MathCore::vec2f(-1, 1024),               // size constraint
-        true                                     // static mesh
+        MeshUploadMode_Static                    // static mesh
     );
 
     // setup renderstate
@@ -84,7 +88,7 @@ void MainScene::bindResourcesToGraph()
         if (evt.type == AppKit::Window::KeyboardEventType::KeyPressed &&
             evt.code == AppKit::Window::Devices::KeyCode::Space){
             auto new_element = root->addChild(spriteNode->clone(false));
-            new_element->addNewComponent<ComponentGrow>();
+            // new_element->addNewComponent<ComponentGrow>();
         } });
 
     renderWindow->OnUpdate.add(&MainScene::update, this);
@@ -126,7 +130,7 @@ void MainScene::update(Platform::Time *elapsed)
                 mathRandom.nextRange(-512.0f, 512.0f),
                 mathRandom.nextRange(-512.0f, 512.0f),
                 0));
-            new_element->addNewComponent<ComponentGrow>();
+            // new_element->addNewComponent<ComponentGrow>();
         }
     }
 }

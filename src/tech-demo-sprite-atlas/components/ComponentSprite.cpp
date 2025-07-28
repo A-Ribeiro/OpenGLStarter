@@ -56,7 +56,7 @@ namespace AppKit
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
                 const MathCore::vec2f &size_constraint,
-                bool staticMesh)
+                MeshUploadMode meshUploadMode)
             {
                 directTexture.texture = texture;
                 directTexture.pivot = pivot;
@@ -123,9 +123,9 @@ namespace AppKit
                 mesh->indices.push_back(3);
                 mesh->indices.push_back(2);
 
-                if (staticMesh)
+                if (meshUploadMode == MeshUploadMode_Static)
                     mesh->syncVBO(0, 0xffffffff);
-                else
+                else if (meshUploadMode == MeshUploadMode_Dynamic)
                     mesh->syncVBO(0xffffffff, 0);
 
                 meshWrapper->setShapeAABB(CollisionCore::AABB<MathCore::vec3f>(

@@ -26,6 +26,7 @@ void SceneSplash::loadResources()
 void SceneSplash::loadGraph()
 {
     root = Transform::CreateShared();
+    root->affectComponentStart = true;
 
     auto t = root->addChild(Transform::CreateShared());
     t->Name = "Main Camera";

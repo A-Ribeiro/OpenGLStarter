@@ -86,6 +86,7 @@ void SceneJesusCross::loadResources() {
 //to load the scene graph
 void SceneJesusCross::loadGraph() {
     root = loadSceneroot();
+    root->affectComponentStart = true;
 }
 
 //to bind the resources to the current graph

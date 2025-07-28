@@ -25,6 +25,7 @@ void MainScene::loadResources()
 void MainScene::loadGraph()
 {
     root = Transform::CreateShared();
+    root->affectComponentStart = true;
     root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
     deprecated_lines_transform = root->addChild(Transform::CreateShared());
