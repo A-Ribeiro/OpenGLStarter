@@ -114,7 +114,9 @@ namespace AppKit
                                 //Components::ComponentMaterial *material;
                                 auto material = result->addNewComponent<Components::ComponentMaterial>();
 
-                                material->type = Components::MaterialPBR;
+                                printf("needs check here for the material [%s:%d] \n", __FILE__, __LINE__);
+                                exit(-1);
+                                //material->type = Components::MaterialPBR;
 
                                 std::unordered_map<std::string, MathCore::vec4f>::const_iterator it = mat->vec4Value.find("diffuse");
                                 if (it != mat->vec4Value.end())

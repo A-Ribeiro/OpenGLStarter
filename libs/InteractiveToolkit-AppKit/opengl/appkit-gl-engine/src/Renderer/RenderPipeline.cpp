@@ -12,358 +12,392 @@ namespace AppKit
     namespace GLEngine
     {
 
-        void RenderPipeline::allMeshRender(Transform *element, const DefaultEngineShader *shader) const
-        {
-            for (int i = 0; i < element->getComponentCount(); i++)
-            {
-                auto component = element->getComponentAt(i);
-                if (component->compareType(Components::ComponentMesh::Type))
-                {
-                    auto mesh = std::dynamic_pointer_cast<Components::ComponentMesh>(component);
-                    mesh->setLayoutPointers(shader);
-                    mesh->draw();
-                    mesh->unsetLayoutPointers(shader);
-                }
-            }
-        }
+        // void RenderPipeline::allMeshRender(Transform *element, const DefaultEngineShader *shader) const
+        // {
+        //     for (int i = 0; i < element->getComponentCount(); i++)
+        //     {
+        //         auto component = element->getComponentAt(i);
+        //         if (component->compareType(Components::ComponentMesh::Type))
+        //         {
+        //             auto mesh = (Components::ComponentMesh *)component.get();
+        //             mesh->setLayoutPointers(shader);
+        //             mesh->draw();
+        //             mesh->unsetLayoutPointers(shader);
+        //         }
+        //     }
+        // }
 
-        void RenderPipeline::allMeshRender_Range(Transform *element, const DefaultEngineShader *shader, int start_index, int end_index) const
-        {
-            for (int i = start_index; i < end_index; i++)
-            {
-                auto component = element->getComponentAt(i);
-                if (component->compareType(Components::ComponentMesh::Type))
-                {
-                    auto mesh = std::dynamic_pointer_cast<Components::ComponentMesh>(component);
-                    mesh->setLayoutPointers(shader);
-                    mesh->draw();
-                    mesh->unsetLayoutPointers(shader);
-                }
-            }
-        }
+        // void RenderPipeline::allMeshRender_Range(Transform *element, const DefaultEngineShader *shader, int start_index, int end_index) const
+        // {
+        //     for (int i = start_index; i < end_index; i++)
+        //     {
+        //         auto component = element->getComponentAt(i);
+        //         if (component->compareType(Components::ComponentMesh::Type))
+        //         {
+        //             auto mesh = (Components::ComponentMesh *)component.get();
+        //             mesh->setLayoutPointers(shader);
+        //             mesh->draw();
+        //             mesh->unsetLayoutPointers(shader);
+        //         }
+        //     }
+        // }
 
-        void RenderPipeline::materialSetupAndRender(
-            Components::ComponentMaterial *material,
-            Transform *element,
-            Components::ComponentCamera *camera,
-            int start_index, int end_index,
-            const MathCore::mat4f *mvp,
-            const MathCore::mat4f *mv,
-            const MathCore::mat4f *mvIT,
-            const MathCore::mat4f *mvInv)
-        {
+        // void RenderPipeline::materialSetupAndRender(
+        //     Components::ComponentMaterial *material,
+        //     Transform *element,
+        //     Components::ComponentCamera *camera,
+        //     int start_index, int end_index,
+        //     const MathCore::mat4f *mvp,
+        //     const MathCore::mat4f *mv,
+        //     const MathCore::mat4f *mvIT,
+        //     const MathCore::mat4f *mvInv)
+        // {
+        //     GLRenderState *state = GLRenderState::Instance();
 
-            GLRenderState *state = GLRenderState::Instance();
+        //     // ShaderAlgorithmsBitMask frankenFormat;
+        //     // FrankenShader *frankenShader;
+        //     // bool use_sRGBConvertion = !AppKit::GLEngine::Engine::Instance()->sRGBCapable;
+        //     // int sunCount;
+        //     // int sunShadowCount;
+        //     // // int sunCount;
+        //     // switch (material->type)
+        //     // {
+        //     // case Components::MaterialUnlit:
+        //     //     state->BlendMode = material->unlit.blendMode;
+        //     //     state->CurrentShader = &unlitShader;
 
-            ShaderAlgorithmsBitMask frankenFormat;
-            FrankenShader *frankenShader;
-            bool use_sRGBConvertion = !AppKit::GLEngine::Engine::Instance()->sRGBCapable;
-            int sunCount;
-            int sunShadowCount;
-            // int sunCount;
-            switch (material->type)
-            {
-            case Components::MaterialUnlit:
-                state->BlendMode = material->unlit.blendMode;
-                state->CurrentShader = &unlitShader;
+        //     //     unlitShader.setColor(material->unlit.color);
+        //     //     unlitShader.setMVP(*mvp);
 
-                unlitShader.setColor(material->unlit.color);
-                unlitShader.setMVP(*mvp);
+        //     //     allMeshRender_Range(element, &unlitShader, start_index, end_index);
+        //     //     break;
 
-                allMeshRender_Range(element, &unlitShader, start_index, end_index);
-                break;
+        //     // case Components::MaterialUnlitVertexColor:
+        //     //     state->BlendMode = material->unlit.blendMode;
+        //     //     state->CurrentShader = &unlit_vertcolor_Shader;
 
-            case Components::MaterialUnlitVertexColor:
-                state->BlendMode = material->unlit.blendMode;
-                state->CurrentShader = &unlit_vertcolor_Shader;
+        //     //     unlit_vertcolor_Shader.setColor(material->unlit.color);
+        //     //     unlit_vertcolor_Shader.setMVP(*mvp);
 
-                unlit_vertcolor_Shader.setColor(material->unlit.color);
-                unlit_vertcolor_Shader.setMVP(*mvp);
+        //     //     allMeshRender_Range(element, &unlit_vertcolor_Shader, start_index, end_index);
+        //     //     break;
+        //     //     break;
 
-                allMeshRender_Range(element, &unlit_vertcolor_Shader, start_index, end_index);
-                break;
-                break;
+        //     // case Components::MaterialUnlitTexture:
+        //     //     state->BlendMode = material->unlit.blendMode;
+        //     //     state->CurrentShader = &unlit_tex_Shader;
 
-            case Components::MaterialUnlitTexture:
-                state->BlendMode = material->unlit.blendMode;
-                state->CurrentShader = &unlit_tex_Shader;
+        //     //     unlit_tex_Shader.setColor(material->unlit.color);
+        //     //     unlit_tex_Shader.setTexture(0);
+        //     //     unlit_tex_Shader.setMVP(*mvp);
 
-                unlit_tex_Shader.setColor(material->unlit.color);
-                unlit_tex_Shader.setTexture(0);
-                unlit_tex_Shader.setMVP(*mvp);
+        //     //     material->unlit.tex->active(0);
+        //     //     allMeshRender_Range(element, &unlit_tex_Shader, start_index, end_index);
+        //     //     material->unlit.tex->deactive(0);
 
-                material->unlit.tex->active(0);
-                allMeshRender_Range(element, &unlit_tex_Shader, start_index, end_index);
-                material->unlit.tex->deactive(0);
+        //     //     break;
 
-                break;
+        //     // case Components::MaterialUnlitTextureVertexColorFont:
 
-            case Components::MaterialUnlitTextureVertexColorFont:
+        //     //     state->BlendMode = material->unlit.blendMode;
+        //     //     state->CurrentShader = &unlit_tex_vertcolor_font_Shader;
 
-                state->BlendMode = material->unlit.blendMode;
-                state->CurrentShader = &unlit_tex_vertcolor_font_Shader;
+        //     //     unlit_tex_vertcolor_font_Shader.setColor(material->unlit.color);
+        //     //     unlit_tex_vertcolor_font_Shader.setTexture(0);
+        //     //     unlit_tex_vertcolor_font_Shader.setMVP(*mvp);
 
-                unlit_tex_vertcolor_font_Shader.setColor(material->unlit.color);
-                unlit_tex_vertcolor_font_Shader.setTexture(0);
-                unlit_tex_vertcolor_font_Shader.setMVP(*mvp);
+        //     //     material->unlit.tex->active(0);
+        //     //     allMeshRender_Range(element, &unlit_tex_vertcolor_font_Shader, start_index, end_index);
+        //     //     material->unlit.tex->deactive(0);
 
-                material->unlit.tex->active(0);
-                allMeshRender_Range(element, &unlit_tex_vertcolor_font_Shader, start_index, end_index);
-                material->unlit.tex->deactive(0);
+        //     //     break;
 
-                break;
+        //     //     // PBR setup
+        //     // case Components::MaterialPBR:
 
-                // PBR setup
-            case Components::MaterialPBR:
+        //     //     state->BlendMode = BlendModeDisabled; // material->pbr.blendMode;
+        //     //     state->DepthTest = DepthTestLess;
 
-                state->BlendMode = BlendModeDisabled; // material->pbr.blendMode;
-                state->DepthTest = DepthTestLess;
+        //     //     // sunCount = 0;
 
-                // sunCount = 0;
+        //     //     frankenFormat = 0;
 
-                frankenFormat = 0;
+        //     //     if (material->pbr.texAlbedo != nullptr)
+        //     //         frankenFormat |= ShaderAlgorithms_TextureAlbedo;
+        //     //     if (material->pbr.texSpecular != nullptr)
+        //     //         frankenFormat |= ShaderAlgorithms_TextureSpecular;
+        //     //     if (material->pbr.texNormal != nullptr)
+        //     //         frankenFormat |= ShaderAlgorithms_NormalMap;
+        //     //     if (material->pbr.texEmission != nullptr && material->pbr.emissionColor != MathCore::vec3f(0.0f))
+        //     //         frankenFormat |= ShaderAlgorithms_TextureEmission;
 
-                if (material->pbr.texAlbedo != nullptr)
-                    frankenFormat |= ShaderAlgorithms_TextureAlbedo;
-                if (material->pbr.texSpecular != nullptr)
-                    frankenFormat |= ShaderAlgorithms_TextureSpecular;
-                if (material->pbr.texNormal != nullptr)
-                    frankenFormat |= ShaderAlgorithms_NormalMap;
-                if (material->pbr.texEmission != nullptr && material->pbr.emissionColor != MathCore::vec3f(0.0f))
-                    frankenFormat |= ShaderAlgorithms_TextureEmission;
+        //     //     if (cubeAmbientLight_1x1 != nullptr && ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
+        //     //         frankenFormat |= ShaderAlgorithms_AmbientLightSkybox;
+        //     //     if (sphereAmbientLight != nullptr && ambientLight.lightMode == AmbientLightMode_SphereMapTexture)
+        //     //         frankenFormat |= ShaderAlgorithms_AmbientLightSpheremap;
 
-                if (cubeAmbientLight_1x1 != nullptr && ambientLight.lightMode == AmbientLightMode_SkyBoxCubeTexture)
-                    frankenFormat |= ShaderAlgorithms_AmbientLightSkybox;
-                if (sphereAmbientLight != nullptr && ambientLight.lightMode == AmbientLightMode_SphereMapTexture)
-                    frankenFormat |= ShaderAlgorithms_AmbientLightSpheremap;
+        //     //     else if (ambientLight.lightMode != AmbientLightMode_None)
+        //     //         frankenFormat |= ShaderAlgorithms_AmbientLightColor;
 
-                else if (ambientLight.lightMode != AmbientLightMode_None)
-                    frankenFormat |= ShaderAlgorithms_AmbientLightColor;
+        //     //     // sunCount = sceneSunLights.size();
+        //     //     // sunCount = (int)objectPlaces.sunLights.size();
 
-                // sunCount = sceneSunLights.size();
-                // sunCount = (int)objectPlaces.sunLights.size();
+        //     //     if (use_sRGBConvertion)
+        //     //         frankenFormat |= ShaderAlgorithms_sRGB;
 
-                if (use_sRGBConvertion)
-                    frankenFormat |= ShaderAlgorithms_sRGB;
+        //     //     // mesh skinning bit flag
+        //     //     frankenFormat |= material->skin_shader_matrix_size_bitflag;
 
-                // mesh skinning bit flag
-                frankenFormat |= material->skin_shader_matrix_size_bitflag;
+        //     //     // setup sun light and shadow sun light
+        //     //     sunCount = 0;
+        //     //     // no shadow processing
+        //     //     for (size_t i = 0; i < lightAndShadowManager.noShadowlightList.size(); i++)
+        //     //     {
+        //     //         auto light = lightAndShadowManager.noShadowlightList[i];
+        //     //         switch (light->type)
+        //     //         {
+        //     //         case Components::LightSun:
+        //     //             if (sunCount < 4)
+        //     //                 frankenFormat |= ShaderAlgorithms_SunLight0 << (sunCount++);
+        //     //             break;
+        //     //         default:
+        //     //             break;
+        //     //         }
+        //     //     }
 
-                // setup sun light and shadow sun light
-                sunCount = 0;
-                // no shadow processing
-                for (size_t i = 0; i < lightAndShadowManager.noShadowlightList.size(); i++)
-                {
-                    auto light = lightAndShadowManager.noShadowlightList[i];
-                    switch (light->type)
-                    {
-                    case Components::LightSun:
-                        if (sunCount < 4)
-                            frankenFormat |= ShaderAlgorithms_SunLight0 << (sunCount++);
-                        break;
-                    default:
-                        break;
-                    }
-                }
+        //     //     sunShadowCount = 0;
+        //     //     // shadow processing...
+        //     //     for (size_t i = 0; i < lightAndShadowManager.shadowLightList.size(); i++)
+        //     //     {
+        //     //         ShadowCache *shadow = lightAndShadowManager.shadowLightList[i];
+        //     //         switch (shadow->light->type)
+        //     //         {
+        //     //         case Components::LightSun:
+        //     //             if (sunShadowCount < 4)
+        //     //                 frankenFormat |= ShaderAlgorithms_ShadowSunLight0 << (sunShadowCount++);
+        //     //             break;
+        //     //         default:
+        //     //             break;
+        //     //         }
+        //     //     }
 
-                sunShadowCount = 0;
-                // shadow processing...
-                for (size_t i = 0; i < lightAndShadowManager.shadowLightList.size(); i++)
-                {
-                    ShadowCache *shadow = lightAndShadowManager.shadowLightList[i];
-                    switch (shadow->light->type)
-                    {
-                    case Components::LightSun:
-                        if (sunShadowCount < 4)
-                            frankenFormat |= ShaderAlgorithms_ShadowSunLight0 << (sunShadowCount++);
-                        break;
-                    default:
-                        break;
-                    }
-                }
+        //     //     frankenFormat = FrankenShader::ValidateFormat(frankenFormat);
+        //     //     frankenFormat &= ShaderAlgorithmsEnum_allowedFlags;
 
-                frankenFormat = FrankenShader::ValidateFormat(frankenFormat);
-                frankenFormat &= ShaderAlgorithmsEnum_allowedFlags;
+        //     //     frankenShader = frankenShaderManager.getShader(frankenFormat, shaderPBRAlgorithm, shaderShadowAlgorithm);
 
-                frankenShader = frankenShaderManager.getShader(frankenFormat, shaderPBRAlgorithm, shaderShadowAlgorithm);
+        //     //     frankenShader->frankenUniformManager.activateShader();
 
-                frankenShader->frankenUniformManager.activateShader();
+        //     //     frankenShader->frankenUniformManager.setMVP(mvp);
+        //     //     frankenShader->frankenUniformManager.setNormalTransform(element);
+        //     //     frankenShader->frankenUniformManager.setCameraReference(camera);
+        //     //     frankenShader->frankenUniformManager.setPBRMaterial(material);
+        //     //     frankenShader->frankenUniformManager.setAmbientLightColor(ambientLightColorVec3);
 
-                frankenShader->frankenUniformManager.setMVP(mvp);
-                frankenShader->frankenUniformManager.setNormalTransform(element);
-                frankenShader->frankenUniformManager.setCameraReference(camera);
-                frankenShader->frankenUniformManager.setPBRMaterial(material);
-                frankenShader->frankenUniformManager.setAmbientLightColor(ambientLightColorVec3);
+        //     //     // texture setup... from global scene
+        //     //     frankenShader->frankenUniformManager.setEnvironmentCubeTexture(cubeAmbientLight_1x1.get());
+        //     //     frankenShader->frankenUniformManager.setEnvironmentSphereTexture(sphereAmbientLight.get());
 
-                // texture setup... from global scene
-                frankenShader->frankenUniformManager.setEnvironmentCubeTexture(cubeAmbientLight_1x1.get());
-                frankenShader->frankenUniformManager.setEnvironmentSphereTexture(sphereAmbientLight.get());
+        //     //     // #if defined(PBR_MODE_TEX_LOOKUP)
+        //     //     frankenShader->frankenUniformManager.setPBROptimizationTexture(&frankenShaderManager.pbrOptimizationTexture);
+        //     //     // #endif
 
-                // #if defined(PBR_MODE_TEX_LOOKUP)
-                frankenShader->frankenUniformManager.setPBROptimizationTexture(&frankenShaderManager.pbrOptimizationTexture);
-                // #endif
+        //     //     // light parameters upload
+        //     //     sunCount = 0;
+        //     //     // no shadow processing
+        //     //     for (size_t i = 0; i < lightAndShadowManager.noShadowlightList.size(); i++)
+        //     //     {
+        //     //         auto light = lightAndShadowManager.noShadowlightList[i];
+        //     //         switch (light->type)
+        //     //         {
+        //     //         case Components::LightSun:
+        //     //             if (sunCount < 4)
+        //     //             {
+        //     //                 // frankenShader->sendSunLightConfig(sunCount, light->sun.finalIntensity, light->sun.worldDirection);
+        //     //                 frankenShader->frankenUniformManager.setSunLightConfig(sunCount, light->sun.finalIntensity, light->sun.worldDirection);
+        //     //                 sunCount++;
+        //     //             }
+        //     //             break;
+        //     //         default:
+        //     //             break;
+        //     //         }
+        //     //     }
 
-                // light parameters upload
-                sunCount = 0;
-                // no shadow processing
-                for (size_t i = 0; i < lightAndShadowManager.noShadowlightList.size(); i++)
-                {
-                    auto light = lightAndShadowManager.noShadowlightList[i];
-                    switch (light->type)
-                    {
-                    case Components::LightSun:
-                        if (sunCount < 4)
-                        {
-                            // frankenShader->sendSunLightConfig(sunCount, light->sun.finalIntensity, light->sun.worldDirection);
-                            frankenShader->frankenUniformManager.setSunLightConfig(sunCount, light->sun.finalIntensity, light->sun.worldDirection);
-                            sunCount++;
-                        }
-                        break;
-                    default:
-                        break;
-                    }
-                }
+        //     //     sunShadowCount = 0;
+        //     //     // shadow processing...
+        //     //     for (size_t i = 0; i < lightAndShadowManager.shadowLightList.size(); i++)
+        //     //     {
+        //     //         ShadowCache *shadow = lightAndShadowManager.shadowLightList[i];
+        //     //         switch (shadow->light->type)
+        //     //         {
+        //     //         case Components::LightSun:
+        //     //             if (sunShadowCount < 4)
+        //     //             {
+        //     //                 frankenShader->frankenUniformManager.setShadowSunLightConfig(
+        //     //                     sunShadowCount,
+        //     //                     shadow->light->sun.finalIntensity, shadow->light->sun.worldDirection,
+        //     //                     shadow->obb.dimension_2 * 2.0f, MathCore::vec3f(shadow->light->sun.cone_cos, shadow->light->sun.cone_sin, shadow->light->sun.cone_tangent),
+        //     //                     shadow->viewProjection, &shadow->depthTexture);
+        //     //                 sunShadowCount++;
+        //     //             }
+        //     //             break;
+        //     //         default:
+        //     //             break;
+        //     //         }
+        //     //     }
 
-                sunShadowCount = 0;
-                // shadow processing...
-                for (size_t i = 0; i < lightAndShadowManager.shadowLightList.size(); i++)
-                {
-                    ShadowCache *shadow = lightAndShadowManager.shadowLightList[i];
-                    switch (shadow->light->type)
-                    {
-                    case Components::LightSun:
-                        if (sunShadowCount < 4)
-                        {
-                            frankenShader->frankenUniformManager.setShadowSunLightConfig(
-                                sunShadowCount,
-                                shadow->light->sun.finalIntensity, shadow->light->sun.worldDirection,
-                                shadow->obb.dimension_2 * 2.0f, MathCore::vec3f(shadow->light->sun.cone_cos, shadow->light->sun.cone_sin, shadow->light->sun.cone_tangent),
-                                shadow->viewProjection, &shadow->depthTexture);
-                            sunShadowCount++;
-                        }
-                        break;
-                    default:
-                        break;
-                    }
-                }
+        //     //     frankenShader->frankenUniformManager.activeTexUnit();
 
-                frankenShader->frankenUniformManager.activeTexUnit();
+        //     //     // mesh skinning upload matrix
+        //     //     if (material->skin_shader_matrix_size_bitflag != 0)
+        //     //     {
+        //     //         if (material->skin_gradient_matrix_dirty)
+        //     //         {
+        //     //             material->skin_gradient_matrix_dirty = false;
+        //     //             frankenShader->sendSkinMatrix(material->skin_gradient_matrix);
+        //     //         }
+        //     //     }
 
-                // mesh skinning upload matrix
-                if (material->skin_shader_matrix_size_bitflag != 0)
-                {
-                    if (material->skin_gradient_matrix_dirty)
-                    {
-                        material->skin_gradient_matrix_dirty = false;
-                        frankenShader->sendSkinMatrix(material->skin_gradient_matrix);
-                    }
-                }
+        //     //     allMeshRender_Range(element, frankenShader, start_index, end_index);
 
-                allMeshRender_Range(element, frankenShader, start_index, end_index);
+        //     //     frankenShader->frankenUniformManager.deactiveTexUnit();
 
-                frankenShader->frankenUniformManager.deactiveTexUnit();
+        //     //     break;
+        //     // case Components::MaterialCustomShader:
 
-                break;
-            case Components::MaterialCustomShader:
+        //     //     if (material->shader == nullptr)
+        //     //         break;
 
-                if (material->custom_shader == nullptr)
-                    break;
+        //     //     material->shader->activateShaderAndSetPropertiesFromBag(
+        //     //         camera, mvp,
+        //     //         element, state,
+        //     //         material->property_bag);
+        //     //     allMeshRender_Range(element, material->shader.get(), start_index, end_index);
+        //     //     material->shader->deactivateShader(state);
 
-                material->custom_shader->activateShaderAndSetPropertiesFromBag(
-                    camera, mvp,
-                    element, state,
-                    material->custom_shader_property_bag);
-                allMeshRender_Range(element, material->custom_shader.get(), start_index, end_index);
-                material->custom_shader->deactivateShader(state);
+        //     //     break;
+        //     // default:
+        //     //     break;
+        //     // }
+        // }
 
-                break;
-            default:
-                break;
-            }
-        }
-
-        void RenderPipeline::traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera)
+        void RenderPipeline::traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap)
         {
             if (element->skip_traversing)
                 return;
 
             Components::ComponentMaterial *material = nullptr;
-            int start_index = 0;
-            int end_index = 0;
+            Components::ComponentMesh *mesh = nullptr;
+            // int start_index = 0;
+            // int end_index = 0;
             bool camera_set = false;
+            GLRenderState *state = GLRenderState::Instance();
 
             MathCore::mat4f *mvp;
             MathCore::mat4f *mv;
             MathCore::mat4f *mvIT;
             MathCore::mat4f *mvInv;
 
-            for (int i = 0; i < element->getComponentCount(); i++)
+            for (auto &component : element->getComponents())
             {
-                auto component = element->getComponentAt(i);
                 if (component->compareType(Components::ComponentMaterial::Type))
                 {
-                    end_index = i;
-                    if (material != nullptr && start_index != end_index)
-                    {
-                        // camera matrix computation
-                        if (!camera_set)
-                        {
-                            camera_set = true;
-                            element->computeRenderMatrix(camera->viewProjection,
-                                                         camera->view,
-                                                         camera->viewIT,
-                                                         camera->viewInv,
-                                                         &mvp,
-                                                         &mv,
-                                                         &mvIT,
-                                                         &mvInv);
-                        }
-                        // setup material and render
-                        materialSetupAndRender(
-                            material,
-                            element,
-                            camera,
-                            start_index, end_index,
-                            mvp,
-                            mv,
-                            mvIT,
-                            mvInv);
-                    }
                     material = (Components::ComponentMaterial *)component.get();
-                    start_index = i + 1;
+                    if (material->shader == nullptr) {
+                        material = nullptr;
+                        continue;
+                    }
+                    setCurrentMaterial(material);
+                }
+                else if (material != nullptr && component->compareType(Components::ComponentMesh::Type))
+                {
+                    mesh = (Components::ComponentMesh *)component.get();
+                    setCurrentMesh(mesh);
+                    if (!camera_set)
+                    {
+                        camera_set = true;
+                        element->computeRenderMatrix(camera->viewProjection, camera->view, camera->viewIT, camera->viewInv,
+                                                     &mvp, &mv, &mvIT, &mvInv);
+                    }
+
+                    material->shader->setUniformsFromMatrices(
+                        state, this,
+                        material, element, camera,
+                        mvp, mv, mvIT, mvInv);
+
+                    mesh->draw();
+
+                    break; // Only render the first mesh found in the element
                 }
             }
 
-            end_index = element->getComponentCount();
-            if (material != nullptr && start_index != end_index)
-            {
-                // camera matrix computation
-                if (!camera_set)
-                {
-                    camera_set = true;
-                    element->computeRenderMatrix(camera->viewProjection,
-                                                 camera->view,
-                                                 camera->viewIT,
-                                                 camera->viewInv,
-                                                 &mvp,
-                                                 &mv,
-                                                 &mvIT,
-                                                 &mvInv);
-                }
-                // setup material and render
-                materialSetupAndRender(
-                    material,
-                    element,
-                    camera,
-                    start_index, end_index,
-                    mvp,
-                    mv,
-                    mvIT,
-                    mvInv);
-            }
+            // for (int i = 0; i < element->getComponentCount(); i++)
+            // {
+            //     auto component = element->getComponentAt(i);
+            //     if (component->compareType(Components::ComponentMaterial::Type))
+            //     {
+            //         end_index = i;
+            //         if (material != nullptr && start_index != end_index)
+            //         {
+            //             // camera matrix computation
+            //             if (!camera_set)
+            //             {
+            //                 camera_set = true;
+            //                 element->computeRenderMatrix(camera->viewProjection,
+            //                                              camera->view,
+            //                                              camera->viewIT,
+            //                                              camera->viewInv,
+            //                                              &mvp,
+            //                                              &mv,
+            //                                              &mvIT,
+            //                                              &mvInv);
+            //             }
+            //             // setup material and render
+            //             materialSetupAndRender(
+            //                 material,
+            //                 element,
+            //                 camera,
+            //                 start_index, end_index,
+            //                 mvp,
+            //                 mv,
+            //                 mvIT,
+            //                 mvInv);
+            //         }
+            //         material = (Components::ComponentMaterial *)component.get();
+            //         start_index = i + 1;
+            //     }
+            // }
+
+            // end_index = element->getComponentCount();
+            // if (material != nullptr && start_index != end_index)
+            // {
+            //     // camera matrix computation
+            //     if (!camera_set)
+            //     {
+            //         camera_set = true;
+            //         element->computeRenderMatrix(camera->viewProjection,
+            //                                      camera->view,
+            //                                      camera->viewIT,
+            //                                      camera->viewInv,
+            //                                      &mvp,
+            //                                      &mv,
+            //                                      &mvIT,
+            //                                      &mvInv);
+            //     }
+            //     // setup material and render
+            //     materialSetupAndRender(
+            //         material,
+            //         element,
+            //         camera,
+            //         start_index, end_index,
+            //         mvp,
+            //         mv,
+            //         mvIT,
+            //         mvInv);
+            // }
 
             for (auto &child : element->getChildren())
-                traverse_singlepass_render(child.get(), camera);
+                traverse_singlepass_render(child.get(), camera, resourceMap);
         }
 
         RenderPipeline::RenderPipeline()
@@ -389,6 +423,9 @@ namespace AppKit
                 nullptr,      //&result->tangent,
                 nullptr       //&result->binormal
             );
+
+            currentMaterial = nullptr;
+            currentMesh = nullptr;
         }
 
         RenderPipeline::~RenderPipeline()
@@ -409,12 +446,50 @@ namespace AppKit
             }
         }
 
+        void RenderPipeline::setCurrentMaterial(Components::ComponentMaterial *material)
+        {
+            if (currentMaterial == material)
+                return;
+            currentMaterial = material;
+            if (currentMaterial != nullptr)
+            {
+                currentMaterial->shader->ActiveShader_And_SetUniformsFromMaterial(
+                    GLRenderState::Instance(),
+                    this,
+                    currentMaterial);
+            }
+        }
+        void RenderPipeline::setCurrentMesh(Components::ComponentMesh *mesh)
+        {
+            if (currentMesh == mesh)
+                return;
+            if (currentMesh != nullptr){
+                // if it is the same shader, skip unsetting layout pointers
+                if (mesh == nullptr || currentMaterial == nullptr ||
+                    (currentMaterial != nullptr && (currentMaterial->shader.get() != shaderMeshLastSet)) ||
+                    (mesh != nullptr && (mesh->usesVBO() != currentMesh->usesVBO())) 
+                ) {
+                    currentMesh->unsetLayoutPointers(shaderMeshLastSet);
+                }
+            }
+            if (mesh != nullptr && currentMaterial != nullptr)
+            {
+                currentMesh = mesh;
+                shaderMeshLastSet = currentMaterial->shader.get();
+                currentMesh->setLayoutPointers(shaderMeshLastSet);
+            } else {
+                currentMesh = nullptr;
+                shaderMeshLastSet = nullptr;
+            }
+        }
+
         // bool __compare__particle__system__reverse__(const Components::ComponentParticleSystem *a, const Components::ComponentParticleSystem *b)
         // {
         //     return (b->distance_to_camera < a->distance_to_camera);
         // }
 
         void RenderPipeline::runSinglePassPipeline(
+            ResourceMap *resourceMap,
             std::shared_ptr<Transform> rootp,
             std::shared_ptr<Components::ComponentCamera> camerap,
             bool clear,
@@ -422,6 +497,8 @@ namespace AppKit
         {
             Transform *root = rootp.get();
             Components::ComponentCamera *camera = camerap.get();
+
+            AppKit::GLEngine::GLRenderState *renderstate = AppKit::GLEngine::GLRenderState::Instance();
 
             if (clear)
             {
@@ -514,7 +591,9 @@ namespace AppKit
                 auto z_axis_lh = rotation * MathCore::vec3f(0, 0, 1);
 
                 if (MathCore::OP<MathCore::vec3f>::angleBetween(z_axis_lh, MathCore::vec3f(0, 0, 1)) < MathCore::OP<float>::deg_2_rad(5.0f))
-                    sortingHelper.sort_by_z(sceneTraverseHelper.transformList, SortingMode_Desc);
+                    sortingHelper.sort_by_z(sceneTraverseHelper.transformList, SortingMode_Desc, true);
+                else
+                    sortingHelper.sort_by_direction(sceneTraverseHelper.transformList, z_axis_lh, SortingMode_Desc, true);
             }
             else
             {
@@ -524,77 +603,82 @@ namespace AppKit
             for (auto &sunLight : sceneTraverseHelper.sunLightList)
                 sunLight->postProcessing_computeLightParameters();
 
-            // draw all sphere suns
-            if (perspective && clear && sceneTraverseHelper.sunLightList.size() > 0)
-            {
+            // // draw all sphere suns
+            // if (perspective && clear && sceneTraverseHelper.sunLightList.size() > 0)
+            // {
 
-                AppKit::GLEngine::GLRenderState *renderstate = AppKit::GLEngine::GLRenderState::Instance();
+            //     // AppKit::GLEngine::GLRenderState *renderstate = AppKit::GLEngine::GLRenderState::Instance();
 
-                // AppKit::OpenGL::GLShader* oldShader = renderstate->CurrentShader;
-                AppKit::GLEngine::DepthTestType oldDepthTest = renderstate->DepthTest;
-                bool oldDepthTestEnabled = renderstate->DepthWrite;
-                AppKit::GLEngine::BlendModeType oldBlendMode = renderstate->BlendMode;
+            //     // AppKit::OpenGL::GLShader* oldShader = renderstate->CurrentShader;
+            //     AppKit::GLEngine::DepthTestType oldDepthTest = renderstate->DepthTest;
+            //     bool oldDepthTestEnabled = renderstate->DepthWrite;
+            //     AppKit::GLEngine::BlendModeType oldBlendMode = renderstate->BlendMode;
 
-                renderstate->CurrentShader = &unlitShader;
-                renderstate->DepthTest = AppKit::GLEngine::DepthTestDisabled;
-                renderstate->DepthWrite = false;
-                renderstate->BlendMode = AppKit::GLEngine::BlendModeAlpha;
+            //     renderstate->CurrentShader = &unlitShader;
+            //     renderstate->DepthTest = AppKit::GLEngine::DepthTestDisabled;
+            //     renderstate->DepthWrite = false;
+            //     renderstate->BlendMode = AppKit::GLEngine::BlendModeAlpha;
 
-                int posAttribLocation = unlitShader.queryAttribLocation("aPosition");
+            //     int posAttribLocation = unlitShader.queryAttribLocation("aPosition");
 
-                // direct draw commands
-                OPENGL_CMD(glEnableVertexAttribArray(posAttribLocation));
-                OPENGL_CMD(glVertexAttribPointer(posAttribLocation, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &sunVertex[0]));
+            //     // direct draw commands
+            //     OPENGL_CMD(glEnableVertexAttribArray(posAttribLocation));
+            //     OPENGL_CMD(glVertexAttribPointer(posAttribLocation, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &sunVertex[0]));
 
-                auto perspCamera = (Components::ComponentCameraPerspective *)camera;
+            //     auto perspCamera = (Components::ComponentCameraPerspective *)camera;
 
-                MathCore::mat4f projection = MathCore::GEN<MathCore::mat4f>::projection_perspective_lh_negative_one(
-                    perspCamera->fovDegrees,                                         // fov
-                    (float)perspCamera->viewport.w / (float)perspCamera->viewport.h, // aspect
-                    1.0f,                                                            // near
-                    1000.0f                                                          // far
-                );
+            //     MathCore::mat4f projection = MathCore::GEN<MathCore::mat4f>::projection_perspective_lh_negative_one(
+            //         perspCamera->fovDegrees,                                         // fov
+            //         (float)perspCamera->viewport.w / (float)perspCamera->viewport.h, // aspect
+            //         1.0f,                                                            // near
+            //         1000.0f                                                          // far
+            //     );
 
-                MathCore::mat4f VP = projection * perspCamera->view;
-                for (size_t j = 0; j < sceneTraverseHelper.sunLightList.size(); j++)
-                {
-                    auto sunLight = sceneTraverseHelper.sunLightList[j];
+            //     MathCore::mat4f VP = projection * perspCamera->view;
+            //     for (size_t j = 0; j < sceneTraverseHelper.sunLightList.size(); j++)
+            //     {
+            //         auto sunLight = sceneTraverseHelper.sunLightList[j];
 
-                    if (!sunLight->sun.render_after_skybox)
-                        continue;
-                    auto sunLight_transform = sunLight->getTransform();
+            //         if (!sunLight->sun.render_after_skybox)
+            //             continue;
+            //         auto sunLight_transform = sunLight->getTransform();
 
-                    MathCore::vec3f dir = sunLight_transform->getRotation(true) * MathCore::vec3f(0, 0, -1);
-                    MathCore::vec3f sunPos = dir * sunLight->sun.distance;
-                    MathCore::mat4f model =
-                        MathCore::GEN<MathCore::mat4f>::translateHomogeneous(sunPos) *
-                        MathCore::GEN<MathCore::mat4f>::scaleHomogeneous(sunLight->sun.radius, sunLight->sun.radius, sunLight->sun.radius);
+            //         MathCore::vec3f dir = sunLight_transform->getRotation(true) * MathCore::vec3f(0, 0, -1);
+            //         MathCore::vec3f sunPos = dir * sunLight->sun.distance;
+            //         MathCore::mat4f model =
+            //             MathCore::GEN<MathCore::mat4f>::translateHomogeneous(sunPos) *
+            //             MathCore::GEN<MathCore::mat4f>::scaleHomogeneous(sunLight->sun.radius, sunLight->sun.radius, sunLight->sun.radius);
 
-                    unlitShader.setMVP(VP * model);
-                    unlitShader.setColor(MathCore::CVT<MathCore::vec3f>::toPtn4(sunLight->sun.color));
+            //         unlitShader.setMVP(VP * model);
+            //         unlitShader.setColor(MathCore::CVT<MathCore::vec3f>::toPtn4(sunLight->sun.color));
 
-                    OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)sunIndex.size(), GL_UNSIGNED_INT, &sunIndex[0]));
-                }
+            //         OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)sunIndex.size(), GL_UNSIGNED_INT, &sunIndex[0]));
+            //     }
 
-                // OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, 6));
+            //     // OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, 6));
 
-                OPENGL_CMD(glDisableVertexAttribArray(posAttribLocation));
+            //     OPENGL_CMD(glDisableVertexAttribArray(posAttribLocation));
 
-                // renderstate->CurrentShader = oldShader;
-                renderstate->DepthTest = oldDepthTest;
-                renderstate->DepthWrite = oldDepthTestEnabled;
-                renderstate->BlendMode = oldBlendMode;
-            }
+            //     // renderstate->CurrentShader = oldShader;
+            //     renderstate->DepthTest = oldDepthTest;
+            //     renderstate->DepthWrite = oldDepthTestEnabled;
+            //     renderstate->BlendMode = oldBlendMode;
+            // }
 
             if (perspective)
             {
-                lightAndShadowManager.computeShadowParametersForMesh(nullptr, shaderShadowAlgorithm != ShaderShadowAlgorithm_None, shaderShadowAlgorithm);
+                //setCurrentMaterial(resourceMap->renderOnlyDepthMaterial.get());
+                lightAndShadowManager.computeShadowParametersForMesh(nullptr, shaderShadowAlgorithm != ShaderShadowAlgorithm_None, shaderShadowAlgorithm, resourceMap);
             }
 
             for (auto &transform : sceneTraverseHelper.transformList)
             {
-                traverse_singlepass_render(transform, camera);
+                traverse_singlepass_render(transform, camera, resourceMap);
             }
+
+            setCurrentMesh(nullptr);
+            setCurrentMaterial(nullptr);
+            renderstate->clearTextureUnitActivationArray();
 
             // render debug lines
             // if (objectPlaces.debugLines.size() > 0)
@@ -699,119 +783,165 @@ namespace AppKit
             }
         }
 
-        void RenderPipeline::traverse_depth_render(Transform *element, Components::ComponentCamera *camera)
+        void RenderPipeline::traverse_depth_render_only_mesh(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap)
         {
             if (element->skip_traversing)
                 return;
 
             Components::ComponentMaterial *material = nullptr;
-            int start_index = 0;
-            int end_index = 0;
+            Components::ComponentMesh *mesh = nullptr;
+            // int start_index = 0;
+            // int end_index = 0;
             bool camera_set = false;
+            GLRenderState *state = GLRenderState::Instance();
 
             MathCore::mat4f *mvp;
             MathCore::mat4f *mv;
             MathCore::mat4f *mvIT;
             MathCore::mat4f *mvInv;
 
-            for (int i = 0; i < element->getComponentCount(); i++)
+            for (auto &component : element->getComponents())
             {
-                auto component = element->getComponentAt(i);
                 if (component->compareType(Components::ComponentMaterial::Type))
                 {
-                    end_index = i;
-                    if (material != nullptr && start_index != end_index)
-                    {
-                        // camera matrix computation
-                        if (!camera_set)
-                        {
-                            camera_set = true;
-                            element->computeRenderMatrix(camera->viewProjection,
-                                                         camera->view,
-                                                         camera->viewIT,
-                                                         camera->viewInv,
-                                                         &mvp,
-                                                         &mv,
-                                                         &mvIT,
-                                                         &mvInv);
-
-                            depthShader.setMVP(*mvp);
-                        }
-                        // setup material and render
-                        materialSetupAndRender_depth(
-                            material,
-                            element,
-                            camera,
-                            start_index, end_index,
-                            mvp,
-                            mv,
-                            mvIT,
-                            mvInv);
-                    }
                     material = (Components::ComponentMaterial *)component.get();
-                    start_index = i + 1;
+                    if (material->shader == nullptr) {
+                        material = nullptr;
+                        continue;
+                    }
+                    setCurrentMaterial(resourceMap->renderOnlyDepthMaterial.get());
                 }
-            }
-
-            end_index = element->getComponentCount();
-            if (material != nullptr && start_index != end_index)
-            {
-                // camera matrix computation
-                if (!camera_set)
+                else if (material != nullptr && component->compareType(Components::ComponentMesh::Type))
                 {
-                    camera_set = true;
-                    element->computeRenderMatrix(camera->viewProjection,
-                                                 camera->view,
-                                                 camera->viewIT,
-                                                 camera->viewInv,
-                                                 &mvp,
-                                                 &mv,
-                                                 &mvIT,
-                                                 &mvInv);
+                    mesh = (Components::ComponentMesh *)component.get();
+                    setCurrentMesh(mesh);
+                    if (!camera_set)
+                    {
+                        camera_set = true;
+                        element->computeRenderMatrix(camera->viewProjection, camera->view, camera->viewIT, camera->viewInv,
+                                                     &mvp, &mv, &mvIT, &mvInv);
+                    }
 
-                    depthShader.setMVP(*mvp);
+                    // using the depth material
+                    this->currentMaterial->shader->setUniformsFromMatrices(
+                        state, this,
+                        this->currentMaterial, element, camera,
+                        mvp, mv, mvIT, mvInv);
+
+                    mesh->draw();
+
+                    break; // Only render the first mesh found in the element
                 }
-                // setup material and render
-                materialSetupAndRender_depth(
-                    material,
-                    element,
-                    camera,
-                    start_index, end_index,
-                    mvp,
-                    mv,
-                    mvIT,
-                    mvInv);
             }
+
+            // Components::ComponentMaterial *material = nullptr;
+            // int start_index = 0;
+            // int end_index = 0;
+            // bool camera_set = false;
+
+            // MathCore::mat4f *mvp;
+            // MathCore::mat4f *mv;
+            // MathCore::mat4f *mvIT;
+            // MathCore::mat4f *mvInv;
+
+            // for (int i = 0; i < element->getComponentCount(); i++)
+            // {
+            //     auto component = element->getComponentAt(i);
+            //     if (component->compareType(Components::ComponentMaterial::Type))
+            //     {
+            //         end_index = i;
+            //         if (material != nullptr && start_index != end_index)
+            //         {
+            //             // camera matrix computation
+            //             if (!camera_set)
+            //             {
+            //                 camera_set = true;
+            //                 element->computeRenderMatrix(camera->viewProjection,
+            //                                              camera->view,
+            //                                              camera->viewIT,
+            //                                              camera->viewInv,
+            //                                              &mvp,
+            //                                              &mv,
+            //                                              &mvIT,
+            //                                              &mvInv);
+
+            //                 depthShader.setMVP(*mvp);
+            //             }
+            //             // setup material and render
+            //             materialSetupAndRender_depth(
+            //                 material,
+            //                 element,
+            //                 camera,
+            //                 start_index, end_index,
+            //                 mvp,
+            //                 mv,
+            //                 mvIT,
+            //                 mvInv);
+            //         }
+            //         material = (Components::ComponentMaterial *)component.get();
+            //         start_index = i + 1;
+            //     }
+            // }
+
+            // end_index = element->getComponentCount();
+            // if (material != nullptr && start_index != end_index)
+            // {
+            //     // camera matrix computation
+            //     if (!camera_set)
+            //     {
+            //         camera_set = true;
+            //         element->computeRenderMatrix(camera->viewProjection,
+            //                                      camera->view,
+            //                                      camera->viewIT,
+            //                                      camera->viewInv,
+            //                                      &mvp,
+            //                                      &mv,
+            //                                      &mvIT,
+            //                                      &mvInv);
+
+            //         depthShader.setMVP(*mvp);
+            //     }
+            //     // setup material and render
+            //     materialSetupAndRender_depth(
+            //         material,
+            //         element,
+            //         camera,
+            //         start_index, end_index,
+            //         mvp,
+            //         mv,
+            //         mvIT,
+            //         mvInv);
+            // }
 
             for (auto &child : element->getChildren())
-                traverse_depth_render(child.get(), camera);
+                traverse_depth_render_only_mesh(child.get(), camera, resourceMap);
         }
 
-        void RenderPipeline::renderDepth(Transform *root, Components::ComponentCamera *camera)
-        {
+        // void RenderPipeline::renderDepth(Transform *root, Components::ComponentCamera *camera)
+        // {
 
-            GLRenderState *state = GLRenderState::Instance();
+        //     GLRenderState *state = GLRenderState::Instance();
 
-            state->ColorWrite = ColorWriteNone;
-            state->DepthTest = DepthTestLess;
-            state->BlendMode = BlendModeDisabled; // material->pbr.blendMode;
+        //     state->ColorWrite = ColorWriteNone;
+        //     state->DepthTest = DepthTestLess;
+        //     state->BlendMode = BlendModeDisabled; // material->pbr.blendMode;
 
-            traverse_depth_render(root, camera);
-        }
+        //     traverse_depth_render_only_mesh(root, camera);
+        // }
 
-        void RenderPipeline::materialSetupAndRender_depth(
-            Components::ComponentMaterial *material,
-            Transform *element,
-            Components::ComponentCamera *camera,
-            int start_index, int end_index,
-            const MathCore::mat4f *mvp,
-            const MathCore::mat4f *mv,
-            const MathCore::mat4f *mvIT,
-            const MathCore::mat4f *mvInv)
-        {
+        // void RenderPipeline::materialSetupAndRender_depth(
+        //     Components::ComponentMaterial *material,
+        //     Transform *element,
+        //     Components::ComponentCamera *camera,
+        //     int start_index, int end_index,
+        //     const MathCore::mat4f *mvp,
+        //     const MathCore::mat4f *mv,
+        //     const MathCore::mat4f *mvIT,
+        //     const MathCore::mat4f *mvInv)
+        // {
 
-            allMeshRender_Range(element, &depthShader, start_index, end_index);
-        }
+        //     allMeshRender_Range(element, &depthShader, start_index, end_index);
+        // }
 
     }
 

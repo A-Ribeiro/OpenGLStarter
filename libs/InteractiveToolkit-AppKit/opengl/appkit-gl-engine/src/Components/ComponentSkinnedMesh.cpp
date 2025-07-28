@@ -283,7 +283,10 @@ namespace AppKit
                     // Components::ComponentMaterial *material;
                     // ReferenceCounter<AppKit::GLEngine::Component *> *refCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
                     auto material = transform->addNewComponent<Components::ComponentMaterial>();
-                    material->type = Components::MaterialPBR;
+                    printf("needs check here for the material [%s:%d] \n", __FILE__, __LINE__);
+                    exit(-1);
+                    // material->type = Components::MaterialPBR;
+
                 }
 
                 if (isGPUSkinning)

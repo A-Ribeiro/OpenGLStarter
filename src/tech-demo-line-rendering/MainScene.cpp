@@ -80,7 +80,7 @@ void MainScene::bindResourcesToGraph()
     line_mounter->setCamera(camera, true);
     line_mounter->meshWrapper->debugCollisionShapes = true;
 
-    auto &bag = line_mounter->material->custom_shader_property_bag;
+    auto &bag = line_mounter->material->property_bag;
     // bag.getProperty("uColor").set(MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
     bag.getProperty("uAntialias").set(1.0f);
 

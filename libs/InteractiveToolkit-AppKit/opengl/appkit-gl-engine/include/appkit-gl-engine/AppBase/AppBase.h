@@ -74,7 +74,7 @@ namespace AppKit
             EventCore::Event<void()> OnLostFocus;
             EventCore::Event<void()> OnGainFocus;
 
-                        AppKit::Window::GLWindow *window;
+            AppKit::Window::GLWindow *window;
             std::shared_ptr<RenderWindowRegion> screenRenderWindow;
 
             AppBase();

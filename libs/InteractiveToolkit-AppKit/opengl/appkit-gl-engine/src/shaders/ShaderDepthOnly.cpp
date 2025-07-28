@@ -1,19 +1,19 @@
-#include <appkit-gl-engine/DefaultEngineShader.h>
+#pragma once
 
-#include <appkit-gl-engine/shaders/DepthPassShader.h>
+#include <appkit-gl-engine/shaders/ShaderDepthOnly.h>
+#include <appkit-gl-engine/Engine.h>
 
 namespace AppKit
 {
     namespace GLEngine
     {
-        DepthPassShader::DepthPassShader()
+
+        ShaderDepthOnly::ShaderDepthOnly()
         {
             format = ITKExtension::Model::CONTAINS_POS;
 
             const char vertexShaderCode[] = {
-#if !defined(GLAD_GLES2)
-                "#version 120\n"
-#endif
+                SHADER_HEADER_120
                 "attribute vec4 aPosition;"
                 "uniform mat4 uMVP;"
                 "void main() {"
@@ -22,11 +22,8 @@ namespace AppKit
             };
 
             const char fragmentShaderCode[] = {
-#if !defined(GLAD_GLES2)
-                "#version 120\n"
-#endif
+                SHADER_HEADER_120
                 "void main() {"
-                //"  gl_FragColor = vec4(vec3( gl_FragCoord.z ),1.0);"
                 "  gl_FragColor = vec4(1.0);"
                 "}"
             };
@@ -36,11 +33,25 @@ namespace AppKit
             link(__FILE__, __LINE__);
 
             u_mvp = getUniformLocation("uMVP");
+
+            uMVP = MathCore::mat4f();
+
+            GLRenderState *state = GLRenderState::Instance();
+            state->CurrentShader = this;
+
+            setUniform(u_mvp, uMVP);
+
+            state->CurrentShader = nullptr;
         }
 
-        void DepthPassShader::setMVP(const MathCore::mat4f &mvp)
+        void ShaderDepthOnly::setMVP(const MathCore::mat4f &mvp)
         {
-            setUniform(u_mvp, mvp);
+            if (uMVP != mvp)
+            {
+                uMVP = mvp;
+                setUniform(u_mvp, uMVP);
+            }
         }
+
     }
 }

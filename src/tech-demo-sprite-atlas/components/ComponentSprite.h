@@ -98,7 +98,7 @@ namespace AppKit
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
                     const MathCore::vec2f &size_constraint = MathCore::vec2f(-1, -1),
-                    MeshUploadMode meshUploadMode = MeshUploadMode_Direct
+                    MeshUploadMode meshUploadMode = MeshUploadMode_Static
                 );
 
                 void setTextureFromAtlas(

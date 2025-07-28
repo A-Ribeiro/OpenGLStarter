@@ -354,6 +354,40 @@ namespace AppKit
         GLRenderState::GLRenderState()
         {
             // initialized = false;
+            for (int i = 0; i < 32; i++)
+                textureUnitActivation[i] = nullptr;
+            textureUnitActivationCount = 0;
+        }
+
+        void GLRenderState::setTextureUnitActivationArray (OpenGL::VirtualTexture** textureUnitActivation, int size){
+            int count = size;
+            if (count > 32)
+                count = 32;
+
+            for(int i = count; i < textureUnitActivationCount; i++){
+                this->textureUnitActivation[i]->deactive(i);
+                this->textureUnitActivation[i] = nullptr;
+            }
+                
+            textureUnitActivationCount = count;
+            for (int i = 0; i < count; i++) {
+                if (this->textureUnitActivation[i] == textureUnitActivation[i])
+                    continue;
+                // if (this->textureUnitActivation[i] != nullptr)
+                //     this->textureUnitActivation[i]->deactive(i);
+                this->textureUnitActivation[i] = textureUnitActivation[i];
+                this->textureUnitActivation[i]->active(i);
+            }
+        }
+
+        void GLRenderState::clearTextureUnitActivationArray () {
+            for(int i = 0; i < textureUnitActivationCount; i++){
+                if (this->textureUnitActivation[i] == nullptr)
+                    continue;
+                this->textureUnitActivation[i]->deactive(i);
+                this->textureUnitActivation[i] = nullptr;
+            }
+            textureUnitActivationCount = 0;
         }
 
     }

@@ -72,8 +72,10 @@ namespace AppKit
         void FrankenUniformManager::setPBRMaterial(const Components::ComponentMaterial *material)
         {
 
-            if (material->type != Components::MaterialPBR)
-                return;
+            printf("needs check here for the pbr material [%s:%d] \n", __FILE__, __LINE__);
+            exit(-1);
+            // if (!material->shader->compareType(PBRShaderSelector::Type))
+            //     return;
 
             bool diff = false;
 

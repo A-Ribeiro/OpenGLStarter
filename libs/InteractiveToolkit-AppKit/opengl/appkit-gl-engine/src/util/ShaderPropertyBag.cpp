@@ -197,7 +197,7 @@ namespace AppKit
                 {
                     return it->second;
                 }
-                throw std::runtime_error("Property not found: " + key);
+                ITK_ABORT(true, "Property not found: %s", key.c_str());
             }
 
             const ShaderProperty &ShaderPropertyBag::getProperty(const std::string &key) const
@@ -207,7 +207,7 @@ namespace AppKit
                 {
                     return it->second;
                 }
-                throw std::runtime_error("Property not found: " + key);
+                ITK_ABORT(true, "Property not found: %s", key.c_str());
             }
 
             bool ShaderPropertyBag::hasProperty(const std::string &key) const

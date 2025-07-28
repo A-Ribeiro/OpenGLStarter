@@ -10,8 +10,10 @@ namespace AppKit
                        bool _left,
                        const std::string &_id,
                        const std::string &_text,
-                       AppKit::OpenGL::GLFont2Builder *_fontBuilder)
+                       AppKit::OpenGL::GLFont2Builder *_fontBuilder,
+                    ResourceMap *resourceMap)
         {
+            this->resourceMap = resourceMap;
 
             position = _position;
             left = _left;
@@ -37,8 +39,10 @@ namespace AppKit
                        const std::string &_id,
                        const std::string &_text,
                        std::shared_ptr<Components::ComponentCameraOrthographic> camera,
-                       AppKit::OpenGL::GLFont2Builder *_fontBuilder)
+                       AppKit::OpenGL::GLFont2Builder *_fontBuilder,
+                    ResourceMap *resourceMap)
         {
+            this->resourceMap = resourceMap;
             this->camera = camera;
             position = _position;
             left = _left;
@@ -171,9 +175,11 @@ namespace AppKit
                     // cursorNode->LocalRotation = MathCore::GEN<MathCore::quatf>::fromEuler(MathCore::OP<float>::deg_2_rad(-90.0f), 0, 0);
                     bg->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 1.0f);
 
-                    materialBackground->type = Components::MaterialUnlit;
-                    materialBackground->unlit.blendMode = BlendModeAlpha;
-                    materialBackground->unlit.color = MathCore::vec4f(0, 0, 0, 0.5);
+                    printf("needs check here for the material [%s:%d] \n", __FILE__, __LINE__);
+                    exit(-1);
+                    // materialBackground->type = Components::MaterialUnlit;
+                    // materialBackground->unlit.blendMode = BlendModeAlpha;
+                    // materialBackground->unlit.color = MathCore::vec4f(0, 0, 0, 0.5);
                 }
                 else
                 {
@@ -197,7 +203,7 @@ namespace AppKit
                     textTransform->setLocalScale(MathCore::vec3f(size, size, 1));
                 }
                 fontBuilder->richBuild(rendered_text.c_str(), false);
-                componentFontToMesh->toMesh(*fontBuilder, true);
+                componentFontToMesh->toMesh(this->resourceMap, *fontBuilder, true);
             }
         }
 
