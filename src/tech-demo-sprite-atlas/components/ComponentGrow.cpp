@@ -10,6 +10,7 @@
 #include <appkit-gl-engine/Components/ComponentMesh.h>
 
 #include "ComponentGrow.h"
+#include "../App.h"
 
 namespace AppKit
 {
@@ -40,7 +41,7 @@ namespace AppKit
 
                 auto transform = getTransform();
 
-                if (transform->getLocalScale().x >= 1.0f - MathCore::EPSILON<float>::low_precision)
+                if (lrp >= 1.0f - MathCore::EPSILON<float>::low_precision)
                 {
                     transform->removeSelf();
                     return;
@@ -54,8 +55,8 @@ namespace AppKit
                 {
                     color.a = expo;
                 }
-                
-                mesh->syncVBODynamic();
+
+                // mesh->syncVBODynamic();
             }
 
             void ComponentGrow::attachToTransform(std::shared_ptr<Transform> t)
@@ -83,7 +84,7 @@ namespace AppKit
             std::shared_ptr<Component> ComponentGrow::duplicate_ref_or_clone(bool force_clone)
             {
                 auto result = Component::CreateShared<ComponentGrow>();
-
+                result->app = app;
                 return result;
             }
             void ComponentGrow::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)

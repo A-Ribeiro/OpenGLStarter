@@ -6,6 +6,8 @@
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
 
+class App;
+
 namespace AppKit
 {
     namespace GLEngine
@@ -24,6 +26,8 @@ namespace AppKit
 
             public:
                 static const ComponentType Type;
+
+                App *app;
 
                 ComponentGrow();
                 ~ComponentGrow();

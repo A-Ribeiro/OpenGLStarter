@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <InteractiveToolkit/Platform/Core/SmartVector.h>
 
 namespace AppKit
 {
@@ -12,12 +12,12 @@ namespace AppKit
 
         class StartEventManager
         {
-            std::vector<Component *> componentList;
+            Platform::SmartVector<Component *> componentList;
 
         public:
             static StartEventManager *Instance();
             void registerNewComponent(Component *c);
-            void unregisterComponent(Component *c);
+            bool unregisterComponent(Component *c);
             void processAllComponentsWithTransform();
         };
 

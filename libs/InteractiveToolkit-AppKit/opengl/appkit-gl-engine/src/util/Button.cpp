@@ -165,11 +165,11 @@ namespace AppKit
                 // back square
                 if (materialBackground == nullptr)
                 {
-                    auto cursorNode = root->addChild(Transform::CreateShared());
-                    materialBackground = cursorNode->addNewComponent<Components::ComponentMaterial>();
-                    cursorNode->addComponent(Components::ComponentMesh::createPlaneXY(xmax - xmin, ymax - ymin));
+                    auto bg = root->addChild(Transform::CreateShared());
+                    materialBackground = bg->addNewComponent<Components::ComponentMaterial>();
+                    bg->addComponent(Components::ComponentMesh::createPlaneXY(xmax - xmin, ymax - ymin));
                     // cursorNode->LocalRotation = MathCore::GEN<MathCore::quatf>::fromEuler(MathCore::OP<float>::deg_2_rad(-90.0f), 0, 0);
-                    cursorNode->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 0);
+                    bg->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 1.0f);
 
                     materialBackground->type = Components::MaterialUnlit;
                     materialBackground->unlit.blendMode = BlendModeAlpha;
@@ -179,15 +179,15 @@ namespace AppKit
                 {
                     // ReferenceCounter<AppKit::GLEngine::Component *> *refCounter = &Engine::Instance()->componentReferenceCounter;
 
-                    auto cursorNode = materialBackground->getTransform();
+                    auto bg = materialBackground->getTransform();
 
-                    auto _mesh = cursorNode->removeComponent(cursorNode->findComponent<Components::ComponentMesh>());
+                    auto _mesh = bg->removeComponent(bg->findComponent<Components::ComponentMesh>());
 
                     // refCounter->remove(_mesh);
 
-                    cursorNode->addComponent(Components::ComponentMesh::createPlaneXY(xmax - xmin, ymax - ymin));
+                    bg->addComponent(Components::ComponentMesh::createPlaneXY(xmax - xmin, ymax - ymin));
                     // cursorNode->LocalRotation = MathCore::GEN<MathCore::quatf>::fromEuler(MathCore::OP<float>::deg_2_rad(-90.0f), 0, 0);
-                    cursorNode->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 0);
+                    bg->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 1.0f);
                 }
                 // font
                 if (componentFontToMesh == nullptr)

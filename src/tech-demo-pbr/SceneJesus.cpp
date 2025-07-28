@@ -227,6 +227,7 @@ void SceneJesus::draw() {
 std::shared_ptr<Transform> loadSceneroot_jesus()
 {
     auto _0 = Transform::CreateShared();
+    _0->affectComponentStart = true;
     _0->Name = std::string("root");
     _0->LocalPosition = MathCore::vec3f(0, 0, 0);
     _0->LocalRotation = MathCore::quatf(0, 0, 0, 1);

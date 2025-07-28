@@ -3,8 +3,7 @@
 
 #include <appkit-gl-engine/StartEventManager.h>
 
-
-//#include <appkit-gl-engine/SharedPointer/SharedPointerDatabase.h>
+// #include <appkit-gl-engine/SharedPointer/SharedPointerDatabase.h>
 
 namespace AppKit
 {
@@ -16,7 +15,23 @@ namespace AppKit
             this->type_const_ref = type;
             // transform = nullptr;
             // mStartCalled = false;
+            // StartEventManager::Instance()->registerNewComponent(this);
+            start_registered = false;
+        }
+
+        void Component::registerStart()
+        {
+            if (start_registered)
+                return;
+            start_registered = true;
             StartEventManager::Instance()->registerNewComponent(this);
+        }
+        void Component::unregisterStart()
+        {
+            if (!start_registered)
+                return;
+            if (StartEventManager::Instance()->unregisterComponent(this))
+                start_registered = false;
         }
 
         ComponentType Component::getType() const

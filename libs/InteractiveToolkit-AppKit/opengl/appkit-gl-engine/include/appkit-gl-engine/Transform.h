@@ -37,7 +37,12 @@ namespace AppKit
             std::weak_ptr<Transform> mParent;
             std::weak_ptr<Transform> mSelf;
 
+            void registerComponentStartRecursive();
+            void unregisterComponentStartRecursive();
         public:
+
+            bool affectComponentStart;
+
             // deleted copy constructor and assign operator, to avoid copy...
             Transform(const Transform &v) = delete;
             Transform &operator=(const Transform &v) = delete;
@@ -68,7 +73,8 @@ namespace AppKit
 
             inline std::shared_ptr<Transform> self()
             {
-                return std::shared_ptr<Transform>(mSelf);
+                return ToShared<Transform>(mSelf);
+                // return std::shared_ptr<Transform>(mSelf);
             }
 
             std::shared_ptr<Transform> getParent();

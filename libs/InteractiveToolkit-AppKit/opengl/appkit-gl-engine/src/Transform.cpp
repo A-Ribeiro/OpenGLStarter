@@ -65,6 +65,23 @@ namespace AppKit
         //
         ///////////////////////////////////////////////////////
 
+        void Transform::registerComponentStartRecursive()
+        {
+            affectComponentStart = true;
+            for (auto &component : components)
+                component->registerStart();
+            for (auto &child : children)
+                child->registerComponentStartRecursive();
+        }
+        void Transform::unregisterComponentStartRecursive()
+        {
+            affectComponentStart = false;
+            for (auto &component : components)
+                component->unregisterStart();
+            for (auto &child : children)
+                child->unregisterComponentStartRecursive();
+        }
+
         std::shared_ptr<Transform> Transform::removeChild(int index)
         {
 
@@ -85,6 +102,9 @@ namespace AppKit
 
             // removeMapName(node);
 
+            if (affectComponentStart)
+                node->unregisterComponentStartRecursive();
+
             return node;
         }
         std::shared_ptr<Transform> Transform::removeChild(std::shared_ptr<Transform> transform)
@@ -101,6 +121,9 @@ namespace AppKit
                     transform->visited = false;
 
                     // removeMapName(transform);
+
+                    if (affectComponentStart)
+                        transform->unregisterComponentStartRecursive();
 
                     return transform;
                 }
@@ -142,6 +165,9 @@ namespace AppKit
             transform->visited = false;
 
             // insertMapName(transform);
+
+            if (affectComponentStart)
+                transform->registerComponentStartRecursive();
 
             return transform;
         }
@@ -825,10 +851,14 @@ namespace AppKit
 
             auto this_self = this->self();
 
-            c->mTransform.push_back(this_self);
+            c->mTransform.push_back({this_self, this});
             // c->transform = this;
 
             c->attachToTransform(this_self);
+
+            if (affectComponentStart)
+                c->registerStart();
+
             return c;
         }
 
@@ -842,7 +872,7 @@ namespace AppKit
 
                     for (int j = (int)c->mTransform.size() - 1; j >= 0; j--)
                     {
-                        if (ToShared(c->mTransform[j]).get() == this)
+                        if (c->mTransform[j].ptr == this)
                         {
                             c->mTransform.erase(c->mTransform.begin() + j);
                             c->detachFromTransform(this->self());
@@ -854,6 +884,9 @@ namespace AppKit
                     // c->transform = nullptr;
                     // if (t != nullptr)
                     // c->detachFromTransform(t);
+
+                    if (affectComponentStart)
+                        c->unregisterStart();
 
                     return c;
                 }
@@ -868,12 +901,17 @@ namespace AppKit
                 std::shared_ptr<Component> result = components[i];
                 components.erase(components.begin() + i);
 
+                auto self = this->self();
                 for (int j = result->getTransformCount() - 1; j >= 0; j--)
                 {
-                    if (result->getTransform(j).get() == this)
+                    if (result->mTransform[j].ptr == this)
                     {
                         result->mTransform.erase(result->mTransform.begin() + j);
-                        result->detachFromTransform(this->self());
+
+                        if (self == nullptr)
+                            result->detachFromTransform( std::shared_ptr<Transform>(this, [](Transform*){}) );
+                        else
+                            result->detachFromTransform(self);
                         break;
                     }
                 }
@@ -882,6 +920,10 @@ namespace AppKit
                 // result->transform = nullptr;
                 // if (t != nullptr)
                 // result->detachFromTransform(t);
+
+                if (affectComponentStart)
+                    result->unregisterStart();
+
                 return result;
             }
             return nullptr;
@@ -1105,6 +1147,8 @@ namespace AppKit
                 renderWindowRegion = app->screenRenderWindow;
 
             skip_traversing = false;
+
+            affectComponentStart = false;
         }
 
         Transform::~Transform()
@@ -1115,8 +1159,9 @@ namespace AppKit
             // for(int i= getComponentCount()-1;i>=0;i--)
             //     removeComponentAt(i);
 
-            clearChildren();
+            // could call detach from transform with a nullptr
             clearComponents();
+            clearChildren();
 
             renderWindowRegion.reset(); // = nullptr;
         }

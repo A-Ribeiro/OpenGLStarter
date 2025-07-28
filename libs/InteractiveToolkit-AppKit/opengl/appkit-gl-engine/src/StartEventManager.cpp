@@ -18,26 +18,25 @@ namespace AppKit
         {
             componentList.push_back(c);
         }
-        void StartEventManager::unregisterComponent(Component *c)
+        bool StartEventManager::unregisterComponent(Component *c)
         {
-            for (int i = (int)componentList.size() - 1; i >= 0; i--)
+            for (auto it = componentList.begin(); it != componentList.end(); ++it)
             {
-                if (componentList[i] == c)
+                if (*it == c)
                 {
-                    componentList.erase(componentList.begin() + i);
-                    return;
+                    componentList.erase(it);
+                    return true;
                 }
             }
+            return false;
         }
         void StartEventManager::processAllComponentsWithTransform()
         {
-            for (int i = (int)componentList.size() - 1; i >= 0; i--)
+            while (componentList.size() > 0)
             {
-                if (componentList[i]->getTransformCount() > 0)
-                {
-                    componentList[i]->start();
-                    componentList.erase(componentList.begin() + i);
-                }
+                auto c = componentList.front();
+                componentList.pop_front();
+                c->start();
             }
         }
 
