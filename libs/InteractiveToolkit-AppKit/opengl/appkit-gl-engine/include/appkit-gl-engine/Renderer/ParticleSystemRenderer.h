@@ -4,7 +4,7 @@
 
 #include <appkit-gl-base/GLTexture.h>
 
-#include <appkit-gl-engine/shaders/UnlitPassShader.h>
+//#include <appkit-gl-engine/shaders/UnlitPassShader.h>
 #include <appkit-gl-engine/GL/GLRenderState.h>
 
 #include <appkit-gl-engine/Components/ComponentParticleSystem.h>
@@ -32,10 +32,10 @@ namespace AppKit
         class ParticleSystemRenderer
         {
         public:
-            // Debug info
-            UnlitPassShader debugLinesShader;
-            int debugLinesShader_AttribLocation_Pos;
-            std::vector<MathCore::vec3f> lines;
+            // // Debug info
+            // UnlitPassShader debugLinesShader;
+            // int debugLinesShader_AttribLocation_Pos;
+            // std::vector<MathCore::vec3f> lines;
 
             // Draw elements
             NormalParticleShader normalShader;
@@ -56,10 +56,10 @@ namespace AppKit
 
             ParticleSystemRenderer();
 
-            void drawDebugPoints(
-                Components::ComponentCamera *camera,
-                Components::ComponentParticleSystem *particleSystem,
-                float size);
+            // void drawDebugPoints(
+            //     Components::ComponentCamera *camera,
+            //     Components::ComponentParticleSystem *particleSystem,
+            //     float size);
 
             void draw(Components::ComponentCamera *camera,
                       const MathCore::vec3f &cameraDirection,

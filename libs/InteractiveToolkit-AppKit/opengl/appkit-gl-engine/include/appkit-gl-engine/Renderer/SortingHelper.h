@@ -34,8 +34,8 @@ namespace AppKit
 
         public:
             std::vector<AlgorithmCore::Sorting::SortIndexu64> &sort_by_material(std::vector<Transform *> &v);
-            void sort_by_z(std::vector<Transform *> &v, SortingModeEnum mode, bool sort_by_material_p = true);
-            void sort_by_direction(std::vector<Transform *> &v, const MathCore::vec3f &dir, SortingModeEnum mode, bool sort_by_material_p = true);
+            void sort_by_z(std::vector<Transform *> &v, SortingModeEnum mode, bool sort_by_material_p);
+            void sort_by_direction(std::vector<Transform *> &v, const MathCore::vec3f &dir, SortingModeEnum mode, bool sort_by_material_p);
             void sort_by_direction(std::vector<Components::ComponentParticleSystem *> &v, const MathCore::vec3f &dir, SortingModeEnum mode);
 
             std::vector<AlgorithmCore::Sorting::SortIndexu32> &sort_by_direction(const std::vector<Components::Particle> &particles, const MathCore::vec3f &dir, SortingModeEnum mode);

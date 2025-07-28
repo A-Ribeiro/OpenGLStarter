@@ -7,6 +7,7 @@
 
 #include <InteractiveToolkit/CollisionCore/CollisionCore.h>
 #include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
@@ -33,16 +34,20 @@ namespace AppKit
 
             bool selected;
 
+            ResourceMap *resourceMap;
+
             Button(int _position, bool _left,
                    const std::string &_id,
                    const std::string &_text,
-                   AppKit::OpenGL::GLFont2Builder *_fontBuilder);
+                   AppKit::OpenGL::GLFont2Builder *_fontBuilder,
+                ResourceMap *resourceMap);
 
             Button(int _position, bool _left,
                    const std::string &_id,
                    const std::string &_text,
                    std::shared_ptr<Components::ComponentCameraOrthographic> camera,
-                   AppKit::OpenGL::GLFont2Builder * _fontBuilder);
+                   AppKit::OpenGL::GLFont2Builder * _fontBuilder,
+                   ResourceMap *resourceMap);
 
             void update(const MathCore::vec3f &mousePosition);
 

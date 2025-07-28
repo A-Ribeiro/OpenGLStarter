@@ -175,21 +175,42 @@ namespace AppKit
             }
         }
 
-        void DefaultEngineShader::activateShaderAndSetPropertiesFromBag(
-            Components::ComponentCamera *camera,
-            const MathCore::mat4f *mvp,
-            const Transform *element, // for localToWorld, localToWorld_IT, worldToLocal,
-            GLRenderState *state,
-            const Utils::ShaderPropertyBag &bag)
-        {
-        }
-        void DefaultEngineShader::deactivateShader(GLRenderState *state)
-        {
-        }
+        // void DefaultEngineShader::activateShaderAndSetPropertiesFromBag(
+        //     Components::ComponentCamera *camera,
+        //     const MathCore::mat4f *mvp,
+        //     const Transform *element, // for localToWorld, localToWorld_IT, worldToLocal,
+        //     GLRenderState *state,
+        //     const Utils::ShaderPropertyBag &bag)
+        // {
+        // }
+        // void DefaultEngineShader::deactivateShader(GLRenderState *state)
+        // {
+        // }
+
         Utils::ShaderPropertyBag DefaultEngineShader::createDefaultBag() const
         {
             Utils::ShaderPropertyBag bag;
             return bag;
         }
+
+        void DefaultEngineShader::ActiveShader_And_SetUniformsFromMaterial(
+            GLRenderState *state,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material)
+        {
+        }
+        void DefaultEngineShader::setUniformsFromMatrices(
+            GLRenderState *state,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material,
+            Transform *element,
+            Components::ComponentCamera *camera,
+            const MathCore::mat4f *mvp,
+            const MathCore::mat4f *mv,
+            const MathCore::mat4f *mvIT,
+            const MathCore::mat4f *mvInv)
+        {
+        }
+
     }
 }

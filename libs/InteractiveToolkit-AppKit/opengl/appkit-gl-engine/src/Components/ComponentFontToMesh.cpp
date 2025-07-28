@@ -12,7 +12,7 @@ namespace AppKit
 
             const ComponentType ComponentFontToMesh::Type = "ComponentFontToMesh";
 
-            void ComponentFontToMesh::toMesh(AppKit::OpenGL::GLFont2Builder &builder, bool dynamic)
+            void ComponentFontToMesh::toMesh(ResourceMap *resourceMap, AppKit::OpenGL::GLFont2Builder &builder, bool dynamic)
             {
                 ITK_ABORT(getTransformCount() == 0, "Transform cannot be 0.\n");
 
@@ -29,7 +29,8 @@ namespace AppKit
 
                 if (is_polygon_font)
                 {
-                    material->type = AppKit::GLEngine::Components::MaterialUnlitVertexColor;
+                    //material->type = AppKit::GLEngine::Components::MaterialUnlitVertexColor;
+                    material->setShader(resourceMap->shaderUnlitVertexColor);
                     material->unlit.tex = nullptr;
 
                     for (size_t i = 0; i < builder.vertexAttrib.size(); i++)
@@ -45,7 +46,8 @@ namespace AppKit
                 else
                 {
                     // texture font
-                    material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
+                    //material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
+                    material->setShader(resourceMap->shaderUnlitTextureVertexColorAlpha);
                     material->unlit.tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&builder.glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
 
                     for (size_t i = 0; i < builder.vertexAttrib.size(); i++)
@@ -100,9 +102,9 @@ namespace AppKit
                 {
                     material = transform->addNewComponent<ComponentMaterial>();
                     // material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
-                    material->type = AppKit::GLEngine::Components::MaterialNone;
-                    material->unlit.color = MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f);
-                    material->unlit.blendMode = AppKit::GLEngine::BlendModeAlpha;
+                    // material->type = AppKit::GLEngine::Components::MaterialNone;
+                    // material->unlit.color = MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+                    // material->unlit.blendMode = AppKit::GLEngine::BlendModeAlpha;
                 }
                 if (mesh == nullptr)
                 {

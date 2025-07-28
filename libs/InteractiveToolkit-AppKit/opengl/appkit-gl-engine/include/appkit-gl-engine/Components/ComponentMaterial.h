@@ -96,7 +96,7 @@ namespace AppKit
                 static const ComponentType Type;
 
                 // material type
-                MaterialType type;
+                // MaterialType type;
 
                 // parameters
                 UnlitSetup unlit;
@@ -107,9 +107,12 @@ namespace AppKit
                 std::vector<MathCore::mat4f> *skin_gradient_matrix;
                 uint32_t skin_shader_matrix_size_bitflag; // skin hint to help to select shader
                 
-                // for custom shader only
-                std::shared_ptr<DefaultEngineShader> custom_shader;
-                Utils::ShaderPropertyBag custom_shader_property_bag;
+                // always custom shader
+                std::shared_ptr<DefaultEngineShader> shader;
+                Utils::ShaderPropertyBag property_bag;
+
+                // set shader and initialize property bag
+                void setShader(std::shared_ptr<DefaultEngineShader> shader);
 
                 bool always_clone;
 

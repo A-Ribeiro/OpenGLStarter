@@ -262,8 +262,8 @@ namespace AppKit
                 }
 
                 material->type = AppKit::GLEngine::Components::MaterialCustomShader;
-                material->custom_shader = lineShader;
-                material->custom_shader_property_bag = lineShader->createDefaultBag();
+                material->shader = lineShader;
+                material->property_bag = lineShader->createDefaultBag();
             }
 
             void ComponentLineMounter::one_time_set(std::shared_ptr<ComponentCamera> p_camera)

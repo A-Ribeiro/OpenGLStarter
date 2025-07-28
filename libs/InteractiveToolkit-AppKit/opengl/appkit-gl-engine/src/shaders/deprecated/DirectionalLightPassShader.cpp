@@ -1,4 +1,4 @@
-#include <appkit-gl-engine/shaders/DirectionalLightPassShader.h>
+#include <appkit-gl-engine/shaders/deprecated/DirectionalLightPassShader.h>
 
 namespace AppKit
 {

@@ -271,7 +271,7 @@ namespace AppKit
             // ComponentMaterial implementation
             ComponentMaterial::ComponentMaterial() : Component(ComponentMaterial::Type)
             {
-                type = MaterialNone;
+                // type = MaterialNone;
 
                 skin_gradient_matrix = nullptr;
                 skin_shader_matrix_size_bitflag = 0;
@@ -286,13 +286,22 @@ namespace AppKit
                 pbr.releaseTextureReferences();
             }
 
+            void ComponentMaterial::setShader(std::shared_ptr<DefaultEngineShader> shader) {
+                this->shader  = shader;
+                if (this->shader != nullptr)
+                    this->property_bag = this->shader->createDefaultBag();
+            }
+
             std::shared_ptr<Component> ComponentMaterial::duplicate_ref_or_clone(bool force_clone)
             {
                 if (!always_clone && !force_clone)
                     return self();
                 auto result = Component::CreateShared<ComponentMaterial>();
 
-                result->type = this->type;
+                // result->type = this->type;
+
+                result->shader = this->shader;
+                result->property_bag = this->property_bag;
 
                 result->unlit = this->unlit;
                 result->pbr = this->pbr;
@@ -314,41 +323,41 @@ namespace AppKit
                 writer.String("id");
                 writer.Uint64((uint64_t)(uintptr_t)self().get());
 
-                if (type == MaterialType::MaterialUnlit)
-                { // implemented
-                    writer.String("data_type");
-                    writer.String("unlit");
-                    writer.String("data");
-                    unlit.Serialize(writer);
-                }
-                else if (type == MaterialType::MaterialUnlitTexture)
-                { // implemented
-                    writer.String("data_type");
-                    writer.String("unlit_texture");
-                    writer.String("data");
-                    unlit.Serialize(writer);
-                }
-                else if (type == MaterialType::MaterialUnlitTextureVertexColor)
-                { // implemented
-                    writer.String("data_type");
-                    writer.String("unlit_texture_vertex_color");
-                    writer.String("data");
-                    unlit.Serialize(writer);
-                }
-                else if (type == MaterialType::MaterialUnlitTextureVertexColorFont)
-                { // implemented
-                    writer.String("data_type");
-                    writer.String("unlit_texture_vertex_color_font");
-                    writer.String("data");
-                    unlit.Serialize(writer);
-                }
-                else if (type == MaterialType::MaterialPBR)
-                {
-                    writer.String("data_type");
-                    writer.String("pbr");
-                    writer.String("data");
-                    pbr.Serialize(writer);
-                }
+                // if (type == MaterialType::MaterialUnlit)
+                // { // implemented
+                //     writer.String("data_type");
+                //     writer.String("unlit");
+                //     writer.String("data");
+                //     unlit.Serialize(writer);
+                // }
+                // else if (type == MaterialType::MaterialUnlitTexture)
+                // { // implemented
+                //     writer.String("data_type");
+                //     writer.String("unlit_texture");
+                //     writer.String("data");
+                //     unlit.Serialize(writer);
+                // }
+                // else if (type == MaterialType::MaterialUnlitTextureVertexColor)
+                // { // implemented
+                //     writer.String("data_type");
+                //     writer.String("unlit_texture_vertex_color");
+                //     writer.String("data");
+                //     unlit.Serialize(writer);
+                // }
+                // else if (type == MaterialType::MaterialUnlitTextureVertexColorFont)
+                // { // implemented
+                //     writer.String("data_type");
+                //     writer.String("unlit_texture_vertex_color_font");
+                //     writer.String("data");
+                //     unlit.Serialize(writer);
+                // }
+                // else if (type == MaterialType::MaterialPBR)
+                // {
+                //     writer.String("data_type");
+                //     writer.String("pbr");
+                //     writer.String("data");
+                //     pbr.Serialize(writer);
+                // }
 
                 writer.EndObject();
             }
@@ -368,32 +377,32 @@ namespace AppKit
                 if (!_value.HasMember("data") || !_value["data"].IsObject())
                     return;
 
-                auto data_type = _value["data_type"].GetString();
-                if (strcmp(data_type, "unlit") == 0)
-                {
-                    type = MaterialType::MaterialUnlit;
-                    unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
-                }
-                else if (strcmp(data_type, "unlit_texture") == 0)
-                {
-                    type = MaterialType::MaterialUnlitTexture;
-                    unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
-                }
-                else if (strcmp(data_type, "unlit_texture_vertex_color") == 0)
-                {
-                    type = MaterialType::MaterialUnlitTextureVertexColor;
-                    unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
-                }
-                else if (strcmp(data_type, "unlit_texture_vertex_color_font") == 0)
-                {
-                    type = MaterialType::MaterialUnlitTextureVertexColorFont;
-                    unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
-                }
-                else if (strcmp(data_type, "pbr") == 0)
-                {
-                    type = MaterialType::MaterialPBR;
-                    pbr.Deserialize(_value["data"], transform_map, component_map, resourceSet);
-                }
+                // auto data_type = _value["data_type"].GetString();
+                // if (strcmp(data_type, "unlit") == 0)
+                // {
+                //     type = MaterialType::MaterialUnlit;
+                //     unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
+                // }
+                // else if (strcmp(data_type, "unlit_texture") == 0)
+                // {
+                //     type = MaterialType::MaterialUnlitTexture;
+                //     unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
+                // }
+                // else if (strcmp(data_type, "unlit_texture_vertex_color") == 0)
+                // {
+                //     type = MaterialType::MaterialUnlitTextureVertexColor;
+                //     unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
+                // }
+                // else if (strcmp(data_type, "unlit_texture_vertex_color_font") == 0)
+                // {
+                //     type = MaterialType::MaterialUnlitTextureVertexColorFont;
+                //     unlit.Deserialize(_value["data"], transform_map, component_map, resourceSet);
+                // }
+                // else if (strcmp(data_type, "pbr") == 0)
+                // {
+                //     type = MaterialType::MaterialPBR;
+                //     pbr.Deserialize(_value["data"], transform_map, component_map, resourceSet);
+                // }
             }
         }
     }

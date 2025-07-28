@@ -150,7 +150,8 @@ namespace AppKit
 
         void LightAndShadowManager::computeShadowParametersForMesh(Components::ComponentMeshWrapper *meshWrapper,
                                                                    bool use_shadow,
-                                                                   ShaderShadowAlgorithmEnum shaderShadowAlgorithm)
+                                                                   ShaderShadowAlgorithmEnum shaderShadowAlgorithm,
+                                                                    ResourceMap *resourceMap)
         {
 
             std::unordered_map<Components::ComponentLight *, ShadowCache *>::iterator it;
@@ -220,18 +221,17 @@ namespace AppKit
                 dynamicFBOSun.enable();
                 dynamicFBOSun.setDepthTextureAttachment(&shadowCache->depthTexture);
 
-                auxObjPlaces.filterByOBB(scene_root, shadowCache->obb, FilterFlags_None);
+                sceneTraverseHelper_aux.filterByOBB(scene_root, shadowCache->obb, FilterFlags_None);
 
                 GLRenderState *state = GLRenderState::Instance();
 
-                state->CurrentShader = &renderPipeline->depthShader;
+                // state->CurrentShader = &renderPipeline->depthShader;
 
                 state->ColorWrite = ColorWriteNone;
                 state->DepthTest = DepthTestLess;
                 state->BlendMode = BlendModeDisabled; // material->pbr.blendMode;
                 iRect old_viewport = state->Viewport;
                 state->Viewport = shadowCache->viewport;
-
                 state->FrontFace = FrontFaceCW;
 
                 // vec4 old_clear_color = state->ClearColor;
@@ -241,8 +241,8 @@ namespace AppKit
                 glClear(GL_DEPTH_BUFFER_BIT);
 
                 // render the depth buffer
-                for(auto &transform: auxObjPlaces.transformList)
-                    renderPipeline->traverse_depth_render(transform, shadowCache);
+                for(auto &transform: sceneTraverseHelper_aux.transformList)
+                    renderPipeline->traverse_depth_render_only_mesh(transform, shadowCache, resourceMap);
 
                 state->ColorWrite = ColorWriteAll;
                 state->Viewport = old_viewport;

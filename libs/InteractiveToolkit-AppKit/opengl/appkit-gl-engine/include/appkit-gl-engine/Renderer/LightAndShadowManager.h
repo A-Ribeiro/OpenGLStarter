@@ -115,7 +115,7 @@ namespace AppKit
 
             RenderPipeline *renderPipeline;
 
-            SceneTraverseHelper auxObjPlaces;
+            SceneTraverseHelper sceneTraverseHelper_aux;
 
             LightAndShadowManager();
 
@@ -137,7 +137,8 @@ namespace AppKit
             std::vector<ShadowCache *> shadowLightList;                  // can be nullptr...
             void computeShadowParametersForMesh(Components::ComponentMeshWrapper *meshWrapper,
                                                 bool use_shadow,
-                                                ShaderShadowAlgorithmEnum shaderShadowAlgorithm);
+                                                ShaderShadowAlgorithmEnum shaderShadowAlgorithm,
+                                                ResourceMap *resourceMap);
         };
 
     }

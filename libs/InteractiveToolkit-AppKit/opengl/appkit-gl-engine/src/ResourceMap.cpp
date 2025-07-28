@@ -1,5 +1,14 @@
 #include <appkit-gl-engine/ResourceMap.h>
 
+// #include <appkit-gl-engine/shaders/SpriteShader.h>
+#include <appkit-gl-engine/shaders/ShaderUnlit.h>            // UnlitPassShader
+#include <appkit-gl-engine/shaders/ShaderUnlitVertexColor.h> // Unlit_vertcolor_Shader
+#include <appkit-gl-engine/shaders/ShaderUnlitTexture.h>     // Unlit_tex_PassShader
+// #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColor.h> //
+#include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlpha.h> // Unlit_tex_vertcolor_font_PassShader
+#include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
+#include <appkit-gl-engine/shaders/ShaderDepthOnly.h> 
+
 namespace AppKit
 {
     namespace GLEngine
@@ -20,52 +29,97 @@ namespace AppKit
 
         void ResourceMap::clear_refcount_equals_1()
         {
-            std::vector<std::string> to_remove;
-
-            spriteMaterialMap.clear();
-
-            for (auto &item : texture2DMap)
+            printf("ResourceMap::clear_refcount_equals_1\n");
             {
-                if (item.second.tex.use_count() > 1 ||
-                    item.second.relative_path.compare("DEFAULT_ALBEDO") == 0 ||
-                    item.second.relative_path.compare("DEFAULT_NORMAL") == 0)
-                    continue;
-                to_remove.push_back(item.first);
+                std::vector<uint64_t> to_remove_u64;
+                // free sprite not used
+                for (auto &item : spriteMaterialMap)
+                {
+                    if (item.second.use_count() > 1)
+                        continue;
+                    to_remove_u64.push_back(item.first);
+                }
+                for (const auto &key : to_remove_u64)
+                    spriteMaterialMap.erase(key);
+                printf("  total loaded sprite materials: %zu\n", spriteMaterialMap.size());
             }
-            for(const auto &key : to_remove)
-                texture2DMap.erase(key);
 
-            to_remove.clear();
-            for (auto &item : cubemapMap)
             {
-                if (item.second.cubemap.use_count() > 1)
-                    continue;
-                to_remove.push_back(item.first);
+                // free texture2D not used
+                std::vector<std::string> to_remove_str;
+                for (auto &item : texture2DMap)
+                {
+                    if (item.second.tex.use_count() > 1 ||
+                        item.second.relative_path.compare("DEFAULT_ALBEDO") == 0 ||
+                        item.second.relative_path.compare("DEFAULT_NORMAL") == 0)
+                        continue;
+                    to_remove_str.push_back(item.first);
+                }
+                for (const auto &key : to_remove_str)
+                    texture2DMap.erase(key);
+
+                printf("  total loaded texture2D: %zu\n", texture2DMap.size());
+
+                // free cubemap not used
+                to_remove_str.clear();
+                for (auto &item : cubemapMap)
+                {
+                    if (item.second.cubemap.use_count() > 1)
+                        continue;
+                    to_remove_str.push_back(item.first);
+                }
+                for (const auto &key : to_remove_str)
+                    cubemapMap.erase(key);
+
+                printf("  total loaded cubemaps: %zu\n", cubemapMap.size());
             }
-            for(const auto &key : to_remove)
-                cubemapMap.erase(key);            
         }
 
         void ResourceMap::clear()
         {
+            printf("ResourceMap::clear");
+
             spriteMaterialMap.clear();
             texture2DMap.clear();
             cubemapMap.clear();
-            
+
             defaultAlbedoTexture = nullptr;
             defaultNormalTexture = nullptr;
             defaultPBRMaterial = nullptr;
+            renderOnlyDepthMaterial = nullptr;
+
+            shaderUnlit = nullptr;
+            shaderUnlitVertexColor = nullptr;
+            shaderUnlitTexture = nullptr;
+            shaderUnlitTextureVertexColorAlpha = nullptr;
+            pbrShaderSelector = nullptr;
+            shaderDepthOnly = nullptr;
         }
 
         void ResourceMap::ensure_default_texture_creation()
         {
+            // creating default shaders
+            if (shaderUnlit == nullptr)
+                shaderUnlit = std::make_shared<ShaderUnlit>();
+            if (shaderUnlitVertexColor == nullptr)
+                shaderUnlitVertexColor = std::make_shared<ShaderUnlitVertexColor>();
+            if (shaderUnlitTexture == nullptr)
+                shaderUnlitTexture = std::make_shared<ShaderUnlitTexture>();
+            if (shaderUnlitTextureVertexColorAlpha == nullptr)
+                shaderUnlitTextureVertexColorAlpha = std::make_shared<ShaderUnlitTextureVertexColorAlpha>();
+            if (pbrShaderSelector == nullptr)
+                pbrShaderSelector = std::make_shared<PBRShaderSelector>();
+            if (shaderDepthOnly == nullptr)
+                shaderDepthOnly = std::make_shared<ShaderDepthOnly>();
+
             if (defaultPBRMaterial == nullptr)
             {
                 defaultAlbedoTexture = getTexture("DEFAULT_ALBEDO", true);
                 defaultNormalTexture = getTexture("DEFAULT_NORMAL", false);
 
                 defaultPBRMaterial = Component::CreateShared<Components::ComponentMaterial>();
-                defaultPBRMaterial->type = Components::MaterialPBR;
+                // defaultPBRMaterial->type = Components::MaterialPBR;
+                defaultPBRMaterial->shader = pbrShaderSelector;
                 defaultPBRMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
                 defaultPBRMaterial->pbr.metallic = 0.0f;
                 defaultPBRMaterial->pbr.roughness = 1.0f;
@@ -73,6 +127,11 @@ namespace AppKit
                 defaultPBRMaterial->pbr.texNormal = defaultNormalTexture;
             }
 
+            if (renderOnlyDepthMaterial == nullptr)
+            {
+                renderOnlyDepthMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                renderOnlyDepthMaterial->setShader(shaderDepthOnly);
+            }
         }
 
         std::shared_ptr<AppKit::OpenGL::GLTexture> ResourceMap::getTexture(const std::string &relative_path, bool is_srgb)
