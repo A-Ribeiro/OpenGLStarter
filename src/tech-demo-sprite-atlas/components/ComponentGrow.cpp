@@ -1,5 +1,3 @@
-#pragma once
-
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <InteractiveToolkit/EaseCore/EaseCore.h>
 
