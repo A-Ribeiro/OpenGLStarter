@@ -35,17 +35,20 @@ void SceneJesusCross::loadResources() {
     JesusTextures[0] = resourceHelper->createTextureFromFile("resources/Jesus/UVJesus.jpg",true && engine->sRGBCapable);
     JesusTextures[1] = nullptr;//resourceHelper->defaultNormalTexture;
         
-    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/JesusOnCross.bams", resourceMap->defaultPBRMaterial);
+    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/JesusOnCross.bams", resourceMap, resourceMap->defaultPBRMaterial);
     
     //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     
     auto newMaterial = Component::CreateShared<ComponentMaterial>();
-    newMaterial->type = Components::MaterialPBR;
-    newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-    newMaterial->pbr.metallic = 0.0f;
-    newMaterial->pbr.roughness = 1.0f;
-    newMaterial->pbr.texAlbedo = JesusTextures[0];
-    newMaterial->pbr.texNormal = nullptr;//texRefCount->add(JesusTextures[1]);
+    // newMaterial->type = Components::MaterialPBR;
+    // newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+    // newMaterial->pbr.metallic = 0.0f;
+    // newMaterial->pbr.roughness = 1.0f;
+    // newMaterial->pbr.texAlbedo = JesusTextures[0];
+    // newMaterial->pbr.texNormal = nullptr;//texRefCount->add(JesusTextures[1]);
+
+    newMaterial->setShader(resourceMap->pbrShaderSelector);
+    newMaterial->property_bag.getProperty("texAlbedo").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(JesusTextures[0]);
     
     Jesus3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
 
@@ -128,16 +131,21 @@ void SceneJesusCross::bindResourcesToGraph() {
             //ReferenceCounter<GLTexture*> *refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
             auto material = node->addNewComponent<ComponentMaterial>();
-            node->addComponent(ComponentMesh::createBox(MathCore::vec3f(50, 1, 50)));
+            auto mesh = ComponentMesh::createBox(MathCore::vec3f(50, 1, 50));
+            //mesh->syncVBOStatic();
+            node->addComponent(mesh);
             //material->type = MaterialUnlit;
             //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
 
-            material->type = MaterialPBR;
-            material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-            material->pbr.metallic = 0.0f;
-            material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
-            material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
+            material->setShader(resourceMap->pbrShaderSelector);
+            material->property_bag.getProperty("texAlbedo").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(resourceMap->defaultAlbedoTexture);
+
+            // material->type = MaterialPBR;
+            // material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+            // material->pbr.metallic = 0.0f;
+            // material->pbr.roughness = 1.0f;
+            // material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
+            // material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
         }
 	}
@@ -151,19 +159,26 @@ void SceneJesusCross::bindResourcesToGraph() {
             // ReferenceCounter<GLTexture*>* refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
             auto material = node->addNewComponent<ComponentMaterial>();
-            node->addComponent(ComponentMesh::createSphere(1.0f,16,16));
+            auto mesh = ComponentMesh::createSphere(1.0f,16,16);
+            //mesh->syncVBOStatic();
+            node->addComponent(mesh);
             node->LocalPosition = MathCore::vec3f(2,3,0);
             node->LocalScale = MathCore::vec3f(0.2f,0.4f,0.2f);
             //node->LocalRotation = quatFromEuler(0,MathCore::OP<float>::deg_2_rad(30.0f), MathCore::OP<float>::deg_2_rad(30.0f));
             //material->type = MaterialUnlit;
             //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
 
-            material->type = MaterialPBR;
-            material->pbr.albedoColor = MathCore::vec3f(1, 1, 0);
-            material->pbr.metallic = 0.0f;
-            material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
-            material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
+            material->setShader(resourceMap->pbrShaderSelector);
+            material->property_bag.getProperty("texAlbedo").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(resourceMap->defaultAlbedoTexture);
+            material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(MathCore::vec3f(1, 1, 0));
+
+
+            // material->type = MaterialPBR;
+            // material->pbr.albedoColor = MathCore::vec3f(1, 1, 0);
+            // material->pbr.metallic = 0.0f;
+            // material->pbr.roughness = 1.0f;
+            // material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
+            // material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
 
         }
     }

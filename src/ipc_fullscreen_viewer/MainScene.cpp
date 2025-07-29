@@ -115,7 +115,7 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
     }
 
     fontBuilder.richBuild(breakLinedTest.c_str(), false);
-    componentFontToMesh->toMesh(fontBuilder, true);
+    componentFontToMesh->toMesh(resourceMap, fontBuilder, true);
     auto componentFontToMesh_transform = componentFontToMesh->getTransform();
     componentFontToMesh_transform->setLocalScale(text_scale_factor);
 }
@@ -139,15 +139,18 @@ void MainScene::bindResourcesToGraph(){
         auto imageMaterial = imageNode->addNewComponent<ComponentMaterial>();
         imageNode->addComponent(ComponentMesh::createPlaneXY(1920.0f, 1080.0f));
 
-        imageMaterial->type = MaterialUnlitTexture;
-        imageMaterial->unlit.blendMode = BlendModeAlpha;
+        imageMaterial->setShader(resourceMap->shaderUnlitTexture);
+        //imageMaterial->type = MaterialUnlitTexture;
+        //imageMaterial->unlit.blendMode = BlendModeAlpha;
+        imageMaterial->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeDisabled);
 
         texture = std::make_shared<AppKit::OpenGL::GLTexture>(1920, 1080, GL_RGBA);
 
         std::vector<uint8_t> data(1920 * 1080 * 4, 255);
         texture->uploadBufferRGBA_8888(&data[0], 1920, 1080, false);
 
-        imageMaterial->unlit.tex = texture;
+        imageMaterial->property_bag.getProperty("uTexture").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(texture);
+        //imageMaterial->unlit.tex = texture;
     }
 
     // texRefCount->add(&fontBuilder.glFont2.texture);
@@ -248,7 +251,7 @@ void MainScene::draw() {
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(root, camera, true);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 }

@@ -215,7 +215,7 @@ namespace AppKit
                 skinning_dirty = true;
             }
 
-            void ComponentSkinnedMesh::loadModelBase(const std::string &filename, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial)
+            void ComponentSkinnedMesh::loadModelBase(const std::string &filename, ResourceMap *resourceMap, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial)
             {
 
                 printf("[ComponentSkinnedMesh] loadModelBase %s\n", filename.c_str());
@@ -225,6 +225,7 @@ namespace AppKit
                 model_base->setName("__root__");
                 model_base->addChild(resourceHelper->createTransformFromModel(
                     filename,
+                    resourceMap,
                     defaultPBRMaterial,
                     0, 0
                     // SkinnedMesh_VBO_Upload_Bitflag,0xffffffff ^ SkinnedMesh_VBO_Upload_Bitflag
@@ -283,7 +284,11 @@ namespace AppKit
                     // Components::ComponentMaterial *material;
                     // ReferenceCounter<AppKit::GLEngine::Component *> *refCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
                     auto material = transform->addNewComponent<Components::ComponentMaterial>();
-                    material->type = Components::MaterialPBR;
+                    // printf("needs check here for the material [%s:%d] \n", __FILE__, __LINE__);
+                    // exit(-1);
+                    // material->type = Components::MaterialPBR;
+                    material->setShader(resourceMap->pbrShaderSelector);
+
                 }
 
                 if (isGPUSkinning)
@@ -439,7 +444,7 @@ namespace AppKit
                 // model_base = nullptr;
             }
 
-            void ComponentSkinnedMesh::loadAnimation(const std::string &clip_name, const std::string &filename)
+            void ComponentSkinnedMesh::loadAnimation(const std::string &clip_name, ResourceMap *resourceMap, const std::string &filename)
             {
                 printf("[ComponentSkinnedMesh] loadAnimation %s\n", filename.c_str());
 

@@ -14,6 +14,8 @@
 #include <appkit-gl-engine/Components/ComponentMesh.h>
 #include <appkit-gl-engine/Components/ComponentMaterial.h>
 
+#include <appkit-gl-engine/ResourceMap.h>
+
 namespace AppKit
 {
     namespace GLEngine
@@ -31,7 +33,7 @@ namespace AppKit
                 std::shared_ptr<ComponentMaterial> material;
                 std::shared_ptr<ComponentMesh> mesh;
 
-                void toMesh(AppKit::OpenGL::GLFont2Builder &builder, bool dynamic);
+                void toMesh(ResourceMap *resourceMap, AppKit::OpenGL::GLFont2Builder &builder, bool dynamic);
 
                 ComponentFontToMesh();
                 ~ComponentFontToMesh();

@@ -7,14 +7,14 @@
 #include <appkit-gl-engine/Components/ComponentCamera.h>
 
 #include <appkit-gl-engine/Engine.h>
+#include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
     namespace GLEngine
     {
-        SpriteShader::SpriteShader(ResourceMap *resourceMap)
+        SpriteShader::SpriteShader()
         {
-            this->resourceMap = resourceMap;
             format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
 
             const char vertexShaderCode[] = {
@@ -40,9 +40,8 @@ namespace AppKit
                 "void main() {"
                 "  vec4 texel = texture2D(uTexture, uv);"
                 "  vec4 result = texel * color * uColor;"
-                "  if (result.a <= 0.0) {"
+                "  if (result.a <= 0.0)"
                 "    discard;"
-                "  }"
                 "  gl_FragColor = result;"
                 "}"};
 
@@ -63,14 +62,13 @@ namespace AppKit
             uTexture = 0;
 
             GLRenderState *state = GLRenderState::Instance();
-            GLShader *old_shader = state->CurrentShader;
             state->CurrentShader = this;
 
             setUniform(u_mvp, uMVP);
             setUniform(u_color, uColor);
-            setUniform(u_texture, uTexture);// tex unit 0
+            setUniform(u_texture, uTexture); // tex unit 0
 
-            state->CurrentShader = old_shader;
+            state->CurrentShader = nullptr;
         }
 
         void SpriteShader::setMVP(const MathCore::mat4f &mvp)
@@ -100,42 +98,6 @@ namespace AppKit
             }
         }
 
-        void SpriteShader::activateShaderAndSetPropertiesFromBag(
-            Components::ComponentCamera *camera,
-            const MathCore::mat4f *mvp,
-            const Transform *element, // for localToWorld, localToWorld_IT, worldToLocal,
-            GLRenderState *state,
-            const Utils::ShaderPropertyBag &bag)
-        {
-            state->CurrentShader = this;
-
-            if (bag.getProperty<bool>("UseDiscard"))
-                state->BlendMode = AppKit::GLEngine::BlendModeDisabled;
-            else
-                state->BlendMode = AppKit::GLEngine::BlendModeAlpha;
-
-
-            setMVP(*mvp);
-            setColor(bag.getProperty<MathCore::vec4f>("uColor"));
-
-            texture_activated = bag.getProperty<std::shared_ptr<OpenGL::VirtualTexture>>("uTexture");
-
-            if (texture_activated == nullptr){
-                bool srgb = GLEngine::Engine::Instance()->sRGBCapable;
-                //texture_activated = this->resourceMap->getTexture("DEFAULT_ALBEDO",srgb);
-                texture_activated = this->resourceMap->defaultAlbedoTexture;
-            }
-
-            texture_activated->active(0);
-            setTexture(0);
-        }
-
-        void SpriteShader::deactivateShader(GLRenderState *state)
-        {
-            texture_activated->deactive(0);
-            texture_activated = nullptr;
-        }
-
         Utils::ShaderPropertyBag SpriteShader::createDefaultBag() const
         {
             Utils::ShaderPropertyBag bag;
@@ -145,6 +107,45 @@ namespace AppKit
             bag.addProperty("UseDiscard", false);
 
             return bag;
+        }
+
+        void SpriteShader::ActiveShader_And_SetUniformsFromMaterial(
+            GLRenderState *state,
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material)
+        {
+            const auto &materialBag = material->property_bag;
+            state->CurrentShader = this;
+            if (materialBag.getProperty<bool>("UseDiscard"))
+                state->BlendMode = AppKit::GLEngine::BlendModeDisabled;
+            else
+                state->BlendMode = AppKit::GLEngine::BlendModeAlpha;
+            setColor(materialBag.getProperty<MathCore::vec4f>("uColor"));
+
+
+            auto tex = materialBag.getProperty<std::shared_ptr<OpenGL::VirtualTexture>>("uTexture");
+            if (tex == nullptr)
+                tex = resourceMap->defaultAlbedoTexture;
+
+            OpenGL::VirtualTexture* textureUnitActivation[] = {tex.get()};
+            state->setTextureUnitActivationArray(textureUnitActivation, 1);
+
+            setTexture(0);
+        }
+        void SpriteShader::setUniformsFromMatrices(
+            GLRenderState *state,
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material,
+            Transform *element,
+            Components::ComponentCamera *camera,
+            const MathCore::mat4f *mvp,
+            const MathCore::mat4f *mv,
+            const MathCore::mat4f *mvIT,
+            const MathCore::mat4f *mvInv)
+        {
+            setMVP(*mvp);
         }
     }
 }

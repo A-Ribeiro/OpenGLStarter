@@ -1,4 +1,4 @@
-#include <appkit-gl-engine/shaders/AmbientLightPassShader.h>
+#include <appkit-gl-engine/shaders/deprecated/AmbientLightPassShader.h>
 
 namespace AppKit
 {

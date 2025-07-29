@@ -10,6 +10,29 @@ namespace AppKit
     namespace GLEngine
     {
 
+        class PBRSetup
+        {
+        public:
+            MathCore::vec3f albedoColor;
+            MathCore::vec3f emissionColor;
+
+            std::shared_ptr<OpenGL::VirtualTexture> texAlbedo;
+            std::shared_ptr<OpenGL::VirtualTexture> texNormal;
+            std::shared_ptr<OpenGL::VirtualTexture> texSpecular;
+            std::shared_ptr<OpenGL::VirtualTexture> texEmission;
+
+            float roughness;
+            float metallic;
+
+            PBRSetup()
+            {
+                albedoColor = MathCore::vec3f(1.0f);
+                emissionColor = MathCore::vec3f(0.0f); // [0.0f .. 8.0f]
+                roughness = 1.0f;
+                metallic = 0.0f;
+            }
+        };
+
         class FrankenShader;
 
         enum FrankenUniformTextureSlot
@@ -38,7 +61,7 @@ namespace AppKit
             FrankenShader *old_frankenShader;
             FrankenShader *frankenShader;
 
-            static const AppKit::OpenGL::VirtualTexture *last_tex_unit[FrankenUniformTextureSlot_Count];
+            // static const AppKit::OpenGL::VirtualTexture *last_tex_unit[FrankenUniformTextureSlot_Count];
             const AppKit::OpenGL::VirtualTexture *tex_unit[FrankenUniformTextureSlot_Count];
 
             // GLint tex_unit_uniform_location[FrankenUniformTextureSlot_Count];
@@ -54,7 +77,7 @@ namespace AppKit
             MathCore::vec3f camera_PosWorld;
 
             // material
-            Components::PBRSetup material_PBRSetup;
+            PBRSetup material_PBRSetup;
 
             // ambientColor
             MathCore::vec3f ambientColor;
@@ -79,14 +102,14 @@ namespace AppKit
             void setMVP(const MathCore::mat4f *mvp);
             void setNormalTransform(Transform *node);
             void setCameraReference(Components::ComponentCamera *camera);
-            void setPBRMaterial(const Components::ComponentMaterial *material);
+            void setPBRMaterial(const PBRSetup &material);
             void setAmbientLightColor(const MathCore::vec3f &ambientLightColor);
 
             // texture setup... from material
-            void setNormalTexture(const AppKit::OpenGL::GLTexture *tex);
-            void setAlbedoTexture(const AppKit::OpenGL::GLTexture *tex);
-            void setSpecularTexture(const AppKit::OpenGL::GLTexture *tex);
-            void setEmissionTexture(const AppKit::OpenGL::GLTexture *tex);
+            void setNormalTexture(const AppKit::OpenGL::VirtualTexture *tex);
+            void setAlbedoTexture(const AppKit::OpenGL::VirtualTexture *tex);
+            void setSpecularTexture(const AppKit::OpenGL::VirtualTexture *tex);
+            void setEmissionTexture(const AppKit::OpenGL::VirtualTexture *tex);
 
             // texture setup... from global scene
             void setEnvironmentCubeTexture(const AppKit::OpenGL::GLCubeMap *tex);
@@ -105,8 +128,8 @@ namespace AppKit
             // upload the uniform parameters
             void activateShader();
 
-            void activeTexUnit();
-            static void deactiveTexUnit();
+            void activeTexUnit(GLRenderState *state);
+            // static void deactiveTexUnit();
 
             void readUniformsFromShaderAndInitStatic();
         };

@@ -26,6 +26,7 @@ namespace AppKit
 {
     namespace GLEngine
     {
+        class ResourceMap;
         namespace Components
         {
 

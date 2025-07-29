@@ -233,7 +233,7 @@ namespace AppKit
                 {
                     material = transform->addNewComponent<ComponentMaterial>();
                     // material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
-                    material->type = AppKit::GLEngine::Components::MaterialNone;
+                    // material->type = AppKit::GLEngine::Components::MaterialNone;
                 }
                 if (mesh == nullptr)
                 {
@@ -257,13 +257,15 @@ namespace AppKit
                 this->lineShader = lineShader;
                 if (lineShader == nullptr)
                 {
-                    material->type = AppKit::GLEngine::Components::MaterialNone;
+                    //material->type = AppKit::GLEngine::Components::MaterialNone;
+                    material->setShader(nullptr);
                     return;
                 }
 
-                material->type = AppKit::GLEngine::Components::MaterialCustomShader;
-                material->custom_shader = lineShader;
-                material->custom_shader_property_bag = lineShader->createDefaultBag();
+                material->setShader(lineShader);
+                // material->type = AppKit::GLEngine::Components::MaterialCustomShader;
+                // material->shader = lineShader;
+                // material->property_bag = lineShader->createDefaultBag();
             }
 
             void ComponentLineMounter::one_time_set(std::shared_ptr<ComponentCamera> p_camera)

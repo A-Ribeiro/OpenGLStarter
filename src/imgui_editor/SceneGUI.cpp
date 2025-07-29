@@ -62,9 +62,13 @@ void SceneGUI::bindResourcesToGraph(){
         auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
         cursorTransform->addComponent(ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height));
 
-        cursorMaterial->type = MaterialUnlitTexture;
-        cursorMaterial->unlit.blendMode = BlendModeAlpha;
-        cursorMaterial->unlit.tex = cursorTexture;
+        cursorMaterial->setShader(resourceMap->shaderUnlitTextureAlpha);
+        //cursorMaterial->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
+        cursorMaterial->property_bag.getProperty("uTexture").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(cursorTexture);
+
+        // cursorMaterial->type = MaterialUnlitTexture;
+        // cursorMaterial->unlit.blendMode = BlendModeAlpha;
+        // cursorMaterial->unlit.tex = cursorTexture;
     }
 
     //texRefCount->add(&fontBuilder.glFont2.texture);
@@ -115,7 +119,7 @@ void SceneGUI::draw() {
     
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(root, camera, false);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, false);
         
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
@@ -172,7 +176,7 @@ void SceneGUI::OnUpdate(Platform::Time* time) {
     char txt[64];
     sprintf(txt, "%i fps", (int)(f_fps + 0.5f));
     fontBuilder.richBuild(txt, false);
-    fps->toMesh(fontBuilder, true);
+    fps->toMesh(resourceMap, fontBuilder, true);
     
     auto fps_transform = fps->getTransform();
     fps_transform->setLocalScale(MathCore::vec3f(40.0f / fontBuilder.glFont2.size));

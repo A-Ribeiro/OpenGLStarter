@@ -10,7 +10,18 @@ namespace AppKit
 {
     namespace GLEngine
     {
-        namespace Components{
+
+        // class SpriteShader;
+        class ShaderUnlit;
+        class ShaderUnlitVertexColor;
+        class ShaderUnlitTexture;
+        class ShaderUnlitTextureAlpha;
+        class ShaderUnlitTextureVertexColorAlpha;
+        class PBRShaderSelector;
+        class ShaderDepthOnly;
+
+        namespace Components
+        {
             class ComponentMaterial;
         }
 
@@ -61,7 +72,7 @@ namespace AppKit
             ITKCommon::FileSystem::File getFile(const std::string &relative_path);
 
             void clear_refcount_equals_1();
-            void clear();
+            void clear();// each scene call this on unload
 
             void ensure_default_texture_creation();
 
@@ -76,10 +87,33 @@ namespace AppKit
             std::shared_ptr<AppKit::OpenGL::GLTexture> defaultNormalTexture;
             std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial;
 
+            std::shared_ptr<Components::ComponentMaterial> renderOnlyDepthMaterial;
+
             std::unordered_map<uint64_t, std::shared_ptr<Components::ComponentMaterial>> spriteMaterialMap;
 
+            // default shaders
+            //std::shared_ptr<SpriteShader> spriteShader;
+            std::shared_ptr<ShaderUnlit> shaderUnlit;
+            std::shared_ptr<ShaderUnlitVertexColor> shaderUnlitVertexColor;
+            std::shared_ptr<ShaderUnlitTexture> shaderUnlitTexture;
+            std::shared_ptr<ShaderUnlitTextureAlpha> shaderUnlitTextureAlpha;
+            std::shared_ptr<ShaderUnlitTextureVertexColorAlpha> shaderUnlitTextureVertexColorAlpha;
+
+            std::shared_ptr<ShaderDepthOnly> shaderDepthOnly;
+
+            std::shared_ptr<PBRShaderSelector> pbrShaderSelector;
         };
     }
 }
 
+// need to include component material after using its forward declaration
 #include <appkit-gl-engine/Components/ComponentMaterial.h>
+
+#include <appkit-gl-engine/shaders/ShaderUnlit.h>            // UnlitPassShader
+#include <appkit-gl-engine/shaders/ShaderUnlitVertexColor.h> // Unlit_vertcolor_Shader
+#include <appkit-gl-engine/shaders/ShaderUnlitTexture.h>     // Unlit_tex_PassShader
+#include <appkit-gl-engine/shaders/ShaderUnlitTextureAlpha.h>     // Unlit_tex_PassShader
+// #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColor.h> //
+#include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlpha.h> // Unlit_tex_vertcolor_font_PassShader
+#include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
+#include <appkit-gl-engine/shaders/ShaderDepthOnly.h>                   // DepthOnlyShader

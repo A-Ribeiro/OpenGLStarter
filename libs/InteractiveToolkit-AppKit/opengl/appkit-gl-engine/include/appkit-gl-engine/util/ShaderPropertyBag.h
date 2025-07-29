@@ -218,127 +218,111 @@ namespace AppKit
             template <>
             inline const bool &ShaderProperty::get<bool>() const
             {
-                if (type_ != TYPE_BOOL)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_BOOL, "Property type mismatch");
                 return bool_value;
             }
 
             template <>
             inline bool &ShaderProperty::get<bool>()
             {
-                if (type_ != TYPE_BOOL)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_BOOL, "Property type mismatch");
                 return bool_value;
             }
             template <>
             inline const int &ShaderProperty::get<int>() const
             {
-                if (type_ != TYPE_INT)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_INT, "Property type mismatch");
                 return int_value;
             }
 
             template <>
             inline int &ShaderProperty::get<int>()
             {
-                if (type_ != TYPE_INT)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_INT, "Property type mismatch");
                 return int_value;
             }
 
             template <>
             inline const float &ShaderProperty::get<float>() const
             {
-                if (type_ != TYPE_FLOAT)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_FLOAT, "Property type mismatch");
                 return float_value;
             }
 
             template <>
             inline float &ShaderProperty::get<float>()
             {
-                if (type_ != TYPE_FLOAT)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_FLOAT, "Property type mismatch");
                 return float_value;
             }
 
             template <>
             inline const MathCore::vec2f &ShaderProperty::get<MathCore::vec2f>() const
             {
-                if (type_ != TYPE_VEC2F)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_VEC2F, "Property type mismatch");
                 return vec2f_value;
             }
 
             template <>
             inline MathCore::vec2f &ShaderProperty::get<MathCore::vec2f>()
             {
-                if (type_ != TYPE_VEC2F)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_VEC2F, "Property type mismatch");
                 return vec2f_value;
             }
 
             template <>
             inline const MathCore::vec3f &ShaderProperty::get<MathCore::vec3f>() const
             {
-                if (type_ != TYPE_VEC3F)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_VEC3F, "Property type mismatch");
                 return vec3f_value;
             }
 
             template <>
             inline MathCore::vec3f &ShaderProperty::get<MathCore::vec3f>()
             {
-                if (type_ != TYPE_VEC3F)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_VEC3F, "Property type mismatch");
                 return vec3f_value;
             }
 
             template <>
             inline const MathCore::vec4f &ShaderProperty::get<MathCore::vec4f>() const
             {
-                if (type_ != TYPE_VEC4F)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_VEC4F, "Property type mismatch");
                 return vec4f_value;
             }
 
             template <>
             inline MathCore::vec4f &ShaderProperty::get<MathCore::vec4f>()
             {
-                if (type_ != TYPE_VEC4F)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_VEC4F, "Property type mismatch");
                 return vec4f_value;
             }
 
             template <>
             inline const MathCore::mat4f &ShaderProperty::get<MathCore::mat4f>() const
             {
-                if (type_ != TYPE_MAT4F)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_MAT4F, "Property type mismatch");
                 return mat4f_value;
             }
 
             template <>
             inline MathCore::mat4f &ShaderProperty::get<MathCore::mat4f>()
             {
-                if (type_ != TYPE_MAT4F)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_MAT4F, "Property type mismatch");
                 return mat4f_value;
             }
 
             template <>
             inline const std::shared_ptr<OpenGL::VirtualTexture> &ShaderProperty::get<std::shared_ptr<OpenGL::VirtualTexture>>() const
             {
-                if (type_ != TYPE_VTEX)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_VTEX, "Property type mismatch");
                 return virtual_texture_value;
             }
 
             template <>
             inline std::shared_ptr<OpenGL::VirtualTexture> &ShaderProperty::get<std::shared_ptr<OpenGL::VirtualTexture>>()
             {
-                if (type_ != TYPE_VTEX)
-                    throw std::runtime_error("Property type mismatch");
+                ITK_ABORT(type_ != TYPE_VTEX, "Property type mismatch");
                 return virtual_texture_value;
             }
 

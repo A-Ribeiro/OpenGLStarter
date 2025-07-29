@@ -12,11 +12,11 @@
 #include <appkit-gl-engine/GL/GLCubeMapSkyBox.h>
 #include <appkit-gl-engine/Components/ComponentCamera.h>
 
-#include <appkit-gl-engine/shaders/UnlitPassShader.h>
-#include <appkit-gl-engine/shaders/DepthPassShader.h>
+//#include <appkit-gl-engine/shaders/UnlitPassShader.h>
+//#include <appkit-gl-engine/shaders/DepthPassShader.h>
 
-#include <appkit-gl-engine/shaders/AmbientLightPassShader.h>
-#include <appkit-gl-engine/shaders/DirectionalLightPassShader.h>
+//#include <appkit-gl-engine/shaders/AmbientLightPassShader.h>
+//#include <appkit-gl-engine/shaders/DirectionalLightPassShader.h>
 #include <appkit-gl-engine/shaders/FrankenShaderManager.h>
 
 #include <appkit-gl-engine/Components/ComponentLight.h>
@@ -32,10 +32,14 @@
 
 #include <appkit-gl-engine/Renderer/LightAndShadowManager.h>
 
+#include <appkit-gl-engine/ResourceMap.h>
+
 namespace AppKit
 {
     namespace GLEngine
     {
+
+        class PBRShaderSelector;
 
         enum OrthographicFilterEnum
         {
@@ -79,48 +83,57 @@ namespace AppKit
             SceneTraverseHelper sceneTraverseHelper;
             SortingHelper sortingHelper;
 
-            // supported shaders in this Render Pipeline
-        public:
-            DepthPassShader depthShader;
-            UnlitPassShader unlitShader;
-            Unlit_vertcolor_Shader unlit_vertcolor_Shader;
-            Unlit_tex_vertcolor_font_PassShader unlit_tex_vertcolor_font_Shader;
-            Unlit_tex_PassShader unlit_tex_Shader;
 
-        private:
-            // PBR multipass shaders
-            AmbientLight_tex_cube_PassShader ambientLight_tex_cube_PassShader;
-            DirectionalLightPassShader directionalLightPassShader;
+            Components::ComponentMaterial *currentMaterial;
+            Components::ComponentMesh *currentMesh;
+            const DefaultEngineShader *shaderMeshLastSet;
+
+            // supported shaders in this Render Pipeline
+            void setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap);
+            void setCurrentMesh(Components::ComponentMesh *mesh);
+        public:
+            // DepthPassShader depthShader;
+            //UnlitPassShader unlitShader;
+            //Unlit_vertcolor_Shader unlit_vertcolor_Shader;
+            //Unlit_tex_vertcolor_font_PassShader unlit_tex_vertcolor_font_Shader;
+            //Unlit_tex_PassShader unlit_tex_Shader;
 
             // PBR single pass frankenshader
             FrankenShaderManager frankenShaderManager;
+        private:
+            // PBR multipass shaders
+            //AmbientLight_tex_cube_PassShader ambientLight_tex_cube_PassShader;
+            //DirectionalLightPassShader directionalLightPassShader;
 
-            void allMeshRender(Transform *element, const DefaultEngineShader *shader) const;
-            void allMeshRender_Range(Transform *element, const DefaultEngineShader *shader, int start_index, int end_index) const;
-            void materialSetupAndRender(
-                Components::ComponentMaterial *material,
-                Transform *element,
-                Components::ComponentCamera *camera,
-                int start_index, int end_index,
-                const MathCore::mat4f *mvp,
-                const MathCore::mat4f *mv,
-                const MathCore::mat4f *mvIT,
-                const MathCore::mat4f *mvInv);
+            
 
-            void materialSetupAndRender_depth(
-                Components::ComponentMaterial *material,
-                Transform *element,
-                Components::ComponentCamera *camera,
-                int start_index, int end_index,
-                const MathCore::mat4f *mvp,
-                const MathCore::mat4f *mv,
-                const MathCore::mat4f *mvIT,
-                const MathCore::mat4f *mvInv);
+            // void allMeshRender(Transform *element, const DefaultEngineShader *shader) const;
+            // void allMeshRender_Range(Transform *element, const DefaultEngineShader *shader, int start_index, int end_index) const;
+            // void materialSetupAndRender(
+            //     Components::ComponentMaterial *material,
+            //     Transform *element,
+            //     Components::ComponentCamera *camera,
+            //     int start_index, int end_index,
+            //     const MathCore::mat4f *mvp,
+            //     const MathCore::mat4f *mv,
+            //     const MathCore::mat4f *mvIT,
+            //     const MathCore::mat4f *mvInv);
 
-            void traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera);
+            // void materialSetupAndRender_depth(
+            //     Components::ComponentMaterial *material,
+            //     Transform *element,
+            //     Components::ComponentCamera *camera,
+            //     int start_index, int end_index,
+            //     const MathCore::mat4f *mvp,
+            //     const MathCore::mat4f *mv,
+            //     const MathCore::mat4f *mvIT,
+            //     const MathCore::mat4f *mvInv);
+
+            void traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap);
 
         public:
-            void traverse_depth_render(Transform *element, Components::ComponentCamera *camera);
+            // lightManager calls this from outside
+            void traverse_depth_render_only_mesh(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap);
 
         public:
             // public skybox setup variables...
@@ -147,12 +160,15 @@ namespace AppKit
             ~RenderPipeline();
 
             void runSinglePassPipeline(
+                ResourceMap *resourceMap,
                 std::shared_ptr<Transform> root, 
                 std::shared_ptr<Components::ComponentCamera> camera, 
                 bool clear = true,
                 OrthographicFilterEnum orthoFilter = OrthographicFilter_UsingAABB);
 
-            void renderDepth(Transform  *root, Components::ComponentCamera *camera);
+            // void renderDepth(Transform  *root, Components::ComponentCamera *camera);
+
+            friend class PBRShaderSelector;
         };
 
     }

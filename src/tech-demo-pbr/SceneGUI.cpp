@@ -22,7 +22,8 @@ void SceneGUI::loadResources()
         true,               // _left,
         "button_NormalMap", //_id,
         "Normal Map ON",    //_text,
-        &fontBuilder        //_fontBuilder
+        &fontBuilder,        //_fontBuilder
+        resourceMap
     );
 
     button_AmbientLight = new Button(
@@ -30,7 +31,8 @@ void SceneGUI::loadResources()
         true,                      // _left,
         "button_AmbientLight",     //_id,
         "Ambient Light SphereMap", //_text,
-        &fontBuilder               //_fontBuilder
+        &fontBuilder,               //_fontBuilder
+        resourceMap
     );
 
     button_SunLight = new Button(
@@ -38,7 +40,8 @@ void SceneGUI::loadResources()
         true,              // _left,
         "button_SunLight", //_id,
         "Sun Light ON",    //_text,
-        &fontBuilder       //_fontBuilder
+        &fontBuilder,       //_fontBuilder
+        resourceMap
     );
 
     button_SunLightRotate = new Button(
@@ -46,7 +49,8 @@ void SceneGUI::loadResources()
         true,                    // _left,
         "button_SunLightRotate", //_id,
         "Sun Light Rotate OFF",  //_text,
-        &fontBuilder             //_fontBuilder
+        &fontBuilder,             //_fontBuilder
+        resourceMap
     );
 
     // right
@@ -55,7 +59,8 @@ void SceneGUI::loadResources()
         false,              // _left,
         "button_NextScene", //_id,
         "Next Scene",       //_text,
-        &fontBuilder        //_fontBuilder
+        &fontBuilder,        //_fontBuilder
+        resourceMap
     );
 
     allButtons.push_back(button_NormalMap);
@@ -107,7 +112,7 @@ void SceneGUI::setText(const std::string &text)
     fontBuilder.drawStroke = true;
 
     fontBuilder.richBuild(text.c_str(), false);
-    componentFontToMesh->toMesh(fontBuilder, true);
+    componentFontToMesh->toMesh(resourceMap, fontBuilder, true);
 }
 
 // to bind the resources to the current graph
@@ -128,9 +133,13 @@ void SceneGUI::bindResourcesToGraph()
         auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
         cursorTransform->addComponent(ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height));
 
-        cursorMaterial->type = MaterialUnlitTexture;
-        cursorMaterial->unlit.blendMode = BlendModeAlpha;
-        cursorMaterial->unlit.tex = cursorTexture;
+        cursorMaterial->setShader(resourceMap->shaderUnlitTextureAlpha);
+        //cursorMaterial->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
+        cursorMaterial->property_bag.getProperty("uTexture").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(cursorTexture);
+
+        // cursorMaterial->type = MaterialUnlitTexture;
+        // cursorMaterial->unlit.blendMode = BlendModeAlpha;
+        // cursorMaterial->unlit.tex = cursorTexture;
     }
 
     // texRefCount->add(&fontBuilder.glFont2.texture);
@@ -216,7 +225,7 @@ void SceneGUI::draw()
     char txt[64];
     sprintf(txt, "%i fps", (int)(f_fps + 0.5f));
     fontBuilder.richBuild(txt, false);
-    fps->toMesh(fontBuilder, true);
+    fps->toMesh(resourceMap, fontBuilder, true);
 
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
     MathCore::vec3f pos3D = MathCore::vec3f(
@@ -237,7 +246,7 @@ void SceneGUI::draw()
 
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(root, camera, false);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, false);
 
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);

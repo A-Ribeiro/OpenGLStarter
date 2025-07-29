@@ -41,9 +41,10 @@ namespace AppKit
                     vbo_skin_weights = new AppKit::OpenGL::GLVertexBufferObject();
                 }
                 vbo_index = new AppKit::OpenGL::GLVertexBufferObject();
+                vao = new AppKit::OpenGL::GLVertexArrayObject();
             }
 
-            void ComponentMesh::uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload)
+            void ComponentMesh::uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, bool index)
             {
                 last_model_dynamic_upload = model_dynamic_upload;
                 last_model_static_upload = model_static_upload;
@@ -127,8 +128,14 @@ namespace AppKit
                     vbo_skin_weights->uploadData((void *)&skin_weights[0], sizeof(MathCore::vec4f) * (int)skin_weights.size(), _dynamic);
                 }
 
-                vbo_indexCount = (int)indices.size();
-                vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), false);
+                if (index) {
+                    vbo_indexCount = (int)indices.size();
+                    vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), false);
+                }
+            }
+
+            bool ComponentMesh::usesVBO() const {
+                return vbo_indexCount > 0;
             }
 
             void ComponentMesh::ComputeFormat(bool skip_if_already_set)
@@ -178,6 +185,9 @@ namespace AppKit
 
                 vbo_index = nullptr;
 
+                vao = nullptr;
+                vao_format = 0;
+
                 format = 0;
 
                 always_clone = false;
@@ -188,6 +198,10 @@ namespace AppKit
 
             ComponentMesh::~ComponentMesh()
             {
+                releaseVBO();
+            }
+
+            void ComponentMesh::releaseVBO() {
                 if (vbo_pos != nullptr)
                     delete vbo_pos;
                 if (vbo_normals != nullptr)
@@ -211,6 +225,31 @@ namespace AppKit
 
                 if (vbo_index != nullptr)
                     delete vbo_index;
+                if (vao != nullptr)
+                    delete vao;
+                
+                vbo_indexCount = 0;
+
+                vbo_pos = nullptr;
+                vbo_normals = nullptr;
+                vbo_tangent = nullptr;
+                vbo_binormal = nullptr;
+                for (int i = 0; i < 8; i++)
+                {
+                    vbo_uv[i] = nullptr;
+                    vbo_color[i] = nullptr;
+                }
+
+                vbo_skin_index = nullptr;
+                vbo_skin_weights = nullptr;
+
+                vbo_index = nullptr;
+
+                vao = nullptr;
+                vao_format = 0;
+
+                last_model_dynamic_upload = 0;
+                last_model_static_upload = 0;
             }
 
             void ComponentMesh::syncVBOStatic()
@@ -241,7 +280,7 @@ namespace AppKit
                 uploadVBO(0xffffffff, 0);
             }
 
-            void ComponentMesh::syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload)
+            void ComponentMesh::syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, bool index)
             {
                 ComputeFormat();
                 if (pos.size() == 0 || indices.size() == 0)
@@ -252,20 +291,37 @@ namespace AppKit
                 else
                     ITK_ABORT(!format, "mesh without vertex\n.");
                 allocateVBO();
-                uploadVBO(model_dynamic_upload, model_static_upload);
+                uploadVBO(model_dynamic_upload, model_static_upload, index);
             }
+
+            
 
             void ComponentMesh::setLayoutPointers(const DefaultEngineShader *shader)
             {
-                ITKExtension::Model::BitMask shaderFormat = shader->format;
+                setLayoutPointers(shader->format);
+            }
+            void ComponentMesh::setLayoutPointers(ITKExtension::Model::BitMask shaderFormat)
+            {
                 ComputeFormat();
-                if (!format)
+                if (!format || !shaderFormat)
                     return;
 
                 ITK_ABORT(((format ^ shaderFormat) & shaderFormat), "Shader not compatible with this mesh.\n");
 
                 if (vbo_indexCount > 0)
                 {
+                    vao->enable();
+
+                    if (vao_format != 0 && vao_format == shaderFormat)
+                        return;
+
+                    if (vao_format != 0) {
+                        ITKExtension::Model::BitMask aux = vao_format;
+                        vao_format = 0;
+                        unsetLayoutPointers(aux);
+                    }
+                        
+
                     int count = 0;
                     if (shaderFormat & ITKExtension::Model::CONTAINS_POS)
                         vbo_pos->setLayout(count++, 3, GL_FLOAT, sizeof(MathCore::vec3f), 0);
@@ -289,6 +345,15 @@ namespace AppKit
                     }
 
                     vbo_index->setIndex();
+
+                    vao->disable();
+                    unsetLayoutPointers(shaderFormat);
+
+                    vao->enable();
+
+
+                    vao_format = shaderFormat;
+
                 }
                 else if (indices.size() > 0)
                 {
@@ -347,7 +412,10 @@ namespace AppKit
                     return;
                 if (vbo_indexCount > 0)
                 {
-                    vbo_index->drawIndex(GL_TRIANGLES, vbo_indexCount, GL_UNSIGNED_INT);
+                    if (vao_format != 0)
+                        vao->drawIndex(GL_TRIANGLES, vbo_indexCount, GL_UNSIGNED_INT);
+                    else
+                        vbo_index->drawIndex(GL_TRIANGLES, vbo_indexCount, GL_UNSIGNED_INT);
                 }
                 else if (indices.size() > 0)
                 {
@@ -357,13 +425,22 @@ namespace AppKit
 
             void ComponentMesh::unsetLayoutPointers(const DefaultEngineShader *shader)
             {
-                ITKExtension::Model::BitMask shaderFormat = shader->format;
+                unsetLayoutPointers(shader->format);
+            }
 
+            void ComponentMesh::unsetLayoutPointers(ITKExtension::Model::BitMask shaderFormat)
+            {
                 ComputeFormat();
-                if (!format)
+                if (!format || !shaderFormat)
                     return;
                 if (vbo_indexCount > 0)
                 {
+                    if (vao_format != 0)
+                    {
+                        vao->disable();
+                        return;
+                    }
+
                     int count = 0;
 
                     if (shaderFormat & ITKExtension::Model::CONTAINS_POS)
@@ -447,10 +524,8 @@ namespace AppKit
                 result->always_clone = this->always_clone;
 
                 // check VBO
-                if (this->vbo_indexCount > 0)
-                {
+                if (usesVBO())
                     result->syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload);
-                }
 
                 return result;
             }
@@ -563,6 +638,7 @@ namespace AppKit
                     &result->normals,
                     &result->tangent,
                     &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 
@@ -577,6 +653,7 @@ namespace AppKit
                          &result->normals,
                          &result->tangent,
                          &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 
@@ -591,6 +668,7 @@ namespace AppKit
                          &result->normals,
                          &result->tangent,
                          &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 
@@ -604,6 +682,7 @@ namespace AppKit
                        &result->normals,
                        &result->tangent,
                        &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 
@@ -617,6 +696,7 @@ namespace AppKit
                           &result->normals,
                           &result->tangent,
                           &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 

@@ -1,6 +1,6 @@
 #include <appkit-gl-engine/DefaultEngineShader.h>
 
-#include <appkit-gl-engine/shaders/DepthPassShader.h>
+#include <appkit-gl-engine/shaders/deprecated/DepthPassShader.h>
 
 namespace AppKit
 {
