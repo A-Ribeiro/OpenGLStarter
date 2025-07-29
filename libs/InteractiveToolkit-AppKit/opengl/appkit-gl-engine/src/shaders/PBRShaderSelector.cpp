@@ -49,8 +49,8 @@ namespace AppKit
             pbrSetup.texSpecular = materialBag.getProperty<std::shared_ptr<OpenGL::VirtualTexture>>("texSpecular");
             pbrSetup.texEmission = materialBag.getProperty<std::shared_ptr<OpenGL::VirtualTexture>>("texEmission");
 
-            if (pbrSetup.texAlbedo == nullptr)
-                pbrSetup.texAlbedo = resourceMap->defaultAlbedoTexture;
+            // if (pbrSetup.texAlbedo == nullptr)
+            //     pbrSetup.texAlbedo = resourceMap->defaultAlbedoTexture;
             // if (pbrSetup.texNormal == nullptr)
             //     pbrSetup.texNormal = resourceMap->defaultNormalTexture;
 
