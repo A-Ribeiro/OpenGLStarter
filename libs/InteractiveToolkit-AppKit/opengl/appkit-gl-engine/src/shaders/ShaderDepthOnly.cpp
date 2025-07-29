@@ -15,17 +15,17 @@ namespace AppKit
 
             const char vertexShaderCode[] = {
                 SHADER_HEADER_120
-                "attribute vec4 aPosition;"
-                "uniform mat4 uMVP;"
-                "void main() {"
-                "  gl_Position = uMVP * aPosition;"
+                "attribute vec4 aPosition;\n"
+                "uniform mat4 uMVP;\n"
+                "void main() {\n"
+                "  gl_Position = uMVP * aPosition;\n"
                 "}"
             };
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
-                "void main() {"
-                "  gl_FragColor = vec4(1.0);"
+                "void main() {\n"
+                "  gl_FragColor = vec4(1.0);\n"
                 "}"
             };
 

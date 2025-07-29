@@ -40,9 +40,8 @@ namespace AppKit
                 "void main() {"
                 "  vec4 texel = texture2D(uTexture, uv);"
                 "  vec4 result = texel * color * uColor;"
-                "  if (result.a <= 0.0) {"
+                "  if (result.a <= 0.0)"
                 "    discard;"
-                "  }"
                 "  gl_FragColor = result;"
                 "}"};
 

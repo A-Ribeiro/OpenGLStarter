@@ -132,7 +132,7 @@ void SceneJesusCross::bindResourcesToGraph() {
 
             auto material = node->addNewComponent<ComponentMaterial>();
             auto mesh = ComponentMesh::createBox(MathCore::vec3f(50, 1, 50));
-            mesh->syncVBOStatic();
+            //mesh->syncVBOStatic();
             node->addComponent(mesh);
             //material->type = MaterialUnlit;
             //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
@@ -160,7 +160,7 @@ void SceneJesusCross::bindResourcesToGraph() {
 
             auto material = node->addNewComponent<ComponentMaterial>();
             auto mesh = ComponentMesh::createSphere(1.0f,16,16);
-            mesh->syncVBOStatic();
+            //mesh->syncVBOStatic();
             node->addComponent(mesh);
             node->LocalPosition = MathCore::vec3f(2,3,0);
             node->LocalScale = MathCore::vec3f(0.2f,0.4f,0.2f);

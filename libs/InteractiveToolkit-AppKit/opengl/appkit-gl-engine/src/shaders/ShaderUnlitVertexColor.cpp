@@ -14,21 +14,23 @@ namespace AppKit
             format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_COLOR0;
 
             const char vertexShaderCode[] = {
-                "attribute vec4 aPosition;"
-                "attribute vec4 aColor0;"
-                "uniform mat4 uMVP;"
-                "varying vec4 color;"
-                "void main() {"
-                "  color = aColor0;"
-                "  gl_Position = uMVP * aPosition;"
+                SHADER_HEADER_120
+                "attribute vec4 aPosition;\n"
+                "attribute vec4 aColor0;\n"
+                "uniform mat4 uMVP;\n"
+                "varying vec4 color;\n"
+                "void main() {\n"
+                "  color = aColor0;\n"
+                "  gl_Position = uMVP * aPosition;\n"
                 "}"};
 
             const char fragmentShaderCode[] = {
-                "varying vec4 color;"
-                "uniform vec4 uColor;"
-                "void main() {"
-                "  vec4 result = color * uColor;"
-                "  gl_FragColor = result;"
+                SHADER_HEADER_120
+                "varying vec4 color;\n"
+                "uniform vec4 uColor;\n"
+                "void main() {\n"
+                "  vec4 result = color * uColor;\n"
+                "  gl_FragColor = result;\n"
                 "}"};
 
             compile(vertexShaderCode, fragmentShaderCode, __FILE__, __LINE__);

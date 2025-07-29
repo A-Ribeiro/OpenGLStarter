@@ -1,6 +1,6 @@
 #pragma once
 
-#include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlpha.h>
+#include <appkit-gl-engine/shaders/ShaderUnlitTextureAlpha.h>
 #include <appkit-gl-engine/Engine.h>
 #include <appkit-gl-engine/ResourceMap.h>
 
@@ -9,33 +9,29 @@ namespace AppKit
     namespace GLEngine
     {
 
-        ShaderUnlitTextureVertexColorAlpha::ShaderUnlitTextureVertexColorAlpha()
+        ShaderUnlitTextureAlpha::ShaderUnlitTextureAlpha()
         {
-            format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
+            format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0;
 
             const char vertexShaderCode[] = {
                 SHADER_HEADER_120
                 "attribute vec4 aPosition;\n"
                 "attribute vec3 aUV0;\n"
-                "attribute vec4 aColor0;\n"
                 "uniform mat4 uMVP;\n"
                 "varying vec2 uv;\n"
-                "varying vec4 color;\n"
                 "void main() {\n"
                 "  uv = aUV0.xy;\n"
-                "  color = aColor0;\n"
                 "  gl_Position = uMVP * aPosition;\n"
                 "}"};
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
                 "varying vec2 uv;\n"
-                "varying vec4 color;\n"
                 "uniform vec4 uColor;\n"
                 "uniform sampler2D uTexture;\n"
                 "void main() {\n"
                 "  vec4 texel = texture2D(uTexture, uv);\n"
-                "  vec4 result = texel * color * uColor;\n"
+                "  vec4 result = texel * uColor;\n"
                 "  if (result.a <= 0.0)\n"
                 "    discard;\n"
                 "  gl_FragColor = result;\n"
@@ -63,7 +59,7 @@ namespace AppKit
             state->CurrentShader = nullptr;
         }
 
-        void ShaderUnlitTextureVertexColorAlpha::setMVP(const MathCore::mat4f &mvp)
+        void ShaderUnlitTextureAlpha::setMVP(const MathCore::mat4f &mvp)
         {
             if (uMVP != mvp)
             {
@@ -71,7 +67,7 @@ namespace AppKit
                 setUniform(u_mvp, uMVP);
             }
         }
-        void ShaderUnlitTextureVertexColorAlpha::setTexture(int texunit)
+        void ShaderUnlitTextureAlpha::setTexture(int texunit)
         {
             if (uTexture != texunit)
             {
@@ -79,7 +75,7 @@ namespace AppKit
                 setUniform(u_texture, uTexture);
             }
         }
-        void ShaderUnlitTextureVertexColorAlpha::setColor(const MathCore::vec4f &color)
+        void ShaderUnlitTextureAlpha::setColor(const MathCore::vec4f &color)
         {
             if (uColor != color)
             {
@@ -88,7 +84,7 @@ namespace AppKit
             }
         }
 
-        Utils::ShaderPropertyBag ShaderUnlitTextureVertexColorAlpha::createDefaultBag() const
+        Utils::ShaderPropertyBag ShaderUnlitTextureAlpha::createDefaultBag() const
         {
             Utils::ShaderPropertyBag bag;
 
@@ -96,11 +92,10 @@ namespace AppKit
             bag.addProperty("uTexture", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
             bag.addProperty("BlendMode", (int)AppKit::GLEngine::BlendModeAlpha);
 
-
             return bag;
         }
 
-        void ShaderUnlitTextureVertexColorAlpha::ActiveShader_And_SetUniformsFromMaterial(
+        void ShaderUnlitTextureAlpha::ActiveShader_And_SetUniformsFromMaterial(
             GLRenderState *state,
             ResourceMap *resourceMap,
             RenderPipeline *renderPipeline,
@@ -122,7 +117,7 @@ namespace AppKit
             setTexture(0);
 
         }
-        void ShaderUnlitTextureVertexColorAlpha::setUniformsFromMatrices(
+        void ShaderUnlitTextureAlpha::setUniformsFromMatrices(
             GLRenderState *state,
             ResourceMap *resourceMap,
             RenderPipeline *renderPipeline,

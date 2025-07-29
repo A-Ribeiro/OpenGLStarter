@@ -4,6 +4,7 @@
 #include <appkit-gl-engine/shaders/ShaderUnlit.h>            // UnlitPassShader
 #include <appkit-gl-engine/shaders/ShaderUnlitVertexColor.h> // Unlit_vertcolor_Shader
 #include <appkit-gl-engine/shaders/ShaderUnlitTexture.h>     // Unlit_tex_PassShader
+#include <appkit-gl-engine/shaders/ShaderUnlitTextureAlpha.h>
 // #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColor.h> //
 #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlpha.h> // Unlit_tex_vertcolor_font_PassShader
 #include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
@@ -91,6 +92,7 @@ namespace AppKit
             shaderUnlit = nullptr;
             shaderUnlitVertexColor = nullptr;
             shaderUnlitTexture = nullptr;
+            shaderUnlitTextureAlpha = nullptr;
             shaderUnlitTextureVertexColorAlpha = nullptr;
             pbrShaderSelector = nullptr;
             shaderDepthOnly = nullptr;
@@ -105,6 +107,8 @@ namespace AppKit
                 shaderUnlitVertexColor = std::make_shared<ShaderUnlitVertexColor>();
             if (shaderUnlitTexture == nullptr)
                 shaderUnlitTexture = std::make_shared<ShaderUnlitTexture>();
+            if (shaderUnlitTextureAlpha == nullptr)
+                shaderUnlitTextureAlpha = std::make_shared<ShaderUnlitTextureAlpha>();
             if (shaderUnlitTextureVertexColorAlpha == nullptr)
                 shaderUnlitTextureVertexColorAlpha = std::make_shared<ShaderUnlitTextureVertexColorAlpha>();
             if (pbrShaderSelector == nullptr)
