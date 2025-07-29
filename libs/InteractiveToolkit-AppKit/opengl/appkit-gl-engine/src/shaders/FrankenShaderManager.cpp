@@ -130,13 +130,8 @@ namespace AppKit
             // delete pbrOptimizationTexture);
             // #endif
 
-            std::unordered_map<ShaderAlgorithmsBitMask, FrankenShader *>::iterator it;
-
-            for (it = shaderMap.begin(); it != shaderMap.end(); it++)
-            {
-                FrankenShader *shader = it->second;
-                delete shader;
-            }
+            for(auto pair: shaderMap)
+                delete pair.second;
 
             shaderMap.clear();
         }

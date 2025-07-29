@@ -110,163 +110,163 @@ namespace AppKit
             //     }
             // }
 
-            // PBRSetup implementation
-            PBRSetup::PBRSetup()
-            {
-                albedoColor = MathCore::vec3f(1.0f);
-                emissionColor = MathCore::vec3f(0.0f); // [0.0f .. 8.0f]
-                roughness = 1.0f;
-                metallic = 0.0f;
-            }
+            // // PBRSetup implementation
+            // PBRSetup::PBRSetup()
+            // {
+            //     albedoColor = MathCore::vec3f(1.0f);
+            //     emissionColor = MathCore::vec3f(0.0f); // [0.0f .. 8.0f]
+            //     roughness = 1.0f;
+            //     metallic = 0.0f;
+            // }
 
-            void PBRSetup::releaseTextureReferences()
-            {
-                texAlbedo = nullptr;
-                texNormal = nullptr;
-                texSpecular = nullptr;
-                texEmission = nullptr;
-            }
+            // void PBRSetup::releaseTextureReferences()
+            // {
+            //     texAlbedo = nullptr;
+            //     texNormal = nullptr;
+            //     texSpecular = nullptr;
+            //     texEmission = nullptr;
+            // }
 
-            void PBRSetup::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
-            {
-                writer.StartObject();
+            // void PBRSetup::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
+            // {
+            //     writer.StartObject();
 
-                if (albedoColor != MathCore::vec3f(1.0f))
-                {
-                    writer.String("albedo_color");
-                    SerializerUtil::write(writer, albedoColor);
-                }
+            //     if (albedoColor != MathCore::vec3f(1.0f))
+            //     {
+            //         writer.String("albedo_color");
+            //         SerializerUtil::write(writer, albedoColor);
+            //     }
 
-                if (emissionColor != MathCore::vec3f(0.0f))
-                {
-                    writer.String("emission_color");
-                    SerializerUtil::write(writer, emissionColor);
-                }
+            //     if (emissionColor != MathCore::vec3f(0.0f))
+            //     {
+            //         writer.String("emission_color");
+            //         SerializerUtil::write(writer, emissionColor);
+            //     }
 
-                if (roughness != 1.0f)
-                {
-                    writer.String("roughness");
-                    writer.Double(MathCore::CVT<float>::toDouble(roughness));
-                }
+            //     if (roughness != 1.0f)
+            //     {
+            //         writer.String("roughness");
+            //         writer.Double(MathCore::CVT<float>::toDouble(roughness));
+            //     }
 
-                if (metallic != 0.0f)
-                {
-                    writer.String("metallic");
-                    writer.Double(MathCore::CVT<float>::toDouble(metallic));
-                }
+            //     if (metallic != 0.0f)
+            //     {
+            //         writer.String("metallic");
+            //         writer.Double(MathCore::CVT<float>::toDouble(metallic));
+            //     }
 
-                if (texAlbedo != nullptr)
-                {
-                    writer.String("tex_albedo");
-                    writer.Uint64((uint64_t)(uintptr_t)texAlbedo.get());
-                }
+            //     if (texAlbedo != nullptr)
+            //     {
+            //         writer.String("tex_albedo");
+            //         writer.Uint64((uint64_t)(uintptr_t)texAlbedo.get());
+            //     }
 
-                if (texNormal != nullptr)
-                {
-                    writer.String("tex_normal");
-                    writer.Uint64((uint64_t)(uintptr_t)texNormal.get());
-                }
+            //     if (texNormal != nullptr)
+            //     {
+            //         writer.String("tex_normal");
+            //         writer.Uint64((uint64_t)(uintptr_t)texNormal.get());
+            //     }
 
-                if (texSpecular != nullptr)
-                {
-                    writer.String("tex_specular");
-                    writer.Uint64((uint64_t)(uintptr_t)texSpecular.get());
-                }
+            //     if (texSpecular != nullptr)
+            //     {
+            //         writer.String("tex_specular");
+            //         writer.Uint64((uint64_t)(uintptr_t)texSpecular.get());
+            //     }
 
-                if (texEmission != nullptr)
-                {
-                    writer.String("tex_emission");
-                    writer.Uint64((uint64_t)(uintptr_t)texEmission.get());
-                }
+            //     if (texEmission != nullptr)
+            //     {
+            //         writer.String("tex_emission");
+            //         writer.Uint64((uint64_t)(uintptr_t)texEmission.get());
+            //     }
 
-                writer.EndObject();
-            }
+            //     writer.EndObject();
+            // }
 
-            void PBRSetup::Deserialize(rapidjson::Value &_value,
-                             std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                             std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                             ResourceSet &resourceSet)
-            {
-                if (_value.HasMember("albedo_color"))
-                    albedoColor = SerializerUtil::read<decltype(albedoColor)>(_value["albedo_color"]);
-                else
-                    albedoColor = MathCore::vec3f(1.0f);
+            // void PBRSetup::Deserialize(rapidjson::Value &_value,
+            //                  std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+            //                  std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+            //                  ResourceSet &resourceSet)
+            // {
+            //     if (_value.HasMember("albedo_color"))
+            //         albedoColor = SerializerUtil::read<decltype(albedoColor)>(_value["albedo_color"]);
+            //     else
+            //         albedoColor = MathCore::vec3f(1.0f);
 
-                if (_value.HasMember("emission_color"))
-                    emissionColor = SerializerUtil::read<decltype(emissionColor)>(_value["emission_color"]);
-                else
-                    emissionColor = MathCore::vec3f(0.0f);
+            //     if (_value.HasMember("emission_color"))
+            //         emissionColor = SerializerUtil::read<decltype(emissionColor)>(_value["emission_color"]);
+            //     else
+            //         emissionColor = MathCore::vec3f(0.0f);
 
-                if (_value.HasMember("roughness") && _value["roughness"].IsDouble())
-                    roughness = MathCore::CVT<double>::toFloat(_value["roughness"].GetDouble());
-                else
-                    roughness = 1.0f;
+            //     if (_value.HasMember("roughness") && _value["roughness"].IsDouble())
+            //         roughness = MathCore::CVT<double>::toFloat(_value["roughness"].GetDouble());
+            //     else
+            //         roughness = 1.0f;
 
-                if (_value.HasMember("metallic") && _value["metallic"].IsDouble())
-                    metallic = MathCore::CVT<double>::toFloat(_value["metallic"].GetDouble());
-                else
-                    metallic = 0.0f;
+            //     if (_value.HasMember("metallic") && _value["metallic"].IsDouble())
+            //         metallic = MathCore::CVT<double>::toFloat(_value["metallic"].GetDouble());
+            //     else
+            //         metallic = 0.0f;
 
-                if (_value.HasMember("tex_albedo") && _value["tex_albedo"].IsUint64())
-                {
-                    printf("needs to query tex resource DB\n");
-                    uint64_t tex_id = _value["tex_albedo"].GetUint64();
-                    auto item = resourceSet.texture_map.find(tex_id);
-                    if (item != resourceSet.texture_map.end())
-                        texAlbedo = item->second;
-                    else
-                        texAlbedo = nullptr;
-                }
-                else
-                {
-                    texAlbedo = nullptr;
-                }
+            //     if (_value.HasMember("tex_albedo") && _value["tex_albedo"].IsUint64())
+            //     {
+            //         printf("needs to query tex resource DB\n");
+            //         uint64_t tex_id = _value["tex_albedo"].GetUint64();
+            //         auto item = resourceSet.texture_map.find(tex_id);
+            //         if (item != resourceSet.texture_map.end())
+            //             texAlbedo = item->second;
+            //         else
+            //             texAlbedo = nullptr;
+            //     }
+            //     else
+            //     {
+            //         texAlbedo = nullptr;
+            //     }
 
-                if (_value.HasMember("tex_normal") && _value["tex_normal"].IsUint64())
-                {
-                    printf("needs to query tex resource DB\n");
-                    uint64_t tex_id = _value["tex_normal"].GetUint64();
-                    auto item = resourceSet.texture_map.find(tex_id);
-                    if (item != resourceSet.texture_map.end())
-                        texNormal = item->second;
-                    else
-                        texNormal = nullptr;
-                }
-                else
-                {
-                    texNormal = nullptr;
-                }
+            //     if (_value.HasMember("tex_normal") && _value["tex_normal"].IsUint64())
+            //     {
+            //         printf("needs to query tex resource DB\n");
+            //         uint64_t tex_id = _value["tex_normal"].GetUint64();
+            //         auto item = resourceSet.texture_map.find(tex_id);
+            //         if (item != resourceSet.texture_map.end())
+            //             texNormal = item->second;
+            //         else
+            //             texNormal = nullptr;
+            //     }
+            //     else
+            //     {
+            //         texNormal = nullptr;
+            //     }
 
-                if (_value.HasMember("tex_specular") && _value["tex_specular"].IsUint64())
-                {
-                    printf("needs to query tex resource DB\n");
-                    uint64_t tex_id = _value["tex_specular"].GetUint64();
-                    auto item = resourceSet.texture_map.find(tex_id);
-                    if (item != resourceSet.texture_map.end())
-                        texSpecular = item->second;
-                    else
-                        texSpecular = nullptr;
-                }
-                else
-                {
-                    texSpecular = nullptr;
-                }
+            //     if (_value.HasMember("tex_specular") && _value["tex_specular"].IsUint64())
+            //     {
+            //         printf("needs to query tex resource DB\n");
+            //         uint64_t tex_id = _value["tex_specular"].GetUint64();
+            //         auto item = resourceSet.texture_map.find(tex_id);
+            //         if (item != resourceSet.texture_map.end())
+            //             texSpecular = item->second;
+            //         else
+            //             texSpecular = nullptr;
+            //     }
+            //     else
+            //     {
+            //         texSpecular = nullptr;
+            //     }
 
-                if (_value.HasMember("tex_emission") && _value["tex_emission"].IsUint64())
-                {
-                    printf("needs to query tex resource DB\n");
-                    uint64_t tex_id = _value["tex_emission"].GetUint64();
-                    auto item = resourceSet.texture_map.find(tex_id);
-                    if (item != resourceSet.texture_map.end())
-                        texEmission = item->second;
-                    else
-                        texEmission = nullptr;
-                }
-                else
-                {
-                    texEmission = nullptr;
-                }
-            }
+            //     if (_value.HasMember("tex_emission") && _value["tex_emission"].IsUint64())
+            //     {
+            //         printf("needs to query tex resource DB\n");
+            //         uint64_t tex_id = _value["tex_emission"].GetUint64();
+            //         auto item = resourceSet.texture_map.find(tex_id);
+            //         if (item != resourceSet.texture_map.end())
+            //             texEmission = item->second;
+            //         else
+            //             texEmission = nullptr;
+            //     }
+            //     else
+            //     {
+            //         texEmission = nullptr;
+            //     }
+            // }
 
             // ComponentMaterial implementation
             ComponentMaterial::ComponentMaterial() : Component(ComponentMaterial::Type)
@@ -283,7 +283,7 @@ namespace AppKit
             ComponentMaterial::~ComponentMaterial()
             {
                 // unlit.releaseTextureReferences();
-                pbr.releaseTextureReferences();
+                // pbr.releaseTextureReferences();
             }
 
             void ComponentMaterial::setShader(std::shared_ptr<DefaultEngineShader> shader) {
@@ -306,7 +306,7 @@ namespace AppKit
                 result->property_bag = this->property_bag;
 
                 // result->unlit = this->unlit;
-                result->pbr = this->pbr;
+                // result->pbr = this->pbr;
 
                 result->always_clone = this->always_clone;
 

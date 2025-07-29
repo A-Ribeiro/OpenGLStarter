@@ -86,7 +86,7 @@ namespace AppKit
         class GLRenderState : public EventCore::HandleCallback
         {
 
-            OpenGL::VirtualTexture* textureUnitActivation[32]; ///< 
+            const OpenGL::VirtualTexture* textureUnitActivation[32]; ///< 
             int textureUnitActivationCount; ///< Number of texture units activated
 
             //
@@ -137,6 +137,7 @@ namespace AppKit
 
 
             void setTextureUnitActivationArray (OpenGL::VirtualTexture** textureUnitActivation, int size);
+            void setTextureUnitActivationArray (const OpenGL::VirtualTexture** textureUnitActivation, int size);
             void clearTextureUnitActivationArray ();
 
             static GLRenderState *Instance();
