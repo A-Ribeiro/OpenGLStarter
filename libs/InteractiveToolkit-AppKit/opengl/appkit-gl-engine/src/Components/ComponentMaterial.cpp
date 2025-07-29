@@ -287,6 +287,8 @@ namespace AppKit
             }
 
             void ComponentMaterial::setShader(std::shared_ptr<DefaultEngineShader> shader) {
+                if (this->shader == shader)
+                    return;
                 this->shader  = shader;
                 if (this->shader != nullptr)
                     this->property_bag = this->shader->createDefaultBag();

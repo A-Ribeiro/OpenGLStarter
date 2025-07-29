@@ -5,6 +5,7 @@
 // #include <aRibeiroCore/aRibeiroCore.h>
 
 #include <appkit-gl-engine/util/ResourceHelper.h>
+#include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
@@ -13,6 +14,7 @@ namespace AppKit
 
         std::shared_ptr<Transform> Basof2ToResource::nodeTraverse(const std::string &spaces,
                                                   int currentIndex,
+                                                  ResourceMap *resourceMap,
                                                   const ITKExtension::Model::Node &node,
                                                   const ITKExtension::Model::ModelContainer *container,
                                                   std::unordered_map<int, std::shared_ptr<Components::ComponentMesh> > &geometryCache,
@@ -114,17 +116,20 @@ namespace AppKit
                                 //Components::ComponentMaterial *material;
                                 auto material = result->addNewComponent<Components::ComponentMaterial>();
 
-                                printf("needs check here for the material [%s:%d] \n", __FILE__, __LINE__);
-                                exit(-1);
+                                material->setShader(resourceMap->pbrShaderSelector);
+                                // printf("needs check here for the material [%s:%d] \n", __FILE__, __LINE__);
+                                // exit(-1);
                                 //material->type = Components::MaterialPBR;
 
                                 std::unordered_map<std::string, MathCore::vec4f>::const_iterator it = mat->vec4Value.find("diffuse");
                                 if (it != mat->vec4Value.end())
                                 {
-                                    material->pbr.albedoColor = MathCore::CVT<MathCore::vec4f>::toVec3(it->second);
+                                    auto albedoColor = MathCore::CVT<MathCore::vec4f>::toVec3(it->second);
                                     // material->pbr.albedoColor = mat->vec4Value.at("diffuse");
 
-                                    material->pbr.albedoColor = ResourceHelper::vec3ColorGammaToLinear(material->pbr.albedoColor);
+                                    albedoColor = ResourceHelper::vec3ColorGammaToLinear(albedoColor);
+
+                                    material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(albedoColor);
                                 }
 
                                 // materialCache.insert_or_assign(geom->materialIndex, material);
@@ -183,6 +188,7 @@ namespace AppKit
                 uint32_t chidx = node.children[i];
                 result->addChild(nodeTraverse(spaces + ".",
                                               chidx,
+                                              resourceMap,
                                               container->nodes[chidx],
                                               container,
                                               geometryCache,
@@ -197,6 +203,7 @@ namespace AppKit
 
         std::shared_ptr<Transform> Basof2ToResource::loadAndConvert(
             const std::string &filename,
+            ResourceMap *resourceMap,
             std::shared_ptr<Components::ComponentMaterial> defaultMaterial,
             std::shared_ptr<Transform> rootNode,
             uint32_t model_dynamic_upload, uint32_t model_static_upload)
@@ -210,6 +217,7 @@ namespace AppKit
 
             auto result = nodeTraverse(".",
                                              0,
+                                             resourceMap,
                                              container->nodes[0],
                                              container,
                                              geometryCache,
