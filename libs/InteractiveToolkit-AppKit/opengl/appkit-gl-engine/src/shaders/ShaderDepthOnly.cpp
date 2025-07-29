@@ -2,6 +2,7 @@
 
 #include <appkit-gl-engine/shaders/ShaderDepthOnly.h>
 #include <appkit-gl-engine/Engine.h>
+#include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
@@ -51,6 +52,32 @@ namespace AppKit
                 uMVP = mvp;
                 setUniform(u_mvp, uMVP);
             }
+        }
+
+        void ShaderDepthOnly::ActiveShader_And_SetUniformsFromMaterial(
+            GLRenderState *state,
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material)
+        {
+            state->CurrentShader = this;
+            state->BlendMode = AppKit::GLEngine::BlendModeDisabled;
+
+            state->clearTextureUnitActivationArray();
+        }
+        void ShaderDepthOnly::setUniformsFromMatrices(
+            GLRenderState *state,
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material,
+            Transform *element,
+            Components::ComponentCamera *camera,
+            const MathCore::mat4f *mvp,
+            const MathCore::mat4f *mv,
+            const MathCore::mat4f *mvIT,
+            const MathCore::mat4f *mvInv)
+        {
+            setMVP(*mvp);
         }
 
     }

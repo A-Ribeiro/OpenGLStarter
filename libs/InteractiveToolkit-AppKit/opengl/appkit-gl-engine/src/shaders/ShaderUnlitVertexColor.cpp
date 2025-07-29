@@ -2,6 +2,7 @@
 
 #include <appkit-gl-engine/shaders/ShaderUnlitVertexColor.h>
 #include <appkit-gl-engine/Engine.h>
+#include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
@@ -71,8 +72,38 @@ namespace AppKit
             Utils::ShaderPropertyBag bag;
 
             bag.addProperty("uColor", uColor);
+            bag.addProperty("BlendMode", (int)AppKit::GLEngine::BlendModeDisabled);
 
             return bag;
+        }
+
+         void ShaderUnlitVertexColor::ActiveShader_And_SetUniformsFromMaterial(
+            GLRenderState *state,
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material)
+        {
+            const auto &materialBag = material->property_bag;
+            state->CurrentShader = this;
+
+            state->BlendMode = (AppKit::GLEngine::BlendModeType)materialBag.getProperty<int>("BlendMode");
+            setColor(materialBag.getProperty<MathCore::vec4f>("uColor"));
+
+            state->clearTextureUnitActivationArray();
+        }
+        void ShaderUnlitVertexColor::setUniformsFromMatrices(
+            GLRenderState *state,
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material,
+            Transform *element,
+            Components::ComponentCamera *camera,
+            const MathCore::mat4f *mvp,
+            const MathCore::mat4f *mv,
+            const MathCore::mat4f *mvIT,
+            const MathCore::mat4f *mvInv)
+        {
+            setMVP(*mvp);
         }
 
     }

@@ -22,93 +22,93 @@ namespace AppKit
         {
             const ComponentType ComponentMaterial::Type = "ComponentMaterial";
 
-            // UnlitSetup implementation
-            UnlitSetup::UnlitSetup()
-            {
-                blendMode = AppKit::GLEngine::BlendModeDisabled;
-                color = MathCore::vec4f(1.0f);
-            }
+            // // UnlitSetup implementation
+            // UnlitSetup::UnlitSetup()
+            // {
+            //     blendMode = AppKit::GLEngine::BlendModeDisabled;
+            //     color = MathCore::vec4f(1.0f);
+            // }
 
-            void UnlitSetup::releaseTextureReferences()
-            {
-                tex = nullptr;
-            }
+            // void UnlitSetup::releaseTextureReferences()
+            // {
+            //     tex = nullptr;
+            // }
 
-            void UnlitSetup::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
-            {
-                writer.StartObject();
+            // void UnlitSetup::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
+            // {
+            //     writer.StartObject();
 
-                if (color != MathCore::vec4f(1.0f))
-                {
-                    writer.String("color");
-                    SerializerUtil::write(writer, color);
-                }
+            //     if (color != MathCore::vec4f(1.0f))
+            //     {
+            //         writer.String("color");
+            //         SerializerUtil::write(writer, color);
+            //     }
 
-                if (tex != nullptr)
-                {
-                    writer.String("tex");
-                    writer.Uint64((uint64_t)(uintptr_t)tex.get());
-                }
+            //     if (tex != nullptr)
+            //     {
+            //         writer.String("tex");
+            //         writer.Uint64((uint64_t)(uintptr_t)tex.get());
+            //     }
 
-                writer.String("blend_mode");
-                if (blendMode == AppKit::GLEngine::BlendModeDisabled)
-                    writer.String("disabled");
-                else if (blendMode == AppKit::GLEngine::BlendModeAlpha)
-                    writer.String("alpha");
-                else if (blendMode == AppKit::GLEngine::BlendModeAdd)
-                    writer.String("add");
-                else if (blendMode == AppKit::GLEngine::BlendModeAddAlpha)
-                    writer.String("add_alpha");
-                else if (blendMode == AppKit::GLEngine::BlendModeSubtract)
-                    writer.String("subtract");
-                else if (blendMode == AppKit::GLEngine::BlendModeSubtractAlpha)
-                    writer.String("subtract_alpha");
+            //     writer.String("blend_mode");
+            //     if (blendMode == AppKit::GLEngine::BlendModeDisabled)
+            //         writer.String("disabled");
+            //     else if (blendMode == AppKit::GLEngine::BlendModeAlpha)
+            //         writer.String("alpha");
+            //     else if (blendMode == AppKit::GLEngine::BlendModeAdd)
+            //         writer.String("add");
+            //     else if (blendMode == AppKit::GLEngine::BlendModeAddAlpha)
+            //         writer.String("add_alpha");
+            //     else if (blendMode == AppKit::GLEngine::BlendModeSubtract)
+            //         writer.String("subtract");
+            //     else if (blendMode == AppKit::GLEngine::BlendModeSubtractAlpha)
+            //         writer.String("subtract_alpha");
 
-                writer.EndObject();
-            }
+            //     writer.EndObject();
+            // }
 
-            void UnlitSetup::Deserialize(rapidjson::Value &_value,
-                             std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                             std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                             ResourceSet &resourceSet)
-            {
-                if (_value.HasMember("color"))
-                    color = SerializerUtil::read<decltype(color)>(_value["color"]);
-                else
-                    color = MathCore::vec4f(1.0f);
+            // void UnlitSetup::Deserialize(rapidjson::Value &_value,
+            //                  std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+            //                  std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+            //                  ResourceSet &resourceSet)
+            // {
+            //     if (_value.HasMember("color"))
+            //         color = SerializerUtil::read<decltype(color)>(_value["color"]);
+            //     else
+            //         color = MathCore::vec4f(1.0f);
 
-                if (_value.HasMember("tex") && _value["tex"].IsUint64())
-                {
-                    printf("needs to query tex resource DB\n");
-                    uint64_t tex_id = _value["tex"].GetUint64();
-                    auto item = resourceSet.texture_map.find(tex_id);
-                    if (item != resourceSet.texture_map.end())
-                        tex = item->second;
-                    else
-                        tex = nullptr;
-                }
-                else
-                {
-                    tex = nullptr;
-                }
+            //     if (_value.HasMember("tex") && _value["tex"].IsUint64())
+            //     {
+            //         printf("needs to query tex resource DB\n");
+            //         uint64_t tex_id = _value["tex"].GetUint64();
+            //         auto item = resourceSet.texture_map.find(tex_id);
+            //         if (item != resourceSet.texture_map.end())
+            //             tex = item->second;
+            //         else
+            //             tex = nullptr;
+            //     }
+            //     else
+            //     {
+            //         tex = nullptr;
+            //     }
 
-                if (_value.HasMember("blend_mode") && _value["blend_mode"].IsString())
-                {
-                    auto blend_mode = _value["blend_mode"].GetString();
-                    if (strcmp(blend_mode, "disabled") == 0)
-                        blendMode = AppKit::GLEngine::BlendModeDisabled;
-                    else if (strcmp(blend_mode, "alpha") == 0)
-                        blendMode = AppKit::GLEngine::BlendModeAlpha;
-                    else if (strcmp(blend_mode, "add") == 0)
-                        blendMode = AppKit::GLEngine::BlendModeAdd;
-                    else if (strcmp(blend_mode, "add_alpha") == 0)
-                        blendMode = AppKit::GLEngine::BlendModeAddAlpha;
-                    else if (strcmp(blend_mode, "subtract") == 0)
-                        blendMode = AppKit::GLEngine::BlendModeSubtract;
-                    else if (strcmp(blend_mode, "subtract_alpha") == 0)
-                        blendMode = AppKit::GLEngine::BlendModeSubtractAlpha;
-                }
-            }
+            //     if (_value.HasMember("blend_mode") && _value["blend_mode"].IsString())
+            //     {
+            //         auto blend_mode = _value["blend_mode"].GetString();
+            //         if (strcmp(blend_mode, "disabled") == 0)
+            //             blendMode = AppKit::GLEngine::BlendModeDisabled;
+            //         else if (strcmp(blend_mode, "alpha") == 0)
+            //             blendMode = AppKit::GLEngine::BlendModeAlpha;
+            //         else if (strcmp(blend_mode, "add") == 0)
+            //             blendMode = AppKit::GLEngine::BlendModeAdd;
+            //         else if (strcmp(blend_mode, "add_alpha") == 0)
+            //             blendMode = AppKit::GLEngine::BlendModeAddAlpha;
+            //         else if (strcmp(blend_mode, "subtract") == 0)
+            //             blendMode = AppKit::GLEngine::BlendModeSubtract;
+            //         else if (strcmp(blend_mode, "subtract_alpha") == 0)
+            //             blendMode = AppKit::GLEngine::BlendModeSubtractAlpha;
+            //     }
+            // }
 
             // PBRSetup implementation
             PBRSetup::PBRSetup()
@@ -282,7 +282,7 @@ namespace AppKit
 
             ComponentMaterial::~ComponentMaterial()
             {
-                unlit.releaseTextureReferences();
+                // unlit.releaseTextureReferences();
                 pbr.releaseTextureReferences();
             }
 
@@ -290,6 +290,8 @@ namespace AppKit
                 this->shader  = shader;
                 if (this->shader != nullptr)
                     this->property_bag = this->shader->createDefaultBag();
+                else
+                    this->property_bag.clear();
             }
 
             std::shared_ptr<Component> ComponentMaterial::duplicate_ref_or_clone(bool force_clone)
@@ -303,7 +305,7 @@ namespace AppKit
                 result->shader = this->shader;
                 result->property_bag = this->property_bag;
 
-                result->unlit = this->unlit;
+                // result->unlit = this->unlit;
                 result->pbr = this->pbr;
 
                 result->always_clone = this->always_clone;

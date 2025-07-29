@@ -13,6 +13,7 @@ namespace AppKit
         class Transform;
         class GLRenderState;
         class RenderPipeline;
+        class ResourceMap;
     }
 }
 namespace AppKit
@@ -74,10 +75,12 @@ namespace AppKit
 
             virtual void ActiveShader_And_SetUniformsFromMaterial(
                 GLRenderState *state,
+                ResourceMap *resourceMap,
                 RenderPipeline *renderPipeline,
                 Components::ComponentMaterial *material);
             virtual void setUniformsFromMatrices(
                 GLRenderState *state,
+                ResourceMap *resourceMap,
                 RenderPipeline *renderPipeline,
                 Components::ComponentMaterial *material,
                 Transform *element,

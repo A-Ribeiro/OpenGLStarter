@@ -195,12 +195,14 @@ namespace AppKit
 
         void DefaultEngineShader::ActiveShader_And_SetUniformsFromMaterial(
             GLRenderState *state,
+            ResourceMap *resourceMap,
             RenderPipeline *renderPipeline,
             Components::ComponentMaterial *material)
         {
         }
         void DefaultEngineShader::setUniformsFromMatrices(
             GLRenderState *state,
+            ResourceMap *resourceMap,
             RenderPipeline *renderPipeline,
             Components::ComponentMaterial *material,
             Transform *element,

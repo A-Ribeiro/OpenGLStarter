@@ -31,7 +31,7 @@ namespace AppKit
                 {
                     //material->type = AppKit::GLEngine::Components::MaterialUnlitVertexColor;
                     material->setShader(resourceMap->shaderUnlitVertexColor);
-                    material->unlit.tex = nullptr;
+                    //material->unlit.tex = nullptr;
 
                     for (size_t i = 0; i < builder.vertexAttrib.size(); i++)
                     {
@@ -48,7 +48,9 @@ namespace AppKit
                     // texture font
                     //material->type = AppKit::GLEngine::Components::MaterialUnlitTextureVertexColorFont;
                     material->setShader(resourceMap->shaderUnlitTextureVertexColorAlpha);
-                    material->unlit.tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&builder.glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
+                    //material->unlit.tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&builder.glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
+                    auto tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&builder.glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
+                    material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
 
                     for (size_t i = 0; i < builder.vertexAttrib.size(); i++)
                     {

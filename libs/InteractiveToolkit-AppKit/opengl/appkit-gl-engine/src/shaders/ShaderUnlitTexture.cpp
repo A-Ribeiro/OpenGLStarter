@@ -2,6 +2,7 @@
 
 #include <appkit-gl-engine/shaders/ShaderUnlitTexture.h>
 #include <appkit-gl-engine/Engine.h>
+#include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
@@ -85,8 +86,46 @@ namespace AppKit
 
             bag.addProperty("uColor", uColor);
             bag.addProperty("uTexture", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+            bag.addProperty("BlendMode", (int)AppKit::GLEngine::BlendModeDisabled);
 
             return bag;
+        }
+
+        void ShaderUnlitTexture::ActiveShader_And_SetUniformsFromMaterial(
+            GLRenderState *state,
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material)
+        {
+            const auto &materialBag = material->property_bag;
+            state->CurrentShader = this;
+
+            state->BlendMode = (AppKit::GLEngine::BlendModeType)materialBag.getProperty<int>("BlendMode");
+            setColor(materialBag.getProperty<MathCore::vec4f>("uColor"));
+
+            auto tex = materialBag.getProperty<std::shared_ptr<OpenGL::VirtualTexture>>("uTexture");
+            if (tex == nullptr)
+                tex = resourceMap->defaultAlbedoTexture;
+
+            OpenGL::VirtualTexture* textureUnitActivation[] = {tex.get()};
+            state->setTextureUnitActivationArray(textureUnitActivation, 1);
+
+            setTexture(0);
+
+        }
+        void ShaderUnlitTexture::setUniformsFromMatrices(
+            GLRenderState *state,
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material,
+            Transform *element,
+            Components::ComponentCamera *camera,
+            const MathCore::mat4f *mvp,
+            const MathCore::mat4f *mv,
+            const MathCore::mat4f *mvIT,
+            const MathCore::mat4f *mvInv)
+        {
+            setMVP(*mvp);
         }
 
     }

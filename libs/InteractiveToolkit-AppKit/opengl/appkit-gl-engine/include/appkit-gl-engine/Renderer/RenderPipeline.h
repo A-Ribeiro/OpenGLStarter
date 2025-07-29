@@ -87,7 +87,7 @@ namespace AppKit
             const DefaultEngineShader *shaderMeshLastSet;
 
             // supported shaders in this Render Pipeline
-            void setCurrentMaterial(Components::ComponentMaterial *material);
+            void setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap);
             void setCurrentMesh(Components::ComponentMesh *mesh);
         public:
             // DepthPassShader depthShader;
