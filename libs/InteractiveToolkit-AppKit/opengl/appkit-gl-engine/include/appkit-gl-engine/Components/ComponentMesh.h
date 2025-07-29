@@ -13,6 +13,11 @@
 
 #include <appkit-gl-engine/DefaultEngineShader.h>
 
+#include <appkit-gl-base/GLVertexBufferObject.h>
+#include <appkit-gl-base/GLVertexArrayObject.h>
+
+
+
 namespace AppKit
 {
     namespace GLEngine
@@ -37,6 +42,9 @@ namespace AppKit
 
                 AppKit::OpenGL::GLVertexBufferObject *vbo_index;
 
+                AppKit::OpenGL::GLVertexArrayObject *vao;
+                ITKExtension::Model::BitMask vao_format;
+
                 int vbo_indexCount;
 
                 ITKExtension::Model::BitMask last_model_dynamic_upload;
@@ -44,7 +52,7 @@ namespace AppKit
 
                 void allocateVBO();
 
-                void uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload);
+                void uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, bool index = true);
 
             public:
                 static const ComponentType Type;
@@ -69,23 +77,29 @@ namespace AppKit
 
                 bool always_clone;
 
+                bool usesVBO() const;
+
                 void ComputeFormat(bool skip_if_already_set = true);
 
                 ComponentMesh();
 
                 ~ComponentMesh();
 
+                void releaseVBO();
+
                 void syncVBOStatic();
 
                 void syncVBODynamic();
 
-                void syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload);
+                void syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, bool index = true);
 
                 void setLayoutPointers(const DefaultEngineShader *shader);
+                void setLayoutPointers(ITKExtension::Model::BitMask shaderFormat);
 
                 void draw();
 
                 void unsetLayoutPointers(const DefaultEngineShader *shader);
+                void unsetLayoutPointers(ITKExtension::Model::BitMask shaderFormat);
 
                 // best option is to return a ref, 
                 // but can clone if necessary

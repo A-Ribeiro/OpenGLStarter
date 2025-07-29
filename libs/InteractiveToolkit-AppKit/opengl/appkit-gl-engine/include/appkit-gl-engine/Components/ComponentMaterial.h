@@ -29,66 +29,66 @@ namespace AppKit
         namespace Components
         {
 
-            enum MaterialType
-            {
-                MaterialNone,
+            // enum MaterialType
+            // {
+            //     MaterialNone,
 
-                MaterialUnlit,                       // implemented
-                MaterialUnlitVertexColor,            // implemented
-                MaterialUnlitTexture,                // implemented
-                MaterialUnlitTextureVertexColor,     // implemented
-                MaterialUnlitTextureVertexColorFont, // implemented
+            //     MaterialUnlit,                       // implemented
+            //     MaterialUnlitVertexColor,            // implemented
+            //     MaterialUnlitTexture,                // implemented
+            //     MaterialUnlitTextureVertexColor,     // implemented
+            //     MaterialUnlitTextureVertexColorFont, // implemented
 
-                MaterialPBR,
+            //     MaterialPBR,
 
-                MaterialCustomShader
-            };
+            //     MaterialCustomShader
+            // };
 
-            class UnlitSetup
-            {
-            public:
-                MathCore::vec4f color;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> tex;
+            // class UnlitSetup
+            // {
+            // public:
+            //     MathCore::vec4f color;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> tex;
 
-                AppKit::GLEngine::BlendModeType blendMode;
+            //     AppKit::GLEngine::BlendModeType blendMode;
 
-                UnlitSetup();
+            //     UnlitSetup();
 
-                void releaseTextureReferences();
+            //     void releaseTextureReferences();
 
-                void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
+            //     void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
-                void Deserialize(rapidjson::Value &_value,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                                 ResourceSet &resourceSet);
-            };
+            //     void Deserialize(rapidjson::Value &_value,
+            //                      std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+            //                      std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+            //                      ResourceSet &resourceSet);
+            // };
 
-            class PBRSetup
-            {
-            public:
-                MathCore::vec3f albedoColor;
-                MathCore::vec3f emissionColor;
+            // class PBRSetup
+            // {
+            // public:
+            //     MathCore::vec3f albedoColor;
+            //     MathCore::vec3f emissionColor;
 
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texAlbedo;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texNormal;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texSpecular;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texEmission;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texAlbedo;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texNormal;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texSpecular;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texEmission;
 
-                float roughness;
-                float metallic;
+            //     float roughness;
+            //     float metallic;
 
-                PBRSetup();
+            //     PBRSetup();
 
-                void releaseTextureReferences();
+            //     void releaseTextureReferences();
 
-                void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
+            //     void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
-                void Deserialize(rapidjson::Value &_value,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                                 ResourceSet &resourceSet);
-            };
+            //     void Deserialize(rapidjson::Value &_value,
+            //                      std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+            //                      std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+            //                      ResourceSet &resourceSet);
+            // };
 
             class ComponentMaterial : public Component
             {
@@ -96,20 +96,23 @@ namespace AppKit
                 static const ComponentType Type;
 
                 // material type
-                MaterialType type;
+                // MaterialType type;
 
                 // parameters
-                UnlitSetup unlit;
-                PBRSetup pbr;
+                // UnlitSetup unlit;
+                // PBRSetup pbr;
 
                 // used for mesh skinning
                 bool skin_gradient_matrix_dirty;
                 std::vector<MathCore::mat4f> *skin_gradient_matrix;
                 uint32_t skin_shader_matrix_size_bitflag; // skin hint to help to select shader
                 
-                // for custom shader only
-                std::shared_ptr<DefaultEngineShader> custom_shader;
-                Utils::ShaderPropertyBag custom_shader_property_bag;
+                // always custom shader
+                std::shared_ptr<DefaultEngineShader> shader;
+                Utils::ShaderPropertyBag property_bag;
+
+                // set shader and initialize property bag
+                void setShader(std::shared_ptr<DefaultEngineShader> shader);
 
                 bool always_clone;
 

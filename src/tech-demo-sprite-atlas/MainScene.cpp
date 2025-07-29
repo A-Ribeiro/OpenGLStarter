@@ -16,7 +16,7 @@ using namespace MathCore;
 void MainScene::loadResources()
 {
     // auto engine = AppKit::GLEngine::Engine::Instance();
-    spriteShader = std::make_shared<SpriteShader>(resourceMap);
+    spriteShader = std::make_shared<SpriteShader>();
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -47,7 +47,7 @@ void MainScene::bindResourcesToGraph()
         MathCore::vec2f(0.5f, 0.5f),             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
         MathCore::vec2f(-1, 256),                // size constraint
-        MeshUploadMode_Direct                    // static mesh
+        MeshUploadMode_Dynamic                   // dynamic mesh
     );
     spriteNode->addNewComponent<ComponentGrow>()->app = app;
 
@@ -142,7 +142,7 @@ void MainScene::draw()
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(root, camera, true);
+    renderPipeline->runSinglePassPipeline(resourceMap,root, camera, true);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 }

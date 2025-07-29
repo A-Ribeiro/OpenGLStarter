@@ -39,14 +39,14 @@ namespace AppKit
 
         void SceneBase::unload()
         {
-            resourceMap->clear_refcount_equals_1();
             unloadAll();
+            resourceMap->clear_refcount_equals_1();
         }
 
         SceneBase::~SceneBase()
         {
-            resourceMap->clear();
             renderWindow.reset();
+            //resourceMap->clear();
         }
 
         void SceneBase::draw()
@@ -55,7 +55,7 @@ namespace AppKit
             if (engine->sRGBCapable)
                 glEnable(GL_FRAMEBUFFER_SRGB);
 
-            renderPipeline->runSinglePassPipeline(root, camera, true);
+            renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true);
 
             if (engine->sRGBCapable)
                 glDisable(GL_FRAMEBUFFER_SRGB);

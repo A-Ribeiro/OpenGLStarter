@@ -29,10 +29,8 @@ namespace AppKit
                 else
                 {
                     material = transform->addNewComponent<ComponentMaterial>();
-                    material->type = AppKit::GLEngine::Components::MaterialCustomShader;
-                    material->custom_shader = spriteShader;
-                    material->custom_shader_property_bag = spriteShader->createDefaultBag();
-                    material->custom_shader_property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)texture);
+                    material->setShader(spriteShader);
+                    material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)texture);
                     resourceMap->spriteMaterialMap[spriteMaterialId] = material;
                 }
 

@@ -3,7 +3,7 @@
 #include <InteractiveToolkit/MathCore/MathCore.h>
 //#include <appkit-gl-base/opengl-wrapper.h>
 
-#include <appkit-gl-engine/shaders/UnlitPassShader.h>
+//#include <appkit-gl-engine/shaders/UnlitPassShader.h>
 #include <appkit-gl-engine/GL/GLRenderState.h>
 
 #include <appkit-gl-engine/Components/ComponentMesh.h>

@@ -16,6 +16,7 @@ namespace AppKit
 {
     namespace GLEngine
     {
+        class ResourceMap;
 
         class ResourceHelper : public EventCore::HandleCallback
         {
@@ -60,7 +61,7 @@ namespace AppKit
 
             std::shared_ptr<AppKit::OpenGL::GLTexture> createTextureFromFile(const std::string &path, bool sRGB);
 
-            std::shared_ptr<Transform> createTransformFromModel(const std::string &path, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial, uint32_t model_dynamic_upload = 0, uint32_t model_static_upload = 0xffffffff);
+            std::shared_ptr<Transform> createTransformFromModel(const std::string &path, ResourceMap *resourceMap, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial, uint32_t model_dynamic_upload = 0, uint32_t model_static_upload = 0xffffffff);
 
         private:
             // static bool traverse_delete(Transform *element, void *userData);

@@ -11,7 +11,7 @@ namespace AppKit
 
         ParticleSystemRenderer::ParticleSystemRenderer()
         {
-            debugLinesShader_AttribLocation_Pos = debugLinesShader.queryAttribLocation("aPosition");
+            // debugLinesShader_AttribLocation_Pos = debugLinesShader.queryAttribLocation("aPosition");
 
             normalShader_pos = normalShader.queryAttribLocation("aPosition");
             normalShader_uv = normalShader.queryAttribLocation("aUV0");
@@ -26,52 +26,52 @@ namespace AppKit
             softShader_alpha = softShader.queryAttribLocation("aAlpha");
         }
 
-        void ParticleSystemRenderer::drawDebugPoints(
-            Components::ComponentCamera *camera,
-            Components::ComponentParticleSystem *particleSystem,
-            float size)
-        {
+        // void ParticleSystemRenderer::drawDebugPoints(
+        //     Components::ComponentCamera *camera,
+        //     Components::ComponentParticleSystem *particleSystem,
+        //     float size)
+        // {
 
-            size *= 0.5f;
-            MathCore::vec3f xneg = MathCore::vec3f(-size, 0, 0);
-            MathCore::vec3f xpos = MathCore::vec3f(size, 0, 0);
+        //     size *= 0.5f;
+        //     MathCore::vec3f xneg = MathCore::vec3f(-size, 0, 0);
+        //     MathCore::vec3f xpos = MathCore::vec3f(size, 0, 0);
 
-            MathCore::vec3f yneg = MathCore::vec3f(0, -size, 0);
-            MathCore::vec3f ypos = MathCore::vec3f(0, size, 0);
+        //     MathCore::vec3f yneg = MathCore::vec3f(0, -size, 0);
+        //     MathCore::vec3f ypos = MathCore::vec3f(0, size, 0);
 
-            MathCore::vec3f zneg = MathCore::vec3f(0, 0, -size);
-            MathCore::vec3f zpos = MathCore::vec3f(0, 0, size);
+        //     MathCore::vec3f zneg = MathCore::vec3f(0, 0, -size);
+        //     MathCore::vec3f zpos = MathCore::vec3f(0, 0, size);
 
-            lines.clear();
-            for (int i = 0; i < particleSystem->particles.size(); i++)
-            {
-                const Components::Particle &p = particleSystem->particles[i];
-                lines.push_back(p.pos - xneg);
-                lines.push_back(p.pos - xpos);
+        //     lines.clear();
+        //     for (int i = 0; i < particleSystem->particles.size(); i++)
+        //     {
+        //         const Components::Particle &p = particleSystem->particles[i];
+        //         lines.push_back(p.pos - xneg);
+        //         lines.push_back(p.pos - xpos);
 
-                lines.push_back(p.pos - yneg);
-                lines.push_back(p.pos - ypos);
+        //         lines.push_back(p.pos - yneg);
+        //         lines.push_back(p.pos - ypos);
 
-                lines.push_back(p.pos - zneg);
-                lines.push_back(p.pos - zpos);
-            }
+        //         lines.push_back(p.pos - zneg);
+        //         lines.push_back(p.pos - zpos);
+        //     }
 
-            GLRenderState *state = GLRenderState::Instance();
+        //     GLRenderState *state = GLRenderState::Instance();
 
-            state->BlendMode = BlendModeDisabled;
-            state->DepthTest = DepthTestLessEqual;
-            state->CurrentShader = &debugLinesShader;
+        //     state->BlendMode = BlendModeDisabled;
+        //     state->DepthTest = DepthTestLessEqual;
+        //     state->CurrentShader = &debugLinesShader;
 
-            debugLinesShader.setColor(MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f));
-            debugLinesShader.setMVP(camera->viewProjection);
+        //     debugLinesShader.setColor(MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f));
+        //     debugLinesShader.setMVP(camera->viewProjection);
 
-            OPENGL_CMD(glEnableVertexAttribArray(debugLinesShader_AttribLocation_Pos));
-            OPENGL_CMD(glVertexAttribPointer(debugLinesShader_AttribLocation_Pos, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &lines[0]));
+        //     OPENGL_CMD(glEnableVertexAttribArray(debugLinesShader_AttribLocation_Pos));
+        //     OPENGL_CMD(glVertexAttribPointer(debugLinesShader_AttribLocation_Pos, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &lines[0]));
 
-            OPENGL_CMD(glDrawArrays(GL_LINES, 0, (GLsizei)lines.size()));
+        //     OPENGL_CMD(glDrawArrays(GL_LINES, 0, (GLsizei)lines.size()));
 
-            OPENGL_CMD(glDisableVertexAttribArray(debugLinesShader_AttribLocation_Pos));
-        }
+        //     OPENGL_CMD(glDisableVertexAttribArray(debugLinesShader_AttribLocation_Pos));
+        // }
 
         void ParticleSystemRenderer::draw(Components::ComponentCamera *camera,
                                           const MathCore::vec3f &cameraDirection,

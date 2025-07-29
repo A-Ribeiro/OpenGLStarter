@@ -38,12 +38,19 @@ void MainScene::loadGraph()
         bgNode->addComponent(Components::ComponentMesh::createPlaneXY(1, 1));
         // bgNode->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 0);
 
-        materialBackground->type = Components::MaterialUnlit;
-        materialBackground->unlit.blendMode = BlendModeAlpha;
-        materialBackground->unlit.color = MathCore::vec4f(1, 1, 1, 0.2);
+        materialBackground->setShader(resourceMap->shaderUnlit);
+        materialBackground->property_bag.getProperty("uColor").set(MathCore::vec4f(1, 1, 1, 0.2));
+        materialBackground->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
+
+        // materialBackground->type = Components::MaterialUnlit;
+        // materialBackground->unlit.blendMode = BlendModeAlpha;
+        // materialBackground->unlit.color = MathCore::vec4f(1, 1, 1, 0.2);
         auto engine = AppKit::GLEngine::Engine::Instance();
         if (engine->sRGBCapable)
-            materialBackground->unlit.color = CVT<vec4f>::sRGBToLinear(materialBackground->unlit.color);
+            materialBackground->property_bag.getProperty("uColor").set(CVT<vec4f>::sRGBToLinear(MathCore::vec4f(1, 1, 1, 0.2)));
+            //materialBackground->unlit.color = CVT<vec4f>::sRGBToLinear(materialBackground->unlit.color);
+        else
+            materialBackground->property_bag.getProperty("uColor").set(MathCore::vec4f(1, 1, 1, 0.2));
     }
 
     // text transform
@@ -85,7 +92,7 @@ void MainScene::setTextWithWidth(float width)
         u8"teclado:" Font_Key_z Font_Key_x Font_Key_c;
 
     fontBuilder.richBuild(txt.c_str(), false, width, polygonFontCache);
-    font_line1->toMesh(fontBuilder, true);
+    font_line1->toMesh(resourceMap, fontBuilder, true);
     font_line1->getTransform()->setLocalScale(1.0f);
 
     //printf("[starting]\n");
@@ -162,7 +169,7 @@ void MainScene::draw()
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(root, camera, true);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 }

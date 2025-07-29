@@ -4,6 +4,7 @@
 #include <appkit-gl-engine/GL/GLRenderState.h>
 #include <appkit-gl-engine/util/ShaderPropertyBag.h>
 #include <appkit-gl-engine/Components/ComponentCamera.h>
+#include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
@@ -274,30 +275,40 @@ namespace AppKit
             }
         }
 
-        void LineShader::activateShaderAndSetPropertiesFromBag(
-            Components::ComponentCamera *camera,
-            const MathCore::mat4f *mvp,
-            const Transform *element, // for localToWorld, localToWorld_IT, worldToLocal, 
+        void LineShader::ActiveShader_And_SetUniformsFromMaterial(
             GLRenderState *state,
-            const Utils::ShaderPropertyBag &bag
-        ) {
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material)
+        {
+            const auto &materialBag = material->property_bag;
             state->CurrentShader = this;
 
-            if (uAntialias < 0.001f)
+            float aa = materialBag.getProperty<float>("uAntialias");
+            if (aa < 0.001f)
                 state->BlendMode =  AppKit::GLEngine::BlendModeDisabled;
             else
                 state->BlendMode = AppKit::GLEngine::BlendModeAlpha;
+            setAntialias(aa);
+            setColor(materialBag.getProperty<MathCore::vec4f>("uColor"));
+        }
 
+        void LineShader::setUniformsFromMatrices(
+            GLRenderState *state,
+            ResourceMap *resourceMap,
+            RenderPipeline *renderPipeline,
+            Components::ComponentMaterial *material,
+            Transform *element,
+            Components::ComponentCamera *camera,
+            const MathCore::mat4f *mvp,
+            const MathCore::mat4f *mv,
+            const MathCore::mat4f *mvIT,
+            const MathCore::mat4f *mvInv)
+        {
             setMVP(*mvp);
             setScreenSizePx(MathCore::vec2f(camera->viewport.w, camera->viewport.h));
-            setColor(bag.getProperty<MathCore::vec4f>("uColor"));
-            setAntialias(bag.getProperty<float>("uAntialias"));
-
         }
 
-        void LineShader::deactivateShader(GLRenderState *state) {
-
-        }
 
         Utils::ShaderPropertyBag LineShader::createDefaultBag() const {
             Utils::ShaderPropertyBag bag;

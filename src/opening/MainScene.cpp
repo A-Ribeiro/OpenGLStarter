@@ -79,7 +79,7 @@ void MainScene::setText(
     fontBuilder.size = _size;
 
     fontBuilder.richBuild(text.c_str(), false, window_width);
-    toMesh->toMesh(fontBuilder, true);
+    toMesh->toMesh(resourceMap, fontBuilder, true);
 
     // auto componentFontToMesh_transform = toMesh->getTransform();
     // componentFontToMesh_transform->setLocalScale(text_scale_factor);
@@ -217,11 +217,14 @@ void MainScene::bindResourcesToGraph()
 
             if (recording == RecordingState::NONE){
 
-                this->font_line1->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
-                this->font_line1->material->unlit.color.a = 0.f;
+                this->font_line1->material->property_bag.getProperty("uColor").set(MathCore::vec4f(1, 1, 1, 0.f));
+                this->font_line2->material->property_bag.getProperty("uColor").set(MathCore::vec4f(1, 1, 1, 0.f));
+
+                // this->font_line1->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
+                // this->font_line1->material->unlit.color.a = 0.f;
     
-                this->font_line2->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
-                this->font_line2->material->unlit.color.a = 0.f;
+                // this->font_line2->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
+                // this->font_line2->material->unlit.color.a = 0.f;
 
                 recording = RecordingState::CLEAR_SCREEN;
 
@@ -279,11 +282,14 @@ void MainScene::update(Platform::Time *elapsed)
 
         float lrp_fade = MathCore::OP<float>::clamp(this->time_sec / this->fade_time_sec, 0.0f, 1.0f);
 
-        this->font_line1->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
-        this->font_line1->material->unlit.color.a = lrp_fade;
+        this->font_line1->material->property_bag.getProperty("uColor").set(MathCore::vec4f(1, 1, 1, lrp_fade));
+        this->font_line2->material->property_bag.getProperty("uColor").set(MathCore::vec4f(1, 1, 1, lrp_fade));
 
-        this->font_line2->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
-        this->font_line2->material->unlit.color.a = lrp_fade;
+        // this->font_line1->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
+        // this->font_line1->material->unlit.color.a = lrp_fade;
+
+        // this->font_line2->material->unlit.blendMode = AppKit::GLEngine::BlendModeType::BlendModeAlpha;
+        // this->font_line2->material->unlit.color.a = lrp_fade;
     }
 }
 
@@ -294,7 +300,7 @@ void MainScene::draw()
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(root, camera, true);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 

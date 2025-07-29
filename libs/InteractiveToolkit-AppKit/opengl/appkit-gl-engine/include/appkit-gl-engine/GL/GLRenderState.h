@@ -8,6 +8,8 @@
 
 #include <appkit-gl-engine/types/iRect.h>
 
+#include <appkit-gl-base/VirtualTexture.h>
+
 namespace AppKit
 {
     namespace GLEngine
@@ -83,6 +85,10 @@ namespace AppKit
 
         class GLRenderState : public EventCore::HandleCallback
         {
+
+            const OpenGL::VirtualTexture* textureUnitActivation[32]; ///< 
+            int textureUnitActivationCount; ///< Number of texture units activated
+
             //
             // change property events
             //
@@ -128,6 +134,11 @@ namespace AppKit
             EventCore::Property<iRect> Viewport;
             EventCore::Property<AppKit::OpenGL::GLFramebufferObject *> CurrentFramebufferObject;
             EventCore::Property<ColorWriteType> ColorWrite;
+
+
+            void setTextureUnitActivationArray (OpenGL::VirtualTexture** textureUnitActivation, int size);
+            void setTextureUnitActivationArray (const OpenGL::VirtualTexture** textureUnitActivation, int size);
+            void clearTextureUnitActivationArray ();
 
             static GLRenderState *Instance();
 
