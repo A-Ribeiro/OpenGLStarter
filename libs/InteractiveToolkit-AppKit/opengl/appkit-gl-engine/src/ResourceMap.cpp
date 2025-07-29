@@ -118,13 +118,19 @@ namespace AppKit
                 defaultNormalTexture = getTexture("DEFAULT_NORMAL", false);
 
                 defaultPBRMaterial = Component::CreateShared<Components::ComponentMaterial>();
-                // defaultPBRMaterial->type = Components::MaterialPBR;
-                defaultPBRMaterial->shader = pbrShaderSelector;
-                defaultPBRMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-                defaultPBRMaterial->pbr.metallic = 0.0f;
-                defaultPBRMaterial->pbr.roughness = 1.0f;
-                defaultPBRMaterial->pbr.texAlbedo = defaultAlbedoTexture;
-                defaultPBRMaterial->pbr.texNormal = defaultNormalTexture;
+
+                defaultPBRMaterial->setShader(pbrShaderSelector);
+                // // defaultPBRMaterial->type = Components::MaterialPBR;
+                // defaultPBRMaterial->shader = pbrShaderSelector;
+                // defaultPBRMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+                // defaultPBRMaterial->pbr.metallic = 0.0f;
+                // defaultPBRMaterial->pbr.roughness = 1.0f;
+                // defaultPBRMaterial->pbr.texAlbedo = defaultAlbedoTexture;
+                // defaultPBRMaterial->pbr.texNormal = defaultNormalTexture;
+
+                defaultPBRMaterial->property_bag.getProperty("texAlbedo").set<std::shared_ptr<OpenGL::VirtualTexture>>(defaultAlbedoTexture);
+                defaultPBRMaterial->property_bag.getProperty("texNormal").set<std::shared_ptr<OpenGL::VirtualTexture>>(defaultNormalTexture);
+
             }
 
             if (renderOnlyDepthMaterial == nullptr)

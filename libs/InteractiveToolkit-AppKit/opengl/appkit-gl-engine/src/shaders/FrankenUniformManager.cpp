@@ -7,11 +7,11 @@ namespace AppKit
     namespace GLEngine
     {
 
-        const AppKit::OpenGL::VirtualTexture *FrankenUniformManager::last_tex_unit[FrankenUniformTextureSlot_Count] =
-            {
-                nullptr, nullptr, nullptr, nullptr, nullptr,
-                nullptr, nullptr, nullptr, nullptr // shadowSunLight
-        };
+        // const AppKit::OpenGL::VirtualTexture *FrankenUniformManager::last_tex_unit[FrankenUniformTextureSlot_Count] =
+        //     {
+        //         nullptr, nullptr, nullptr, nullptr, nullptr,
+        //         nullptr, nullptr, nullptr, nullptr // shadowSunLight
+        // };
 
         FrankenUniformManager::FrankenUniformManager(FrankenShader *_frankenShader)
         {
@@ -69,7 +69,7 @@ namespace AppKit
             }
         }
 
-        void FrankenUniformManager::setPBRMaterial(const Components::ComponentMaterial *material)
+        void FrankenUniformManager::setPBRMaterial(const PBRSetup &material)
         {
 
             printf("needs check here for the pbr material [%s:%d] \n", __FILE__, __LINE__);
@@ -80,30 +80,30 @@ namespace AppKit
             bool diff = false;
 
             if (frankenShader->PBR.u_materialAlbedoColor >= 0)
-                if (material->pbr.albedoColor != material_PBRSetup.albedoColor)
+                if (material.albedoColor != material_PBRSetup.albedoColor)
                 {
-                    frankenShader->setUniform(frankenShader->PBR.u_materialAlbedoColor, material->pbr.albedoColor);
+                    frankenShader->setUniform(frankenShader->PBR.u_materialAlbedoColor, material.albedoColor);
                     diff = true;
                 }
 
             if (frankenShader->PBR.u_materialEmissionColor >= 0)
-                if (material->pbr.emissionColor != material_PBRSetup.emissionColor)
+                if (material.emissionColor != material_PBRSetup.emissionColor)
                 {
-                    frankenShader->setUniform(frankenShader->PBR.u_materialEmissionColor, material->pbr.emissionColor);
+                    frankenShader->setUniform(frankenShader->PBR.u_materialEmissionColor, material.emissionColor);
                     diff = true;
                 }
 
             if (frankenShader->PBR.u_materialRoughness >= 0)
-                if (material->pbr.roughness != material_PBRSetup.roughness)
+                if (material.roughness != material_PBRSetup.roughness)
                 {
-                    frankenShader->setUniform(frankenShader->PBR.u_materialRoughness, material->pbr.roughness);
+                    frankenShader->setUniform(frankenShader->PBR.u_materialRoughness, material.roughness);
                     diff = true;
                 }
 
             if (frankenShader->PBR.u_materialMetallic >= 0)
-                if (material->pbr.metallic != material_PBRSetup.metallic)
+                if (material.metallic != material_PBRSetup.metallic)
                 {
-                    frankenShader->setUniform(frankenShader->PBR.u_materialMetallic, material->pbr.metallic);
+                    frankenShader->setUniform(frankenShader->PBR.u_materialMetallic, material.metallic);
                     diff = true;
                 }
 
@@ -111,19 +111,19 @@ namespace AppKit
             // tex_unit[FrankenUniformTextureSlot_Albedo] = material->pbr.texAlbedo;
             // tex_unit[FrankenUniformTextureSlot_Specular] = material->pbr.texSpecular;
             // tex_unit[FrankenUniformTextureSlot_Emission] = material->pbr.texEmission;
-            setNormalTexture(material->pbr.texNormal.get());
-            setAlbedoTexture(material->pbr.texAlbedo.get());
-            setSpecularTexture(material->pbr.texSpecular.get());
-            setEmissionTexture(material->pbr.texEmission.get());
+            setNormalTexture(material.texNormal.get());
+            setAlbedoTexture(material.texAlbedo.get());
+            setSpecularTexture(material.texSpecular.get());
+            setEmissionTexture(material.texEmission.get());
 
-            if (material->pbr.texAlbedo != material_PBRSetup.texAlbedo ||
-                material->pbr.texNormal != material_PBRSetup.texNormal ||
-                material->pbr.texSpecular != material_PBRSetup.texSpecular ||
-                material->pbr.texEmission != material_PBRSetup.texEmission)
+            if (material.texAlbedo != material_PBRSetup.texAlbedo ||
+                material.texNormal != material_PBRSetup.texNormal ||
+                material.texSpecular != material_PBRSetup.texSpecular ||
+                material.texEmission != material_PBRSetup.texEmission)
                 diff = true;
 
             if (diff)
-                material_PBRSetup = material->pbr;
+                material_PBRSetup = material;
         }
 
         void FrankenUniformManager::setAmbientLightColor(const MathCore::vec3f &ambientLightColor)
@@ -138,7 +138,7 @@ namespace AppKit
             }
         }
 
-        void FrankenUniformManager::setNormalTexture(const AppKit::OpenGL::GLTexture *tex)
+        void FrankenUniformManager::setNormalTexture(const AppKit::OpenGL::VirtualTexture *tex)
         {
             if (frankenShader->normalMap.u_textureNormal >= 0)
             {
@@ -147,7 +147,7 @@ namespace AppKit
             }
         }
 
-        void FrankenUniformManager::setAlbedoTexture(const AppKit::OpenGL::GLTexture *tex)
+        void FrankenUniformManager::setAlbedoTexture(const AppKit::OpenGL::VirtualTexture *tex)
         {
             if (frankenShader->PBR.u_textureAlbedo >= 0)
             {
@@ -156,7 +156,7 @@ namespace AppKit
             }
         }
 
-        void FrankenUniformManager::setSpecularTexture(const AppKit::OpenGL::GLTexture *tex)
+        void FrankenUniformManager::setSpecularTexture(const AppKit::OpenGL::VirtualTexture *tex)
         {
             if (frankenShader->PBR.u_textureSpecular >= 0)
             {
@@ -165,7 +165,7 @@ namespace AppKit
             }
         }
 
-        void FrankenUniformManager::setEmissionTexture(const AppKit::OpenGL::GLTexture *tex)
+        void FrankenUniformManager::setEmissionTexture(const AppKit::OpenGL::VirtualTexture *tex)
         {
             if (frankenShader->PBR.u_textureEmission >= 0)
             {
@@ -313,50 +313,58 @@ namespace AppKit
                 old_frankenShader = nullptr;
         }
 
-        void FrankenUniformManager::activeTexUnit()
+        void FrankenUniformManager::activeTexUnit(GLRenderState *state)
         {
-            int count = 0;
-            int count_old = 0;
+            std::vector<const AppKit::OpenGL::VirtualTexture *> textureUnitActivation;
             for (int i = 0; i < FrankenUniformTextureSlot_Count; i++)
             {
-
-                if ( // old_frankenShader->frankenUniformManager.tex_unit[i] == tex_unit[i] &&
-                    last_tex_unit[i] == tex_unit[i])
-                {
-                    if (tex_unit[i] != nullptr)
-                    {
-                        count++;
-                        count_old++;
-                    }
-                    continue;
-                }
-
-                if (last_tex_unit[i] != nullptr)
-                {
-                    last_tex_unit[i]->deactive(count_old);
-                    count_old++;
-                }
-
-                last_tex_unit[i] = tex_unit[i];
                 if (tex_unit[i] != nullptr)
-                {
-                    tex_unit[i]->active(count);
-                    // frankenShader->setUniform(tex_unit_uniform_location[i], count);
-                    count++;
-                }
+                    textureUnitActivation.push_back(tex_unit[i]);
             }
+            state->setTextureUnitActivationArray(textureUnitActivation.data(), (int)textureUnitActivation.size());
+
+            // int count = 0;
+            // int count_old = 0;
+            // for (int i = 0; i < FrankenUniformTextureSlot_Count; i++)
+            // {
+
+            //     if ( // old_frankenShader->frankenUniformManager.tex_unit[i] == tex_unit[i] &&
+            //         last_tex_unit[i] == tex_unit[i])
+            //     {
+            //         if (tex_unit[i] != nullptr)
+            //         {
+            //             count++;
+            //             count_old++;
+            //         }
+            //         continue;
+            //     }
+
+            //     if (last_tex_unit[i] != nullptr)
+            //     {
+            //         last_tex_unit[i]->deactive(count_old);
+            //         count_old++;
+            //     }
+
+            //     last_tex_unit[i] = tex_unit[i];
+            //     if (tex_unit[i] != nullptr)
+            //     {
+            //         tex_unit[i]->active(count);
+            //         // frankenShader->setUniform(tex_unit_uniform_location[i], count);
+            //         count++;
+            //     }
+            // }
         }
 
-        void FrankenUniformManager::deactiveTexUnit()
-        {
-            int count = 0;
-            for (int i = 0; i < FrankenUniformTextureSlot_Count; i++)
-            {
-                if (last_tex_unit[i] != nullptr)
-                    last_tex_unit[i]->deactive(count++);
-                last_tex_unit[i] = nullptr;
-            }
-        }
+        // void FrankenUniformManager::deactiveTexUnit()
+        // {
+        //     int count = 0;
+        //     for (int i = 0; i < FrankenUniformTextureSlot_Count; i++)
+        //     {
+        //         if (last_tex_unit[i] != nullptr)
+        //             last_tex_unit[i]->deactive(count++);
+        //         last_tex_unit[i] = nullptr;
+        //     }
+        // }
 
         void FrankenUniformManager::readUniformsFromShaderAndInitStatic()
         {

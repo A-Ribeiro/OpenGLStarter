@@ -64,31 +64,31 @@ namespace AppKit
             //                      ResourceSet &resourceSet);
             // };
 
-            class PBRSetup
-            {
-            public:
-                MathCore::vec3f albedoColor;
-                MathCore::vec3f emissionColor;
+            // class PBRSetup
+            // {
+            // public:
+            //     MathCore::vec3f albedoColor;
+            //     MathCore::vec3f emissionColor;
 
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texAlbedo;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texNormal;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texSpecular;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texEmission;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texAlbedo;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texNormal;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texSpecular;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texEmission;
 
-                float roughness;
-                float metallic;
+            //     float roughness;
+            //     float metallic;
 
-                PBRSetup();
+            //     PBRSetup();
 
-                void releaseTextureReferences();
+            //     void releaseTextureReferences();
 
-                void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
+            //     void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
-                void Deserialize(rapidjson::Value &_value,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                                 ResourceSet &resourceSet);
-            };
+            //     void Deserialize(rapidjson::Value &_value,
+            //                      std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+            //                      std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+            //                      ResourceSet &resourceSet);
+            // };
 
             class ComponentMaterial : public Component
             {
@@ -100,7 +100,7 @@ namespace AppKit
 
                 // parameters
                 // UnlitSetup unlit;
-                PBRSetup pbr;
+                // PBRSetup pbr;
 
                 // used for mesh skinning
                 bool skin_gradient_matrix_dirty;

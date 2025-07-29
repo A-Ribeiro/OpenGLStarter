@@ -39,6 +39,8 @@ namespace AppKit
     namespace GLEngine
     {
 
+        class PBRShaderSelector;
+
         enum OrthographicFilterEnum
         {
             OrthographicFilter_UsingAABB, /// AABB filter, faster, when using orthographic camera aligned with axes
@@ -165,6 +167,8 @@ namespace AppKit
                 OrthographicFilterEnum orthoFilter = OrthographicFilter_UsingAABB);
 
             // void renderDepth(Transform  *root, Components::ComponentCamera *camera);
+
+            friend class PBRShaderSelector;
         };
 
     }
