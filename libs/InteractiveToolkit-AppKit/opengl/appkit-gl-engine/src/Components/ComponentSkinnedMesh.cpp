@@ -284,9 +284,10 @@ namespace AppKit
                     // Components::ComponentMaterial *material;
                     // ReferenceCounter<AppKit::GLEngine::Component *> *refCount = &AppKit::GLEngine::Engine::Instance()->componentReferenceCounter;
                     auto material = transform->addNewComponent<Components::ComponentMaterial>();
-                    printf("needs check here for the material [%s:%d] \n", __FILE__, __LINE__);
-                    exit(-1);
+                    // printf("needs check here for the material [%s:%d] \n", __FILE__, __LINE__);
+                    // exit(-1);
                     // material->type = Components::MaterialPBR;
+                    material->setShader(resourceMap->pbrShaderSelector);
 
                 }
 

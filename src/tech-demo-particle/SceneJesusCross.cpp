@@ -44,40 +44,67 @@ void SceneJesusCross::loadResources() {
     Rock03Textures[0] = resourceHelper->createTextureFromFile("resources/Rocks/rock03_diffuse.jpg",true && engine->sRGBCapable);
     Rock03Textures[1] = resourceHelper->createTextureFromFile("resources/Rocks/rock03_normal.jpg",false);
     
-    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/JesusOnCross.bams", resourceMap->defaultPBRMaterial);
+    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/JesusOnCross.bams", resourceMap, resourceMap->defaultPBRMaterial);
     
-    Rocks02_3DModel = resourceHelper->createTransformFromModel("resources/Rocks/Rocks02.bams", resourceMap->defaultPBRMaterial);
-    Rocks03_3DModel = resourceHelper->createTransformFromModel("resources/Rocks/Rocks03.bams", resourceMap->defaultPBRMaterial);
+    Rocks02_3DModel = resourceHelper->createTransformFromModel("resources/Rocks/Rocks02.bams", resourceMap, resourceMap->defaultPBRMaterial);
+    Rocks03_3DModel = resourceHelper->createTransformFromModel("resources/Rocks/Rocks03.bams", resourceMap, resourceMap->defaultPBRMaterial);
     
     //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
     
     auto newMaterial = Component::CreateShared<ComponentMaterial>();
-    newMaterial->type = Components::MaterialPBR;
-    newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-    newMaterial->pbr.metallic = 0.0f;
-    newMaterial->pbr.roughness = 1.0f;
-    newMaterial->pbr.texAlbedo = JesusTextures[0];
-    newMaterial->pbr.texNormal = nullptr;//texRefCount->add(JesusTextures[1]);
+    // newMaterial->type = Components::MaterialPBR;
+    // newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+    // newMaterial->pbr.metallic = 0.0f;
+    // newMaterial->pbr.roughness = 1.0f;
+    // newMaterial->pbr.texAlbedo = JesusTextures[0];
+    // newMaterial->pbr.texNormal = nullptr;//texRefCount->add(JesusTextures[1]);
     
+    newMaterial->setShader(resourceMap->pbrShaderSelector);
+    newMaterial->property_bag.getProperty("texAlbedo").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(JesusTextures[0]);
+
     Jesus3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
     
     newMaterial = Component::CreateShared<ComponentMaterial>();
-    newMaterial->type = Components::MaterialPBR;
-    newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-    newMaterial->pbr.metallic = 0.0f;
-    newMaterial->pbr.roughness = 1.0f;
-    newMaterial->pbr.texAlbedo = Rock02Textures[0];
-    newMaterial->pbr.texNormal = Rock02Textures[1];
+    // newMaterial->type = Components::MaterialPBR;
+    // newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+    // newMaterial->pbr.metallic = 0.0f;
+    // newMaterial->pbr.roughness = 1.0f;
+    // newMaterial->pbr.texAlbedo = Rock02Textures[0];
+    // newMaterial->pbr.texNormal = Rock02Textures[1];
+
+    newMaterial->setShader(resourceMap->pbrShaderSelector);
+    newMaterial->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(1.0f);
+    newMaterial->property_bag.getProperty("emissionColor").set<MathCore::vec3f>(0.0f);
+    newMaterial->property_bag.getProperty("roughness").set<float>(1.0f);
+    newMaterial->property_bag.getProperty("metallic").set<float>(0.0f);
+
+    newMaterial->property_bag.getProperty("texAlbedo").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(Rock02Textures[0]);
+    newMaterial->property_bag.getProperty("texNormal").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(Rock02Textures[1]);
+    newMaterial->property_bag.getProperty("texSpecular").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(nullptr);
+    newMaterial->property_bag.getProperty("texEmission").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(nullptr);
+
     
     Rocks02_3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
     
     newMaterial = Component::CreateShared<ComponentMaterial>();
-    newMaterial->type = Components::MaterialPBR;
-    newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-    newMaterial->pbr.metallic = 0.0f;
-    newMaterial->pbr.roughness = 1.0f;
-    newMaterial->pbr.texAlbedo = Rock03Textures[0];
-    newMaterial->pbr.texNormal = Rock03Textures[1];
+    // newMaterial->type = Components::MaterialPBR;
+    // newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+    // newMaterial->pbr.metallic = 0.0f;
+    // newMaterial->pbr.roughness = 1.0f;
+    // newMaterial->pbr.texAlbedo = Rock03Textures[0];
+    // newMaterial->pbr.texNormal = Rock03Textures[1];
+
+    newMaterial->setShader(resourceMap->pbrShaderSelector);
+    newMaterial->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(1.0f);
+    newMaterial->property_bag.getProperty("emissionColor").set<MathCore::vec3f>(0.0f);
+    newMaterial->property_bag.getProperty("roughness").set<float>(1.0f);
+    newMaterial->property_bag.getProperty("metallic").set<float>(0.0f);
+
+    newMaterial->property_bag.getProperty("texAlbedo").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(Rock03Textures[0]);
+    newMaterial->property_bag.getProperty("texNormal").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(Rock03Textures[1]);
+    newMaterial->property_bag.getProperty("texSpecular").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(nullptr);
+    newMaterial->property_bag.getProperty("texEmission").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(nullptr);
+
     
     Rocks03_3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
     

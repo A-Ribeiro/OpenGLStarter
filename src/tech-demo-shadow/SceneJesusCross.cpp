@@ -131,7 +131,9 @@ void SceneJesusCross::bindResourcesToGraph() {
             //ReferenceCounter<GLTexture*> *refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
             auto material = node->addNewComponent<ComponentMaterial>();
-            node->addComponent(ComponentMesh::createBox(MathCore::vec3f(50, 1, 50)));
+            auto mesh = ComponentMesh::createBox(MathCore::vec3f(50, 1, 50));
+            mesh->syncVBOStatic();
+            node->addComponent(mesh);
             //material->type = MaterialUnlit;
             //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
 
@@ -157,7 +159,9 @@ void SceneJesusCross::bindResourcesToGraph() {
             // ReferenceCounter<GLTexture*>* refCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
             auto material = node->addNewComponent<ComponentMaterial>();
-            node->addComponent(ComponentMesh::createSphere(1.0f,16,16));
+            auto mesh = ComponentMesh::createSphere(1.0f,16,16);
+            mesh->syncVBOStatic();
+            node->addComponent(mesh);
             node->LocalPosition = MathCore::vec3f(2,3,0);
             node->LocalScale = MathCore::vec3f(0.2f,0.4f,0.2f);
             //node->LocalRotation = quatFromEuler(0,MathCore::OP<float>::deg_2_rad(30.0f), MathCore::OP<float>::deg_2_rad(30.0f));
