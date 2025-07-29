@@ -29,40 +29,40 @@ namespace AppKit
         namespace Components
         {
 
-            enum MaterialType
-            {
-                MaterialNone,
+            // enum MaterialType
+            // {
+            //     MaterialNone,
 
-                MaterialUnlit,                       // implemented
-                MaterialUnlitVertexColor,            // implemented
-                MaterialUnlitTexture,                // implemented
-                MaterialUnlitTextureVertexColor,     // implemented
-                MaterialUnlitTextureVertexColorFont, // implemented
+            //     MaterialUnlit,                       // implemented
+            //     MaterialUnlitVertexColor,            // implemented
+            //     MaterialUnlitTexture,                // implemented
+            //     MaterialUnlitTextureVertexColor,     // implemented
+            //     MaterialUnlitTextureVertexColorFont, // implemented
 
-                MaterialPBR,
+            //     MaterialPBR,
 
-                MaterialCustomShader
-            };
+            //     MaterialCustomShader
+            // };
 
-            class UnlitSetup
-            {
-            public:
-                MathCore::vec4f color;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> tex;
+            // class UnlitSetup
+            // {
+            // public:
+            //     MathCore::vec4f color;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> tex;
 
-                AppKit::GLEngine::BlendModeType blendMode;
+            //     AppKit::GLEngine::BlendModeType blendMode;
 
-                UnlitSetup();
+            //     UnlitSetup();
 
-                void releaseTextureReferences();
+            //     void releaseTextureReferences();
 
-                void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
+            //     void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
 
-                void Deserialize(rapidjson::Value &_value,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                                 ResourceSet &resourceSet);
-            };
+            //     void Deserialize(rapidjson::Value &_value,
+            //                      std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+            //                      std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+            //                      ResourceSet &resourceSet);
+            // };
 
             class PBRSetup
             {
@@ -99,7 +99,7 @@ namespace AppKit
                 // MaterialType type;
 
                 // parameters
-                UnlitSetup unlit;
+                // UnlitSetup unlit;
                 PBRSetup pbr;
 
                 // used for mesh skinning

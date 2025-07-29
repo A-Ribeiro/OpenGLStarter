@@ -16,7 +16,7 @@ using namespace MathCore;
 void MainScene::loadResources()
 {
     // auto engine = AppKit::GLEngine::Engine::Instance();
-    spriteShader = std::make_shared<SpriteShader>(resourceMap);
+    spriteShader = std::make_shared<SpriteShader>();
 }
 // to load the scene graph
 void MainScene::loadGraph()

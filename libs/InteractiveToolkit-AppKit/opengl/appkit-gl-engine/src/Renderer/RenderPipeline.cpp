@@ -307,7 +307,7 @@ namespace AppKit
                         material = nullptr;
                         continue;
                     }
-                    setCurrentMaterial(material);
+                    setCurrentMaterial(material, resourceMap);
                 }
                 else if (material != nullptr && component->compareType(Components::ComponentMesh::Type))
                 {
@@ -321,7 +321,7 @@ namespace AppKit
                     }
 
                     material->shader->setUniformsFromMatrices(
-                        state, this,
+                        state, resourceMap, this,
                         material, element, camera,
                         mvp, mv, mvIT, mvInv);
 
@@ -446,7 +446,7 @@ namespace AppKit
             }
         }
 
-        void RenderPipeline::setCurrentMaterial(Components::ComponentMaterial *material)
+        void RenderPipeline::setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap)
         {
             if (currentMaterial == material)
                 return;
@@ -454,7 +454,7 @@ namespace AppKit
             if (currentMaterial != nullptr)
             {
                 currentMaterial->shader->ActiveShader_And_SetUniformsFromMaterial(
-                    GLRenderState::Instance(),
+                    GLRenderState::Instance(),resourceMap,
                     this,
                     currentMaterial);
             }
@@ -677,7 +677,7 @@ namespace AppKit
             }
 
             setCurrentMesh(nullptr);
-            setCurrentMaterial(nullptr);
+            setCurrentMaterial(nullptr, resourceMap);
             renderstate->clearTextureUnitActivationArray();
 
             // render debug lines
@@ -809,7 +809,7 @@ namespace AppKit
                         material = nullptr;
                         continue;
                     }
-                    setCurrentMaterial(resourceMap->renderOnlyDepthMaterial.get());
+                    setCurrentMaterial(resourceMap->renderOnlyDepthMaterial.get(), resourceMap);
                 }
                 else if (material != nullptr && component->compareType(Components::ComponentMesh::Type))
                 {
@@ -824,7 +824,7 @@ namespace AppKit
 
                     // using the depth material
                     this->currentMaterial->shader->setUniformsFromMatrices(
-                        state, this,
+                        state, resourceMap, this,
                         this->currentMaterial, element, camera,
                         mvp, mv, mvIT, mvInv);
 

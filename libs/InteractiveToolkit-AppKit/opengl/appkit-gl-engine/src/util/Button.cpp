@@ -68,12 +68,13 @@ namespace AppKit
         {
             if (CollisionCore::AABB<MathCore::vec3f>::pointInsideAABB(mousePosition, aabb))
             {
-                materialBackground->unlit.color = MathCore::vec4f(1, 1, 0, 0.5);
+                //materialBackground->unlit.color = MathCore::vec4f(1, 1, 0, 0.5);
+                materialBackground->property_bag.getProperty("uColor").set(MathCore::vec4f(1, 1, 0, 0.5));
                 selected = true;
             }
             else
             {
-                materialBackground->unlit.color = MathCore::vec4f(0, 0, 0, 0.5);
+                materialBackground->property_bag.getProperty("uColor").set(MathCore::vec4f(0, 0, 0, 0.5));
                 selected = false;
             }
         }
@@ -175,8 +176,10 @@ namespace AppKit
                     // cursorNode->LocalRotation = MathCore::GEN<MathCore::quatf>::fromEuler(MathCore::OP<float>::deg_2_rad(-90.0f), 0, 0);
                     bg->LocalPosition = MathCore::vec3f((xmin + xmax) * 0.5f, (ymin + ymax) * 0.5f, 1.0f);
 
-                    printf("needs check here for the material [%s:%d] \n", __FILE__, __LINE__);
-                    exit(-1);
+                    materialBackground->setShader(resourceMap->shaderUnlit);
+                    materialBackground->property_bag.getProperty("uColor").set(MathCore::vec4f(0, 0, 0, 0.5));
+                    materialBackground->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
+
                     // materialBackground->type = Components::MaterialUnlit;
                     // materialBackground->unlit.blendMode = BlendModeAlpha;
                     // materialBackground->unlit.color = MathCore::vec4f(0, 0, 0, 0.5);

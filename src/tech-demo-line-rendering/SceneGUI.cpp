@@ -45,7 +45,8 @@ void SceneGUI::bindResourcesToGraph()
         "button_change_scene",       //_id,
         "View in 3D",                //_text,
         componentCameraOrthographic, // camera,
-        &fontBuilder                 //_fontBuilder
+        &fontBuilder,                 //_fontBuilder
+        resourceMap
     );
 
     root->addChild(button->getTransform());
@@ -98,7 +99,7 @@ void SceneGUI::draw()
 
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(root, camera, false);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, false);
 
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);

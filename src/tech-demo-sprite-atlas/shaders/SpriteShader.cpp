@@ -7,14 +7,14 @@
 #include <appkit-gl-engine/Components/ComponentCamera.h>
 
 #include <appkit-gl-engine/Engine.h>
+#include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit
 {
     namespace GLEngine
     {
-        SpriteShader::SpriteShader(ResourceMap *resourceMap)
+        SpriteShader::SpriteShader()
         {
-            this->resourceMap = resourceMap;
             format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
 
             const char vertexShaderCode[] = {
@@ -99,42 +99,6 @@ namespace AppKit
             }
         }
 
-        // void SpriteShader::activateShaderAndSetPropertiesFromBag(
-        //     Components::ComponentCamera *camera,
-        //     const MathCore::mat4f *mvp,
-        //     const Transform *element, // for localToWorld, localToWorld_IT, worldToLocal,
-        //     GLRenderState *state,
-        //     const Utils::ShaderPropertyBag &bag)
-        // {
-        //     state->CurrentShader = this;
-
-        //     if (bag.getProperty<bool>("UseDiscard"))
-        //         state->BlendMode = AppKit::GLEngine::BlendModeDisabled;
-        //     else
-        //         state->BlendMode = AppKit::GLEngine::BlendModeAlpha;
-
-        //     setMVP(*mvp);
-        //     setColor(bag.getProperty<MathCore::vec4f>("uColor"));
-
-        //     texture_activated = bag.getProperty<std::shared_ptr<OpenGL::VirtualTexture>>("uTexture");
-
-        //     if (texture_activated == nullptr)
-        //     {
-        //         bool srgb = GLEngine::Engine::Instance()->sRGBCapable;
-        //         // texture_activated = this->resourceMap->getTexture("DEFAULT_ALBEDO",srgb);
-        //         texture_activated = this->resourceMap->defaultAlbedoTexture;
-        //     }
-
-        //     texture_activated->active(0);
-        //     setTexture(0);
-        // }
-
-        // void SpriteShader::deactivateShader(GLRenderState *state)
-        // {
-        //     texture_activated->deactive(0);
-        //     texture_activated = nullptr;
-        // }
-
         Utils::ShaderPropertyBag SpriteShader::createDefaultBag() const
         {
             Utils::ShaderPropertyBag bag;
@@ -148,6 +112,7 @@ namespace AppKit
 
         void SpriteShader::ActiveShader_And_SetUniformsFromMaterial(
             GLRenderState *state,
+            ResourceMap *resourceMap,
             RenderPipeline *renderPipeline,
             Components::ComponentMaterial *material)
         {
@@ -162,7 +127,7 @@ namespace AppKit
 
             auto tex = materialBag.getProperty<std::shared_ptr<OpenGL::VirtualTexture>>("uTexture");
             if (tex == nullptr)
-                tex = this->resourceMap->defaultAlbedoTexture;
+                tex = resourceMap->defaultAlbedoTexture;
 
             OpenGL::VirtualTexture* textureUnitActivation[] = {tex.get()};
             state->setTextureUnitActivationArray(textureUnitActivation, 1);
@@ -171,6 +136,7 @@ namespace AppKit
         }
         void SpriteShader::setUniformsFromMatrices(
             GLRenderState *state,
+            ResourceMap *resourceMap,
             RenderPipeline *renderPipeline,
             Components::ComponentMaterial *material,
             Transform *element,
