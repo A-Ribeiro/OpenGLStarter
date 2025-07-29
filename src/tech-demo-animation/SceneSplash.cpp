@@ -58,8 +58,8 @@ void SceneSplash::bindResourcesToGraph(){
 
     //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    material->setShader(resourceMap->shaderUnlitTexture);
-    material->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
+    material->setShader(resourceMap->shaderUnlitTextureAlpha);
+    //material->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
     material->property_bag.getProperty("uTexture").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(Milky_512_512);
 
     // material->type = MaterialUnlitTexture;

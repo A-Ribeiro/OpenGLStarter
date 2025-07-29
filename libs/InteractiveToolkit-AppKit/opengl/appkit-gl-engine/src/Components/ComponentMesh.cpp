@@ -198,6 +198,10 @@ namespace AppKit
 
             ComponentMesh::~ComponentMesh()
             {
+                releaseVBO();
+            }
+
+            void ComponentMesh::releaseVBO() {
                 if (vbo_pos != nullptr)
                     delete vbo_pos;
                 if (vbo_normals != nullptr)
@@ -223,6 +227,29 @@ namespace AppKit
                     delete vbo_index;
                 if (vao != nullptr)
                     delete vao;
+                
+                vbo_indexCount = 0;
+
+                vbo_pos = nullptr;
+                vbo_normals = nullptr;
+                vbo_tangent = nullptr;
+                vbo_binormal = nullptr;
+                for (int i = 0; i < 8; i++)
+                {
+                    vbo_uv[i] = nullptr;
+                    vbo_color[i] = nullptr;
+                }
+
+                vbo_skin_index = nullptr;
+                vbo_skin_weights = nullptr;
+
+                vbo_index = nullptr;
+
+                vao = nullptr;
+                vao_format = 0;
+
+                last_model_dynamic_upload = 0;
+                last_model_static_upload = 0;
             }
 
             void ComponentMesh::syncVBOStatic()
@@ -611,6 +638,7 @@ namespace AppKit
                     &result->normals,
                     &result->tangent,
                     &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 
@@ -625,6 +653,7 @@ namespace AppKit
                          &result->normals,
                          &result->tangent,
                          &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 
@@ -639,6 +668,7 @@ namespace AppKit
                          &result->normals,
                          &result->tangent,
                          &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 
@@ -652,6 +682,7 @@ namespace AppKit
                        &result->normals,
                        &result->tangent,
                        &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 
@@ -665,6 +696,7 @@ namespace AppKit
                           &result->normals,
                           &result->tangent,
                           &result->binormal);
+                result->syncVBOStatic();
                 return result;
             }
 

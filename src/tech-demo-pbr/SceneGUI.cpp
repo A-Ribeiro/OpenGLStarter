@@ -133,8 +133,8 @@ void SceneGUI::bindResourcesToGraph()
         auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
         cursorTransform->addComponent(ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height));
 
-        cursorMaterial->setShader(resourceMap->shaderUnlitTexture);
-        cursorMaterial->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
+        cursorMaterial->setShader(resourceMap->shaderUnlitTextureAlpha);
+        //cursorMaterial->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
         cursorMaterial->property_bag.getProperty("uTexture").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(cursorTexture);
 
         // cursorMaterial->type = MaterialUnlitTexture;

@@ -85,6 +85,8 @@ namespace AppKit
 
                 ~ComponentMesh();
 
+                void releaseVBO();
+
                 void syncVBOStatic();
 
                 void syncVBODynamic();

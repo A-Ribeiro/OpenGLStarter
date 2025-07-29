@@ -170,7 +170,7 @@ void SceneMary::bindResourcesToGraph()
 
             auto material = cube->addNewComponent<ComponentMaterial>();
             auto mesh = ComponentMesh::createBox(MathCore::vec3f(1, 1, 1));
-            mesh->syncVBOStatic();
+            //mesh->syncVBOStatic();
             cube->addComponent(mesh);
             // material->type = MaterialUnlit;
             // material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);

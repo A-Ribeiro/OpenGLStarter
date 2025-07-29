@@ -15,6 +15,7 @@ namespace AppKit
         class ShaderUnlit;
         class ShaderUnlitVertexColor;
         class ShaderUnlitTexture;
+        class ShaderUnlitTextureAlpha;
         class ShaderUnlitTextureVertexColorAlpha;
         class PBRShaderSelector;
         class ShaderDepthOnly;
@@ -95,6 +96,7 @@ namespace AppKit
             std::shared_ptr<ShaderUnlit> shaderUnlit;
             std::shared_ptr<ShaderUnlitVertexColor> shaderUnlitVertexColor;
             std::shared_ptr<ShaderUnlitTexture> shaderUnlitTexture;
+            std::shared_ptr<ShaderUnlitTextureAlpha> shaderUnlitTextureAlpha;
             std::shared_ptr<ShaderUnlitTextureVertexColorAlpha> shaderUnlitTextureVertexColorAlpha;
 
             std::shared_ptr<ShaderDepthOnly> shaderDepthOnly;
@@ -110,6 +112,7 @@ namespace AppKit
 #include <appkit-gl-engine/shaders/ShaderUnlit.h>            // UnlitPassShader
 #include <appkit-gl-engine/shaders/ShaderUnlitVertexColor.h> // Unlit_vertcolor_Shader
 #include <appkit-gl-engine/shaders/ShaderUnlitTexture.h>     // Unlit_tex_PassShader
+#include <appkit-gl-engine/shaders/ShaderUnlitTextureAlpha.h>     // Unlit_tex_PassShader
 // #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColor.h> //
 #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlpha.h> // Unlit_tex_vertcolor_font_PassShader
 #include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
