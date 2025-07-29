@@ -12,14 +12,14 @@ namespace AppKit
         {
             FrankenShader *frankenShader;
         public:
-            Utils::ShaderPropertyBag PBRShaderSelector::createDefaultBag() const override;
+            Utils::ShaderPropertyBag createDefaultBag() const override;
 
-            void PBRShaderSelector::ActiveShader_And_SetUniformsFromMaterial(
+            void ActiveShader_And_SetUniformsFromMaterial(
                 GLRenderState *state,
                 ResourceMap *resourceMap,
                 RenderPipeline *renderPipeline,
                 Components::ComponentMaterial *material) override;
-            void PBRShaderSelector::setUniformsFromMatrices(
+            void setUniformsFromMatrices(
                 GLRenderState *state,
                 ResourceMap *resourceMap,
                 RenderPipeline *renderPipeline,
