@@ -51,8 +51,8 @@ namespace AppKit
 
             if (pbrSetup.texAlbedo == nullptr)
                 pbrSetup.texAlbedo = resourceMap->defaultAlbedoTexture;
-            if (pbrSetup.texNormal == nullptr)
-                pbrSetup.texNormal = resourceMap->defaultNormalTexture;
+            // if (pbrSetup.texNormal == nullptr)
+            //     pbrSetup.texNormal = resourceMap->defaultNormalTexture;
 
             state->BlendMode = BlendModeDisabled; // material->pbr.blendMode;
             state->DepthTest = DepthTestLess;
@@ -121,6 +121,9 @@ namespace AppKit
             frankenFormat &= renderPipeline->ShaderAlgorithmsEnum_allowedFlags;
 
             frankenShader = renderPipeline->frankenShaderManager.getShader(frankenFormat, renderPipeline->shaderPBRAlgorithm, renderPipeline->shaderShadowAlgorithm);
+            
+            // forwarding the format, to be used by the next setLayout call for the next mesh to be rendered
+            this->format = frankenShader->format;
 
             // frankenShader->frankenUniformManager.activateShader();
             state->CurrentShader = frankenShader;

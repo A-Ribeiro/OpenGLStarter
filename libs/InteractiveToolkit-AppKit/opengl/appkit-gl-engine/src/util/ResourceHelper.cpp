@@ -209,9 +209,9 @@ namespace AppKit
             return nullptr;
         }
 
-        std::shared_ptr<Transform> ResourceHelper::createTransformFromModel(const std::string &path, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial, uint32_t model_dynamic_upload, uint32_t model_static_upload)
+        std::shared_ptr<Transform> ResourceHelper::createTransformFromModel(const std::string &path, ResourceMap *resourceMap, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial, uint32_t model_dynamic_upload, uint32_t model_static_upload)
         {
-            return Basof2ToResource::loadAndConvert(path.c_str(), defaultPBRMaterial, nullptr, model_dynamic_upload, model_static_upload);
+            return Basof2ToResource::loadAndConvert(path.c_str(), resourceMap, defaultPBRMaterial, nullptr, model_dynamic_upload, model_static_upload);
         }
 
         // bool ResourceHelper::traverse_delete(Transform *element, void *userData)

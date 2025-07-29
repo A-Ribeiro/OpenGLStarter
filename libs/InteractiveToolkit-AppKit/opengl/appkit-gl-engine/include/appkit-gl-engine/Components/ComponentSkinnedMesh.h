@@ -21,6 +21,8 @@ namespace AppKit
 {
     namespace GLEngine
     {
+        class ResourceMap;
+        
         namespace Components
         {
 
@@ -89,11 +91,11 @@ namespace AppKit
 
                 ComponentSkinnedMesh(ResourceHelper *_resourceHelper = nullptr, bool isGPUSkinning = true);
 
-                void loadModelBase(const std::string &filename, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial);
+                void loadModelBase(const std::string &filename, ResourceMap *resourceMap, std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial);
 
                 void moveMeshToTransform();
 
-                void loadAnimation(const std::string &clip_name, const std::string &filename);
+                void loadAnimation(const std::string &clip_name, ResourceMap *resourceMap, const std::string &filename);
 
                 void done();
 
