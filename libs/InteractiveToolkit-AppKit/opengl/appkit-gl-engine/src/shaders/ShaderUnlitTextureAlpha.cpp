@@ -1,5 +1,3 @@
-#pragma once
-
 #include <appkit-gl-engine/shaders/ShaderUnlitTextureAlpha.h>
 #include <appkit-gl-engine/Engine.h>
 #include <appkit-gl-engine/ResourceMap.h>
