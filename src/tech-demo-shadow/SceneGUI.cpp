@@ -59,7 +59,9 @@ void SceneGUI::bindResourcesToGraph()
 
     {
         auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
-        cursorTransform->addComponent(ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height));
+        auto mesh = ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height);
+        mesh->syncVBOStatic();
+        cursorTransform->addComponent(mesh);
 
         cursorMaterial->setShader(resourceMap->shaderUnlitTexture);
         cursorMaterial->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);

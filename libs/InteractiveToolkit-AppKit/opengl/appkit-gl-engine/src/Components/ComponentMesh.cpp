@@ -404,7 +404,7 @@ namespace AppKit
             void ComponentMesh::unsetLayoutPointers(ITKExtension::Model::BitMask shaderFormat)
             {
                 ComputeFormat();
-                if (!format)
+                if (!format || !shaderFormat)
                     return;
                 if (vbo_indexCount > 0)
                 {

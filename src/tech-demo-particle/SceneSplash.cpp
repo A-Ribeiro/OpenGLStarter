@@ -59,10 +59,14 @@ void SceneSplash::bindResourcesToGraph()
 
     //ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
-    material->type = MaterialUnlitTexture;
-    material->unlit.color = vec4f(1.0f);
-    material->unlit.blendMode = BlendModeAlpha;
-    material->unlit.tex = Milky_512_512;
+    material->setShader(resourceMap->shaderUnlitTexture);
+    material->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
+    material->property_bag.getProperty("uTexture").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(Milky_512_512);
+
+    // material->type = MaterialUnlitTexture;
+    // material->unlit.color = vec4f(1.0f);
+    // material->unlit.blendMode = BlendModeAlpha;
+    // material->unlit.tex = Milky_512_512;
 
     // Add AABB for all meshs...
     {

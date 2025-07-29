@@ -22,7 +22,8 @@ void SceneGUI::loadResources()
         true,                   // _left,
         "button_SoftParticles", //_id,
         "Soft Particles ON",    //_text,
-        &fontBuilder            //_fontBuilder
+        &fontBuilder,            //_fontBuilder
+        resourceMap             // resourceMap
     );
 }
 // to load the scene graph
@@ -58,9 +59,13 @@ void SceneGUI::bindResourcesToGraph()
         auto cursorMaterial = cursorTransform->addNewComponent<ComponentMaterial>();
         cursorTransform->addComponent(ComponentMesh::createPlaneXY(cursorTexture->width, cursorTexture->height));
 
-        cursorMaterial->type = MaterialUnlitTexture;
-        cursorMaterial->unlit.blendMode = BlendModeAlpha;
-        cursorMaterial->unlit.tex = cursorTexture;
+        cursorMaterial->setShader(resourceMap->shaderUnlitTexture);
+        cursorMaterial->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeAlpha);
+        cursorMaterial->property_bag.getProperty("uTexture").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(cursorTexture);
+
+        // cursorMaterial->type = MaterialUnlitTexture;
+        // cursorMaterial->unlit.blendMode = BlendModeAlpha;
+        // cursorMaterial->unlit.tex = cursorTexture;
     }
 
     // texRefCount->add(&fontBuilder.glFont2.texture);
@@ -116,7 +121,7 @@ void SceneGUI::draw()
 
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(root, camera, false);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, false);
 
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);

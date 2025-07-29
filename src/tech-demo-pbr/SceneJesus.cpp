@@ -44,7 +44,7 @@ void SceneJesus::loadResources() {
     JesusTextures[0] = nullptr;
     JesusTextures[1] = resourceHelper->createTextureFromFile("resources/Jesus/NormalMap_jesus.jpg",false);
     
-    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/Jesus.bams", resourceMap->defaultPBRMaterial);
+    Jesus3DModel = resourceHelper->createTransformFromModel("resources/Jesus/Jesus.bams", resourceMap, resourceMap->defaultPBRMaterial);
 
 
     // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
@@ -52,12 +52,24 @@ void SceneJesus::loadResources() {
     std::shared_ptr<ComponentMaterial> newMaterial;
     
     newMaterial =  Component::CreateShared<ComponentMaterial>();
-    newMaterial->type = Components::MaterialPBR;
-    newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-    newMaterial->pbr.metallic = 0.0f;
-    newMaterial->pbr.roughness = 1.0f;
-    newMaterial->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
-    newMaterial->pbr.texNormal = JesusTextures[1];
+    // newMaterial->type = Components::MaterialPBR;
+    // newMaterial->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+    // newMaterial->pbr.metallic = 0.0f;
+    // newMaterial->pbr.roughness = 1.0f;
+    // newMaterial->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
+    // newMaterial->pbr.texNormal = JesusTextures[1];
+
+    newMaterial->setShader(resourceMap->pbrShaderSelector);
+    newMaterial->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(1.0f);
+    newMaterial->property_bag.getProperty("emissionColor").set<MathCore::vec3f>(0.0f);
+    newMaterial->property_bag.getProperty("roughness").set<float>(1.0f);
+    newMaterial->property_bag.getProperty("metallic").set<float>(0.0f);
+
+    newMaterial->property_bag.getProperty("texAlbedo").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(resourceMap->defaultAlbedoTexture);
+    newMaterial->property_bag.getProperty("texNormal").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(JesusTextures[1]);
+    newMaterial->property_bag.getProperty("texSpecular").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(nullptr);
+    newMaterial->property_bag.getProperty("texEmission").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(nullptr);
+
     
     Jesus3DModel->traversePreOrder_DepthFirst(ReplaceMaterial, &newMaterial);
     
@@ -148,12 +160,16 @@ void SceneJesus::bindResourcesToGraph() {
             //material->type = MaterialUnlit;
             //material->unlit.color = vec4(0.5f,0.5f,0.5f,1.0f);
 
-            material->type = MaterialPBR;
-            material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
-            material->pbr.metallic = 0.0f;
-            material->pbr.roughness = 1.0f;
-            material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
-            material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
+            // material->type = MaterialPBR;
+            // material->pbr.albedoColor = MathCore::vec3f(1, 1, 1);
+            // material->pbr.metallic = 0.0f;
+            // material->pbr.roughness = 1.0f;
+            // material->pbr.texAlbedo = resourceMap->defaultAlbedoTexture;
+            // material->pbr.texNormal = nullptr;//refCount->add( resourceHelper->defaultNormalTexture );
+
+            material->setShader(resourceMap->pbrShaderSelector);
+            material->property_bag.getProperty("texAlbedo").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(resourceMap->defaultAlbedoTexture);
+
 
         }
     }
