@@ -198,6 +198,8 @@ namespace AppKit
                     return it->second;
                 }
                 ITK_ABORT(true, "Property not found: %s", key.c_str());
+                static ShaderProperty dummy;
+                return dummy;
             }
 
             const ShaderProperty &ShaderPropertyBag::getProperty(const std::string &key) const
@@ -208,6 +210,8 @@ namespace AppKit
                     return it->second;
                 }
                 ITK_ABORT(true, "Property not found: %s", key.c_str());
+                static ShaderProperty dummy;
+                return dummy;
             }
 
             bool ShaderPropertyBag::hasProperty(const std::string &key) const
