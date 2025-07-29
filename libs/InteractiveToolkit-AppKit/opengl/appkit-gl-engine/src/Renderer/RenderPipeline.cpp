@@ -305,7 +305,8 @@ namespace AppKit
                     material = (Components::ComponentMaterial *)component.get();
                     if (material->shader == nullptr) {
                         material = nullptr;
-                        continue;
+                        // in case the object has no material, or a material without a shader, skip it completely
+                        return;
                     }
                     setCurrentMaterial(material, resourceMap);
                 }
