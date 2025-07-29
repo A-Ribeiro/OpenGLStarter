@@ -276,7 +276,7 @@ namespace AppKit
             void ComponentMesh::setLayoutPointers(ITKExtension::Model::BitMask shaderFormat)
             {
                 ComputeFormat();
-                if (!format)
+                if (!format || !shaderFormat)
                     return;
 
                 ITK_ABORT(((format ^ shaderFormat) & shaderFormat), "Shader not compatible with this mesh.\n");
