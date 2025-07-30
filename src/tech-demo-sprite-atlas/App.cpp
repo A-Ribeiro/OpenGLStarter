@@ -75,6 +75,12 @@ void App::draw() {
     }
     
     time.update();
+    this->fps_accumulator -= time.deltaTime;
+    if (this->fps_accumulator < 0){
+        this->fps_accumulator = App::fps_time_sec;
+        if (time.deltaTime > EPSILON<float>::high_precision)
+            printf("%.2f FPS\n", 1.0f / time.deltaTime);
+    }
 
     //set min delta time (the passed time or the time to render at 24fps)
     //time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);

@@ -21,7 +21,7 @@ namespace AppKit
 
             ComponentGrow::ComponentGrow() : Component(ComponentGrow::Type)
             {
-                lrp = 0.0f;
+                transformPool = nullptr;
             }
 
             ComponentGrow::~ComponentGrow()
@@ -42,6 +42,16 @@ namespace AppKit
                 if (lrp >= 1.0f - MathCore::EPSILON<float>::low_precision)
                 {
                     transform->removeSelf();
+                    if (transformPool != nullptr){
+
+                        // allow call start event again
+                        this->start_registered = false;
+                        auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                        if (renderWindowRegion != nullptr)
+                            renderWindowRegion->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
+        
+                        transformPool->enqueue(transform);
+                    }
                     return;
                 }
                 transform->setLocalScale(MathCore::vec3f(lrp));
@@ -72,6 +82,8 @@ namespace AppKit
             void ComponentGrow::start()
             {
                 auto transform = getTransform();
+                transform->setLocalScale(MathCore::vec3f(0));
+                lrp = 0.0f;
 
                 renderWindowRegionRef = transform->renderWindowRegion;
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
@@ -83,6 +95,7 @@ namespace AppKit
             {
                 auto result = Component::CreateShared<ComponentGrow>();
                 result->app = app;
+                result->transformPool = transformPool;
                 return result;
             }
             void ComponentGrow::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)

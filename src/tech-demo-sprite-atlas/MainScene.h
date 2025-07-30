@@ -62,6 +62,8 @@ public:
     ITKCommon::Random32 random32;
     MathCore::MathRandomExt<ITKCommon::Random32> mathRandom;
 
+    Platform::ObjectQueue<std::shared_ptr<AppKit::GLEngine::Transform>> transformPool;
+
     MainScene(
         App *app,
         Platform::Time *_time,
