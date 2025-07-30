@@ -44,6 +44,9 @@ namespace AppKit
                     transform->removeSelf();
                     if (transformPool != nullptr){
 
+                        transform->setLocalScale(MathCore::vec3f(0));
+                        lrp = 0.0f;
+
                         // allow call start event again
                         this->start_registered = false;
                         auto renderWindowRegion = ToShared(renderWindowRegionRef);
