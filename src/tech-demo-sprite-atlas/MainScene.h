@@ -51,8 +51,9 @@ public:
 
     std::shared_ptr<AppKit::GLEngine::SpriteShader> spriteShader;
 
-    std::shared_ptr<AppKit::GLEngine::Components::ComponentSprite> componentSprite;
+    // std::shared_ptr<AppKit::GLEngine::Components::ComponentSprite> componentSprite;
     std::shared_ptr<AppKit::GLEngine::Transform> spriteNode;
+    std::shared_ptr<AppKit::GLEngine::Transform> logoNode;
 
     std::shared_ptr<AppKit::GLEngine::Components::ComponentSprite> bgComponentSprite;
     std::shared_ptr<AppKit::GLEngine::Transform> bgNode;

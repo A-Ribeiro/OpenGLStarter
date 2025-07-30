@@ -38,22 +38,41 @@ void MainScene::bindResourcesToGraph()
 
     GLRenderState *renderState = GLRenderState::Instance();
 
-    spriteNode = Transform::CreateShared("smoke");
-    spriteNode->setLocalScale(MathCore::vec3f(0));
-    componentSprite = spriteNode->addNewComponent<ComponentSprite>();
-    componentSprite->setTexture(
-        resourceMap, spriteShader,
-        resourceMap->getTexture("resources/smoke.png", engine->sRGBCapable),
-        MathCore::vec2f(0.5f, 0.5f),             // pivot
-        MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
-        MathCore::vec2f(-1, 256),                // size constraint
-        MeshUploadMode_Direct                    // direct draw, causes better performance on old hardware
-    );
-    auto componentGrow = spriteNode->addNewComponent<ComponentGrow>();
-    componentGrow->app = app;
-    componentGrow->transformPool = &transformPool;
+    {
+        spriteNode = Transform::CreateShared("smoke");
+        spriteNode->setLocalScale(MathCore::vec3f(0));
+        auto componentSprite = spriteNode->addNewComponent<ComponentSprite>();
+        componentSprite->setTexture(
+            resourceMap, spriteShader,
+            resourceMap->getTexture("resources/smoke.png", engine->sRGBCapable),
+            MathCore::vec2f(0.5f, 0.5f),             // pivot
+            MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
+            MathCore::vec2f(-1, 256),                // size constraint
+            MeshUploadMode_Direct                    // direct draw, causes better performance on old hardware
+        );
+        auto componentGrow = spriteNode->addNewComponent<ComponentGrow>();
+        componentGrow->app = app;
+        componentGrow->transformPool = &transformPool;
+        componentSprite->mesh->always_clone = true;
+    }
 
-    componentSprite->mesh->always_clone = true;
+    {
+        logoNode = Transform::CreateShared("logo");
+        logoNode->setLocalScale(MathCore::vec3f(0));
+        auto componentSprite = logoNode->addNewComponent<ComponentSprite>();
+        componentSprite->setTexture(
+            resourceMap, spriteShader,
+            resourceMap->getTexture("resources/opengl_logo_white.png", engine->sRGBCapable),
+            MathCore::vec2f(0.5f, 0.5f),             // pivot
+            MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
+            MathCore::vec2f(-1, 256),                // size constraint
+            MeshUploadMode_Direct                    // direct draw, causes better performance on old hardware
+        );
+        auto componentGrow = logoNode->addNewComponent<ComponentGrow>();
+        componentGrow->app = app;
+        componentGrow->transformPool = &transformPool;
+        componentSprite->mesh->always_clone = true;
+    }
 
     // componentSprite->meshWrapper->debugCollisionShapes = true;
     // spriteNode->skip_traversing = true;
@@ -96,8 +115,10 @@ void MainScene::bindResourcesToGraph()
     renderWindow->OnUpdate.add(&MainScene::update, this);
 
     // initialize pool
-    for (int i = 0; i < 150; i++)
+    for (int i = 0; i < 75; i++){
         transformPool.enqueue(spriteNode->clone(false));
+        transformPool.enqueue(logoNode->clone(false));
+    }
 }
 
 // clear all loaded scene
@@ -110,8 +131,9 @@ void MainScene::unloadAll()
 
     spriteShader = nullptr;
 
-    componentSprite = nullptr;
+    //componentSprite = nullptr;
     spriteNode = nullptr;
+    logoNode = nullptr;
 
     bgComponentSprite = nullptr;
     bgNode = nullptr;
@@ -122,9 +144,10 @@ void MainScene::unloadAll()
 
 void MainScene::update(Platform::Time *elapsed)
 {
-    camera->getTransform()->setLocalRotation(
-        camera->getTransform()->getLocalRotation() *
-        MathCore::GEN<MathCore::quatf>::fromAxisAngle(MathCore::vec3f(0, 0, 1), elapsed->deltaTime * 0.5f));
+    static float s_angle = 0;
+    s_angle = MathCore::OP<float>::fmod(s_angle + elapsed->deltaTime * 0.5f, MathCore::CONSTANT<float>::PI * 2.0f);
+
+    camera->getTransform()->setLocalRotation(MathCore::GEN<MathCore::quatf>::fromAxisAngle(MathCore::vec3f(0, 0, 1), s_angle));
 
     randomNext -= elapsed->deltaTime;
 
@@ -179,8 +202,9 @@ MainScene::MainScene(
 
     spriteShader = nullptr;
 
-    componentSprite = nullptr;
+    //componentSprite = nullptr;
     spriteNode = nullptr;
+    logoNode = nullptr;
 
     bgComponentSprite = nullptr;
     bgNode = nullptr;
