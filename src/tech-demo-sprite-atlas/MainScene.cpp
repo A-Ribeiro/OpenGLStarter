@@ -47,7 +47,7 @@ void MainScene::bindResourcesToGraph()
         MathCore::vec2f(0.5f, 0.5f),             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
         MathCore::vec2f(-1, 256),                // size constraint
-        MeshUploadMode_Dynamic                   // dynamic mesh
+        MeshUploadMode_Direct                    // direct draw, causes better performance on old hardware
     );
     auto componentGrow = spriteNode->addNewComponent<ComponentGrow>();
     componentGrow->app = app;
@@ -96,7 +96,7 @@ void MainScene::bindResourcesToGraph()
     renderWindow->OnUpdate.add(&MainScene::update, this);
 
     // initialize pool
-    for(int i=0;i<150;i++)
+    for (int i = 0; i < 150; i++)
         transformPool.enqueue(spriteNode->clone(false));
 }
 
@@ -153,7 +153,7 @@ void MainScene::draw()
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(resourceMap,root, camera, true);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 }

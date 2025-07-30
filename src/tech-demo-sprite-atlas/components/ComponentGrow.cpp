@@ -64,7 +64,7 @@ namespace AppKit
                     color.a = expo;
                 }
 
-                mesh->syncVBO(ITKExtension::Model::CONTAINS_COLOR0, 0, false);
+                //mesh->syncVBO(ITKExtension::Model::CONTAINS_COLOR0, 0, false);
             }
 
             void ComponentGrow::attachToTransform(std::shared_ptr<Transform> t)
