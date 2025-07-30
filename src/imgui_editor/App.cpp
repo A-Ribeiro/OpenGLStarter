@@ -105,6 +105,7 @@ App::~App()
         delete fade;
         fade = nullptr;
     }
+    resourceMap.clear();
     resourceHelper.finalize();
 }
 

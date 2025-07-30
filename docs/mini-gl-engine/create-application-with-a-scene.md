@@ -132,7 +132,7 @@ public:
             delete fade;
             fade = nullptr;
         }
-
+        resourceMap.clear();
         resourceHelper.finalize();
     }
     virtual void draw(){

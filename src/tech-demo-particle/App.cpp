@@ -99,7 +99,7 @@ App::~App()
     {
         delete fade;
     }
-
+    resourceMap.clear();
     resourceHelper.finalize();
 }
 
