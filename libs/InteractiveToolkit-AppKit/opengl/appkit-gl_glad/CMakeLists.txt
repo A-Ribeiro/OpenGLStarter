@@ -9,6 +9,14 @@ FILE( GLOB_RECURSE HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" *.h)
 
 SET( SRC src/gl.c)
 
+if(WIN32)
+    list(APPEND SRC src/wgl.c)
+elseif(APPLE)
+    #list(APPEND SRC src/cgl.c)
+elseif(UNIX)
+    list(APPEND SRC src/glx.c)
+endif()
+
 #if(ITK_RPI)
 #    list(APPEND SRC src/egl.c)
 #endif()
