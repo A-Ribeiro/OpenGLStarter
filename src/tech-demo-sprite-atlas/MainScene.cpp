@@ -49,7 +49,9 @@ void MainScene::bindResourcesToGraph()
         MathCore::vec2f(-1, 256),                // size constraint
         MeshUploadMode_Dynamic                   // dynamic mesh
     );
-    spriteNode->addNewComponent<ComponentGrow>()->app = app;
+    auto componentGrow = spriteNode->addNewComponent<ComponentGrow>();
+    componentGrow->app = app;
+    componentGrow->transformPool = &transformPool;
 
     componentSprite->mesh->always_clone = true;
 
@@ -92,6 +94,10 @@ void MainScene::bindResourcesToGraph()
         } });
 
     renderWindow->OnUpdate.add(&MainScene::update, this);
+
+    // initialize pool
+    for(int i=0;i<150;i++)
+        transformPool.enqueue(spriteNode->clone(false));
 }
 
 // clear all loaded scene
@@ -109,6 +115,9 @@ void MainScene::unloadAll()
 
     bgComponentSprite = nullptr;
     bgNode = nullptr;
+
+    while (transformPool.size() > 0)
+        transformPool.dequeue(nullptr, true);
 }
 
 void MainScene::update(Platform::Time *elapsed)
@@ -125,7 +134,9 @@ void MainScene::update(Platform::Time *elapsed)
 
         for (int i = 0; i < random32.getRange<int>(10, 50); i++)
         {
-            auto new_element = root->addChild(spriteNode->clone(false));
+            if (transformPool.size() <= 0)
+                break;
+            auto new_element = root->addChild(transformPool.dequeue(nullptr, true));
             new_element->setLocalPosition(MathCore::vec3f(
                 mathRandom.nextRange(-512.0f, 512.0f),
                 mathRandom.nextRange(-512.0f, 512.0f),
@@ -161,7 +172,8 @@ MainScene::MainScene(
     AppKit::GLEngine::ResourceMap *_resourceMap,
     std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
                                                                           random32(ITKCommon::RandomDefinition<uint32_t>::randomSeed()),
-                                                                          mathRandom(&random32)
+                                                                          mathRandom(&random32),
+                                                                          transformPool(false)
 {
     this->app = app;
 

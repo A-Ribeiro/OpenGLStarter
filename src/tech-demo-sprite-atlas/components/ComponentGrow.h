@@ -5,6 +5,7 @@
 #include <appkit-gl-engine/Component.h>
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
+#include <InteractiveToolkit/Platform/Core/ObjectQueue.h>
 
 class App;
 
@@ -28,6 +29,7 @@ namespace AppKit
                 static const ComponentType Type;
 
                 App *app;
+                Platform::ObjectQueue<std::shared_ptr<AppKit::GLEngine::Transform>> *transformPool;
 
                 ComponentGrow();
                 ~ComponentGrow();
