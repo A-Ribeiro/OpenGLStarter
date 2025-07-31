@@ -75,7 +75,7 @@ namespace AppKit
 
             std::vector<uint32_t> sunIndex;
             std::vector<MathCore::vec3f> sunVertex;
-            // ObjectPlaces objectPlaces;
+
             DepthRenderer *depthRenderer;
             ParticleSystemRenderer particleSystemRenderer;
             MathCore::vec3f ambientLightColorVec3;
@@ -92,42 +92,9 @@ namespace AppKit
             void setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap);
             void setCurrentMesh(Components::ComponentMesh *mesh);
         public:
-            // DepthPassShader depthShader;
-            //UnlitPassShader unlitShader;
-            //Unlit_vertcolor_Shader unlit_vertcolor_Shader;
-            //Unlit_tex_vertcolor_font_PassShader unlit_tex_vertcolor_font_Shader;
-            //Unlit_tex_PassShader unlit_tex_Shader;
-
             // PBR single pass frankenshader
             FrankenShaderManager frankenShaderManager;
         private:
-            // PBR multipass shaders
-            //AmbientLight_tex_cube_PassShader ambientLight_tex_cube_PassShader;
-            //DirectionalLightPassShader directionalLightPassShader;
-
-            
-
-            // void allMeshRender(Transform *element, const DefaultEngineShader *shader) const;
-            // void allMeshRender_Range(Transform *element, const DefaultEngineShader *shader, int start_index, int end_index) const;
-            // void materialSetupAndRender(
-            //     Components::ComponentMaterial *material,
-            //     Transform *element,
-            //     Components::ComponentCamera *camera,
-            //     int start_index, int end_index,
-            //     const MathCore::mat4f *mvp,
-            //     const MathCore::mat4f *mv,
-            //     const MathCore::mat4f *mvIT,
-            //     const MathCore::mat4f *mvInv);
-
-            // void materialSetupAndRender_depth(
-            //     Components::ComponentMaterial *material,
-            //     Transform *element,
-            //     Components::ComponentCamera *camera,
-            //     int start_index, int end_index,
-            //     const MathCore::mat4f *mvp,
-            //     const MathCore::mat4f *mv,
-            //     const MathCore::mat4f *mvIT,
-            //     const MathCore::mat4f *mvInv);
 
             void traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap);
 
@@ -165,8 +132,6 @@ namespace AppKit
                 std::shared_ptr<Components::ComponentCamera> camera, 
                 bool clear = true,
                 OrthographicFilterEnum orthoFilter = OrthographicFilter_UsingAABB);
-
-            // void renderDepth(Transform  *root, Components::ComponentCamera *camera);
 
             friend class PBRShaderSelector;
         };

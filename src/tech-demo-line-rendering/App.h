@@ -20,7 +20,8 @@ class App : public AppBase {
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
 
-    
+    const float fps_time_sec = 0.5f;
+    float fps_accumulator;
 public:
     Fade *fade;
     MainScene *mainScene;
