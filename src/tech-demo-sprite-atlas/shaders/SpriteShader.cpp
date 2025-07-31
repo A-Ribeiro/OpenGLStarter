@@ -19,30 +19,30 @@ namespace AppKit
 
             const char vertexShaderCode[] = {
                 SHADER_HEADER_120
-                "attribute vec4 aPosition;"
-                "attribute vec3 aUV0;"
-                "attribute vec4 aColor0;"
-                "uniform mat4 uMVP;"
-                "varying vec2 uv;"
-                "varying vec4 color;"
-                "void main() {"
-                "  uv = aUV0.xy;"
-                "  color = aColor0;"
-                "  gl_Position = uMVP * aPosition;"
+                "attribute vec4 aPosition;\n"
+                "attribute vec3 aUV0;\n"
+                "attribute vec4 aColor0;\n"
+                "uniform mat4 uMVP;\n"
+                "varying vec2 uv;\n"
+                "varying vec4 color;\n"
+                "void main() {\n"
+                "  uv = aUV0.xy;\n"
+                "  color = aColor0;\n"
+                "  gl_Position = uMVP * aPosition;\n"
                 "}"};
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
-                "varying vec2 uv;"
-                "varying vec4 color;"
-                "uniform vec4 uColor;"
-                "uniform sampler2D uTexture;"
-                "void main() {"
-                "  vec4 texel = texture2D(uTexture, uv);"
-                "  vec4 result = texel * color * uColor;"
-                "  if (result.a <= 0.0)"
-                "    discard;"
-                "  gl_FragColor = result;"
+                "varying vec2 uv;\n"
+                "varying vec4 color;\n"
+                "uniform vec4 uColor;\n"
+                "uniform sampler2D uTexture;\n"
+                "void main() {\n"
+                "  vec4 texel = texture2D(uTexture, uv);\n"
+                "  vec4 result = texel * color * uColor;\n"
+                "  if (result.a <= 0.0)\n"
+                "    discard;\n"
+                "  gl_FragColor = result;\n"
                 "}"};
 
             compile(vertexShaderCode, fragmentShaderCode, __FILE__, __LINE__);

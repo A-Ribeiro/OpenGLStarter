@@ -29,78 +29,10 @@ namespace AppKit
         namespace Components
         {
 
-            // enum MaterialType
-            // {
-            //     MaterialNone,
-
-            //     MaterialUnlit,                       // implemented
-            //     MaterialUnlitVertexColor,            // implemented
-            //     MaterialUnlitTexture,                // implemented
-            //     MaterialUnlitTextureVertexColor,     // implemented
-            //     MaterialUnlitTextureVertexColorFont, // implemented
-
-            //     MaterialPBR,
-
-            //     MaterialCustomShader
-            // };
-
-            // class UnlitSetup
-            // {
-            // public:
-            //     MathCore::vec4f color;
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> tex;
-
-            //     AppKit::GLEngine::BlendModeType blendMode;
-
-            //     UnlitSetup();
-
-            //     void releaseTextureReferences();
-
-            //     void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
-
-            //     void Deserialize(rapidjson::Value &_value,
-            //                      std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-            //                      std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-            //                      ResourceSet &resourceSet);
-            // };
-
-            // class PBRSetup
-            // {
-            // public:
-            //     MathCore::vec3f albedoColor;
-            //     MathCore::vec3f emissionColor;
-
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texAlbedo;
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texNormal;
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texSpecular;
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texEmission;
-
-            //     float roughness;
-            //     float metallic;
-
-            //     PBRSetup();
-
-            //     void releaseTextureReferences();
-
-            //     void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
-
-            //     void Deserialize(rapidjson::Value &_value,
-            //                      std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-            //                      std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-            //                      ResourceSet &resourceSet);
-            // };
-
             class ComponentMaterial : public Component
             {
             public:
                 static const ComponentType Type;
-
-                // material type
-                // MaterialType type;
-
-                // parameters
-                // UnlitSetup unlit;
-                // PBRSetup pbr;
 
                 // used for mesh skinning
                 bool skin_gradient_matrix_dirty;
