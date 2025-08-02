@@ -107,8 +107,8 @@ void MainScene::bindResourcesToGraph()
         StrokeModeGrowInside,                    // stroke mode
         10.0f,                                   // stroke thickness
         MathCore::vec4f(0.0f, 0.0f, 0.8f, 0.6f), // stroke color
-        50.0f,                                   // drop shadow thickness
-        MathCore::vec4f(0.0f, 0.0f, 0.0f, 0.2f), // drop shadow color
+        80.0f,                                   // drop shadow thickness
+        MathCore::vec4f(1.0f, 0.0f, 1.0f, 0.2f), // drop shadow color
         0                                        // z
     );
 

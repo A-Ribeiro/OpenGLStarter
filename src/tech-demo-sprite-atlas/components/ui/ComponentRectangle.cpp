@@ -130,7 +130,7 @@ namespace AppKit
                     drawStroke(center,
                                size,
                                drop_shadow_color,                                  // internal color
-                               drop_shadow_color * MathCore::vec4f(1, 1, 1, 0.5f), // external color
+                               drop_shadow_color * MathCore::vec4f(1, 1, 1, _40_percent), // external color
                                radius,
                                StrokeModeGrowOutside,
                                drop_shadow_thickness_40_percent,
@@ -139,7 +139,7 @@ namespace AppKit
 
                     drawStroke(center,
                                size,
-                               drop_shadow_color * MathCore::vec4f(1, 1, 1, 0.5f), // internal color
+                               drop_shadow_color * MathCore::vec4f(1, 1, 1, _40_percent), // internal color
                                drop_shadow_color * MathCore::vec4f(1, 1, 1, 0.0f), // external color
                                radius,
                                StrokeModeGrowOutside,
