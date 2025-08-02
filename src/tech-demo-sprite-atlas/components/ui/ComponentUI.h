@@ -54,23 +54,27 @@ namespace AppKit
                     float z,
                     const std::string &name = "_text");
 
-                UIItem addRectangleMinMax(
-                    const MathCore::vec2f &min,
-                    const MathCore::vec2f &max,
-                    const MathCore::vec4f &color,
-                    const MathCore::vec4f &radius,
-                    float z,
-                    const std::string &name = "_rect");
-                
+                // UIItem addRectangleMinMax(
+                //     const MathCore::vec2f &min,
+                //     const MathCore::vec2f &max,
+                //     const MathCore::vec4f &color,
+                //     const MathCore::vec4f &radius,
+                //     float z,
+                //     const std::string &name = "_rect");
+
                 UIItem addRectangleCenterSize(
                     const MathCore::vec2f &center,
                     const MathCore::vec2f &size,
                     const MathCore::vec4f &color,
                     const MathCore::vec4f &radius,
+                    StrokeModeEnum stroke_mode,
+                    float stroke_thickness,
+                    const MathCore::vec4f &stroke_color,
+                    float drop_shadow_thickness,
+                    const MathCore::vec4f &drop_shadow_color,
+
                     float z,
                     const std::string &name = "_rect");
-
-                    
 
                 UIItem addSprite(
                     const MathCore::vec2f &pos,
