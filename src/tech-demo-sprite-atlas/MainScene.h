@@ -8,6 +8,8 @@
 
 #include "components/ComponentSprite.h"
 
+#include "components/ui/ComponentUI.h"
+
 class App;
 
 //
@@ -58,6 +60,8 @@ public:
     std::shared_ptr<AppKit::GLEngine::Components::ComponentSprite> bgComponentSprite;
     std::shared_ptr<AppKit::GLEngine::Transform> bgNode;
     
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> uiComponent;
+    std::shared_ptr<AppKit::GLEngine::Transform> uiNode;
 
     float randomNext;
     ITKCommon::Random32 random32;

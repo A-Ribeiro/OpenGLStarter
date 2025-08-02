@@ -14,13 +14,13 @@
 // #include <aRibeiroData/aRibeiroData.h>
 
 // #include <appkit-gl-engine/DefaultEngineShader.h>
-#include "../util/SpriteAtlas.h"
+//#include "../../util/SpriteAtlas.h"
 
 #include <appkit-gl-engine/Components/ComponentMesh.h>
 #include <appkit-gl-engine/Components/ComponentMaterial.h>
 #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
 
-#include "../shaders/SpriteShader.h"
+// #include "../../shaders/SpriteShader.h"
 
 namespace AppKit
 {
