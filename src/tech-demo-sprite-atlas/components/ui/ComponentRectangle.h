@@ -14,7 +14,7 @@
 // #include <aRibeiroData/aRibeiroData.h>
 
 // #include <appkit-gl-engine/DefaultEngineShader.h>
-//#include "../../util/SpriteAtlas.h"
+// #include "../../util/SpriteAtlas.h"
 
 #include <appkit-gl-engine/Components/ComponentMesh.h>
 #include <appkit-gl-engine/Components/ComponentMaterial.h>
@@ -29,8 +29,37 @@ namespace AppKit
         namespace Components
         {
 
+            enum StrokeModeEnum
+            {
+                StrokeModeGrowMiddle,
+                StrokeModeGrowInside,
+                StrokeModeGrowOutside
+            };
+
             class ComponentRectangle : public Component
             {
+
+                void clearMesh();
+
+                void drawInside(const MathCore::vec2f &center,
+                                const MathCore::vec2f &size,
+                                const MathCore::vec4f &color_internal,
+                                const MathCore::vec4f &color_external,
+                                const MathCore::vec4f &radius,
+                                StrokeModeEnum stroke_mode,
+                                float ignore_stroke_thickness,
+                                uint32_t segment_count);
+
+                void drawStroke(const MathCore::vec2f &center,
+                                const MathCore::vec2f &size,
+                                const MathCore::vec4f &color_internal,
+                                const MathCore::vec4f &color_external,
+                                const MathCore::vec4f &radius,
+                                StrokeModeEnum stroke_mode,
+                                float stroke_thickness,
+                                float stroke_offset,
+                                uint32_t segment_count);
+
             public:
                 static const ComponentType Type;
 
@@ -41,24 +70,32 @@ namespace AppKit
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
 
                 void checkOrCreateAuxiliaryComponents(
-                    AppKit::GLEngine::ResourceMap *resourceMap
-                );
+                    AppKit::GLEngine::ResourceMap *resourceMap);
 
-                void setQuadFromMinMax(
-                    AppKit::GLEngine::ResourceMap *resourceMap,
-                    const MathCore::vec2f &min,
-                    const MathCore::vec2f &max,
-                    const MathCore::vec4f &color,
-                    const MathCore::vec4f &radius
-                );
+                // void setQuadFromMinMax(
+                //     AppKit::GLEngine::ResourceMap *resourceMap,
+                //     const MathCore::vec2f &min,
+                //     const MathCore::vec2f &max,
+                //     const MathCore::vec4f &color,
+                //     const MathCore::vec4f &radius,
+                //     StrokeModeEnum stroke_mode = StrokeModeGrowMiddle,
+                //     float ignore_stroke_thickness = 0.0f,
+                //     uint32_t segment_count = 10);
 
+
+                // if color.a == 0, skip this draw
                 void setQuadFromCenterSize(
                     AppKit::GLEngine::ResourceMap *resourceMap,
                     const MathCore::vec2f &center,
                     const MathCore::vec2f &size,
                     const MathCore::vec4f &color,
-                    const MathCore::vec4f &radius
-                );
+                    const MathCore::vec4f &radius,
+                    StrokeModeEnum stroke_mode,
+                    float stroke_thickness,
+                    const MathCore::vec4f &stroke_color,
+                    float drop_shadow_thickness,
+                    const MathCore::vec4f &drop_shadow_color,
+                    uint32_t segment_count = 10);
 
                 ComponentRectangle();
 

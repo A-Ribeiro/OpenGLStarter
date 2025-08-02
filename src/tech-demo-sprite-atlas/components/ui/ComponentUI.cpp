@@ -37,31 +37,39 @@ namespace AppKit
                 return item;
             }
 
-            UIItem ComponentUI::addRectangleMinMax(
-                const MathCore::vec2f &min,
-                const MathCore::vec2f &max,
-                const MathCore::vec4f &color,
-                const MathCore::vec4f &radius,
-                float z,
-                const std::string &name)
-            {
-                auto transform = Transform::CreateShared(name);
-                transform->setLocalPosition(MathCore::vec3f(0, 0, z));
-                auto rect = transform->addNewComponent<ComponentRectangle>();
-                rect->setQuadFromMinMax(this->resourceMap, min, max, color, radius);
-                auto item = UIItem(
-                    getTransform()->addChild(transform),
-                    self<ComponentUI>());
-                item.set<ComponentRectangle>(rect);
-                items.push_back(item);
-                return item;
-            }
+            // UIItem ComponentUI::addRectangleMinMax(
+            //     const MathCore::vec2f &min,
+            //     const MathCore::vec2f &max,
+            //     const MathCore::vec4f &color,
+            //     const MathCore::vec4f &radius,
+            //     float z,
+            //     const std::string &name)
+            // {
+            //     auto transform = Transform::CreateShared(name);
+            //     transform->setLocalPosition(MathCore::vec3f(0, 0, z));
+            //     auto rect = transform->addNewComponent<ComponentRectangle>();
+            //     rect->setQuadFromMinMax(this->resourceMap, min, max, color, radius);
+            //     auto item = UIItem(
+            //         getTransform()->addChild(transform),
+            //         self<ComponentUI>());
+            //     item.set<ComponentRectangle>(rect);
+            //     items.push_back(item);
+            //     return item;
+            // }
 
+            // color.a == 0, skip this draw
             UIItem ComponentUI::addRectangleCenterSize(
+                
                 const MathCore::vec2f &center,
                 const MathCore::vec2f &size,
                 const MathCore::vec4f &color,
                 const MathCore::vec4f &radius,
+                StrokeModeEnum stroke_mode,
+                float stroke_thickness,
+                const MathCore::vec4f &stroke_color,
+                float drop_shadow_thickness,
+                const MathCore::vec4f &drop_shadow_color,
+
                 float z,
                 const std::string &name)
 
@@ -69,7 +77,18 @@ namespace AppKit
                 auto transform = Transform::CreateShared(name);
                 transform->setLocalPosition(MathCore::vec3f(0, 0, z));
                 auto rect = transform->addNewComponent<ComponentRectangle>();
-                rect->setQuadFromCenterSize(this->resourceMap, center, size, color, radius);
+                rect->setQuadFromCenterSize(
+                    this->resourceMap,
+                    center,
+                    size,
+                    color,
+                    radius,
+                    stroke_mode,
+                    stroke_thickness,
+                    stroke_color,
+                    drop_shadow_thickness,
+                    drop_shadow_color
+                );
                 auto item = UIItem(
                     getTransform()->addChild(transform),
                     self<ComponentUI>());
@@ -97,8 +116,7 @@ namespace AppKit
                     pivot,
                     color,
                     size_constraint,
-                    MeshUploadMode_Direct
-                );
+                    MeshUploadMode_Direct);
                 auto item = UIItem(
                     getTransform()->addChild(transform),
                     self<ComponentUI>());
@@ -114,7 +132,7 @@ namespace AppKit
 
             void ComponentUI::clear()
             {
-                for(auto &item : items)
+                for (auto &item : items)
                     item.transform->removeSelf();
                 items.clear();
             }

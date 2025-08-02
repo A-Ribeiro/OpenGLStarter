@@ -32,7 +32,6 @@ void MainScene::loadGraph()
     root->addChild(Transform::CreateShared())->Name = "bg";
 
     main_camera->addChild(Transform::CreateShared())->Name = "ui";
-
 }
 
 // to bind the resources to the current graph
@@ -94,29 +93,32 @@ void MainScene::bindResourcesToGraph()
         MeshUploadMode_Static                    // static mesh
     );
 
-
     uiNode = root->findTransformByName("ui");
     // uiNode->setLocalPosition(MathCore::vec3f(0, 0, camera));
 
     uiComponent = uiNode->addNewComponent<ComponentUI>();
     uiComponent->Initialize(resourceMap, spriteShader);
 
-
     uiComponent->addRectangleCenterSize(
-        vec2f(0, 0), // center
-        vec2f(256, 256), // size
-        MathCore::vec4f(0.0f, 0.0f, 1.0f, 0.4f), //color
-        MathCore::vec4f(32.0f), // radius
-        0 //z
+        vec2f(0, 0),                             // center
+        vec2f(256, 128),                         // size
+        MathCore::vec4f(0.0f, 0.0f, 1.0f, 0.4f), // color
+        MathCore::vec4f(64.0f),                  // radius
+        StrokeModeGrowInside,                    // stroke mode
+        10.0f,                                   // stroke thickness
+        MathCore::vec4f(0.0f, 0.0f, 0.8f, 0.6f), // stroke color
+        50.0f,                                   // drop shadow thickness
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 0.2f), // drop shadow color
+        0                                        // z
     );
 
     uiComponent->addSprite(
-        vec2f(0, 0), // pos
-        resourceMap->getTexture("resources/opengl_logo_white.png", engine->sRGBCapable),// texture
-        vec2f(0.5f), // pivot
-        MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), //color
-        MathCore::vec2f(256-16, -1), // size constraint
-        -1 //z
+        vec2f(0, 0),                                                                     // pos
+        resourceMap->getTexture("resources/opengl_logo_white.png", engine->sRGBCapable), // texture
+        vec2f(0.5f),                                                                     // pivot
+        MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f),                                         // color
+        MathCore::vec2f(256 - 16, -1),                                                   // size constraint
+        -1                                                                               // z
     );
 
     // setup renderstate
@@ -146,7 +148,8 @@ void MainScene::bindResourcesToGraph()
     renderWindow->OnUpdate.add(&MainScene::update, this);
 
     // initialize pool
-    for (int i = 0; i < 75; i++){
+    for (int i = 0; i < 75; i++)
+    {
         transformPool.enqueue(spriteNode->clone(false));
         transformPool.enqueue(logoNode->clone(false));
     }
@@ -162,7 +165,7 @@ void MainScene::unloadAll()
 
     spriteShader = nullptr;
 
-    //componentSprite = nullptr;
+    // componentSprite = nullptr;
     spriteNode = nullptr;
     logoNode = nullptr;
 
@@ -171,7 +174,7 @@ void MainScene::unloadAll()
 
     while (transformPool.size() > 0)
         transformPool.dequeue(nullptr, true);
-    
+
     uiComponent = nullptr;
     uiNode = nullptr;
 }
