@@ -7,6 +7,18 @@ namespace AppKit
     {
         namespace Components
         {
+
+            void UIItem::setType(UIItemType new_type) {
+                type = new_type;
+                // transform.reset();
+                // self_ui.reset();
+                rectangle.reset();
+                sprite.reset();
+                ui.reset();
+            }
+            UIItem::UIItem(){
+                type = UIItemNone;
+            }
             UIItem::UIItem(std::shared_ptr<Transform> transform,
                            std::weak_ptr<ComponentUI> self_ui)
             {
@@ -17,11 +29,12 @@ namespace AppKit
 
             void UIItem::removeSelf()
             {
-                if (auto self = self_ui.lock())
+                this->transform->removeSelf();
+                if (auto component_ui = self_ui.lock())
                 {
-                    auto it = std::find(self->items.begin(), self->items.end(), *this);
-                    if (it != self->items.end())
-                        self->items.erase(it);
+                    auto it = std::find(component_ui->items.begin(), component_ui->items.end(), *this);
+                    if (it != component_ui->items.end())
+                        component_ui->items.erase(it);
                 }
             }
 

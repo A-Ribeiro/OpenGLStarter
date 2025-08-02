@@ -24,11 +24,15 @@ void MainScene::loadGraph()
     root = Transform::CreateShared();
     root->affectComponentStart = true;
 
-    root->addChild(Transform::CreateShared())->Name = "Main Camera";
+    auto main_camera = root->addChild(Transform::CreateShared());
+    main_camera->Name = "Main Camera";
 
     // root->addChild(Transform::CreateShared())->Name = "Smoke";
 
     root->addChild(Transform::CreateShared())->Name = "bg";
+
+    main_camera->addChild(Transform::CreateShared())->Name = "ui";
+
 }
 
 // to bind the resources to the current graph
@@ -90,11 +94,38 @@ void MainScene::bindResourcesToGraph()
         MeshUploadMode_Static                    // static mesh
     );
 
+
+    uiNode = root->findTransformByName("ui");
+    // uiNode->setLocalPosition(MathCore::vec3f(0, 0, camera));
+
+    uiComponent = uiNode->addNewComponent<ComponentUI>();
+    uiComponent->Initialize(resourceMap, spriteShader);
+
+
+    uiComponent->addRectangleCenterSize(
+        vec2f(0, 0), // center
+        vec2f(256, 256), // size
+        MathCore::vec4f(0.0f, 0.0f, 1.0f, 0.4f), //color
+        MathCore::vec4f(32.0f), // radius
+        0 //z
+    );
+
+    uiComponent->addSprite(
+        vec2f(0, 0), // pos
+        resourceMap->getTexture("resources/opengl_logo_white.png", engine->sRGBCapable),// texture
+        vec2f(0.5f), // pivot
+        MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), //color
+        MathCore::vec2f(256-16, -1), // size constraint
+        -1 //z
+    );
+
     // setup renderstate
 
     auto mainCamera = root->findTransformByName("Main Camera");
     std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
     camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
+
+    uiNode->setLocalPosition(MathCore::vec3f(0, 0, componentCameraOrthographic->nearPlane + 100.0f));
 
     auto rect = renderWindow->CameraViewport.c_ptr();
     resize(MathCore::vec2i(rect->w, rect->h));
@@ -140,6 +171,9 @@ void MainScene::unloadAll()
 
     while (transformPool.size() > 0)
         transformPool.dequeue(nullptr, true);
+    
+    uiComponent = nullptr;
+    uiNode = nullptr;
 }
 
 void MainScene::update(Platform::Time *elapsed)
@@ -200,14 +234,17 @@ MainScene::MainScene(
 {
     this->app = app;
 
-    spriteShader = nullptr;
+    // spriteShader = nullptr;
 
-    //componentSprite = nullptr;
-    spriteNode = nullptr;
-    logoNode = nullptr;
+    // //componentSprite = nullptr;
+    // spriteNode = nullptr;
+    // logoNode = nullptr;
 
-    bgComponentSprite = nullptr;
-    bgNode = nullptr;
+    // bgComponentSprite = nullptr;
+    // bgNode = nullptr;
+
+    // uiComponent = nullptr;
+    // uiNode = nullptr;
 
     randomNext = 0.0f;
 }

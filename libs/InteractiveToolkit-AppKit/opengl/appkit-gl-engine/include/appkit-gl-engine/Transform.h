@@ -271,14 +271,14 @@ namespace AppKit
             void makeFirstComponent(std::shared_ptr<Component>);
             void makeLastComponent(std::shared_ptr<Component>);
 
-            template <typename _ComponentType,
+            template <typename _ComponentType, typename... _param_args,
                       typename std::enable_if<
                           std::is_base_of<Component, _ComponentType>::value,
                           bool>::type = true>
-            inline std::shared_ptr<_ComponentType> addNewComponent()
+            inline std::shared_ptr<_ComponentType> addNewComponent(_param_args &&...args)
             {
                 std::shared_ptr<_ComponentType> result;
-                result = Component::CreateShared<_ComponentType>();
+                result = Component::CreateShared<_ComponentType>(std::forward<_param_args>(args)...);
                 addComponent(result);
                 return result;
             }

@@ -16,19 +16,19 @@ namespace AppKit
         namespace Components
         {
 
-            class ComponentFont;
+            // class ComponentFont;
             class ComponentRectangle;
             class ComponentSprite;
-            class ComponentSpriteAtlas;
+            // class ComponentSpriteAtlas;
             class ComponentUI;
 
             enum UIItemType
             {
                 UIItemNone,
-                UIItemFont,
+                // UIItemFont,
                 UIItemRectangle,
                 UIItemSprite,
-                UIItemSpriteAtlas,
+                // UIItemSpriteAtlas,
                 UIItemUI,
             };
 
@@ -40,17 +40,20 @@ namespace AppKit
                 std::weak_ptr<ComponentUI> self_ui;
 
             private:
-                std::shared_ptr<ComponentFont> font;
+                // std::shared_ptr<ComponentFont> font;
                 std::shared_ptr<ComponentRectangle> rectangle;
                 std::shared_ptr<ComponentSprite> sprite;
-                std::shared_ptr<ComponentSpriteAtlas> sprite_atlas;
+                // std::shared_ptr<ComponentSpriteAtlas> sprite_atlas;
                 std::shared_ptr<ComponentUI> ui;
 
+                void setType(UIItemType new_type);
             public:
                 template <typename T>
                 std::shared_ptr<T> &get();
                 template <typename T>
                 void set(std::shared_ptr<T> v);
+
+                UIItem();
 
                 UIItem(std::shared_ptr<Transform> transform,
                        std::weak_ptr<ComponentUI> self_ui);
@@ -63,9 +66,9 @@ namespace AppKit
     }
 }
 
-// #include "../shaders/ComponentFont.h"
+#include "./ComponentRectangle.h"
 // #include "../shaders/ComponentRectangle.h"
-// #include "../shaders/ComponentSprite.h"
+#include "../ComponentSprite.h"
 // #include "../shaders/ComponentSpriteAtlas.h"
 // #include "../shaders/ComponentUI.h"
 

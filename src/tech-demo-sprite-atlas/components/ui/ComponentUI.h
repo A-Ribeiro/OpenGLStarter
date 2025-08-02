@@ -21,7 +21,7 @@
 // #include <appkit-gl-engine/Components/ComponentMaterial.h>
 // #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
 
-#include "../shaders/SpriteShader.h"
+#include "../../shaders/SpriteShader.h"
 
 #include "UIItem.h"
 
@@ -39,6 +39,9 @@ namespace AppKit
 
                 bool always_clone;
 
+                AppKit::GLEngine::ResourceMap *resourceMap;
+                std::shared_ptr<SpriteShader> spriteShader;
+
                 Platform::SmartVector<UIItem> items;
 
                 UIItem addText(
@@ -51,13 +54,23 @@ namespace AppKit
                     float z,
                     const std::string &name = "_text");
 
-                UIItem addRectangle(
+                UIItem addRectangleMinMax(
                     const MathCore::vec2f &min,
                     const MathCore::vec2f &max,
                     const MathCore::vec4f &color,
                     const MathCore::vec4f &radius,
                     float z,
                     const std::string &name = "_rect");
+                
+                UIItem addRectangleCenterSize(
+                    const MathCore::vec2f &center,
+                    const MathCore::vec2f &size,
+                    const MathCore::vec4f &color,
+                    const MathCore::vec4f &radius,
+                    float z,
+                    const std::string &name = "_rect");
+
+                    
 
                 UIItem addSprite(
                     const MathCore::vec2f &pos,

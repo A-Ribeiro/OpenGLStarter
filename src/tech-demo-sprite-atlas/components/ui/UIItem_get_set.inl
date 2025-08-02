@@ -7,18 +7,18 @@ namespace AppKit
         namespace Components
         {
 
-            template <>
-            inline std::shared_ptr<ComponentFont> &UIItem::get<ComponentFont>()
-            {
-                ITK_ABORT(type != UIItemFont, "This is not a font item");
-                return font;
-            }
-            template <>
-            inline void UIItem::set<ComponentFont>(std::shared_ptr<ComponentFont> v)
-            {
-                ITK_ABORT(type != UIItemFont, "This is not a font item");
-                font = v;
-            }
+            // template <>
+            // inline std::shared_ptr<ComponentFont> &UIItem::get<ComponentFont>()
+            // {
+            //     ITK_ABORT(type != UIItemFont, "This is not a font item");
+            //     return font;
+            // }
+            // template <>
+            // inline void UIItem::set<ComponentFont>(std::shared_ptr<ComponentFont> v)
+            // {
+            //     setType(UIItemFont);
+            //     font = v;
+            // }
             template <>
             inline std::shared_ptr<ComponentRectangle> &UIItem::get<ComponentRectangle>()
             {
@@ -28,7 +28,7 @@ namespace AppKit
             template <>
             inline void UIItem::set<ComponentRectangle>(std::shared_ptr<ComponentRectangle> v)
             {
-                ITK_ABORT(type != UIItemRectangle, "This is not a rectangle item");
+                setType(UIItemRectangle);
                 rectangle = v;
             }
             template <>
@@ -40,21 +40,21 @@ namespace AppKit
             template <>
             inline void UIItem::set<ComponentSprite>(std::shared_ptr<ComponentSprite> v)
             {
-                ITK_ABORT(type != UIItemSprite, "This is not a sprite item");
+                setType(UIItemSprite);
                 sprite = v;
             }
-            template <>
-            inline std::shared_ptr<ComponentSpriteAtlas> &UIItem::get<ComponentSpriteAtlas>()
-            {
-                ITK_ABORT(type != UIItemSpriteAtlas, "This is not a sprite atlas item");
-                return sprite_atlas;
-            }
-            template <>
-            inline void UIItem::set<ComponentSpriteAtlas>(std::shared_ptr<ComponentSpriteAtlas> v)
-            {
-                ITK_ABORT(type != UIItemSpriteAtlas, "This is not a sprite atlas item");
-                sprite_atlas = v;
-            }
+            // template <>
+            // inline std::shared_ptr<ComponentSpriteAtlas> &UIItem::get<ComponentSpriteAtlas>()
+            // {
+            //     ITK_ABORT(type != UIItemSpriteAtlas, "This is not a sprite atlas item");
+            //     return sprite_atlas;
+            // }
+            // template <>
+            // inline void UIItem::set<ComponentSpriteAtlas>(std::shared_ptr<ComponentSpriteAtlas> v)
+            // {
+            //     setType(UIItemSpriteAtlas);
+            //     sprite_atlas = v;
+            // }
             template <>
             inline std::shared_ptr<ComponentUI> &UIItem::get<ComponentUI>()
             {
@@ -64,7 +64,7 @@ namespace AppKit
             template <>
             inline void UIItem::set<ComponentUI>(std::shared_ptr<ComponentUI> v)
             {
-                ITK_ABORT(type != UIItemUI, "This is not a UI item");
+                setType(UIItemUI);
                 ui = v;
             }
 
