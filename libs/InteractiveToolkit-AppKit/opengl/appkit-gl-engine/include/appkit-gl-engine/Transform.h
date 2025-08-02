@@ -39,8 +39,8 @@ namespace AppKit
 
             void registerComponentStartRecursive();
             void unregisterComponentStartRecursive();
-        public:
 
+        public:
             bool affectComponentStart;
 
             // deleted copy constructor and assign operator, to avoid copy...
@@ -281,6 +281,17 @@ namespace AppKit
                 result = Component::CreateShared<_ComponentType>();
                 addComponent(result);
                 return result;
+            }
+
+            template <typename _ComponentType,
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value &&
+                              !std::is_same<_ComponentType, Component>::value,
+                          bool>::type = true>
+            inline std::shared_ptr<_ComponentType> addComponent(std::shared_ptr<_ComponentType> c)
+            {
+                addComponent((std::shared_ptr<Component>)c);
+                return c;
             }
 
             std::shared_ptr<Component> addComponent(std::shared_ptr<Component>);

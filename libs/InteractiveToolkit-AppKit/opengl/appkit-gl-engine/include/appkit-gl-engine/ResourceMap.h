@@ -89,6 +89,12 @@ namespace AppKit
 
             std::shared_ptr<Components::ComponentMaterial> renderOnlyDepthMaterial;
 
+            std::shared_ptr<Components::ComponentMaterial> defaultUnlitMaterial;
+            std::shared_ptr<Components::ComponentMaterial> defaultUnlitAlphaMaterial;
+
+            std::shared_ptr<Components::ComponentMaterial> defaultUnlitVertexColorMaterial;
+            std::shared_ptr<Components::ComponentMaterial> defaultUnlitVertexColorAlphaMaterial;
+
             std::unordered_map<uint64_t, std::shared_ptr<Components::ComponentMaterial>> spriteMaterialMap;
 
             // default shaders

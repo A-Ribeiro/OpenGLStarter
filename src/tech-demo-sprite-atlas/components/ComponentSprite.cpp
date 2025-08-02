@@ -20,18 +20,20 @@ namespace AppKit
                     return;
                 auto transform = getTransform();
 
-                uint64_t spriteMaterialId = (uint64_t)texture.get();
-
-                if (resourceMap->spriteMaterialMap.find(spriteMaterialId) != resourceMap->spriteMaterialMap.end())
+                if (material == nullptr)
                 {
-                    material = resourceMap->spriteMaterialMap[spriteMaterialId];
-                }
-                else
-                {
-                    material = transform->addNewComponent<ComponentMaterial>();
-                    material->setShader(spriteShader);
-                    material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)texture);
-                    resourceMap->spriteMaterialMap[spriteMaterialId] = material;
+                    uint64_t spriteMaterialId = (uint64_t)texture.get();
+                    if (resourceMap->spriteMaterialMap.find(spriteMaterialId) != resourceMap->spriteMaterialMap.end())
+                    {
+                        material = transform->addComponent(resourceMap->spriteMaterialMap[spriteMaterialId]);
+                    }
+                    else
+                    {
+                        material = transform->addNewComponent<ComponentMaterial>();
+                        material->setShader(spriteShader);
+                        material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)texture);
+                        resourceMap->spriteMaterialMap[spriteMaterialId] = material;
+                    }
                 }
 
                 if (mesh == nullptr)
@@ -39,6 +41,7 @@ namespace AppKit
                     mesh = transform->addNewComponent<ComponentMesh>();
                     mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
                 }
+
                 if (meshWrapper == nullptr)
                 {
                     meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
@@ -126,10 +129,11 @@ namespace AppKit
                 else if (meshUploadMode == MeshUploadMode_Dynamic)
                     mesh->syncVBO(0xffffffff, 0);
 
-                meshWrapper->setShapeAABB(CollisionCore::AABB<MathCore::vec3f>(
-                                              mesh->pos[0],
-                                              mesh->pos[2]),
-                                          true);
+                meshWrapper->setShapeAABB(
+                    CollisionCore::AABB<MathCore::vec3f>(
+                        mesh->pos[0],
+                        mesh->pos[2]),
+                    true);
             }
 
             void ComponentSprite::setTextureFromAtlas(

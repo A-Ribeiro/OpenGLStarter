@@ -8,7 +8,7 @@
 // #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColor.h> //
 #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlpha.h> // Unlit_tex_vertcolor_font_PassShader
 #include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
-#include <appkit-gl-engine/shaders/ShaderDepthOnly.h> 
+#include <appkit-gl-engine/shaders/ShaderDepthOnly.h>
 
 namespace AppKit
 {
@@ -89,6 +89,12 @@ namespace AppKit
             defaultPBRMaterial = nullptr;
             renderOnlyDepthMaterial = nullptr;
 
+            defaultUnlitMaterial = nullptr;
+            defaultUnlitVertexColorMaterial = nullptr;
+
+            defaultUnlitAlphaMaterial = nullptr;
+            defaultUnlitVertexColorAlphaMaterial = nullptr;
+
             shaderUnlit = nullptr;
             shaderUnlitVertexColor = nullptr;
             shaderUnlitTexture = nullptr;
@@ -134,13 +140,38 @@ namespace AppKit
 
                 defaultPBRMaterial->property_bag.getProperty("texAlbedo").set<std::shared_ptr<OpenGL::VirtualTexture>>(defaultAlbedoTexture);
                 defaultPBRMaterial->property_bag.getProperty("texNormal").set<std::shared_ptr<OpenGL::VirtualTexture>>(defaultNormalTexture);
-
             }
 
             if (renderOnlyDepthMaterial == nullptr)
             {
                 renderOnlyDepthMaterial = Component::CreateShared<Components::ComponentMaterial>();
                 renderOnlyDepthMaterial->setShader(shaderDepthOnly);
+            }
+
+            if (defaultUnlitMaterial == nullptr)
+            {
+                defaultUnlitMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultUnlitMaterial->setShader(shaderUnlit);
+            }
+
+            if (defaultUnlitVertexColorMaterial == nullptr)
+            {
+                defaultUnlitVertexColorMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultUnlitVertexColorMaterial->setShader(shaderUnlitVertexColor);
+            }
+
+            if (defaultUnlitAlphaMaterial == nullptr)
+            {
+                defaultUnlitAlphaMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultUnlitAlphaMaterial->setShader(shaderUnlit);
+                defaultUnlitAlphaMaterial->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
+            }
+            
+            if (defaultUnlitVertexColorAlphaMaterial == nullptr)
+            {
+                defaultUnlitVertexColorAlphaMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultUnlitVertexColorAlphaMaterial->setShader(shaderUnlitVertexColor);
+                defaultUnlitVertexColorAlphaMaterial->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
             }
         }
 
