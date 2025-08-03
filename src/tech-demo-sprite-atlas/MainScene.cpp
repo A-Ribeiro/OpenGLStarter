@@ -113,12 +113,12 @@ void MainScene::bindResourcesToGraph()
     );
 
     uiComponent->addSprite(
-        vec2f(0, 0),                                                                     // pos
-        resourceMap->getTexture("resources/opengl_logo_white.png", engine->sRGBCapable), // texture
-        vec2f(0.5f),                                                                     // pivot
-        MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f),                                         // color
-        MathCore::vec2f(256 - 16, -1),                                                   // size constraint
-        -1                                                                               // z
+        vec2f(0, 0),                             // pos
+        "resources/opengl_logo_white.png",       // texture
+        vec2f(0.5f),                             // pivot
+        MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
+        MathCore::vec2f(256 - 16, -1),           // size constraint
+        -1                                       // z
     );
 
     // setup renderstate

@@ -5,6 +5,7 @@
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/GLCubeMap.h>
 #include <appkit-gl-engine/Serializer/SerializerUtil.h>
+#include <appkit-gl-base/font/GLFont2Builder.h>
 
 namespace AppKit
 {
@@ -53,6 +54,17 @@ namespace AppKit
             std::unordered_map<std::string, CubemapInfo> cubemapMap;
 
         public:
+            struct FontResource
+            {
+                std::shared_ptr<AppKit::OpenGL::GLFont2Builder> fontBuilder;
+                std::shared_ptr<AppKit::OpenGL::GLFont2PolygonCache> polygonFontCache;
+            };
+
+        private:
+            std::unordered_map<std::string, std::shared_ptr<AppKit::OpenGL::GLFont2Builder>> textureFontMap;
+            std::unordered_map<std::string, std::shared_ptr<FontResource>> geometryFontMap;
+
+        public:
             static inline std::shared_ptr<ResourceMap> CreateShared()
             {
                 auto result = std::make_shared<ResourceMap>();
@@ -72,13 +84,16 @@ namespace AppKit
             ITKCommon::FileSystem::File getFile(const std::string &relative_path);
 
             void clear_refcount_equals_1();
-            void clear();// each scene call this on unload
+            void clear(); // each scene call this on unload
 
             void ensure_default_texture_creation();
 
             std::shared_ptr<AppKit::OpenGL::GLTexture> getTexture(const std::string &relative_path, bool is_srgb);
 
             std::shared_ptr<AppKit::OpenGL::GLCubeMap> getCubeMap(const std::string &relative_path, bool is_srgb, int maxResolution);
+
+            std::shared_ptr<AppKit::OpenGL::GLFont2Builder> getTextureFont(const std::string &relative_path, bool is_srgb);
+            std::shared_ptr<FontResource> getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb);
 
             void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
             void Deserialize(rapidjson::Value &_value, ResourceSet *resourceSetOutput);
@@ -98,7 +113,7 @@ namespace AppKit
             std::unordered_map<uint64_t, std::shared_ptr<Components::ComponentMaterial>> spriteMaterialMap;
 
             // default shaders
-            //std::shared_ptr<SpriteShader> spriteShader;
+            // std::shared_ptr<SpriteShader> spriteShader;
             std::shared_ptr<ShaderUnlit> shaderUnlit;
             std::shared_ptr<ShaderUnlitVertexColor> shaderUnlitVertexColor;
             std::shared_ptr<ShaderUnlitTexture> shaderUnlitTexture;
@@ -115,11 +130,11 @@ namespace AppKit
 // need to include component material after using its forward declaration
 #include <appkit-gl-engine/Components/ComponentMaterial.h>
 
-#include <appkit-gl-engine/shaders/ShaderUnlit.h>            // UnlitPassShader
-#include <appkit-gl-engine/shaders/ShaderUnlitVertexColor.h> // Unlit_vertcolor_Shader
-#include <appkit-gl-engine/shaders/ShaderUnlitTexture.h>     // Unlit_tex_PassShader
-#include <appkit-gl-engine/shaders/ShaderUnlitTextureAlpha.h>     // Unlit_tex_PassShader
+#include <appkit-gl-engine/shaders/ShaderUnlit.h>             // UnlitPassShader
+#include <appkit-gl-engine/shaders/ShaderUnlitVertexColor.h>  // Unlit_vertcolor_Shader
+#include <appkit-gl-engine/shaders/ShaderUnlitTexture.h>      // Unlit_tex_PassShader
+#include <appkit-gl-engine/shaders/ShaderUnlitTextureAlpha.h> // Unlit_tex_PassShader
 // #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColor.h> //
 #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlpha.h> // Unlit_tex_vertcolor_font_PassShader
 #include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
-#include <appkit-gl-engine/shaders/ShaderDepthOnly.h>                   // DepthOnlyShader
+#include <appkit-gl-engine/shaders/ShaderDepthOnly.h>                    // DepthOnlyShader
