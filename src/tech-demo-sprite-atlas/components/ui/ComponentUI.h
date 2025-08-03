@@ -44,14 +44,30 @@ namespace AppKit
 
                 Platform::SmartVector<UIItem> items;
 
-                UIItem addText(
+                UIItem addTextureText(
                     const std::string &font_name,
-                    const std::string &text,
-                    int h_align,
-                    int v_align,
                     const MathCore::vec2f &pos,
-                    const MathCore::vec4f &color,
                     float z,
+
+                    const std::string &text,
+                    float size, ///< current state of the font size
+
+                    const MathCore::vec4f &faceColor,   ///< current state of the face color
+                    const MathCore::vec4f &strokeColor, ///< current state of the stroke color
+
+                    // .a == 0 turn off the drawing
+                    // bool drawFace;                          ///< should draw face
+                    // bool drawStroke;                        ///< should draw stroke
+
+                    const MathCore::vec3f &strokeOffset,
+                    AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+                    AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+                    float lineHeight,
+
+                    AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                    AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+                    char32_t wordSeparatorChar,
+
                     const std::string &name = "_text");
 
                 // UIItem addRectangleMinMax(
@@ -78,7 +94,7 @@ namespace AppKit
 
                 UIItem addSprite(
                     const MathCore::vec2f &pos,
-                    std::shared_ptr<AppKit::OpenGL::GLTexture> texture,
+                    const std::string &texture_path,
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
                     const MathCore::vec2f &size_constraint,

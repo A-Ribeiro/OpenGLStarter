@@ -31,6 +31,32 @@ namespace AppKit
         void ResourceMap::clear_refcount_equals_1()
         {
             printf("ResourceMap::clear_refcount_equals_1\n");
+
+            {
+                std::vector<std::string> to_remove_str;
+                for (auto &item : geometryFontMap)
+                {
+                    if (item.second.use_count() > 1)
+                        continue;
+                    to_remove_str.push_back(item.first);
+                }
+                for (const auto &key : to_remove_str)
+                    geometryFontMap.erase(key);
+
+                to_remove_str.clear();
+                for (auto &item : textureFontMap)
+                {
+                    if (item.second.use_count() > 1)
+                        continue;
+                    to_remove_str.push_back(item.first);
+                }
+                for (const auto &key : to_remove_str)
+                    textureFontMap.erase(key);
+
+                printf("  total loaded texture fonts: %zu\n", textureFontMap.size());
+                printf("  total loaded geometry fonts: %zu\n", geometryFontMap.size());
+            }
+
             {
                 std::vector<uint64_t> to_remove_u64;
                 // free sprite not used
@@ -78,7 +104,10 @@ namespace AppKit
 
         void ResourceMap::clear()
         {
-            printf("ResourceMap::clear");
+            printf("ResourceMap::clear\n");
+
+            geometryFontMap.clear();
+            textureFontMap.clear();
 
             spriteMaterialMap.clear();
             texture2DMap.clear();
@@ -166,7 +195,7 @@ namespace AppKit
                 defaultUnlitAlphaMaterial->setShader(shaderUnlit);
                 defaultUnlitAlphaMaterial->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
             }
-            
+
             if (defaultUnlitVertexColorAlphaMaterial == nullptr)
             {
                 defaultUnlitVertexColorAlphaMaterial = Component::CreateShared<Components::ComponentMaterial>();
@@ -292,6 +321,39 @@ namespace AppKit
             }
 
             return cube_it->second.cubemap;
+        }
+
+        std::shared_ptr<AppKit::OpenGL::GLFont2Builder> ResourceMap::getTextureFont(const std::string &relative_path, bool is_srgb)
+        {
+            std::string to_query = ITKCommon::PrintfToStdString("%s:%s", (is_srgb) ? "srgb" : "linear", relative_path.c_str());
+
+            auto font_it = textureFontMap.find(to_query);
+            if (font_it == textureFontMap.end())
+            {
+                auto fontBuilder = std::make_shared<AppKit::OpenGL::GLFont2Builder>();
+                fontBuilder->load(relative_path, is_srgb);
+                textureFontMap[to_query] = fontBuilder;
+                return fontBuilder;
+            }
+            return font_it->second;
+        }
+        std::shared_ptr<ResourceMap::FontResource> ResourceMap::getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb)
+        {
+            std::string to_query = ITKCommon::PrintfToStdString("%s:%s:%f:%f", relative_path.c_str(), (is_srgb) ? "srgb" : "linear", defaultSize, max_distance_tolerance);
+            auto font_it = geometryFontMap.find(to_query);
+            if (font_it == geometryFontMap.end())
+            {
+                auto fontBuilder = getTextureFont(relative_path, is_srgb);
+                auto polygonCache = fontBuilder->createPolygonCache(
+                    defaultSize, max_distance_tolerance, threadPool);
+                auto fontResource = std::make_shared<FontResource>();
+                fontResource->fontBuilder = fontBuilder;
+                fontResource->polygonFontCache = polygonCache;
+                geometryFontMap[to_query] = fontResource;
+                return fontResource;
+            }
+
+            return font_it->second;
         }
 
         void ResourceMap::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)

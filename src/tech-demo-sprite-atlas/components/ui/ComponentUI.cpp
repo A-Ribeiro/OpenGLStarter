@@ -99,20 +99,22 @@ namespace AppKit
 
             UIItem ComponentUI::addSprite(
                 const MathCore::vec2f &pos,
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texture,
+                const std::string &texture_path,
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
                 const MathCore::vec2f &size_constraint,
                 float z,
                 const std::string &name)
             {
+                auto engine = AppKit::GLEngine::Engine::Instance();
+
                 auto transform = Transform::CreateShared(name);
                 transform->setLocalPosition(MathCore::vec3f(pos.x, pos.y, z));
                 auto sprite = transform->addNewComponent<ComponentSprite>();
                 sprite->setTexture(
                     this->resourceMap,
                     this->spriteShader,
-                    texture,
+                    resourceMap->getTexture(texture_path, engine->sRGBCapable),
                     pivot,
                     color,
                     size_constraint,
