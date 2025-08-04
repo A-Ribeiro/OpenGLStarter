@@ -1,0 +1,91 @@
+#pragma once
+
+#include <InteractiveToolkit/MathCore/MathCore.h>
+
+// #include <appkit-gl-base/opengl-wrapper.h>
+
+#include <appkit-gl-engine/Component.h>
+#include <appkit-gl-engine/Transform.h>
+#include <appkit-gl-engine/Engine.h>
+
+#include <appkit-gl-engine/Components/deprecated/ComponentColorMesh.h>
+#include <appkit-gl-engine/GL/GLRenderState.h>
+// #include <appkit-gl-engine/util/ReferenceCounter.h>
+// #include <aRibeiroData/aRibeiroData.h>
+
+// #include <appkit-gl-engine/DefaultEngineShader.h>
+// #include "../../util/SpriteAtlas.h"
+
+#include <appkit-gl-engine/Components/ComponentMesh.h>
+#include <appkit-gl-engine/Components/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+
+// #include "../../shaders/SpriteShader.h"
+
+namespace AppKit
+{
+    namespace GLEngine
+    {
+        namespace Components
+        {
+
+            class ComponentFont : public Component
+            {
+
+            public:
+                static const ComponentType Type;
+
+                bool always_clone;
+
+                std::shared_ptr<ComponentMaterial> material;
+                std::shared_ptr<ComponentMesh> mesh;
+                std::shared_ptr<ComponentMeshWrapper> meshWrapper;
+
+                void checkOrCreateAuxiliaryComponents(
+                    AppKit::GLEngine::ResourceMap *resourceMap);
+
+                // if color.a == 0, skip this draw
+                void setText(
+                    AppKit::GLEngine::ResourceMap *resourceMap,
+                    
+                    const std::string &font_path,
+
+                    bool is_srgb,
+
+                    const std::string &text,
+                    float size = 60.0f, ///< current state of the font size
+                    float max_width = -1.0f,
+
+                    const MathCore::vec4f &faceColor = MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f),   ///< current state of the face color
+                    const MathCore::vec4f &strokeColor = MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f), ///< current state of the stroke color
+
+                    // .a == 0 turn off the drawing
+                    // bool drawFace;                          ///< should draw face
+                    // bool drawStroke;                        ///< should draw stroke
+
+                    const MathCore::vec3f &strokeOffset = MathCore::vec3f(0.0f, 0.0f, -0.02f),
+                    AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_center,
+                    AppKit::OpenGL::GLFont2VerticalAlign verticalAlign = AppKit::OpenGL::GLFont2VerticalAlign_middle,
+                    float lineHeight = 1.5f,
+
+                    AppKit::OpenGL::GLFont2WrapMode wrapMode = AppKit::OpenGL::GLFont2WrapMode_Word,
+                    AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,
+                    char32_t wordSeparatorChar = U' ');
+
+                ComponentFont();
+
+                ~ComponentFont();
+
+                // always clone
+                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone);
+                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
+
+                void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
+                void Deserialize(rapidjson::Value &_value,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                 ResourceSet &resourceSet);
+            };
+        }
+    }
+}

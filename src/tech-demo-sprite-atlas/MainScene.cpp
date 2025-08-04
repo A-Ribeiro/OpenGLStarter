@@ -121,6 +121,24 @@ void MainScene::bindResourcesToGraph()
         -1                                       // z
     );
 
+    uiComponent->addTextureText(
+        "resources/Roboto-Regular-100.basof2",                            // font_path
+        MathCore::vec2f(0, 128),                                          // pos
+        -1,                                                               // z
+        "Hello, {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}World{pop;} (Text) !",                                          // text
+        64.0f,                                                            // size
+        -1.0f,                                                            // max_width
+        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                          // strokeColor
+        MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
+        AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
+        AppKit::OpenGL::GLFont2VerticalAlign_bottom,                      // verticalAlign
+        1.0f,                                                             // lineHeight
+        AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
+        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
+        U' '                                                              // wordSeparatorChar
+    );
+
     // setup renderstate
 
     auto mainCamera = root->findTransformByName("Main Camera");

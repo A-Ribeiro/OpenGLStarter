@@ -19,43 +19,63 @@ namespace AppKit
             {
             }
 
-            UIItem ComponentUI::addText(
-                const std::string &font_name,
-                const std::string &text,
-                int h_align,
-                int v_align,
-                const MathCore::vec2f &pos,
-                const MathCore::vec4f &color,
-                float z,
-                const std::string &name)
+            UIItem ComponentUI::addTextureText(
+                    const std::string &font_path,
+                    const MathCore::vec2f &pos,
+                    float z,
+
+                    const std::string &text,
+                    float size, ///< current state of the font size
+                    float max_width,
+
+                    const MathCore::vec4f &faceColor,   ///< current state of the face color
+                    const MathCore::vec4f &strokeColor, ///< current state of the stroke color
+
+                    // .a == 0 turn off the drawing
+                    // bool drawFace;                          ///< should draw face
+                    // bool drawStroke;                        ///< should draw stroke
+
+                    const MathCore::vec3f &strokeOffset,
+                    AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+                    AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+                    float lineHeight,
+
+                    AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                    AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+                    char32_t wordSeparatorChar,
+
+                    const std::string &name)
             {
+                auto engine = AppKit::GLEngine::Engine::Instance();
                 auto transform = Transform::CreateShared(name);
+                transform->setLocalPosition(MathCore::vec3f(pos.x, pos.y, z));
+
+                auto font = transform->addNewComponent<ComponentFont>();
+                font->setText(
+                    this->resourceMap,
+                    font_path,
+                    engine->sRGBCapable,
+                    text,
+                    size,
+                    max_width,
+                    faceColor,
+                    strokeColor,
+                    strokeOffset,
+                    horizontalAlign,
+                    verticalAlign,
+                    lineHeight,
+                    wrapMode,
+                    firstLineHeightMode,
+                    wordSeparatorChar
+                );
+
                 auto item = UIItem(
                     getTransform()->addChild(transform),
                     self<ComponentUI>());
+                item.set<ComponentFont>(font);
                 items.push_back(item);
                 return item;
             }
-
-            // UIItem ComponentUI::addRectangleMinMax(
-            //     const MathCore::vec2f &min,
-            //     const MathCore::vec2f &max,
-            //     const MathCore::vec4f &color,
-            //     const MathCore::vec4f &radius,
-            //     float z,
-            //     const std::string &name)
-            // {
-            //     auto transform = Transform::CreateShared(name);
-            //     transform->setLocalPosition(MathCore::vec3f(0, 0, z));
-            //     auto rect = transform->addNewComponent<ComponentRectangle>();
-            //     rect->setQuadFromMinMax(this->resourceMap, min, max, color, radius);
-            //     auto item = UIItem(
-            //         getTransform()->addChild(transform),
-            //         self<ComponentUI>());
-            //     item.set<ComponentRectangle>(rect);
-            //     items.push_back(item);
-            //     return item;
-            // }
 
             // color.a == 0, skip this draw
             UIItem ComponentUI::addRectangleCenterSize(
