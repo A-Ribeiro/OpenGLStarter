@@ -7,18 +7,18 @@ namespace AppKit
         namespace Components
         {
 
-            // template <>
-            // inline std::shared_ptr<ComponentFont> &UIItem::get<ComponentFont>()
-            // {
-            //     ITK_ABORT(type != UIItemFont, "This is not a font item");
-            //     return font;
-            // }
-            // template <>
-            // inline void UIItem::set<ComponentFont>(std::shared_ptr<ComponentFont> v)
-            // {
-            //     setType(UIItemFont);
-            //     font = v;
-            // }
+            template <>
+            inline std::shared_ptr<ComponentFont> &UIItem::get<ComponentFont>()
+            {
+                ITK_ABORT(type != UIItemFont, "This is not a font item");
+                return font;
+            }
+            template <>
+            inline void UIItem::set<ComponentFont>(std::shared_ptr<ComponentFont> v)
+            {
+                setType(UIItemFont);
+                font = v;
+            }
             template <>
             inline std::shared_ptr<ComponentRectangle> &UIItem::get<ComponentRectangle>()
             {

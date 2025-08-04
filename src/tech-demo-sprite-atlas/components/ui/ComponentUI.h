@@ -45,12 +45,13 @@ namespace AppKit
                 Platform::SmartVector<UIItem> items;
 
                 UIItem addTextureText(
-                    const std::string &font_name,
+                    const std::string &font_path,
                     const MathCore::vec2f &pos,
                     float z,
 
                     const std::string &text,
                     float size, ///< current state of the font size
+                    float max_width,
 
                     const MathCore::vec4f &faceColor,   ///< current state of the face color
                     const MathCore::vec4f &strokeColor, ///< current state of the stroke color
