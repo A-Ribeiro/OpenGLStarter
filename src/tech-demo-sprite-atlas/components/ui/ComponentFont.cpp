@@ -12,16 +12,22 @@ namespace AppKit
             const ComponentType ComponentFont::Type = "ComponentFont";
 
             void ComponentFont::checkOrCreateAuxiliaryComponents(
-                AppKit::GLEngine::ResourceMap *resourceMap)
+                AppKit::GLEngine::ResourceMap *resourceMap,
+                std::shared_ptr<ComponentMaterial> &materialp)
             {
 
                 if (material != nullptr || mesh != nullptr || meshWrapper != nullptr)
+                {
+                    if (material != materialp)
+                        material = getTransform()->replaceComponent<ComponentMaterial>(material, materialp);
                     return;
+                }
+
                 auto transform = getTransform();
 
                 if (material == nullptr)
                 {
-                    material = transform->addNewComponent<ComponentMaterial>();
+                    material = transform->addComponent<ComponentMaterial>(materialp);
                 }
 
                 if (mesh == nullptr)
@@ -43,6 +49,11 @@ namespace AppKit
 
                 const std::string &font_path,
 
+                // 0 = texture, > 0 = polygon
+                float polygon_size,
+                float polygon_distance_tolerance,
+                Platform::ThreadPool *polygon_threadPool,
+
                 bool is_srgb,
 
                 const std::string &text,
@@ -50,12 +61,9 @@ namespace AppKit
 
                 float max_width,
 
+                // .a == 0 turn off the drawing
                 const MathCore::vec4f &faceColor,   ///< current state of the face color
                 const MathCore::vec4f &strokeColor, ///< current state of the stroke color
-
-                // .a == 0 turn off the drawing
-                // bool drawFace;                          ///< should draw face
-                // bool drawStroke;                        ///< should draw stroke
 
                 const MathCore::vec3f &strokeOffset,
                 AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
@@ -66,9 +74,16 @@ namespace AppKit
                 AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
                 char32_t wordSeparatorChar)
             {
-                checkOrCreateAuxiliaryComponents(resourceMap);
+                std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource;
 
-                auto builder = resourceMap->getTextureFont(font_path, is_srgb);
+                if (polygon_size > 0.0f)
+                    fontResource = resourceMap->getPolygonFont(font_path, polygon_size, polygon_distance_tolerance, polygon_threadPool, is_srgb);
+                else
+                    fontResource = resourceMap->getTextureFont(font_path, is_srgb);
+
+                auto builder = fontResource->fontBuilder.get();
+
+                checkOrCreateAuxiliaryComponents(resourceMap, fontResource->material);
 
                 builder->size = size;
                 builder->faceColor = faceColor;
@@ -84,7 +99,7 @@ namespace AppKit
                 builder->drawFace = faceColor.a > 0.0f;
                 builder->drawStroke = strokeColor.a > 0.0f;
 
-                builder->richBuild(text.c_str(), is_srgb, max_width, nullptr);
+                builder->richBuild(text.c_str(), is_srgb, max_width, fontResource->polygonFontCache);
 
                 auto transform = getTransform();
 
@@ -93,31 +108,56 @@ namespace AppKit
                 mesh->color[0].clear();
                 mesh->indices.clear();
 
-                material->setShader(resourceMap->shaderUnlitTextureVertexColorAlpha);
-                auto tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&builder->glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
-                material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+                // material->setShader(resourceMap->shaderUnlitTextureVertexColorAlpha);
+                // auto tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&builder->glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
+                // material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
 
                 MathCore::vec3f min, max;
-                for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
+
+                if (builder->isConstructedFromPolygonCache())
                 {
-                    if (i == 0)
-                        min = max = builder->vertexAttrib[i].pos;
-                    else
+
+                    for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
                     {
-                        min = MathCore::OP<MathCore::vec3f>::minimum(min, builder->vertexAttrib[i].pos);
-                        max = MathCore::OP<MathCore::vec3f>::maximum(max, builder->vertexAttrib[i].pos);
+                        if (i == 0)
+                            min = max = builder->vertexAttrib[i].pos;
+                        else
+                        {
+                            min = MathCore::OP<MathCore::vec3f>::minimum(min, builder->vertexAttrib[i].pos);
+                            max = MathCore::OP<MathCore::vec3f>::maximum(max, builder->vertexAttrib[i].pos);
+                        }
+
+                        mesh->pos.push_back(builder->vertexAttrib[i].pos);
+                        mesh->color[0].push_back(builder->vertexAttrib[i].color);
                     }
 
-                    mesh->pos.push_back(builder->vertexAttrib[i].pos);
-                    mesh->uv[0].push_back(MathCore::vec3f(builder->vertexAttrib[i].uv, 0.0f));
-                    mesh->color[0].push_back(builder->vertexAttrib[i].color);
-
-                    // keep CCW orientation
-                    if ((i % 3) == 0)
+                    mesh->indices.insert(mesh->indices.end(),
+                                         builder->triangles.begin(),
+                                         builder->triangles.end());
+                }
+                else
+                {
+                    for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
                     {
-                        mesh->indices.push_back((uint16_t)i);
-                        mesh->indices.push_back((uint16_t)(i + 1));
-                        mesh->indices.push_back((uint16_t)(i + 2));
+                        if (i == 0)
+                            min = max = builder->vertexAttrib[i].pos;
+                        else
+                        {
+                            min = MathCore::OP<MathCore::vec3f>::minimum(min, builder->vertexAttrib[i].pos);
+                            max = MathCore::OP<MathCore::vec3f>::maximum(max, builder->vertexAttrib[i].pos);
+                        }
+
+                        mesh->pos.push_back(builder->vertexAttrib[i].pos);
+                        mesh->uv[0].push_back(MathCore::vec3f(builder->vertexAttrib[i].uv, 0.0f));
+                        mesh->color[0].push_back(builder->vertexAttrib[i].color);
+
+                        // keep CCW orientation
+                        if ((i % 3) == 0)
+                        {
+                            mesh->indices.push_back((uint16_t)i);
+                            mesh->indices.push_back((uint16_t)(i + 1));
+                            mesh->indices.push_back((uint16_t)(i + 2));
+                        }
                     }
                 }
 

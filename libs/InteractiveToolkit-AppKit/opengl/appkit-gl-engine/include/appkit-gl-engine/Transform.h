@@ -298,6 +298,19 @@ namespace AppKit
             std::shared_ptr<Component> removeComponent(std::shared_ptr<Component>);
             std::shared_ptr<Component> removeComponentAt(int);
 
+            std::shared_ptr<Component> replaceComponent(std::shared_ptr<Component> search, std::shared_ptr<Component> replace);
+
+            template <typename _ComponentType,
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value &&
+                              !std::is_same<_ComponentType, Component>::value,
+                          bool>::type = true>
+            inline std::shared_ptr<_ComponentType> replaceComponent(std::shared_ptr<Component> search, std::shared_ptr<_ComponentType> replace)
+            {
+                replaceComponent(search, (std::shared_ptr<Component>)replace);
+                return replace;
+            }
+
             template <typename _ComponentType,
                       typename std::enable_if<
                           std::is_base_of<Component, _ComponentType>::value,

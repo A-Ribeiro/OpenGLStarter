@@ -53,12 +53,36 @@ namespace AppKit
                     float size, ///< current state of the font size
                     float max_width,
 
+                    // .a == 0 turn off the drawing
                     const MathCore::vec4f &faceColor,   ///< current state of the face color
                     const MathCore::vec4f &strokeColor, ///< current state of the stroke color
 
+                    const MathCore::vec3f &strokeOffset,
+                    AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+                    AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+                    float lineHeight,
+
+                    AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                    AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+                    char32_t wordSeparatorChar,
+
+                    const std::string &name = "_text");
+                
+                UIItem addPolygonText(
+                    const std::string &font_path,
+                    float base_polygon_size,
+                    float base_polygon_distance_tolerance,
+                    Platform::ThreadPool *polygon_threadPool,
+                    const MathCore::vec2f &pos,
+                    float z,
+
+                    const std::string &text,
+                    float size, ///< current state of the font size
+                    float max_width,
+
                     // .a == 0 turn off the drawing
-                    // bool drawFace;                          ///< should draw face
-                    // bool drawStroke;                        ///< should draw stroke
+                    const MathCore::vec4f &faceColor,   ///< current state of the face color
+                    const MathCore::vec4f &strokeColor, ///< current state of the stroke color
 
                     const MathCore::vec3f &strokeOffset,
                     AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
