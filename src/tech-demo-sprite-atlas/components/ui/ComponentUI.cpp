@@ -20,31 +20,31 @@ namespace AppKit
             }
 
             UIItem ComponentUI::addTextureText(
-                    const std::string &font_path,
-                    const MathCore::vec2f &pos,
-                    float z,
+                const std::string &font_path,
+                const MathCore::vec2f &pos,
+                float z,
 
-                    const std::string &text,
-                    float size, ///< current state of the font size
-                    float max_width,
+                const std::string &text,
+                float size, ///< current state of the font size
+                float max_width,
 
-                    const MathCore::vec4f &faceColor,   ///< current state of the face color
-                    const MathCore::vec4f &strokeColor, ///< current state of the stroke color
+                const MathCore::vec4f &faceColor,   ///< current state of the face color
+                const MathCore::vec4f &strokeColor, ///< current state of the stroke color
 
-                    // .a == 0 turn off the drawing
-                    // bool drawFace;                          ///< should draw face
-                    // bool drawStroke;                        ///< should draw stroke
+                // .a == 0 turn off the drawing
+                // bool drawFace;                          ///< should draw face
+                // bool drawStroke;                        ///< should draw stroke
 
-                    const MathCore::vec3f &strokeOffset,
-                    AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
-                    AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
-                    float lineHeight,
+                const MathCore::vec3f &strokeOffset,
+                AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+                AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+                float lineHeight,
 
-                    AppKit::OpenGL::GLFont2WrapMode wrapMode,
-                    AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
-                    char32_t wordSeparatorChar,
+                AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+                char32_t wordSeparatorChar,
 
-                    const std::string &name)
+                const std::string &name)
             {
                 auto engine = AppKit::GLEngine::Engine::Instance();
                 auto transform = Transform::CreateShared(name);
@@ -54,6 +54,7 @@ namespace AppKit
                 font->setText(
                     this->resourceMap,
                     font_path,
+                    0, 0, nullptr,
                     engine->sRGBCapable,
                     text,
                     size,
@@ -66,8 +67,65 @@ namespace AppKit
                     lineHeight,
                     wrapMode,
                     firstLineHeightMode,
-                    wordSeparatorChar
-                );
+                    wordSeparatorChar);
+
+                auto item = UIItem(
+                    getTransform()->addChild(transform),
+                    self<ComponentUI>());
+                item.set<ComponentFont>(font);
+                items.push_back(item);
+                return item;
+            }
+
+            UIItem ComponentUI::addPolygonText(
+                const std::string &font_path,
+                float base_polygon_size,
+                float base_polygon_distance_tolerance,
+                Platform::ThreadPool *polygon_threadPool,
+                const MathCore::vec2f &pos,
+                float z,
+
+                const std::string &text,
+                float size, ///< current state of the font size
+                float max_width,
+
+                // .a == 0 turn off the drawing
+                const MathCore::vec4f &faceColor,   ///< current state of the face color
+                const MathCore::vec4f &strokeColor, ///< current state of the stroke color
+
+                const MathCore::vec3f &strokeOffset,
+                AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+                AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+                float lineHeight,
+
+                AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+                char32_t wordSeparatorChar,
+
+                const std::string &name)
+            {
+                auto engine = AppKit::GLEngine::Engine::Instance();
+                auto transform = Transform::CreateShared(name);
+                transform->setLocalPosition(MathCore::vec3f(pos.x, pos.y, z));
+
+                auto font = transform->addNewComponent<ComponentFont>();
+                font->setText(
+                    this->resourceMap,
+                    font_path,
+                    base_polygon_size, base_polygon_distance_tolerance, polygon_threadPool,
+                    engine->sRGBCapable,
+                    text,
+                    size,
+                    max_width,
+                    faceColor,
+                    strokeColor,
+                    strokeOffset,
+                    horizontalAlign,
+                    verticalAlign,
+                    lineHeight,
+                    wrapMode,
+                    firstLineHeightMode,
+                    wordSeparatorChar);
 
                 auto item = UIItem(
                     getTransform()->addChild(transform),
@@ -79,7 +137,7 @@ namespace AppKit
 
             // color.a == 0, skip this draw
             UIItem ComponentUI::addRectangleCenterSize(
-                
+
                 const MathCore::vec2f &center,
                 const MathCore::vec2f &size,
                 const MathCore::vec4f &color,
@@ -107,8 +165,7 @@ namespace AppKit
                     stroke_thickness,
                     stroke_color,
                     drop_shadow_thickness,
-                    drop_shadow_color
-                );
+                    drop_shadow_color);
                 auto item = UIItem(
                     getTransform()->addChild(transform),
                     self<ComponentUI>());

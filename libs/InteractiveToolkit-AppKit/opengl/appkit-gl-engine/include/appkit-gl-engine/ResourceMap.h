@@ -58,10 +58,11 @@ namespace AppKit
             {
                 std::shared_ptr<AppKit::OpenGL::GLFont2Builder> fontBuilder;
                 std::shared_ptr<AppKit::OpenGL::GLFont2PolygonCache> polygonFontCache;
+                std::shared_ptr<Components::ComponentMaterial> material;
             };
 
         private:
-            std::unordered_map<std::string, std::shared_ptr<AppKit::OpenGL::GLFont2Builder>> textureFontMap;
+            std::unordered_map<std::string, std::shared_ptr<FontResource>> textureFontMap;
             std::unordered_map<std::string, std::shared_ptr<FontResource>> geometryFontMap;
 
         public:
@@ -92,7 +93,7 @@ namespace AppKit
 
             std::shared_ptr<AppKit::OpenGL::GLCubeMap> getCubeMap(const std::string &relative_path, bool is_srgb, int maxResolution);
 
-            std::shared_ptr<AppKit::OpenGL::GLFont2Builder> getTextureFont(const std::string &relative_path, bool is_srgb);
+            std::shared_ptr<FontResource> getTextureFont(const std::string &relative_path, bool is_srgb);
             std::shared_ptr<FontResource> getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb);
 
             void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);

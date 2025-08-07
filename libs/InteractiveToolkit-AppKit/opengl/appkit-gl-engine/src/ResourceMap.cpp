@@ -323,17 +323,28 @@ namespace AppKit
             return cube_it->second.cubemap;
         }
 
-        std::shared_ptr<AppKit::OpenGL::GLFont2Builder> ResourceMap::getTextureFont(const std::string &relative_path, bool is_srgb)
+        std::shared_ptr<ResourceMap::FontResource> ResourceMap::getTextureFont(const std::string &relative_path, bool is_srgb)
         {
             std::string to_query = ITKCommon::PrintfToStdString("%s:%s", (is_srgb) ? "srgb" : "linear", relative_path.c_str());
 
             auto font_it = textureFontMap.find(to_query);
             if (font_it == textureFontMap.end())
             {
+                auto fontResource = std::make_shared<FontResource>();
                 auto fontBuilder = std::make_shared<AppKit::OpenGL::GLFont2Builder>();
                 fontBuilder->load(relative_path, is_srgb);
-                textureFontMap[to_query] = fontBuilder;
-                return fontBuilder;
+                fontResource->fontBuilder = fontBuilder;
+
+                fontResource->material = Component::CreateShared<Components::ComponentMaterial>();
+
+                fontResource->material->setShader(this->shaderUnlitTextureVertexColorAlpha);
+                auto tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&fontBuilder->glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
+                fontResource->material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+
+
+
+                textureFontMap[to_query] = fontResource;
+                return fontResource;
             }
             return font_it->second;
         }
@@ -343,12 +354,13 @@ namespace AppKit
             auto font_it = geometryFontMap.find(to_query);
             if (font_it == geometryFontMap.end())
             {
-                auto fontBuilder = getTextureFont(relative_path, is_srgb);
-                auto polygonCache = fontBuilder->createPolygonCache(
+                auto fontResourceBase = getTextureFont(relative_path, is_srgb);
+                auto polygonCache = fontResourceBase->fontBuilder->createPolygonCache(
                     defaultSize, max_distance_tolerance, threadPool);
                 auto fontResource = std::make_shared<FontResource>();
-                fontResource->fontBuilder = fontBuilder;
+                fontResource->fontBuilder = fontResourceBase->fontBuilder;
                 fontResource->polygonFontCache = polygonCache;
+                fontResource->material = this->defaultUnlitVertexColorAlphaMaterial;
                 geometryFontMap[to_query] = fontResource;
                 return fontResource;
             }

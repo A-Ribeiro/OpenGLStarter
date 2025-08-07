@@ -42,7 +42,8 @@ namespace AppKit
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
 
                 void checkOrCreateAuxiliaryComponents(
-                    AppKit::GLEngine::ResourceMap *resourceMap);
+                    AppKit::GLEngine::ResourceMap *resourceMap,
+                    std::shared_ptr<ComponentMaterial> &material);
 
                 // if color.a == 0, skip this draw
                 void setText(
@@ -50,18 +51,20 @@ namespace AppKit
                     
                     const std::string &font_path,
 
+                    // 0 = texture, > 0 = polygon
+                    float polygon_size,
+                    float polygon_distance_tolerance,
+                    Platform::ThreadPool *polygon_threadPool,
+
                     bool is_srgb,
 
                     const std::string &text,
                     float size = 60.0f, ///< current state of the font size
                     float max_width = -1.0f,
 
+                    // .a == 0 turn off the drawing
                     const MathCore::vec4f &faceColor = MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f),   ///< current state of the face color
                     const MathCore::vec4f &strokeColor = MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f), ///< current state of the stroke color
-
-                    // .a == 0 turn off the drawing
-                    // bool drawFace;                          ///< should draw face
-                    // bool drawStroke;                        ///< should draw stroke
 
                     const MathCore::vec3f &strokeOffset = MathCore::vec3f(0.0f, 0.0f, -0.02f),
                     AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_center,

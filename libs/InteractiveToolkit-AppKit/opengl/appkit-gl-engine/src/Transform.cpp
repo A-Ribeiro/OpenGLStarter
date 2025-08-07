@@ -894,6 +894,31 @@ namespace AppKit
             return nullptr;
         }
 
+        std::shared_ptr<Component> Transform::replaceComponent(std::shared_ptr<Component> search, std::shared_ptr<Component> replace) {
+            for (int i = 0; i < components.size(); i++)
+            {
+                if (components[i] == search)
+                {
+                    auto t_self = this->self();
+                    auto old = components[i];
+                    
+                    components[i] = nullptr;
+                    old->detachFromTransform(t_self);
+                    if (affectComponentStart)
+                        old->unregisterStart();
+
+                    components[i] = replace;
+                    replace->attachToTransform(t_self);
+                    if (affectComponentStart)
+                        replace->registerStart();
+
+                    return replace;
+                }
+            }
+            return nullptr;
+        }
+
+
         std::shared_ptr<Component> Transform::removeComponentAt(int i)
         {
             if (i >= 0 && i < components.size())
