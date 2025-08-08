@@ -28,6 +28,7 @@ namespace AppKit
                 {
                     mesh = transform->addNewComponent<ComponentMesh>();
                     mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_COLOR0;
+                    mesh->always_clone = true;
                 }
 
                 if (meshWrapper == nullptr)
@@ -35,6 +36,7 @@ namespace AppKit
                     meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
                     transform->makeFirstComponent(meshWrapper);
                     // meshWrapper->updateMeshAABB();
+                    // meshWrapper->always_clone = true;
                 }
             }
 
@@ -70,9 +72,15 @@ namespace AppKit
                 const MathCore::vec4f &stroke_color,
                 float drop_shadow_thickness,
                 const MathCore::vec4f &drop_shadow_color,
+                MeshUploadMode meshUploadMode,
                 uint32_t segment_count)
             {
                 checkOrCreateAuxiliaryComponents(resourceMap);
+                if (meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify)
+                {
+                    mesh->always_clone = false;
+                    this->always_clone = false;
+                }
 
                 // uint32_t segment_count = 3;
                 // float ignore_stroke_thickness = 0.0f;
@@ -380,7 +388,7 @@ namespace AppKit
 
             ComponentRectangle::ComponentRectangle() : Component(ComponentRectangle::Type)
             {
-                always_clone = false;
+                always_clone = true;
             }
 
             ComponentRectangle::~ComponentRectangle()
@@ -396,10 +404,20 @@ namespace AppKit
 
                 result->always_clone = this->always_clone;
 
+                result->material = this->material;
+                result->mesh = this->mesh;
+                result->meshWrapper = this->meshWrapper;
+
                 return result;
             }
             void ComponentRectangle::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
             {
+                if (componentMap.find(material) != componentMap.end())
+                    material = std::dynamic_pointer_cast<ComponentMaterial>(componentMap[material]);
+                if (componentMap.find(mesh) != componentMap.end())
+                    mesh = std::dynamic_pointer_cast<ComponentMesh>(componentMap[mesh]);
+                if (componentMap.find(meshWrapper) != componentMap.end())
+                    meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(componentMap[meshWrapper]);
             }
 
             void ComponentRectangle::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)

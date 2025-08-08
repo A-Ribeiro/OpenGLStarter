@@ -21,6 +21,7 @@
 #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
 
 // #include "../../shaders/SpriteShader.h"
+#include "./common.h"
 
 namespace AppKit
 {
@@ -95,6 +96,7 @@ namespace AppKit
                     const MathCore::vec4f &stroke_color,
                     float drop_shadow_thickness,
                     const MathCore::vec4f &drop_shadow_color,
+                    MeshUploadMode meshUploadMode,
                     uint32_t segment_count = 10);
 
                 ComponentRectangle();

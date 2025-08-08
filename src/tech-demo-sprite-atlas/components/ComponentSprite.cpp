@@ -40,6 +40,7 @@ namespace AppKit
                 {
                     mesh = transform->addNewComponent<ComponentMesh>();
                     mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
+                    mesh->always_clone = true;
                 }
 
                 if (meshWrapper == nullptr)
@@ -47,6 +48,7 @@ namespace AppKit
                     meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
                     transform->makeFirstComponent(meshWrapper);
                     // meshWrapper->updateMeshAABB();
+                    // meshWrapper->always_clone = true;
                 }
             }
 
@@ -59,12 +61,16 @@ namespace AppKit
                 const MathCore::vec2f &size_constraint,
                 MeshUploadMode meshUploadMode)
             {
-                directTexture.texture = texture;
-                directTexture.pivot = pivot;
-                directTexture.color = color;
-                type = SpriteSourceDirectTexture;
+                // directTexture.texture = texture;
+                // directTexture.pivot = pivot;
+                // directTexture.color = color;
+                // type = SpriteSourceDirectTexture;
                 checkOrCreateAuxiliaryComponents(resourceMap, spriteShader, texture);
-
+                if (meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify)
+                {
+                    mesh->always_clone = false;
+                    this->always_clone = false;
+                }
                 MathCore::vec3f size((float)texture->width, (float)texture->height, 0.0f);
                 if (size_constraint.x > 0.0f && size_constraint.y > 0.0f)
                     size = MathCore::vec3f(size_constraint.x, size_constraint.y, 0.0f);
@@ -158,16 +164,16 @@ namespace AppKit
 
             ComponentSprite::ComponentSprite() : Component(ComponentSprite::Type)
             {
-                type = SpriteSourceNone;
-                directTexture.color = MathCore::vec4f(1.0f);
-                directTexture.pivot = MathCore::vec2f(0.5f, 0.5f);
-                directTexture.texture = nullptr;
+                // type = SpriteSourceNone;
+                // directTexture.color = MathCore::vec4f(1.0f);
+                // directTexture.pivot = MathCore::vec2f(0.5f, 0.5f);
+                // directTexture.texture = nullptr;
 
-                textureFromAtlas.color = MathCore::vec4f(1.0f);
-                textureFromAtlas.entry = SpriteAtlas::Entry();
-                textureFromAtlas.texture = nullptr;
+                // textureFromAtlas.color = MathCore::vec4f(1.0f);
+                // textureFromAtlas.entry = SpriteAtlas::Entry();
+                // textureFromAtlas.texture = nullptr;
 
-                always_clone = false;
+                always_clone = true;
             }
 
             ComponentSprite::~ComponentSprite()
@@ -181,15 +187,25 @@ namespace AppKit
                     return self();
                 auto result = Component::CreateShared<ComponentSprite>();
 
-                result->type = this->type;
-                result->directTexture = this->directTexture;
-                result->textureFromAtlas = this->textureFromAtlas;
+                // result->type = this->type;
+                // result->directTexture = this->directTexture;
+                // result->textureFromAtlas = this->textureFromAtlas;
                 result->always_clone = this->always_clone;
+
+                result->material = this->material;
+                result->mesh = this->mesh;
+                result->meshWrapper = this->meshWrapper;
 
                 return result;
             }
             void ComponentSprite::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
             {
+                if (componentMap.find(material) != componentMap.end())
+                    material = std::dynamic_pointer_cast<ComponentMaterial>(componentMap[material]);
+                if (componentMap.find(mesh) != componentMap.end())
+                    mesh = std::dynamic_pointer_cast<ComponentMesh>(componentMap[mesh]);
+                if (componentMap.find(meshWrapper) != componentMap.end())
+                    meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(componentMap[meshWrapper]);
             }
 
             void ComponentSprite::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)

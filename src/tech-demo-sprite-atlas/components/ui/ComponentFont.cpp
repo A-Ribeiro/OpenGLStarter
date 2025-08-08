@@ -34,6 +34,7 @@ namespace AppKit
                 {
                     mesh = transform->addNewComponent<ComponentMesh>();
                     mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
+                    mesh->always_clone = true;
                 }
 
                 if (meshWrapper == nullptr)
@@ -41,6 +42,7 @@ namespace AppKit
                     meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
                     transform->makeFirstComponent(meshWrapper);
                     // meshWrapper->updateMeshAABB();
+                    // meshWrapper->always_clone = true;
                 }
             }
 
@@ -72,7 +74,8 @@ namespace AppKit
 
                 AppKit::OpenGL::GLFont2WrapMode wrapMode,
                 AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
-                char32_t wordSeparatorChar)
+                char32_t wordSeparatorChar,
+                MeshUploadMode meshUploadMode)
             {
                 std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource;
 
@@ -84,6 +87,11 @@ namespace AppKit
                 auto builder = fontResource->fontBuilder.get();
 
                 checkOrCreateAuxiliaryComponents(resourceMap, fontResource->material);
+                if (meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify)
+                {
+                    mesh->always_clone = false;
+                    this->always_clone = false;
+                }
 
                 builder->size = size;
                 builder->faceColor = faceColor;
@@ -170,7 +178,7 @@ namespace AppKit
 
             ComponentFont::ComponentFont() : Component(ComponentFont::Type)
             {
-                always_clone = false;
+                always_clone = true;
             }
 
             ComponentFont::~ComponentFont()
@@ -186,10 +194,20 @@ namespace AppKit
 
                 result->always_clone = this->always_clone;
 
+                result->material = this->material;
+                result->mesh = this->mesh;
+                result->meshWrapper = this->meshWrapper;
+
                 return result;
             }
             void ComponentFont::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
             {
+                if (componentMap.find(material) != componentMap.end())
+                    material = std::dynamic_pointer_cast<ComponentMaterial>(componentMap[material]);
+                if (componentMap.find(mesh) != componentMap.end())
+                    mesh = std::dynamic_pointer_cast<ComponentMesh>(componentMap[mesh]);
+                if (componentMap.find(meshWrapper) != componentMap.end())
+                    meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(componentMap[meshWrapper]);
             }
 
             void ComponentFont::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
