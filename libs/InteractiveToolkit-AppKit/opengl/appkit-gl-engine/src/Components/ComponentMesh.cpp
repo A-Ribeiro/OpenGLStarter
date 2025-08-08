@@ -233,6 +233,8 @@ namespace AppKit
                 // concatenate the vertex data
                 auto m = toApply->getMatrix(true);
 
+                uint32_t idx_offset = (uint32_t)pos.size();
+
                 if (format & ITKExtension::Model::CONTAINS_POS)
                 {
                     for (const auto &v : other->pos)
@@ -280,7 +282,8 @@ namespace AppKit
                         color[i].insert(color[i].end(), other->color[i].begin(), other->color[i].end());
                 }
 
-                indices.insert(indices.end(), other->indices.begin(), other->indices.end());
+                for (const auto &v : other->indices)
+                    indices.push_back(v + idx_offset);
 
                 // concatenate the structure for vertex skinning
                 // bones.insert(bones.end(), other->bones.begin(), other->bones.end());
