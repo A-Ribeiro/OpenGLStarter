@@ -64,7 +64,7 @@ void MainScene::bindResourcesToGraph()
         auto componentGrow = spriteNode->addNewComponent<ComponentGrow>();
         componentGrow->app = app;
         componentGrow->transformPool = &transformPool;
-        componentSprite->mesh->always_clone = true;
+        // componentSprite->mesh->always_clone = true;
     }
 
     {
@@ -82,7 +82,7 @@ void MainScene::bindResourcesToGraph()
         auto componentGrow = logoNode->addNewComponent<ComponentGrow>();
         componentGrow->app = app;
         componentGrow->transformPool = &transformPool;
-        componentSprite->mesh->always_clone = true;
+        // componentSprite->mesh->always_clone = true;
     }
 
     // componentSprite->meshWrapper->debugCollisionShapes = true;

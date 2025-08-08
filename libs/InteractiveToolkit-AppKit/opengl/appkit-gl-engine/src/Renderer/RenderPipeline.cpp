@@ -163,6 +163,7 @@ namespace AppKit
 
             currentMaterial = nullptr;
             currentMesh = nullptr;
+            meshAgregator = std::make_shared<Components::ComponentMesh>();
         }
 
         RenderPipeline::~RenderPipeline()
@@ -178,6 +179,7 @@ namespace AppKit
                 delete depthRenderer;
                 depthRenderer = nullptr;
             }
+            meshAgregator = nullptr;
         }
 
         void RenderPipeline::setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap)

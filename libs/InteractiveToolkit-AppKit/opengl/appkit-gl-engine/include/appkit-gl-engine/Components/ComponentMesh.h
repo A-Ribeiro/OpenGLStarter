@@ -85,6 +85,9 @@ namespace AppKit
 
                 ~ComponentMesh();
 
+                void clear();
+                void concatenate( Transform *toApply, const ComponentMesh *other, const DefaultEngineShader *shader);
+
                 void releaseVBO();
 
                 void syncVBOStatic();

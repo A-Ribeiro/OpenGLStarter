@@ -128,13 +128,15 @@ namespace AppKit
                     vbo_skin_weights->uploadData((void *)&skin_weights[0], sizeof(MathCore::vec4f) * (int)skin_weights.size(), _dynamic);
                 }
 
-                if (index) {
+                if (index)
+                {
                     vbo_indexCount = (int)indices.size();
                     vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), false);
                 }
             }
 
-            bool ComponentMesh::usesVBO() const {
+            bool ComponentMesh::usesVBO() const
+            {
                 return vbo_indexCount > 0;
             }
 
@@ -142,7 +144,7 @@ namespace AppKit
             {
                 if (skip_if_already_set && format != 0)
                     return;
-                
+
                 format = 0;
 
                 if (pos.size() > 0)
@@ -201,7 +203,96 @@ namespace AppKit
                 releaseVBO();
             }
 
-            void ComponentMesh::releaseVBO() {
+            void ComponentMesh::clear()
+            {
+                format = 0;
+
+                pos.clear();
+                normals.clear();
+                tangent.clear();
+                binormal.clear();
+                for (int i = 0; i < 8; i++)
+                {
+                    uv[i].clear();
+                    color[i].clear();
+                }
+
+                indices.clear();
+
+                // store the structure for vertex skinning
+                bones.clear();
+                skin_index.clear();
+                skin_weights.clear();
+            }
+            void ComponentMesh::concatenate(Transform *toApply, const ComponentMesh *other, const DefaultEngineShader *shader)
+            {
+                ITK_ABORT((format != 0 && format != shader->format), "Mesh incompatible format for concatenation.\n");
+
+                format = shader->format;
+
+                // concatenate the vertex data
+                auto m = toApply->getMatrix(true);
+
+                if (format & ITKExtension::Model::CONTAINS_POS)
+                {
+                    for (const auto &v : other->pos)
+                        pos.push_back(MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(v)));
+                }
+                if (format & ITKExtension::Model::CONTAINS_NORMAL)
+                {
+                    MathCore::mat3f m_it_3x3 = MathCore::GEN<MathCore::mat3f>::fromMat4(m.inverse_transpose_3x3());
+                    for (const auto &v : other->normals)
+                        normals.push_back(MathCore::OP<MathCore::vec3f>::normalize(m_it_3x3 * v));
+
+                    if (format & ITKExtension::Model::CONTAINS_TANGENT)
+                    {
+                        MathCore::mat3f m_3x3 = MathCore::GEN<MathCore::mat3f>::fromMat4(m);
+
+                        size_t idx = other->tangent.size();
+                        for (const auto &v : other->tangent)
+                            tangent.push_back(MathCore::OP<MathCore::vec3f>::normalize(m_3x3 * v));
+                        // fix orthogonallity
+                        for (size_t i = idx; i < other->tangent.size() && i < other->normals.size(); i++)
+                        {
+                            MathCore::vec3f &T = tangent[i];
+                            MathCore::vec3f &N = normals[i];
+                            T = MathCore::OP<MathCore::vec3f>::normalize(T - MathCore::OP<MathCore::vec3f>::dot(T, N) * N);
+                        }
+
+                        if (format & ITKExtension::Model::CONTAINS_BINORMAL)
+                        {
+                            size_t idx = other->binormal.size();
+                            for (size_t i = idx; i < other->tangent.size() && i < other->normals.size(); i++)
+                            {
+                                MathCore::vec3f &T = tangent[i];
+                                MathCore::vec3f &N = normals[i];
+                                binormal.push_back(MathCore::OP<MathCore::vec3f>::cross(T, N));
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < 8; i++)
+                {
+                    if (format & (ITKExtension::Model::CONTAINS_UV0 << i))
+                        uv[i].insert(uv[i].end(), other->uv[i].begin(), other->uv[i].end());
+                    if (format & (ITKExtension::Model::CONTAINS_COLOR0 << i))
+                        color[i].insert(color[i].end(), other->color[i].begin(), other->color[i].end());
+                }
+
+                indices.insert(indices.end(), other->indices.begin(), other->indices.end());
+
+                // concatenate the structure for vertex skinning
+                // bones.insert(bones.end(), other->bones.begin(), other->bones.end());
+                if (format & ITKExtension::Model::CONTAINS_VERTEX_WEIGHT_ANY)
+                {
+                    skin_index.insert(skin_index.end(), other->skin_index.begin(), other->skin_index.end());
+                    skin_weights.insert(skin_weights.end(), other->skin_weights.begin(), other->skin_weights.end());
+                }
+            }
+
+            void ComponentMesh::releaseVBO()
+            {
                 if (vbo_pos != nullptr)
                     delete vbo_pos;
                 if (vbo_normals != nullptr)
@@ -227,7 +318,7 @@ namespace AppKit
                     delete vbo_index;
                 if (vao != nullptr)
                     delete vao;
-                
+
                 vbo_indexCount = 0;
 
                 vbo_pos = nullptr;
@@ -294,8 +385,6 @@ namespace AppKit
                 uploadVBO(model_dynamic_upload, model_static_upload, index);
             }
 
-            
-
             void ComponentMesh::setLayoutPointers(const DefaultEngineShader *shader)
             {
                 setLayoutPointers(shader->format);
@@ -315,12 +404,12 @@ namespace AppKit
                     if (vao_format != 0 && vao_format == shaderFormat)
                         return;
 
-                    if (vao_format != 0) {
+                    if (vao_format != 0)
+                    {
                         ITKExtension::Model::BitMask aux = vao_format;
                         vao_format = 0;
                         unsetLayoutPointers(aux);
                     }
-                        
 
                     int count = 0;
                     if (shaderFormat & ITKExtension::Model::CONTAINS_POS)
@@ -351,9 +440,7 @@ namespace AppKit
 
                     vao->enable();
 
-
                     vao_format = shaderFormat;
-
                 }
                 else if (indices.size() > 0)
                 {
@@ -572,7 +659,6 @@ namespace AppKit
                 SerializerUtil::write_vector(writer, "skin_index", skin_index);
                 SerializerUtil::write_vector(writer, "skin_weights", skin_weights);
 
-
                 writer.EndObject();
             }
             void ComponentMesh::Deserialize(rapidjson::Value &_value,
@@ -619,7 +705,6 @@ namespace AppKit
                 SerializerUtil::read_vector(_value, "bones", bones);
                 SerializerUtil::read_vector(_value, "skin_index", skin_index);
                 SerializerUtil::read_vector(_value, "skin_weights", skin_weights);
-
 
                 if (last_model_dynamic_upload != 0 || last_model_static_upload != 0)
                     syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload);
