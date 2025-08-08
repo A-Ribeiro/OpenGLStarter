@@ -306,6 +306,32 @@ void MainScene::update(Platform::Time *elapsed)
             // new_element->addNewComponent<ComponentGrow>();
         }
     }
+
+    if (elapsed->unscaledDeltaTime > 0)
+    {
+        auto engine = AppKit::GLEngine::Engine::Instance();
+        auto &top_text_font = uiComponent->getItemByName("top_text").get<ComponentFont>();
+        top_text_font->setText(
+            this->resourceMap,
+            "resources/Roboto-Regular-100.basof2", // font_path
+            0,                                     // polygon_size
+            0,                                     // polygon_distance_tolerance
+            nullptr,                               // polygon_threadPool
+            engine->sRGBCapable,
+            ITKCommon::PrintfToStdString("%i fps", (int)(MathCore::OP<float>::round(app->fps) + 0.5f)), // text
+            64.0f,                                                                                      // size
+            -1.0f,                                                                                      // max_width
+            MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                                                    // faceColor
+            MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                                                    // strokeColor
+            MathCore::vec3f(0.0f, 0.0f, -0.02f),                                                        // strokeOffset
+            AppKit::OpenGL::GLFont2HorizontalAlign_center,                                              // horizontalAlign
+            AppKit::OpenGL::GLFont2VerticalAlign_bottom,                                                // verticalAlign
+            1.0f,                                                                                       // lineHeight
+            AppKit::OpenGL::GLFont2WrapMode_Word,                                                       // wrapMode
+            AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                           // firstLineHeightMode
+            U' '                                                                                        // wordSeparatorChar
+        );
+    }
 }
 
 void MainScene::draw()
