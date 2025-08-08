@@ -8,10 +8,12 @@ namespace AppKit
         {
             enum MeshUploadMode
             {
-                MeshUploadMode_Direct_OnClone_NoModify,
                 MeshUploadMode_Direct,
                 MeshUploadMode_Dynamic,
                 MeshUploadMode_Static,
+                MeshUploadMode_Direct_OnClone_NoModify,
+                MeshUploadMode_Dynamic_OnClone_NoModify,
+                MeshUploadMode_Static_OnClone_NoModify
             };
         }
     }

@@ -19,6 +19,16 @@ namespace AppKit
             {
             }
 
+            UIItem &ComponentUI::getItemByName(const std::string &name) {
+                for (size_t i = 0; i < items.size(); i++) {
+                    if (items[i].transform->getName() == name) {
+                        return items[i];
+                    }
+                }
+                static UIItem dummy;
+                return dummy;
+            }
+
             UIItem ComponentUI::addTextureText(
                 const std::string &font_path,
                 const MathCore::vec2f &pos,
@@ -67,7 +77,8 @@ namespace AppKit
                     lineHeight,
                     wrapMode,
                     firstLineHeightMode,
-                    wordSeparatorChar);
+                    wordSeparatorChar,
+                    MeshUploadMode_Direct);
 
                 auto item = UIItem(
                     getTransform()->addChild(transform),
@@ -125,7 +136,8 @@ namespace AppKit
                     lineHeight,
                     wrapMode,
                     firstLineHeightMode,
-                    wordSeparatorChar);
+                    wordSeparatorChar,
+                    MeshUploadMode_Direct);
 
                 auto item = UIItem(
                     getTransform()->addChild(transform),
