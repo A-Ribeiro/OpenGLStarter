@@ -14,6 +14,7 @@ using namespace AppKit::OpenGL;
 class App : public AppBase {
     RenderPipeline renderPipeline;
     Platform::Time time;
+    Platform::Time fps_timer;
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
 
