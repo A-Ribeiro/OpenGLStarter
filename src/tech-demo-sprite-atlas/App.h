@@ -26,6 +26,8 @@ public:
     Platform::ThreadPool threadPool;
     Platform::ObjectQueue<EventCore::Callback<void(void)>> executeOnMainThread;
 
+    float fps;
+    bool gain_focus;
 
     App();
     ~App();
