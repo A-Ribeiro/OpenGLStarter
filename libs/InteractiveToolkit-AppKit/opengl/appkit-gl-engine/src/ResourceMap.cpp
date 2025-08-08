@@ -8,7 +8,7 @@
 // #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColor.h> //
 #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlpha.h> // Unlit_tex_vertcolor_font_PassShader
 #include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
-#include <appkit-gl-engine/shaders/ShaderDepthOnly.h> 
+#include <appkit-gl-engine/shaders/ShaderDepthOnly.h>
 
 namespace AppKit
 {
@@ -31,6 +31,32 @@ namespace AppKit
         void ResourceMap::clear_refcount_equals_1()
         {
             printf("ResourceMap::clear_refcount_equals_1\n");
+
+            {
+                std::vector<std::string> to_remove_str;
+                for (auto &item : geometryFontMap)
+                {
+                    if (item.second.use_count() > 1)
+                        continue;
+                    to_remove_str.push_back(item.first);
+                }
+                for (const auto &key : to_remove_str)
+                    geometryFontMap.erase(key);
+
+                to_remove_str.clear();
+                for (auto &item : textureFontMap)
+                {
+                    if (item.second.use_count() > 1)
+                        continue;
+                    to_remove_str.push_back(item.first);
+                }
+                for (const auto &key : to_remove_str)
+                    textureFontMap.erase(key);
+
+                printf("  total loaded texture fonts: %zu\n", textureFontMap.size());
+                printf("  total loaded geometry fonts: %zu\n", geometryFontMap.size());
+            }
+
             {
                 std::vector<uint64_t> to_remove_u64;
                 // free sprite not used
@@ -78,7 +104,10 @@ namespace AppKit
 
         void ResourceMap::clear()
         {
-            printf("ResourceMap::clear");
+            printf("ResourceMap::clear\n");
+
+            geometryFontMap.clear();
+            textureFontMap.clear();
 
             spriteMaterialMap.clear();
             texture2DMap.clear();
@@ -88,6 +117,12 @@ namespace AppKit
             defaultNormalTexture = nullptr;
             defaultPBRMaterial = nullptr;
             renderOnlyDepthMaterial = nullptr;
+
+            defaultUnlitMaterial = nullptr;
+            defaultUnlitVertexColorMaterial = nullptr;
+
+            defaultUnlitAlphaMaterial = nullptr;
+            defaultUnlitVertexColorAlphaMaterial = nullptr;
 
             shaderUnlit = nullptr;
             shaderUnlitVertexColor = nullptr;
@@ -134,13 +169,38 @@ namespace AppKit
 
                 defaultPBRMaterial->property_bag.getProperty("texAlbedo").set<std::shared_ptr<OpenGL::VirtualTexture>>(defaultAlbedoTexture);
                 defaultPBRMaterial->property_bag.getProperty("texNormal").set<std::shared_ptr<OpenGL::VirtualTexture>>(defaultNormalTexture);
-
             }
 
             if (renderOnlyDepthMaterial == nullptr)
             {
                 renderOnlyDepthMaterial = Component::CreateShared<Components::ComponentMaterial>();
                 renderOnlyDepthMaterial->setShader(shaderDepthOnly);
+            }
+
+            if (defaultUnlitMaterial == nullptr)
+            {
+                defaultUnlitMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultUnlitMaterial->setShader(shaderUnlit);
+            }
+
+            if (defaultUnlitVertexColorMaterial == nullptr)
+            {
+                defaultUnlitVertexColorMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultUnlitVertexColorMaterial->setShader(shaderUnlitVertexColor);
+            }
+
+            if (defaultUnlitAlphaMaterial == nullptr)
+            {
+                defaultUnlitAlphaMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultUnlitAlphaMaterial->setShader(shaderUnlit);
+                defaultUnlitAlphaMaterial->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
+            }
+
+            if (defaultUnlitVertexColorAlphaMaterial == nullptr)
+            {
+                defaultUnlitVertexColorAlphaMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultUnlitVertexColorAlphaMaterial->setShader(shaderUnlitVertexColor);
+                defaultUnlitVertexColorAlphaMaterial->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
             }
         }
 
@@ -261,6 +321,55 @@ namespace AppKit
             }
 
             return cube_it->second.cubemap;
+        }
+
+        std::shared_ptr<ResourceMap::FontResource> ResourceMap::getTextureFont(const std::string &relative_path, bool is_srgb)
+        {
+            std::string to_query = ITKCommon::PrintfToStdString("%s:%s", (is_srgb) ? "srgb" : "linear", relative_path.c_str());
+
+            auto font_it = textureFontMap.find(to_query);
+            if (font_it == textureFontMap.end())
+            {
+                auto fontResource = std::make_shared<FontResource>();
+                auto fontBuilder = std::make_shared<AppKit::OpenGL::GLFont2Builder>();
+                fontBuilder->load(relative_path, is_srgb);
+                fontResource->fontBuilder = fontBuilder;
+
+                fontResource->material = Component::CreateShared<Components::ComponentMaterial>();
+
+                fontResource->material->setShader(this->shaderUnlitTextureVertexColorAlpha);
+                auto tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&fontBuilder->glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
+                fontResource->material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+
+
+
+                textureFontMap[to_query] = fontResource;
+                return fontResource;
+            }
+            return font_it->second;
+        }
+        std::shared_ptr<ResourceMap::FontResource> ResourceMap::getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb)
+        {
+            std::string to_query = ITKCommon::PrintfToStdString("%s:%s:%i:%i", 
+                relative_path.c_str(), 
+                (is_srgb) ? "srgb" : "linear", 
+                (int)(MathCore::OP<float>::ceil(defaultSize) + 0.5f), 
+                (int)(MathCore::OP<float>::ceil(max_distance_tolerance) + 0.5f)
+            );
+            auto font_it = geometryFontMap.find(to_query);
+            if (font_it == geometryFontMap.end())
+            {
+                auto fontResourceBase = getTextureFont(relative_path, is_srgb);
+                auto polygonCache = fontResourceBase->fontBuilder->createPolygonCache(
+                    defaultSize, max_distance_tolerance, threadPool);
+                auto fontResource = std::make_shared<FontResource>();
+                fontResource->fontBuilder = fontResourceBase->fontBuilder;
+                fontResource->polygonFontCache = polygonCache;
+                fontResource->material = this->defaultUnlitVertexColorAlphaMaterial;
+                geometryFontMap[to_query] = fontResource;
+                return fontResource;
+            }
+            return font_it->second;
         }
 
         void ResourceMap::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)

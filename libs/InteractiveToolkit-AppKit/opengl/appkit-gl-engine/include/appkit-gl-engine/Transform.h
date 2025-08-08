@@ -39,8 +39,8 @@ namespace AppKit
 
             void registerComponentStartRecursive();
             void unregisterComponentStartRecursive();
-        public:
 
+        public:
             bool affectComponentStart;
 
             // deleted copy constructor and assign operator, to avoid copy...
@@ -271,21 +271,45 @@ namespace AppKit
             void makeFirstComponent(std::shared_ptr<Component>);
             void makeLastComponent(std::shared_ptr<Component>);
 
-            template <typename _ComponentType,
+            template <typename _ComponentType, typename... _param_args,
                       typename std::enable_if<
                           std::is_base_of<Component, _ComponentType>::value,
                           bool>::type = true>
-            inline std::shared_ptr<_ComponentType> addNewComponent()
+            inline std::shared_ptr<_ComponentType> addNewComponent(_param_args &&...args)
             {
                 std::shared_ptr<_ComponentType> result;
-                result = Component::CreateShared<_ComponentType>();
+                result = Component::CreateShared<_ComponentType>(std::forward<_param_args>(args)...);
                 addComponent(result);
                 return result;
+            }
+
+            template <typename _ComponentType,
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value &&
+                              !std::is_same<_ComponentType, Component>::value,
+                          bool>::type = true>
+            inline std::shared_ptr<_ComponentType> addComponent(std::shared_ptr<_ComponentType> c)
+            {
+                addComponent((std::shared_ptr<Component>)c);
+                return c;
             }
 
             std::shared_ptr<Component> addComponent(std::shared_ptr<Component>);
             std::shared_ptr<Component> removeComponent(std::shared_ptr<Component>);
             std::shared_ptr<Component> removeComponentAt(int);
+
+            std::shared_ptr<Component> replaceComponent(std::shared_ptr<Component> search, std::shared_ptr<Component> replace);
+
+            template <typename _ComponentType,
+                      typename std::enable_if<
+                          std::is_base_of<Component, _ComponentType>::value &&
+                              !std::is_same<_ComponentType, Component>::value,
+                          bool>::type = true>
+            inline std::shared_ptr<_ComponentType> replaceComponent(std::shared_ptr<Component> search, std::shared_ptr<_ComponentType> replace)
+            {
+                replaceComponent(search, (std::shared_ptr<Component>)replace);
+                return replace;
+            }
 
             template <typename _ComponentType,
                       typename std::enable_if<

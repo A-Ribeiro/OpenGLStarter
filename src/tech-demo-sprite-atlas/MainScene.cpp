@@ -17,6 +17,14 @@ void MainScene::loadResources()
 {
     // auto engine = AppKit::GLEngine::Engine::Instance();
     spriteShader = std::make_shared<SpriteShader>();
+
+    SpriteAtlasGenerator gen;
+
+    gen.addEntry("resources/smoke.png");
+    gen.addEntry("resources/opengl_logo_white.png");
+
+    auto engine = AppKit::GLEngine::Engine::Instance();
+    spriteAtlas = gen.generateAtlas(*resourceMap, engine->sRGBCapable, true, 10);
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -24,11 +32,14 @@ void MainScene::loadGraph()
     root = Transform::CreateShared();
     root->affectComponentStart = true;
 
-    root->addChild(Transform::CreateShared())->Name = "Main Camera";
+    auto main_camera = root->addChild(Transform::CreateShared());
+    main_camera->Name = "Main Camera";
 
     // root->addChild(Transform::CreateShared())->Name = "Smoke";
 
     root->addChild(Transform::CreateShared())->Name = "bg";
+
+    main_camera->addChild(Transform::CreateShared())->Name = "ui";
 }
 
 // to bind the resources to the current graph
@@ -42,9 +53,9 @@ void MainScene::bindResourcesToGraph()
         spriteNode = Transform::CreateShared("smoke");
         spriteNode->setLocalScale(MathCore::vec3f(0));
         auto componentSprite = spriteNode->addNewComponent<ComponentSprite>();
-        componentSprite->setTexture(
+        componentSprite->setTextureFromAtlas(
             resourceMap, spriteShader,
-            resourceMap->getTexture("resources/smoke.png", engine->sRGBCapable),
+            spriteAtlas, "resources/smoke.png",
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
             MathCore::vec2f(-1, 256),                // size constraint
@@ -60,9 +71,9 @@ void MainScene::bindResourcesToGraph()
         logoNode = Transform::CreateShared("logo");
         logoNode->setLocalScale(MathCore::vec3f(0));
         auto componentSprite = logoNode->addNewComponent<ComponentSprite>();
-        componentSprite->setTexture(
+        componentSprite->setTextureFromAtlas(
             resourceMap, spriteShader,
-            resourceMap->getTexture("resources/opengl_logo_white.png", engine->sRGBCapable),
+            spriteAtlas, "resources/opengl_logo_white.png",
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
             MathCore::vec2f(-1, 256),                // size constraint
@@ -90,11 +101,133 @@ void MainScene::bindResourcesToGraph()
         MeshUploadMode_Static                    // static mesh
     );
 
+    uiNode = root->findTransformByName("ui");
+    // uiNode->setLocalPosition(MathCore::vec3f(0, 0, camera));
+
+    uiComponent = uiNode->addNewComponent<ComponentUI>();
+    uiComponent->Initialize(resourceMap, spriteShader);
+
+    uiComponent->addRectangleCenterSize(
+        vec2f(0, 0),                             // center
+        vec2f(256, 128),                         // size
+        MathCore::vec4f(0.0f, 0.0f, 1.0f, 0.4f), // color
+        MathCore::vec4f(64.0f),                  // radius
+        StrokeModeGrowInside,                    // stroke mode
+        10.0f,                                   // stroke thickness
+        MathCore::vec4f(0.0f, 0.0f, 0.8f, 0.6f), // stroke color
+        80.0f,                                   // drop shadow thickness
+        MathCore::vec4f(1.0f, 0.0f, 1.0f, 0.2f), // drop shadow color
+        0                                        // z
+    );
+
+    uiComponent->addSpriteFromAtlas(
+        vec2f(0, 0),                             // pos
+        spriteAtlas,                             // atlas
+        "resources/opengl_logo_white.png",       // texture
+        vec2f(0.5f),                             // pivot
+        MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
+        MathCore::vec2f(256 - 16, -1),           // size constraint
+        -1                                       // z
+    );
+
+    uiComponent->addTextureText(
+        "resources/Roboto-Regular-100.basof2",                                            // font_path
+        MathCore::vec2f(0, 128),                                                          // pos
+        -1,                                                                               // z
+        "Hello, {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}World{pop;} (Text) !", // text
+        64.0f,                                                                            // size
+        -1.0f,                                                                            // max_width
+        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                                          // faceColor
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                                          // strokeColor
+        MathCore::vec3f(0.0f, 0.0f, -0.02f),                                              // strokeOffset
+        AppKit::OpenGL::GLFont2HorizontalAlign_center,                                    // horizontalAlign
+        AppKit::OpenGL::GLFont2VerticalAlign_bottom,                                      // verticalAlign
+        1.0f,                                                                             // lineHeight
+        AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
+        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
+        U' ',                                                                             // wordSeparatorChar
+        "top_text");
+
+    uiComponent->addPolygonText(
+        "resources/Roboto-Regular-100.basof2",                                            // font_path
+        64.0f,                                                                            // polygon_size
+        10.0f,                                                                            // polygon_distance_tolerance
+        &app->threadPool,                                                                 // polygon_threadPool
+        MathCore::vec2f(0, -128),                                                         // pos
+        -1,                                                                               // z
+        "Hello, {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}World{pop;} (Text) !", // text
+        64.0f,                                                                            // size
+        -1.0f,                                                                            // max_width
+        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                                          // faceColor
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                                          // strokeColor
+        MathCore::vec3f(0.0f, 0.0f, -0.02f),                                              // strokeOffset
+        AppKit::OpenGL::GLFont2HorizontalAlign_center,                                    // horizontalAlign
+        AppKit::OpenGL::GLFont2VerticalAlign_top,                                         // verticalAlign
+        1.0f,                                                                             // lineHeight
+        AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
+        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
+        U' ',                                                                             // wordSeparatorChar
+        "bottom_text");
+
     // setup renderstate
 
     auto mainCamera = root->findTransformByName("Main Camera");
     std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
     camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
+
+    uiNode->setLocalPosition(MathCore::vec3f(0, 0, componentCameraOrthographic->nearPlane + 100.0f));
+
+    auto uiNodeParent = uiNode->getParent();
+    auto new_node = uiNodeParent->addChild(uiNode->clone(false));
+
+    new_node->setLocalPosition(MathCore::vec3f(500.0f, 0, componentCameraOrthographic->nearPlane + 100.0f));
+
+    auto new_ui = new_node->findComponent<ComponentUI>();
+
+    auto top_text_font = new_ui->getItemByName("top_text").get<ComponentFont>();
+    top_text_font->setText(
+        this->resourceMap,
+        "resources/Roboto-Regular-100.basof2", // font_path
+        0,                                     // polygon_size
+        0,                                     // polygon_distance_tolerance
+        nullptr,                               // polygon_threadPool
+        engine->sRGBCapable,
+        "Top Text!",                                                      // text
+        64.0f,                                                            // size
+        -1.0f,                                                            // max_width
+        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                          // strokeColor
+        MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
+        AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
+        AppKit::OpenGL::GLFont2VerticalAlign_bottom,                      // verticalAlign
+        1.0f,                                                             // lineHeight
+        AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
+        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
+        U' '                                                              // wordSeparatorChar
+    );
+
+    top_text_font = new_ui->getItemByName("bottom_text").get<ComponentFont>();
+
+    top_text_font->setText(
+        this->resourceMap,
+        "resources/Roboto-Regular-100.basof2", // font_path
+        64.0f,                                 // polygon_size
+        10.0f,                                 // polygon_distance_tolerance
+        &app->threadPool,                      // polygon_threadPool
+        engine->sRGBCapable,
+        "Text Bottom!",                                                   // text
+        64.0f,                                                            // size
+        -1.0f,                                                            // max_width
+        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                          // strokeColor
+        MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
+        AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
+        AppKit::OpenGL::GLFont2VerticalAlign_top,                         // verticalAlign
+        1.0f,                                                             // lineHeight
+        AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
+        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
+        U' '                                                              // wordSeparatorChar
+    );
 
     auto rect = renderWindow->CameraViewport.c_ptr();
     resize(MathCore::vec2i(rect->w, rect->h));
@@ -115,7 +248,8 @@ void MainScene::bindResourcesToGraph()
     renderWindow->OnUpdate.add(&MainScene::update, this);
 
     // initialize pool
-    for (int i = 0; i < 75; i++){
+    for (int i = 0; i < 75; i++)
+    {
         transformPool.enqueue(spriteNode->clone(false));
         transformPool.enqueue(logoNode->clone(false));
     }
@@ -131,7 +265,7 @@ void MainScene::unloadAll()
 
     spriteShader = nullptr;
 
-    //componentSprite = nullptr;
+    // componentSprite = nullptr;
     spriteNode = nullptr;
     logoNode = nullptr;
 
@@ -140,6 +274,11 @@ void MainScene::unloadAll()
 
     while (transformPool.size() > 0)
         transformPool.dequeue(nullptr, true);
+
+    uiComponent = nullptr;
+    uiNode = nullptr;
+
+    spriteAtlas = nullptr;
 }
 
 void MainScene::update(Platform::Time *elapsed)
@@ -200,14 +339,17 @@ MainScene::MainScene(
 {
     this->app = app;
 
-    spriteShader = nullptr;
+    // spriteShader = nullptr;
 
-    //componentSprite = nullptr;
-    spriteNode = nullptr;
-    logoNode = nullptr;
+    // //componentSprite = nullptr;
+    // spriteNode = nullptr;
+    // logoNode = nullptr;
 
-    bgComponentSprite = nullptr;
-    bgNode = nullptr;
+    // bgComponentSprite = nullptr;
+    // bgNode = nullptr;
+
+    // uiComponent = nullptr;
+    // uiNode = nullptr;
 
     randomNext = 0.0f;
 }

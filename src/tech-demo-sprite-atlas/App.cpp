@@ -75,12 +75,19 @@ void App::draw() {
     }
     
     time.update();
-    this->fps_accumulator -= time.deltaTime;
+    // 1000 hz protection code
+    if (time.unscaledDeltaTime <= 1.0f/1000.0f) 
+        time.rollback_and_set_zero();
+
+    fps_timer.update();
+    this->fps_accumulator -= fps_timer.unscaledDeltaTime;
     if (this->fps_accumulator < 0){
         this->fps_accumulator = App::fps_time_sec;
-        if (time.deltaTime > EPSILON<float>::high_precision)
-            printf("%.2f FPS\n", 1.0f / time.deltaTime);
+        if (fps_timer.unscaledDeltaTime > EPSILON<float>::high_precision)
+            printf("%.2f FPS\n", 1.0f / fps_timer.unscaledDeltaTime);
     }
+
+    
 
     //set min delta time (the passed time or the time to render at 24fps)
     //time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
