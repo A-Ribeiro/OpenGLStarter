@@ -106,20 +106,23 @@ namespace AppKit
                 );
 
                 void setTextureFromAtlas(
+                    AppKit::GLEngine::ResourceMap *resourceMap,
+                    std::shared_ptr<SpriteShader> spriteShader,
                     std::shared_ptr<SpriteAtlas> atlas,
                     const std::string &name,
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
-                    bool staticMesh
+                    const MathCore::vec2f &size_constraint = MathCore::vec2f(-1, -1),
+                    MeshUploadMode meshUploadMode = MeshUploadMode_Static
                 );
 
-                void setTextureFromAtlas(
-                    std::shared_ptr<AppKit::OpenGL::GLTexture> altas_texture,
-                    const SpriteAtlas::Entry &altas_entry,
-                    const MathCore::vec2f &pivot,
-                    const MathCore::vec4f &color,
-                    bool staticMesh
-                );
+                // void setTextureFromAtlas(
+                //     std::shared_ptr<AppKit::OpenGL::GLTexture> altas_texture,
+                //     const SpriteAtlas::Entry &altas_entry,
+                //     const MathCore::vec2f &pivot,
+                //     const MathCore::vec4f &color,
+                //     bool staticMesh
+                // );
 
                 ComponentSprite();
 

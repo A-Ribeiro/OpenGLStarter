@@ -19,9 +19,12 @@ namespace AppKit
             {
             }
 
-            UIItem &ComponentUI::getItemByName(const std::string &name) {
-                for (size_t i = 0; i < items.size(); i++) {
-                    if (items[i].transform->getName() == name) {
+            UIItem &ComponentUI::getItemByName(const std::string &name)
+            {
+                for (size_t i = 0; i < items.size(); i++)
+                {
+                    if (items[i].transform->getName() == name)
+                    {
                         return items[i];
                     }
                 }
@@ -205,6 +208,38 @@ namespace AppKit
                     this->resourceMap,
                     this->spriteShader,
                     resourceMap->getTexture(texture_path, engine->sRGBCapable),
+                    pivot,
+                    color,
+                    size_constraint,
+                    MeshUploadMode_Direct);
+                auto item = UIItem(
+                    getTransform()->addChild(transform),
+                    self<ComponentUI>());
+                item.set<ComponentSprite>(sprite);
+                items.push_back(item);
+                return item;
+            }
+
+            UIItem ComponentUI::addSpriteFromAtlas(
+                const MathCore::vec2f &pos,
+                std::shared_ptr<SpriteAtlas> atlas,
+                const std::string &texture_path,
+                const MathCore::vec2f &pivot,
+                const MathCore::vec4f &color,
+                const MathCore::vec2f &size_constraint,
+                float z,
+                const std::string &name)
+            {
+                auto engine = AppKit::GLEngine::Engine::Instance();
+
+                auto transform = Transform::CreateShared(name);
+                transform->setLocalPosition(MathCore::vec3f(pos.x, pos.y, z));
+                auto sprite = transform->addNewComponent<ComponentSprite>();
+                sprite->setTextureFromAtlas(
+                    this->resourceMap,
+                    this->spriteShader,
+                    atlas,
+                    texture_path,
                     pivot,
                     color,
                     size_constraint,

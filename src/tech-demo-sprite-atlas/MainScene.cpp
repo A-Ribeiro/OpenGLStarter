@@ -17,6 +17,14 @@ void MainScene::loadResources()
 {
     // auto engine = AppKit::GLEngine::Engine::Instance();
     spriteShader = std::make_shared<SpriteShader>();
+
+    SpriteAtlasGenerator gen;
+
+    gen.addEntry("resources/smoke.png");
+    gen.addEntry("resources/opengl_logo_white.png");
+
+    auto engine = AppKit::GLEngine::Engine::Instance();
+    spriteAtlas = gen.generateAtlas(*resourceMap, engine->sRGBCapable, true, 10);
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -45,9 +53,9 @@ void MainScene::bindResourcesToGraph()
         spriteNode = Transform::CreateShared("smoke");
         spriteNode->setLocalScale(MathCore::vec3f(0));
         auto componentSprite = spriteNode->addNewComponent<ComponentSprite>();
-        componentSprite->setTexture(
+        componentSprite->setTextureFromAtlas(
             resourceMap, spriteShader,
-            resourceMap->getTexture("resources/smoke.png", engine->sRGBCapable),
+            spriteAtlas, "resources/smoke.png",
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
             MathCore::vec2f(-1, 256),                // size constraint
@@ -63,9 +71,9 @@ void MainScene::bindResourcesToGraph()
         logoNode = Transform::CreateShared("logo");
         logoNode->setLocalScale(MathCore::vec3f(0));
         auto componentSprite = logoNode->addNewComponent<ComponentSprite>();
-        componentSprite->setTexture(
+        componentSprite->setTextureFromAtlas(
             resourceMap, spriteShader,
-            resourceMap->getTexture("resources/opengl_logo_white.png", engine->sRGBCapable),
+            spriteAtlas, "resources/opengl_logo_white.png",
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
             MathCore::vec2f(-1, 256),                // size constraint
@@ -112,8 +120,9 @@ void MainScene::bindResourcesToGraph()
         0                                        // z
     );
 
-    uiComponent->addSprite(
+    uiComponent->addSpriteFromAtlas(
         vec2f(0, 0),                             // pos
+        spriteAtlas,                             // atlas
         "resources/opengl_logo_white.png",       // texture
         vec2f(0.5f),                             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
@@ -178,43 +187,46 @@ void MainScene::bindResourcesToGraph()
     auto top_text_font = new_ui->getItemByName("top_text").get<ComponentFont>();
     top_text_font->setText(
         this->resourceMap,
-        "resources/Roboto-Regular-100.basof2",
-        0, 0, nullptr,
+        "resources/Roboto-Regular-100.basof2", // font_path
+        0,                                     // polygon_size
+        0,                                     // polygon_distance_tolerance
+        nullptr,                               // polygon_threadPool
         engine->sRGBCapable,
-        "New Text!",
-        64.0f,
-        -1.0f,
-        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),
-        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),
-        MathCore::vec3f(0.0f, 0.0f, -0.02f),
-        AppKit::OpenGL::GLFont2HorizontalAlign_center,
-        AppKit::OpenGL::GLFont2VerticalAlign_bottom,
-        1.0f,
-        AppKit::OpenGL::GLFont2WrapMode_Word,
-        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,
-        U' ');
+        "Top Text!",                                                      // text
+        64.0f,                                                            // size
+        -1.0f,                                                            // max_width
+        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                          // strokeColor
+        MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
+        AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
+        AppKit::OpenGL::GLFont2VerticalAlign_bottom,                      // verticalAlign
+        1.0f,                                                             // lineHeight
+        AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
+        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
+        U' '                                                              // wordSeparatorChar
+    );
 
     top_text_font = new_ui->getItemByName("bottom_text").get<ComponentFont>();
 
     top_text_font->setText(
         this->resourceMap,
-        "resources/Roboto-Regular-100.basof2",                                            // font_path
-        64.0f,                                                                            // polygon_size
-        10.0f,                                                                            // polygon_distance_tolerance
-        &app->threadPool,                                                                 // polygon_threadPool
+        "resources/Roboto-Regular-100.basof2", // font_path
+        64.0f,                                 // polygon_size
+        10.0f,                                 // polygon_distance_tolerance
+        &app->threadPool,                      // polygon_threadPool
         engine->sRGBCapable,
-        "Text Bottom!", // text
-        64.0f,                                                                            // size
-        -1.0f,                                                                            // max_width
-        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                                          // faceColor
-        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                                          // strokeColor
-        MathCore::vec3f(0.0f, 0.0f, -0.02f),                                              // strokeOffset
-        AppKit::OpenGL::GLFont2HorizontalAlign_center,                                    // horizontalAlign
-        AppKit::OpenGL::GLFont2VerticalAlign_top,                                         // verticalAlign
-        1.0f,                                                                             // lineHeight
-        AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
-        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
-        U' '                                                                             // wordSeparatorChar
+        "Text Bottom!",                                                   // text
+        64.0f,                                                            // size
+        -1.0f,                                                            // max_width
+        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                          // strokeColor
+        MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
+        AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
+        AppKit::OpenGL::GLFont2VerticalAlign_top,                         // verticalAlign
+        1.0f,                                                             // lineHeight
+        AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
+        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
+        U' '                                                              // wordSeparatorChar
     );
 
     auto rect = renderWindow->CameraViewport.c_ptr();
@@ -265,6 +277,8 @@ void MainScene::unloadAll()
 
     uiComponent = nullptr;
     uiNode = nullptr;
+
+    spriteAtlas = nullptr;
 }
 
 void MainScene::update(Platform::Time *elapsed)

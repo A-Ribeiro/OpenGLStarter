@@ -127,6 +127,16 @@ namespace AppKit
                     const MathCore::vec2f &size_constraint,
                     float z,
                     const std::string &name = "_sprite");
+                
+                UIItem addSpriteFromAtlas(
+                    const MathCore::vec2f &pos,
+                    std::shared_ptr<SpriteAtlas> atlas,
+                    const std::string &texture_path,
+                    const MathCore::vec2f &pivot,
+                    const MathCore::vec4f &color,
+                    const MathCore::vec2f &size_constraint,
+                    float z,
+                    const std::string &name = "_sprite");
 
                 void setVisible(bool visible);
 

@@ -37,12 +37,11 @@ namespace AppKit
             sprites[name] = entry;
         }
 
-        void SpriteAtlasGenerator::addEntry(const std::string &texture_path,
-                                            const MathCore::vec2f &pivot)
+        void SpriteAtlasGenerator::addEntry(const std::string &texture_path)
         {
             if (entries.find(texture_path) != entries.end())
                 throw std::runtime_error("Entry already exists: " + texture_path);
-            entries[texture_path] = {texture_path, pivot};
+            entries[texture_path] = {texture_path};
         }
 
         void SpriteAtlasGenerator::removeEntry(const std::string &name)
@@ -132,9 +131,10 @@ namespace AppKit
 
                 SpriteAtlas::Entry atlasEntry;
                 atlasEntry.spriteSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.w);
-                atlasEntry.spritePivot = item.genEntry.pivot;
+                // atlasEntry.spritePivot = item.genEntry.pivot;
 
-                atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x, atlas.textureResolution.h - 1 - item.atlasElementFace->rect.y);
+                atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x,
+                                                   item.atlasElementFace->rect.y);
                 atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteSize;
 
                 atlasEntry.uvMin *= atlasSize_inv;

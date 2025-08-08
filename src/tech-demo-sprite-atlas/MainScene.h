@@ -10,6 +10,8 @@
 
 #include "components/ui/ComponentUI.h"
 
+#include "./util/SpriteAtlas.h"
+
 class App;
 
 //
@@ -50,6 +52,8 @@ protected:
 public:
 
     App *app;
+
+    std::shared_ptr<AppKit::GLEngine::SpriteAtlas> spriteAtlas;
 
     std::shared_ptr<AppKit::GLEngine::SpriteShader> spriteShader;
 
