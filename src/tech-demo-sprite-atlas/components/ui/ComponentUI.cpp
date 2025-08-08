@@ -165,7 +165,8 @@ namespace AppKit
                     stroke_thickness,
                     stroke_color,
                     drop_shadow_thickness,
-                    drop_shadow_color);
+                    drop_shadow_color,
+                    MeshUploadMode_Direct);
                 auto item = UIItem(
                     getTransform()->addChild(transform),
                     self<ComponentUI>());
@@ -231,10 +232,30 @@ namespace AppKit
 
                 result->always_clone = this->always_clone;
 
+                result->resourceMap = this->resourceMap;
+                result->spriteShader = this->spriteShader;
+
+                for (auto &item : items)
+                    result->items.push_back(item);
+
                 return result;
             }
             void ComponentUI::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
             {
+                for (auto &item : items)
+                {
+                    if (transformMap.find(item.transform) != transformMap.end())
+                        item.transform = transformMap[item.transform];
+                    item.self_ui = self<ComponentUI>();
+                    if (item.type == UIItemFont && componentMap.find(item.get<ComponentFont>()) != componentMap.end())
+                        item.set<ComponentFont>(std::dynamic_pointer_cast<ComponentFont>(componentMap[item.get<ComponentFont>()]));
+                    else if (item.type == UIItemRectangle && componentMap.find(item.get<ComponentRectangle>()) != componentMap.end())
+                        item.set<ComponentRectangle>(std::dynamic_pointer_cast<ComponentRectangle>(componentMap[item.get<ComponentRectangle>()]));
+                    else if (item.type == UIItemSprite && componentMap.find(item.get<ComponentSprite>()) != componentMap.end())
+                        item.set<ComponentSprite>(std::dynamic_pointer_cast<ComponentSprite>(componentMap[item.get<ComponentSprite>()]));
+                    else if (item.type == UIItemUI && componentMap.find(item.get<ComponentUI>()) != componentMap.end())
+                        item.set<ComponentUI>(std::dynamic_pointer_cast<ComponentUI>(componentMap[item.get<ComponentUI>()]));
+                }
             }
 
             void ComponentUI::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)

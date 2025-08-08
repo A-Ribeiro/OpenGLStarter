@@ -22,6 +22,9 @@
 
 #include "../shaders/SpriteShader.h"
 
+#include "./ui/common.h"
+
+
 namespace AppKit
 {
     namespace GLEngine
@@ -29,43 +32,44 @@ namespace AppKit
         namespace Components
         {
 
-            enum SpriteSourceType
-            {
-                SpriteSourceNone,
-                SpriteSourceDirectTexture,
-                SpriteSourceAtlas,
-            };
+            // enum SpriteSourceType
+            // {
+            //     SpriteSourceNone,
+            //     SpriteSourceDirectTexture,
+            //     SpriteSourceAtlas,
+            // };
 
-            enum MeshUploadMode
-            {
-                MeshUploadMode_Direct,
-                MeshUploadMode_Dynamic,
-                MeshUploadMode_Static,
-            };
+            // enum MeshUploadMode
+            // {
+            //     MeshUploadMode_Direct_OnClone_NoModify,
+            //     MeshUploadMode_Direct,
+            //     MeshUploadMode_Dynamic,
+            //     MeshUploadMode_Static,
+            // };
 
-            class DirectTextureSetup
-            {
-            public:
-                MathCore::vec4f color;
-                MathCore::vec2f pivot;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
-            };
+            // class DirectTextureSetup
+            // {
+            // public:
+            //     MathCore::vec4f color;
+            //     MathCore::vec2f pivot;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
+            // };
 
-            class TextureFromAtlasSetup
-            {
-            public:
-                MathCore::vec4f color;
-                SpriteAtlas::Entry entry;
-                std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
+            // class TextureFromAtlasSetup
+            // {
+            // public:
+            //     MathCore::vec4f color;
+            //     SpriteAtlas::Entry entry;
+            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
 
-                void setFromAtlas(const std::shared_ptr<SpriteAtlas> &atlas, const std::string &name)
-                {
-                    if (!atlas->hasSprite(name))
-                        return;
-                    entry = atlas->getSprite(name);
-                    texture = atlas->texture;
-                }
-            };
+            //     void setFromAtlas(const std::shared_ptr<SpriteAtlas> &atlas, const std::string &name)
+            //     {
+            //         if (!atlas->hasSprite(name))
+            //             return;
+            //         entry = atlas->getSprite(name);
+            //         texture = atlas->texture;
+            //     }
+            // };
 
             class ComponentSprite : public Component
             {
@@ -73,11 +77,11 @@ namespace AppKit
                 static const ComponentType Type;
 
                 // material type
-                SpriteSourceType type;
+                // SpriteSourceType type;
 
                 // parameters
-                DirectTextureSetup directTexture;
-                TextureFromAtlasSetup textureFromAtlas;
+                // DirectTextureSetup directTexture;
+                // TextureFromAtlasSetup textureFromAtlas;
 
                 bool always_clone;
 

@@ -21,6 +21,7 @@
 #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
 
 // #include "../../shaders/SpriteShader.h"
+#include "./common.h"
 
 namespace AppKit
 {
@@ -73,7 +74,8 @@ namespace AppKit
 
                     AppKit::OpenGL::GLFont2WrapMode wrapMode = AppKit::OpenGL::GLFont2WrapMode_Word,
                     AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,
-                    char32_t wordSeparatorChar = U' ');
+                    char32_t wordSeparatorChar = U' ',
+                    MeshUploadMode meshUploadMode = MeshUploadMode_Direct);
 
                 ComponentFont();
 
