@@ -42,12 +42,25 @@ namespace AppKit
                         // in case the object has no material, or a material without a shader, skip it completely
                         return;
                     }
-                    setCurrentMaterial(material, resourceMap);
+                    setCurrentMaterial(material, resourceMap, camera);
                 }
                 else if (material != nullptr && component->compareType(Components::ComponentMesh::Type))
                 {
                     mesh = (Components::ComponentMesh *)component.get();
-                    setCurrentMesh(mesh);
+
+                    if (!mesh->usesVBO() && mesh->indices.size() <= agregateMesh_ConcatenateLowerThanIndexCount)
+                    {
+                        // flush if more than the triangles limit
+                        if (meshAgregator->indices.size() > agregateMesh_FlushMoreThanIndexCount)
+                            renderMeshAgregatorAndClear(resourceMap, camera);
+
+                        meshAgregatorMaterial = material;
+                        meshAgregator->concatenate(element, mesh, material->shader.get());
+                        setCurrentMesh(meshAgregator, resourceMap, camera);
+                        continue;
+                    }
+
+                    setCurrentMesh(mesh, resourceMap, camera);
                     if (!camera_set)
                     {
                         camera_set = true;
@@ -104,12 +117,25 @@ namespace AppKit
                         material = nullptr;
                         continue;
                     }
-                    setCurrentMaterial(resourceMap->renderOnlyDepthMaterial.get(), resourceMap);
+                    setCurrentMaterial(resourceMap->renderOnlyDepthMaterial.get(), resourceMap, camera);
                 }
                 else if (material != nullptr && component->compareType(Components::ComponentMesh::Type))
                 {
                     mesh = (Components::ComponentMesh *)component.get();
-                    setCurrentMesh(mesh);
+
+                    if (!mesh->usesVBO() && mesh->indices.size() <= agregateMesh_ConcatenateLowerThanIndexCount)
+                    {
+                        // flush if more than the triangles limit
+                        if (meshAgregator->indices.size() > agregateMesh_FlushMoreThanIndexCount)
+                            renderMeshAgregatorAndClear(resourceMap, camera);
+
+                        meshAgregatorMaterial = material;
+                        meshAgregator->concatenate(element, mesh, material->shader.get());
+                        setCurrentMesh(meshAgregator, resourceMap, camera);
+                        continue;
+                    }
+
+                    setCurrentMesh(mesh, resourceMap, camera);
                     if (!camera_set)
                     {
                         camera_set = true;
@@ -163,7 +189,13 @@ namespace AppKit
 
             currentMaterial = nullptr;
             currentMesh = nullptr;
-            meshAgregator = std::make_shared<Components::ComponentMesh>();
+            meshAgregatorMaterial = nullptr;
+            meshAgregator = new Components::ComponentMesh();
+            dummyTransform = new Transform();
+            dummyTransform->setName("__dummy__");
+
+            agregateMesh_ConcatenateLowerThanTriangleCount = 1024;
+            agregateMesh_FlushMoreThanTriangleCount = 65536; // 64K
         }
 
         RenderPipeline::~RenderPipeline()
@@ -179,13 +211,52 @@ namespace AppKit
                 delete depthRenderer;
                 depthRenderer = nullptr;
             }
-            meshAgregator = nullptr;
+            if (meshAgregator != nullptr)
+            {
+                delete meshAgregator;
+                meshAgregator = nullptr;
+            }
+
+            if (dummyTransform != nullptr) 
+            {
+                delete dummyTransform;
+                dummyTransform = nullptr;
+            }
+
+            meshAgregatorMaterial = nullptr;
         }
 
-        void RenderPipeline::setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap)
+        void RenderPipeline::renderMeshAgregatorAndClear(ResourceMap *resourceMap, Components::ComponentCamera *camera)
+        {
+            if (meshAgregator->indices.size() == 0)
+                return;
+
+            MathCore::mat4f *mvp;
+            MathCore::mat4f *mv;
+            MathCore::mat4f *mvIT;
+            MathCore::mat4f *mvInv;
+
+            dummyTransform->computeRenderMatrix(camera->viewProjection, camera->view, camera->viewIT, camera->viewInv,
+                                                &mvp, &mv, &mvIT, &mvInv);
+            auto shader = meshAgregatorMaterial->shader.get();
+            shader->setUniformsFromMatrices(
+                GLRenderState::Instance(), resourceMap, this,
+                meshAgregatorMaterial, dummyTransform, camera,
+                mvp, mv, mvIT, mvInv);
+
+            // the meshAgregator is dynamic, and can change its size...
+            // so we need to set it immediately before draw
+            meshAgregator->setLayoutPointers(shader);
+            meshAgregator->draw();
+            meshAgregator->clear();
+        }
+
+        void RenderPipeline::setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap, Components::ComponentCamera *camera)
         {
             if (currentMaterial == material)
                 return;
+            if (currentMesh == meshAgregator && currentMesh->indices.size() > 0)
+                renderMeshAgregatorAndClear(resourceMap, camera);
             currentMaterial = material;
             if (currentMaterial != nullptr)
             {
@@ -195,22 +266,30 @@ namespace AppKit
                     currentMaterial);
             }
         }
-        void RenderPipeline::setCurrentMesh(Components::ComponentMesh *mesh)
+        void RenderPipeline::setCurrentMesh(Components::ComponentMesh *mesh, ResourceMap *resourceMap, Components::ComponentCamera *camera)
         {
             if (currentMesh == mesh)
                 return;
             if (currentMesh != nullptr && (mesh == nullptr || currentMaterial == nullptr ||
-                    // here mesh and currentMaterial are not null, so we can safely access them
-                    mesh->usesVBO() != currentMesh->usesVBO() ||
-                    // here usesVBO are equal, we check if they are not using VBOs
-                    (!mesh->usesVBO() && currentMaterial->shader.get() != shaderMeshLastSet)))
-                    currentMesh->unsetLayoutPointers(shaderMeshLastSet);
+                                           // here mesh and currentMaterial are not null, so we can safely access them
+                                           mesh->usesVBO() != currentMesh->usesVBO() ||
+                                           // here usesVBO are equal, we check if they are not using VBOs
+                                           (!mesh->usesVBO() && currentMaterial->shader.get() != shaderMeshLastSet)))
+            {
+                if (currentMesh == meshAgregator && currentMesh->indices.size() > 0)
+                    renderMeshAgregatorAndClear(resourceMap, camera);
+                currentMesh->unsetLayoutPointers(shaderMeshLastSet);
+            }
 
             if (mesh != nullptr && currentMaterial != nullptr)
             {
                 currentMesh = mesh;
                 shaderMeshLastSet = currentMaterial->shader.get();
-                currentMesh->setLayoutPointers(shaderMeshLastSet);
+
+                // the meshAgregator is dynamic, and can change its size...
+                // so we need to set it immediately before draw
+                if (currentMesh != meshAgregator)
+                    currentMesh->setLayoutPointers(shaderMeshLastSet);
             }
             else
             {
@@ -231,6 +310,9 @@ namespace AppKit
             bool clear,
             OrthographicFilterEnum orthoFilter)
         {
+            agregateMesh_ConcatenateLowerThanIndexCount = agregateMesh_ConcatenateLowerThanTriangleCount * 3;
+            agregateMesh_FlushMoreThanIndexCount = agregateMesh_FlushMoreThanTriangleCount * 3;
+
             Transform *root = rootp.get();
             Components::ComponentCamera *camera = camerap.get();
 
@@ -412,8 +494,8 @@ namespace AppKit
                 traverse_singlepass_render(transform, camera, resourceMap);
             }
 
-            setCurrentMesh(nullptr);
-            setCurrentMaterial(nullptr, resourceMap);
+            setCurrentMesh(nullptr, resourceMap, camera);
+            setCurrentMaterial(nullptr, resourceMap, camera);
             renderstate->clearTextureUnitActivationArray();
 
             // render debug lines

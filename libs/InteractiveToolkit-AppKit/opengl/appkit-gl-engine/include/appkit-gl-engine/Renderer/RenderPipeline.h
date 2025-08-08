@@ -88,14 +88,23 @@ namespace AppKit
             Components::ComponentMesh *currentMesh;
             const DefaultEngineShader *shaderMeshLastSet;
 
-            std::shared_ptr<Components::ComponentMesh> meshAgregator;
+            Components::ComponentMaterial *meshAgregatorMaterial;
+            Components::ComponentMesh *meshAgregator;
+            Transform *dummyTransform;
+            size_t agregateMesh_ConcatenateLowerThanIndexCount;
+            size_t agregateMesh_FlushMoreThanIndexCount;
+
+            void renderMeshAgregatorAndClear(ResourceMap *resourceMap, Components::ComponentCamera *camera);
 
             // supported shaders in this Render Pipeline
-            void setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap);
-            void setCurrentMesh(Components::ComponentMesh *mesh);
+            void setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap, Components::ComponentCamera *camera);
+            void setCurrentMesh(Components::ComponentMesh *mesh, ResourceMap *resourceMap, Components::ComponentCamera *camera);
         public:
             // PBR single pass frankenshader
             FrankenShaderManager frankenShaderManager;
+
+            size_t agregateMesh_ConcatenateLowerThanTriangleCount;
+            size_t agregateMesh_FlushMoreThanTriangleCount;
         private:
 
             void traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap);
