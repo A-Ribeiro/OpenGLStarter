@@ -21,7 +21,7 @@ namespace AppKit
             struct Entry
             {
                 MathCore::vec2f spriteSize;
-                MathCore::vec2f spritePivot;
+                // MathCore::vec2f spritePivot;
                 MathCore::vec2f uvMin;
                 MathCore::vec2f uvMax;
             };
@@ -44,12 +44,12 @@ namespace AppKit
             {
                 // std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
                 std::string texture_path;
-                MathCore::vec2f pivot;
+                // MathCore::vec2f pivot;
             };
             std::unordered_map<std::string, GeneratorEntry> entries;
 
-            void addEntry(const std::string &texture_path,
-                          const MathCore::vec2f &pivot = MathCore::vec2f(0.5f, 0.5f));
+            void addEntry(const std::string &texture_path);
+            // ,const MathCore::vec2f &pivot = MathCore::vec2f(0.5f, 0.5f));
 
             void removeEntry(const std::string &name);
 
