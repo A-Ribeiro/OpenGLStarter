@@ -88,6 +88,8 @@ namespace AppKit
             Components::ComponentMesh *currentMesh;
             const DefaultEngineShader *shaderMeshLastSet;
 
+            std::shared_ptr<Components::ComponentMesh> meshAgregator;
+
             // supported shaders in this Render Pipeline
             void setCurrentMaterial(Components::ComponentMaterial *material, ResourceMap *resourceMap);
             void setCurrentMesh(Components::ComponentMesh *mesh);
