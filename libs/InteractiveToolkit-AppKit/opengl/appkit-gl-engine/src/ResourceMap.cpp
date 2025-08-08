@@ -350,7 +350,12 @@ namespace AppKit
         }
         std::shared_ptr<ResourceMap::FontResource> ResourceMap::getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb)
         {
-            std::string to_query = ITKCommon::PrintfToStdString("%s:%s:%f:%f", relative_path.c_str(), (is_srgb) ? "srgb" : "linear", defaultSize, max_distance_tolerance);
+            std::string to_query = ITKCommon::PrintfToStdString("%s:%s:%i:%i", 
+                relative_path.c_str(), 
+                (is_srgb) ? "srgb" : "linear", 
+                (int)(MathCore::OP<float>::ceil(defaultSize) + 0.5f), 
+                (int)(MathCore::OP<float>::ceil(max_distance_tolerance) + 0.5f)
+            );
             auto font_it = geometryFontMap.find(to_query);
             if (font_it == geometryFontMap.end())
             {
@@ -364,7 +369,6 @@ namespace AppKit
                 geometryFontMap[to_query] = fontResource;
                 return fontResource;
             }
-
             return font_it->second;
         }
 

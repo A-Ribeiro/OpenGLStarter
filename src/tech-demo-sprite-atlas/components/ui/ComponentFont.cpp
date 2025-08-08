@@ -87,11 +87,14 @@ namespace AppKit
                 auto builder = fontResource->fontBuilder.get();
 
                 checkOrCreateAuxiliaryComponents(resourceMap, fontResource->material);
-                if (meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify)
-                {
-                    mesh->always_clone = false;
-                    this->always_clone = false;
-                }
+
+                bool onCloneNoModify = 
+                meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify || 
+                meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify || 
+                meshUploadMode == MeshUploadMode_Static_OnClone_NoModify;
+
+                mesh->always_clone = !onCloneNoModify;
+                this->always_clone = !onCloneNoModify;
 
                 builder->size = size;
                 builder->faceColor = faceColor;

@@ -76,11 +76,13 @@ namespace AppKit
                 uint32_t segment_count)
             {
                 checkOrCreateAuxiliaryComponents(resourceMap);
-                if (meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify)
-                {
-                    mesh->always_clone = false;
-                    this->always_clone = false;
-                }
+                bool onCloneNoModify = 
+                meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify || 
+                meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify || 
+                meshUploadMode == MeshUploadMode_Static_OnClone_NoModify;
+
+                mesh->always_clone = !onCloneNoModify;
+                this->always_clone = !onCloneNoModify;
 
                 // uint32_t segment_count = 3;
                 // float ignore_stroke_thickness = 0.0f;

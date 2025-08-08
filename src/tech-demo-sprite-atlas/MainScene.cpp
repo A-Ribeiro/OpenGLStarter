@@ -136,8 +136,8 @@ void MainScene::bindResourcesToGraph()
         1.0f,                                                                             // lineHeight
         AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
         AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
-        U' '                                                                              // wordSeparatorChar
-    );
+        U' ',                                                                             // wordSeparatorChar
+        "top_text");
 
     uiComponent->addPolygonText(
         "resources/Roboto-Regular-100.basof2",                                            // font_path
@@ -157,8 +157,8 @@ void MainScene::bindResourcesToGraph()
         1.0f,                                                                             // lineHeight
         AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
         AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
-        U' '                                                                              // wordSeparatorChar
-    );
+        U' ',                                                                             // wordSeparatorChar
+        "bottom_text");
 
     // setup renderstate
 
@@ -167,6 +167,55 @@ void MainScene::bindResourcesToGraph()
     camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
 
     uiNode->setLocalPosition(MathCore::vec3f(0, 0, componentCameraOrthographic->nearPlane + 100.0f));
+
+    auto uiNodeParent = uiNode->getParent();
+    auto new_node = uiNodeParent->addChild(uiNode->clone(false));
+
+    new_node->setLocalPosition(MathCore::vec3f(500.0f, 0, componentCameraOrthographic->nearPlane + 100.0f));
+
+    auto new_ui = new_node->findComponent<ComponentUI>();
+
+    auto top_text_font = new_ui->getItemByName("top_text").get<ComponentFont>();
+    top_text_font->setText(
+        this->resourceMap,
+        "resources/Roboto-Regular-100.basof2",
+        0, 0, nullptr,
+        engine->sRGBCapable,
+        "New Text!",
+        64.0f,
+        -1.0f,
+        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),
+        MathCore::vec3f(0.0f, 0.0f, -0.02f),
+        AppKit::OpenGL::GLFont2HorizontalAlign_center,
+        AppKit::OpenGL::GLFont2VerticalAlign_bottom,
+        1.0f,
+        AppKit::OpenGL::GLFont2WrapMode_Word,
+        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,
+        U' ');
+
+    top_text_font = new_ui->getItemByName("bottom_text").get<ComponentFont>();
+
+    top_text_font->setText(
+        this->resourceMap,
+        "resources/Roboto-Regular-100.basof2",                                            // font_path
+        64.0f,                                                                            // polygon_size
+        10.0f,                                                                            // polygon_distance_tolerance
+        &app->threadPool,                                                                 // polygon_threadPool
+        engine->sRGBCapable,
+        "Text Bottom!", // text
+        64.0f,                                                                            // size
+        -1.0f,                                                                            // max_width
+        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                                          // faceColor
+        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                                          // strokeColor
+        MathCore::vec3f(0.0f, 0.0f, -0.02f),                                              // strokeOffset
+        AppKit::OpenGL::GLFont2HorizontalAlign_center,                                    // horizontalAlign
+        AppKit::OpenGL::GLFont2VerticalAlign_top,                                         // verticalAlign
+        1.0f,                                                                             // lineHeight
+        AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
+        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
+        U' '                                                                             // wordSeparatorChar
+    );
 
     auto rect = renderWindow->CameraViewport.c_ptr();
     resize(MathCore::vec2i(rect->w, rect->h));

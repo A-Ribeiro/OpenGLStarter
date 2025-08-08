@@ -66,11 +66,15 @@ namespace AppKit
                 // directTexture.color = color;
                 // type = SpriteSourceDirectTexture;
                 checkOrCreateAuxiliaryComponents(resourceMap, spriteShader, texture);
-                if (meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify)
-                {
-                    mesh->always_clone = false;
-                    this->always_clone = false;
-                }
+                
+                bool onCloneNoModify = 
+                meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify || 
+                meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify || 
+                meshUploadMode == MeshUploadMode_Static_OnClone_NoModify;
+
+                mesh->always_clone = !onCloneNoModify;
+                this->always_clone = !onCloneNoModify;
+
                 MathCore::vec3f size((float)texture->width, (float)texture->height, 0.0f);
                 if (size_constraint.x > 0.0f && size_constraint.y > 0.0f)
                     size = MathCore::vec3f(size_constraint.x, size_constraint.y, 0.0f);
@@ -130,9 +134,9 @@ namespace AppKit
                 mesh->indices.push_back(3);
                 mesh->indices.push_back(2);
 
-                if (meshUploadMode == MeshUploadMode_Static)
+                if (meshUploadMode == MeshUploadMode_Static || meshUploadMode == MeshUploadMode_Static_OnClone_NoModify)
                     mesh->syncVBO(0, 0xffffffff);
-                else if (meshUploadMode == MeshUploadMode_Dynamic)
+                else if (meshUploadMode == MeshUploadMode_Dynamic || meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify)
                     mesh->syncVBO(0xffffffff, 0);
 
                 meshWrapper->setShapeAABB(

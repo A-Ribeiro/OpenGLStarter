@@ -44,6 +44,8 @@ namespace AppKit
 
                 Platform::SmartVector<UIItem> items;
 
+                UIItem &getItemByName(const std::string &name);
+
                 UIItem addTextureText(
                     const std::string &font_path,
                     const MathCore::vec2f &pos,
