@@ -1,9 +1,9 @@
 ﻿#include "MainScene.h"
 #include "App.h"
 
-#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 
-#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+#include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 #include <InteractiveToolkit/EaseCore/EaseCore.h>
 
 using namespace AppKit::GLEngine;

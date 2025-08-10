@@ -2,9 +2,9 @@
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
 
-#include <appkit-gl-engine/Components/ComponentLight.h>
-#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
-#include <appkit-gl-engine/Components/ComponentParticleSystem.h>
+#include <appkit-gl-engine/Components/Core/ComponentLight.h>
+#include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
+#include <appkit-gl-engine/Components/Ext/ComponentParticleSystem.h>
 
 #include <appkit-gl-engine/Transform.h>
 
@@ -13,7 +13,7 @@
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/GLDynamicFBO.h>
 
-#include <appkit-gl-engine/Components/ComponentCamera.h>
+#include <appkit-gl-engine/Components/Core/ComponentCamera.h>
 #include <appkit-gl-engine/shaders/FrankenShader.h>
 
 #include <InteractiveToolkit/Platform/Core/ObjectPool.h>

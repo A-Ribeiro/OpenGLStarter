@@ -3,7 +3,7 @@
 // #include <appkit-gl-engine/mini-gl-engine.h>
 // #include <aRibeiroCore/aRibeiroCore.h>
 #include <appkit-gl-engine/util/Basof2ToResource.h>
-#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+#include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 
 namespace AppKit
 {

@@ -2,7 +2,7 @@
 #include "../all.h"
 #include "../../ImGuiManager.h"
 
-#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+#include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 
 InspectorImGuiComponent_MeshWrapper::InspectorImGuiComponent_MeshWrapper(std::shared_ptr<AppKit::GLEngine::Components::ComponentMeshWrapper> _mesh_wrapper):
     InspectorImGuiComponent("mesh wrapper") {

@@ -1,5 +1,5 @@
 #include <appkit-gl-engine/util/Button.h>
-#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 
 namespace AppKit
 {

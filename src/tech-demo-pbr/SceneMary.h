@@ -1,7 +1,7 @@
 #pragma once
 
 #include <appkit-gl-engine/AppBase/SceneBase.h>
-#include <appkit-gl-engine/Components/ComponentCameraRotateOnTarget.h>
+#include <appkit-gl-engine/Components/Util/ComponentCameraRotateOnTarget.h>
 
 class SceneMary : public AppKit::GLEngine::SceneBase {
 protected:

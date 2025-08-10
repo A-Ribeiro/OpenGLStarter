@@ -7,10 +7,10 @@
 //#include <appkit-gl-engine/shaders/UnlitPassShader.h>
 #include <appkit-gl-engine/GL/GLRenderState.h>
 
-#include <appkit-gl-engine/Components/ComponentParticleSystem.h>
+#include <appkit-gl-engine/Components/Ext/ComponentParticleSystem.h>
 #include <appkit-gl-engine/shaders/ParticleSystemShaders.h>
 
-#include <appkit-gl-engine/Components/ComponentCamera.h>
+#include <appkit-gl-engine/Components/Core/ComponentCamera.h>
 
 namespace AppKit
 {

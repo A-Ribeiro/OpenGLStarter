@@ -20,6 +20,7 @@ namespace AppKit
         class ShaderUnlitTextureVertexColorAlpha;
         class PBRShaderSelector;
         class ShaderDepthOnly;
+        class LineShader;
 
         namespace Components
         {
@@ -104,12 +105,11 @@ namespace AppKit
             std::shared_ptr<Components::ComponentMaterial> defaultPBRMaterial;
 
             std::shared_ptr<Components::ComponentMaterial> renderOnlyDepthMaterial;
-
             std::shared_ptr<Components::ComponentMaterial> defaultUnlitMaterial;
             std::shared_ptr<Components::ComponentMaterial> defaultUnlitAlphaMaterial;
-
             std::shared_ptr<Components::ComponentMaterial> defaultUnlitVertexColorMaterial;
             std::shared_ptr<Components::ComponentMaterial> defaultUnlitVertexColorAlphaMaterial;
+            std::shared_ptr<Components::ComponentMaterial> defaultLineMaterial;
 
             std::unordered_map<uint64_t, std::shared_ptr<Components::ComponentMaterial>> spriteMaterialMap;
 
@@ -120,16 +120,15 @@ namespace AppKit
             std::shared_ptr<ShaderUnlitTexture> shaderUnlitTexture;
             std::shared_ptr<ShaderUnlitTextureAlpha> shaderUnlitTextureAlpha;
             std::shared_ptr<ShaderUnlitTextureVertexColorAlpha> shaderUnlitTextureVertexColorAlpha;
-
             std::shared_ptr<ShaderDepthOnly> shaderDepthOnly;
-
             std::shared_ptr<PBRShaderSelector> pbrShaderSelector;
+            std::shared_ptr<LineShader> lineShader;
         };
     }
 }
 
 // need to include component material after using its forward declaration
-#include <appkit-gl-engine/Components/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 
 #include <appkit-gl-engine/shaders/ShaderUnlit.h>             // UnlitPassShader
 #include <appkit-gl-engine/shaders/ShaderUnlitVertexColor.h>  // Unlit_vertcolor_Shader
@@ -139,3 +138,4 @@ namespace AppKit
 #include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlpha.h> // Unlit_tex_vertcolor_font_PassShader
 #include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
 #include <appkit-gl-engine/shaders/ShaderDepthOnly.h>                    // DepthOnlyShader
+#include <appkit-gl-engine/shaders/LineShader.h>

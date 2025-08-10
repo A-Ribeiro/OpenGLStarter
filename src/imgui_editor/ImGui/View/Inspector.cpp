@@ -3,9 +3,9 @@
 #include "../ImGuiManager.h"
 
 #include <appkit-gl-engine/Component.h>
-#include <appkit-gl-engine/Components/ComponentMaterial.h>
-#include <appkit-gl-engine/Components/ComponentMesh.h>
-#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+#include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/Core/ComponentMesh.h>
+#include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 
 const ViewType Inspector::Type = "Inspector";
 

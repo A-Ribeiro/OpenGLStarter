@@ -6,8 +6,8 @@
 //#include <appkit-gl-engine/shaders/UnlitPassShader.h>
 #include <appkit-gl-engine/GL/GLRenderState.h>
 
-#include <appkit-gl-engine/Components/ComponentMesh.h>
-#include <appkit-gl-engine/Components/ComponentCamera.h>
+#include <appkit-gl-engine/Components/Core/ComponentMesh.h>
+#include <appkit-gl-engine/Components/Core/ComponentCamera.h>
 
 namespace AppKit
 {

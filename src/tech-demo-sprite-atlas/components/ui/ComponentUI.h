@@ -17,9 +17,9 @@
 // // #include <appkit-gl-engine/DefaultEngineShader.h>
 // #include "../util/SpriteAtlas.h"
 
-// #include <appkit-gl-engine/Components/ComponentMesh.h>
-// #include <appkit-gl-engine/Components/ComponentMaterial.h>
-// #include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+// #include <appkit-gl-engine/Components/Core/ComponentMesh.h>
+// #include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
+// #include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 
 #include "../../shaders/SpriteShader.h"
 

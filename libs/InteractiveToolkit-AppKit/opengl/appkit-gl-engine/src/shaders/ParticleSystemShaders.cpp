@@ -10,48 +10,42 @@ namespace AppKit
             format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
 
             const char vertexShaderCode[] = {
-#if !defined(GLAD_GLES2)
-                "#version 120\n"
-#endif
-                "attribute vec4 aPosition;"
-                "attribute vec2 aUV0;"
-                "attribute vec3 aColor0;"
-                "attribute float aSize;"
-                "attribute float aAlpha;"
+                SHADER_HEADER_120
+                "attribute vec4 aPosition;\n"
+                "attribute vec2 aUV0;\n"
+                "attribute vec3 aColor0;\n"
+                "attribute float aSize;\n"
+                "attribute float aAlpha;\n"
 
-                "uniform mat4 uMVP;"
-                "uniform mat4 uV_inv;"
+                "uniform mat4 uMVP;\n"
+                "uniform mat4 uV_inv;\n"
 
-                "varying vec2 uv;"
-                "varying vec4 color;"
+                "varying vec2 uv;\n"
+                "varying vec4 color;\n"
 
-                "void main() {"
-                "  uv = aUV0.xy;"
-                "  color = vec4(aColor0.rgb,aAlpha);"
-                "  vec2 newUV = (aUV0 - vec2(0.5)) * aSize;"
-                "  vec3 offset = newUV.x * uV_inv[0].xyz + newUV.y * uV_inv[1].xyz;"
-                "  gl_Position = uMVP * ( aPosition + vec4(offset , 0.0) );"
-                "}"
-            };
+                "void main() {\n"
+                "  uv = aUV0.xy;\n"
+                "  color = vec4(aColor0.rgb,aAlpha);\n"
+                "  vec2 newUV = (aUV0 - vec2(0.5)) * aSize;\n"
+                "  vec3 offset = newUV.x * uV_inv[0].xyz + newUV.y * uV_inv[1].xyz;\n"
+                "  gl_Position = uMVP * ( aPosition + vec4(offset , 0.0) );\n"
+                "}"};
 
             const char fragmentShaderCode[] = {
-#if !defined(GLAD_GLES2)
-                "#version 120\n"
-#endif
-                "varying vec2 uv;"
-                "varying vec4 color;"
+                SHADER_HEADER_120
+                "varying vec2 uv;\n"
+                "varying vec4 color;\n"
 
-                "uniform vec4 uColor;"
-                "uniform sampler2D uTexture;"
+                "uniform vec4 uColor;\n"
+                "uniform sampler2D uTexture;\n"
 
-                "void main() {"
-                "  vec4 texel = texture2D(uTexture, uv);"
-                "  vec4 result = texel * uColor * color;"
-                //"  result.rgb = result.rgb*vec3(0) + vec3(1);"
-                //"  result.a = result.a*0 + 1;"
-                "  gl_FragColor = result;"
-                "}"
-            };
+                "void main() {\n"
+                "  vec4 texel = texture2D(uTexture, uv);\n"
+                "  vec4 result = texel * uColor * color;\n"
+                //"  result.rgb = result.rgb*vec3(0) + vec3(1);\n"
+                //"  result.a = result.a*0 + 1;\n"
+                "  gl_FragColor = result;\n"
+                "}"};
 
             compile(vertexShaderCode, fragmentShaderCode, __FILE__, __LINE__);
             DefaultEngineShader::setupAttribLocation();
@@ -106,106 +100,100 @@ namespace AppKit
             format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
 
             const char vertexShaderCode[] = {
-            // https://en.wikipedia.org/wiki/OpenGL_Shading_Language#Versions
-#if !defined(GLAD_GLES2)
-                "#version 120\n"
-#endif
+                // https://en.wikipedia.org/wiki/OpenGL_Shading_Language#Versions
+                SHADER_HEADER_120
 
-                "attribute vec4 aPosition;"
-                "attribute vec2 aUV0;"
-                "attribute vec3 aColor0;"
-                "attribute float aSize;"
-                "attribute float aAlpha;"
+                "attribute vec4 aPosition;\n"
+                "attribute vec2 aUV0;\n"
+                "attribute vec3 aColor0;\n"
+                "attribute float aSize;\n"
+                "attribute float aAlpha;\n"
 
-                "uniform mat4 uMVP;"
-                "uniform mat4 uV_inv;"
+                "uniform mat4 uMVP;\n"
+                "uniform mat4 uV_inv;\n"
 
-                "varying vec2 uv;"
-                "varying vec4 color;"
+                "varying vec2 uv;\n"
+                "varying vec4 color;\n"
 
-                "void main() {"
-                "  uv = aUV0.xy;"
-                "  color = vec4(aColor0.rgb,aAlpha);"
-                "  vec2 newUV = (aUV0 - vec2(0.5)) * aSize;"
-                "  vec3 offset = newUV.x * uV_inv[0].xyz + newUV.y * uV_inv[1].xyz;"
-                "  gl_Position = uMVP * ( aPosition + vec4(offset , 0.0) );"
-                "}"
-            };
+                "void main() {\n"
+                "  uv = aUV0.xy;\n"
+                "  color = vec4(aColor0.rgb,aAlpha);\n"
+                "  vec2 newUV = (aUV0 - vec2(0.5)) * aSize;\n"
+                "  vec3 offset = newUV.x * uV_inv[0].xyz + newUV.y * uV_inv[1].xyz;\n"
+                "  gl_Position = uMVP * ( aPosition + vec4(offset , 0.0) );\n"
+                "}"};
 
             const char fragmentShaderCode[] = {
-            // https://en.wikipedia.org/wiki/OpenGL_Shading_Language#Versions
-#if !defined(GLAD_GLES2)
-                "#version 120\n"
-#endif
+                // https://en.wikipedia.org/wiki/OpenGL_Shading_Language#Versions
+                SHADER_HEADER_120
 
-                "varying vec2 uv;"
-                "varying vec4 color;"
+                "varying vec2 uv;\n"
+                "varying vec4 color;\n"
 
-                "uniform vec4 uColor;"
-                "uniform sampler2D uTexture;"
+                "uniform vec4 uColor;\n"
+                "uniform sampler2D uTexture;\n"
 
-                "uniform vec2 uScreenSize;"
-                "uniform vec4 u_FMinusN_FPlusN_FTimesNTimes2_N;"
+                "uniform vec2 uScreenSize;\n"
+                "uniform vec4 u_FMinusN_FPlusN_FTimesNTimes2_N;\n"
 
-                "uniform sampler2D uDepthTextureComponent24;"
+                "uniform sampler2D uDepthTextureComponent24;\n"
 
-                "float DepthToWorld_optimized(float z)"
-                "{"
-                "    float z_aux = z * 2.0 - 1.0;"
-                "    return u_FMinusN_FPlusN_FTimesNTimes2_N.z / (u_FMinusN_FPlusN_FTimesNTimes2_N.y - z_aux * u_FMinusN_FPlusN_FTimesNTimes2_N.x);"
-                "}"
+                "float DepthToWorld_optimized(float z)\n"
+                "{\n"
+                "    float z_aux = z * 2.0 - 1.0;\n"
+                "    return u_FMinusN_FPlusN_FTimesNTimes2_N.z / (u_FMinusN_FPlusN_FTimesNTimes2_N.y - z_aux * u_FMinusN_FPlusN_FTimesNTimes2_N.x);\n"
+                "}\n"
 
-                "void main() {"
-                "  vec4 texel = texture2D(uTexture, uv);"
-                "  vec4 result = texel * uColor * color;"
+                "void main() {\n"
+                "  vec4 texel = texture2D(uTexture, uv);\n"
+                "  vec4 result = texel * uColor * color;\n"
 
-                "  float framebuffer_depth = texture2D(uDepthTextureComponent24, (gl_FragCoord.xy / uScreenSize) ).x;"
+                "  float framebuffer_depth = texture2D(uDepthTextureComponent24, (gl_FragCoord.xy / uScreenSize) ).x;\n"
 
-                //"if (framebuffer_depth < 0.5){ result = vec4(1,0,0,1);  }else{"
+                //"if (framebuffer_depth < 0.5){ result = vec4(1,0,0,1);  }else{\n"
 
-                //"  framebuffer_depth = DepthToWorld(framebuffer_depth);"
-                "  framebuffer_depth = DepthToWorld_optimized(framebuffer_depth);"
+                //"  framebuffer_depth = DepthToWorld(framebuffer_depth);\n"
+                "  framebuffer_depth = DepthToWorld_optimized(framebuffer_depth);\n"
 
-                //"  float particle_depth = DepthToWorld(gl_FragCoord.z);"
-                "  float particle_depth = DepthToWorld_optimized(gl_FragCoord.z);"
+                //"  float particle_depth = DepthToWorld(gl_FragCoord.z);\n"
+                "  float particle_depth = DepthToWorld_optimized(gl_FragCoord.z);\n"
 
-                "  float distance_01 = framebuffer_depth - particle_depth;"
+                "  float distance_01 = framebuffer_depth - particle_depth;\n"
 
                 /*
                 // configure soft range (starts in 0 with alpha 0, and go to 1.0 with alpha 1)
 
-                "  float soft_delta = 1.0;"
-                "  distance_01 /= soft_delta;"
+                "  float soft_delta = 1.0;\n"
+                "  distance_01 /= soft_delta;\n"
 
-                "  float soft_start = 0.0;"
-                "  distance_01 -= soft_start;"
+                "  float soft_start = 0.0;\n"
+                "  distance_01 -= soft_start;\n"
                 */
 
-                "  distance_01 = clamp(distance_01,0.0,1.0);"
+                "  distance_01 = clamp(distance_01,0.0,1.0);\n"
 
                 // configure camera soft range (starts in 1 with alpha 0, and go to 2.0 - delta 1 -  with alpha 1)
 
-                "  float cameraDistance_01 = particle_depth - u_FMinusN_FPlusN_FTimesNTimes2_N.w;"
+                "  float cameraDistance_01 = particle_depth - u_FMinusN_FPlusN_FTimesNTimes2_N.w;\n"
 
                 /*
-                "  float soft_camera_delta = 1.0;"
-                "  cameraDistance_01 /= soft_camera_delta;"
+                "  float soft_camera_delta = 1.0;\n"
+                "  cameraDistance_01 /= soft_camera_delta;\n"
                 */
 
-                "  float soft_camera_start = 1.0;"
-                "  cameraDistance_01 -= soft_camera_start;"
+                "  float soft_camera_start = 1.0;\n"
+                "  cameraDistance_01 -= soft_camera_start;\n"
 
-                "  cameraDistance_01 = clamp(cameraDistance_01,0.0,1.0);"
+                "  cameraDistance_01 = clamp(cameraDistance_01,0.0,1.0);\n"
 
-                "  result.a *= distance_01 * cameraDistance_01;"
+                "  result.a *= distance_01 * cameraDistance_01;\n"
 
-                //"  result.rgb = result.rgb*vec3(0) + vec3(distance_01 * cameraDistance_01);"
-                //"  result.rgb = result.rgb*vec3(0) + vec3(1);"
-                //"  result.a = result.a*0 + 1;"
+                //"  result.rgb = result.rgb*vec3(0) + vec3(distance_01 * cameraDistance_01);\n"
+                //"  result.rgb = result.rgb*vec3(0) + vec3(1);\n"
+                //"  result.a = result.a*0 + 1;\n"
 
-                "  gl_FragColor = result;"
-                "}"
-            };
+                "  gl_FragColor = result;\n"
+                "}"};
 
             compile(vertexShaderCode, fragmentShaderCode, __FILE__, __LINE__);
             DefaultEngineShader::setupAttribLocation();

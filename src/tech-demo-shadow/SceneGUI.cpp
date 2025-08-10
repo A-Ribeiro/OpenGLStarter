@@ -1,6 +1,6 @@
 #include "SceneGUI.h"
 
-#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;

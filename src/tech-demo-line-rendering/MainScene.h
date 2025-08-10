@@ -7,9 +7,7 @@
 #include <InteractiveToolkit/Platform/Platform.h>
 #include <appkit-gl-engine/Components/deprecated/ComponentColorLine.h>
 
-#include "shaders/LineShader.h"
-
-#include "components/ComponentLineMounter.h"
+#include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
 
 class App;
 
@@ -60,8 +58,6 @@ public:
 
     std::shared_ptr<AppKit::GLEngine::Transform> deprecated_lines_transform;
     std::shared_ptr<AppKit::GLEngine::Components::ComponentColorLine> deprecated_lines;
-    std::shared_ptr<AppKit::GLEngine::LineShader> lineShader;
-
 
     std::shared_ptr<AppKit::GLEngine::Transform> new_line_algorithm_transform;
     std::shared_ptr<AppKit::GLEngine::Components::ComponentLineMounter> line_mounter;

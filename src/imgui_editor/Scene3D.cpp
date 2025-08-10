@@ -1,6 +1,6 @@
 #include "Scene3D.h"
 
-#include <appkit-gl-engine/Components/ComponentCameraMove.h>
+#include <appkit-gl-engine/Components/Util/ComponentCameraMove.h>
 
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;

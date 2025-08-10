@@ -10,7 +10,7 @@
 
 // #include <appkit-gl-engine/SharedPointer/SharedPointer.h>
 
-#include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 
 namespace AppKit
 {

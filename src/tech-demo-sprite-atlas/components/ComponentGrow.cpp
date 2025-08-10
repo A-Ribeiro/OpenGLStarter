@@ -5,7 +5,7 @@
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/Engine.h>
 
-#include <appkit-gl-engine/Components/ComponentMesh.h>
+#include <appkit-gl-engine/Components/Core/ComponentMesh.h>
 
 #include "ComponentGrow.h"
 #include "../App.h"

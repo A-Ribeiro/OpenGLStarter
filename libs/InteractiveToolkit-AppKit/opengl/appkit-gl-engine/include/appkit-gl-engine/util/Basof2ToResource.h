@@ -1,8 +1,8 @@
 #pragma once
 
 #include <appkit-gl-engine/Transform.h>
-#include <appkit-gl-engine/Components/ComponentMesh.h>
-#include <appkit-gl-engine/Components/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/Core/ComponentMesh.h>
+#include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 
 #include <InteractiveToolkit-Extension/model/ModelContainer.h>
 #include <InteractiveToolkit/MathCore/MathCore.h>

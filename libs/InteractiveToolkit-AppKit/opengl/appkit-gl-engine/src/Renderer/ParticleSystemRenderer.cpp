@@ -1,7 +1,7 @@
 #include <appkit-gl-engine/Renderer/ParticleSystemRenderer.h>
 
-#include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
-#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 #include <appkit-gl-engine/Renderer/SortingHelper.h>
 
 namespace AppKit

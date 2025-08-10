@@ -2,7 +2,7 @@
 #include "../all.h"
 #include "../../ImGuiManager.h"
 
-#include <appkit-gl-engine/Components/ComponentMesh.h>
+#include <appkit-gl-engine/Components/Core/ComponentMesh.h>
 
 InspectorImGuiComponent_Mesh::InspectorImGuiComponent_Mesh(std::shared_ptr<AppKit::GLEngine::Components::ComponentMesh> _mesh):
     InspectorImGuiComponent("mesh") {

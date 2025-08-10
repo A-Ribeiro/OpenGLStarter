@@ -3,8 +3,8 @@
 #include <appkit-gl-engine/AppBase/SceneBase.h>
 #include <appkit-gl-engine/util/Button.h>
 
-#include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
-#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 
 #include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <appkit-gl-engine/Components/ComponentCamera.h>
+#include <appkit-gl-engine/Components/Core/ComponentCamera.h>
 #include <appkit-gl-engine/Transform.h>
 
 #include <appkit-gl-engine/Renderer/RenderPipeline.h>

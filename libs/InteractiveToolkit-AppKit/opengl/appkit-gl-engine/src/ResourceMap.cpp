@@ -116,13 +116,13 @@ namespace AppKit
             defaultAlbedoTexture = nullptr;
             defaultNormalTexture = nullptr;
             defaultPBRMaterial = nullptr;
-            renderOnlyDepthMaterial = nullptr;
 
+            renderOnlyDepthMaterial = nullptr;
             defaultUnlitMaterial = nullptr;
             defaultUnlitVertexColorMaterial = nullptr;
-
             defaultUnlitAlphaMaterial = nullptr;
             defaultUnlitVertexColorAlphaMaterial = nullptr;
+            defaultLineMaterial = nullptr;
 
             shaderUnlit = nullptr;
             shaderUnlitVertexColor = nullptr;
@@ -131,6 +131,7 @@ namespace AppKit
             shaderUnlitTextureVertexColorAlpha = nullptr;
             pbrShaderSelector = nullptr;
             shaderDepthOnly = nullptr;
+            lineShader = nullptr;
         }
 
         void ResourceMap::ensure_default_texture_creation()
@@ -150,6 +151,8 @@ namespace AppKit
                 pbrShaderSelector = std::make_shared<PBRShaderSelector>();
             if (shaderDepthOnly == nullptr)
                 shaderDepthOnly = std::make_shared<ShaderDepthOnly>();
+            if (lineShader == nullptr)
+                lineShader = std::make_shared<LineShader>();
 
             if (defaultPBRMaterial == nullptr)
             {
@@ -201,6 +204,12 @@ namespace AppKit
                 defaultUnlitVertexColorAlphaMaterial = Component::CreateShared<Components::ComponentMaterial>();
                 defaultUnlitVertexColorAlphaMaterial->setShader(shaderUnlitVertexColor);
                 defaultUnlitVertexColorAlphaMaterial->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
+            }
+
+            if (defaultLineMaterial == nullptr)
+            {
+                defaultLineMaterial = Component::CreateShared<Components::ComponentMaterial>();
+                defaultLineMaterial->setShader(lineShader);
             }
         }
 
