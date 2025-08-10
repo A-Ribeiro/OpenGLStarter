@@ -235,51 +235,69 @@ namespace AppKit
 
                 uint32_t idx_offset = (uint32_t)pos.size();
 
-                if (format & ITKExtension::Model::CONTAINS_POS)
+                if (shader->compareType(LineShader::Type))
                 {
-                    for (const auto &v : other->pos)
-                        pos.push_back(MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(v)));
+                    // line shader case
+                    pos.insert(pos.end(), other->pos.begin(), other->pos.end());
+
+                    for (const auto &v : other->uv[1])
+                        uv[1].push_back(MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(v)));
+                    for (const auto &v : other->uv[2])
+                        uv[2].push_back(MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(v)));
+
+                    uv[3].insert(uv[3].end(), other->uv[3].begin(), other->uv[3].end());
+                    color[0].insert(color[0].end(), other->color[0].begin(), other->color[0].end());
                 }
-                if (format & ITKExtension::Model::CONTAINS_NORMAL)
+                else
                 {
-                    MathCore::mat3f m_it_3x3 = MathCore::GEN<MathCore::mat3f>::fromMat4(m.inverse_transpose_3x3());
-                    for (const auto &v : other->normals)
-                        normals.push_back(MathCore::OP<MathCore::vec3f>::normalize(m_it_3x3 * v));
+                    // normal case
 
-                    if (format & ITKExtension::Model::CONTAINS_TANGENT)
+                    if (format & ITKExtension::Model::CONTAINS_POS)
                     {
-                        MathCore::mat3f m_3x3 = MathCore::GEN<MathCore::mat3f>::fromMat4(m);
+                        for (const auto &v : other->pos)
+                            pos.push_back(MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(v)));
+                    }
+                    if (format & ITKExtension::Model::CONTAINS_NORMAL)
+                    {
+                        MathCore::mat3f m_it_3x3 = MathCore::GEN<MathCore::mat3f>::fromMat4(m.inverse_transpose_3x3());
+                        for (const auto &v : other->normals)
+                            normals.push_back(MathCore::OP<MathCore::vec3f>::normalize(m_it_3x3 * v));
 
-                        size_t idx = other->tangent.size();
-                        for (const auto &v : other->tangent)
-                            tangent.push_back(MathCore::OP<MathCore::vec3f>::normalize(m_3x3 * v));
-                        // fix orthogonallity
-                        for (size_t i = idx; i < other->tangent.size() && i < other->normals.size(); i++)
+                        if (format & ITKExtension::Model::CONTAINS_TANGENT)
                         {
-                            MathCore::vec3f &T = tangent[i];
-                            MathCore::vec3f &N = normals[i];
-                            T = MathCore::OP<MathCore::vec3f>::normalize(T - MathCore::OP<MathCore::vec3f>::dot(T, N) * N);
-                        }
+                            MathCore::mat3f m_3x3 = MathCore::GEN<MathCore::mat3f>::fromMat4(m);
 
-                        if (format & ITKExtension::Model::CONTAINS_BINORMAL)
-                        {
-                            size_t idx = other->binormal.size();
+                            size_t idx = other->tangent.size();
+                            for (const auto &v : other->tangent)
+                                tangent.push_back(MathCore::OP<MathCore::vec3f>::normalize(m_3x3 * v));
+                            // fix orthogonallity
                             for (size_t i = idx; i < other->tangent.size() && i < other->normals.size(); i++)
                             {
                                 MathCore::vec3f &T = tangent[i];
                                 MathCore::vec3f &N = normals[i];
-                                binormal.push_back(MathCore::OP<MathCore::vec3f>::cross(T, N));
+                                T = MathCore::OP<MathCore::vec3f>::normalize(T - MathCore::OP<MathCore::vec3f>::dot(T, N) * N);
+                            }
+
+                            if (format & ITKExtension::Model::CONTAINS_BINORMAL)
+                            {
+                                size_t idx = other->binormal.size();
+                                for (size_t i = idx; i < other->tangent.size() && i < other->normals.size(); i++)
+                                {
+                                    MathCore::vec3f &T = tangent[i];
+                                    MathCore::vec3f &N = normals[i];
+                                    binormal.push_back(MathCore::OP<MathCore::vec3f>::cross(T, N));
+                                }
                             }
                         }
                     }
-                }
 
-                for (int i = 0; i < 8; i++)
-                {
-                    if (format & (ITKExtension::Model::CONTAINS_UV0 << i))
-                        uv[i].insert(uv[i].end(), other->uv[i].begin(), other->uv[i].end());
-                    if (format & (ITKExtension::Model::CONTAINS_COLOR0 << i))
-                        color[i].insert(color[i].end(), other->color[i].begin(), other->color[i].end());
+                    for (int i = 0; i < 8; i++)
+                    {
+                        if (format & (ITKExtension::Model::CONTAINS_UV0 << i))
+                            uv[i].insert(uv[i].end(), other->uv[i].begin(), other->uv[i].end());
+                        if (format & (ITKExtension::Model::CONTAINS_COLOR0 << i))
+                            color[i].insert(color[i].end(), other->color[i].begin(), other->color[i].end());
+                    }
                 }
 
                 for (const auto &v : other->indices)
@@ -787,7 +805,6 @@ namespace AppKit
                 result->syncVBOStatic();
                 return result;
             }
-
         }
     }
 }

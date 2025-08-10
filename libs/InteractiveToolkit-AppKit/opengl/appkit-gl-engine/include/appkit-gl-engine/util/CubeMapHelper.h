@@ -18,6 +18,8 @@ namespace AppKit
         {
 
         public:
+            static const AppKit::OpenGL::ShaderType Type;
+
             //
             // attrib locations
             //
@@ -29,7 +31,7 @@ namespace AppKit
             //
             int cubeTexture;
 
-            ShaderCopyCubeMap() : GLShader()
+            ShaderCopyCubeMap() : GLShader(ShaderCopyCubeMap::Type)
             {
                 const char vertexShaderCode[] = {
                     "attribute vec4 vPosition;"
@@ -71,6 +73,8 @@ namespace AppKit
         {
 
         public:
+            static const AppKit::OpenGL::ShaderType Type;
+
             //
             // attrib locations
             //
@@ -82,7 +86,7 @@ namespace AppKit
             //
             int cubeTexture;
 
-            ShaderRender1x1CubeMap() : GLShader()
+            ShaderRender1x1CubeMap() : GLShader(ShaderRender1x1CubeMap::Type)
             {
                 const char vertexShaderCode[] = {
                     "attribute vec4 vPosition;\n"

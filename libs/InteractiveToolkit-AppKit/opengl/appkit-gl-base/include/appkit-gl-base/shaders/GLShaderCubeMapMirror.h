@@ -27,13 +27,14 @@ namespace AppKit
             int cubeTexture;
 
         public:
+            static const AppKit::OpenGL::ShaderType Type;
             //
             // attrib locations
             //
             static const int vPosition = 0; ///< vertex atribute layout position
             static const int vNormal = 1;   ///< vertex atribute layout position
 
-            GLShaderCubeMapMirror() : GLShader()
+            GLShaderCubeMapMirror() : GLShader(GLShaderCubeMapMirror::Type)
             {
                 const char vertexShaderCode[] = {
 #if !defined(GLAD_GLES2)
@@ -56,8 +57,7 @@ namespace AppKit
                     "  worldNormal = ( localToWorld_it * vec4( vNormal, 0.0 ) ).xyz;"
                     "  worldI =  worldPos - worldCameraPos;"
                     "  gl_Position = mvp * vPosition;"
-                    "}"
-                };
+                    "}"};
 
                 const char fragmentShaderCode[] = {
                 //"precision mediump float;"
@@ -76,8 +76,7 @@ namespace AppKit
                     "  vec3 R = reflect(I, normalize(worldNormal));"
                     "  vec3 texel = textureCube(cubeTexture, R).rgb;"
                     "  gl_FragColor = vec4(texel,1.0);"
-                    "}"
-                };
+                    "}"};
 
                 compile(vertexShaderCode, fragmentShaderCode, __FILE__, __LINE__);
                 bindAttribLocation(GLShaderCubeMapMirror::vPosition, "vPosition");

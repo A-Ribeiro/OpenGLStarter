@@ -2,13 +2,14 @@
 
 #include <appkit-gl-base/platform/PlatformGL.h>
 // #include <glew/glew.h> // extensions here
-//#include <aRibeiroCore/all_math.h>
+// #include <aRibeiroCore/all_math.h>
 
 namespace AppKit
 {
 
     namespace OpenGL
     {
+        typedef const char *ShaderType;
 
         /// \brief Parent class to implement shader code
         ///
@@ -212,17 +213,17 @@ namespace AppKit
 
             void setUniform(int location, int v);                    ///< Setup an uniform from int value
             void setUniform(int location, float v);                  ///< Setup an uniform from float value
-            void setUniform(int location, const MathCore::vec2f &v);  ///< Setup an uniform from vec2 value
+            void setUniform(int location, const MathCore::vec2f &v); ///< Setup an uniform from vec2 value
             void setUniform(int location, const MathCore::vec3f &v); ///< Setup an uniform from vec3 value
-            void setUniform(int location, const MathCore::vec4f &v);  ///< Setup an uniform from vec4 value
-            void setUniform(int location, const MathCore::mat4f &v);  ///< Setup an uniform from mat4 value
+            void setUniform(int location, const MathCore::vec4f &v); ///< Setup an uniform from vec4 value
+            void setUniform(int location, const MathCore::mat4f &v); ///< Setup an uniform from mat4 value
 
             int getUniformInt(int location);              ///< Query an uniform from int value
             float getUniformFloat(int location);          ///< Query an uniform from float value
-            MathCore::vec2f getUniformVec2(int location);  ///< Query an uniform from vec2 value
+            MathCore::vec2f getUniformVec2(int location); ///< Query an uniform from vec2 value
             MathCore::vec3f getUniformVec3(int location); ///< Query an uniform from vec3 value
-            MathCore::vec4f getUniformVec4(int location);  ///< Query an uniform from vec4 value
-            MathCore::mat4f getUniformMat4(int location);  ///< Query an uniform from mat4 value
+            MathCore::vec4f getUniformVec4(int location); ///< Query an uniform from vec4 value
+            MathCore::mat4f getUniformMat4(int location); ///< Query an uniform from mat4 value
 
             /// \brief Reference to setup attribute locations.
             ///
@@ -231,6 +232,9 @@ namespace AppKit
             /// \author Alessandro Ribeiro
             ///
             // virtual void setupAttribLocation()=0;
+
+            ShaderType type_const_ref;
+            GLShader(ShaderType type);
 
         public:
             /// \brief Set this shader to be activated in the OpenGL pipeline.
@@ -245,10 +249,18 @@ namespace AppKit
             ///
             static void disable();
 
-            GLShader();
+            // GLShader();
             virtual ~GLShader();
 
-            char class_name[128];
+            // char class_name[128];
+
+            //deleted copy constructor and assign operator, to avoid copy...
+            GLShader(const GLShader &v) = delete;
+            GLShader& operator=(const GLShader &v) = delete;
+
+            ShaderType getType() const;
+            bool compareType(ShaderType t) const;
+
         };
 
     }

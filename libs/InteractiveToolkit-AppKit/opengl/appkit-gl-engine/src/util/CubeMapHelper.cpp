@@ -6,6 +6,9 @@ namespace AppKit
     namespace GLEngine
     {
 
+        const AppKit::OpenGL::ShaderType ShaderCopyCubeMap::Type = "ShaderCopyCubeMap";
+        const AppKit::OpenGL::ShaderType ShaderRender1x1CubeMap::Type = "ShaderRender1x1CubeMap";
+
         // AppKit::OpenGL::GLDynamicFBO dinamicFBO_1x1;
         // ShaderCopyCubeMap shaderCopyCubeMap;
 

@@ -17,6 +17,7 @@ namespace AppKit
         {
 
         public:
+            static const AppKit::OpenGL::ShaderType Type;
             //
             // attrib locations
             //
@@ -34,7 +35,7 @@ namespace AppKit
 
             void setColor(const MathCore::vec4f &c);  ///< set the color to fill the triangles
             void setMatrix(const MathCore::mat4f &m); ///< set the transform matrix
-            void setTexture(int activeTextureUnit);  ///< set the OpenGL texture unit to be used by the texture sampler.
+            void setTexture(int activeTextureUnit);   ///< set the OpenGL texture unit to be used by the texture sampler.
         };
 
     }

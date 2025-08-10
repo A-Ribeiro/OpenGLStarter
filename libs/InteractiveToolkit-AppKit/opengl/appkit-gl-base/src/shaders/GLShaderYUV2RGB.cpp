@@ -8,8 +8,9 @@ namespace AppKit
 
     namespace OpenGL
     {
+        const AppKit::OpenGL::ShaderType GLShaderYUV2RGB::Type = "GLShaderYUV2RGB";
 
-        GLShaderYUV2RGB::GLShaderYUV2RGB(bool useBlur) : GLShader()
+        GLShaderYUV2RGB::GLShaderYUV2RGB(bool useBlur) : GLShader(GLShaderYUV2RGB::Type)
         {
 
             const char vertexShaderCode[] = {

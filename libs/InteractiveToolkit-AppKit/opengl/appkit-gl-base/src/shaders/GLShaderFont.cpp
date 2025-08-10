@@ -9,7 +9,9 @@ namespace AppKit
     namespace OpenGL
     {
 
-        GLShaderFont::GLShaderFont() : GLShader()
+        const AppKit::OpenGL::ShaderType GLShaderFont::Type = "GLShaderFont";
+
+        GLShaderFont::GLShaderFont() : GLShader(GLShaderFont::Type)
         {
             const char vertexShaderCode[] = {
 #if !defined(GLAD_GLES2)

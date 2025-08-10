@@ -17,6 +17,7 @@ namespace AppKit
         {
 
         public:
+            static const AppKit::OpenGL::ShaderType Type;
             //
             // attrib locations
             //
@@ -28,7 +29,7 @@ namespace AppKit
             int matrix;
             int cubeTexture;
 
-            GLShaderCubeMapSkyBox() : GLShader()
+            GLShaderCubeMapSkyBox() : GLShader(GLShaderCubeMapSkyBox::Type)
             {
                 const char vertexShaderCode[] = {
 #if !defined(GLAD_GLES2)
@@ -40,8 +41,7 @@ namespace AppKit
                     "void main() {"
                     "  cubeAccess = vPosition.rgb;"
                     "  gl_Position = matrix * vPosition;"
-                    "}"
-                };
+                    "}"};
 
                 const char fragmentShaderCode[] = {
                 //"precision mediump float;"
@@ -53,8 +53,7 @@ namespace AppKit
                     "void main() {"
                     "  vec4 texel = textureCube(cubeTexture, cubeAccess);"
                     "  gl_FragColor = texel;"
-                    "}"
-                };
+                    "}"};
 
                 compile(vertexShaderCode, fragmentShaderCode, __FILE__, __LINE__);
                 bindAttribLocation(GLShaderCubeMapSkyBox::vPosition, "vPosition");

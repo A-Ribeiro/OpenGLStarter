@@ -8,8 +8,9 @@ namespace AppKit
 
     namespace OpenGL
     {
+        const AppKit::OpenGL::ShaderType GLShaderFont2::Type = "GLShaderFont2";
 
-        GLShaderFont2::GLShaderFont2() : GLShader()
+        GLShaderFont2::GLShaderFont2() : GLShader(GLShaderFont2::Type)
         {
             const char vertexShaderCode[] = {
                 "attribute vec4 vPosition;"

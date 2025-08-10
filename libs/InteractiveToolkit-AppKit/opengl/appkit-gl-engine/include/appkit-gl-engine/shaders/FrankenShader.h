@@ -139,6 +139,8 @@ namespace AppKit
             void queryShaderUniforms();
 
         public:
+            static const AppKit::OpenGL::ShaderType Type;
+
             ShaderAlgorithmsBitMask frankenFormat;
             ShaderPBRAlgorithmEnum shaderPBRAlgorithm;
             ShaderShadowAlgorithmEnum shaderShadowAlgorithm;

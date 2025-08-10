@@ -335,7 +335,7 @@ void MainScene::resize(const MathCore::vec2i &size)
         line_mounter->addLine(
             MathCore::vec3f(0, 0, 0),
             MathCore::vec3f(size.width, size.height, 0) * 0.25f,
-            150.0f,
+            15.0f,
             MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
                 MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f)));
 

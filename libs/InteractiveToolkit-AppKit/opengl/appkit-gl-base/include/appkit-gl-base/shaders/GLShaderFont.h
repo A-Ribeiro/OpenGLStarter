@@ -21,6 +21,7 @@ namespace AppKit
         {
 
         public:
+            static const AppKit::OpenGL::ShaderType Type;
             //
             // attrib locations
             //
@@ -36,7 +37,7 @@ namespace AppKit
 
             GLShaderFont();
 
-            void setTexture(int activeTextureUnit);  ///< set the OpenGL texture unit to be used by the texture sampler.
+            void setTexture(int activeTextureUnit);   ///< set the OpenGL texture unit to be used by the texture sampler.
             void setMatrix(const MathCore::mat4f &m); ///< set the transform matrix
         };
 
