@@ -1,5 +1,7 @@
 #pragma once
 
+#include <appkit-gl-engine/ResourceMap.h>
+
 namespace AppKit
 {
     namespace GLEngine

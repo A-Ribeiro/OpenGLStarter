@@ -1,9 +1,9 @@
 ﻿#include "MainScene.h"
 #include "App.h"
 
-#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
-#include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
-#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 #include <appkit-gl-engine/Components/deprecated/ComponentColorLine.h>
 #include <InteractiveToolkit/ITKCommon/Random.h>
 
@@ -19,7 +19,6 @@ using namespace AppKit::GLEngine::Components;
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources()
 {
-    lineShader = std::make_shared<LineShader>();
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -69,15 +68,12 @@ void MainScene::bindResourcesToGraph()
         camera->getTransform()->setLocalPosition(MathCore::vec3f(0.0f, 0.0f, -100.0f));
     }
 
-    
-
     deprecated_lines = deprecated_lines_transform->addNewComponent<ComponentColorLine>();
     deprecated_lines->color = MathCore::vec4f(1.0f, 0.0f, 1.0f, 1.0f);
     deprecated_lines->width = 5.0f;
 
     line_mounter = new_line_algorithm_transform->addNewComponent<ComponentLineMounter>();
-    line_mounter->setLineShader(lineShader);
-    line_mounter->setCamera(camera, true);
+    line_mounter->setCamera(resourceMap, camera, true);
     line_mounter->meshWrapper->debugCollisionShapes = true;
 
     auto &bag = line_mounter->material->property_bag;
@@ -107,14 +103,12 @@ void MainScene::unloadAll()
 
     new_line_algorithm_transform = nullptr;
     line_mounter = nullptr;
-
-    lineShader = nullptr;
 }
 
 void MainScene::update(Platform::Time *elapsed)
 {
     angle = MathCore::OP<float>::fmod(angle + elapsed->deltaTime * 0.125f, 2.0f * MathCore::CONSTANT<float>::PI);
-    auto rot = (this->use3DSet)?MathCore::GEN<MathCore::quatf>::fromEuler(angle, 0, 0):MathCore::GEN<MathCore::quatf>::fromEuler(0, 0, angle);
+    auto rot = (this->use3DSet) ? MathCore::GEN<MathCore::quatf>::fromEuler(angle, 0, 0) : MathCore::GEN<MathCore::quatf>::fromEuler(0, 0, angle);
     // line_middle_to_half->setLocalRotation(MathCore::GEN< MathCore::quatf>::fromEuler(0, 0, angle));
 
     auto size = MathCore::vec2i(this->camera->viewport.w, this->camera->viewport.h);
@@ -151,22 +145,22 @@ void MainScene::update(Platform::Time *elapsed)
         const auto &local_scale = new_line_algorithm_transform->getLocalScale();
 
         MathCore::vec3f x_offset = MathCore::vec3f(3.0f, 0.0f, 0.0f) * local_scale;
-        //MathCore::vec3f z_offset = MathCore::vec3f(0.0f, 0.0f, -1.0f) * local_scale;
+        // MathCore::vec3f z_offset = MathCore::vec3f(0.0f, 0.0f, -1.0f) * local_scale;
         MathCore::vec3f y_offset = MathCore::vec3f(0.0f, 3.0f, 0.0f) * local_scale;
 
         for (int x = -5; x <= 5; x++)
         {
             for (int i = 0; i < 24; i += 2)
             {
-                deprecated_lines->vertices.push_back( rot * ( lines[i] * local_scale + x_offset * (float)x));
-                deprecated_lines->vertices.push_back( rot * ( lines[i + 1] * local_scale + x_offset * (float)x));
+                deprecated_lines->vertices.push_back(rot * (lines[i] * local_scale + x_offset * (float)x));
+                deprecated_lines->vertices.push_back(rot * (lines[i + 1] * local_scale + x_offset * (float)x));
             }
 
             if (x)
                 for (int i = 0; i < 24; i += 2)
                 {
-                    deprecated_lines->vertices.push_back( rot * ( lines[i] * local_scale + y_offset * (float)x));
-                    deprecated_lines->vertices.push_back( rot * ( lines[i + 1] * local_scale + y_offset * (float)x));
+                    deprecated_lines->vertices.push_back(rot * (lines[i] * local_scale + y_offset * (float)x));
+                    deprecated_lines->vertices.push_back(rot * (lines[i + 1] * local_scale + y_offset * (float)x));
                 }
         }
     }
@@ -341,7 +335,7 @@ void MainScene::resize(const MathCore::vec2i &size)
         line_mounter->addLine(
             MathCore::vec3f(0, 0, 0),
             MathCore::vec3f(size.width, size.height, 0) * 0.25f,
-            15.0f,
+            150.0f,
             MathCore::CVT<MathCore::vec4f>::sRGBToLinear(
                 MathCore::vec4f(0.0f, 1.0f, 0.0f, 1.0f)));
 
@@ -361,9 +355,8 @@ MainScene::MainScene(
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
     std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow,
-    bool _3d) : 
-    AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
-    mathRnd(ITKCommon::Random::Instance())
+    bool _3d) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
+                mathRnd(ITKCommon::Random::Instance())
 {
     this->app = app;
     this->use3DSet = _3d;

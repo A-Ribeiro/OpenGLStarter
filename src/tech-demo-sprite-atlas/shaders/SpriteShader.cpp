@@ -4,7 +4,7 @@
 #include <appkit-gl-engine/DefaultEngineShader.h>
 #include <appkit-gl-engine/GL/GLRenderState.h>
 #include <appkit-gl-engine/util/ShaderPropertyBag.h>
-#include <appkit-gl-engine/Components/ComponentCamera.h>
+#include <appkit-gl-engine/Components/Core/ComponentCamera.h>
 
 #include <appkit-gl-engine/Engine.h>
 #include <appkit-gl-engine/ResourceMap.h>

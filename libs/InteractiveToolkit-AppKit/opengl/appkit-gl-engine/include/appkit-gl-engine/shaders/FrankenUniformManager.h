@@ -2,8 +2,8 @@
 
 #include <appkit-gl-engine/DefaultEngineShader.h>
 
-#include <appkit-gl-engine/Components/ComponentCamera.h>
-#include <appkit-gl-engine/Components/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/Core/ComponentCamera.h>
+#include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 
 namespace AppKit
 {

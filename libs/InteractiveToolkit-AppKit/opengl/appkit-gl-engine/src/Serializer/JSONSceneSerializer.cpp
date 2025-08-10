@@ -9,21 +9,21 @@
 #include <appkit-gl-engine/Components/deprecated/ComponentColorLine.h>
 #include <appkit-gl-engine/Components/deprecated/ComponentColorMesh.h>
 
-#include <appkit-gl-engine/Components/ComponentAnimationMotion.h>
-#include <appkit-gl-engine/Components/ComponentCameraMove.h>
-#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
-#include <appkit-gl-engine/Components/ComponentCameraPerspective.h>
-#include <appkit-gl-engine/Components/ComponentCameraRotateOnTarget.h>
-#include <appkit-gl-engine/Components/ComponentFontToMesh.h>
-#include <appkit-gl-engine/Components/ComponentFrustumCulling.h>
-#include <appkit-gl-engine/Components/ComponentLight.h>
-#include <appkit-gl-engine/Components/ComponentMaterial.h>
-#include <appkit-gl-engine/Components/ComponentMesh.h>
-#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
-#include <appkit-gl-engine/Components/ComponentParticleSystem.h>
-#include <appkit-gl-engine/Components/ComponentSkinnedMesh.h>
-#include <appkit-gl-engine/Components/ComponentThirdPersonCamera.h>
-#include <appkit-gl-engine/Components/ComponentThirdPersonPlayerController.h>
+#include <appkit-gl-engine/Components/Ext/ComponentAnimationMotion.h>
+#include <appkit-gl-engine/Components/Util/ComponentCameraMove.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/Util/ComponentCameraRotateOnTarget.h>
+#include <appkit-gl-engine/Components/deprecated/ComponentFontToMesh.h>
+#include <appkit-gl-engine/Components/deprecated/ComponentFrustumCulling.h>
+#include <appkit-gl-engine/Components/Core/ComponentLight.h>
+#include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/Core/ComponentMesh.h>
+#include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
+#include <appkit-gl-engine/Components/Ext/ComponentParticleSystem.h>
+#include <appkit-gl-engine/Components/Ext/ComponentSkinnedMesh.h>
+#include <appkit-gl-engine/Components/Util/ComponentThirdPersonCamera.h>
+#include <appkit-gl-engine/Components/Util/ComponentThirdPersonPlayerController.h>
 
 namespace AppKit
 {

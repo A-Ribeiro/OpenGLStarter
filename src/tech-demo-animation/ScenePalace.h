@@ -1,12 +1,12 @@
 #pragma once
 
 #include <appkit-gl-engine/AppBase/SceneBase.h>
-#include <appkit-gl-engine/Components/ComponentCameraRotateOnTarget.h>
+#include <appkit-gl-engine/Components/Util/ComponentCameraRotateOnTarget.h>
 
-#include <appkit-gl-engine/Components/ComponentSkinnedMesh.h>
-#include <appkit-gl-engine/Components/ComponentAnimationMotion.h>
-#include <appkit-gl-engine/Components/ComponentThirdPersonPlayerController.h>
-#include <appkit-gl-engine/Components/ComponentThirdPersonCamera.h>
+#include <appkit-gl-engine/Components/Ext/ComponentSkinnedMesh.h>
+#include <appkit-gl-engine/Components/Ext/ComponentAnimationMotion.h>
+#include <appkit-gl-engine/Components/Util/ComponentThirdPersonPlayerController.h>
+#include <appkit-gl-engine/Components/Util/ComponentThirdPersonCamera.h>
 
 /*
 namespace AppKit { namespace GLEngine {

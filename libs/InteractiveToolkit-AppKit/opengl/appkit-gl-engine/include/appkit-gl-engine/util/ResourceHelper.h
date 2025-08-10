@@ -2,7 +2,7 @@
 
 #include <appkit-gl-engine/Transform.h>
 #include <appkit-gl-engine/util/CubeMapHelper.h>
-#include <appkit-gl-engine/Components/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 #include <appkit-gl-engine/GL/GLCubeMapSkyBox.h>
 
 #include <appkit-gl-base/GLTexture.h>

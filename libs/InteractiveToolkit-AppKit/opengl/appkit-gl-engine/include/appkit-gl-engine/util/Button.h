@@ -1,12 +1,12 @@
 #pragma once
 
-#include <appkit-gl-engine/Components/ComponentMaterial.h>
-#include <appkit-gl-engine/Components/ComponentFontToMesh.h>
+#include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/deprecated/ComponentFontToMesh.h>
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
 
 #include <InteractiveToolkit/CollisionCore/CollisionCore.h>
-#include <appkit-gl-engine/Components/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 #include <appkit-gl-engine/ResourceMap.h>
 
 namespace AppKit

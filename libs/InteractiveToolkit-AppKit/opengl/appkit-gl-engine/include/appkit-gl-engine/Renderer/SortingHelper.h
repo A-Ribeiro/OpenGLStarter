@@ -1,8 +1,8 @@
 #pragma once
 
-#include <appkit-gl-engine/Components/ComponentLight.h>
-#include <appkit-gl-engine/Components/ComponentMeshWrapper.h>
-#include <appkit-gl-engine/Components/ComponentParticleSystem.h>
+#include <appkit-gl-engine/Components/Core/ComponentLight.h>
+#include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
+#include <appkit-gl-engine/Components/Ext/ComponentParticleSystem.h>
 
 #include <appkit-gl-engine/Transform.h>
 

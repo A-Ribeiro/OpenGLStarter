@@ -2,7 +2,7 @@
 #include "../all.h"
 #include "../../ImGuiManager.h"
 
-#include <appkit-gl-engine/Components/ComponentMaterial.h>
+#include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 
 InspectorImGuiComponent_Material::InspectorImGuiComponent_Material(std::shared_ptr<AppKit::GLEngine::Components::ComponentMaterial> _material):
     InspectorImGuiComponent("material") {

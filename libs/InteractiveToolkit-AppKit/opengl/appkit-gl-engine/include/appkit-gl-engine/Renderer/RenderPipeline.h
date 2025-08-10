@@ -10,7 +10,7 @@
 //#include <aRibeiroData/aRibeiroData.h>
 
 #include <appkit-gl-engine/GL/GLCubeMapSkyBox.h>
-#include <appkit-gl-engine/Components/ComponentCamera.h>
+#include <appkit-gl-engine/Components/Core/ComponentCamera.h>
 
 //#include <appkit-gl-engine/shaders/UnlitPassShader.h>
 //#include <appkit-gl-engine/shaders/DepthPassShader.h>
@@ -19,8 +19,8 @@
 //#include <appkit-gl-engine/shaders/DirectionalLightPassShader.h>
 #include <appkit-gl-engine/shaders/FrankenShaderManager.h>
 
-#include <appkit-gl-engine/Components/ComponentLight.h>
-#include <appkit-gl-engine/Components/ComponentParticleSystem.h>
+#include <appkit-gl-engine/Components/Core/ComponentLight.h>
+#include <appkit-gl-engine/Components/Ext/ComponentParticleSystem.h>
 
 #include <appkit-gl-engine/Renderer/ParticleSystemRenderer.h>
 #include <appkit-gl-engine/Renderer/DepthRenderer.h>
