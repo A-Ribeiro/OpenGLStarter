@@ -304,7 +304,8 @@ namespace AppKit
             if (different_shader)
             {
                 state->CurrentShader = frankenShader;
-                if (strcmp(oldShader->class_name, "FrankenShader") == 0)
+                if (oldShader->compareType(FrankenShader::Type))
+                //if (strcmp(oldShader->class_name, "FrankenShader") == 0)
                     old_frankenShader = (FrankenShader *)oldShader;
                 else
                     old_frankenShader = nullptr;

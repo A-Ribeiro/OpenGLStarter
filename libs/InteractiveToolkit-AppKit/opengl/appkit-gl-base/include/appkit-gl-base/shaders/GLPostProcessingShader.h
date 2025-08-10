@@ -21,8 +21,13 @@ namespace AppKit
         class GLPostProcessingShader : public GLShader
         {
         public:
+            static const AppKit::OpenGL::ShaderType Type;
             static const int aVec2Position = 0; ///< vertex atribute location for position = 0
             static const int aVec2UV = 1;       ///< vertex atribute location for position = 1
+
+            GLPostProcessingShader() : GLShader(GLPostProcessingShader::Type)
+            {
+            }
         };
 
     }

@@ -54,9 +54,11 @@ namespace AppKit
         class DefaultEngineShader : public AppKit::OpenGL::GLShader
         {
         public:
+            static const AppKit::OpenGL::ShaderType Type;
+
             ITKExtension::Model::BitMask format;
 
-            DefaultEngineShader();
+            DefaultEngineShader(AppKit::OpenGL::ShaderType type = DefaultEngineShader::Type);
 
             virtual int queryAttribLocation(const char *aname);
 

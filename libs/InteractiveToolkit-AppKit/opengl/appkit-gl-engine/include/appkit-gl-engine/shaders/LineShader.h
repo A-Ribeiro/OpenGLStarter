@@ -23,6 +23,8 @@ namespace AppKit
             float uAntialias;
 
         public:
+            static const AppKit::OpenGL::ShaderType Type;
+            
             LineShader();
 
             void setMVP(const MathCore::mat4f &mvp);

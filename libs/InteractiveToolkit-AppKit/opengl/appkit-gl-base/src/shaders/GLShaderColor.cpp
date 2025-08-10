@@ -8,8 +8,9 @@ namespace AppKit
 
     namespace OpenGL
     {
+        const AppKit::OpenGL::ShaderType GLShaderColor::Type = "GLShaderColor";
 
-        GLShaderColor::GLShaderColor() : GLShader()
+        GLShaderColor::GLShaderColor() : GLShader(GLShaderColor::Type)
         {
             const char vertexShaderCode[] = {
 #if !defined(GLAD_GLES2)

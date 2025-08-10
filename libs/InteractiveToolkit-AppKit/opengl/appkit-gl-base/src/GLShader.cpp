@@ -218,7 +218,7 @@ namespace AppKit
                 OPENGL_CMD(glUseProgram(mProgram));
         }
 
-        GLShader::GLShader()
+        GLShader::GLShader(ShaderType type)
         {
 
 #if !defined(GLAD_GLES2)
@@ -231,7 +231,9 @@ namespace AppKit
             mVertShader = 0;
             mFragShader = 0;
 
-            snprintf(class_name, 128, "GLShader");
+            type_const_ref = type;
+
+            // snprintf(class_name, 128, "GLShader");
         }
 
         GLShader::~GLShader()
@@ -259,6 +261,17 @@ namespace AppKit
                 mProgram = 0;
             }
         }
+
+        ShaderType GLShader::getType() const
+        {
+            return type_const_ref;
+        }
+
+        bool GLShader::compareType(ShaderType t) const
+        {
+            return type_const_ref == t;
+        }
+
     }
 
 }

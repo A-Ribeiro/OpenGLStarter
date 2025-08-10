@@ -23,6 +23,8 @@ namespace AppKit
         {
 
         public:
+            static const AppKit::OpenGL::ShaderType Type;
+
             //
             // attrib locations
             //

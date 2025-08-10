@@ -10,11 +10,13 @@ namespace AppKit
 {
     namespace GLEngine
     {
-        LineShader::LineShader()
+        const AppKit::OpenGL::ShaderType LineShader::Type = "LineShader";
+
+        LineShader::LineShader() : DefaultEngineShader(LineShader::Type)
         {
-            format = ITKExtension::Model::CONTAINS_POS | 
-                        ITKExtension::Model::CONTAINS_UV1 | ITKExtension::Model::CONTAINS_UV2 | ITKExtension::Model::CONTAINS_UV3 | 
-                        ITKExtension::Model::CONTAINS_COLOR0;
+            format = ITKExtension::Model::CONTAINS_POS |
+                     ITKExtension::Model::CONTAINS_UV1 | ITKExtension::Model::CONTAINS_UV2 | ITKExtension::Model::CONTAINS_UV3 |
+                     ITKExtension::Model::CONTAINS_COLOR0;
 
             const char vertexShaderCode[] = {
                 SHADER_HEADER_120
@@ -61,7 +63,7 @@ namespace AppKit
                 // "    if (r > u2) return false;" // line starts after exit point
                 // "    if (r > u1) u1 = r;"
                 // "  }"
-                // // If p > 0 (exiting), update u2 if r is valid  
+                // // If p > 0 (exiting), update u2 if r is valid
                 // "  else if (is_p_positive) {"
                 // "    if (r < u1) return false;" // line ends before entry point
                 // "    if (r < u2) u2 = r;"
@@ -72,27 +74,27 @@ namespace AppKit
                 // Liang-Barsky line clipping algorithm (simplified branch-less version)
                 "bool barsky_clip_test(float p, float q, inout float u1, inout float u2) {\n"
                 "  const float epsilon = 1e-10;\n"
-                
+
                 // Handle p ≈ 0 case: line is parallel to clipping plane
                 "  float is_p_zero = step(abs(p), epsilon);\n"
                 "  float parallel_reject = is_p_zero * step(q, -epsilon);\n" // reject if q < 0
-                
+
                 // Calculate intersection parameter r, avoiding division by zero
                 "  float safe_p = p + epsilon * sign(p + epsilon);\n" // ensure non-zero with correct sign
                 "  float r = q / safe_p;\n"
-                
+
                 // Determine which parameter to update based on sign of p
                 "  float is_entering = step(p, -epsilon);\n" // p < 0 (entering region)
                 "  float is_exiting = step(epsilon, p);\n"   // p > 0 (exiting region)
-                
+
                 // Update u1 (entry) if entering and r > u1
                 "  float update_u1 = is_entering * step(u1, r);\n"
                 "  u1 = mix(u1, r, update_u1);\n"
-                
-                // Update u2 (exit) if exiting and r < u2  
+
+                // Update u2 (exit) if exiting and r < u2
                 "  float update_u2 = is_exiting * step(r, u2);\n"
                 "  u2 = mix(u2, r, update_u2);\n"
-                
+
                 // Check validity: not parallel-rejected AND u1 <= u2
                 "  float is_valid = (1.0 - parallel_reject) * step(u1, u2);\n"
                 "  return is_valid > 0.5;\n"
@@ -117,7 +119,7 @@ namespace AppKit
                 // Near plane clipping: -w <= z <= w, so z >= -w means z + w >= 0
                 // min test on lim_min = -(-line_p1_clip.w + epsilon)
                 "  bool near_clipped = barsky_clip_test(-p1p2_clip_dir.z - p1p2_clip_dir.w, line_p1_clip.z - (-line_p1_clip.w + epsilon), u1, u2);\n"
-                // Far plane clipping: z <= w means w - z >= 0  
+                // Far plane clipping: z <= w means w - z >= 0
                 // max test on lim_max = (line_p1_clip.w - epsilon)
                 "  bool far_clipped = barsky_clip_test(p1p2_clip_dir.z - p1p2_clip_dir.w, (line_p1_clip.w - epsilon) - line_p1_clip.z, u1, u2);\n"
 
@@ -148,7 +150,7 @@ namespace AppKit
 
                 "  p1p2_length_px = dot(p1p2_px, rotation_matrix[0]);\n"
 
-                // intel HD3000 hack... 
+                // intel HD3000 hack...
                 // avoid artifacts due to 16bit float on fragment shader
                 // use the point that is near the screen center as reference of the line
                 // this will keep the numbers, and line distance calculation
@@ -221,11 +223,11 @@ namespace AppKit
             uScreenSizePx = MathCore::vec2f(1.0f, 1.0f);
             uScreenSizePx_inv = MathCore::vec2f(1.0f, 1.0f);
             uMVP = MathCore::mat4f();
-            uColor = MathCore::vec4f(1.0,1.0,1.0,1.0);
+            uColor = MathCore::vec4f(1.0, 1.0, 1.0, 1.0);
             uAntialias = 0.0f;
 
             GLRenderState *state = GLRenderState::Instance();
-            GLShader* old_shader = state->CurrentShader;
+            GLShader *old_shader = state->CurrentShader;
             state->CurrentShader = this;
 
             setUniform(u_screenSizePx, uScreenSizePx);
@@ -286,7 +288,7 @@ namespace AppKit
 
             float aa = materialBag.getProperty<float>("uAntialias");
             if (aa <= 0.0f)
-                state->BlendMode =  AppKit::GLEngine::BlendModeDisabled;
+                state->BlendMode = AppKit::GLEngine::BlendModeDisabled;
             else
                 state->BlendMode = AppKit::GLEngine::BlendModeAlpha;
             setAntialias(aa);
@@ -309,8 +311,8 @@ namespace AppKit
             setScreenSizePx(MathCore::vec2f(camera->viewport.w, camera->viewport.h));
         }
 
-
-        Utils::ShaderPropertyBag LineShader::createDefaultBag() const {
+        Utils::ShaderPropertyBag LineShader::createDefaultBag() const
+        {
             Utils::ShaderPropertyBag bag;
             // bag.addProperty("uScreenSizePx", uScreenSizePx);
             // bag.addProperty("uScreenSizePx_inv", uScreenSizePx_inv);

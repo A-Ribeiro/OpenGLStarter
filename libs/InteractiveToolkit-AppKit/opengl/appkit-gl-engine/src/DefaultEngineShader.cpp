@@ -8,12 +8,13 @@ namespace AppKit
 {
     namespace GLEngine
     {
-        DefaultEngineShader::DefaultEngineShader()
+        const AppKit::OpenGL::ShaderType DefaultEngineShader::Type = "DefaultEngineShader";
+
+        DefaultEngineShader::DefaultEngineShader(AppKit::OpenGL::ShaderType type): GLShader(type)
         {
             format = 0;
             // format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0;
-
-            snprintf(class_name, 128, "DefaultEngineShader");
+            // snprintf(class_name, 128, "DefaultEngineShader");
         }
 
         int DefaultEngineShader::queryAttribLocation(const char *aname)

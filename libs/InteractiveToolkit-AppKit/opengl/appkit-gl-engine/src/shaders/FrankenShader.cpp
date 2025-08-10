@@ -41,10 +41,13 @@ namespace AppKit
             return data;
         }
 
+        const AppKit::OpenGL::ShaderType FrankenShader::Type = "FrankenShader";
+
         FrankenShader::FrankenShader(
             ShaderAlgorithmsBitMask shaderAlgorithms,
             ShaderPBRAlgorithmEnum _shaderPBRAlgorithm,
-            ShaderShadowAlgorithmEnum _shaderShadowAlgorithm) : frankenUniformManager(this)
+            ShaderShadowAlgorithmEnum _shaderShadowAlgorithm) : DefaultEngineShader(FrankenShader::Type),
+                                                                frankenUniformManager(this)
         {
 
             frankenFormat = shaderAlgorithms;
@@ -55,7 +58,7 @@ namespace AppKit
 
             // frankenUniformManager.readUniformsFromShaderAndInitStatic();
 
-            sprintf(class_name, "FrankenShader");
+            // sprintf(class_name, "FrankenShader");
         }
 
         void FrankenShader::compileShader()
