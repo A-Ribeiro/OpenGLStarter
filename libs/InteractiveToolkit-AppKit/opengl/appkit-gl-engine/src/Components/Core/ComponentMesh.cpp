@@ -240,10 +240,17 @@ namespace AppKit
                     // line shader case
                     pos.insert(pos.end(), other->pos.begin(), other->pos.end());
 
-                    for (const auto &v : other->uv[1])
-                        uv[1].push_back(MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(v)));
-                    for (const auto &v : other->uv[2])
-                        uv[2].push_back(MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(v)));
+                    MathCore::vec3f a, b;
+                    for (size_t i = 0; i < other->uv[1].size(); i++)
+                    {
+                        if ((i & 0x07) == 0)
+                        {
+                            a = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(other->uv[1][i]));
+                            b = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(other->uv[2][i]));
+                        }
+                        uv[1].push_back(a);
+                        uv[2].push_back(b);
+                    }
 
                     uv[3].insert(uv[3].end(), other->uv[3].begin(), other->uv[3].end());
                     color[0].insert(color[0].end(), other->color[0].begin(), other->color[0].end());
