@@ -111,8 +111,8 @@ void MainScene::bindResourcesToGraph()
         vec2f(0, 0),                             // center
         vec2f(256, 128),                         // size
         MathCore::vec4f(0.0f, 0.25f, 0.5f, 0.8f), // color
-        MathCore::vec4f(64, -1, 64, -1),         // radius
-        StrokeModeGrowOutside,                   // stroke mode
+        MathCore::vec4f(64, -1, 16, -1),         // radius
+        StrokeModeGrowInside,                   // stroke mode
         5.0f,                                   // stroke thickness
         MathCore::vec4f(0.0f, 0.0f, 0.8f, 0.6f), // stroke color
         60.0f,                                   // drop shadow thickness
