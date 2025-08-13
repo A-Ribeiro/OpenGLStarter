@@ -199,9 +199,12 @@ namespace AppKit
                 MathCore::vec4f radius_segment_count_f = radius * segment_factor;
                 radius_segment_count_f = MathCore::OP<MathCore::vec4f>::ceil(radius_segment_count_f) + 0.5f;
                 MathCore::vec4u radius_segment_count_i = (MathCore::vec4u)radius_segment_count_f;
-                radius_segment_count_i = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i, segment_count_ref/2);
+                // radius_segment_count_i = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i, segment_count_ref / 2);
+                // for (int i = 0; i < 4; i++)
+                //     if (radius_segment_count_i[i] == 0 && radius[i] == 0.0f)
+                //         radius_segment_count_i[i] = segment_count_ref / 2;
 
-                uint32_t segment_count = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i);
+                // uint32_t segment_count = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i);
 
                 auto size_half = size * 0.5f;
 
@@ -249,7 +252,7 @@ namespace AppKit
 
                     for (uint32_t i = 0; i <= segment_count; i++)
                     {
-                        float lrp = (float)i / (float)segment_count;
+                        float lrp = (float)i / (float)(segment_count ? segment_count : 1);
                         float angl = MathCore::OP<float>::lerp(angle_start_rad, angle_end_rad, lrp);
                         MathCore::vec2f pos = MathCore::vec2f(MathCore::OP<float>::cos(angl), MathCore::OP<float>::sin(angl)) * radius_min + center;
                         polygon->push_back(MathCore::vec3f(pos, 0.0f));
@@ -263,29 +266,41 @@ namespace AppKit
                 MathCore::vec2f size_factor[Order_Count] = {MathCore::vec2f(1, 1), MathCore::vec2f(1, -1), MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1)};
 
                 for (int i = 0; i < Order_Count; i++)
-                    genArc(&polygon, size_half * size_factor[i] + radius_aux[i] * rad_factor[i], start_deg[i], end_deg[i], radius_min[i], segment_count);
+                    genArc(&polygon, size_half * size_factor[i] + radius_aux[i] * rad_factor[i], start_deg[i], end_deg[i], radius_min[i], radius_segment_count_i[i]);
 
                 // genArc(&polygon, MathCore::vec2f(size_half.x - radius_aux, size_half.y - radius_aux), 90, 0, radius_min, segment_count);
                 // genArc(&polygon, MathCore::vec2f(size_half.x - radius_aux, -size_half.y + radius_aux), 0, -90, radius_min, segment_count);
                 // genArc(&polygon, MathCore::vec2f(-size_half.x + radius_aux, -size_half.y + radius_aux), -90, -180, radius_min, segment_count);
                 // genArc(&polygon, MathCore::vec2f(-size_half.x + radius_aux, size_half.y - radius_aux), -180, -270, radius_min, segment_count);
 
-                int total_verts_per_quadrant = (segment_count + 1) + 1;
+                uint32_t total_verts_per_quadrant[Order_Count] = {
+                    (radius_segment_count_i[Order_topRight] + 1) + 1,
+                    (radius_segment_count_i[Order_bottomRight] + 1) + 1,
+                    (radius_segment_count_i[Order_bottomLeft] + 1) + 1,
+                    (radius_segment_count_i[Order_topLeft] + 1) + 1,
+                };
 
                 uint32_t vert_start_position = (uint32_t)mesh->pos.size();
                 mesh->pos.insert(mesh->pos.end(), polygon.begin(), polygon.end());
                 mesh->color[0].insert(mesh->color[0].end(), polygon.size(), color_external);
                 // mesh->uv[0].insert(mesh->uv[0].end(), polygon.size(), MathCore::vec3f(0.0f, 1.0f, 0.0f));
-                for (size_t i = (size_t)vert_start_position; i < mesh->color[0].size(); i += total_verts_per_quadrant)
+
+                for (size_t i = (size_t)vert_start_position, j = 0; i < mesh->color[0].size(); i += total_verts_per_quadrant[j++])
                     mesh->color[0][i] = color_internal;
 
                 uint32_t vert_count = (uint32_t)polygon.size();
 
+                int quadrant_start_idx[Order_Count];
+                quadrant_start_idx[Order_topRight] = 0;
+                quadrant_start_idx[Order_bottomRight] = total_verts_per_quadrant[Order_topRight];
+                quadrant_start_idx[Order_bottomLeft] = quadrant_start_idx[Order_bottomRight] + total_verts_per_quadrant[Order_bottomRight];
+                quadrant_start_idx[Order_topLeft] = quadrant_start_idx[Order_bottomLeft] + total_verts_per_quadrant[Order_bottomLeft];
+
                 for (uint32_t quadrant = 0; quadrant < 4; quadrant++)
                 {
-                    uint32_t quadrant_idx = total_verts_per_quadrant * quadrant;
+                    uint32_t quadrant_idx = quadrant_start_idx[quadrant];
                     uint32_t quadrant_start_vert = quadrant_idx + 1;
-                    for (uint32_t i = 0; i < segment_count; i++)
+                    for (uint32_t i = 0; i < radius_segment_count_i[quadrant]; i++)
                     {
                         uint32_t a = quadrant_start_vert + i;
                         uint32_t b = quadrant_start_vert + i + 1;
@@ -294,14 +309,14 @@ namespace AppKit
 
                     // add next quad
                     // last
-                    uint32_t a = (total_verts_per_quadrant * quadrant + 1 + segment_count) % vert_count;
+                    uint32_t a = (quadrant_start_idx[quadrant] + 1 + radius_segment_count_i[quadrant]) % vert_count;
                     // start
-                    uint32_t b = (total_verts_per_quadrant * (quadrant + 1) + 1) % vert_count;
+                    uint32_t b = (quadrant_start_idx[(quadrant + 1) % Order_Count] + 1) % vert_count;
 
                     // q2
-                    uint32_t c = (total_verts_per_quadrant * (quadrant + 1)) % vert_count;
+                    uint32_t c = (quadrant_start_idx[(quadrant + 1) % Order_Count]) % vert_count;
                     // q1
-                    uint32_t d = (total_verts_per_quadrant * (quadrant)) % vert_count;
+                    uint32_t d = (quadrant_start_idx[quadrant]) % vert_count;
 
                     // triangle 1
                     mesh->indices.insert(mesh->indices.end(), {b + vert_start_position, d + vert_start_position, c + vert_start_position});
@@ -311,14 +326,14 @@ namespace AppKit
 
                 // add quad center
                 // last
-                uint32_t a = (total_verts_per_quadrant * 0) % vert_count;
+                uint32_t a = (quadrant_start_idx[0]) % vert_count;
                 // start
-                uint32_t b = (total_verts_per_quadrant * 1) % vert_count;
+                uint32_t b = (quadrant_start_idx[1]) % vert_count;
 
                 // q2
-                uint32_t c = (total_verts_per_quadrant * 2) % vert_count;
+                uint32_t c = (quadrant_start_idx[2]) % vert_count;
                 // q1
-                uint32_t d = (total_verts_per_quadrant * 3) % vert_count;
+                uint32_t d = (quadrant_start_idx[3]) % vert_count;
 
                 // triangle 1
                 mesh->indices.insert(mesh->indices.end(), {b + vert_start_position, d + vert_start_position, c + vert_start_position});
@@ -352,9 +367,12 @@ namespace AppKit
                 MathCore::vec4f radius_segment_count_f = radius * segment_factor;
                 radius_segment_count_f = MathCore::OP<MathCore::vec4f>::ceil(radius_segment_count_f) + 0.5f;
                 MathCore::vec4u radius_segment_count_i = (MathCore::vec4u)radius_segment_count_f;
-                radius_segment_count_i = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i, segment_count_ref/2);
+                // radius_segment_count_i = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i, segment_count_ref/2);
+                for (int i = 0; i < 4; i++)
+                    if (radius_segment_count_i[i] == 0 && radius[i] == 0.0f)
+                        radius_segment_count_i[i] = segment_count_ref / 2;
 
-                uint32_t segment_count = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i);
+                // uint32_t segment_count = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i);
 
                 auto size_half = size * 0.5f;
 
@@ -432,7 +450,7 @@ namespace AppKit
 
                     for (uint32_t i = 0; i <= segment_count; i++)
                     {
-                        float lrp = (float)i / (float)segment_count;
+                        float lrp = (float)i / (float)(segment_count ? segment_count : 1);
                         float angl = MathCore::OP<float>::lerp(angle_start_rad, angle_end_rad, lrp);
                         MathCore::vec2f dir = MathCore::vec2f(MathCore::OP<float>::cos(angl), MathCore::OP<float>::sin(angl));
                         MathCore::vec2f pos = dir * radius_max + center_max;
@@ -455,7 +473,7 @@ namespace AppKit
                     genArc(&polygon, &hole,
                            size_half * size_factor[i] + radius_aux[i] * rad_factor[i],     // center
                            size_half * size_factor[i] + radius_aux_max[i] * rad_factor[i], // center_max
-                           start_deg[i], end_deg[i], radius_min[i], radius_max[i], segment_count);
+                           start_deg[i], end_deg[i], radius_min[i], radius_max[i], radius_segment_count_i[i]);
 
                 // genArc(&polygon, &hole, MathCore::vec2f(size_half.x - radius_aux, size_half.y - radius_aux), 90, 0, radius_min, radius_max, segment_count);
                 // genArc(&polygon, &hole, MathCore::vec2f(size_half.x - radius_aux, -size_half.y + radius_aux), 0, -90, radius_min, radius_max, segment_count);
