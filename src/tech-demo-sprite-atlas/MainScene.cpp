@@ -110,13 +110,13 @@ void MainScene::bindResourcesToGraph()
     uiComponent->addRectangleCenterSize(
         vec2f(0, 0),                             // center
         vec2f(256, 128),                         // size
-        MathCore::vec4f(0.0f, 0.0f, 1.0f, 0.4f), // color
-        MathCore::vec4f(64.0f),                  // radius
-        StrokeModeGrowInside,                    // stroke mode
-        10.0f,                                   // stroke thickness
+        MathCore::vec4f(0.0f, 0.25f, 0.5f, 0.8f), // color
+        MathCore::vec4f(64, -1, 64, -1),         // radius
+        StrokeModeGrowOutside,                   // stroke mode
+        5.0f,                                   // stroke thickness
         MathCore::vec4f(0.0f, 0.0f, 0.8f, 0.6f), // stroke color
-        80.0f,                                   // drop shadow thickness
-        MathCore::vec4f(1.0f, 0.0f, 1.0f, 0.2f), // drop shadow color
+        60.0f,                                   // drop shadow thickness
+        MathCore::vec4f(0.4f, 0.4f, 0.4f, 0.5f), // drop shadow color
         0                                        // z
     );
 

@@ -76,10 +76,10 @@ namespace AppKit
                 uint32_t segment_count)
             {
                 checkOrCreateAuxiliaryComponents(resourceMap);
-                bool onCloneNoModify = 
-                meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify || 
-                meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify || 
-                meshUploadMode == MeshUploadMode_Static_OnClone_NoModify;
+                bool onCloneNoModify =
+                    meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify ||
+                    meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify ||
+                    meshUploadMode == MeshUploadMode_Static_OnClone_NoModify;
 
                 mesh->always_clone = !onCloneNoModify;
                 this->always_clone = !onCloneNoModify;
@@ -139,7 +139,7 @@ namespace AppKit
                     // drop shadow test
                     drawStroke(center,
                                size,
-                               drop_shadow_color,                                  // internal color
+                               drop_shadow_color,                                         // internal color
                                drop_shadow_color * MathCore::vec4f(1, 1, 1, _40_percent), // external color
                                radius,
                                StrokeModeGrowOutside,
@@ -150,7 +150,7 @@ namespace AppKit
                     drawStroke(center,
                                size,
                                drop_shadow_color * MathCore::vec4f(1, 1, 1, _40_percent), // internal color
-                               drop_shadow_color * MathCore::vec4f(1, 1, 1, 0.0f), // external color
+                               drop_shadow_color * MathCore::vec4f(1, 1, 1, 0.0f),        // external color
                                radius,
                                StrokeModeGrowOutside,
                                drop_shadow_thickness_60_percent,
@@ -181,16 +181,36 @@ namespace AppKit
                                                 const MathCore::vec4f &radius,
                                                 StrokeModeEnum stroke_mode,
                                                 float ignore_stroke_thickness,
-                                                uint32_t segment_count)
+                                                uint32_t segment_count_ref)
             {
+                enum Order
+                {
+                    Order_topRight = 0,
+                    Order_bottomRight,
+                    Order_bottomLeft,
+                    Order_topLeft,
+                    Order_Count
+                };
+
+                // const float perimeter_90 = MathCore::OP<float>::deg_2_rad(90);
+                const float base_radius = 64.0f;
+                float segment_factor = (float)segment_count_ref / base_radius;
+
+                MathCore::vec4f radius_segment_count_f = radius * segment_factor;
+                radius_segment_count_f = MathCore::OP<MathCore::vec4f>::ceil(radius_segment_count_f) + 0.5f;
+                MathCore::vec4u radius_segment_count_i = (MathCore::vec4u)radius_segment_count_f;
+                radius_segment_count_i = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i, segment_count_ref/2);
+
+                uint32_t segment_count = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i);
+
                 auto size_half = size * 0.5f;
 
                 float min_size_half = MathCore::OP<MathCore::vec2f>::minimum(size_half);
 
-                float radius_aux = MathCore::OP<float>::minimum(radius.x, min_size_half);
+                MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
 
-                float radius_min = radius_aux - ignore_stroke_thickness * 0.5f;
-                float radius_max = radius_aux + ignore_stroke_thickness * 0.5f;
+                MathCore::vec4f radius_min = radius_aux - ignore_stroke_thickness * 0.5f;
+                MathCore::vec4f radius_max = radius_aux + ignore_stroke_thickness * 0.5f;
 
                 if (stroke_mode == StrokeModeGrowInside)
                 {
@@ -203,9 +223,18 @@ namespace AppKit
                     radius_min = radius_aux;
                 }
 
-                radius_min = MathCore::OP<float>::minimum(radius_min, min_size_half);
+                radius_min = MathCore::OP<MathCore::vec4f>::minimum(radius_min, min_size_half);
                 // avoid negative radius
-                radius_min = MathCore::OP<float>::maximum(0, radius_min);
+                radius_min = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_min);
+
+                for (int i = 0; i < Order_Count; i++)
+                    if (radius_min[i] < 0.0f)
+                    {
+                        radius_aux[i] -= radius_min[i];
+                        radius_min[i] = 0.0f;
+                    }
+
+                radius_aux = MathCore::OP<MathCore::vec4f>::maximum(0, radius_aux);
 
                 auto genArc = [](std::vector<MathCore::vec3f> *polygon,
                                  const MathCore::vec2f &center,
@@ -228,11 +257,18 @@ namespace AppKit
                 };
 
                 std::vector<MathCore::vec3f> polygon;
+                float start_deg[Order_Count] = {90, 0, -90, -180};
+                float end_deg[Order_Count] = {0, -90, -180, -270};
+                MathCore::vec2f rad_factor[Order_Count] = {MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1), MathCore::vec2f(1, 1), MathCore::vec2f(1, -1)};
+                MathCore::vec2f size_factor[Order_Count] = {MathCore::vec2f(1, 1), MathCore::vec2f(1, -1), MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1)};
 
-                genArc(&polygon, MathCore::vec2f(size_half.x - radius_aux, size_half.y - radius_aux), 90, 0, radius_min, segment_count);
-                genArc(&polygon, MathCore::vec2f(size_half.x - radius_aux, -size_half.y + radius_aux), 0, -90, radius_min, segment_count);
-                genArc(&polygon, MathCore::vec2f(-size_half.x + radius_aux, -size_half.y + radius_aux), -90, -180, radius_min, segment_count);
-                genArc(&polygon, MathCore::vec2f(-size_half.x + radius_aux, size_half.y - radius_aux), -180, -270, radius_min, segment_count);
+                for (int i = 0; i < Order_Count; i++)
+                    genArc(&polygon, size_half * size_factor[i] + radius_aux[i] * rad_factor[i], start_deg[i], end_deg[i], radius_min[i], segment_count);
+
+                // genArc(&polygon, MathCore::vec2f(size_half.x - radius_aux, size_half.y - radius_aux), 90, 0, radius_min, segment_count);
+                // genArc(&polygon, MathCore::vec2f(size_half.x - radius_aux, -size_half.y + radius_aux), 0, -90, radius_min, segment_count);
+                // genArc(&polygon, MathCore::vec2f(-size_half.x + radius_aux, -size_half.y + radius_aux), -90, -180, radius_min, segment_count);
+                // genArc(&polygon, MathCore::vec2f(-size_half.x + radius_aux, size_half.y - radius_aux), -180, -270, radius_min, segment_count);
 
                 int total_verts_per_quadrant = (segment_count + 1) + 1;
 
@@ -298,16 +334,36 @@ namespace AppKit
                                                 StrokeModeEnum stroke_mode,
                                                 float stroke_thickness,
                                                 float stroke_offset,
-                                                uint32_t segment_count)
+                                                uint32_t segment_count_ref)
             {
+                enum Order
+                {
+                    Order_topRight = 0,
+                    Order_bottomRight,
+                    Order_bottomLeft,
+                    Order_topLeft,
+                    Order_Count
+                };
+
+                // const float perimeter_90 = MathCore::OP<float>::deg_2_rad(90);
+                const float base_radius = 64.0f;
+                float segment_factor = (float)segment_count_ref / base_radius;
+
+                MathCore::vec4f radius_segment_count_f = radius * segment_factor;
+                radius_segment_count_f = MathCore::OP<MathCore::vec4f>::ceil(radius_segment_count_f) + 0.5f;
+                MathCore::vec4u radius_segment_count_i = (MathCore::vec4u)radius_segment_count_f;
+                radius_segment_count_i = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i, segment_count_ref/2);
+
+                uint32_t segment_count = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i);
+
                 auto size_half = size * 0.5f;
 
                 float min_size_half = MathCore::OP<MathCore::vec2f>::minimum(size_half);
 
-                float radius_aux = MathCore::OP<float>::minimum(radius.x, min_size_half);
+                MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::clamp(radius, 0, min_size_half);
 
-                float radius_min = radius_aux - stroke_thickness * 0.5f;
-                float radius_max = radius_aux + stroke_thickness * 0.5f;
+                MathCore::vec4f radius_min = radius_aux - stroke_thickness * 0.5f;
+                MathCore::vec4f radius_max = radius_aux + stroke_thickness * 0.5f;
 
                 if (stroke_mode == StrokeModeGrowInside)
                 {
@@ -320,17 +376,51 @@ namespace AppKit
                     radius_min = radius_aux;
                 }
 
-                radius_min = MathCore::OP<float>::minimum(radius_min, min_size_half);
+                radius_min = MathCore::OP<MathCore::vec4f>::minimum(radius_min, min_size_half);
 
                 radius_min += stroke_offset;
                 radius_max += stroke_offset;
 
+                // for(int i=0;i<Order_Count;i++)
+                //     if (radius_aux[i] < -0.5f)
+                //         radius_max = -radius_max;
+
                 // avoid negative radius
-                radius_min = MathCore::OP<float>::maximum(0, radius_min);
+                radius_min = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_min);
+                radius_max = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_max);
+
+                MathCore::vec4f radius_aux_max = radius_aux;
+                for (int i = 0; i < Order_Count; i++)
+                {
+                    if (radius[i] < -0.5f)
+                    {
+                        radius_aux[i] -= radius_min[i];
+                        radius_aux_max[i] -= radius_max[i];
+                        radius_min[i] = 0.0f;
+                        radius_max[i] = 0.0f;
+                    }
+                    else
+                    {
+                        if (radius_min[i] < 0.0f)
+                        {
+                            radius_aux[i] -= radius_min[i];
+                            radius_min[i] = 0.0f;
+                        }
+                        if (radius_max[i] < 0.0f)
+                        {
+                            radius_aux_max[i] -= radius_max[i];
+                            radius_max[i] = 0.0f;
+                        }
+                    }
+                }
+
+                // radius_aux = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_aux);
+                // radius_aux_max = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_aux_max);
 
                 auto genArc = [](std::vector<MathCore::vec3f> *polygon,
                                  std::vector<MathCore::vec3f> *hole,
                                  const MathCore::vec2f &center,
+                                 const MathCore::vec2f &center_max,
                                  float angle_start_deg, float angle_end_deg,
                                  float radius_min, float radius_max,
                                  uint32_t segment_count)
@@ -345,7 +435,7 @@ namespace AppKit
                         float lrp = (float)i / (float)segment_count;
                         float angl = MathCore::OP<float>::lerp(angle_start_rad, angle_end_rad, lrp);
                         MathCore::vec2f dir = MathCore::vec2f(MathCore::OP<float>::cos(angl), MathCore::OP<float>::sin(angl));
-                        MathCore::vec2f pos = dir * radius_max + center;
+                        MathCore::vec2f pos = dir * radius_max + center_max;
                         polygon->push_back(MathCore::vec3f(pos, 0.0f));
 
                         pos = dir * radius_min + center;
@@ -356,10 +446,21 @@ namespace AppKit
                 std::vector<MathCore::vec3f> polygon;
                 std::vector<MathCore::vec3f> hole;
 
-                genArc(&polygon, &hole, MathCore::vec2f(size_half.x - radius_aux, size_half.y - radius_aux), 90, 0, radius_min, radius_max, segment_count);
-                genArc(&polygon, &hole, MathCore::vec2f(size_half.x - radius_aux, -size_half.y + radius_aux), 0, -90, radius_min, radius_max, segment_count);
-                genArc(&polygon, &hole, MathCore::vec2f(-size_half.x + radius_aux, -size_half.y + radius_aux), -90, -180, radius_min, radius_max, segment_count);
-                genArc(&polygon, &hole, MathCore::vec2f(-size_half.x + radius_aux, size_half.y - radius_aux), -180, -270, radius_min, radius_max, segment_count);
+                float start_deg[Order_Count] = {90, 0, -90, -180};
+                float end_deg[Order_Count] = {0, -90, -180, -270};
+                MathCore::vec2f rad_factor[Order_Count] = {MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1), MathCore::vec2f(1, 1), MathCore::vec2f(1, -1)};
+                MathCore::vec2f size_factor[Order_Count] = {MathCore::vec2f(1, 1), MathCore::vec2f(1, -1), MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1)};
+
+                for (int i = 0; i < Order_Count; i++)
+                    genArc(&polygon, &hole,
+                           size_half * size_factor[i] + radius_aux[i] * rad_factor[i],     // center
+                           size_half * size_factor[i] + radius_aux_max[i] * rad_factor[i], // center_max
+                           start_deg[i], end_deg[i], radius_min[i], radius_max[i], segment_count);
+
+                // genArc(&polygon, &hole, MathCore::vec2f(size_half.x - radius_aux, size_half.y - radius_aux), 90, 0, radius_min, radius_max, segment_count);
+                // genArc(&polygon, &hole, MathCore::vec2f(size_half.x - radius_aux, -size_half.y + radius_aux), 0, -90, radius_min, radius_max, segment_count);
+                // genArc(&polygon, &hole, MathCore::vec2f(-size_half.x + radius_aux, -size_half.y + radius_aux), -90, -180, radius_min, radius_max, segment_count);
+                // genArc(&polygon, &hole, MathCore::vec2f(-size_half.x + radius_aux, size_half.y - radius_aux), -180, -270, radius_min, radius_max, segment_count);
 
                 // int total_verts_per_quadrant = (segment_count + 1) + 1;
 
