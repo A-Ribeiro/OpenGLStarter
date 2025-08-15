@@ -1,4 +1,6 @@
 #include <appkit-gl-engine/util/ShaderPropertyBag.h>
+#include <appkit-gl-engine/Component.h>
+#include <appkit-gl-engine/Transform.h>
 
 // Check for C++17 support using standard macros
 #if false && (__cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L))
@@ -70,6 +72,10 @@ namespace AppKit
 
             ShaderProperty::ShaderProperty(std::shared_ptr<OpenGL::VirtualTexture> value) : type_(TYPE_VTEX), virtual_texture_value(value) {}
 
+            ShaderProperty::ShaderProperty(std::weak_ptr<AppKit::GLEngine::Component> value) : type_(TYPE_WEAK_COMPONENT), component_value(value) {}
+
+            ShaderProperty::ShaderProperty(std::weak_ptr<AppKit::GLEngine::Transform> value) : type_(TYPE_WEAK_TRANSFORM), transform_value(value) {}
+
             ShaderProperty::ShaderProperty(const ShaderProperty &other) : type_(other.type_)
             {
                 switch (type_)
@@ -98,6 +104,12 @@ namespace AppKit
                 case TYPE_VTEX:
                     virtual_texture_value = other.virtual_texture_value;
                     break;
+                case TYPE_WEAK_COMPONENT:
+                    component_value = other.component_value;
+                    break;
+                case TYPE_WEAK_TRANSFORM:
+                    transform_value = other.transform_value;
+                    break;
                 }
             }
 
@@ -107,6 +119,11 @@ namespace AppKit
                 {
                     if (type_ == TYPE_VTEX && other.type_ != TYPE_VTEX)
                         virtual_texture_value.reset();
+                    else if (type_ == TYPE_WEAK_COMPONENT && other.type_ != TYPE_WEAK_COMPONENT)
+                        component_value.reset();
+                    else if (type_ == TYPE_WEAK_TRANSFORM && other.type_ != TYPE_WEAK_TRANSFORM)
+                        transform_value.reset();
+
                     type_ = other.type_;
                     switch (type_)
                     {
@@ -133,6 +150,12 @@ namespace AppKit
                         break;
                     case TYPE_VTEX:
                         virtual_texture_value = other.virtual_texture_value;
+                        break;
+                    case TYPE_WEAK_COMPONENT:
+                        component_value = other.component_value;
+                        break;
+                    case TYPE_WEAK_TRANSFORM:
+                        transform_value = other.transform_value;
                         break;
                     }
                 }
@@ -169,6 +192,10 @@ namespace AppKit
 
                 case TYPE_VTEX:
                     return virtual_texture_value ? "VTEX<valid>" : "VTEX<null>";
+                case TYPE_WEAK_COMPONENT:
+                    return component_value.lock() ? "COMPONENT<valid>" : "COMPONENT<null>";
+                case TYPE_WEAK_TRANSFORM:
+                    return transform_value.lock() ? "TRANSFORM<valid>" : "TRANSFORM<null>";
                 default:
                     return "<unknown type>";
                 }

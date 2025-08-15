@@ -151,9 +151,9 @@ namespace AppKit
             }
 
             // color.a == 0, skip this draw
-            UIItem ComponentUI::addRectangleCenterSize(
+            UIItem ComponentUI::addRectangle(
 
-                const MathCore::vec2f &center,
+                const MathCore::vec2f &pos,
                 const MathCore::vec2f &size,
                 const MathCore::vec4f &color,
                 const MathCore::vec4f &radius,
@@ -168,11 +168,10 @@ namespace AppKit
 
             {
                 auto transform = Transform::CreateShared(name);
-                transform->setLocalPosition(MathCore::vec3f(0, 0, z));
+                transform->setLocalPosition(MathCore::vec3f(pos.x, pos.y, z));
                 auto rect = transform->addNewComponent<ComponentRectangle>();
-                rect->setQuadFromCenterSize(
+                rect->setQuad(
                     this->resourceMap,
-                    center,
                     size,
                     color,
                     radius,

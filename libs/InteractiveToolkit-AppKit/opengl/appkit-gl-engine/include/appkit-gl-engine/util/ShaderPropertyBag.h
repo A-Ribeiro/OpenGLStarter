@@ -73,6 +73,8 @@ namespace AppKit
 {
     namespace GLEngine
     {
+        class Component;
+        class Transform;
         namespace Utils
         {
 
@@ -88,8 +90,11 @@ namespace AppKit
                     TYPE_VEC3F,
                     TYPE_VEC4F,
                     TYPE_MAT4F,
-                    
+
                     TYPE_VTEX,
+
+                    TYPE_WEAK_COMPONENT,
+                    TYPE_WEAK_TRANSFORM,
                 };
 
             private:
@@ -107,10 +112,17 @@ namespace AppKit
 
                 std::shared_ptr<OpenGL::VirtualTexture> virtual_texture_value;
 
-                inline void clearSharedPtr()
+                std::weak_ptr<Component> component_value;
+                std::weak_ptr<Transform> transform_value;
+
+                inline void clearSharedPtr(PropertyType new_type)
                 {
-                    if (type_ == TYPE_VTEX)
+                    if (type_ == TYPE_VTEX && new_type != TYPE_VTEX)
                         virtual_texture_value.reset();
+                    else if (type_ == TYPE_WEAK_COMPONENT && new_type != TYPE_WEAK_COMPONENT)
+                        component_value.reset();
+                    else if (type_ == TYPE_WEAK_TRANSFORM && new_type != TYPE_WEAK_TRANSFORM)
+                        transform_value.reset();
                 }
 
             public:
@@ -122,8 +134,10 @@ namespace AppKit
                 ShaderProperty(const MathCore::vec3f &value);
                 ShaderProperty(const MathCore::vec4f &value);
                 ShaderProperty(const MathCore::mat4f &value);
-                
+
                 ShaderProperty(std::shared_ptr<OpenGL::VirtualTexture> value);
+                ShaderProperty(std::weak_ptr<Component> value);
+                ShaderProperty(std::weak_ptr<Transform> value);
 
                 // Copy constructor
                 ShaderProperty(const ShaderProperty &other);
@@ -150,11 +164,10 @@ namespace AppKit
                 std::string toString() const;
             };
 
-
             template <>
             inline void ShaderProperty::set<bool>(const bool &v)
             {
-                clearSharedPtr();
+                clearSharedPtr(TYPE_BOOL);
                 type_ = TYPE_BOOL;
                 bool_value = v;
             }
@@ -162,7 +175,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<int>(const int &v)
             {
-                clearSharedPtr();
+                clearSharedPtr(TYPE_INT);
                 type_ = TYPE_INT;
                 int_value = v;
             }
@@ -170,7 +183,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<float>(const float &v)
             {
-                clearSharedPtr();
+                clearSharedPtr(TYPE_FLOAT);
                 type_ = TYPE_FLOAT;
                 float_value = v;
             }
@@ -178,7 +191,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<MathCore::vec2f>(const MathCore::vec2f &v)
             {
-                clearSharedPtr();
+                clearSharedPtr(TYPE_VEC2F);
                 type_ = TYPE_VEC2F;
                 vec2f_value = v;
             }
@@ -186,7 +199,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<MathCore::vec3f>(const MathCore::vec3f &v)
             {
-                clearSharedPtr();
+                clearSharedPtr(TYPE_VEC3F);
                 type_ = TYPE_VEC3F;
                 vec3f_value = v;
             }
@@ -194,7 +207,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<MathCore::vec4f>(const MathCore::vec4f &v)
             {
-                clearSharedPtr();
+                clearSharedPtr(TYPE_VEC4F);
                 type_ = TYPE_VEC4F;
                 vec4f_value = v;
             }
@@ -202,7 +215,7 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<MathCore::mat4f>(const MathCore::mat4f &v)
             {
-                clearSharedPtr();
+                clearSharedPtr(TYPE_MAT4F);
                 type_ = TYPE_MAT4F;
                 mat4f_value = v;
             }
@@ -210,8 +223,25 @@ namespace AppKit
             template <>
             inline void ShaderProperty::set<std::shared_ptr<OpenGL::VirtualTexture>>(const std::shared_ptr<OpenGL::VirtualTexture> &v)
             {
+                clearSharedPtr(TYPE_VTEX);
                 type_ = TYPE_VTEX;
                 virtual_texture_value = v;
+            }
+
+            template <>
+            inline void ShaderProperty::set<std::weak_ptr<Component>>(const std::weak_ptr<Component> &v)
+            {
+                clearSharedPtr(TYPE_WEAK_COMPONENT);
+                type_ = TYPE_WEAK_COMPONENT;
+                component_value = v;
+            }
+
+            template <>
+            inline void ShaderProperty::set<std::weak_ptr<Transform>>(const std::weak_ptr<Transform> &v)
+            {
+                clearSharedPtr(TYPE_WEAK_TRANSFORM);
+                type_ = TYPE_WEAK_TRANSFORM;
+                transform_value = v;
             }
 
             // Template specializations for get() method
@@ -326,6 +356,34 @@ namespace AppKit
                 return virtual_texture_value;
             }
 
+            template <>
+            inline const std::weak_ptr<Component> &ShaderProperty::get<std::weak_ptr<Component>>() const
+            {
+                ITK_ABORT(type_ != TYPE_WEAK_COMPONENT, "Property type mismatch");
+                return component_value;
+            }
+
+            template <>
+            inline std::weak_ptr<Component> &ShaderProperty::get<std::weak_ptr<Component>>()
+            {
+                ITK_ABORT(type_ != TYPE_WEAK_COMPONENT, "Property type mismatch");
+                return component_value;
+            }
+
+            template <>
+            inline const std::weak_ptr<Transform> &ShaderProperty::get<std::weak_ptr<Transform>>() const
+            {
+                ITK_ABORT(type_ != TYPE_WEAK_TRANSFORM, "Property type mismatch");
+                return transform_value;
+            }
+
+            template <>
+            inline std::weak_ptr<Transform> &ShaderProperty::get<std::weak_ptr<Transform>>()
+            {
+                ITK_ABORT(type_ != TYPE_WEAK_TRANSFORM, "Property type mismatch");
+                return transform_value;
+            }
+
             // Template specializations for holds() method
             template <>
             inline bool ShaderProperty::holds<bool>() const
@@ -373,6 +431,19 @@ namespace AppKit
             {
                 return type_ == TYPE_VTEX;
             }
+
+            template <>
+            inline bool ShaderProperty::holds<std::weak_ptr<Component>>() const
+            {
+                return type_ == TYPE_WEAK_COMPONENT;
+            }
+
+            template <>
+            inline bool ShaderProperty::holds<std::weak_ptr<Transform>>() const
+            {
+                return type_ == TYPE_WEAK_TRANSFORM;
+            }
+
         }
     }
 }
@@ -395,13 +466,13 @@ namespace AppKit
                 const ShaderProperty &getProperty(const std::string &key) const;
 
                 template <typename T>
-                const T& getProperty(const std::string &key) const
+                const T &getProperty(const std::string &key) const
                 {
                     return getProperty(key).get<T>();
                 }
 
                 template <typename T>
-                T& getProperty(const std::string &key)
+                T &getProperty(const std::string &key)
                 {
                     return getProperty(key).get<T>();
                 }
@@ -414,4 +485,3 @@ namespace AppKit
         }
     }
 }
-

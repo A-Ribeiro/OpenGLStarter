@@ -27,6 +27,8 @@ namespace AppKit
 {
     namespace GLEngine
     {
+        class ShaderUnlitVertexColorWithMask;
+
         namespace Components
         {
 
@@ -37,13 +39,30 @@ namespace AppKit
                 StrokeModeGrowOutside
             };
 
+            enum MaskOrder
+            {
+                MaskOrder_topRight = 0,
+                MaskOrder_bottomRight,
+                MaskOrder_bottomLeft,
+                MaskOrder_topLeft,
+                MaskOrder_Count
+            };
+
             class ComponentRectangle : public Component
             {
+            protected:
+                MathCore::vec2f mask_corner[MaskOrder_Count];
+                MathCore::vec4f mask_radius;
 
+            private:
                 void clearMesh();
 
-                void drawInside(const MathCore::vec2f &center,
-                                const MathCore::vec2f &size,
+                void precomputeMaskParameters(const MathCore::vec2f &size,
+                                              const MathCore::vec4f &radius,
+                                              StrokeModeEnum stroke_mode,
+                                              float ignore_stroke_thickness);
+
+                void drawInside(const MathCore::vec2f &size,
                                 const MathCore::vec4f &color_internal,
                                 const MathCore::vec4f &color_external,
                                 const MathCore::vec4f &radius,
@@ -51,8 +70,7 @@ namespace AppKit
                                 float ignore_stroke_thickness,
                                 uint32_t segment_count);
 
-                void drawStroke(const MathCore::vec2f &center,
-                                const MathCore::vec2f &size,
+                void drawStroke(const MathCore::vec2f &size,
                                 const MathCore::vec4f &color_internal,
                                 const MathCore::vec4f &color_external,
                                 const MathCore::vec4f &radius,
@@ -62,6 +80,8 @@ namespace AppKit
                                 uint32_t segment_count);
 
             public:
+                friend class AppKit::GLEngine::ShaderUnlitVertexColorWithMask;
+
                 static const ComponentType Type;
 
                 bool always_clone;
@@ -69,6 +89,8 @@ namespace AppKit
                 std::shared_ptr<ComponentMaterial> material;
                 std::shared_ptr<ComponentMesh> mesh;
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
+
+                std::shared_ptr<ComponentRectangle> mask;
 
                 void checkOrCreateAuxiliaryComponents(
                     AppKit::GLEngine::ResourceMap *resourceMap);
@@ -83,11 +105,10 @@ namespace AppKit
                 //     float ignore_stroke_thickness = 0.0f,
                 //     uint32_t segment_count = 10);
 
-
                 // if color.a == 0, skip this draw
-                void setQuadFromCenterSize(
+                void setQuad(
                     AppKit::GLEngine::ResourceMap *resourceMap,
-                    const MathCore::vec2f &center,
+                    // const MathCore::vec2f &center,
                     const MathCore::vec2f &size,
                     const MathCore::vec4f &color,
                     const MathCore::vec4f &radius,
@@ -98,6 +119,9 @@ namespace AppKit
                     const MathCore::vec4f &drop_shadow_color,
                     MeshUploadMode meshUploadMode,
                     uint32_t segment_count = 10);
+
+                void setMask(AppKit::GLEngine::ResourceMap *resourceMap,
+                             std::shared_ptr<ComponentRectangle> &mask);
 
                 ComponentRectangle();
 
