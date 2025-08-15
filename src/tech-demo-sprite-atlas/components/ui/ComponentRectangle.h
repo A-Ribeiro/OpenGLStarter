@@ -27,7 +27,7 @@ namespace AppKit
 {
     namespace GLEngine
     {
-        class ShaderUnlitVertexColorWithMask;
+        class AddShaderRectangleMask;
 
         namespace Components
         {
@@ -80,7 +80,7 @@ namespace AppKit
                                 uint32_t segment_count);
 
             public:
-                friend class AppKit::GLEngine::ShaderUnlitVertexColorWithMask;
+                friend class AppKit::GLEngine::AddShaderRectangleMask;
 
                 static const ComponentType Type;
 
@@ -121,6 +121,7 @@ namespace AppKit
                     uint32_t segment_count = 10);
 
                 void setMask(AppKit::GLEngine::ResourceMap *resourceMap,
+                             std::shared_ptr<ComponentCamera> &camera,
                              std::shared_ptr<ComponentRectangle> &mask);
 
                 ComponentRectangle();

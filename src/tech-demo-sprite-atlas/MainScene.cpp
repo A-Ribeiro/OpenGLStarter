@@ -49,6 +49,12 @@ void MainScene::bindResourcesToGraph()
 
     GLRenderState *renderState = GLRenderState::Instance();
 
+    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+    {
+        auto mainCamera = root->findTransformByName("Main Camera");
+        camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
+    }
+
     {
         spriteNode = Transform::CreateShared("smoke");
         spriteNode->setLocalScale(MathCore::vec3f(0));
@@ -139,7 +145,7 @@ void MainScene::bindResourcesToGraph()
                                        -10                                                                 // z
                                        )
                             .get<ComponentRectangle>();
-    front_screen->setMask(resourceMap, base_mask);
+    front_screen->setMask(resourceMap, camera, base_mask);
 
     uiComponent->addSpriteFromAtlas(
         vec2f(0, 0),                             // pos
@@ -191,11 +197,6 @@ void MainScene::bindResourcesToGraph()
         "bottom_text");
 
     // setup renderstate
-
-    auto mainCamera = root->findTransformByName("Main Camera");
-    std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
-    camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
-
     uiNode->setLocalPosition(MathCore::vec3f(0, 0, componentCameraOrthographic->nearPlane + 100.0f));
 
     {

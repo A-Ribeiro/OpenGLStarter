@@ -2,6 +2,9 @@
 #include "ComponentRectangle.h"
 #include "../../shaders/ShaderUnlitVertexColorWithMask.h"
 
+#include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
+
 using namespace AppKit::GLEngine;
 
 namespace AppKit
@@ -198,7 +201,7 @@ namespace AppKit
 
                 float min_size_half = MathCore::OP<MathCore::vec2f>::minimum(size_half);
 
-                //MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
+                // MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
                 MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::clamp(radius, 0, min_size_half);
 
                 float min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness * 0.5f);
@@ -278,7 +281,7 @@ namespace AppKit
 
                 float min_size_half = MathCore::OP<MathCore::vec2f>::minimum(size_half);
 
-                //MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
+                // MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
                 MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::clamp(radius, 0, min_size_half);
 
                 float min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness * 0.5f);
@@ -583,6 +586,7 @@ namespace AppKit
             }
 
             void ComponentRectangle::setMask(AppKit::GLEngine::ResourceMap *resourceMap,
+                                             std::shared_ptr<ComponentCamera> &camera,
                                              std::shared_ptr<ComponentRectangle> &mask)
             {
                 this->mask = mask;
@@ -596,6 +600,7 @@ namespace AppKit
                     new_material->setShader(std::make_shared<AppKit::GLEngine::ShaderUnlitVertexColorWithMask>());
                     new_material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
                     new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
                     material = transform->replaceComponent<ComponentMaterial>(material, new_material);
                 }
             }
@@ -624,7 +629,7 @@ namespace AppKit
 
                 result->mask = this->mask;
 
-                for(int i=0;i<MaskOrder_Count;i++)
+                for (int i = 0; i < MaskOrder_Count; i++)
                     result->mask_corner[i] = this->mask_corner[i];
                 result->mask_radius = this->mask_radius;
 
