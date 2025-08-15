@@ -107,18 +107,39 @@ void MainScene::bindResourcesToGraph()
     uiComponent = uiNode->addNewComponent<ComponentUI>();
     uiComponent->Initialize(resourceMap, spriteShader);
 
-    uiComponent->addRectangleCenterSize(
-        vec2f(0, 0),                             // center
-        vec2f(256, 128),                         // size
-        MathCore::vec4f(0.0f, 0.25f, 0.5f, 0.8f), // color
-        MathCore::vec4f(64, -1, 16, -1),         // radius
-        StrokeModeGrowInside,                   // stroke mode
-        5.0f,                                   // stroke thickness
-        MathCore::vec4f(0.0f, 0.0f, 0.8f, 0.6f), // stroke color
-        60.0f,                                   // drop shadow thickness
-        MathCore::vec4f(0.4f, 0.4f, 0.4f, 0.5f), // drop shadow color
-        0                                        // z
-    );
+    auto base_mask = uiComponent->addRectangle(
+                                    vec2f(-100, 0),                              // pos
+                                    vec2f(256, 512),                          // size
+                                    MathCore::vec4f(0.0f, 0.25f, 0.5f, 0.8f), // color
+                                    MathCore::vec4f(64, 0, 16, -1),           // radius
+                                    StrokeModeGrowInside,                     // stroke mode
+                                    15.0f,                                     // stroke thickness
+                                    MathCore::vec4f(0.0f, 0.0f, 0.8f, 0.6f),  // stroke color
+                                    40.0f,                                    // drop shadow thickness
+                                    MathCore::vec4f(0.4f, 0.4f, 0.4f, 0.5f),  // drop shadow color
+                                    0                                         // z
+                                    )
+                         .get<ComponentRectangle>();
+
+    base_mask->getTransform()->setLocalRotation(MathCore::GEN<MathCore::quatf>::fromAxisAngle(MathCore::vec3f(0, 0, 1), MathCore::OP<float>::deg_2_rad(15.0f)));
+
+    base_mask->getTransform()->setLocalScale(MathCore::vec3f(2.0f, 1.0f, 1.0f));
+
+
+    auto front_screen = uiComponent->addRectangle(
+                                       vec2f(0, 0),                                                        // pos
+                                       vec2f(app->window->getSize().width, app->window->getSize().height), // size
+                                       MathCore::vec4f(1.0f, 0.0f, 0.0f, 0.2f),                            // color
+                                       MathCore::vec4f(-1, -1, -1, -1),                                    // radius
+                                       StrokeModeGrowInside,                                               // stroke mode
+                                       0.0f,                                                               // stroke thickness
+                                       MathCore::vec4f(0),                                                 // stroke color
+                                       0,                                                                  // drop shadow thickness
+                                       MathCore::vec4f(0),                                                 // drop shadow color
+                                       -10                                                                 // z
+                                       )
+                            .get<ComponentRectangle>();
+    front_screen->setMask(resourceMap, base_mask);
 
     uiComponent->addSpriteFromAtlas(
         vec2f(0, 0),                             // pos
@@ -177,57 +198,58 @@ void MainScene::bindResourcesToGraph()
 
     uiNode->setLocalPosition(MathCore::vec3f(0, 0, componentCameraOrthographic->nearPlane + 100.0f));
 
-    auto uiNodeParent = uiNode->getParent();
-    auto new_node = uiNodeParent->addChild(uiNode->clone(false));
+    {
+        auto uiNodeParent = uiNode->getParent();
+        auto new_node = uiNodeParent->addChild(uiNode->clone(false));
+        new_node->setLocalPosition(MathCore::vec3f(500.0f, 0, componentCameraOrthographic->nearPlane + 100.0f));
 
-    new_node->setLocalPosition(MathCore::vec3f(500.0f, 0, componentCameraOrthographic->nearPlane + 100.0f));
+        auto new_ui = new_node->findComponent<ComponentUI>();
 
-    auto new_ui = new_node->findComponent<ComponentUI>();
+        auto top_text_font = new_ui->getItemByName("top_text").get<ComponentFont>();
+        top_text_font->setText(
+            this->resourceMap,
+            "resources/Roboto-Regular-100.basof2", // font_path
+            0,                                     // polygon_size
+            0,                                     // polygon_distance_tolerance
+            nullptr,                               // polygon_threadPool
+            engine->sRGBCapable,
+            "Top Text!",                                                      // text
+            64.0f,                                                            // size
+            -1.0f,                                                            // max_width
+            MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
+            MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                          // strokeColor
+            MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
+            AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
+            AppKit::OpenGL::GLFont2VerticalAlign_bottom,                      // verticalAlign
+            1.0f,                                                             // lineHeight
+            AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
+            AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
+            U' '                                                              // wordSeparatorChar
+        );
 
-    auto top_text_font = new_ui->getItemByName("top_text").get<ComponentFont>();
-    top_text_font->setText(
-        this->resourceMap,
-        "resources/Roboto-Regular-100.basof2", // font_path
-        0,                                     // polygon_size
-        0,                                     // polygon_distance_tolerance
-        nullptr,                               // polygon_threadPool
-        engine->sRGBCapable,
-        "Top Text!",                                                      // text
-        64.0f,                                                            // size
-        -1.0f,                                                            // max_width
-        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
-        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                          // strokeColor
-        MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
-        AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
-        AppKit::OpenGL::GLFont2VerticalAlign_bottom,                      // verticalAlign
-        1.0f,                                                             // lineHeight
-        AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
-        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
-        U' '                                                              // wordSeparatorChar
-    );
+        top_text_font = new_ui->getItemByName("bottom_text").get<ComponentFont>();
 
-    top_text_font = new_ui->getItemByName("bottom_text").get<ComponentFont>();
-
-    top_text_font->setText(
-        this->resourceMap,
-        "resources/Roboto-Regular-100.basof2", // font_path
-        64.0f,                                 // polygon_size
-        10.0f,                                 // polygon_distance_tolerance
-        &app->threadPool,                      // polygon_threadPool
-        engine->sRGBCapable,
-        "Text Bottom!",                                                   // text
-        64.0f,                                                            // size
-        -1.0f,                                                            // max_width
-        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
-        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                          // strokeColor
-        MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
-        AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
-        AppKit::OpenGL::GLFont2VerticalAlign_top,                         // verticalAlign
-        1.0f,                                                             // lineHeight
-        AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
-        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
-        U' '                                                              // wordSeparatorChar
-    );
+        top_text_font->setText(
+            this->resourceMap,
+            "resources/Roboto-Regular-100.basof2", // font_path
+            64.0f,                                 // polygon_size
+            10.0f,                                 // polygon_distance_tolerance
+            &app->threadPool,                      // polygon_threadPool
+            engine->sRGBCapable,
+            "Text Bottom!",                                                   // text
+            64.0f,                                                            // size
+            -1.0f,                                                            // max_width
+            MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
+            MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                          // strokeColor
+            MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
+            AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
+            AppKit::OpenGL::GLFont2VerticalAlign_top,                         // verticalAlign
+            1.0f,                                                             // lineHeight
+            AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
+            AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
+            U' '                                                              // wordSeparatorChar
+        );
+    }
 
     auto rect = renderWindow->CameraViewport.c_ptr();
     resize(MathCore::vec2i(rect->w, rect->h));

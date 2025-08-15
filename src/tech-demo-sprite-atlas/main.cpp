@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 //     engine->configureWindow(engineConfig);
 // #else
     engineConfig.windowConfig.windowStyle = AppKit::Window::WindowStyle::Default;
-    engineConfig.windowConfig.videoMode = AppKit::Window::VideoMode(1920, 1080);
+    engineConfig.windowConfig.videoMode = AppKit::Window::VideoMode(1024, 768);
 
     engineConfig.glContextConfig.antialiasingLevel = 0;
     engineConfig.glContextConfig.sRgbCapable = false;

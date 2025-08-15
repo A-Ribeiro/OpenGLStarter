@@ -1,5 +1,6 @@
 // #include <appkit-gl-engine/Components/ComponentSprite.h>
 #include "ComponentRectangle.h"
+#include "../../shaders/ShaderUnlitVertexColorWithMask.h"
 
 using namespace AppKit::GLEngine;
 
@@ -61,9 +62,9 @@ namespace AppKit
             //         segment_count);
             // }
 
-            void ComponentRectangle::setQuadFromCenterSize(
+            void ComponentRectangle::setQuad(
                 AppKit::GLEngine::ResourceMap *resourceMap,
-                const MathCore::vec2f &center,
+                // const MathCore::vec2f &center,
                 const MathCore::vec2f &size,
                 const MathCore::vec4f &color,
                 const MathCore::vec4f &radius,
@@ -90,9 +91,17 @@ namespace AppKit
 
                 clearMesh();
 
+                if (size.width <= 0.0f || size.height <= 0.0f)
+                    return;
+
+                precomputeMaskParameters(
+                    size,
+                    radius,
+                    stroke_mode,
+                    stroke_thickness);
+
                 if (color.a > 0.0f)
-                    drawInside(center,
-                               size,
+                    drawInside(size,
                                color, // internal color
                                color, // external color
                                radius,
@@ -101,8 +110,7 @@ namespace AppKit
                                segment_count);
 
                 if (stroke_thickness > 0.0f && stroke_color.a > 0.0f)
-                    drawStroke(center,
-                               size,
+                    drawStroke(size,
                                stroke_color, // internal color
                                stroke_color, // external color
                                radius,
@@ -137,8 +145,7 @@ namespace AppKit
                     // |      x             |
 
                     // drop shadow test
-                    drawStroke(center,
-                               size,
+                    drawStroke(size,
                                drop_shadow_color,                                         // internal color
                                drop_shadow_color * MathCore::vec4f(1, 1, 1, _40_percent), // external color
                                radius,
@@ -147,8 +154,7 @@ namespace AppKit
                                offset, // stroke offset
                                segment_count);
 
-                    drawStroke(center,
-                               size,
+                    drawStroke(size,
                                drop_shadow_color * MathCore::vec4f(1, 1, 1, _40_percent), // internal color
                                drop_shadow_color * MathCore::vec4f(1, 1, 1, 0.0f),        // external color
                                radius,
@@ -161,8 +167,8 @@ namespace AppKit
                 auto size_half = size * 0.5f;
                 meshWrapper->setShapeAABB(
                     CollisionCore::AABB<MathCore::vec3f>(
-                        center - size_half,
-                        center + size_half),
+                        -size_half,
+                        size_half),
                     true);
             }
 
@@ -174,8 +180,70 @@ namespace AppKit
                 mesh->indices.clear();
             }
 
-            void ComponentRectangle::drawInside(const MathCore::vec2f &center,
-                                                const MathCore::vec2f &size,
+            void ComponentRectangle::precomputeMaskParameters(const MathCore::vec2f &size,
+                                                              const MathCore::vec4f &radius,
+                                                              StrokeModeEnum stroke_mode,
+                                                              float ignore_stroke_thickness)
+            {
+                enum Order
+                {
+                    Order_topRight = 0,
+                    Order_bottomRight,
+                    Order_bottomLeft,
+                    Order_topLeft,
+                    Order_Count
+                };
+
+                auto size_half = size * 0.5f;
+
+                float min_size_half = MathCore::OP<MathCore::vec2f>::minimum(size_half);
+
+                //MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
+                MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::clamp(radius, 0, min_size_half);
+
+                float min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness * 0.5f);
+
+                MathCore::vec4f radius_min = radius_aux - min_ignore_stroke_subtract;
+                MathCore::vec4f radius_max = radius_aux + ignore_stroke_thickness * 0.5f;
+
+                if (stroke_mode == StrokeModeGrowInside)
+                {
+                    min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness);
+                    radius_max = radius_aux;
+                    radius_min = radius_aux - min_ignore_stroke_subtract;
+                }
+                else if (stroke_mode == StrokeModeGrowOutside)
+                {
+                    radius_max = radius_aux + ignore_stroke_thickness;
+                    radius_min = radius_aux;
+                }
+
+                radius_min = MathCore::OP<MathCore::vec4f>::minimum(radius_min, min_size_half);
+                // avoid negative radius
+                radius_min = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_min);
+
+                for (int i = 0; i < Order_Count; i++)
+                    if (radius_min[i] < 0.0f)
+                    {
+                        radius_aux[i] -= radius_min[i];
+                        radius_min[i] = 0.0f;
+                    }
+
+                // radius_aux = MathCore::OP<MathCore::vec4f>::maximum(0, radius_aux);
+
+                float start_deg[Order_Count] = {90, 0, -90, -180};
+                float end_deg[Order_Count] = {0, -90, -180, -270};
+                MathCore::vec2f rad_factor[Order_Count] = {MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1), MathCore::vec2f(1, 1), MathCore::vec2f(1, -1)};
+                MathCore::vec2f size_factor[Order_Count] = {MathCore::vec2f(1, 1), MathCore::vec2f(1, -1), MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1)};
+
+                for (int i = 0; i < Order_Count; i++)
+                {
+                    mask_corner[i] = size_half * size_factor[i] + radius_aux[i] * rad_factor[i];
+                    mask_radius[i] = radius_min[i];
+                }
+            }
+
+            void ComponentRectangle::drawInside(const MathCore::vec2f &size,
                                                 const MathCore::vec4f &color_internal,
                                                 const MathCore::vec4f &color_external,
                                                 const MathCore::vec4f &radius,
@@ -210,15 +278,19 @@ namespace AppKit
 
                 float min_size_half = MathCore::OP<MathCore::vec2f>::minimum(size_half);
 
-                MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
+                //MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
+                MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::clamp(radius, 0, min_size_half);
 
-                MathCore::vec4f radius_min = radius_aux - ignore_stroke_thickness * 0.5f;
+                float min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness * 0.5f);
+
+                MathCore::vec4f radius_min = radius_aux - min_ignore_stroke_subtract;
                 MathCore::vec4f radius_max = radius_aux + ignore_stroke_thickness * 0.5f;
 
                 if (stroke_mode == StrokeModeGrowInside)
                 {
+                    min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness);
                     radius_max = radius_aux;
-                    radius_min = radius_aux - ignore_stroke_thickness;
+                    radius_min = radius_aux - min_ignore_stroke_subtract;
                 }
                 else if (stroke_mode == StrokeModeGrowOutside)
                 {
@@ -237,7 +309,7 @@ namespace AppKit
                         radius_min[i] = 0.0f;
                     }
 
-                radius_aux = MathCore::OP<MathCore::vec4f>::maximum(0, radius_aux);
+                // radius_aux = MathCore::OP<MathCore::vec4f>::maximum(0, radius_aux);
 
                 auto genArc = [](std::vector<MathCore::vec3f> *polygon,
                                  const MathCore::vec2f &center,
@@ -341,8 +413,7 @@ namespace AppKit
                 mesh->indices.insert(mesh->indices.end(), {a + vert_start_position, d + vert_start_position, b + vert_start_position});
             }
 
-            void ComponentRectangle::drawStroke(const MathCore::vec2f &center,
-                                                const MathCore::vec2f &size,
+            void ComponentRectangle::drawStroke(const MathCore::vec2f &size,
                                                 const MathCore::vec4f &color_internal,
                                                 const MathCore::vec4f &color_external,
                                                 const MathCore::vec4f &radius,
@@ -380,13 +451,17 @@ namespace AppKit
 
                 MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::clamp(radius, 0, min_size_half);
 
-                MathCore::vec4f radius_min = radius_aux - stroke_thickness * 0.5f;
+                float min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, stroke_thickness * 0.5f);
+
+                MathCore::vec4f radius_min = radius_aux - min_ignore_stroke_subtract;
                 MathCore::vec4f radius_max = radius_aux + stroke_thickness * 0.5f;
 
                 if (stroke_mode == StrokeModeGrowInside)
                 {
+                    min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, stroke_thickness);
+
                     radius_max = radius_aux;
-                    radius_min = radius_aux - stroke_thickness;
+                    radius_min = radius_aux - min_ignore_stroke_subtract;
                 }
                 else if (stroke_mode == StrokeModeGrowOutside)
                 {
@@ -507,6 +582,24 @@ namespace AppKit
                 }
             }
 
+            void ComponentRectangle::setMask(AppKit::GLEngine::ResourceMap *resourceMap,
+                                             std::shared_ptr<ComponentRectangle> &mask)
+            {
+                this->mask = mask;
+                auto transform = getTransform();
+                if (mask == nullptr)
+                    material = transform->replaceComponent<ComponentMaterial>(material, resourceMap->defaultUnlitVertexColorAlphaMaterial);
+                else
+                {
+                    auto new_material = Component::CreateShared<Components::ComponentMaterial>();
+                    new_material->always_clone = true;
+                    new_material->setShader(std::make_shared<AppKit::GLEngine::ShaderUnlitVertexColorWithMask>());
+                    new_material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
+                    new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    material = transform->replaceComponent<ComponentMaterial>(material, new_material);
+                }
+            }
+
             ComponentRectangle::ComponentRectangle() : Component(ComponentRectangle::Type)
             {
                 always_clone = true;
@@ -529,6 +622,12 @@ namespace AppKit
                 result->mesh = this->mesh;
                 result->meshWrapper = this->meshWrapper;
 
+                result->mask = this->mask;
+
+                for(int i=0;i<MaskOrder_Count;i++)
+                    result->mask_corner[i] = this->mask_corner[i];
+                result->mask_radius = this->mask_radius;
+
                 return result;
             }
             void ComponentRectangle::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
@@ -539,6 +638,11 @@ namespace AppKit
                     mesh = std::dynamic_pointer_cast<ComponentMesh>(componentMap[mesh]);
                 if (componentMap.find(meshWrapper) != componentMap.end())
                     meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(componentMap[meshWrapper]);
+                if (componentMap.find(mask) != componentMap.end())
+                {
+                    mask = std::dynamic_pointer_cast<ComponentRectangle>(componentMap[mask]);
+                    material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                }
             }
 
             void ComponentRectangle::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)

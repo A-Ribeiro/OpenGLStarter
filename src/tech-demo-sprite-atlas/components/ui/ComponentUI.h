@@ -105,8 +105,8 @@ namespace AppKit
                 //     float z,
                 //     const std::string &name = "_rect");
 
-                UIItem addRectangleCenterSize(
-                    const MathCore::vec2f &center,
+                UIItem addRectangle(
+                    const MathCore::vec2f &pos,
                     const MathCore::vec2f &size,
                     const MathCore::vec4f &color,
                     const MathCore::vec4f &radius,
