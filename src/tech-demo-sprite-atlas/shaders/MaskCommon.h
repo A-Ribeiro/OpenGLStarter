@@ -1,4 +1,5 @@
 #pragma once
+#include <appkit-gl-engine/DefaultEngineShader.h>
 
 namespace AppKit
 {
@@ -69,6 +70,34 @@ namespace AppKit
         // "  } else {\n" \
         // "    valid *= step(length(ptn_on_proj_vec), uMask_radius[quadrant]);\n" \
         // "  }\n" \
+
+
+        class AddShaderRectangleMask : public DefaultEngineShader
+        {
+        protected:
+
+            int u_transform_to_mask;
+            int u_mask_corner;
+            int u_mask_radius;
+
+            MathCore::mat4f uTransformToMask;
+            MathCore::vec2<float, MathCore::SIMD_TYPE::NONE> uMask_corner[4];
+            MathCore::vec4f uMask_radius;
+
+            void setMaskFromPropertyBag(const AppKit::GLEngine::Utils::ShaderPropertyBag &bag);
+
+            void mask_query_uniform_locations_and_set_default_values();
+
+            Utils::ShaderPropertyBag mask_default_bag() const;
+
+        public:
+            // friend class AppKit::GLEngine::Components::ComponentRectangle;
+
+            void setMask_ScreenToLocalTransform(const MathCore::mat4f &uTransformToMask);
+            void setMask_Corner_Centers(const MathCore::vec2f uMask_corner[4]);
+            void setMask_Corner_Radius(const MathCore::vec4f &uMask_radius);
+
+        };
 
     }
 }

@@ -17,9 +17,6 @@ namespace AppKit
 
         ShaderUnlitVertexColorWithMask::ShaderUnlitVertexColorWithMask()
         {
-            componentRectangle = nullptr;
-            componentRectangle_transform = nullptr;
-
             format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_COLOR0;
 
             const char vertexShaderCode[] = {
@@ -58,10 +55,6 @@ namespace AppKit
             u_mvp = getUniformLocation("uMVP");
             u_color = getUniformLocation("uColor");
 
-            u_transform_to_mask = getUniformLocation("uTransformToMask");
-            u_mask_corner = getUniformLocation("uMask_corner");
-            u_mask_radius = getUniformLocation("uMask_radius");
-
             uMVP = MathCore::mat4f();
             uColor = MathCore::vec4f(1.0, 1.0, 1.0, 1.0);
 
@@ -71,12 +64,8 @@ namespace AppKit
             setUniform(u_mvp, uMVP);
             setUniform(u_color, uColor);
 
-            setUniform(u_transform_to_mask, uTransformToMask);
-            setUniform(u_mask_radius, uMask_radius);
-            // array uniform upload
-            if (u_mask_corner >= 0)
-                OPENGL_CMD(glUniform2fv(u_mask_corner, (GLsizei)4, uMask_corner[0].array));
-
+            mask_query_uniform_locations_and_set_default_values();
+            
             state->CurrentShader = nullptr;
         }
 
@@ -99,12 +88,10 @@ namespace AppKit
 
         Utils::ShaderPropertyBag ShaderUnlitVertexColorWithMask::createDefaultBag() const
         {
-            Utils::ShaderPropertyBag bag;
+            Utils::ShaderPropertyBag bag = mask_default_bag();
 
             bag.addProperty("uColor", uColor);
             bag.addProperty("BlendMode", (int)AppKit::GLEngine::BlendModeDisabled);
-
-            bag.addProperty("ComponentRectangle", std::weak_ptr<Component>());
 
             return bag;
         }
@@ -121,37 +108,7 @@ namespace AppKit
             state->BlendMode = (AppKit::GLEngine::BlendModeType)materialBag.getProperty<int>("BlendMode");
             setColor(materialBag.getProperty<MathCore::vec4f>("uColor"));
 
-            auto componentRectangleRaw = materialBag.getProperty<std::weak_ptr<Component>>("ComponentRectangle").lock();
-            if (componentRectangleRaw != nullptr)
-            {
-                componentRectangle = (Components::ComponentRectangle *)(componentRectangleRaw.get());
-                componentRectangle_transform = componentRectangle->getTransform().get();
-
-                if (uMask_radius != componentRectangle->mask_radius)
-                {
-                    uMask_radius = componentRectangle->mask_radius;
-                    setUniform(u_mask_radius, uMask_radius);
-                }
-
-                bool needs_set = false;
-                for (int i = 0; i < 4; i++)
-                {
-                    if (uMask_corner[i] != componentRectangle->mask_corner[i])
-                    {
-                        uMask_corner[i] = componentRectangle->mask_corner[i];
-                        needs_set = true;
-                    }
-                }
-
-                // array uniform upload
-                if (u_mask_corner >= 0 && needs_set)
-                    OPENGL_CMD(glUniform2fv(u_mask_corner, (GLsizei)4, uMask_corner[0].array));
-            }
-            else
-            {
-                componentRectangle = nullptr;
-                componentRectangle_transform = nullptr;
-            }
+            setMaskFromPropertyBag(materialBag);
 
             state->clearTextureUnitActivationArray();
         }
@@ -167,27 +124,6 @@ namespace AppKit
             const MathCore::mat4f *mvIT,
             const MathCore::mat4f *mvInv)
         {
-            // needs the camera that renders the mask, to inverse project correctly
-            if (componentRectangle_transform != nullptr)
-            {
-                MathCore::mat4f *mvp;
-                MathCore::mat4f *mv;
-                MathCore::mat4f *mvIT;
-                MathCore::mat4f *mvInv;
-                componentRectangle_transform->computeRenderMatrix(camera->viewProjection, camera->view, camera->viewIT, camera->viewInv,
-                                                                  &mvp, &mv, &mvIT, &mvInv);
-                MathCore::vec3f scale = 2.0f / MathCore::vec3f(camera->viewport.w, camera->viewport.h, 2.0f);
-                MathCore::mat4f transform_mask = mvp->inverse() *
-                                                 MathCore::GEN<MathCore::mat4f>::translateHomogeneous(-1.0f, -1.0f, 0.0f) *
-                                                 MathCore::GEN<MathCore::mat4f>::scaleHomogeneous(scale);
-
-                if (uTransformToMask != transform_mask)
-                {
-                    uTransformToMask = transform_mask;
-                    setUniform(u_transform_to_mask, uTransformToMask);
-                }
-            }
-
             setMVP(*mvp);
         }
 
