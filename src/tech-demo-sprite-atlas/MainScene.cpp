@@ -124,7 +124,7 @@ void MainScene::bindResourcesToGraph()
                                     40.0f,                                    // drop shadow thickness
                                     MathCore::vec4f(0.4f, 0.4f, 0.4f, 0.5f),  // drop shadow color
                                     0                                         // z
-                                    )
+                                    ,"rect_mask")
                          .get<ComponentRectangle>();
 
     base_mask->getTransform()->setLocalRotation(MathCore::GEN<MathCore::quatf>::fromAxisAngle(MathCore::vec3f(0, 0, 1), MathCore::OP<float>::deg_2_rad(15.0f)));
@@ -157,7 +157,7 @@ void MainScene::bindResourcesToGraph()
         -1                                       // z
     );
 
-    uiComponent->addTextureText(
+    auto textComponent = uiComponent->addTextureText(
         "resources/Roboto-Regular-100.basof2",                                            // font_path
         MathCore::vec2f(0, 128),                                                          // pos
         -1,                                                                               // z
@@ -173,7 +173,8 @@ void MainScene::bindResourcesToGraph()
         AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
         AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
         U' ',                                                                             // wordSeparatorChar
-        "top_text");
+        "top_text").get<ComponentFont>();
+    textComponent->setMask(resourceMap, camera, base_mask);
 
     uiComponent->addPolygonText(
         "resources/Roboto-Regular-100.basof2",                                            // font_path
@@ -227,6 +228,12 @@ void MainScene::bindResourcesToGraph()
             AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
             U' '                                                              // wordSeparatorChar
         );
+        // TODO: implement text set content after set mask
+        //  it is resetting material every time the program sets the text to display
+        top_text_font->setMask(resourceMap, camera, 
+            new_ui->getItemByName("rect_mask").get<ComponentRectangle>()
+        );
+
 
         top_text_font = new_ui->getItemByName("bottom_text").get<ComponentFont>();
 

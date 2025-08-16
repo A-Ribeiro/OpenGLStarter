@@ -29,6 +29,7 @@ namespace AppKit
     {
         namespace Components
         {
+            class ComponentRectangle;
 
             class ComponentFont : public Component
             {
@@ -42,6 +43,10 @@ namespace AppKit
                 std::shared_ptr<ComponentMesh> mesh;
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
 
+                std::shared_ptr<ComponentRectangle> mask;
+
+                std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> last_fontResource;
+
                 void checkOrCreateAuxiliaryComponents(
                     AppKit::GLEngine::ResourceMap *resourceMap,
                     std::shared_ptr<ComponentMaterial> &material);
@@ -49,7 +54,7 @@ namespace AppKit
                 // if color.a == 0, skip this draw
                 void setText(
                     AppKit::GLEngine::ResourceMap *resourceMap,
-                    
+
                     const std::string &font_path,
 
                     // 0 = texture, > 0 = polygon
@@ -77,6 +82,9 @@ namespace AppKit
                     char32_t wordSeparatorChar = U' ',
                     MeshUploadMode meshUploadMode = MeshUploadMode_Direct);
 
+                void setMask(AppKit::GLEngine::ResourceMap *resourceMap,
+                             std::shared_ptr<ComponentCamera> &camera,
+                             std::shared_ptr<ComponentRectangle> &mask);
                 ComponentFont();
 
                 ~ComponentFont();

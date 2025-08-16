@@ -1,5 +1,12 @@
 // #include <appkit-gl-engine/Components/ComponentSprite.h>
 #include "ComponentFont.h"
+#include "ComponentRectangle.h"
+
+#include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
+
+#include "../../shaders/ShaderUnlitTextureVertexColorAlphaWithMask.h"
+
 
 using namespace AppKit::GLEngine;
 
@@ -84,14 +91,16 @@ namespace AppKit
                 else
                     fontResource = resourceMap->getTextureFont(font_path, is_srgb);
 
+                last_fontResource = fontResource;
+
                 auto builder = fontResource->fontBuilder.get();
 
                 checkOrCreateAuxiliaryComponents(resourceMap, fontResource->material);
 
-                bool onCloneNoModify = 
-                meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify || 
-                meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify || 
-                meshUploadMode == MeshUploadMode_Static_OnClone_NoModify;
+                bool onCloneNoModify =
+                    meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify ||
+                    meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify ||
+                    meshUploadMode == MeshUploadMode_Static_OnClone_NoModify;
 
                 mesh->always_clone = !onCloneNoModify;
                 this->always_clone = !onCloneNoModify;
@@ -179,6 +188,32 @@ namespace AppKit
                 meshWrapper->setShapeAABB(CollisionCore::AABB<MathCore::vec3f>(min, max), true);
             }
 
+            void ComponentFont::setMask(AppKit::GLEngine::ResourceMap *resourceMap,
+                                        std::shared_ptr<ComponentCamera> &camera,
+                                        std::shared_ptr<ComponentRectangle> &mask)
+            {
+                this->mask = mask;
+
+                if (last_fontResource == nullptr)
+                    return;
+
+                auto transform = getTransform();
+                if (mask == nullptr)
+                    material = transform->replaceComponent<ComponentMaterial>(material, last_fontResource->material);
+                else
+                {
+                    // auto new_material = std::dynamic_pointer_cast<ComponentMaterial>(last_fontResource->material_mask->duplicate_ref_or_clone(true));
+                    auto new_material = Component::CreateShared<Components::ComponentMaterial>();
+                    new_material->always_clone = true;
+                    new_material->setShader(std::make_shared<AppKit::GLEngine::ShaderUnlitTextureVertexColorAlphaWithMask>());
+                    auto tex = last_fontResource->material->property_bag.getProperty("uTexture").get<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>();
+                    new_material->property_bag.getProperty("uTexture").set(tex);
+                    new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+                    material = transform->replaceComponent<ComponentMaterial>(material, new_material);
+                }
+            }
+
             ComponentFont::ComponentFont() : Component(ComponentFont::Type)
             {
                 always_clone = true;
@@ -201,6 +236,8 @@ namespace AppKit
                 result->mesh = this->mesh;
                 result->meshWrapper = this->meshWrapper;
 
+                result->mask = this->mask;
+
                 return result;
             }
             void ComponentFont::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
@@ -211,6 +248,11 @@ namespace AppKit
                     mesh = std::dynamic_pointer_cast<ComponentMesh>(componentMap[mesh]);
                 if (componentMap.find(meshWrapper) != componentMap.end())
                     meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(componentMap[meshWrapper]);
+                if (componentMap.find(mask) != componentMap.end())
+                {
+                    mask = std::dynamic_pointer_cast<ComponentRectangle>(componentMap[mask]);
+                    material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                }
             }
 
             void ComponentFont::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
