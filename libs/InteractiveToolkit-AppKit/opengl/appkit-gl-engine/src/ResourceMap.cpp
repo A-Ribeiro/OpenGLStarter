@@ -351,6 +351,10 @@ namespace AppKit
                 fontResource->material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
 
 
+                fontResource->material_mask = Component::CreateShared<Components::ComponentMaterial>();
+                fontResource->material->setShader(this->shaderUnlitTextureVertexColorAlpha);
+                fontResource->material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+
 
                 textureFontMap[to_query] = fontResource;
                 return fontResource;

@@ -60,6 +60,7 @@ namespace AppKit
                 std::shared_ptr<AppKit::OpenGL::GLFont2Builder> fontBuilder;
                 std::shared_ptr<AppKit::OpenGL::GLFont2PolygonCache> polygonFontCache;
                 std::shared_ptr<Components::ComponentMaterial> material;
+                std::shared_ptr<Components::ComponentMaterial> material_mask;
             };
 
         private:
