@@ -1,4 +1,4 @@
-#include <appkit-gl-engine/components/2d/ComponentUI.h>
+#include <appkit-gl-engine/Components/2d/ComponentUI.h>
 
 using namespace AppKit::GLEngine;
 

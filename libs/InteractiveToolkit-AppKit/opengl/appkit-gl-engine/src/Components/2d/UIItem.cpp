@@ -1,5 +1,5 @@
-#include <appkit-gl-engine/components/2d/UIItem.h>
-#include <appkit-gl-engine/components/2d/ComponentUI.h>
+#include <appkit-gl-engine/Components/2d/UIItem.h>
+#include <appkit-gl-engine/Components/2d/ComponentUI.h>
 
 namespace AppKit
 {
