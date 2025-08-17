@@ -1,4 +1,4 @@
-#include "ComponentUI.h"
+#include <appkit-gl-engine/components/2d/ComponentUI.h>
 
 using namespace AppKit::GLEngine;
 
@@ -205,7 +205,6 @@ namespace AppKit
                 auto sprite = transform->addNewComponent<ComponentSprite>();
                 sprite->setTexture(
                     this->resourceMap,
-                    this->spriteShader,
                     resourceMap->getTexture(texture_path, engine->sRGBCapable),
                     pivot,
                     color,
@@ -236,7 +235,6 @@ namespace AppKit
                 auto sprite = transform->addNewComponent<ComponentSprite>();
                 sprite->setTextureFromAtlas(
                     this->resourceMap,
-                    this->spriteShader,
                     atlas,
                     texture_path,
                     pivot,
@@ -263,11 +261,9 @@ namespace AppKit
                 items.clear();
             }
 
-            void ComponentUI::Initialize(AppKit::GLEngine::ResourceMap *resourceMap,
-                                         std::shared_ptr<SpriteShader> spriteShader)
+            void ComponentUI::Initialize(AppKit::GLEngine::ResourceMap *resourceMap)
             {
                 this->resourceMap = resourceMap;
-                this->spriteShader = spriteShader;
             }
 
             std::shared_ptr<Component> ComponentUI::duplicate_ref_or_clone(bool force_clone)
@@ -279,7 +275,6 @@ namespace AppKit
                 result->always_clone = this->always_clone;
 
                 result->resourceMap = this->resourceMap;
-                result->spriteShader = this->spriteShader;
 
                 for (auto &item : items)
                     result->items.push_back(item);

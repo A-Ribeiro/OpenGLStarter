@@ -69,7 +69,7 @@ namespace AppKit
 #include "./ComponentFont.h"
 #include "./ComponentRectangle.h"
 // #include "../shaders/ComponentRectangle.h"
-#include "../ComponentSprite.h"
+#include "./ComponentSprite.h"
 // #include "../shaders/ComponentSpriteAtlas.h"
 // #include "../shaders/ComponentUI.h"
 

@@ -14,18 +14,13 @@
 // #include <aRibeiroData/aRibeiroData.h>
 
 // #include <appkit-gl-engine/DefaultEngineShader.h>
-#include "../util/SpriteAtlas.h"
+#include <appkit-gl-engine/util/SpriteAtlas.h>
 
 #include <appkit-gl-engine/Components/Core/ComponentMesh.h>
 #include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 #include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 
-#include "../shaders/SpriteShader.h"
-
-#include "./ui/common.h"
-
-
-
+#include "./common.h"
 
 namespace AppKit
 {
@@ -35,56 +30,10 @@ namespace AppKit
         {
             class ComponentRectangle;
 
-            // enum SpriteSourceType
-            // {
-            //     SpriteSourceNone,
-            //     SpriteSourceDirectTexture,
-            //     SpriteSourceAtlas,
-            // };
-
-            // enum MeshUploadMode
-            // {
-            //     MeshUploadMode_Direct_OnClone_NoModify,
-            //     MeshUploadMode_Direct,
-            //     MeshUploadMode_Dynamic,
-            //     MeshUploadMode_Static,
-            // };
-
-            // class DirectTextureSetup
-            // {
-            // public:
-            //     MathCore::vec4f color;
-            //     MathCore::vec2f pivot;
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
-            // };
-
-            // class TextureFromAtlasSetup
-            // {
-            // public:
-            //     MathCore::vec4f color;
-            //     SpriteAtlas::Entry entry;
-            //     std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
-
-            //     void setFromAtlas(const std::shared_ptr<SpriteAtlas> &atlas, const std::string &name)
-            //     {
-            //         if (!atlas->hasSprite(name))
-            //             return;
-            //         entry = atlas->getSprite(name);
-            //         texture = atlas->texture;
-            //     }
-            // };
-
             class ComponentSprite : public Component
             {
             public:
                 static const ComponentType Type;
-
-                // material type
-                // SpriteSourceType type;
-
-                // parameters
-                // DirectTextureSetup directTexture;
-                // TextureFromAtlasSetup textureFromAtlas;
 
                 bool always_clone;
 
@@ -95,17 +44,14 @@ namespace AppKit
                 std::shared_ptr<ComponentRectangle> mask;
 
                 std::shared_ptr<AppKit::OpenGL::GLTexture> last_texture;
-                std::shared_ptr<SpriteShader> last_spriteShader;
 
                 void checkOrCreateAuxiliaryComponents(
                     AppKit::GLEngine::ResourceMap *resourceMap,
-                    std::shared_ptr<SpriteShader> spriteShader,
                     std::shared_ptr<AppKit::OpenGL::GLTexture> texture
                 );
 
                 void setTexture(
                     AppKit::GLEngine::ResourceMap *resourceMap,
-                    std::shared_ptr<SpriteShader> spriteShader,
                     std::shared_ptr<AppKit::OpenGL::GLTexture> texture,
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
@@ -115,7 +61,6 @@ namespace AppKit
 
                 void setTextureFromAtlas(
                     AppKit::GLEngine::ResourceMap *resourceMap,
-                    std::shared_ptr<SpriteShader> spriteShader,
                     std::shared_ptr<SpriteAtlas> atlas,
                     const std::string &name,
                     const MathCore::vec2f &pivot,

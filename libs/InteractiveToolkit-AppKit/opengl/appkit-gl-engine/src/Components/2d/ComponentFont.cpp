@@ -1,12 +1,12 @@
 // #include <appkit-gl-engine/Components/ComponentSprite.h>
-#include "ComponentFont.h"
-#include "ComponentRectangle.h"
+#include <appkit-gl-engine/components/2d/ComponentFont.h>
+#include <appkit-gl-engine/components/2d/ComponentRectangle.h>
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 
-#include "../../shaders/ShaderUnlitTextureVertexColorAlphaWithMask.h"
-#include "../../shaders/ShaderUnlitVertexColorWithMask.h"
+// #include "../../shaders/ShaderUnlitTextureVertexColorAlphaWithMask.h"
+// #include "../../shaders/ShaderUnlitVertexColorWithMask.h"
 
 
 
@@ -207,7 +207,7 @@ namespace AppKit
                     if (last_fontResource->polygonFontCache){
                         auto new_material = Component::CreateShared<Components::ComponentMaterial>();
                         new_material->always_clone = true;
-                        new_material->setShader(std::make_shared<AppKit::GLEngine::ShaderUnlitVertexColorWithMask>());
+                        new_material->setShader(resourceMap->shaderUnlitVertexColorWithMask);
                         new_material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
                         new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
                         new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
@@ -216,7 +216,7 @@ namespace AppKit
                         // auto new_material = std::dynamic_pointer_cast<ComponentMaterial>(last_fontResource->material_mask->duplicate_ref_or_clone(true));
                         auto new_material = Component::CreateShared<Components::ComponentMaterial>();
                         new_material->always_clone = true;
-                        new_material->setShader(std::make_shared<AppKit::GLEngine::ShaderUnlitTextureVertexColorAlphaWithMask>());
+                        new_material->setShader(resourceMap->shaderUnlitTextureVertexColorAlphaWithMask);
                         auto tex = last_fontResource->material->property_bag.getProperty("uTexture").get<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>();
                         new_material->property_bag.getProperty("uTexture").set(tex);
                         new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);

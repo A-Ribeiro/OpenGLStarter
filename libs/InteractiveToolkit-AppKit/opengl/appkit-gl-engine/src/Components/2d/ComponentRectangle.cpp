@@ -1,6 +1,6 @@
 // #include <appkit-gl-engine/Components/ComponentSprite.h>
-#include "ComponentRectangle.h"
-#include "../../shaders/ShaderUnlitVertexColorWithMask.h"
+#include <appkit-gl-engine/components/2d/ComponentRectangle.h>
+// #include "../../shaders/ShaderUnlitVertexColorWithMask.h"
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
@@ -597,7 +597,7 @@ namespace AppKit
                 {
                     auto new_material = Component::CreateShared<Components::ComponentMaterial>();
                     new_material->always_clone = true;
-                    new_material->setShader(std::make_shared<AppKit::GLEngine::ShaderUnlitVertexColorWithMask>());
+                    new_material->setShader(resourceMap->shaderUnlitVertexColorWithMask);
                     new_material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
                     new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
                     new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);

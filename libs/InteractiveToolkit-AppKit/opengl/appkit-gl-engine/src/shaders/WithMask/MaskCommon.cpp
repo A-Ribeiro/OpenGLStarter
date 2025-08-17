@@ -1,13 +1,12 @@
-#include "MaskCommon.h"
+#include <appkit-gl-engine/shaders/WithMask/MaskCommon.h>
 
 #include <appkit-gl-engine/Engine.h>
 #include <appkit-gl-engine/ResourceMap.h>
 
-#include "../components/ui/ComponentRectangle.h"
+#include <appkit-gl-engine/components/2d/ComponentRectangle.h>
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
-
 
 namespace AppKit
 {
@@ -25,7 +24,6 @@ namespace AppKit
             // array uniform upload
             if (u_mask_corner >= 0)
                 OPENGL_CMD(glUniform2fv(u_mask_corner, (GLsizei)4, uMask_corner[0].array));
-
         }
 
         void AddShaderRectangleMask::setMaskFromPropertyBag(const AppKit::GLEngine::Utils::ShaderPropertyBag &materialBag)
@@ -105,6 +103,5 @@ namespace AppKit
             return bag;
         }
 
-
-}
+    }
 }

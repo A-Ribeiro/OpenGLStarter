@@ -21,6 +21,12 @@ namespace AppKit
         class PBRShaderSelector;
         class ShaderDepthOnly;
         class LineShader;
+        class SpriteShader;
+
+        // shader with mask
+        class SpriteShaderWithMask;
+        class ShaderUnlitVertexColorWithMask;
+        class ShaderUnlitTextureVertexColorAlphaWithMask;
 
         namespace Components
         {
@@ -124,6 +130,13 @@ namespace AppKit
             std::shared_ptr<ShaderDepthOnly> shaderDepthOnly;
             std::shared_ptr<PBRShaderSelector> pbrShaderSelector;
             std::shared_ptr<LineShader> lineShader;
+            std::shared_ptr<SpriteShader> spriteShader;
+
+            // mask shaders
+            std::shared_ptr<ShaderUnlitTextureVertexColorAlphaWithMask> shaderUnlitTextureVertexColorAlphaWithMask;
+            std::shared_ptr<ShaderUnlitVertexColorWithMask> shaderUnlitVertexColorWithMask;
+            std::shared_ptr<SpriteShaderWithMask> spriteShaderWithMask;
+
         };
     }
 }
@@ -140,3 +153,10 @@ namespace AppKit
 #include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
 #include <appkit-gl-engine/shaders/ShaderDepthOnly.h>                    // DepthOnlyShader
 #include <appkit-gl-engine/shaders/LineShader.h>
+#include <appkit-gl-engine/shaders/SpriteShader.h>
+
+
+#include <appkit-gl-engine/shaders/WithMask/ShaderUnlitTextureVertexColorAlphaWithMask.h>
+#include <appkit-gl-engine/shaders/WithMask/ShaderUnlitVertexColorWithMask.h>
+#include <appkit-gl-engine/shaders/WithMask/SpriteShaderWithMask.h>
+

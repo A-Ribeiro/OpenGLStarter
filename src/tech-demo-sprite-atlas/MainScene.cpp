@@ -16,7 +16,6 @@ using namespace MathCore;
 void MainScene::loadResources()
 {
     // auto engine = AppKit::GLEngine::Engine::Instance();
-    spriteShader = std::make_shared<SpriteShader>();
 
     SpriteAtlasGenerator gen;
 
@@ -60,7 +59,7 @@ void MainScene::bindResourcesToGraph()
         spriteNode->setLocalScale(MathCore::vec3f(0));
         auto componentSprite = spriteNode->addNewComponent<ComponentSprite>();
         componentSprite->setTextureFromAtlas(
-            resourceMap, spriteShader,
+            resourceMap,
             spriteAtlas, "resources/smoke.png",
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
@@ -78,7 +77,7 @@ void MainScene::bindResourcesToGraph()
         logoNode->setLocalScale(MathCore::vec3f(0));
         auto componentSprite = logoNode->addNewComponent<ComponentSprite>();
         componentSprite->setTextureFromAtlas(
-            resourceMap, spriteShader,
+            resourceMap,
             spriteAtlas, "resources/opengl_logo_white.png",
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
@@ -99,7 +98,7 @@ void MainScene::bindResourcesToGraph()
     bgNode->setLocalPosition(MathCore::vec3f(0, 0, 10));
     bgComponentSprite = bgNode->addNewComponent<ComponentSprite>();
     bgComponentSprite->setTexture(
-        resourceMap, spriteShader,
+        resourceMap,
         resourceMap->getTexture("resources/Skyboxes/SanFrancisco4/posy.jpg", engine->sRGBCapable),
         MathCore::vec2f(0.5f, 0.5f),             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
@@ -111,7 +110,7 @@ void MainScene::bindResourcesToGraph()
     // uiNode->setLocalPosition(MathCore::vec3f(0, 0, camera));
 
     uiComponent = uiNode->addNewComponent<ComponentUI>();
-    uiComponent->Initialize(resourceMap, spriteShader);
+    uiComponent->Initialize(resourceMap);
 
     auto base_mask = uiComponent->addRectangle(
                                     vec2f(-150, 0),                           // pos
@@ -299,8 +298,6 @@ void MainScene::unloadAll()
 
     root = nullptr;
     camera = nullptr;
-
-    spriteShader = nullptr;
 
     // componentSprite = nullptr;
     spriteNode = nullptr;

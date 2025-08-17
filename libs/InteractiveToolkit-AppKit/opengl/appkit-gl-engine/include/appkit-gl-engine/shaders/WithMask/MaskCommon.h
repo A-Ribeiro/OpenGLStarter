@@ -54,7 +54,7 @@ namespace AppKit
     "  float case1_valid = smoothstep(size.y, size_smooth.y, ptn_local_space.y) * smoothstep(size.x, size_smooth.x, ptn_local_space.x);\n" \
     "  float case2_valid = case1_valid;\n"                                                                                                 \
     "  float length_smooth = length(ptn_on_proj_vec);\n"                                                                                   \
-    "  float case3_valid = smoothstep(length_smooth, length_smooth + margin,uMask_radius[quadrant]);\n"                                      \
+    "  float case3_valid = smoothstep(length_smooth, length_smooth + margin,uMask_radius[quadrant]);\n"                                    \
     "  valid *= mix(\n"                                                                                                                    \
     "    mix(case3_valid, case2_valid, in_y_region * (1.0 - in_x_region)),\n"                                                              \
     "    case1_valid,\n"                                                                                                                   \
@@ -75,7 +75,6 @@ namespace AppKit
         class AddShaderRectangleMask : public DefaultEngineShader
         {
         protected:
-
             int u_transform_to_mask;
             int u_mask_corner;
             int u_mask_radius;
@@ -96,7 +95,6 @@ namespace AppKit
             void setMask_ScreenToLocalTransform(const MathCore::mat4f &uTransformToMask);
             void setMask_Corner_Centers(const MathCore::vec2f uMask_corner[4]);
             void setMask_Corner_Radius(const MathCore::vec4f &uMask_radius);
-
         };
 
     }
