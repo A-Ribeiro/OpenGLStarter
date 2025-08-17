@@ -6,7 +6,7 @@
 #include <InteractiveToolkit-Extension/image/PNG.h>
 #include <InteractiveToolkit/Platform/Platform.h>
 
-#include <appkit-gl-engine/components/2d/ComponentUI.h>
+#include <appkit-gl-engine/Components/2d/ComponentUI.h>
 
 #include <appkit-gl-engine/util/SpriteAtlas.h>
 

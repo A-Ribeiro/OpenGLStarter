@@ -3,7 +3,7 @@
 #include <appkit-gl-engine/Engine.h>
 #include <appkit-gl-engine/ResourceMap.h>
 
-#include <appkit-gl-engine/components/2d/ComponentRectangle.h>
+#include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>

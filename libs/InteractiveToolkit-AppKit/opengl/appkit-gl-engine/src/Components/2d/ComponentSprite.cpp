@@ -1,5 +1,5 @@
 // #include <appkit-gl-engine/Components/ComponentSprite.h>
-#include <appkit-gl-engine/components/2d/ComponentSprite.h>
+#include <appkit-gl-engine/Components/2d/ComponentSprite.h>
 
 #include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 

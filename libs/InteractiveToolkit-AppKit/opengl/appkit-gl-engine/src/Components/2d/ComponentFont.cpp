@@ -1,6 +1,6 @@
 // #include <appkit-gl-engine/Components/ComponentSprite.h>
-#include <appkit-gl-engine/components/2d/ComponentFont.h>
-#include <appkit-gl-engine/components/2d/ComponentRectangle.h>
+#include <appkit-gl-engine/Components/2d/ComponentFont.h>
+#include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
