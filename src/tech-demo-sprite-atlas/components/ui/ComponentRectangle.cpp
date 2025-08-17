@@ -646,7 +646,7 @@ namespace AppKit
                 if (componentMap.find(mask) != componentMap.end())
                 {
                     mask = std::dynamic_pointer_cast<ComponentRectangle>(componentMap[mask]);
-                    material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    // material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
                 }
             }
 

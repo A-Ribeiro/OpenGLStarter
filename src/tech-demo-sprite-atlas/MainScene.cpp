@@ -148,14 +148,15 @@ void MainScene::bindResourcesToGraph()
     front_screen->setMask(resourceMap, camera, base_mask);
 
     auto sprite = uiComponent->addSpriteFromAtlas(
-        vec2f(0, 0),                             // pos
-        spriteAtlas,                             // atlas
-        "resources/opengl_logo_white.png",       // texture
-        vec2f(0.5f),                             // pivot
-        MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
-        MathCore::vec2f(256, -1),                // size constraint
-        -1                                       // z
-    ).get<ComponentSprite>();
+                                 vec2f(0, 0),                             // pos
+                                 spriteAtlas,                             // atlas
+                                 "resources/opengl_logo_white.png",       // texture
+                                 vec2f(0.5f),                             // pivot
+                                 MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
+                                 MathCore::vec2f(256, -1),                // size constraint
+                                 -1                                       // z
+                                 )
+                      .get<ComponentSprite>();
     sprite->setMask(resourceMap, camera, base_mask);
 
     auto textComponent = uiComponent->addTextureText(
@@ -181,7 +182,7 @@ void MainScene::bindResourcesToGraph()
     textComponent = uiComponent->addPolygonText(
                                    "resources/Roboto-Regular-100.basof2",                                            // font_path
                                    64.0f,                                                                            // polygon_size
-                                   10.0f,                                                                            // polygon_distance_tolerance
+                                   5.0f,                                                                             // polygon_distance_tolerance
                                    &app->threadPool,                                                                 // polygon_threadPool
                                    MathCore::vec2f(0, -128),                                                         // pos
                                    -1,                                                                               // z
@@ -243,7 +244,7 @@ void MainScene::bindResourcesToGraph()
             this->resourceMap,
             "resources/Roboto-Regular-100.basof2", // font_path
             64.0f,                                 // polygon_size
-            10.0f,                                 // polygon_distance_tolerance
+            5.0f,                                  // polygon_distance_tolerance
             &app->threadPool,                      // polygon_threadPool
             engine->sRGBCapable,
             "Text Bottom! With Many Letters",                                 // text

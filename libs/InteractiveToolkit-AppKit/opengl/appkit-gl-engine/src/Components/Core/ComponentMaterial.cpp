@@ -62,6 +62,18 @@ namespace AppKit
 
             void ComponentMaterial::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
             {
+                for (auto& entry : property_bag.getProperties()) {
+                    auto& item = entry.second;
+                    if (item.holds<std::weak_ptr<Component>>()) {
+                        auto ptr = item.get<std::weak_ptr<Component>>().lock();
+                        if (componentMap.find(ptr) != componentMap.end())
+                            item.set<std::weak_ptr<Component>>(componentMap[ptr]);
+                    } else if (item.holds<std::weak_ptr<Transform>>()) {
+                        auto ptr = item.get<std::weak_ptr<Transform>>().lock();
+                        if (transformMap.find(ptr) != transformMap.end())
+                            item.set<std::weak_ptr<Transform>>(transformMap[ptr]);
+                    }
+                }
             }
 
             void ComponentMaterial::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
