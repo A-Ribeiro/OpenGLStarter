@@ -480,6 +480,9 @@ namespace AppKit
                 bool hasProperty(const std::string &key) const;
                 void removeProperty(const std::string &key);
                 void clear();
+
+                std::unordered_map<std::string, ShaderProperty> &getProperties();
+                const std::unordered_map<std::string, ShaderProperty> &getProperties() const;
             };
 
         }

@@ -191,11 +191,11 @@ namespace AppKit
                         mat4f_value.a4, mat4f_value.b4, mat4f_value.c4, mat4f_value.d4);
 
                 case TYPE_VTEX:
-                    return virtual_texture_value ? "VTEX<valid>" : "VTEX<null>";
+                    return ITKCommon::PrintfToStdString("VTEX<%p>", virtual_texture_value.get());
                 case TYPE_WEAK_COMPONENT:
-                    return component_value.lock() ? "COMPONENT<valid>" : "COMPONENT<null>";
+                    return ITKCommon::PrintfToStdString("COMPONENT<%p>", component_value.lock().get());
                 case TYPE_WEAK_TRANSFORM:
-                    return transform_value.lock() ? "TRANSFORM<valid>" : "TRANSFORM<null>";
+                    return ITKCommon::PrintfToStdString("TRANSFORM<%p>", transform_value.lock().get());
                 default:
                     return "<unknown type>";
                 }
@@ -254,6 +254,15 @@ namespace AppKit
             void ShaderPropertyBag::clear()
             {
                 properties_.clear();
+            }
+
+            std::unordered_map<std::string, ShaderProperty> &ShaderPropertyBag::getProperties()
+            {
+                return properties_;
+            }
+            const std::unordered_map<std::string, ShaderProperty> &ShaderPropertyBag::getProperties() const
+            {
+                return properties_;
             }
         }
     }
