@@ -6,11 +6,9 @@
 #include <InteractiveToolkit-Extension/image/PNG.h>
 #include <InteractiveToolkit/Platform/Platform.h>
 
-#include "components/ComponentSprite.h"
+#include <appkit-gl-engine/components/2d/ComponentUI.h>
 
-#include "components/ui/ComponentUI.h"
-
-#include "./util/SpriteAtlas.h"
+#include <appkit-gl-engine/util/SpriteAtlas.h>
 
 class App;
 
@@ -54,8 +52,6 @@ public:
     App *app;
 
     std::shared_ptr<AppKit::GLEngine::SpriteAtlas> spriteAtlas;
-
-    std::shared_ptr<AppKit::GLEngine::SpriteShader> spriteShader;
 
     // std::shared_ptr<AppKit::GLEngine::Components::ComponentSprite> componentSprite;
     std::shared_ptr<AppKit::GLEngine::Transform> spriteNode;

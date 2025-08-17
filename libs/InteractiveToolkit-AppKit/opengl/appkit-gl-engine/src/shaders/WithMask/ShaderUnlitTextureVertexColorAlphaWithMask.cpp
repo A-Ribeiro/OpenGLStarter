@@ -1,11 +1,5 @@
-
-#include "SpriteShader.h"
-#include <appkit-gl-engine/Transform.h>
-#include <appkit-gl-engine/DefaultEngineShader.h>
-#include <appkit-gl-engine/GL/GLRenderState.h>
-#include <appkit-gl-engine/util/ShaderPropertyBag.h>
-#include <appkit-gl-engine/Components/Core/ComponentCamera.h>
-
+//#include <appkit-gl-engine/shaders/ShaderUnlitTextureVertexColorAlphaWithMask.h>
+#include <appkit-gl-engine/shaders/WithMask/ShaderUnlitTextureVertexColorAlphaWithMask.h>
 #include <appkit-gl-engine/Engine.h>
 #include <appkit-gl-engine/ResourceMap.h>
 
@@ -13,7 +7,8 @@ namespace AppKit
 {
     namespace GLEngine
     {
-        SpriteShader::SpriteShader()
+
+        ShaderUnlitTextureVertexColorAlphaWithMask::ShaderUnlitTextureVertexColorAlphaWithMask()
         {
             format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
 
@@ -33,13 +28,22 @@ namespace AppKit
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
+
+                MASKSHADER_FRAGMENT_UNIFORM
+
+                MASKSHADER_COMPUTE_MASK_FUNCTION
+
                 "varying vec2 uv;\n"
                 "varying vec4 color;\n"
                 "uniform vec4 uColor;\n"
                 "uniform sampler2D uTexture;\n"
                 "void main() {\n"
+                "  float mask = compute_mask();\n"
+                "  if (mask <= 0.0)\n"
+                "    discard;\n"
                 "  vec4 texel = texture2D(uTexture, uv);\n"
                 "  vec4 result = texel * color * uColor;\n"
+                "  result.a *= mask;\n"
                 "  if (result.a <= 0.0)\n"
                 "    discard;\n"
                 "  gl_FragColor = result;\n"
@@ -49,13 +53,9 @@ namespace AppKit
             DefaultEngineShader::setupAttribLocation();
             link(__FILE__, __LINE__);
 
-            // u_screenSizePx = getUniformLocation("uScreenSizePx");
-            // u_screenSizePx_inv = getUniformLocation("uScreenSizePx_inv");
             u_mvp = getUniformLocation("uMVP");
-            u_color = getUniformLocation("uColor");
             u_texture = getUniformLocation("uTexture");
-
-            // initialize uniforms
+            u_color = getUniformLocation("uColor");
 
             uMVP = MathCore::mat4f();
             uColor = MathCore::vec4f(1.0, 1.0, 1.0, 1.0);
@@ -68,10 +68,12 @@ namespace AppKit
             setUniform(u_color, uColor);
             setUniform(u_texture, uTexture); // tex unit 0
 
+            mask_query_uniform_locations_and_set_default_values();
+
             state->CurrentShader = nullptr;
         }
 
-        void SpriteShader::setMVP(const MathCore::mat4f &mvp)
+        void ShaderUnlitTextureVertexColorAlphaWithMask::setMVP(const MathCore::mat4f &mvp)
         {
             if (uMVP != mvp)
             {
@@ -79,8 +81,15 @@ namespace AppKit
                 setUniform(u_mvp, uMVP);
             }
         }
-
-        void SpriteShader::setColor(const MathCore::vec4f &color)
+        void ShaderUnlitTextureVertexColorAlphaWithMask::setTexture(int texunit)
+        {
+            if (uTexture != texunit)
+            {
+                uTexture = texunit;
+                setUniform(u_texture, uTexture);
+            }
+        }
+        void ShaderUnlitTextureVertexColorAlphaWithMask::setColor(const MathCore::vec4f &color)
         {
             if (uColor != color)
             {
@@ -89,27 +98,19 @@ namespace AppKit
             }
         }
 
-        void SpriteShader::setTexture(int texunit)
+        Utils::ShaderPropertyBag ShaderUnlitTextureVertexColorAlphaWithMask::createDefaultBag() const
         {
-            if (uTexture != texunit)
-            {
-                uTexture = texunit;
-                setUniform(u_texture, uTexture);
-            }
-        }
-
-        Utils::ShaderPropertyBag SpriteShader::createDefaultBag() const
-        {
-            Utils::ShaderPropertyBag bag;
+            Utils::ShaderPropertyBag bag = mask_default_bag();
 
             bag.addProperty("uColor", uColor);
             bag.addProperty("uTexture", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
-            bag.addProperty("UseDiscard", false);
+            bag.addProperty("BlendMode", (int)AppKit::GLEngine::BlendModeAlpha);
+
 
             return bag;
         }
 
-        void SpriteShader::ActiveShader_And_SetUniformsFromMaterial(
+        void ShaderUnlitTextureVertexColorAlphaWithMask::ActiveShader_And_SetUniformsFromMaterial(
             GLRenderState *state,
             ResourceMap *resourceMap,
             RenderPipeline *renderPipeline,
@@ -117,12 +118,11 @@ namespace AppKit
         {
             const auto &materialBag = material->property_bag;
             state->CurrentShader = this;
-            if (materialBag.getProperty<bool>("UseDiscard"))
-                state->BlendMode = AppKit::GLEngine::BlendModeDisabled;
-            else
-                state->BlendMode = AppKit::GLEngine::BlendModeAlpha;
+
+            state->BlendMode = (AppKit::GLEngine::BlendModeType)materialBag.getProperty<int>("BlendMode");
             setColor(materialBag.getProperty<MathCore::vec4f>("uColor"));
 
+            setMaskFromPropertyBag(materialBag);
 
             auto tex = materialBag.getProperty<std::shared_ptr<OpenGL::VirtualTexture>>("uTexture");
             if (tex == nullptr)
@@ -132,8 +132,9 @@ namespace AppKit
             state->setTextureUnitActivationArray(textureUnitActivation, 1);
 
             setTexture(0);
+
         }
-        void SpriteShader::setUniformsFromMatrices(
+        void ShaderUnlitTextureVertexColorAlphaWithMask::setUniformsFromMatrices(
             GLRenderState *state,
             ResourceMap *resourceMap,
             RenderPipeline *renderPipeline,
@@ -147,5 +148,6 @@ namespace AppKit
         {
             setMVP(*mvp);
         }
+
     }
 }

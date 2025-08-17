@@ -132,6 +132,11 @@ namespace AppKit
             pbrShaderSelector = nullptr;
             shaderDepthOnly = nullptr;
             lineShader = nullptr;
+            spriteShader = nullptr;
+
+            shaderUnlitTextureVertexColorAlphaWithMask = nullptr;
+            shaderUnlitVertexColorWithMask = nullptr;
+            spriteShaderWithMask = nullptr;
         }
 
         void ResourceMap::ensure_default_texture_creation()
@@ -153,6 +158,15 @@ namespace AppKit
                 shaderDepthOnly = std::make_shared<ShaderDepthOnly>();
             if (lineShader == nullptr)
                 lineShader = std::make_shared<LineShader>();
+            if (spriteShader == nullptr)
+                spriteShader = std::make_shared<SpriteShader>();
+
+            if (shaderUnlitTextureVertexColorAlphaWithMask == nullptr)
+                shaderUnlitTextureVertexColorAlphaWithMask = std::make_shared<ShaderUnlitTextureVertexColorAlphaWithMask>();
+            if (shaderUnlitVertexColorWithMask == nullptr)
+                shaderUnlitVertexColorWithMask = std::make_shared<ShaderUnlitVertexColorWithMask>();
+            if (spriteShaderWithMask == nullptr)
+                spriteShaderWithMask = std::make_shared<SpriteShaderWithMask>();
 
             if (defaultPBRMaterial == nullptr)
             {

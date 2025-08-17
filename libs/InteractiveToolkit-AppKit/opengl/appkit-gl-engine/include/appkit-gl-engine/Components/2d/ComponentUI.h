@@ -21,7 +21,6 @@
 // #include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 // #include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 
-#include "../../shaders/SpriteShader.h"
 
 #include "UIItem.h"
 
@@ -40,7 +39,6 @@ namespace AppKit
                 bool always_clone;
 
                 AppKit::GLEngine::ResourceMap *resourceMap;
-                std::shared_ptr<SpriteShader> spriteShader;
 
                 Platform::SmartVector<UIItem> items;
 
@@ -142,8 +140,7 @@ namespace AppKit
 
                 void clear();
 
-                void Initialize(AppKit::GLEngine::ResourceMap *resourceMap,
-                                std::shared_ptr<SpriteShader> spriteShader);
+                void Initialize(AppKit::GLEngine::ResourceMap *resourceMap);
 
                 ComponentUI();
 
@@ -163,4 +160,4 @@ namespace AppKit
     }
 }
 
-#include "UIItem_get_set.inl"
+#include "./UIItem_get_set.inl"

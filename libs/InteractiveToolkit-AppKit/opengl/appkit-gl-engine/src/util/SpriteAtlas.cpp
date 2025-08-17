@@ -1,4 +1,4 @@
-#include "SpriteAtlas.h"
+#include <appkit-gl-engine/util/SpriteAtlas.h>
 #include <InteractiveToolkit-Extension/InteractiveToolkit-Extension.h>
 
 #include <InteractiveToolkit/EventCore/ExecuteOnScopeEnd.h>

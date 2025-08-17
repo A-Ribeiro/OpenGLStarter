@@ -1,12 +1,12 @@
 // #include <appkit-gl-engine/Components/ComponentSprite.h>
-#include "ComponentSprite.h"
+#include <appkit-gl-engine/components/2d/ComponentSprite.h>
 
-#include "./ui/ComponentRectangle.h"
+#include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 
-#include "../shaders/SpriteShaderWithMask.h"
+// #include "../shaders/SpriteShaderWithMask.h"
 
 using namespace AppKit::GLEngine;
 
@@ -20,7 +20,6 @@ namespace AppKit
 
             void ComponentSprite::checkOrCreateAuxiliaryComponents(
                 AppKit::GLEngine::ResourceMap *resourceMap,
-                std::shared_ptr<SpriteShader> spriteShader,
                 std::shared_ptr<AppKit::OpenGL::GLTexture> texture)
             {
                 if (material != nullptr || mesh != nullptr || meshWrapper != nullptr)
@@ -29,7 +28,6 @@ namespace AppKit
 
                 if (material == nullptr)
                 {
-                    last_spriteShader = spriteShader;
                     last_texture = texture;
                     uint64_t spriteMaterialId = (uint64_t)texture.get();
                     if (resourceMap->spriteMaterialMap.find(spriteMaterialId) != resourceMap->spriteMaterialMap.end())
@@ -39,7 +37,7 @@ namespace AppKit
                     else
                     {
                         material = transform->addNewComponent<ComponentMaterial>();
-                        material->setShader(spriteShader);
+                        material->setShader(resourceMap->spriteShader);
                         material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)texture);
                         resourceMap->spriteMaterialMap[spriteMaterialId] = material;
                     }
@@ -63,7 +61,6 @@ namespace AppKit
 
             void ComponentSprite::setTexture(
                 AppKit::GLEngine::ResourceMap *resourceMap,
-                std::shared_ptr<SpriteShader> spriteShader,
                 std::shared_ptr<AppKit::OpenGL::GLTexture> texture,
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
@@ -74,7 +71,7 @@ namespace AppKit
                 // directTexture.pivot = pivot;
                 // directTexture.color = color;
                 // type = SpriteSourceDirectTexture;
-                checkOrCreateAuxiliaryComponents(resourceMap, spriteShader, texture);
+                checkOrCreateAuxiliaryComponents(resourceMap, texture);
 
                 bool onCloneNoModify =
                     meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify ||
@@ -157,7 +154,6 @@ namespace AppKit
 
             void ComponentSprite::setTextureFromAtlas(
                 AppKit::GLEngine::ResourceMap *resourceMap,
-                std::shared_ptr<SpriteShader> spriteShader,
                 std::shared_ptr<SpriteAtlas> atlas,
                 const std::string &name,
                 const MathCore::vec2f &pivot,
@@ -165,7 +161,7 @@ namespace AppKit
                 const MathCore::vec2f &size_constraint,
                 MeshUploadMode meshUploadMode)
             {
-                checkOrCreateAuxiliaryComponents(resourceMap, spriteShader, atlas->texture);
+                checkOrCreateAuxiliaryComponents(resourceMap, atlas->texture);
 
                 bool onCloneNoModify =
                     meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify ||
@@ -267,7 +263,7 @@ namespace AppKit
                         else
                         {
                             material = transform->replaceComponent<ComponentMaterial>(material, Component::CreateShared<ComponentMaterial>());
-                            material->setShader(last_spriteShader);
+                            material->setShader(resourceMap->spriteShader);
                             material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)last_texture);
                             resourceMap->spriteMaterialMap[spriteMaterialId] = material;
                         }
@@ -277,7 +273,7 @@ namespace AppKit
                 {
                     auto new_material = Component::CreateShared<Components::ComponentMaterial>();
                     new_material->always_clone = true;
-                    new_material->setShader(std::make_shared<AppKit::GLEngine::SpriteShaderWithMask>());
+                    new_material->setShader(resourceMap->spriteShaderWithMask);
                     new_material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)last_texture);
                     new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
                     new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
@@ -325,7 +321,6 @@ namespace AppKit
                 result->mask = this->mask;
 
                 result->last_texture = this->last_texture;
-                result->last_spriteShader = this->last_spriteShader;
 
                 //if (this->mask)
                 //{

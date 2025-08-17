@@ -1,14 +1,12 @@
 // #include <appkit-gl-engine/shaders/ShaderUnlitVertexColorWithMask.h>
-#include "./ShaderUnlitVertexColorWithMask.h"
+#include <appkit-gl-engine/shaders/WithMask/ShaderUnlitVertexColorWithMask.h>
 #include <appkit-gl-engine/Engine.h>
 #include <appkit-gl-engine/ResourceMap.h>
 
-#include "../components/ui/ComponentRectangle.h"
+#include <appkit-gl-engine/components/2d/ComponentRectangle.h>
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
-
-#include "./MaskCommon.h"
 
 namespace AppKit
 {
