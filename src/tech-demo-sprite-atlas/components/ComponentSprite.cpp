@@ -252,6 +252,8 @@ namespace AppKit
                                           std::shared_ptr<ComponentCamera> &camera,
                                           std::shared_ptr<ComponentRectangle> &mask)
             {
+                this->mask = mask;
+
                 auto transform = getTransform();
                 if (mask == nullptr)
                 {
@@ -325,12 +327,12 @@ namespace AppKit
                 result->last_texture = this->last_texture;
                 result->last_spriteShader = this->last_spriteShader;
 
-                if (this->mask)
-                {
-                    printf("props before clone:\n");
-                    for (const auto &entry : material->property_bag.getProperties())
-                        printf("    \"%s\" = %s\n", entry.first.c_str(), entry.second.toString().c_str());
-                }
+                //if (this->mask)
+                //{
+                //    printf("props before clone:\n");
+                //    for (const auto &entry : material->property_bag.getProperties())
+                //        printf("    \"%s\" = %s\n", entry.first.c_str(), entry.second.toString().c_str());
+                //}
 
                 return result;
             }
@@ -345,11 +347,10 @@ namespace AppKit
                 if (componentMap.find(mask) != componentMap.end())
                 {
                     mask = std::dynamic_pointer_cast<ComponentRectangle>(componentMap[mask]);
-                    material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
-
-                    printf("props after clone:\n");
-                    for (const auto &entry : material->property_bag.getProperties())
-                        printf("    \"%s\" = %s\n", entry.first.c_str(), entry.second.toString().c_str());
+                    //material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    //printf("props after clone:\n");
+                    //for (const auto &entry : material->property_bag.getProperties())
+                    //    printf("    \"%s\" = %s\n", entry.first.c_str(), entry.second.toString().c_str());
                 }
             }
 
