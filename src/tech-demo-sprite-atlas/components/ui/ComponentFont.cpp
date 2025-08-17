@@ -6,6 +6,8 @@
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 
 #include "../../shaders/ShaderUnlitTextureVertexColorAlphaWithMask.h"
+#include "../../shaders/ShaderUnlitVertexColorWithMask.h"
+
 
 
 using namespace AppKit::GLEngine;
@@ -202,15 +204,25 @@ namespace AppKit
                     material = transform->replaceComponent<ComponentMaterial>(material, last_fontResource->material);
                 else
                 {
-                    // auto new_material = std::dynamic_pointer_cast<ComponentMaterial>(last_fontResource->material_mask->duplicate_ref_or_clone(true));
-                    auto new_material = Component::CreateShared<Components::ComponentMaterial>();
-                    new_material->always_clone = true;
-                    new_material->setShader(std::make_shared<AppKit::GLEngine::ShaderUnlitTextureVertexColorAlphaWithMask>());
-                    auto tex = last_fontResource->material->property_bag.getProperty("uTexture").get<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>();
-                    new_material->property_bag.getProperty("uTexture").set(tex);
-                    new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
-                    new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
-                    material = transform->replaceComponent<ComponentMaterial>(material, new_material);
+                    if (last_fontResource->polygonFontCache){
+                        auto new_material = Component::CreateShared<Components::ComponentMaterial>();
+                        new_material->always_clone = true;
+                        new_material->setShader(std::make_shared<AppKit::GLEngine::ShaderUnlitVertexColorWithMask>());
+                        new_material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
+                        new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                        new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+                        material = transform->replaceComponent<ComponentMaterial>(material, new_material);
+                    } else {
+                        // auto new_material = std::dynamic_pointer_cast<ComponentMaterial>(last_fontResource->material_mask->duplicate_ref_or_clone(true));
+                        auto new_material = Component::CreateShared<Components::ComponentMaterial>();
+                        new_material->always_clone = true;
+                        new_material->setShader(std::make_shared<AppKit::GLEngine::ShaderUnlitTextureVertexColorAlphaWithMask>());
+                        auto tex = last_fontResource->material->property_bag.getProperty("uTexture").get<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>();
+                        new_material->property_bag.getProperty("uTexture").set(tex);
+                        new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                        new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+                        material = transform->replaceComponent<ComponentMaterial>(material, new_material);
+                    }
                 }
             }
 
@@ -237,6 +249,8 @@ namespace AppKit
                 result->meshWrapper = this->meshWrapper;
 
                 result->mask = this->mask;
+
+                result->last_fontResource = this->last_fontResource;
 
                 return result;
             }

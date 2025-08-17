@@ -114,23 +114,23 @@ void MainScene::bindResourcesToGraph()
     uiComponent->Initialize(resourceMap, spriteShader);
 
     auto base_mask = uiComponent->addRectangle(
-                                    vec2f(-100, 0),                              // pos
+                                    vec2f(-150, 0),                           // pos
                                     vec2f(256, 512),                          // size
                                     MathCore::vec4f(0.0f, 0.25f, 0.5f, 0.8f), // color
                                     MathCore::vec4f(64, 0, 16, -1),           // radius
                                     StrokeModeGrowInside,                     // stroke mode
-                                    15.0f,                                     // stroke thickness
+                                    15.0f,                                    // stroke thickness
                                     MathCore::vec4f(0.0f, 0.0f, 0.8f, 0.6f),  // stroke color
                                     40.0f,                                    // drop shadow thickness
                                     MathCore::vec4f(0.4f, 0.4f, 0.4f, 0.5f),  // drop shadow color
                                     0                                         // z
-                                    ,"rect_mask")
+                                    ,
+                                    "rect_mask")
                          .get<ComponentRectangle>();
 
     base_mask->getTransform()->setLocalRotation(MathCore::GEN<MathCore::quatf>::fromAxisAngle(MathCore::vec3f(0, 0, 1), MathCore::OP<float>::deg_2_rad(15.0f)));
 
     base_mask->getTransform()->setLocalScale(MathCore::vec3f(2.0f, 1.0f, 1.0f));
-
 
     auto front_screen = uiComponent->addRectangle(
                                        vec2f(0, 0),                                                        // pos
@@ -147,55 +147,59 @@ void MainScene::bindResourcesToGraph()
                             .get<ComponentRectangle>();
     front_screen->setMask(resourceMap, camera, base_mask);
 
-    uiComponent->addSpriteFromAtlas(
+    auto sprite = uiComponent->addSpriteFromAtlas(
         vec2f(0, 0),                             // pos
         spriteAtlas,                             // atlas
         "resources/opengl_logo_white.png",       // texture
         vec2f(0.5f),                             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
-        MathCore::vec2f(256 - 16, -1),           // size constraint
+        MathCore::vec2f(256, -1),                // size constraint
         -1                                       // z
-    );
+    ).get<ComponentSprite>();
+    sprite->setMask(resourceMap, camera, base_mask);
 
     auto textComponent = uiComponent->addTextureText(
-        "resources/Roboto-Regular-100.basof2",                                            // font_path
-        MathCore::vec2f(0, 128),                                                          // pos
-        -1,                                                                               // z
-        "Hello, {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}World{pop;} (Text) !", // text
-        64.0f,                                                                            // size
-        -1.0f,                                                                            // max_width
-        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                                          // faceColor
-        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                                          // strokeColor
-        MathCore::vec3f(0.0f, 0.0f, -0.02f),                                              // strokeOffset
-        AppKit::OpenGL::GLFont2HorizontalAlign_center,                                    // horizontalAlign
-        AppKit::OpenGL::GLFont2VerticalAlign_bottom,                                      // verticalAlign
-        1.0f,                                                                             // lineHeight
-        AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
-        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
-        U' ',                                                                             // wordSeparatorChar
-        "top_text").get<ComponentFont>();
+                                        "resources/Roboto-Regular-100.basof2",                                            // font_path
+                                        MathCore::vec2f(0, 128),                                                          // pos
+                                        -1,                                                                               // z
+                                        "Hello, {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}World{pop;} (Text) !", // text
+                                        64.0f,                                                                            // size
+                                        -1.0f,                                                                            // max_width
+                                        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                                          // faceColor
+                                        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                                          // strokeColor
+                                        MathCore::vec3f(0.0f, 0.0f, -0.02f),                                              // strokeOffset
+                                        AppKit::OpenGL::GLFont2HorizontalAlign_center,                                    // horizontalAlign
+                                        AppKit::OpenGL::GLFont2VerticalAlign_bottom,                                      // verticalAlign
+                                        1.0f,                                                                             // lineHeight
+                                        AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
+                                        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
+                                        U' ',                                                                             // wordSeparatorChar
+                                        "top_text")
+                             .get<ComponentFont>();
     textComponent->setMask(resourceMap, camera, base_mask);
 
-    uiComponent->addPolygonText(
-        "resources/Roboto-Regular-100.basof2",                                            // font_path
-        64.0f,                                                                            // polygon_size
-        10.0f,                                                                            // polygon_distance_tolerance
-        &app->threadPool,                                                                 // polygon_threadPool
-        MathCore::vec2f(0, -128),                                                         // pos
-        -1,                                                                               // z
-        "Hello, {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}World{pop;} (Text) !", // text
-        64.0f,                                                                            // size
-        -1.0f,                                                                            // max_width
-        MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                                          // faceColor
-        MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                                          // strokeColor
-        MathCore::vec3f(0.0f, 0.0f, -0.02f),                                              // strokeOffset
-        AppKit::OpenGL::GLFont2HorizontalAlign_center,                                    // horizontalAlign
-        AppKit::OpenGL::GLFont2VerticalAlign_top,                                         // verticalAlign
-        1.0f,                                                                             // lineHeight
-        AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
-        AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
-        U' ',                                                                             // wordSeparatorChar
-        "bottom_text");
+    textComponent = uiComponent->addPolygonText(
+                                   "resources/Roboto-Regular-100.basof2",                                            // font_path
+                                   64.0f,                                                                            // polygon_size
+                                   10.0f,                                                                            // polygon_distance_tolerance
+                                   &app->threadPool,                                                                 // polygon_threadPool
+                                   MathCore::vec2f(0, -128),                                                         // pos
+                                   -1,                                                                               // z
+                                   "Hello, {push;lineHeight:0.8;faceColor:ff0000ff;size:80.0;}World{pop;} (Text) !", // text
+                                   64.0f,                                                                            // size
+                                   -1.0f,                                                                            // max_width
+                                   MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                                          // faceColor
+                                   MathCore::vec4f(0.0f, 0.0f, 0.0f, 1.0f),                                          // strokeColor
+                                   MathCore::vec3f(0.0f, 0.0f, -0.02f),                                              // strokeOffset
+                                   AppKit::OpenGL::GLFont2HorizontalAlign_center,                                    // horizontalAlign
+                                   AppKit::OpenGL::GLFont2VerticalAlign_top,                                         // verticalAlign
+                                   1.0f,                                                                             // lineHeight
+                                   AppKit::OpenGL::GLFont2WrapMode_Word,                                             // wrapMode
+                                   AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,                 // firstLineHeightMode
+                                   U' ',                                                                             // wordSeparatorChar
+                                   "bottom_text")
+                        .get<ComponentFont>();
+    textComponent->setMask(resourceMap, camera, base_mask);
 
     // setup renderstate
     uiNode->setLocalPosition(MathCore::vec3f(0, 0, componentCameraOrthographic->nearPlane + 100.0f));
@@ -203,7 +207,7 @@ void MainScene::bindResourcesToGraph()
     {
         auto uiNodeParent = uiNode->getParent();
         auto new_node = uiNodeParent->addChild(uiNode->clone(false));
-        new_node->setLocalPosition(MathCore::vec3f(500.0f, 0, componentCameraOrthographic->nearPlane + 100.0f));
+        new_node->setLocalPosition(MathCore::vec3f(550.0f, 0, componentCameraOrthographic->nearPlane + 100.0f));
 
         auto new_ui = new_node->findComponent<ComponentUI>();
 
@@ -230,10 +234,8 @@ void MainScene::bindResourcesToGraph()
         );
         // TODO: implement text set content after set mask
         //  it is resetting material every time the program sets the text to display
-        top_text_font->setMask(resourceMap, camera, 
-            new_ui->getItemByName("rect_mask").get<ComponentRectangle>()
-        );
-
+        top_text_font->setMask(resourceMap, camera,
+                               new_ui->getItemByName("rect_mask").get<ComponentRectangle>());
 
         top_text_font = new_ui->getItemByName("bottom_text").get<ComponentFont>();
 
@@ -244,7 +246,7 @@ void MainScene::bindResourcesToGraph()
             10.0f,                                 // polygon_distance_tolerance
             &app->threadPool,                      // polygon_threadPool
             engine->sRGBCapable,
-            "Text Bottom!",                                                   // text
+            "Text Bottom! With Many Letters",                                 // text
             64.0f,                                                            // size
             -1.0f,                                                            // max_width
             MathCore::vec4f(1.0f, 1.0f, 0.0f, 1.0f),                          // faceColor
@@ -257,6 +259,10 @@ void MainScene::bindResourcesToGraph()
             AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
             U' '                                                              // wordSeparatorChar
         );
+        // TODO: implement text set content after set mask
+        //  it is resetting material every time the program sets the text to display
+        top_text_font->setMask(resourceMap, camera,
+                               new_ui->getItemByName("rect_mask").get<ComponentRectangle>());
     }
 
     auto rect = renderWindow->CameraViewport.c_ptr();

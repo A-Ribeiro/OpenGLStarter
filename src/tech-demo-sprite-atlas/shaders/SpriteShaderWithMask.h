@@ -1,33 +1,38 @@
+
 #pragma once
 
 #include <appkit-gl-engine/DefaultEngineShader.h>
+//#include <appkit-gl-engine/ResourceMap.h>
 #include "./MaskCommon.h"
+
 
 namespace AppKit
 {
     namespace GLEngine
     {
+
         namespace Components
         {
             class ComponentRectangle;
         }
 
-        class ShaderUnlitTextureVertexColorAlphaWithMask : public AddShaderRectangleMask
+        class SpriteShaderWithMask : public AddShaderRectangleMask
         {
+        private:
             int u_mvp;
-            int u_texture;
             int u_color;
+            int u_texture;
 
             MathCore::mat4f uMVP;
             MathCore::vec4f uColor;
             int uTexture;
 
         public:
-            ShaderUnlitTextureVertexColorAlphaWithMask();
+            SpriteShaderWithMask();
 
             void setMVP(const MathCore::mat4f &mvp);
-            void setTexture(int texunit);
             void setColor(const MathCore::vec4f &color);
+            void setTexture(int texunit);
 
             Utils::ShaderPropertyBag createDefaultBag() const override;
 
@@ -47,8 +52,6 @@ namespace AppKit
                 const MathCore::mat4f *mv,
                 const MathCore::mat4f *mvIT,
                 const MathCore::mat4f *mvInv)override;
-
         };
-        
     }
 }

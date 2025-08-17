@@ -33,6 +33,7 @@ namespace AppKit
     {
         namespace Components
         {
+            class ComponentRectangle;
 
             // enum SpriteSourceType
             // {
@@ -91,6 +92,11 @@ namespace AppKit
                 std::shared_ptr<ComponentMesh> mesh;
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
 
+                std::shared_ptr<ComponentRectangle> mask;
+
+                std::shared_ptr<AppKit::OpenGL::GLTexture> last_texture;
+                std::shared_ptr<SpriteShader> last_spriteShader;
+
                 void checkOrCreateAuxiliaryComponents(
                     AppKit::GLEngine::ResourceMap *resourceMap,
                     std::shared_ptr<SpriteShader> spriteShader,
@@ -125,6 +131,10 @@ namespace AppKit
                 //     const MathCore::vec4f &color,
                 //     bool staticMesh
                 // );
+
+                void setMask(AppKit::GLEngine::ResourceMap *resourceMap,
+                             std::shared_ptr<ComponentCamera> &camera,
+                             std::shared_ptr<ComponentRectangle> &mask);
 
                 ComponentSprite();
 

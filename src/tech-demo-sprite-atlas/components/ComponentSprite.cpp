@@ -1,6 +1,13 @@
 // #include <appkit-gl-engine/Components/ComponentSprite.h>
 #include "ComponentSprite.h"
 
+#include "./ui/ComponentRectangle.h"
+
+#include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
+
+#include "../shaders/SpriteShaderWithMask.h"
+
 using namespace AppKit::GLEngine;
 
 namespace AppKit
@@ -22,6 +29,8 @@ namespace AppKit
 
                 if (material == nullptr)
                 {
+                    last_spriteShader = spriteShader;
+                    last_texture = texture;
                     uint64_t spriteMaterialId = (uint64_t)texture.get();
                     if (resourceMap->spriteMaterialMap.find(spriteMaterialId) != resourceMap->spriteMaterialMap.end())
                     {
@@ -168,7 +177,6 @@ namespace AppKit
 
                 auto entry = atlas->getSprite(name);
 
-
                 MathCore::vec3f size((float)entry.spriteSize.width, (float)entry.spriteSize.height, 0.0f);
                 if (size_constraint.x > 0.0f && size_constraint.y > 0.0f)
                     size = MathCore::vec3f(size_constraint.x, size_constraint.y, 0.0f);
@@ -240,6 +248,44 @@ namespace AppKit
                     true);
             }
 
+            void ComponentSprite::setMask(AppKit::GLEngine::ResourceMap *resourceMap,
+                                          std::shared_ptr<ComponentCamera> &camera,
+                                          std::shared_ptr<ComponentRectangle> &mask)
+            {
+                auto transform = getTransform();
+                if (mask == nullptr)
+                {
+                    if (last_texture != nullptr)
+                    {
+                        uint64_t spriteMaterialId = (uint64_t)last_texture.get();
+                        if (resourceMap->spriteMaterialMap.find(spriteMaterialId) != resourceMap->spriteMaterialMap.end())
+                        {
+                            material = transform->replaceComponent<ComponentMaterial>(material, resourceMap->spriteMaterialMap[spriteMaterialId]);
+                        }
+                        else
+                        {
+                            material = transform->replaceComponent<ComponentMaterial>(material, Component::CreateShared<ComponentMaterial>());
+                            material->setShader(last_spriteShader);
+                            material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)last_texture);
+                            resourceMap->spriteMaterialMap[spriteMaterialId] = material;
+                        }
+                    }
+                }
+                else
+                {
+                    auto new_material = Component::CreateShared<Components::ComponentMaterial>();
+                    new_material->always_clone = true;
+                    new_material->setShader(std::make_shared<AppKit::GLEngine::SpriteShaderWithMask>());
+                    new_material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)last_texture);
+                    new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+                    material = transform->replaceComponent<ComponentMaterial>(material, new_material);
+
+                    mesh->always_clone = true;
+                    this->always_clone = true;
+                }
+            }
+
             ComponentSprite::ComponentSprite() : Component(ComponentSprite::Type)
             {
                 // type = SpriteSourceNone;
@@ -274,6 +320,18 @@ namespace AppKit
                 result->mesh = this->mesh;
                 result->meshWrapper = this->meshWrapper;
 
+                result->mask = this->mask;
+
+                result->last_texture = this->last_texture;
+                result->last_spriteShader = this->last_spriteShader;
+
+                if (this->mask)
+                {
+                    printf("props before clone:\n");
+                    for (const auto &entry : material->property_bag.getProperties())
+                        printf("    \"%s\" = %s\n", entry.first.c_str(), entry.second.toString().c_str());
+                }
+
                 return result;
             }
             void ComponentSprite::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
@@ -284,6 +342,15 @@ namespace AppKit
                     mesh = std::dynamic_pointer_cast<ComponentMesh>(componentMap[mesh]);
                 if (componentMap.find(meshWrapper) != componentMap.end())
                     meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(componentMap[meshWrapper]);
+                if (componentMap.find(mask) != componentMap.end())
+                {
+                    mask = std::dynamic_pointer_cast<ComponentRectangle>(componentMap[mask]);
+                    material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+
+                    printf("props after clone:\n");
+                    for (const auto &entry : material->property_bag.getProperties())
+                        printf("    \"%s\" = %s\n", entry.first.c_str(), entry.second.toString().c_str());
+                }
             }
 
             void ComponentSprite::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
