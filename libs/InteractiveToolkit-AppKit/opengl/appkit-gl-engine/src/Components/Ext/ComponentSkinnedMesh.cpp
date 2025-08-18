@@ -563,7 +563,7 @@ namespace AppKit
 
                 TransformMapT internalModelMap;
 
-                this->model_base = this->model_base->clone(false, &internalModelMap);
+                this->model_base = this->model_base->clone(resourceMap, false, &internalModelMap);
 
                 {
                     mixer.fix_internal_references(resourceMap, internalModelMap);
