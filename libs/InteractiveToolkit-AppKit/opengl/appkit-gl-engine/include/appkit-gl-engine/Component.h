@@ -89,9 +89,9 @@ namespace AppKit
         protected:
             // clone a component by using the same reference when possible,
             // or making a new object from the original
-            virtual std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone) = 0;
+            virtual std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone) = 0;
             // after a full clone, you need to fix the internal component references
-            virtual void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap) = 0;
+            virtual void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap) = 0;
 
         public:
             inline std::shared_ptr<Component> self()

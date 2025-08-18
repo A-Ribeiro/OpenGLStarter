@@ -188,7 +188,7 @@ namespace AppKit
                 }
             }
 
-            std::shared_ptr<Component> ComponentCameraLookToNode::duplicate_ref_or_clone(bool force_clone){
+            std::shared_ptr<Component> ComponentCameraLookToNode::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone){
                 auto result = Component::CreateShared<ComponentCameraLookToNode>();
 
                 result->camera = this->camera;
@@ -204,7 +204,7 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentCameraLookToNode::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+            void ComponentCameraLookToNode::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap){
                 {
                     auto found = transformMap.find(ToShared(this->targetRef));
                     if (found != transformMap.end())

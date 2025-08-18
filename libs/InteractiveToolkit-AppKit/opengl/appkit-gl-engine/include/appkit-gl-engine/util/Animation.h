@@ -373,7 +373,7 @@ namespace AppKit
             void didExternalSample();
 
             AnimationClip* clone(std::unordered_map<NodeAnimation*,NodeAnimation*> *nodeMap);
-            void fix_internal_references(Transform::TransformMapT &transformMap);
+            void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, Transform::TransformMapT &transformMap);
         };
 
         class AnimationTransitionChannelInformation
@@ -485,7 +485,7 @@ namespace AppKit
 
             void copy(const AnimationMixer& src);
 
-            void fix_internal_references(Transform::TransformMapT &transformMap);
+            void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, Transform::TransformMapT &transformMap);
 
         };
 

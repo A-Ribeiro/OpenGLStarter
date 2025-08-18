@@ -102,7 +102,7 @@ namespace AppKit
             }
 
             // always clone
-            std::shared_ptr<Component> ComponentLight::duplicate_ref_or_clone(bool force_clone){
+            std::shared_ptr<Component> ComponentLight::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone){
                 auto result = Component::CreateShared<ComponentLight>();
 
                 result->type = this->type;
@@ -111,7 +111,7 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentLight::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+            void ComponentLight::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap){
 
             }
 

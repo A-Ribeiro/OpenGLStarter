@@ -129,7 +129,7 @@ namespace AppKit
                 createAuxiliaryComponents();
             }
 
-            std::shared_ptr<Component> ComponentFontToMesh::duplicate_ref_or_clone(bool force_clone)
+            std::shared_ptr<Component> ComponentFontToMesh::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
             {
                 auto result = Component::CreateShared<ComponentFontToMesh>();
 
@@ -138,7 +138,7 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentFontToMesh::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            void ComponentFontToMesh::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
             {
                 auto found_material = componentMap.find(this->material);
                 if (found_material != componentMap.end())

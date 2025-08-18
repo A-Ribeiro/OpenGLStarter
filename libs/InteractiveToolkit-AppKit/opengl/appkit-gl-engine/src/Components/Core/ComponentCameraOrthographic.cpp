@@ -283,7 +283,7 @@ namespace AppKit
             }
 
             // always clone
-            std::shared_ptr<Component> ComponentCameraOrthographic::duplicate_ref_or_clone(bool force_clone){
+            std::shared_ptr<Component> ComponentCameraOrthographic::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone){
                 auto result = Component::CreateShared<ComponentCameraOrthographic>();
 
                 result->nearPlane.setValueNoCallback(this->nearPlane);

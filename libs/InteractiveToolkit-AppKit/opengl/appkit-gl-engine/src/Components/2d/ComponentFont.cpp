@@ -213,7 +213,7 @@ namespace AppKit
                         new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
                         material = transform->replaceComponent<ComponentMaterial>(material, new_material);
                     } else {
-                        // auto new_material = std::dynamic_pointer_cast<ComponentMaterial>(last_fontResource->material_mask->duplicate_ref_or_clone(true));
+                        // auto new_material = std::dynamic_pointer_cast<ComponentMaterial>(last_fontResource->material_mask->duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, true));
                         auto new_material = Component::CreateShared<Components::ComponentMaterial>();
                         new_material->always_clone = true;
                         new_material->setShader(resourceMap->shaderUnlitTextureVertexColorAlphaWithMask);
@@ -236,7 +236,7 @@ namespace AppKit
             }
 
             // always clone
-            std::shared_ptr<Component> ComponentFont::duplicate_ref_or_clone(bool force_clone)
+            std::shared_ptr<Component> ComponentFont::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
             {
                 if (!always_clone && !force_clone)
                     return self();
@@ -254,7 +254,7 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentFont::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            void ComponentFont::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
             {
                 if (componentMap.find(material) != componentMap.end())
                     material = std::dynamic_pointer_cast<ComponentMaterial>(componentMap[material]);

@@ -59,10 +59,10 @@ namespace AppKit
                 const CollisionCore::Sphere<MathCore::vec3f> &camera_sphere);
             
 
-            std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone) {
+            std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone) {
                 return nullptr;
             }
-            void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+            void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap){
                 
             }
 

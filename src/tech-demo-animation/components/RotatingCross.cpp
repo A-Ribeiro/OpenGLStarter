@@ -35,12 +35,12 @@ namespace AppKit
                         0);
             }
 
-            std::shared_ptr<Component> RotatingCross::duplicate_ref_or_clone(bool force_clone) {
+            std::shared_ptr<Component> RotatingCross::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone) {
                 auto result = Component::CreateShared<RotatingCross>();
                 result->speed_degrees = this->speed_degrees;
                 return result;
             }
-            void RotatingCross::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+            void RotatingCross::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap){
                 
             }
 

@@ -272,7 +272,7 @@ namespace AppKit
             }
 
 
-            std::shared_ptr<Component> ComponentFrustumCulling::duplicate_ref_or_clone(bool force_clone){
+            std::shared_ptr<Component> ComponentFrustumCulling::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone){
                 auto result = Component::CreateShared<ComponentFrustumCulling>();
 
                 result->debugCollisionShapes = this->debugCollisionShapes;
@@ -293,7 +293,7 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentFrustumCulling::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+            void ComponentFrustumCulling::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap){
 
             }
 

@@ -762,7 +762,7 @@ namespace AppKit
                 lines->syncVBODynamic();
             }
 
-            std::shared_ptr<Component> ComponentMeshWrapper::duplicate_ref_or_clone(bool force_clone)
+            std::shared_ptr<Component> ComponentMeshWrapper::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
             {
                 auto result = Component::CreateShared<ComponentMeshWrapper>();
 
@@ -783,7 +783,7 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentMeshWrapper::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            void ComponentMeshWrapper::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
             {
             }
 

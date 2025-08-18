@@ -84,6 +84,7 @@ void App::load()
         { this->exitApp(); });
 
     ImGuiManager::Instance()->Initialize(
+        this,
         window,
         &this->screenRenderWindow->inputManager,
         ITKCommon::Path::getDocumentsPath("Milky Way Studio", "imgui_editor"));

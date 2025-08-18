@@ -894,14 +894,15 @@ namespace AppKit
             return nullptr;
         }
 
-        std::shared_ptr<Component> Transform::replaceComponent(std::shared_ptr<Component> search, std::shared_ptr<Component> replace) {
+        std::shared_ptr<Component> Transform::replaceComponent(std::shared_ptr<Component> search, std::shared_ptr<Component> replace)
+        {
             for (int i = 0; i < components.size(); i++)
             {
                 if (components[i] == search)
                 {
                     auto t_self = this->self();
                     auto old = components[i];
-                    
+
                     components[i] = nullptr;
                     old->detachFromTransform(t_self);
                     if (affectComponentStart)
@@ -918,7 +919,6 @@ namespace AppKit
             return nullptr;
         }
 
-
         std::shared_ptr<Component> Transform::removeComponentAt(int i)
         {
             if (i >= 0 && i < components.size())
@@ -934,7 +934,7 @@ namespace AppKit
                         result->mTransform.erase(result->mTransform.begin() + j);
 
                         if (self == nullptr)
-                            result->detachFromTransform( std::shared_ptr<Transform>(this, [](Transform*){}) );
+                            result->detachFromTransform(std::shared_ptr<Transform>(this, [](Transform *) {}));
                         else
                             result->detachFromTransform(self);
                         break;
@@ -1743,7 +1743,8 @@ namespace AppKit
             return OnPostOrderNode(_self, userData);
         }
 
-        std::shared_ptr<Transform> Transform::internal_clone(bool force_make_component_copy,
+        std::shared_ptr<Transform> Transform::internal_clone(AppKit::GLEngine::ResourceMap *resourceMap,
+                                                             bool force_make_component_copy,
                                                              std::shared_ptr<TransformMapT> transformMap,
                                                              std::shared_ptr<ComponentMapT> componentMap)
         {
@@ -1759,7 +1760,7 @@ namespace AppKit
 
             for (auto &src_component : getComponents())
             {
-                auto new_component = result->addComponent(src_component->duplicate_ref_or_clone(force_make_component_copy));
+                auto new_component = result->addComponent(src_component->duplicate_ref_or_clone(resourceMap, force_make_component_copy));
                 if (src_component != new_component)
                 {
                     // the component was fully cloned, so it needs
@@ -1769,12 +1770,13 @@ namespace AppKit
             }
 
             for (auto &child : getChildren())
-                result->addChild(child->internal_clone(force_make_component_copy, transformMap, componentMap));
+                result->addChild(child->internal_clone(resourceMap, force_make_component_copy, transformMap, componentMap));
 
             return result;
         }
 
         std::shared_ptr<Transform> Transform::clone(
+            AppKit::GLEngine::ResourceMap *resourceMap,
             bool force_make_component_copy,
             TransformMapT *_transformMap,
             ComponentMapT *_componentMap)
@@ -1794,7 +1796,7 @@ namespace AppKit
             // // transformMap->clear();
             // // componentMap->clear();
 
-            auto result = internal_clone(force_make_component_copy, transformMap, componentMap);
+            auto result = internal_clone(resourceMap, force_make_component_copy, transformMap, componentMap);
 
             // auto result = Transform::CreateShared();
 
@@ -1844,7 +1846,7 @@ namespace AppKit
             //     auto &dst = pair.second;
             //     for (auto &src_component : src->getComponents())
             //     {
-            //         auto new_component = dst->addComponent(src_component->duplicate_ref_or_clone(force_make_component_copy));
+            //         auto new_component = dst->addComponent(src_component->duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, force_make_component_copy));
             //         if (src_component != new_component)
             //         {
             //             // the component was fully cloned, so it needs
@@ -1859,7 +1861,7 @@ namespace AppKit
             {
                 // auto &src = pair.first;
                 auto &dst = pair.second;
-                dst->fix_internal_references(*transformMap, *componentMap);
+                dst->fix_internal_references(resourceMap, *transformMap, *componentMap);
             }
 
             return result;

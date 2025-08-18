@@ -94,8 +94,8 @@ namespace AppKit
                              float thickness,
                              const MathCore::vec4f &color);
                 // always clone
-                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone) { return nullptr; }
-                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap) {}
+                std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone) { return nullptr; }
+                void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap) {}
 
                 void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) {}
                 void Deserialize(rapidjson::Value &_value,

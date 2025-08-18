@@ -23,10 +23,11 @@ ImGuiManager* ImGuiManager::Instance()
 	return &_ImGuiManager;
 }
 
-void ImGuiManager::Initialize(AppKit::Window::GLWindow* window,
+void ImGuiManager::Initialize(App *app, AppKit::Window::GLWindow* window,
 	AppKit::Window::InputManager* inputManager,
 	const std::string& base_path)
 {
+    this->app = app;
 	// DPI Computation
 	{
 		int monitorDefault = 0;
