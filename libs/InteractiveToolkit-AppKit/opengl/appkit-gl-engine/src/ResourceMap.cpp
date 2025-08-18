@@ -57,29 +57,28 @@ namespace AppKit
                 std::vector<std::string> to_remove_str;
                 for (auto &item : geometryFontMap)
                 {
-                    if (item.second.use_count() > 1)
-                        continue;
-                    else
+                    if (item.second.use_count() > 1) {
                         mask_clear_unused("PolygonFont", item.second->mask_FontMap);
+                        continue;
+                    }
                     to_remove_str.push_back(item.first);
                 }
                 for (const auto &key : to_remove_str)
                     geometryFontMap.erase(key);
+                printf("  total loaded geometry fonts: %zu\n", geometryFontMap.size());
 
                 to_remove_str.clear();
                 for (auto &item : textureFontMap)
                 {
-                    if (item.second.use_count() > 1)
-                        continue;
-                    else
+                    if (item.second.use_count() > 1) {
                         mask_clear_unused("TextureFont", item.second->mask_FontMap);
+                        continue;
+                    }
                     to_remove_str.push_back(item.first);
                 }
                 for (const auto &key : to_remove_str)
                     textureFontMap.erase(key);
-
                 printf("  total loaded texture fonts: %zu\n", textureFontMap.size());
-                printf("  total loaded geometry fonts: %zu\n", geometryFontMap.size());
             }
 
             {
@@ -87,10 +86,10 @@ namespace AppKit
                 // free sprite not used
                 for (auto &item : spriteMaterialMap)
                 {
-                    if (item.second.use_count() > 1)
-                        continue;
-                    else
+                    if (item.second.use_count() > 1) {
                         mask_clear_unused("Sprite", item.second->mask_SpriteMap);
+                        continue;
+                    }
                     to_remove_u64.push_back(item.first);
                 }
                 for (const auto &key : to_remove_u64)
