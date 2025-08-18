@@ -220,7 +220,7 @@ namespace AppKit
             }
 
             // always clone
-            std::shared_ptr<Component> ComponentCameraPerspective::duplicate_ref_or_clone(bool force_clone){
+            std::shared_ptr<Component> ComponentCameraPerspective::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone){
                 auto result = Component::CreateShared<ComponentCameraPerspective>();
 
                 result->nearPlane.setValueNoCallback(this->nearPlane);

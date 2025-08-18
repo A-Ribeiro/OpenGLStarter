@@ -610,7 +610,7 @@ namespace AppKit
 
             // best option to ref,
             // but can clone if necessary
-            std::shared_ptr<Component> ComponentMesh::duplicate_ref_or_clone(bool force_clone)
+            std::shared_ptr<Component> ComponentMesh::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
             {
                 if (!always_clone && !force_clone)
                     return self();
@@ -644,7 +644,7 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentMesh::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            void ComponentMesh::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
             {
             }
 

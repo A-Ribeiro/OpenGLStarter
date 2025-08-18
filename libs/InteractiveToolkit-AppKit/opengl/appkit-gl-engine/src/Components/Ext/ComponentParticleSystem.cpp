@@ -323,7 +323,7 @@ namespace AppKit
             }
 
             // always clone 
-            std::shared_ptr<Component> ComponentParticleSystem::duplicate_ref_or_clone(bool force_clone){
+            std::shared_ptr<Component> ComponentParticleSystem::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone){
                 auto result = Component::CreateShared<ComponentParticleSystem>();
 
                 //result->random32;
@@ -363,7 +363,7 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentParticleSystem::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+            void ComponentParticleSystem::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap){
                 auto found_transform = transformMap.find(this->boxEmmiter);
                 if (found_transform != transformMap.end())
                     this->boxEmmiter = found_transform->second;

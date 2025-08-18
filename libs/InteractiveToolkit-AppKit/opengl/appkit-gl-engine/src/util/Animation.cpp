@@ -193,7 +193,7 @@ namespace AppKit
             return result;
         }
 
-        void AnimationClip::fix_internal_references(Transform::TransformMapT &transformMap) {
+        void AnimationClip::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, Transform::TransformMapT &transformMap) {
             this->base_model = transformMap[this->base_model];
             this->root_node = transformMap[this->root_node];
             for (auto &chnl : this->channels)
@@ -545,10 +545,10 @@ namespace AppKit
             rootMotionAnalyser.copy(clipMap, src.rootMotionAnalyser);
         }
 
-        void AnimationMixer::fix_internal_references(Transform::TransformMapT &transformMap)
+        void AnimationMixer::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, Transform::TransformMapT &transformMap)
         {
             for (auto &item : clips_array)
-                item->fix_internal_references(transformMap);
+                item->fix_internal_references(resourceMap, transformMap);
             // {
             //     item->base_model = transformMap[item->base_model];
             //     item->root_node = transformMap[item->root_node];

@@ -170,7 +170,7 @@ namespace AppKit
             }
 
             // always clone
-            std::shared_ptr<Component> ComponentCameraMove::duplicate_ref_or_clone(bool force_clone){
+            std::shared_ptr<Component> ComponentCameraMove::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone){
                 auto result = Component::CreateShared<ComponentCameraMove>();
 
                 result->forwardSpeed = this->forwardSpeed;
@@ -185,7 +185,7 @@ namespace AppKit
                 return result;
             }
 
-            void ComponentCameraMove::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap){
+            void ComponentCameraMove::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap){
                 // start() will set cameraRef
                 // auto camera_shared = ToShared(this->cameraRef);
                 // auto found = componentMap.find(camera_shared);

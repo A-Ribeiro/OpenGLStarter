@@ -41,9 +41,10 @@ namespace AppKit
                 std::shared_ptr<ComponentMesh> mesh;
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
 
+                std::shared_ptr<ComponentCamera> camera;
                 std::shared_ptr<ComponentRectangle> mask;
 
-                std::shared_ptr<AppKit::OpenGL::GLTexture> last_texture;
+                std::shared_ptr<ResourceMap::SpriteInfo> last_SpriteInfo;
 
                 void checkOrCreateAuxiliaryComponents(
                     AppKit::GLEngine::ResourceMap *resourceMap,
@@ -86,8 +87,8 @@ namespace AppKit
                 ~ComponentSprite();
 
                 // always clone
-                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone);
-                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap);
+                std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone);
+                void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap);
 
                 void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
                 void Deserialize(rapidjson::Value &_value,

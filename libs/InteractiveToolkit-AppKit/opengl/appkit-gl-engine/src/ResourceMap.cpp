@@ -10,6 +10,10 @@
 #include <appkit-gl-engine/shaders/PBRShaderSelector.h>                  //
 #include <appkit-gl-engine/shaders/ShaderDepthOnly.h>
 
+#include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
+
 namespace AppKit
 {
     namespace GLEngine
@@ -72,6 +76,20 @@ namespace AppKit
             }
 
             {
+                std::vector<std::shared_ptr<Components::ComponentRectangle>> to_remove;
+                // free sprite not used
+                for (auto &item : mask_RectangleMap)
+                {
+                    if (item.second.use_count() > 1)
+                        continue;
+                    to_remove.push_back(item.first);
+                }
+                for (const auto &key : to_remove)
+                    mask_RectangleMap.erase(key);
+                printf("  total loaded mask rectangles: %zu\n", mask_RectangleMap.size());
+            }
+
+            {
                 // free texture2D not used
                 std::vector<std::string> to_remove_str;
                 for (auto &item : texture2DMap)
@@ -112,6 +130,8 @@ namespace AppKit
             spriteMaterialMap.clear();
             texture2DMap.clear();
             cubemapMap.clear();
+
+            mask_RectangleMap.clear();
 
             defaultAlbedoTexture = nullptr;
             defaultNormalTexture = nullptr;
@@ -364,11 +384,9 @@ namespace AppKit
                 auto tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&fontBuilder->glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
                 fontResource->material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
 
-
                 fontResource->material_mask = Component::CreateShared<Components::ComponentMaterial>();
                 fontResource->material->setShader(this->shaderUnlitTextureVertexColorAlpha);
                 fontResource->material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
-
 
                 textureFontMap[to_query] = fontResource;
                 return fontResource;
@@ -377,12 +395,11 @@ namespace AppKit
         }
         std::shared_ptr<ResourceMap::FontResource> ResourceMap::getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb)
         {
-            std::string to_query = ITKCommon::PrintfToStdString("%s:%s:%i:%i", 
-                relative_path.c_str(), 
-                (is_srgb) ? "srgb" : "linear", 
-                (int)(MathCore::OP<float>::ceil(defaultSize) + 0.5f), 
-                (int)(MathCore::OP<float>::ceil(max_distance_tolerance) + 0.5f)
-            );
+            std::string to_query = ITKCommon::PrintfToStdString("%s:%s:%i:%i",
+                                                                relative_path.c_str(),
+                                                                (is_srgb) ? "srgb" : "linear",
+                                                                (int)(MathCore::OP<float>::ceil(defaultSize) + 0.5f),
+                                                                (int)(MathCore::OP<float>::ceil(max_distance_tolerance) + 0.5f));
             auto font_it = geometryFontMap.find(to_query);
             if (font_it == geometryFontMap.end())
             {
@@ -397,6 +414,65 @@ namespace AppKit
                 return fontResource;
             }
             return font_it->second;
+        }
+
+        std::shared_ptr<Components::ComponentMaterial> ResourceMap::mask_query_or_create_rectangle(
+            std::shared_ptr<Components::ComponentCamera> &camera,
+            std::shared_ptr<Components::ComponentRectangle> &mask)
+        {
+            auto it = mask_RectangleMap.find(mask);
+            if (it != mask_RectangleMap.end())
+                return it->second;
+
+            auto material = Component::CreateShared<Components::ComponentMaterial>();
+            // material->always_clone = true;
+            material->setShader(this->shaderUnlitVertexColorWithMask);
+            material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
+            material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+            material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+
+            mask_RectangleMap[mask] = material;
+            return material;
+        }
+
+        std::shared_ptr<ResourceMap::SpriteInfo> ResourceMap::query_or_create_sprite(
+            std::shared_ptr<AppKit::OpenGL::VirtualTexture> texture)
+        {
+            uint64_t tex_id = (uint64_t)(uintptr_t)texture.get();
+
+            auto it = this->spriteMaterialMap.find(tex_id);
+            if (it != this->spriteMaterialMap.end())
+                return it->second;
+
+            auto material = Component::CreateShared<Components::ComponentMaterial>();
+            material->setShader(this->spriteShader);
+            material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)texture);
+
+            auto result = std::make_shared<SpriteInfo>();
+            result->material = material;
+
+            this->spriteMaterialMap[tex_id] = result;
+            return result;
+        }
+
+        std::shared_ptr<Components::ComponentMaterial> ResourceMap::mask_query_or_create_sprite(
+            std::shared_ptr<ResourceMap::SpriteInfo> &sprite_info,
+            std::shared_ptr<Components::ComponentCamera> &camera,
+            std::shared_ptr<Components::ComponentRectangle> &mask)
+        {
+            auto it = sprite_info->mask_SpriteMap.find(mask);
+            if (it != sprite_info->mask_SpriteMap.end())
+                return it->second;
+
+            auto material = Component::CreateShared<Components::ComponentMaterial>();
+            // material->always_clone = true;
+            material->setShader(this->spriteShaderWithMask);
+            material->property_bag.getProperty("uTexture").set(sprite_info->material->property_bag.getProperty("uTexture").get<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>());
+            material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+            material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+
+            sprite_info->mask_SpriteMap[mask] = material;
+            return material;
         }
 
         void ResourceMap::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)

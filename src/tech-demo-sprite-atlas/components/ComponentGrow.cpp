@@ -94,14 +94,14 @@ namespace AppKit
             }
 
             // always clone
-            std::shared_ptr<Component> ComponentGrow::duplicate_ref_or_clone(bool force_clone)
+            std::shared_ptr<Component> ComponentGrow::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
             {
                 auto result = Component::CreateShared<ComponentGrow>();
                 result->app = app;
                 result->transformPool = transformPool;
                 return result;
             }
-            void ComponentGrow::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            void ComponentGrow::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
             {
             }
 

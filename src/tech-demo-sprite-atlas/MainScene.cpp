@@ -206,7 +206,7 @@ void MainScene::bindResourcesToGraph()
 
     {
         auto uiNodeParent = uiNode->getParent();
-        auto new_node = uiNodeParent->addChild(uiNode->clone(false));
+        auto new_node = uiNodeParent->addChild(uiNode->clone(resourceMap, false));
         new_node->setLocalPosition(MathCore::vec3f(550.0f, 0, componentCameraOrthographic->nearPlane + 100.0f));
 
         auto new_ui = new_node->findComponent<ComponentUI>();
@@ -277,7 +277,7 @@ void MainScene::bindResourcesToGraph()
                                                    {
         if (evt.type == AppKit::Window::KeyboardEventType::KeyPressed &&
             evt.code == AppKit::Window::Devices::KeyCode::Space){
-            auto new_element = root->addChild(spriteNode->clone(false));
+            auto new_element = root->addChild(spriteNode->clone(resourceMap, false));
             // new_element->addNewComponent<ComponentGrow>();
         } });
 
@@ -286,8 +286,8 @@ void MainScene::bindResourcesToGraph()
     // initialize pool
     for (int i = 0; i < 75; i++)
     {
-        transformPool.enqueue(spriteNode->clone(false));
-        transformPool.enqueue(logoNode->clone(false));
+        transformPool.enqueue(spriteNode->clone(resourceMap, false));
+        transformPool.enqueue(logoNode->clone(resourceMap, false));
     }
 }
 

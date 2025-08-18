@@ -163,7 +163,7 @@ namespace AppKit
                 }
 
                 // always clone
-                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone)
+                std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
                 {
                     auto result = Component::CreateShared<ComponentColorMesh>();
 
@@ -181,7 +181,7 @@ namespace AppKit
 
                     return result;
                 }
-                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+                void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
                 {
                 }
 

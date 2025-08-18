@@ -25,7 +25,11 @@ namespace AppKit
 
                 if (material == nullptr)
                 {
-                    material = transform->addComponent(resourceMap->defaultUnlitVertexColorAlphaMaterial);
+                    if (mask != nullptr && camera != nullptr) {
+                        auto new_material = resourceMap->mask_query_or_create_rectangle(camera, mask);
+                        material = transform->addComponent(new_material);
+                    } else
+                        material = transform->addComponent(resourceMap->defaultUnlitVertexColorAlphaMaterial);
                 }
 
                 if (mesh == nullptr)
@@ -589,18 +593,20 @@ namespace AppKit
                                              std::shared_ptr<ComponentCamera> &camera,
                                              std::shared_ptr<ComponentRectangle> &mask)
             {
+                this->camera = camera;
                 this->mask = mask;
                 auto transform = getTransform();
                 if (mask == nullptr)
                     material = transform->replaceComponent<ComponentMaterial>(material, resourceMap->defaultUnlitVertexColorAlphaMaterial);
                 else
                 {
-                    auto new_material = Component::CreateShared<Components::ComponentMaterial>();
-                    new_material->always_clone = true;
-                    new_material->setShader(resourceMap->shaderUnlitVertexColorWithMask);
-                    new_material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
-                    new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
-                    new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+                    // auto new_material = Component::CreateShared<Components::ComponentMaterial>();
+                    // new_material->always_clone = true;
+                    // new_material->setShader(resourceMap->shaderUnlitVertexColorWithMask);
+                    // new_material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
+                    // new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    // new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+                    auto new_material = resourceMap->mask_query_or_create_rectangle(camera, mask);
                     material = transform->replaceComponent<ComponentMaterial>(material, new_material);
                 }
             }
@@ -615,7 +621,7 @@ namespace AppKit
             }
 
             // always clone
-            std::shared_ptr<Component> ComponentRectangle::duplicate_ref_or_clone(bool force_clone)
+            std::shared_ptr<Component> ComponentRectangle::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
             {
                 if (!always_clone && !force_clone)
                     return self();
@@ -627,6 +633,7 @@ namespace AppKit
                 result->mesh = this->mesh;
                 result->meshWrapper = this->meshWrapper;
 
+                result->camera = this->camera;
                 result->mask = this->mask;
 
                 for (int i = 0; i < MaskOrder_Count; i++)
@@ -635,7 +642,7 @@ namespace AppKit
 
                 return result;
             }
-            void ComponentRectangle::fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap)
+            void ComponentRectangle::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
             {
                 if (componentMap.find(material) != componentMap.end())
                     material = std::dynamic_pointer_cast<ComponentMaterial>(componentMap[material]);
@@ -643,9 +650,27 @@ namespace AppKit
                     mesh = std::dynamic_pointer_cast<ComponentMesh>(componentMap[mesh]);
                 if (componentMap.find(meshWrapper) != componentMap.end())
                     meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(componentMap[meshWrapper]);
+                if (componentMap.find(camera) != componentMap.end())
+                    camera = std::dynamic_pointer_cast<ComponentCamera>(componentMap[camera]);
                 if (componentMap.find(mask) != componentMap.end())
                 {
                     mask = std::dynamic_pointer_cast<ComponentRectangle>(componentMap[mask]);
+                    if (camera != nullptr)
+                    {
+                        // auto camera = std::dynamic_pointer_cast<ComponentCamera>(material->property_bag.getProperty("ComponentCamera").get<std::weak_ptr<Component>>().lock());
+                        auto new_material = resourceMap->mask_query_or_create_rectangle(camera, mask);
+                        for (auto &entry : mTransform)
+                        {
+                            auto transform = entry.weak_ptr.lock();
+                            if (!transform)
+                            {
+                                printf("[ComponentRectangle] error, clonning null transform list");
+                                continue;
+                            }
+                            transform->replaceComponent(material, new_material);
+                        }
+                        material = new_material;
+                    }
                     // material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
                 }
             }

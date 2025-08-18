@@ -52,9 +52,9 @@ namespace AppKit
                 ~ComponentMaterial();
 
                 // always clone
-                std::shared_ptr<Component> duplicate_ref_or_clone(bool force_clone) override;
+                std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone) override;
                 
-                void fix_internal_references(TransformMapT &transformMap, ComponentMapT &componentMap) override;
+                void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap) override;
 
                 void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) override;
                 

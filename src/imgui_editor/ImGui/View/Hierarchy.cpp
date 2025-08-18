@@ -176,7 +176,7 @@ std::shared_ptr<TreeNode> Hierarchy::cloneTreeNode(std::shared_ptr<TreeNode> src
 
     auto treeData = std::dynamic_pointer_cast<HierarchyTreeData>(src->data);
     // clone current transform
-    auto cloned_transform = treeData->transform->clone(false, &transformMap, &componentMap);
+    auto cloned_transform = treeData->transform->clone(&ImGuiManager::Instance()->app->resourceMap, false, &transformMap, &componentMap);
 
     auto result = createTreeNode(
         src->getName(), 

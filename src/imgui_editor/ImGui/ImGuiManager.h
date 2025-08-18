@@ -11,6 +11,7 @@
 #include "Dialogs.h"
 
 class InnerViewport;
+class App;
 
 class ImGuiManager
 {
@@ -49,6 +50,8 @@ public:
 
     std::vector<View*> views;
 
+    App *app;
+
     EventCore::Event<void(View*,bool)> OnHover;
     EventCore::Event<void(View*,bool)> OnFocus;
 
@@ -60,6 +63,7 @@ public:
     static ImGuiManager* Instance();
 
     void Initialize(
+        App *app,
         AppKit::Window::GLWindow* window, 
         AppKit::Window::InputManager* inputManager, 
         const std::string& base_path);
@@ -78,3 +82,5 @@ public:
 
     void applyGlobalScale();
 };
+
+#include "../App.h"

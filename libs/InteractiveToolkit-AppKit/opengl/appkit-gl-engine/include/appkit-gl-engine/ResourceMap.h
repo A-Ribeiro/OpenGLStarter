@@ -31,6 +31,8 @@ namespace AppKit
         namespace Components
         {
             class ComponentMaterial;
+            class ComponentRectangle;
+            class ComponentCamera;
         }
 
         struct ResourceSet
@@ -118,8 +120,14 @@ namespace AppKit
             std::shared_ptr<Components::ComponentMaterial> defaultUnlitVertexColorAlphaMaterial;
             std::shared_ptr<Components::ComponentMaterial> defaultLineMaterial;
 
-            std::unordered_map<uint64_t, std::shared_ptr<Components::ComponentMaterial>> spriteMaterialMap;
-
+            struct SpriteInfo
+            {
+                std::shared_ptr<Components::ComponentMaterial> material;
+                std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> mask_SpriteMap;
+            };
+protected:
+            std::unordered_map<uint64_t, std::shared_ptr<SpriteInfo>> spriteMaterialMap;
+public:
             // default shaders
             // std::shared_ptr<SpriteShader> spriteShader;
             std::shared_ptr<ShaderUnlit> shaderUnlit;
@@ -136,6 +144,24 @@ namespace AppKit
             std::shared_ptr<ShaderUnlitTextureVertexColorAlphaWithMask> shaderUnlitTextureVertexColorAlphaWithMask;
             std::shared_ptr<ShaderUnlitVertexColorWithMask> shaderUnlitVertexColorWithMask;
             std::shared_ptr<SpriteShaderWithMask> spriteShaderWithMask;
+
+protected:
+            std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> mask_RectangleMap;
+public:
+            std::shared_ptr<Components::ComponentMaterial> mask_query_or_create_rectangle(
+                std::shared_ptr<Components::ComponentCamera> &camera,
+                std::shared_ptr<Components::ComponentRectangle> &mask
+            );
+
+            std::shared_ptr<SpriteInfo> query_or_create_sprite(
+                std::shared_ptr<AppKit::OpenGL::VirtualTexture> texture
+            );
+
+            std::shared_ptr<Components::ComponentMaterial> mask_query_or_create_sprite(
+                std::shared_ptr<ResourceMap::SpriteInfo> &sprite_info,
+                std::shared_ptr<Components::ComponentCamera> &camera,
+                std::shared_ptr<Components::ComponentRectangle> &mask
+            );
 
         };
     }
