@@ -8,8 +8,6 @@
 // #include "../../shaders/ShaderUnlitTextureVertexColorAlphaWithMask.h"
 // #include "../../shaders/ShaderUnlitVertexColorWithMask.h"
 
-
-
 using namespace AppKit::GLEngine;
 
 namespace AppKit
@@ -21,14 +19,22 @@ namespace AppKit
             const ComponentType ComponentFont::Type = "ComponentFont";
 
             void ComponentFont::checkOrCreateAuxiliaryComponents(
-                AppKit::GLEngine::ResourceMap *resourceMap,
-                std::shared_ptr<ComponentMaterial> &materialp)
+                AppKit::GLEngine::ResourceMap *resourceMap)
             {
 
                 if (material != nullptr || mesh != nullptr || meshWrapper != nullptr)
                 {
-                    if (material != materialp)
-                        material = getTransform()->replaceComponent<ComponentMaterial>(material, materialp);
+                    // if (material != materialp)
+                    //     material = getTransform()->replaceComponent<ComponentMaterial>(material, materialp);
+                    std::shared_ptr<Components::ComponentMaterial> target_material;
+
+                    if (mask != nullptr && camera != nullptr)
+                        target_material = resourceMap->mask_query_or_create_font(last_fontResource, camera, mask);
+                    else
+                        target_material = last_fontResource->material;
+
+                    if (target_material != material)
+                        material = getTransform()->replaceComponent<ComponentMaterial>(material, target_material);
                     return;
                 }
 
@@ -36,7 +42,12 @@ namespace AppKit
 
                 if (material == nullptr)
                 {
-                    material = transform->addComponent<ComponentMaterial>(materialp);
+                    // material = transform->addComponent<ComponentMaterial>(materialp);
+
+                    if (mask != nullptr && camera != nullptr)
+                        material = transform->addComponent(resourceMap->mask_query_or_create_font(last_fontResource, camera, mask));
+                    else
+                        material = transform->addComponent(last_fontResource->material);
                 }
 
                 if (mesh == nullptr)
@@ -97,7 +108,7 @@ namespace AppKit
 
                 auto builder = fontResource->fontBuilder.get();
 
-                checkOrCreateAuxiliaryComponents(resourceMap, fontResource->material);
+                checkOrCreateAuxiliaryComponents(resourceMap);
 
                 bool onCloneNoModify =
                     meshUploadMode == MeshUploadMode_Direct_OnClone_NoModify ||
@@ -194,6 +205,7 @@ namespace AppKit
                                         std::shared_ptr<ComponentCamera> &camera,
                                         std::shared_ptr<ComponentRectangle> &mask)
             {
+                this->camera = camera;
                 this->mask = mask;
 
                 if (last_fontResource == nullptr)
@@ -201,28 +213,38 @@ namespace AppKit
 
                 auto transform = getTransform();
                 if (mask == nullptr)
-                    material = transform->replaceComponent<ComponentMaterial>(material, last_fontResource->material);
+                {
+                    // material = transform->replaceComponent<ComponentMaterial>(material, last_fontResource->material);
+                    if (last_fontResource != nullptr)
+                        material = transform->replaceComponent<ComponentMaterial>(material, last_fontResource->material);
+                }
                 else
                 {
-                    if (last_fontResource->polygonFontCache){
-                        auto new_material = Component::CreateShared<Components::ComponentMaterial>();
-                        new_material->always_clone = true;
-                        new_material->setShader(resourceMap->shaderUnlitVertexColorWithMask);
-                        new_material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
-                        new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
-                        new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
-                        material = transform->replaceComponent<ComponentMaterial>(material, new_material);
-                    } else {
-                        // auto new_material = std::dynamic_pointer_cast<ComponentMaterial>(last_fontResource->material_mask->duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, true));
-                        auto new_material = Component::CreateShared<Components::ComponentMaterial>();
-                        new_material->always_clone = true;
-                        new_material->setShader(resourceMap->shaderUnlitTextureVertexColorAlphaWithMask);
-                        auto tex = last_fontResource->material->property_bag.getProperty("uTexture").get<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>();
-                        new_material->property_bag.getProperty("uTexture").set(tex);
-                        new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
-                        new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
-                        material = transform->replaceComponent<ComponentMaterial>(material, new_material);
-                    }
+                    if (last_fontResource != nullptr)
+                        material = transform->replaceComponent<ComponentMaterial>(material, resourceMap->mask_query_or_create_font(last_fontResource, camera, mask));
+
+                    // if (last_fontResource->polygonFontCache)
+                    // {
+                    //     auto new_material = Component::CreateShared<Components::ComponentMaterial>();
+                    //     new_material->always_clone = true;
+                    //     new_material->setShader(resourceMap->shaderUnlitVertexColorWithMask);
+                    //     new_material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
+                    //     new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    //     new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+                    //     material = transform->replaceComponent<ComponentMaterial>(material, new_material);
+                    // }
+                    // else
+                    // {
+                    //     // auto new_material = std::dynamic_pointer_cast<ComponentMaterial>(last_fontResource->material_mask->duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, true));
+                    //     auto new_material = Component::CreateShared<Components::ComponentMaterial>();
+                    //     new_material->always_clone = true;
+                    //     new_material->setShader(resourceMap->shaderUnlitTextureVertexColorAlphaWithMask);
+                    //     auto tex = last_fontResource->material->property_bag.getProperty("uTexture").get<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>();
+                    //     new_material->property_bag.getProperty("uTexture").set(tex);
+                    //     new_material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    //     new_material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+                    //     material = transform->replaceComponent<ComponentMaterial>(material, new_material);
+                    // }
                 }
             }
 
@@ -248,6 +270,7 @@ namespace AppKit
                 result->mesh = this->mesh;
                 result->meshWrapper = this->meshWrapper;
 
+                result->camera = this->camera;
                 result->mask = this->mask;
 
                 result->last_fontResource = this->last_fontResource;
@@ -262,10 +285,28 @@ namespace AppKit
                     mesh = std::dynamic_pointer_cast<ComponentMesh>(componentMap[mesh]);
                 if (componentMap.find(meshWrapper) != componentMap.end())
                     meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(componentMap[meshWrapper]);
+                if (componentMap.find(camera) != componentMap.end())
+                    camera = std::dynamic_pointer_cast<ComponentCamera>(componentMap[camera]);
                 if (componentMap.find(mask) != componentMap.end())
                 {
                     mask = std::dynamic_pointer_cast<ComponentRectangle>(componentMap[mask]);
                     // material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                    if (camera != nullptr && last_fontResource != nullptr)
+                    {
+                        auto new_material = resourceMap->mask_query_or_create_font(last_fontResource, camera, mask);
+                        // for (auto &entry : mTransform)
+                        // {
+                        //     auto transform = entry.weak_ptr.lock();
+                        //     if (!transform)
+                        //     {
+                        //         printf("[ComponentSprite] error, clonning null transform list");
+                        //         continue;
+                        //     }
+                        //     transform->replaceComponent(material, new_material);
+                        // }
+                        getTransform()->replaceComponent(material, new_material);
+                        material = new_material;
+                    }
                 }
             }
 
