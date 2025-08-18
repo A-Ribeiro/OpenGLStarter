@@ -659,16 +659,18 @@ namespace AppKit
                     {
                         // auto camera = std::dynamic_pointer_cast<ComponentCamera>(material->property_bag.getProperty("ComponentCamera").get<std::weak_ptr<Component>>().lock());
                         auto new_material = resourceMap->mask_query_or_create_rectangle(camera, mask);
-                        for (auto &entry : mTransform)
-                        {
-                            auto transform = entry.weak_ptr.lock();
-                            if (!transform)
-                            {
-                                printf("[ComponentRectangle] error, clonning null transform list");
-                                continue;
-                            }
-                            transform->replaceComponent(material, new_material);
-                        }
+                        // for (auto &entry : mTransform)
+                        // {
+                        //     auto transform = entry.weak_ptr.lock();
+                        //     if (!transform)
+                        //     {
+                        //         printf("[ComponentRectangle] error, clonning null transform list");
+                        //         continue;
+                        //     }
+                        //     transform->replaceComponent(material, new_material);
+                        // }
+                        getTransform()->replaceComponent(material, new_material);
+
                         material = new_material;
                     }
                     // material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);

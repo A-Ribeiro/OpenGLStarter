@@ -366,16 +366,17 @@ namespace AppKit
                     if (camera != nullptr && last_SpriteInfo != nullptr)
                     {
                         auto new_material = resourceMap->mask_query_or_create_sprite(last_SpriteInfo, camera, mask);
-                        for (auto &entry : mTransform)
-                        {
-                            auto transform = entry.weak_ptr.lock();
-                            if (!transform)
-                            {
-                                printf("[ComponentSprite] error, clonning null transform list");
-                                continue;
-                            }
-                            transform->replaceComponent(material, new_material);
-                        }
+                        // for (auto &entry : mTransform)
+                        // {
+                        //     auto transform = entry.weak_ptr.lock();
+                        //     if (!transform)
+                        //     {
+                        //         printf("[ComponentSprite] error, clonning null transform list");
+                        //         continue;
+                        //     }
+                        //     transform->replaceComponent(material, new_material);
+                        // }
+                        getTransform()->replaceComponent(material, new_material);
                         material = new_material;
                     }
                 }

@@ -32,6 +32,23 @@ namespace AppKit
             return result;
         }
 
+        void ResourceMap::mask_clear_unused(const char* name, std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> &map)
+        {
+            {
+                std::vector<std::shared_ptr<Components::ComponentRectangle>> to_remove;
+                // free sprite not used
+                for (auto &item : map)
+                {
+                    if (item.second.use_count() > 1)
+                        continue;
+                    to_remove.push_back(item.first);
+                }
+                for (const auto &key : to_remove)
+                    map.erase(key);
+                printf("     [Mask] total loaded mask for %s: %zu\n", name, map.size());
+            }
+        }
+
         void ResourceMap::clear_refcount_equals_1()
         {
             printf("ResourceMap::clear_refcount_equals_1\n");
@@ -42,6 +59,8 @@ namespace AppKit
                 {
                     if (item.second.use_count() > 1)
                         continue;
+                    else
+                        mask_clear_unused("PolygonFont", item.second->mask_FontMap);
                     to_remove_str.push_back(item.first);
                 }
                 for (const auto &key : to_remove_str)
@@ -52,6 +71,8 @@ namespace AppKit
                 {
                     if (item.second.use_count() > 1)
                         continue;
+                    else
+                        mask_clear_unused("TextureFont", item.second->mask_FontMap);
                     to_remove_str.push_back(item.first);
                 }
                 for (const auto &key : to_remove_str)
@@ -68,6 +89,8 @@ namespace AppKit
                 {
                     if (item.second.use_count() > 1)
                         continue;
+                    else
+                        mask_clear_unused("Sprite", item.second->mask_SpriteMap);
                     to_remove_u64.push_back(item.first);
                 }
                 for (const auto &key : to_remove_u64)
@@ -76,17 +99,18 @@ namespace AppKit
             }
 
             {
-                std::vector<std::shared_ptr<Components::ComponentRectangle>> to_remove;
-                // free sprite not used
-                for (auto &item : mask_RectangleMap)
-                {
-                    if (item.second.use_count() > 1)
-                        continue;
-                    to_remove.push_back(item.first);
-                }
-                for (const auto &key : to_remove)
-                    mask_RectangleMap.erase(key);
-                printf("  total loaded mask rectangles: %zu\n", mask_RectangleMap.size());
+                mask_clear_unused("Rectangles", mask_RectangleMap);
+                // std::vector<std::shared_ptr<Components::ComponentRectangle>> to_remove;
+                // // free sprite not used
+                // for (auto &item : mask_RectangleMap)
+                // {
+                //     if (item.second.use_count() > 1)
+                //         continue;
+                //     to_remove.push_back(item.first);
+                // }
+                // for (const auto &key : to_remove)
+                //     mask_RectangleMap.erase(key);
+                // printf("  total loaded mask rectangles: %zu\n", mask_RectangleMap.size());
             }
 
             {
@@ -384,9 +408,9 @@ namespace AppKit
                 auto tex = std::shared_ptr<AppKit::OpenGL::GLTexture>(&fontBuilder->glFont2.texture, [](AppKit::OpenGL::GLTexture *v) {});
                 fontResource->material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
 
-                fontResource->material_mask = Component::CreateShared<Components::ComponentMaterial>();
-                fontResource->material->setShader(this->shaderUnlitTextureVertexColorAlpha);
-                fontResource->material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+                // fontResource->material_mask = Component::CreateShared<Components::ComponentMaterial>();
+                // fontResource->material_mask->setShader(this->shaderUnlitTextureVertexColorAlpha);
+                // fontResource->material_mask->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
 
                 textureFontMap[to_query] = fontResource;
                 return fontResource;
@@ -473,6 +497,44 @@ namespace AppKit
 
             sprite_info->mask_SpriteMap[mask] = material;
             return material;
+        }
+
+        std::shared_ptr<Components::ComponentMaterial> ResourceMap::mask_query_or_create_font(
+            std::shared_ptr<ResourceMap::FontResource> &font_resource,
+            std::shared_ptr<Components::ComponentCamera> &camera,
+            std::shared_ptr<Components::ComponentRectangle> &mask)
+        {
+            auto it = font_resource->mask_FontMap.find(mask);
+            if (it != font_resource->mask_FontMap.end())
+                return it->second;
+
+            bool is_polygon = font_resource->polygonFontCache != nullptr;
+
+            if (is_polygon)
+            {
+                auto material = Component::CreateShared<Components::ComponentMaterial>();
+                // material->always_clone = true;
+                material->setShader(this->shaderUnlitVertexColorWithMask);
+                material->property_bag.getProperty("BlendMode").set<int>((int)AppKit::GLEngine::BlendModeAlpha);
+                material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+
+                font_resource->mask_FontMap[mask] = material;
+                return material;
+            }
+            else
+            {
+                auto material = Component::CreateShared<Components::ComponentMaterial>();
+                // material->always_clone = true;
+                material->setShader(this->shaderUnlitTextureVertexColorAlphaWithMask);
+                auto tex = font_resource->material->property_bag.getProperty("uTexture").get<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>();
+                material->property_bag.getProperty("uTexture").set(tex);
+                material->property_bag.getProperty("ComponentRectangle").set<std::weak_ptr<Component>>(mask);
+                material->property_bag.getProperty("ComponentCamera").set<std::weak_ptr<Component>>(camera);
+
+                font_resource->mask_FontMap[mask] = material;
+                return material;
+            }
         }
 
         void ResourceMap::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)

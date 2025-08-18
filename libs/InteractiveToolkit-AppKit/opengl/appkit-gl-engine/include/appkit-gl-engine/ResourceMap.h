@@ -68,7 +68,8 @@ namespace AppKit
                 std::shared_ptr<AppKit::OpenGL::GLFont2Builder> fontBuilder;
                 std::shared_ptr<AppKit::OpenGL::GLFont2PolygonCache> polygonFontCache;
                 std::shared_ptr<Components::ComponentMaterial> material;
-                std::shared_ptr<Components::ComponentMaterial> material_mask;
+
+                std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> mask_FontMap;
             };
 
         private:
@@ -147,6 +148,8 @@ public:
 
 protected:
             std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> mask_RectangleMap;
+
+            void mask_clear_unused(const char* name, std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> &map);
 public:
             std::shared_ptr<Components::ComponentMaterial> mask_query_or_create_rectangle(
                 std::shared_ptr<Components::ComponentCamera> &camera,
@@ -159,6 +162,12 @@ public:
 
             std::shared_ptr<Components::ComponentMaterial> mask_query_or_create_sprite(
                 std::shared_ptr<ResourceMap::SpriteInfo> &sprite_info,
+                std::shared_ptr<Components::ComponentCamera> &camera,
+                std::shared_ptr<Components::ComponentRectangle> &mask
+            );
+
+            std::shared_ptr<Components::ComponentMaterial> mask_query_or_create_font(
+                std::shared_ptr<ResourceMap::FontResource> &font_resource,
                 std::shared_ptr<Components::ComponentCamera> &camera,
                 std::shared_ptr<Components::ComponentRectangle> &mask
             );

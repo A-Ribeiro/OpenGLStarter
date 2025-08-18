@@ -43,13 +43,13 @@ namespace AppKit
                 std::shared_ptr<ComponentMesh> mesh;
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
 
+                std::shared_ptr<ComponentCamera> camera;
                 std::shared_ptr<ComponentRectangle> mask;
 
                 std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> last_fontResource;
 
                 void checkOrCreateAuxiliaryComponents(
-                    AppKit::GLEngine::ResourceMap *resourceMap,
-                    std::shared_ptr<ComponentMaterial> &material);
+                    AppKit::GLEngine::ResourceMap *resourceMap);
 
                 // if color.a == 0, skip this draw
                 void setText(

@@ -232,10 +232,6 @@ void MainScene::bindResourcesToGraph()
             AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
             U' '                                                              // wordSeparatorChar
         );
-        // TODO: implement text set content after set mask
-        //  it is resetting material every time the program sets the text to display
-        top_text_font->setMask(resourceMap, camera,
-                               new_ui->getItemByName("rect_mask").get<ComponentRectangle>());
 
         top_text_font = new_ui->getItemByName("bottom_text").get<ComponentFont>();
 
@@ -259,10 +255,6 @@ void MainScene::bindResourcesToGraph()
             AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
             U' '                                                              // wordSeparatorChar
         );
-        // TODO: implement text set content after set mask
-        //  it is resetting material every time the program sets the text to display
-        top_text_font->setMask(resourceMap, camera,
-                               new_ui->getItemByName("rect_mask").get<ComponentRectangle>());
     }
 
     auto rect = renderWindow->CameraViewport.c_ptr();
