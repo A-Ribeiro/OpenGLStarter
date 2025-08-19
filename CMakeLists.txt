@@ -165,3 +165,5 @@ add_subdirectory(src/font-with-bitmap)
 add_subdirectory(src/tech-demo-line-rendering)
 
 add_subdirectory(src/tech-demo-sprite-atlas)
+
+add_subdirectory(src/example-ui)
