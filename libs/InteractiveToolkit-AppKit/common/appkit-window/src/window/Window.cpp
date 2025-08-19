@@ -52,18 +52,18 @@ namespace AppKit
                 sf::Style::None,
                 sf::Style::Default,
                 sf::Style::None
-//                sf::Style::Fullscreen
+                //                sf::Style::Fullscreen
             };
 
             sf::State wState = sf::State::Windowed;
             if (windowConfig.windowStyle == WindowStyle::FullScreen)
                 wState = sf::State::Fullscreen;
 
-            sf::RenderWindow *window = new sf::RenderWindow(videoMode, 
-                windowConfig.windowName,
-                windowStyle_mapping[(int)windowConfig.windowStyle], 
-                wState,
-                contextSettings);
+            sf::RenderWindow *window = new sf::RenderWindow(videoMode,
+                                                            windowConfig.windowName,
+                                                            windowStyle_mapping[(int)windowConfig.windowStyle],
+                                                            wState,
+                                                            contextSettings);
 
             contextSettings = window->getSettings();
 
@@ -170,10 +170,10 @@ namespace AppKit
         }
 
 #endif
-        Window::Window() {
+        Window::Window()
+        {
 
-            memset(key_states, 0, sizeof(bool) * (int)Devices::KeyCode::Count );
-
+            memset(key_states, 0, sizeof(bool) * (int)Devices::KeyCode::Count);
         }
 
         const WindowConfig &Window::getConfig() const
@@ -221,108 +221,160 @@ namespace AppKit
             window->requestFocus();
         }
 
-        const Devices::KeyCode reverse_key_mapping[] = {
-            Devices::KeyCode::A,
-            Devices::KeyCode::B,
-            Devices::KeyCode::C,
-            Devices::KeyCode::D,
-            Devices::KeyCode::E,
-            Devices::KeyCode::F,
-            Devices::KeyCode::G,
-            Devices::KeyCode::H,
-            Devices::KeyCode::I,
-            Devices::KeyCode::J,
-            Devices::KeyCode::K,
-            Devices::KeyCode::L,
-            Devices::KeyCode::M,
-            Devices::KeyCode::N,
-            Devices::KeyCode::O,
-            Devices::KeyCode::P,
-            Devices::KeyCode::Q,
-            Devices::KeyCode::R,
-            Devices::KeyCode::S,
-            Devices::KeyCode::T,
-            Devices::KeyCode::U,
-            Devices::KeyCode::V,
-            Devices::KeyCode::W,
-            Devices::KeyCode::X,
-            Devices::KeyCode::Y,
-            Devices::KeyCode::Z,
-            Devices::KeyCode::Num0,
-            Devices::KeyCode::Num1,
-            Devices::KeyCode::Num2,
-            Devices::KeyCode::Num3,
-            Devices::KeyCode::Num4,
-            Devices::KeyCode::Num5,
-            Devices::KeyCode::Num6,
-            Devices::KeyCode::Num7,
-            Devices::KeyCode::Num8,
-            Devices::KeyCode::Num9,
-            Devices::KeyCode::Escape,
-            Devices::KeyCode::LControl,
-            Devices::KeyCode::LShift,
-            Devices::KeyCode::LAlt,
-            Devices::KeyCode::LSystem,
-            Devices::KeyCode::RControl,
-            Devices::KeyCode::RShift,
-            Devices::KeyCode::RAlt,
-            Devices::KeyCode::RSystem,
-            Devices::KeyCode::Menu,
-            Devices::KeyCode::LBracket,
-            Devices::KeyCode::RBracket,
-            Devices::KeyCode::Semicolon,
-            Devices::KeyCode::Comma,
-            Devices::KeyCode::Period,
-            Devices::KeyCode::Apostrophe, // Quote,
-            Devices::KeyCode::Slash,
-            Devices::KeyCode::Backslash,
-            Devices::KeyCode::Grave, // Tilde,
-            Devices::KeyCode::Equal,
-            Devices::KeyCode::Hyphen,
-            Devices::KeyCode::Space,
-            Devices::KeyCode::Enter,
-            Devices::KeyCode::Backspace,
-            Devices::KeyCode::Tab,
-            Devices::KeyCode::PageUp,
-            Devices::KeyCode::PageDown,
-            Devices::KeyCode::End,
-            Devices::KeyCode::Home,
-            Devices::KeyCode::Insert,
-            Devices::KeyCode::Delete,
-            Devices::KeyCode::Add,
-            Devices::KeyCode::Subtract,
-            Devices::KeyCode::Multiply,
-            Devices::KeyCode::Divide,
-            Devices::KeyCode::Left,
-            Devices::KeyCode::Right,
-            Devices::KeyCode::Up,
-            Devices::KeyCode::Down,
-            Devices::KeyCode::Numpad0,
-            Devices::KeyCode::Numpad1,
-            Devices::KeyCode::Numpad2,
-            Devices::KeyCode::Numpad3,
-            Devices::KeyCode::Numpad4,
-            Devices::KeyCode::Numpad5,
-            Devices::KeyCode::Numpad6,
-            Devices::KeyCode::Numpad7,
-            Devices::KeyCode::Numpad8,
-            Devices::KeyCode::Numpad9,
-            Devices::KeyCode::F1,
-            Devices::KeyCode::F2,
-            Devices::KeyCode::F3,
-            Devices::KeyCode::F4,
-            Devices::KeyCode::F5,
-            Devices::KeyCode::F6,
-            Devices::KeyCode::F7,
-            Devices::KeyCode::F8,
-            Devices::KeyCode::F9,
-            Devices::KeyCode::F10,
-            Devices::KeyCode::F11,
-            Devices::KeyCode::F12,
-            Devices::KeyCode::F13,
-            Devices::KeyCode::F14,
-            Devices::KeyCode::F15,
-            Devices::KeyCode::Pause};
+        const Devices::KeyCode reverse_key_mapping[int(sf::Keyboard::Scan::LaunchMediaSelect) + 1] = {
+            Devices::KeyCode::A,         // A       = 0,  //!< Keyboard a and A key
+            Devices::KeyCode::B,         // B       = 1,  //!< Keyboard b and B key
+            Devices::KeyCode::C,         // C       = 2,  //!< Keyboard c and C key
+            Devices::KeyCode::D,         // D       = 3,  //!< Keyboard d and D key
+            Devices::KeyCode::E,         // E       = 4,  //!< Keyboard e and E key
+            Devices::KeyCode::F,         // F       = 5,  //!< Keyboard f and F key
+            Devices::KeyCode::G,         // G       = 6,  //!< Keyboard g and G key
+            Devices::KeyCode::H,         // H       = 7,  //!< Keyboard h and H key
+            Devices::KeyCode::I,         // I       = 8,  //!< Keyboard i and I key
+            Devices::KeyCode::J,         // J       = 9,  //!< Keyboard j and J key
+            Devices::KeyCode::K,         // K       = 10, //!< Keyboard k and K key
+            Devices::KeyCode::L,         // L       = 11, //!< Keyboard l and L key
+            Devices::KeyCode::M,         // M       = 12, //!< Keyboard m and M key
+            Devices::KeyCode::N,         // N       = 13, //!< Keyboard n and N key
+            Devices::KeyCode::O,         // O       = 14, //!< Keyboard o and O key
+            Devices::KeyCode::P,         // P       = 15, //!< Keyboard p and P key
+            Devices::KeyCode::Q,         // Q       = 16, //!< Keyboard q and Q key
+            Devices::KeyCode::R,         // R       = 17, //!< Keyboard r and R key
+            Devices::KeyCode::S,         // S       = 18, //!< Keyboard s and S key
+            Devices::KeyCode::T,         // T       = 19, //!< Keyboard t and T key
+            Devices::KeyCode::U,         // U       = 20, //!< Keyboard u and U key
+            Devices::KeyCode::V,         // V       = 21, //!< Keyboard v and V key
+            Devices::KeyCode::W,         // W       = 22, //!< Keyboard w and W key
+            Devices::KeyCode::X,         // X       = 23, //!< Keyboard x and X key
+            Devices::KeyCode::Y,         // Y       = 24, //!< Keyboard y and Y key
+            Devices::KeyCode::Z,         // Z       = 25, //!< Keyboard z and Z key
+            Devices::KeyCode::Num1,      // Num1 = 26, //!< Keyboard 1 and ! key
+            Devices::KeyCode::Num2,      // Num2 = 27, //!< Keyboard 2 and @ key
+            Devices::KeyCode::Num3,      // Num3 = 28, //!< Keyboard 3 and # key
+            Devices::KeyCode::Num4,      // Num4 = 29, //!< Keyboard 4 and $ key
+            Devices::KeyCode::Num5,      // Num5 = 30, //!< Keyboard 5 and % key
+            Devices::KeyCode::Num6,      // Num6 = 31, //!< Keyboard 6 and ^ key
+            Devices::KeyCode::Num7,      // Num7 = 32, //!< Keyboard 7 and & key
+            Devices::KeyCode::Num8,      // Num8 = 33, //!< Keyboard 8 and * key
+            Devices::KeyCode::Num9,      // Num9 = 34, //!< Keyboard 9 and ) key
+            Devices::KeyCode::Num0,      // Num0 = 35, //!< Keyboard 0 and ) key
+            Devices::KeyCode::Enter,     // Enter = 36, //!< Keyboard Enter/Return key
+            Devices::KeyCode::Escape,    // Escape = 37, //!< Keyboard Escape key
+            Devices::KeyCode::Backspace, // Backspace = 38, //!< Keyboard Backspace key
+            Devices::KeyCode::Tab,       // Tab = 39, //!< Keyboard Tab key
+            Devices::KeyCode::Space,     // Space = 40, //!< Keyboard Space key
+            Devices::KeyCode::Hyphen,    // Hyphen = 41, //!< Keyboard - and _ key
+            Devices::KeyCode::Equal,     // Equal = 42, //!< Keyboard = and + key
+            Devices::KeyCode::LBracket,  //!< Keyboard [ and { key
+            Devices::KeyCode::RBracket,  //!< Keyboard ] and } key
+            // For US keyboards mapped to key 29 (Microsoft Keyboard Scan Code Specification)
+            // For Non-US keyboards mapped to key 42 (Microsoft Keyboard Scan Code Specification)
+            // Typical language mappings: Belg:£µ` FrCa:<>} Dan:*' Dutch:`´ Fren:µ* Ger:'# Ital:§ù LatAm:[}` Nor:*@ Span:ç} Swed:*' Swiss:$£} UK:~# Brazil:}]
+            Devices::KeyCode::Backslash,  // Backslash,      //!< Keyboard \ and | key OR various keys for Non-US keyboards
+            Devices::KeyCode::Semicolon,  // Semicolon,      //!< Keyboard ; and : key
+            Devices::KeyCode::Apostrophe, // Apostrophe,     //!< Keyboard ' and " key
+            Devices::KeyCode::Grave,      // Grave,          //!< Keyboard ` and ~ key
+            Devices::KeyCode::Comma,      // Comma,          //!< Keyboard , and < key
+            Devices::KeyCode::Period,     // Period,         //!< Keyboard . and > key
+            Devices::KeyCode::Slash,      // Slash,          //!< Keyboard / and ? key
+            Devices::KeyCode::F1,         // F1,             //!< Keyboard F1 key
+            Devices::KeyCode::F2,         // F2,             //!< Keyboard F2 key
+            Devices::KeyCode::F3,         // F3,             //!< Keyboard F3 key
+            Devices::KeyCode::F4,         // F4,             //!< Keyboard F4 key
+            Devices::KeyCode::F5,         // F5,             //!< Keyboard F5 key
+            Devices::KeyCode::F6,         // F6,             //!< Keyboard F6 key
+            Devices::KeyCode::F7,         // F7,             //!< Keyboard F7 key
+            Devices::KeyCode::F8,         // F8,             //!< Keyboard F8 key
+            Devices::KeyCode::F9,         // F9,             //!< Keyboard F9 key
+            Devices::KeyCode::F10,        // F10,            //!< Keyboard F10 key
+            Devices::KeyCode::F11,        // F11,            //!< Keyboard F11 key
+            Devices::KeyCode::F12,        // F12,            //!< Keyboard F12 key
+            Devices::KeyCode::F13,        // F13,            //!< Keyboard F13 key
+            Devices::KeyCode::F14,        // F14,            //!< Keyboard F14 key
+            Devices::KeyCode::F15,        // F15,            //!< Keyboard F15 key
+            Devices::KeyCode::Unknown,    // F16,            //!< Keyboard F16 key
+            Devices::KeyCode::Unknown,    // F17,            //!< Keyboard F17 key
+            Devices::KeyCode::Unknown,    // F18,            //!< Keyboard F18 key
+            Devices::KeyCode::Unknown,    // F19,            //!< Keyboard F19 key
+            Devices::KeyCode::Unknown,    // F20,            //!< Keyboard F20 key
+            Devices::KeyCode::Unknown,    // F21,            //!< Keyboard F21 key
+            Devices::KeyCode::Unknown,    // F22,            //!< Keyboard F22 key
+            Devices::KeyCode::Unknown,    // F23,            //!< Keyboard F23 key
+            Devices::KeyCode::Unknown,    // F24,            //!< Keyboard F24 key
+            Devices::KeyCode::Unknown,    // CapsLock,       //!< Keyboard Caps %Lock key
+            Devices::KeyCode::Unknown,    // PrintScreen,    //!< Keyboard Print Screen key
+            Devices::KeyCode::Unknown,    // ScrollLock,     //!< Keyboard Scroll %Lock key
+            Devices::KeyCode::Pause,      // Pause,          //!< Keyboard Pause key
+            Devices::KeyCode::Insert,     // Insert,         //!< Keyboard Insert key
+            Devices::KeyCode::Home,       // Home,           //!< Keyboard Home key
+            Devices::KeyCode::PageUp,     // PageUp,         //!< Keyboard Page Up key
+            Devices::KeyCode::Delete,     // Delete,         //!< Keyboard Delete Forward key
+            Devices::KeyCode::End,        // End,            //!< Keyboard End key
+            Devices::KeyCode::PageDown,   // PageDown,       //!< Keyboard Page Down key
+            Devices::KeyCode::Right,      // Right,          //!< Keyboard Right Arrow key
+            Devices::KeyCode::Left,       // Left,           //!< Keyboard Left Arrow key
+            Devices::KeyCode::Down,       // Down,           //!< Keyboard Down Arrow key
+            Devices::KeyCode::Up,         // Up,             //!< Keyboard Up Arrow key
+            Devices::KeyCode::Unknown,    // NumLock,        //!< Keypad Num %Lock and Clear key
+            Devices::KeyCode::Divide,     // NumpadDivide,   //!< Keypad / key
+            Devices::KeyCode::Multiply,   // NumpadMultiply, //!< Keypad * key
+            Devices::KeyCode::Subtract,   // NumpadMinus,    //!< Keypad - key
+            Devices::KeyCode::Add,        // NumpadPlus,     //!< Keypad + key
+            Devices::KeyCode::Equal,      // NumpadEqual,    //!< keypad = key
+            Devices::KeyCode::Enter,      // NumpadEnter,    //!< Keypad Enter/Return key
+            Devices::KeyCode::Comma,      // NumpadDecimal,  //!< Keypad . and Delete key
+            Devices::KeyCode::Numpad1,    // Numpad1,        //!< Keypad 1 and End key
+            Devices::KeyCode::Numpad2,    // Numpad2,        //!< Keypad 2 and Down Arrow key
+            Devices::KeyCode::Numpad3,    // Numpad3,        //!< Keypad 3 and Page Down key
+            Devices::KeyCode::Numpad4,    // Numpad4,        //!< Keypad 4 and Left Arrow key
+            Devices::KeyCode::Numpad5,    // Numpad5,        //!< Keypad 5 key
+            Devices::KeyCode::Numpad6,    // Numpad6,        //!< Keypad 6 and Right Arrow key
+            Devices::KeyCode::Numpad7,    // Numpad7,        //!< Keypad 7 and Home key
+            Devices::KeyCode::Numpad8,    // Numpad8,        //!< Keypad 8 and Up Arrow key
+            Devices::KeyCode::Numpad9,    // Numpad9,        //!< Keypad 9 and Page Up key
+            Devices::KeyCode::Numpad0,    // Numpad0,        //!< Keypad 0 and Insert key
+            // For US keyboards doesn't exist
+            // For Non-US keyboards mapped to key 45 (Microsoft Keyboard Scan Code Specification)
+            // Typical language mappings: Belg:<\> FrCa:«°» Dan:<\> Dutch:]|[ Fren:<> Ger:<|> Ital:<> LatAm:<> Nor:<> Span:<> Swed:<|> Swiss:<\> UK:\| Brazil: \|.
+            Devices::KeyCode::Backslash, // NonUsBackslash,     //!< Keyboard Non-US \ and | key
+            Devices::KeyCode::Unknown,   // Application,        //!< Keyboard Application key
+            Devices::KeyCode::Unknown,   // Execute,            //!< Keyboard Execute key
+            Devices::KeyCode::Unknown,   // ModeChange,         //!< Keyboard Mode Change key
+            Devices::KeyCode::Unknown,   // Help,               //!< Keyboard Help key
+            Devices::KeyCode::Menu,      // Menu,               //!< Keyboard Menu key
+            Devices::KeyCode::Unknown,   // Select,             //!< Keyboard Select key
+            Devices::KeyCode::Unknown,   // Redo,               //!< Keyboard Redo key
+            Devices::KeyCode::Unknown,   // Undo,               //!< Keyboard Undo key
+            Devices::KeyCode::Unknown,   // Cut,                //!< Keyboard Cut key
+            Devices::KeyCode::Unknown,   // Copy,               //!< Keyboard Copy key
+            Devices::KeyCode::Unknown,   // Paste,              //!< Keyboard Paste key
+            Devices::KeyCode::Unknown,   // VolumeMute,         //!< Keyboard Volume Mute key
+            Devices::KeyCode::Unknown,   // VolumeUp,           //!< Keyboard Volume Up key
+            Devices::KeyCode::Unknown,   // VolumeDown,         //!< Keyboard Volume Down key
+            Devices::KeyCode::Unknown,   // MediaPlayPause,     //!< Keyboard Media Play Pause key
+            Devices::KeyCode::Unknown,   // MediaStop,          //!< Keyboard Media Stop key
+            Devices::KeyCode::Unknown,   // MediaNextTrack,     //!< Keyboard Media Next Track key
+            Devices::KeyCode::Unknown,   // MediaPreviousTrack, //!< Keyboard Media Previous Track key
+            Devices::KeyCode::LControl,  // LControl,           //!< Keyboard Left Control key
+            Devices::KeyCode::LShift,    // LShift,             //!< Keyboard Left Shift key
+            Devices::KeyCode::LAlt,      // LAlt,               //!< Keyboard Left Alt key
+            Devices::KeyCode::LSystem,   // LSystem,            //!< Keyboard Left System key
+            Devices::KeyCode::RControl,  // RControl,           //!< Keyboard Right Control key
+            Devices::KeyCode::RShift,    // RShift,             //!< Keyboard Right Shift key
+            Devices::KeyCode::RAlt,      // RAlt,               //!< Keyboard Right Alt key
+            Devices::KeyCode::RSystem,   // RSystem,            //!< Keyboard Right System key
+            Devices::KeyCode::Unknown,   // Back,               //!< Keyboard Back key
+            Devices::KeyCode::Unknown,   // Forward,            //!< Keyboard Forward key
+            Devices::KeyCode::Unknown,   // Refresh,            //!< Keyboard Refresh key
+            Devices::KeyCode::Unknown,   // Stop,               //!< Keyboard Stop key
+            Devices::KeyCode::Unknown,   // Search,             //!< Keyboard Search key
+            Devices::KeyCode::Unknown,   // Favorites,          //!< Keyboard Favorites key
+            Devices::KeyCode::Unknown,   // HomePage,           //!< Keyboard Home Page key
+            Devices::KeyCode::Unknown,   // LaunchApplication1, //!< Keyboard Launch Application 1 key
+            Devices::KeyCode::Unknown,   // LaunchApplication2, //!< Keyboard Launch Application 2 key
+            Devices::KeyCode::Unknown,   // LaunchMail,         //!< Keyboard Launch Mail key
+            Devices::KeyCode::Unknown    // LaunchMediaSelect,  //!< Keyboard Launch Media Select key
+        };
 
         const Devices::MouseButton reverse_mouse_btn_mapping[] = {
             Devices::MouseButton::Left,
@@ -380,7 +432,7 @@ namespace AppKit
                     windowEventg.window = this;
                     windowEventg.type = WindowEventType::Closed;
                     targetInputManager->onWindowEvent(windowEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::Resized>())
                 { //!< The window was resized (data in event.size)
@@ -395,7 +447,7 @@ namespace AppKit
                     windowEventg.type = WindowEventType::Resized;
                     windowEventg.resized = MathCore::vec2i(value->size.x, value->size.y);
                     targetInputManager->onWindowEvent(windowEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::FocusLost>())
                 { //!< The window lost the focus (no data)
@@ -407,7 +459,7 @@ namespace AppKit
                     windowEventg.window = this;
                     windowEventg.type = WindowEventType::LostFocus;
                     targetInputManager->onWindowEvent(windowEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::FocusGained>())
                 { //!< The window gained the focus (no data)
@@ -419,7 +471,7 @@ namespace AppKit
                     windowEventg.window = this;
                     windowEventg.type = WindowEventType::GainedFocus;
                     targetInputManager->onWindowEvent(windowEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::TextEntered>())
                 { //!< A character was entered (data in event.text)
@@ -434,12 +486,12 @@ namespace AppKit
                     windowEventg.type = WindowEventType::TextEntered;
                     windowEventg.textEntered = value->unicode;
                     targetInputManager->onWindowEvent(windowEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::KeyPressed>())
                 { //!< A key was pressed (data in event.key)
                     auto value = event.getIf<sf::Event::KeyPressed>();
-                    if ((int)value->code < 0 || (int)value->code >= (int)Devices::KeyCode::Count)
+                    if ((int)value->code < 0 || (int)value->scancode > int(sf::Keyboard::Scan::LaunchMediaSelect))
                         continue;
                     // KeyboardEvent keyboardEvent;
                     // memset(&keyboardEvent, 0, sizeof(KeyboardEvent));
@@ -451,7 +503,7 @@ namespace AppKit
                     // keyboardEvent.system = value->system;
                     // targetInputManager->onKeyboardEvent(keyboardEvent);
 
-                    keyboardEventg.code = reverse_key_mapping[(int)value->code];
+                    keyboardEventg.code = reverse_key_mapping[(int)value->scancode];
                     if (key_states[(int)keyboardEventg.code])
                         continue;
 
@@ -463,12 +515,12 @@ namespace AppKit
                     keyboardEventg.shift = value->shift;
                     keyboardEventg.system = value->system;
                     targetInputManager->onKeyboardEvent(keyboardEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::KeyReleased>())
                 { //!< A key was released (data in event.key)
                     auto value = event.getIf<sf::Event::KeyReleased>();
-                    if ((int)value->code < 0 || (int)value->code >= (int)Devices::KeyCode::Count)
+                    if ((int)value->code < 0 || (int)value->scancode >= int(sf::Keyboard::Scan::LaunchMediaSelect))
                         continue;
                     // KeyboardEvent keyboardEvent;
                     // memset(&keyboardEvent, 0, sizeof(KeyboardEvent));
@@ -480,7 +532,7 @@ namespace AppKit
                     // keyboardEvent.system = value->system;
                     // targetInputManager->onKeyboardEvent(keyboardEvent);
 
-                    keyboardEventg.code = reverse_key_mapping[(int)value->code];
+                    keyboardEventg.code = reverse_key_mapping[(int)value->scancode];
 
                     if (!key_states[(int)keyboardEventg.code])
                         continue;
@@ -493,11 +545,12 @@ namespace AppKit
                     keyboardEventg.shift = value->shift;
                     keyboardEventg.system = value->system;
                     targetInputManager->onKeyboardEvent(keyboardEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::MouseWheelScrolled>())
                 { //!< The mouse wheel was scrolled (data in event.mouseWheelScroll)
-                    if (mouseEventg.type == MouseEventType::Moved){
+                    if (mouseEventg.type == MouseEventType::Moved)
+                    {
                         targetInputManager->onMouseEvent(mouseEventg);
                         // mouseEventg.type = MouseEventType::None;
                     }
@@ -518,14 +571,15 @@ namespace AppKit
                     mouseEventg.position = MathCore::vec2i(value->position.x, value->position.y);
                     mouseEventg.wheelDelta = value->delta;
                     targetInputManager->onMouseEvent(mouseEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::MouseButtonPressed>())
                 { //!< A mouse button was pressed (data in event.mouseButton)
                     auto value = event.getIf<sf::Event::MouseButtonPressed>();
                     if ((int)value->button >= (int)Devices::MouseButton::Count)
                         continue;
-                    if (mouseEventg.type == MouseEventType::Moved){
+                    if (mouseEventg.type == MouseEventType::Moved)
+                    {
                         targetInputManager->onMouseEvent(mouseEventg);
                         // mouseEventg.type = MouseEventType::None;
                     }
@@ -539,14 +593,15 @@ namespace AppKit
                     mouseEventg.position = MathCore::vec2i(value->position.x, value->position.y);
                     mouseEventg.button = reverse_mouse_btn_mapping[(int)value->button];
                     targetInputManager->onMouseEvent(mouseEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::MouseButtonReleased>())
                 { //!< A mouse button was released (data in event.mouseButton)
                     auto value = event.getIf<sf::Event::MouseButtonReleased>();
                     if ((int)value->button >= (int)Devices::MouseButton::Count)
                         continue;
-                    if (mouseEventg.type == MouseEventType::Moved){
+                    if (mouseEventg.type == MouseEventType::Moved)
+                    {
                         targetInputManager->onMouseEvent(mouseEventg);
                         // mouseEventg.type = MouseEventType::None;
                     }
@@ -560,7 +615,7 @@ namespace AppKit
                     mouseEventg.position = MathCore::vec2i(value->position.x, value->position.y);
                     mouseEventg.button = reverse_mouse_btn_mapping[(int)value->button];
                     targetInputManager->onMouseEvent(mouseEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::MouseMoved>())
                 { //!< The mouse cursor moved (data in event.mouseMove)
@@ -572,11 +627,11 @@ namespace AppKit
                     // targetInputManager->onMouseEvent(mouseEvent);
                     // if (mouseEventg.type == MouseEventType::None ||
                     //     mouseEventg.type == MouseEventType::Moved){
-                        mouseEventg.type = MouseEventType::Moved;
-                        mouseEventg.position = MathCore::vec2i(value->position.x, value->position.y);
+                    mouseEventg.type = MouseEventType::Moved;
+                    mouseEventg.position = MathCore::vec2i(value->position.x, value->position.y);
                     //}
 
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::MouseEntered>())
                 { //!< The mouse cursor entered the area of the window (no data)
@@ -588,7 +643,7 @@ namespace AppKit
                     windowEventg.window = this;
                     windowEventg.type = WindowEventType::MouseEntered;
                     targetInputManager->onWindowEvent(windowEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::MouseLeft>())
                 { //!< The mouse cursor left the area of the window (no data)
@@ -600,7 +655,7 @@ namespace AppKit
                     windowEventg.window = this;
                     windowEventg.type = WindowEventType::MouseLeft;
                     targetInputManager->onWindowEvent(windowEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::JoystickButtonPressed>())
                 { //!< A joystick button was pressed (data in event.joystickButton)
@@ -615,7 +670,7 @@ namespace AppKit
                     joystickEventg.joystickId = value->joystickId;
                     joystickEventg.button = value->button;
                     targetInputManager->onJoystickEvent(joystickEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::JoystickButtonReleased>())
                 { //!< A joystick button was released (data in event.joystickButton)
@@ -630,7 +685,7 @@ namespace AppKit
                     joystickEventg.joystickId = value->joystickId;
                     joystickEventg.button = value->button;
                     targetInputManager->onJoystickEvent(joystickEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::JoystickMoved>())
                 { //!< The joystick moved along an axis (data in event.joystickMove)
@@ -649,7 +704,7 @@ namespace AppKit
                     joystickEventg.move.axis = reverse_joystick_axis_mapping[(int)value->axis];
                     joystickEventg.move.value = value->position;
                     targetInputManager->onJoystickEvent(joystickEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::JoystickConnected>())
                 { //!< A joystick was connected (data in event.joystickConnect)
@@ -662,7 +717,7 @@ namespace AppKit
                     joystickEventg.type = JoystickEventConnected;
                     joystickEventg.joystickId = value->joystickId;
                     targetInputManager->onJoystickEvent(joystickEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::JoystickDisconnected>())
                 { //!< A joystick was disconnected (data in event.joystickConnect)
@@ -675,7 +730,7 @@ namespace AppKit
                     joystickEventg.type = JoystickEventDisconnected;
                     joystickEventg.joystickId = value->joystickId;
                     targetInputManager->onJoystickEvent(joystickEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::TouchBegan>())
                 { //!< A touch event began (data in event.touch)
@@ -690,7 +745,7 @@ namespace AppKit
                     touchEventg.finger = value->finger;
                     touchEventg.position = MathCore::vec2i(value->position.x, value->position.y);
                     targetInputManager->onTouchEvent(touchEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::TouchMoved>())
                 { //!< A touch moved (data in event.touch)
@@ -705,7 +760,7 @@ namespace AppKit
                     touchEventg.finger = value->finger;
                     touchEventg.position = MathCore::vec2i(value->position.x, value->position.y);
                     targetInputManager->onTouchEvent(touchEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::TouchEnded>())
                 { //!< A touch event ended (data in event.touch)
@@ -720,7 +775,7 @@ namespace AppKit
                     touchEventg.finger = value->finger;
                     touchEventg.position = MathCore::vec2i(value->position.x, value->position.y);
                     targetInputManager->onTouchEvent(touchEventg);
-                    //break;
+                    // break;
                 }
                 else if (event.is<sf::Event::SensorChanged>())
                 { //!< A sensor value changed (data in event.sensor)
@@ -735,16 +790,19 @@ namespace AppKit
                     sensorEventg.type = reverse_sensor_type_mapping[(int)value->type];
                     sensorEventg.value = MathCore::vec3f(value->value.x, value->value.y, value->value.z);
                     targetInputManager->onSensorEvent(sensorEventg);
-                    //break;
+                    // break;
                 }
-                else if (event.is<sf::Event::MouseMovedRaw>()){
-
-                } else {
+                else if (event.is<sf::Event::MouseMovedRaw>())
+                {
+                }
+                else
+                {
                     printf("[Window] Event not recognized.\n");
-                    //break;
+                    // break;
                 }
             }
-            if (mouseEventg.type == MouseEventType::Moved){
+            if (mouseEventg.type == MouseEventType::Moved)
+            {
                 targetInputManager->onMouseEvent(mouseEventg);
                 // mouseEventg.type = MouseEventType::None;
             }
@@ -849,10 +907,10 @@ namespace windowGLWrapper
 #ifdef NDEBUG
 #define eglCheck(expr) expr
 #else
-#define eglCheck(expr)                                             \
-    do                                                             \
-    {                                                              \
-        expr;                                                      \
+#define eglCheck(expr)                                            \
+    do                                                            \
+    {                                                             \
+        expr;                                                     \
         AppKit::Window::eglCheckError(__FILE__, __LINE__, #expr); \
     } while (false)
     static void eglCheckError(const std::string &file, unsigned int line, const char *expression)
