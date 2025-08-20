@@ -32,6 +32,22 @@ namespace AppKit
                 return dummy;
             }
 
+            UIItem ComponentUI::addComponentUI(const MathCore::vec2f &pos,
+                                               float z,
+                                               const std::string &name)
+            {
+                auto transform = Transform::CreateShared(name);
+                transform->setLocalPosition(MathCore::vec3f(pos.x, pos.y, z));
+                auto ui = transform->addNewComponent<ComponentUI>();
+                ui->Initialize(resourceMap);
+                auto item = UIItem(
+                    getTransform()->addChild(transform),
+                    self<ComponentUI>());
+                item.set<ComponentUI>(ui);
+                items.push_back(item);
+                return item;
+            }
+
             UIItem ComponentUI::addTextureText(
                 const std::string &font_path,
                 const MathCore::vec2f &pos,

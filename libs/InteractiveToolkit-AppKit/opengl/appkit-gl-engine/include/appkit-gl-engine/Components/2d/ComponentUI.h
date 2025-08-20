@@ -21,7 +21,6 @@
 // #include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 // #include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 
-
 #include "UIItem.h"
 
 namespace AppKit
@@ -43,6 +42,10 @@ namespace AppKit
                 Platform::SmartVector<UIItem> items;
 
                 UIItem &getItemByName(const std::string &name);
+
+                UIItem addComponentUI(const MathCore::vec2f &pos,
+                                      float z,
+                                      const std::string &name = "_ui");
 
                 UIItem addTextureText(
                     const std::string &font_path,
@@ -67,7 +70,7 @@ namespace AppKit
                     char32_t wordSeparatorChar,
 
                     const std::string &name = "_text");
-                
+
                 UIItem addPolygonText(
                     const std::string &font_path,
                     float base_polygon_size,
@@ -125,7 +128,7 @@ namespace AppKit
                     const MathCore::vec2f &size_constraint,
                     float z,
                     const std::string &name = "_sprite");
-                
+
                 UIItem addSpriteFromAtlas(
                     const MathCore::vec2f &pos,
                     std::shared_ptr<SpriteAtlas> atlas,
