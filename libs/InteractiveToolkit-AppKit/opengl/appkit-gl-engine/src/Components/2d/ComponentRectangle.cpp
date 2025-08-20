@@ -25,10 +25,12 @@ namespace AppKit
 
                 if (material == nullptr)
                 {
-                    if (mask != nullptr && camera != nullptr) {
+                    if (mask != nullptr && camera != nullptr)
+                    {
                         auto new_material = resourceMap->mask_query_or_create_rectangle(camera, mask);
                         material = transform->addComponent(new_material);
-                    } else
+                    }
+                    else
                         material = transform->addComponent(resourceMap->defaultUnlitVertexColorAlphaMaterial);
                 }
 
@@ -124,7 +126,8 @@ namespace AppKit
                                stroke_mode,
                                stroke_thickness,
                                0.0f, // stroke offset
-                               segment_count);
+                               segment_count,
+                               DrawStroke_Stroke);
 
                 if (drop_shadow_thickness > 0.0f && drop_shadow_color.a > 0.0f)
                 {
@@ -159,7 +162,8 @@ namespace AppKit
                                StrokeModeGrowOutside,
                                drop_shadow_thickness_40_percent,
                                offset, // stroke offset
-                               segment_count);
+                               segment_count,
+                               DrawStroke_DropShadow_Internal);
 
                     drawStroke(size,
                                drop_shadow_color * MathCore::vec4f(1, 1, 1, _40_percent), // internal color
@@ -168,7 +172,8 @@ namespace AppKit
                                StrokeModeGrowOutside,
                                drop_shadow_thickness_60_percent,
                                offset + drop_shadow_thickness_40_percent, // stroke offset
-                               segment_count);
+                               segment_count,
+                               DrawStroke_DropShadow_External);
                 }
 
                 auto size_half = size * 0.5f;
@@ -185,6 +190,15 @@ namespace AppKit
                 mesh->color[0].clear();
                 // mesh->uv[0].clear();
                 mesh->indices.clear();
+
+                idx_start_inside =
+                    idx_start_stroke_external =
+                        idx_start_stroke_internal =
+                            idx_start_drop_shadow_min_external =
+                                idx_start_drop_shadow_min_internal =
+                                    idx_start_drop_shadow_max_external =
+                                        idx_start_drop_shadow_max_internal =
+                                            idx_end = 0;
             }
 
             void ComponentRectangle::precomputeMaskParameters(const MathCore::vec2f &size,
@@ -363,6 +377,13 @@ namespace AppKit
                 mesh->pos.insert(mesh->pos.end(), polygon.begin(), polygon.end());
                 mesh->color[0].insert(mesh->color[0].end(), polygon.size(), color_external);
                 // mesh->uv[0].insert(mesh->uv[0].end(), polygon.size(), MathCore::vec3f(0.0f, 1.0f, 0.0f));
+                idx_start_stroke_external =
+                    idx_start_stroke_internal =
+                        idx_start_drop_shadow_min_external =
+                            idx_start_drop_shadow_min_internal =
+                                idx_start_drop_shadow_max_external =
+                                    idx_start_drop_shadow_max_internal =
+                                        idx_end = mesh->color[0].size();
 
                 for (size_t i = (size_t)vert_start_position, j = 0; i < mesh->color[0].size(); i += total_verts_per_quadrant[j++])
                     mesh->color[0][i] = color_internal;
@@ -427,7 +448,8 @@ namespace AppKit
                                                 StrokeModeEnum stroke_mode,
                                                 float stroke_thickness,
                                                 float stroke_offset,
-                                                uint32_t segment_count_ref)
+                                                uint32_t segment_count_ref,
+                                                DrawStrokeEnum drawStrokeMode)
             {
                 enum Order
                 {
@@ -568,11 +590,38 @@ namespace AppKit
 
                 mesh->pos.insert(mesh->pos.end(), polygon.begin(), polygon.end());
                 mesh->color[0].insert(mesh->color[0].end(), polygon.size(), color_external);
+                if (drawStrokeMode == DrawStroke_Stroke)
+                    idx_start_stroke_internal =
+                        idx_start_drop_shadow_min_external =
+                            idx_start_drop_shadow_min_internal =
+                                idx_start_drop_shadow_max_external =
+                                    idx_start_drop_shadow_max_internal =
+                                        idx_end = mesh->color[0].size();
+                else if (drawStrokeMode == DrawStroke_DropShadow_Internal)
+                    idx_start_drop_shadow_min_internal =
+                        idx_start_drop_shadow_max_external =
+                            idx_start_drop_shadow_max_internal =
+                                idx_end = mesh->color[0].size();
+                else if (drawStrokeMode == DrawStroke_DropShadow_External)
+                    idx_start_drop_shadow_max_internal =
+                        idx_end = mesh->color[0].size();
 
                 uint32_t hole_start_idx = (uint32_t)mesh->pos.size();
 
                 mesh->pos.insert(mesh->pos.end(), hole.begin(), hole.end());
                 mesh->color[0].insert(mesh->color[0].end(), hole.size(), color_internal);
+                if (drawStrokeMode == DrawStroke_Stroke)
+                    idx_start_drop_shadow_min_external =
+                        idx_start_drop_shadow_min_internal =
+                            idx_start_drop_shadow_max_external =
+                                idx_start_drop_shadow_max_internal =
+                                    idx_end = mesh->color[0].size();
+                else if (drawStrokeMode == DrawStroke_DropShadow_Internal)
+                    idx_start_drop_shadow_max_external =
+                        idx_start_drop_shadow_max_internal =
+                            idx_end = mesh->color[0].size();
+                else if (drawStrokeMode == DrawStroke_DropShadow_External)
+                    idx_end = mesh->color[0].size();
 
                 for (uint32_t i = 0; i < (uint32_t)polygon.size(); i++)
                 {
@@ -587,6 +636,40 @@ namespace AppKit
                     // triangle 2
                     mesh->indices.insert(mesh->indices.end(), {b, c, d});
                 }
+            }
+
+            void ComponentRectangle::setColor(
+                const MathCore::vec4f &color,
+                const MathCore::vec4f &stroke_color,
+                const MathCore::vec4f &drop_shadow_color)
+            {
+                // idx_start_inside,
+                // idx_start_stroke_external,
+                // idx_start_stroke_internal,
+                // idx_start_drop_shadow_min_external,
+                // idx_start_drop_shadow_min_internal,
+                // idx_start_drop_shadow_max_external,
+                // idx_start_drop_shadow_max_internal,
+                // idx_end
+                for (size_t i = idx_start_inside; i < idx_start_stroke_external; i++)
+                    mesh->color[0][i] = color;
+                for (size_t i = idx_start_stroke_external; i < idx_start_drop_shadow_min_external; i++)
+                    mesh->color[0][i] = stroke_color;
+
+                const float _60_percent = MathCore::CONSTANT<float>::RPHI;
+                const float _40_percent = 1.0f - MathCore::CONSTANT<float>::RPHI;
+                auto drop_shadow_color_middle = drop_shadow_color * MathCore::vec4f(1, 1, 1, _40_percent);
+                auto drop_shadow_color_external = drop_shadow_color * MathCore::vec4f(1, 1, 1, 0.0f);
+
+                for (size_t i = idx_start_drop_shadow_min_external; i < idx_start_drop_shadow_min_internal; i++)
+                    mesh->color[0][i] = drop_shadow_color_middle;
+                for (size_t i = idx_start_drop_shadow_min_internal; i < idx_start_drop_shadow_max_external; i++)
+                    mesh->color[0][i] = drop_shadow_color;
+
+                for (size_t i = idx_start_drop_shadow_max_external; i < idx_start_drop_shadow_max_internal; i++)
+                    mesh->color[0][i] = drop_shadow_color_external;
+                for (size_t i = idx_start_drop_shadow_max_internal; i < idx_end; i++)
+                    mesh->color[0][i] = drop_shadow_color_middle;
             }
 
             void ComponentRectangle::setMask(AppKit::GLEngine::ResourceMap *resourceMap,
@@ -614,6 +697,15 @@ namespace AppKit
             ComponentRectangle::ComponentRectangle() : Component(ComponentRectangle::Type)
             {
                 always_clone = true;
+
+                idx_start_inside =
+                    idx_start_stroke_external =
+                        idx_start_stroke_internal =
+                            idx_start_drop_shadow_min_external =
+                                idx_start_drop_shadow_min_internal =
+                                    idx_start_drop_shadow_max_external =
+                                        idx_start_drop_shadow_max_internal =
+                                            idx_end = 0;
             }
 
             ComponentRectangle::~ComponentRectangle()

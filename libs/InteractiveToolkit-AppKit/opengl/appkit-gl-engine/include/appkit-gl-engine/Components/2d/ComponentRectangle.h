@@ -54,6 +54,22 @@ namespace AppKit
                 MathCore::vec2f mask_corner[MaskOrder_Count];
                 MathCore::vec4f mask_radius;
 
+                size_t
+                    idx_start_inside,
+                    idx_start_stroke_external,
+                    idx_start_stroke_internal,
+                    idx_start_drop_shadow_min_external,
+                    idx_start_drop_shadow_min_internal,
+                    idx_start_drop_shadow_max_external,
+                    idx_start_drop_shadow_max_internal,
+                    idx_end;
+
+                enum DrawStrokeEnum {
+                    DrawStroke_Stroke,
+                    DrawStroke_DropShadow_Internal,
+                    DrawStroke_DropShadow_External
+                };
+
             private:
                 void clearMesh();
 
@@ -77,7 +93,8 @@ namespace AppKit
                                 StrokeModeEnum stroke_mode,
                                 float stroke_thickness,
                                 float stroke_offset,
-                                uint32_t segment_count);
+                                uint32_t segment_count,
+                                DrawStrokeEnum drawStrokeMode);
 
             public:
                 friend class AppKit::GLEngine::AddShaderRectangleMask;
@@ -120,6 +137,11 @@ namespace AppKit
                     const MathCore::vec4f &drop_shadow_color,
                     MeshUploadMode meshUploadMode,
                     uint32_t segment_count = 10);
+                
+                void setColor(
+                    const MathCore::vec4f &color,
+                    const MathCore::vec4f &stroke_color,
+                    const MathCore::vec4f &drop_shadow_color);
 
                 void setMask(AppKit::GLEngine::ResourceMap *resourceMap,
                              std::shared_ptr<ComponentCamera> &camera,

@@ -34,18 +34,18 @@ namespace ui
 
         float width = 256;
 
-        uiComponent->addRectangle(
+        auto rect = uiComponent->addRectangle(
             MathCore::vec2f(0, 0),                              // pos
             MathCore::vec2f(width, 64),                         // size
-            colorFromHex("#bbbbff", 1.0f),                      // color
+            screenManager->colorPalette.primary,               // color
             MathCore::vec4f(32),                                // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
-            3.0f,                                               // stroke thickness
-            colorFromHex("#610081", 1.0f),                      // stroke color
+            screenManager->colorPalette.stroke_thickness,       // stroke thickness
+            screenManager->colorPalette.primary_stroke,        // stroke color
             0,                                                  // drop shadow thickness
             MathCore::vec4f(0),                                 // drop shadow color
             0,                                                  // z
-            "bg");
+            "bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
 
         uiComponent->addTextureText(
             "resources/Roboto-Regular-100.basof2",                            // font_path
@@ -54,7 +54,7 @@ namespace ui
             "Option Nº1!",                                                    // text
             32.0f,                                                            // size
             width,                                                            // max_width
-            colorFromHex("#000000", 1.0f),                                    // faceColor
+            screenManager->colorPalette.text,                                 // faceColor
             colorFromHex("#000000", 0.0f),                                    // strokeColor
             MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
             AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
@@ -64,6 +64,12 @@ namespace ui
             AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
             U' ',                                                             // wordSeparatorChar
             "text");
+
+        rect->setColor(
+            screenManager->colorPalette.active,
+            screenManager->colorPalette.active_stroke,
+            MathCore::vec4f(0)
+        );
 
         return uiNode;
     }
