@@ -32,9 +32,11 @@ namespace ui
         uiComponent = uiNode->addNewComponent<AppKit::GLEngine::Components::ComponentUI>();
         uiComponent->Initialize(resourceMap);
 
+        auto ui = uiComponent->addComponentUI(MathCore::vec2f(0, 0), 0, "btn").get<AppKit::GLEngine::Components::ComponentUI>();
+
         float width = 256;
 
-        auto rect = uiComponent->addRectangle(
+        auto rect = ui->addRectangle(
             MathCore::vec2f(0, 0),                              // pos
             MathCore::vec2f(width, 64),                         // size
             screenManager->colorPalette.primary,               // color
@@ -47,7 +49,7 @@ namespace ui
             0,                                                  // z
             "bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
 
-        uiComponent->addTextureText(
+        ui->addTextureText(
             "resources/Roboto-Regular-100.basof2",                            // font_path
             MathCore::vec2f(0, 0),                                            // pos
             -1,                                                               // z
