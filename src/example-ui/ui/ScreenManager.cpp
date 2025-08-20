@@ -64,7 +64,7 @@ namespace ui
         printf("[ScreenManager] load_screens\n");
         for (auto &screen : screens)
         {
-            auto name = screen->name(); 
+            auto name = screen->name();
             screen_map[name] = std::move(screen);
         }
 
@@ -95,5 +95,10 @@ namespace ui
     }
 
     void ScreenManager::update(Platform::Time *elapsed) {}
+
+    void ScreenManager::setColorPalette(const ColorPalette &palette)
+    {
+        this->colorPalette = palette;
+    }
 
 }

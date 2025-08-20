@@ -45,6 +45,7 @@ void MainScene::bindResourcesToGraph()
 
     std::vector<std::unique_ptr<ui::Screen>> screens;
     screens.push_back(STL_Tools::make_unique<ui::ScreenMain>());
+    screenManager->setColorPalette(ui::Pallete::Blush);
     screenManager->load_screens(engine, resourceMap, &mathRandom, screens);
     auto ui = root->findTransformByName("ui");
     ui->addChild(screenManager->uiRoot);
