@@ -85,6 +85,8 @@ namespace ui
     void ScreenManager::triggerEvent(UIEventEnum event)
     {
         printf("[ScreenManager] %s\n", UIEventToStr(event));
+        if (screen_stack.size() > 0)
+            screen_stack.back()->triggerEvent(event);
     }
 
     void ScreenManager::resize(const MathCore::vec2i &size)
@@ -94,7 +96,10 @@ namespace ui
             screen.second->resize(size);
     }
 
-    void ScreenManager::update(Platform::Time *elapsed) {}
+    void ScreenManager::update(Platform::Time *elapsed) {
+        for (auto &screen : screen_stack)
+            screen->update(elapsed);
+    }
 
     void ScreenManager::setColorPalette(const ColorPalette &palette)
     {
