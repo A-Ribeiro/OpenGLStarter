@@ -10,6 +10,9 @@ namespace ui
         void addButton(const std::string &text);
         void previousButton();
         void nextButton();
+        void backButton();
+        void selectOption(const std::string &name);
+        void setPrimaryColorAll();
         
         bool change_screen;
         float increase_speed_for_secs_and_trigger_action;
