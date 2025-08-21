@@ -55,8 +55,47 @@ namespace ui
             U' ',                                                             // wordSeparatorChar
             "text");
     }
-    void ScreenMain::previousButton() {}
-    void ScreenMain::nextButton() {}
+    void ScreenMain::previousButton()
+    {
+        if (change_screen)
+            return;
+        selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, uiComponent->items.size() - 1);
+        setPrimaryColorAll();
+    }
+    void ScreenMain::nextButton()
+    {
+        if (change_screen)
+            return;
+        selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, uiComponent->items.size() - 1);
+        setPrimaryColorAll();
+    }
+    void ScreenMain::backButton()
+    {
+        if (change_screen)
+            return;
+        selected_button = uiComponent->items.size() - 1;
+        setPrimaryColorAll();
+    }
+    void ScreenMain::selectOption(const std::string &name)
+    {
+        printf("Selected name: %s\n", name.c_str());
+        setPrimaryColorAll();
+        if (name == "Exit Game")
+            AppKit::GLEngine::Engine::Instance()->app->exitApp();
+        else
+            screenManager->open_screen("ScreenMain");
+    }
+    void ScreenMain::setPrimaryColorAll()
+    {
+        for (auto &entry : uiComponent->items)
+        {
+            auto rect = entry.get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+            rect->setColor(
+                screenManager->colorPalette.primary,
+                screenManager->colorPalette.primary_stroke,
+                0);
+        }
+    }
 
     std::string ScreenMain::name() const
     {
@@ -71,26 +110,36 @@ namespace ui
 
     void ScreenMain::update(Platform::Time *elapsed)
     {
+        if (uiComponent->items.size() == 0)
+            return;
+
         float speed = osciloscope_normal_hz;
 
-        if (increase_speed_for_secs_and_trigger_action > 0.0f){
+        if (increase_speed_for_secs_and_trigger_action > 0.0f)
+        {
             speed = osciloscope_selected_hz;
             increase_speed_for_secs_and_trigger_action -= elapsed->unscaledDeltaTime;
-            if (increase_speed_for_secs_and_trigger_action < 0.0f){
+            if (increase_speed_for_secs_and_trigger_action < 0.0f)
+            {
                 increase_speed_for_secs_and_trigger_action = -1.0f;
                 printf("Action at selection end...");
+                selectOption(uiComponent->items[selected_button].transform->getName());
             }
         }
 
-        const float _360_pi = MathCore::CONSTANT<float>::PI * 2.0f;
-        osciloscope = MathCore::OP<float>::fmod(osciloscope + elapsed->unscaledDeltaTime * speed * _360_pi, _360_pi);
-        float sin = MathCore::OP<float>::sin(osciloscope) * 0.5f + 0.5f;
+        if (!change_screen || increase_speed_for_secs_and_trigger_action > 0.0f)
+        {
 
-        auto rect = uiComponent->items[0].get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
-        rect->setColor(
-            screenManager->colorPalette.lrp_active(sin),
-            screenManager->colorPalette.lrp_active_stroke(sin),
-            0);
+            const float _360_pi = MathCore::CONSTANT<float>::PI * 2.0f;
+            osciloscope = MathCore::OP<float>::fmod(osciloscope + elapsed->unscaledDeltaTime * speed * _360_pi, _360_pi);
+            float sin = MathCore::OP<float>::sin(osciloscope) * 0.5f + 0.5f;
+
+            auto rect = uiComponent->items[selected_button].get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+            rect->setColor(
+                screenManager->colorPalette.lrp_active(sin),
+                screenManager->colorPalette.lrp_active_stroke(sin),
+                0);
+        }
     }
 
     std::shared_ptr<AppKit::GLEngine::Transform> ScreenMain::initializeTransform(
@@ -131,18 +180,29 @@ namespace ui
             osciloscope = 0.0f;
             increase_speed_for_secs_and_trigger_action = -1.0f;
             change_screen = false;
-            
         }
         else if (event == UIEventEnum::UIEvent_ScreenPop)
         {
             uiNode->skip_traversing = true;
         }
-        else if (increase_speed_for_secs_and_trigger_action < 0.0f)
+        else if (!change_screen && increase_speed_for_secs_and_trigger_action < 0.0f)
         {
             if (event == UIEventEnum::UIEvent_InputActionEnter)
             {
                 increase_speed_for_secs_and_trigger_action = 0.5f;
                 change_screen = true;
+            }
+            else if (event == UIEventEnum::UIEvent_InputDown)
+            {
+                nextButton();
+            }
+            else if (event == UIEventEnum::UIEvent_InputUp)
+            {
+                previousButton();
+            }
+            else if (event == UIEventEnum::UIEvent_InputActionBack)
+            {
+                backButton();
             }
         }
     }

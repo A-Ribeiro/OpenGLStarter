@@ -11,11 +11,11 @@ namespace ui
             printf("[ScreenManager] Screen %s not found\n", name.c_str());
             return;
         }
-        if (screen_stack.size() > 0 && screen_stack.back()->name() == name)
-        {
-            printf("[ScreenManager] Screen %s already in stack\n", name.c_str());
-            return;
-        }
+        // if (screen_stack.size() > 0 && screen_stack.back()->name() == name)
+        // {
+        //     printf("[ScreenManager] Screen %s already in stack\n", name.c_str());
+        //     return;
+        // }
         close_all();
         push_screen(name);
     }
