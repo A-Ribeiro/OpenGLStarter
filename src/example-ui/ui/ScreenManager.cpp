@@ -63,6 +63,7 @@ namespace ui
         if (uiRoot)
             return;
         printf("[ScreenManager] load_screens\n");
+        current_size = size;
         for (auto &screen : screens)
         {
             auto name = screen->name();
@@ -94,6 +95,7 @@ namespace ui
     void ScreenManager::resize(const MathCore::vec2i &size)
     {
         printf("[ScreenManager] resize %i %i\n", size.width, size.height);
+        current_size = size;
         for (auto &screen : screen_map)
             screen.second->resize(size);
     }
