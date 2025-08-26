@@ -4,15 +4,16 @@
 
 namespace ui
 {
-    class ScreenMain : public ui::Screen
+    class ScreenOptions : public ui::Screen
     {
         void layoutElements(const MathCore::vec2i &size);
-        void addButton(const std::string &text);
-        void previousButton();
-        void nextButton();
-        void backButton();
-        void selectOption(const std::string &name);
-        void setPrimaryColorAll();
+
+        // void addButton(const std::string &text);
+        // void previousButton();
+        // void nextButton();
+        // void backButton();
+        // void selectOption(const std::string &name);
+        // void setPrimaryColorAll();
 
         bool change_screen;
         float increase_speed_for_secs_and_trigger_action;
@@ -21,11 +22,14 @@ namespace ui
         ui::ScreenManager *screenManager;
 
     public:
-        static constexpr float width = 256;
-        static constexpr float height = 64;
-        static constexpr float gap = 10;
+        // static constexpr float width = 256;
+        // static constexpr float height = 64;
+        // static constexpr float gap = 10;
 
-        static constexpr float margin_bottom = 64;
+        static constexpr float margin = 64;
+
+        static constexpr float button_gap = 8.0f;
+        static constexpr float top_bar_height = 64.0f;
 
         static constexpr float osciloscope_normal_hz = 1.0f;
         static constexpr float osciloscope_selected_hz = 6.0f;

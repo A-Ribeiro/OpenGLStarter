@@ -82,6 +82,8 @@ namespace ui
         setPrimaryColorAll();
         if (name == "Exit Game")
             AppKit::GLEngine::Engine::Instance()->app->exitApp();
+        else if (name == "Options")
+            screenManager->open_screen("ScreenOptions");
         else
             screenManager->open_screen("ScreenMain");
     }
@@ -146,7 +148,8 @@ namespace ui
         AppKit::GLEngine::Engine *engine,
         AppKit::GLEngine::ResourceMap *resourceMap,
         MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
-        ui::ScreenManager *screenManager)
+        ui::ScreenManager *screenManager,
+        const MathCore::vec2i &size)
     {
         if (uiNode)
             return uiNode;

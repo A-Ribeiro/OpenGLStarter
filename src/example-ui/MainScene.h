@@ -12,7 +12,7 @@
 
 #include "./ui/ScreenManager.h"
 #include "./ui/ScreenMain.h"
-
+#include "./ui/ScreenOptions.h"
 
 class App;
 
