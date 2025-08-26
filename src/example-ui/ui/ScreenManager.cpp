@@ -57,7 +57,8 @@ namespace ui
     void ScreenManager::load_screens(AppKit::GLEngine::Engine *engine,
                                      AppKit::GLEngine::ResourceMap *resourceMap,
                                      MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
-                                     std::vector<std::unique_ptr<Screen>> &screens)
+                                     std::vector<std::unique_ptr<Screen>> &screens,
+                                     const MathCore::vec2i &size)
     {
         if (uiRoot)
             return;
@@ -75,7 +76,8 @@ namespace ui
                 engine,
                 resourceMap,
                 mathRandom,
-                this);
+                this,
+                size);
             uiRoot->addChild(transform);
         }
     }
@@ -96,7 +98,8 @@ namespace ui
             screen.second->resize(size);
     }
 
-    void ScreenManager::update(Platform::Time *elapsed) {
+    void ScreenManager::update(Platform::Time *elapsed)
+    {
         for (auto &screen : screen_stack)
             screen->update(elapsed);
     }

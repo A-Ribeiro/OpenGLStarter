@@ -40,7 +40,9 @@ namespace ui
             AppKit::GLEngine::Engine *engine,
             AppKit::GLEngine::ResourceMap *resourceMap,
             MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
-            ScreenManager *screenManager) = 0;
+            ScreenManager *screenManager,
+            const MathCore::vec2i &size
+        ) = 0;
 
         virtual void triggerEvent(UIEventEnum event) = 0;
     };

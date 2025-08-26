@@ -25,7 +25,8 @@ namespace ui
         void load_screens(AppKit::GLEngine::Engine *engine,
                           AppKit::GLEngine::ResourceMap *resourceMap,
                           MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
-                          std::vector<std::unique_ptr<Screen>> &screens);
+                          std::vector<std::unique_ptr<Screen>> &screens,
+                          const MathCore::vec2i &size);
         void unload_screens();
 
         void triggerEvent(UIEventEnum event);
