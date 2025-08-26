@@ -15,6 +15,7 @@ namespace ui
         std::vector<Screen *> screen_stack;
 
         std::shared_ptr<AppKit::GLEngine::Transform> uiRoot;
+        MathCore::vec2f current_size;
 
         void open_screen(const std::string &name);
         void push_screen(const std::string &name);

@@ -4,6 +4,8 @@
 
 namespace ui
 {
+    class TopBar;
+
     class ScreenOptions : public ui::Screen
     {
         void layoutElements(const MathCore::vec2i &size);
@@ -37,6 +39,8 @@ namespace ui
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> uiComponent;
         std::shared_ptr<AppKit::GLEngine::Transform> uiNode;
 
+        std::shared_ptr<TopBar> topBar;
+
         std::string name() const;
         void resize(const MathCore::vec2i &size);
         void update(Platform::Time *elapsed);
@@ -49,5 +53,28 @@ namespace ui
             const MathCore::vec2i &size);
 
         void triggerEvent(ui::UIEventEnum event);
+    };
+
+    class TopBar
+    {
+        void addShoulder(int side);
+        void addButton(const std::string &text);
+    public:
+        std::shared_ptr<AppKit::GLEngine::Transform> uiNode;
+        std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> ui;
+        std::vector<std::shared_ptr<AppKit::GLEngine::Components::ComponentUI>> btns;
+        std::vector<std::shared_ptr<AppKit::GLEngine::Components::ComponentUI>> shoulders;
+
+        ScreenManager *screenManager;
+
+        void initialize(
+            std::vector<std::string> buttonNames,
+            std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> uiComponent,
+            ScreenManager *screenManager);
+
+        void layoutElements(const MathCore::vec2i &size);
+
+
+
     };
 }
