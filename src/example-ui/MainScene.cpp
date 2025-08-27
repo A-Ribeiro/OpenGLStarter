@@ -48,6 +48,7 @@ void MainScene::bindResourcesToGraph()
     screens.push_back(STL_Tools::make_unique<ui::ScreenOptions>());
     
     screenManager->setColorPalette(ui::Pallete::Blush);
+    screenManager->camera = camera;
     screenManager->load_screens(engine, resourceMap, &mathRandom, screens, MathCore::vec2i(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h));
     auto ui = root->findTransformByName("ui");
     ui->addChild(screenManager->uiRoot);

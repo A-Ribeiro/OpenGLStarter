@@ -16,6 +16,7 @@ namespace ui
 
         std::shared_ptr<AppKit::GLEngine::Transform> uiRoot;
         MathCore::vec2f current_size;
+        std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera;
 
         void open_screen(const std::string &name);
         void push_screen(const std::string &name);
