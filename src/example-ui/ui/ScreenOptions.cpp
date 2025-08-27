@@ -186,24 +186,143 @@ namespace ui
 
         auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
                                           size.height - ScreenOptions::margin * 2.0f);
-        uiComponent->addRectangle(
-            MathCore::vec2f(0, -top_bar_height * 0.5f),                   // pos
-            MathCore::vec2f(valid_size.x, valid_size.y - top_bar_height), // size
-            screenManager->colorPalette.primary,                          // color
-            MathCore::vec4f(0, 32, 32, 0),                                // radius
-            AppKit::GLEngine::Components::StrokeModeGrowInside,           // stroke mode
-            screenManager->colorPalette.stroke_thickness,                 // stroke thickness
-            screenManager->colorPalette.primary_stroke,                   // stroke color
-            0,                                                            // drop shadow thickness
-            MathCore::vec4f(0),                                           // drop shadow color
-            0,                                                            // z
-            "bg");
+        auto mask = uiComponent->addRectangle(
+                                   MathCore::vec2f(0, -top_bar_height * 0.5f),                   // pos
+                                   MathCore::vec2f(valid_size.x, valid_size.y - top_bar_height), // size
+                                   screenManager->colorPalette.primary,                          // color
+                                   MathCore::vec4f(0, 32, 32, 0),                                // radius
+                                   AppKit::GLEngine::Components::StrokeModeGrowInside,           // stroke mode
+                                   screenManager->colorPalette.stroke_thickness,                 // stroke thickness
+                                   screenManager->colorPalette.primary_stroke,                   // stroke color
+                                   0,                                                            // drop shadow thickness
+                                   MathCore::vec4f(0),                                           // drop shadow color
+                                   0,                                                            // z
+                                   "bg")
+                        .get<AppKit::GLEngine::Components::ComponentRectangle>();
 
         topBar = std::make_shared<TopBar>();
         topBar->initialize({"Game",
                             "Audio",
                             "Graphics"},
                            uiComponent, screenManager);
+
+        static constexpr float item_height = 64.0f;
+        static constexpr float item_margin = 16.0f;
+        float item_width = valid_size.width * 0.5f - item_margin * 2.0f;
+
+        MathCore::vec2f center = MathCore::vec2f(0, -top_bar_height * 0.5f);
+        auto rect = uiComponent->addRectangle(
+                                   center,                                             // pos
+                                   MathCore::vec2f(valid_size.x, item_height),         // size
+                                   screenManager->colorPalette.active,                 // color
+                                   MathCore::vec4f(32, 32, 32, 32),                    // radius
+                                   AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
+                                   screenManager->colorPalette.stroke_thickness,       // stroke thickness
+                                   screenManager->colorPalette.active_stroke,          // stroke color
+                                   0,                                                  // drop shadow thickness
+                                   MathCore::vec4f(0),                                 // drop shadow color
+                                   -1,                                                 // z
+                                   "selection")
+                        .get<AppKit::GLEngine::Components::ComponentRectangle>();
+        rect->setMask(uiComponent->resourceMap, screenManager->camera, mask);
+
+        auto option_text_center = center + MathCore::vec2f(-valid_size.width * 0.25f, 0);
+        auto txt = uiComponent->addTextureText(
+                                  "resources/Roboto-Regular-100.basof2",                            // font_path
+                                  option_text_center,                                               // pos
+                                  -3,                                                               // z
+                                  "VSync",                                                          // text
+                                  item_height * 0.5f,                                               // size
+                                  -1,                                                               // max_width
+                                  screenManager->colorPalette.text,                                 // faceColor
+                                  colorFromHex("#000000", 0.0f),                                    // strokeColor
+                                  MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
+                                  AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
+                                  AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // verticalAlign
+                                  1.0f,                                                             // lineHeight
+                                  AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
+                                  AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
+                                  U' ',                                                             // wordSeparatorChar
+                                  "option1-text")
+                       .get<AppKit::GLEngine::Components::ComponentFont>();
+        txt->setMask(uiComponent->resourceMap, screenManager->camera, mask);
+
+        // auto option_center = center + MathCore::vec2f(item_margin + item_width * 0.5f, 0);
+        auto option_center = center + MathCore::vec2f(valid_size.width * 0.25f, 0);
+        rect = uiComponent->addRectangle(
+                              option_center,                                                                         // pos
+                              MathCore::vec2f(item_width, item_height * 0.6f),                                       // size
+                              (MathCore::vec4f)screenManager->colorPalette.primary * MathCore::vec4f(1, 1, 1, 0.4f), // color
+                              MathCore::vec4f(16),                                                                   // radius
+                              AppKit::GLEngine::Components::StrokeModeGrowInside,                                    // stroke mode
+                              screenManager->colorPalette.stroke_thickness,                                          // stroke thickness
+                              screenManager->colorPalette.primary_stroke,                                            // stroke color
+                              0,                                                                                     // drop shadow thickness
+                              MathCore::vec4f(0),                                                                    // drop shadow color
+                              -2,                                                                                    // z
+                              "selection")
+                   .get<AppKit::GLEngine::Components::ComponentRectangle>();
+        rect->setMask(uiComponent->resourceMap, screenManager->camera, mask);
+
+        txt = uiComponent->addTextureText(
+                             "resources/Roboto-Regular-100.basof2",                            // font_path
+                             option_center,                                                    // pos
+                             -3,                                                               // z
+                             "ON",                                                             // text
+                             item_height * 0.5f,                                               // size
+                             -1,                                                               // max_width
+                             screenManager->colorPalette.text,                                 // faceColor
+                             colorFromHex("#000000", 0.0f),                                    // strokeColor
+                             MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
+                             AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
+                             AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // verticalAlign
+                             1.0f,                                                             // lineHeight
+                             AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
+                             AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
+                             U' ',                                                             // wordSeparatorChar
+                             "option1-sel")
+                  .get<AppKit::GLEngine::Components::ComponentFont>();
+        txt->setMask(uiComponent->resourceMap, screenManager->camera, mask);
+
+        txt = uiComponent->addTextureText(
+                             "resources/Roboto-Regular-100.basof2",                                // font_path
+                             option_center + MathCore::vec2f(-item_width * 0.5f + item_margin, 0), // pos
+                             -3,                                                                   // z
+                             "<",                                                                  // text
+                             item_height * 0.5f,                                                   // size
+                             -1,                                                                   // max_width
+                             screenManager->colorPalette.text,                                     // faceColor
+                             colorFromHex("#000000", 0.0f),                                        // strokeColor
+                             MathCore::vec3f(0.0f, 0.0f, -0.02f),                                  // strokeOffset
+                             AppKit::OpenGL::GLFont2HorizontalAlign_left,                          // horizontalAlign
+                             AppKit::OpenGL::GLFont2VerticalAlign_middle,                          // verticalAlign
+                             1.0f,                                                                 // lineHeight
+                             AppKit::OpenGL::GLFont2WrapMode_Word,                                 // wrapMode
+                             AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,     // firstLineHeightMode
+                             U' ',                                                                 // wordSeparatorChar
+                             "option1-<")
+                  .get<AppKit::GLEngine::Components::ComponentFont>();
+        txt->setMask(uiComponent->resourceMap, screenManager->camera, mask);
+
+        txt = uiComponent->addTextureText(
+                             "resources/Roboto-Regular-100.basof2",                               // font_path
+                             option_center + MathCore::vec2f(item_width * 0.5f - item_margin, 0), // pos
+                             -3,                                                                  // z
+                             ">",                                                                 // text
+                             item_height * 0.5f,                                                  // size
+                             -1,                                                                  // max_width
+                             screenManager->colorPalette.text,                                    // faceColor
+                             colorFromHex("#000000", 0.0f),                                       // strokeColor
+                             MathCore::vec3f(0.0f, 0.0f, -0.02f),                                 // strokeOffset
+                             AppKit::OpenGL::GLFont2HorizontalAlign_right,                        // horizontalAlign
+                             AppKit::OpenGL::GLFont2VerticalAlign_middle,                         // verticalAlign
+                             1.0f,                                                                // lineHeight
+                             AppKit::OpenGL::GLFont2WrapMode_Word,                                // wrapMode
+                             AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,    // firstLineHeightMode
+                             U' ',                                                                // wordSeparatorChar
+                             "option1->")
+                  .get<AppKit::GLEngine::Components::ComponentFont>();
+        txt->setMask(uiComponent->resourceMap, screenManager->camera, mask);
 
         return uiNode;
     }
