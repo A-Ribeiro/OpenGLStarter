@@ -28,6 +28,8 @@ namespace AppKit
             LostFocus,
             GainedFocus,
 
+            Win32RedrawOnResize,
+
             // window related events
             TextEntered,
             MouseEntered,

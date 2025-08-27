@@ -45,9 +45,8 @@ namespace AppKit
             bool key_states[(int)Devices::KeyCode::Count];
 
         protected:
-
             void *libraryHandle;
-            
+
             // user defined opaque handlers for GLWindow or VulkanWindow use
             void *usr1Handle;
             void *usr2Handle;
@@ -57,7 +56,18 @@ namespace AppKit
 
             Window();
 
+#if defined(_WIN32)
+            UINT_PTR resizeTimerId;
+            static void _win32_draw_on_resize_or_move(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
+#endif
+
         public:
+
+            //allow redrawing when is resizing or moving the window
+            EventCore::Callback<void(const WindowEvent&)> onWin32BlockState_WindowEvent;
+
+            virtual ~Window() = default;
+
             InputManager inputManager;
 
             const WindowConfig &getConfig() const;
@@ -91,15 +101,14 @@ namespace AppKit
             NativeWindowHandleType getNativeWindowHandle();
         };
 
-
 #if defined(APPKIT_WINDOW_GL)
 
-        class GLWindow: public Window {
-        
-        
+        class GLWindow : public Window
+        {
+
             GLContextConfig glContextConfig;
+
         public:
-            
             GLWindow(const WindowConfig &windowConfig, const GLContextConfig &glContextConfig);
 
             ~GLWindow();
@@ -111,32 +120,29 @@ namespace AppKit
             bool glSetActivate(bool v);
             void glSwapBuffers();
             void glSetVSync(bool vsyncOn);
-
         };
 
 #endif
 
 #if defined(APPKIT_WINDOW_VULKAN)
 
-// #define GLAD_VULKAN_IMPLEMENTATION
-// #include <vulkan.h>
-typedef void* VkInstance;
-typedef void* VkSurfaceKHR;
-typedef void* VkAllocationCallbacks;
+        // #define GLAD_VULKAN_IMPLEMENTATION
+        // #include <vulkan.h>
+        typedef void *VkInstance;
+        typedef void *VkSurfaceKHR;
+        typedef void *VkAllocationCallbacks;
 
-        class VulkanWindow: public Window {
+        class VulkanWindow : public Window
+        {
 
-            public:
-
+        public:
             VulkanWindow(const WindowConfig &windowConfig);
 
             // need headers vulkan
             void createVulkanSurface(
-                const VkInstance& instance, VkSurfaceKHR& surface, const VkAllocationCallbacks* allocator = nullptr
-            );
+                const VkInstance &instance, VkSurfaceKHR &surface, const VkAllocationCallbacks *allocator = nullptr);
 
             ~VulkanWindow();
-
         };
 
 #endif
