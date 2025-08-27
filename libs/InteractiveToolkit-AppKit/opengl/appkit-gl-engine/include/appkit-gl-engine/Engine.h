@@ -45,7 +45,7 @@ namespace AppKit
             AppKit::Window::GLContextConfig glContextConfig;
         };
 
-        class Engine
+        class Engine : public EventCore::HandleCallback
         {
 
             EngineWindowConfig changeWindowConfig;
@@ -57,6 +57,8 @@ namespace AppKit
             Engine();
 
             void clear();
+
+            void onWin32BlockState_WindowEvent(const AppKit::Window::WindowEvent&);
 
         public:
             std::string companyName;
