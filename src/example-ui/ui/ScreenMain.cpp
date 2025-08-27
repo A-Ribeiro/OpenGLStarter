@@ -59,21 +59,21 @@ namespace ui
     {
         if (change_screen)
             return;
-        selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, uiComponent->items.size() - 1);
+        selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)uiComponent->items.size() - 1);
         setPrimaryColorAll();
     }
     void ScreenMain::nextButton()
     {
         if (change_screen)
             return;
-        selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, uiComponent->items.size() - 1);
+        selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)uiComponent->items.size() - 1);
         setPrimaryColorAll();
     }
     void ScreenMain::backButton()
     {
         if (change_screen)
             return;
-        selected_button = uiComponent->items.size() - 1;
+        selected_button = (int)uiComponent->items.size() - 1;
         setPrimaryColorAll();
     }
     void ScreenMain::selectOption(const std::string &name)
