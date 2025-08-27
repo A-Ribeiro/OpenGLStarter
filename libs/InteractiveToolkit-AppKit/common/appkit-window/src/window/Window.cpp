@@ -201,7 +201,7 @@ namespace AppKit
             {
             case WM_SIZE:
             {
-                if (window->resizeTimerId != 0 && window && window->onWin32BlockState_WindowEvent != nullptr)
+                if (window->resizeTimerId != 0 && window->onWin32BlockState_WindowEvent != nullptr)
                 {
 
                     RECT rect;
@@ -236,17 +236,56 @@ namespace AppKit
                 break;
             }
 
+            case WM_NCLBUTTONDOWN:
+            {
+                if (wParam == HTCAPTION || wParam == HTSYSMENU)
+                {
+                    if (window->resizeTimerId == 0)
+                        window->resizeTimerId = SetTimer(handle, 1, 16, nullptr); // ~60 FPS
+                }
+                break;
+            }
+            case WM_NCLBUTTONUP:
+            {
+                if (wParam == HTCAPTION || wParam == HTSYSMENU) // Title bar or system menu
+                {
+                    // Only stop timer if we're not in a size/move operation
+                    // WM_EXITSIZEMOVE will handle stopping the timer in that case
+                    if (window->resizeTimerId != 0)
+                    {
+                        // Small delay to ensure any pending operations complete
+                        SetTimer(handle, 2, 100, nullptr); // 100ms delay before stopping
+                    }
+                }
+                break;
+            }
+
             case WM_TIMER:
             {
+                if (!wParam)
+                    break;
                 auto window = it->second;
                 // Handle the 60Hz timer during resize
-                if (wParam == window->resizeTimerId && window && window->onWin32BlockState_WindowEvent != nullptr)
+                if (wParam == window->resizeTimerId)
                 {
-                    AppKit::Window::WindowEvent windowEventg;
-                    windowEventg.window = window;
-                    windowEventg.type = AppKit::Window::WindowEventType::Win32RedrawOnResize;
+                    if (window->onWin32BlockState_WindowEvent != nullptr)
+                    {
+                        AppKit::Window::WindowEvent windowEventg;
+                        windowEventg.window = window;
+                        windowEventg.type = AppKit::Window::WindowEventType::Win32RedrawOnResize;
 
-                    window->onWin32BlockState_WindowEvent(windowEventg);
+                        window->onWin32BlockState_WindowEvent(windowEventg);
+                    }
+                }
+                else if (wParam == 2)
+                {
+                    // Delayed timer cleanup
+                    KillTimer(handle, 2);
+                    if (window->resizeTimerId != 0)
+                    {
+                        KillTimer(handle, window->resizeTimerId);
+                        window->resizeTimerId = 0;
+                    }
                 }
 
                 break;
