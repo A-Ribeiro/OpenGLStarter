@@ -15,7 +15,7 @@ namespace AppKit
     "float compute_mask(){\n"                                                                                                     \
     "  vec2 ptn_local_space = (uTransformToMask * vec4(gl_FragCoord.x, gl_FragCoord.y, (gl_FragCoord.z - 0.5) * 2.0, 1.0)).xy;\n" \
     "  vec2 ptn_step = step(vec2(0.0), ptn_local_space);\n"                                                                       \
-    "  int quadrant = int((1.0 - ptn_step.x) * ( 2.0 + ptn_step.y ) + ptn_step.x * (1.0 - ptn_step.y));\n"                        \
+    "  int quadrant = int((1.0 - ptn_step.x) * ( 2.0 + ptn_step.y ) + ptn_step.x * (1.0 - ptn_step.y) + 0.5);\n"                  \
     "  vec2 quadrant_sign = sign(ptn_step - 0.5);\n"                                                                              \
     "  ptn_local_space *= quadrant_sign;\n"                                                                                       \
     "  vec2 corner_abs_space = abs(uMask_corner[quadrant]);\n"                                                                    \
@@ -40,7 +40,7 @@ namespace AppKit
     "float compute_mask(float margin){\n"                                                                                                  \
     "  vec2 ptn_local_space = (uTransformToMask * vec4(gl_FragCoord.x, gl_FragCoord.y, (gl_FragCoord.z - 0.5) * 2.0, 1.0)).xy;\n"          \
     "  vec2 ptn_step = step(vec2(0.0), ptn_local_space);\n"                                                                                \
-    "  int quadrant = int((1.0 - ptn_step.x) * ( 2.0 + ptn_step.y ) + ptn_step.x * (1.0 - ptn_step.y));\n"                                 \
+    "  int quadrant = int((1.0 - ptn_step.x) * ( 2.0 + ptn_step.y ) + ptn_step.x * (1.0 - ptn_step.y) + 0.5);\n"                           \
     "  vec2 quadrant_sign = sign(ptn_step - 0.5);\n"                                                                                       \
     "  ptn_local_space *= quadrant_sign;\n"                                                                                                \
     "  vec2 corner_abs_space = abs(uMask_corner[quadrant]);\n"                                                                             \
