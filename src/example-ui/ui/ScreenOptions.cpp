@@ -28,7 +28,7 @@ namespace ui
             uiComponent->resourceMap,
             MathCore::vec2f(valid_size.x, valid_size.y - top_bar_height), // size
             screenManager->colorPalette.primary,                          // color
-            MathCore::vec4f(0, 32, 32, 0),                                // radius
+            MathCore::vec4f(32, 32, 32, 32),                              // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,           // stroke mode
             screenManager->colorPalette.stroke_thickness,                 // stroke thickness
             screenManager->colorPalette.primary_stroke,                   // stroke color
@@ -243,6 +243,14 @@ namespace ui
                 // backButton();
                 screenManager->open_screen("ScreenMain");
             }
+            else if (event == UIEventEnum::UIEvent_InputShoulderRight)
+            {
+                topBar->shoulderNext();
+            }
+            else if (event == UIEventEnum::UIEvent_InputShoulderLeft)
+            {
+                topBar->shoulderPrevious();
+            }
         }
     }
 
@@ -251,6 +259,7 @@ namespace ui
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> uiComponent,
         ScreenManager *screenManager)
     {
+        selected_button = 0;
         this->screenManager = screenManager;
         ui = uiComponent->addComponentUI(MathCore::vec2f(0, 0), -1, "top_bar").get<AppKit::GLEngine::Components::ComponentUI>();
 
@@ -259,6 +268,8 @@ namespace ui
 
         for (const auto &buttonName : buttonNames)
             addButton(buttonName);
+
+        setButtonColors();
     }
 
     void TopBar::layoutElements(const MathCore::vec2i &size)
@@ -308,6 +319,25 @@ namespace ui
             return;
         shoulders[0]->getTransform()->setLocalPosition(MathCore::vec3f(-valid_size.width * 0.5f + shoulder_size.x * 0.5f, 0, 0));
         shoulders[1]->getTransform()->setLocalPosition(MathCore::vec3f(valid_size.width * 0.5f - shoulder_size.x * 0.5f, 0, 0));
+
+        setButtonColors();
+    }
+
+    void TopBar::shoulderNext()
+    {
+        selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, btns.size() - 1);
+        setButtonColors();
+    }
+
+    void TopBar::shoulderPrevious()
+    {
+        selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, btns.size() - 1);
+        setButtonColors();
+    }
+
+    const std::string &TopBar::getSelectedButtonName() const
+    {
+        return btns[selected_button]->getTransform()->getName();
     }
 
     void TopBar::addShoulder(int side)
@@ -391,6 +421,31 @@ namespace ui
             AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
             U' ',                                                             // wordSeparatorChar
             "text");
+    }
+
+    void TopBar::setButtonColors()
+    {
+        for (size_t i = 0; i < btns.size(); ++i)
+        {
+            auto btn = btns[i];
+            auto bg = btn->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+            if ((int)i == selected_button)
+            {
+                bg->setColor(
+                    screenManager->colorPalette.primary,        // color
+                    screenManager->colorPalette.primary_stroke, // stroke color
+                    MathCore::vec4f(0)                          // drop shadow color
+                );
+            }
+            else
+            {
+                bg->setColor(
+                    screenManager->colorPalette.disabled,        // color
+                    screenManager->colorPalette.disabled_stroke, // stroke color
+                    MathCore::vec4f(0)                           // drop shadow color
+                );
+            }
+        }
     }
 
 }

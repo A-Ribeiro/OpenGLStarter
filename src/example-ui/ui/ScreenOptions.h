@@ -59,6 +59,10 @@ namespace ui
     {
         void addShoulder(int side);
         void addButton(const std::string &text);
+
+        int selected_button;
+
+        void setButtonColors();
     public:
         std::shared_ptr<AppKit::GLEngine::Transform> uiNode;
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> ui;
@@ -74,7 +78,9 @@ namespace ui
 
         void layoutElements(const MathCore::vec2i &size);
 
+        void shoulderNext();
+        void shoulderPrevious();
 
-
+        const std::string &getSelectedButtonName() const;
     };
 }
