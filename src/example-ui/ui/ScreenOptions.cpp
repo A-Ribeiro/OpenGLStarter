@@ -444,13 +444,13 @@ namespace ui
 
     void TopBar::shoulderNext()
     {
-        selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, btns.size() - 1);
+        selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)btns.size() - 1);
         setButtonColors();
     }
 
     void TopBar::shoulderPrevious()
     {
-        selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, btns.size() - 1);
+        selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)btns.size() - 1);
         setButtonColors();
     }
 
