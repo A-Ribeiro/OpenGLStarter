@@ -202,6 +202,7 @@ namespace ui
 
         topBar = std::make_shared<TopBar>();
         topBar->initialize({"Game",
+                            "Control",
                             "Audio",
                             "Graphics"},
                            uiComponent, screenManager);
