@@ -16,6 +16,15 @@ if(WIN32)
 elseif(APPLE)
 elseif(UNIX)
 
+    message(STATUS "")
+    message(STATUS "UNIX BUILD DPI Toolkit")
+    message(STATUS "")
+    message(STATUS "You need to run the following code:")
+    message(STATUS "")
+    message(STATUS "    sudo apt install libx11-dev libxrandr-dev")
+    message(STATUS "")
+
+
     find_package(X11 REQUIRED COMPONENTS Xrandr QUIET)
 
     list(APPEND ADD_LIBS X11::X11 X11::Xrandr  )
