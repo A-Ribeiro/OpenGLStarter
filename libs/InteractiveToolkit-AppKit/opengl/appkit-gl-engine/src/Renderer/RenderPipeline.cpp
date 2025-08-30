@@ -217,7 +217,7 @@ namespace AppKit
                 meshAgregator = nullptr;
             }
 
-            if (dummyTransform != nullptr) 
+            if (dummyTransform != nullptr)
             {
                 delete dummyTransform;
                 dummyTransform = nullptr;
@@ -248,6 +248,7 @@ namespace AppKit
             // so we need to set it immediately before draw
             meshAgregator->setLayoutPointers(shader);
             meshAgregator->draw();
+            meshAgregator->unsetLayoutPointers(shader); // needs to unset before clear, or it could get invalid memory address on dynamic pointers...
             meshAgregator->clear();
         }
 
@@ -278,7 +279,8 @@ namespace AppKit
             {
                 if (currentMesh == meshAgregator && currentMesh->indices.size() > 0)
                     renderMeshAgregatorAndClear(resourceMap, camera);
-                currentMesh->unsetLayoutPointers(shaderMeshLastSet);
+                else
+                    currentMesh->unsetLayoutPointers(shaderMeshLastSet); // don't need to unset if is a mesh agregator... 
             }
 
             if (mesh != nullptr && currentMaterial != nullptr)
