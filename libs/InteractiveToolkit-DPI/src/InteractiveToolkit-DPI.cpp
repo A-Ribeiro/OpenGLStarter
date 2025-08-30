@@ -128,9 +128,13 @@ namespace DPI
 				if (gdk_dpi_scale_str)
 				{
 					double gdk_dpi_scale = atof(gdk_dpi_scale_str);
-					gdk_dpi_scale *= 96.0 / 25.4;
-					monitor.mwidth = (int)((double)monitor.width / gdk_dpi_scale);
-					monitor.mheight = (int)((double)monitor.height / gdk_dpi_scale);
+                    
+					// gdk_dpi_scale *= 96.0 / 25.4;
+					// monitor.mwidth = (int)((double)monitor.width / gdk_dpi_scale);
+					// monitor.mheight = (int)((double)monitor.height / gdk_dpi_scale);
+
+                    monitor.mwidth = (int)((double)monitor.mwidth / gdk_dpi_scale);
+					monitor.mheight = (int)((double)monitor.mheight / gdk_dpi_scale);
 				}
 			}
 

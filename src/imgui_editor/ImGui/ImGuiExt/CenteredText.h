@@ -25,7 +25,10 @@ class CenteredText
             text_end = text_begin + strlen(text_begin); // FIXME-OPT: Need to avoid this.
 
         const float line_height = size;
-        const float scale = size / font->FontSize;
+
+        ImFontBaked* baked = font->GetFontBaked(size);
+
+        const float scale = size / baked->Size;
 
         ImVec2 text_size = ImVec2(0, 0);
         float line_width = 0.0f;
@@ -89,7 +92,7 @@ class CenteredText
             }
 
             aux_str += c;
-            const float char_width = ((int)c < font->IndexAdvanceX.Size ? font->IndexAdvanceX.Data[c] : font->FallbackAdvanceX) * scale;
+            const float char_width = ((int)c < baked->IndexAdvanceX.Size ? baked->IndexAdvanceX.Data[c] : baked->FallbackAdvanceX) * scale;
             if (line_width + char_width >= max_width)
             {
                 s = prev_s;
@@ -188,7 +191,9 @@ public:
         if (font != nullptr)
             ImGui::PushFont(font);
 
-        float font_size = font->FontSize;
+        ImFontBaked* baked = font->GetFontBaked(ImGui::GetFontSize());
+
+        float font_size = baked->Size;
         float line_height = font_size;
 
         ImVec2 currentPos = -text_size_2;
