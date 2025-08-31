@@ -11,15 +11,19 @@ namespace ui
     {
         this->mask = mask;
         this->screenManager = screenManager;
-        ui = uiComponent->addComponentUI(MathCore::vec2f(0, 0), -1, buttonSetName).get<AppKit::GLEngine::Components::ComponentUI>();
-        ui->getTransform()->skip_traversing = true;
 
         auto size = screenManager->current_size;
 
         auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
-                                          size.height - ScreenOptions::margin * 2.0f);
+                                          size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
+        float y_pos =
+            -ScreenOptions::top_bar_height * 0.5f + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
 
-        MathCore::vec2f center = MathCore::vec2f(0, -ScreenOptions::top_bar_height * 0.5f);
+        // ui at center
+        ui = uiComponent->addComponentUI(MathCore::vec2f(0, y_pos), -1, buttonSetName).get<AppKit::GLEngine::Components::ComponentUI>();
+        ui->getTransform()->skip_traversing = true;
+
+        MathCore::vec2f center = MathCore::vec2f(0, 0);
         selection_rect = ui->addRectangle(
                                center,                                                    // pos
                                MathCore::vec2f(valid_size.x, ScreenOptions::item_height), // size
@@ -39,9 +43,11 @@ namespace ui
     void OptionSet::addOption(const std::string &option, const std::vector<std::string> &choices, const std::string &selected)
     {
 
+        float y_pos = -(float)items.size() * (ScreenOptions::item_height + ScreenOptions::item_hmargin);
+
         ItemDefinition itemDefinition;
 
-        itemDefinition.ui = ui->addComponentUI(MathCore::vec2f(0, 0), 0, option).get<AppKit::GLEngine::Components::ComponentUI>();
+        itemDefinition.ui = ui->addComponentUI(MathCore::vec2f(0, y_pos), 0, option).get<AppKit::GLEngine::Components::ComponentUI>();
         itemDefinition.option = option;
         itemDefinition.choices = choices;
         auto sel_it = std::find(choices.begin(), choices.end(), selected);
@@ -65,7 +71,7 @@ namespace ui
 
         float item_width = valid_size.width * 0.5f - ScreenOptions::item_hmargin * 2.0f;
 
-        MathCore::vec2f center = MathCore::vec2f(0, -ScreenOptions::top_bar_height * 0.5f);
+        MathCore::vec2f center = MathCore::vec2f(0, 0);
 
         auto option_text_center = center + MathCore::vec2f(-valid_size.width * 0.25f, 0);
         auto txt = itemDefinition.ui->addTextureText(
@@ -168,6 +174,62 @@ namespace ui
 
     void OptionSet::layoutElements(const MathCore::vec2i &size)
     {
+        auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
+                                          size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
+        float y_center = -ScreenOptions::top_bar_height * 0.5f;
+        float y_pos_start =
+            y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
+        float y_pos_end =
+            y_center - valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f;
+
+        float y_height_items = (float)(items.size() - 1) * (ScreenOptions::item_height + ScreenOptions::item_hmargin);
+
+        ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + y_height_items * 0.5f, -1));
+
+        float item_width = valid_size.width * 0.5f - ScreenOptions::item_hmargin * 2.0f;
+
+        auto option_text_center = MathCore::vec3f(-valid_size.width * 0.25f, 0, -3);
+        auto option_center = MathCore::vec3f(valid_size.width * 0.25f, 0, -3);
+        auto option_sel_bg_size = MathCore::vec2f(item_width, ScreenOptions::item_height * 0.6f);
+        auto option_less = option_center + MathCore::vec3f(-item_width * 0.5f + ScreenOptions::item_hmargin, 0, 0);
+        auto option_greater = option_center + MathCore::vec3f(item_width * 0.5f - ScreenOptions::item_hmargin, 0, 0);
+
+        for (auto &item : items)
+        {
+            item.ui->getItemByName("title").transform->setLocalPosition(option_text_center);
+            item.ui->getItemByName("option-text").transform->setLocalPosition(option_center);
+            item.ui->getItemByName("option-less").transform->setLocalPosition(option_less);
+            item.ui->getItemByName("option-greater").transform->setLocalPosition(option_greater);
+
+            auto &bg = item.ui->getItemByName("option-bg");
+            bg.transform->setLocalPosition(option_center - MathCore::vec3f(0, 0, -1));
+
+            bg.get<AppKit::GLEngine::Components::ComponentRectangle>()->setQuad(
+                ui->resourceMap,
+                option_sel_bg_size,                                                                    // size
+                (MathCore::vec4f)screenManager->colorPalette.primary * MathCore::vec4f(1, 1, 1, 0.4f), // color
+                MathCore::vec4f(16),                                                                   // radius
+                AppKit::GLEngine::Components::StrokeModeGrowInside,                                    // stroke mode
+                screenManager->colorPalette.stroke_thickness,                                          // stroke thickness
+                screenManager->colorPalette.primary_stroke,                                            // stroke color
+                0,                                                                                     // drop shadow thickness
+                MathCore::vec4f(0),                                                                    // drop shadow color
+                AppKit::GLEngine::Components::MeshUploadMode_Direct                                    // meshUploadMode,
+            );
+        }
+
+        selection_rect->setQuad(
+            ui->resourceMap,
+            MathCore::vec2f(valid_size.x, ScreenOptions::item_height), // size
+            screenManager->colorPalette.active,                        // color
+            MathCore::vec4f(32, 32, 32, 32),                           // radius
+            AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
+            screenManager->colorPalette.stroke_thickness,              // stroke thickness
+            screenManager->colorPalette.active_stroke,                 // stroke color
+            0,                                                         // drop shadow thickness
+            MathCore::vec4f(0),                                        // drop shadow color
+            AppKit::GLEngine::Components::MeshUploadMode_Direct        // meshUploadMode,
+        );
     }
 
     void OptionSet::leftButton()
