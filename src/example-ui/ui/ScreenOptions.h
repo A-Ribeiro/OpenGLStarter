@@ -5,11 +5,10 @@
 namespace ui
 {
     class TopBar;
+    class OptionSet;
 
     class ScreenOptions : public ui::Screen
     {
-        void layoutElements(const MathCore::vec2i &size);
-
         // void addButton(const std::string &text);
         // void previousButton();
         // void nextButton();
@@ -23,6 +22,10 @@ namespace ui
         int selected_button;
         ui::ScreenManager *screenManager;
 
+        void layoutElements(const MathCore::vec2i &size);
+
+        void activeCurrentTab();
+
     public:
         // static constexpr float width = 256;
         // static constexpr float height = 64;
@@ -33,6 +36,11 @@ namespace ui
         static constexpr float button_gap = 8.0f;
         static constexpr float top_bar_height = 64.0f;
 
+        static constexpr float item_height = 64.0f;
+        static constexpr float item_hmargin = 16.0f;
+        static constexpr float item_vmargin = 32.0f;
+
+
         static constexpr float osciloscope_normal_hz = 1.0f;
         static constexpr float osciloscope_selected_hz = 6.0f;
 
@@ -40,6 +48,7 @@ namespace ui
         std::shared_ptr<AppKit::GLEngine::Transform> uiNode;
 
         std::shared_ptr<TopBar> topBar;
+        std::unordered_map<std::string, std::unique_ptr<OptionSet>> optionMap;
 
         std::string name() const;
         void resize(const MathCore::vec2i &size);
@@ -55,32 +64,7 @@ namespace ui
         void triggerEvent(ui::UIEventEnum event);
     };
 
-    class TopBar
-    {
-        void addShoulder(int side);
-        void addButton(const std::string &text);
-
-        int selected_button;
-
-        void setButtonColors();
-    public:
-        std::shared_ptr<AppKit::GLEngine::Transform> uiNode;
-        std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> ui;
-        std::vector<std::shared_ptr<AppKit::GLEngine::Components::ComponentUI>> btns;
-        std::vector<std::shared_ptr<AppKit::GLEngine::Components::ComponentUI>> shoulders;
-
-        ScreenManager *screenManager;
-
-        void initialize(
-            std::vector<std::string> buttonNames,
-            std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> uiComponent,
-            ScreenManager *screenManager);
-
-        void layoutElements(const MathCore::vec2i &size);
-
-        void shoulderNext();
-        void shoulderPrevious();
-
-        const std::string &getSelectedButtonName() const;
-    };
 }
+
+#include "./Options/TopBar.h"
+#include "./Options/OptionSet.h"
