@@ -41,6 +41,9 @@ namespace ui
 
         if (topBar)
             topBar->layoutElements(size);
+
+        for (auto &item : optionMap)
+            item.second->layoutElements(size);
     }
 
     void ScreenOptions::activeCurrentTab()

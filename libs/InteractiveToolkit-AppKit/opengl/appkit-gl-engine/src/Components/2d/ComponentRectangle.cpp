@@ -199,6 +199,12 @@ namespace AppKit
                                     idx_start_drop_shadow_max_external =
                                         idx_start_drop_shadow_max_internal =
                                             idx_end = 0;
+
+                precomputeMaskParameters(
+                    MathCore::vec2f(0),
+                    MathCore::vec4f(0),
+                    StrokeModeGrowInside,
+                    0);
             }
 
             void ComponentRectangle::precomputeMaskParameters(const MathCore::vec2f &size,

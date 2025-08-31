@@ -38,7 +38,7 @@ namespace ui
 
         static constexpr float item_height = 64.0f;
         static constexpr float item_hmargin = 16.0f;
-        static constexpr float item_vmargin = 32.0f;
+        static constexpr float item_vmargin = 16.0f;
 
 
         static constexpr float osciloscope_normal_hz = 1.0f;
