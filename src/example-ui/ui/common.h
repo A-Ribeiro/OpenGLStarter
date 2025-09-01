@@ -129,6 +129,8 @@ namespace ui
 
         Color text;
 
+        Color scroll_gradient;
+
         MathCore::vec4f lrp_active(float active_lrp) const {
             return MathCore::OP<MathCore::vec4f>::lerp(primary, active, active_lrp);
         }
