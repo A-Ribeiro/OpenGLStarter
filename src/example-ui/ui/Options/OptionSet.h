@@ -8,6 +8,8 @@ namespace ui
     class OptionSet
     {
         void set_selected_rect_pos();
+        // float get_selection_percentagem_related_to_valid_area();
+        void set_selection_percentagem_related_to_valid_area();
     public:
         struct ItemDefinition
         {
