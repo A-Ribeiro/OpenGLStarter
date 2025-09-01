@@ -177,15 +177,17 @@ namespace ui
     {
         auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
                                           size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
-        float y_center = -ScreenOptions::top_bar_height * 0.5f;
-        float y_pos_start =
-            y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
-        float y_pos_end =
-            y_center - valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f;
+        // float y_center = -ScreenOptions::top_bar_height * 0.5f;
+        // float y_pos_start =
+        //     y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
+        // float y_pos_end =
+        //     y_center - valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f;
 
-        float y_height_items = (float)(items.size() - 1) * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+        // float y_height_items = (float)(items.size() - 1) * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
 
-        ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + y_height_items * 0.5f, -1));
+        // ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + y_height_items * 0.5f, -1));
+
+        set_selection_percentagem_related_to_valid_area();
 
         float item_width = valid_size.width * 0.5f - ScreenOptions::item_hmargin * 2.0f;
 
@@ -231,6 +233,8 @@ namespace ui
             MathCore::vec4f(0),                                        // drop shadow color
             AppKit::GLEngine::Components::MeshUploadMode_Direct        // meshUploadMode,
         );
+
+        // printf("Selection Percent: %f\n", get_selection_percentagem_related_to_valid_area());
     }
 
     void OptionSet::leftButton()
@@ -262,16 +266,108 @@ namespace ui
 
     void OptionSet::set_selected_rect_pos()
     {
-        auto size = screenManager->current_size;
-        auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
-                                          size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
+        // auto size = screenManager->current_size;
+        // auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
+        //                                   size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
         // float y_center = -ScreenOptions::top_bar_height * 0.5f;
         // float y_pos_start =
         //     y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
 
-        float rect_y_pos = - (float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+        float rect_y_pos = -(float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
 
         selection_rect->getTransform()->setLocalPosition(MathCore::vec3f(0, rect_y_pos, -1));
+        set_selection_percentagem_related_to_valid_area();
+    }
+
+    // float OptionSet::get_selection_percentagem_related_to_valid_area()
+    // {
+
+    //     auto ui_pos = ui->getTransform()->getLocalPosition();
+
+    //     auto size = screenManager->current_size;
+    //     auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
+    //                                       size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
+    //     float rect_y_pos = -(float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+    //     rect_y_pos += ui_pos.y;
+
+    //     float y_center = -ScreenOptions::top_bar_height * 0.5f;
+    //     float y_pos_start =
+    //         y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
+    //     float y_pos_end =
+    //         y_center - valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f;
+
+    //     if (valid_size.height < ScreenOptions::item_height)
+    //         return MathCore::FloatTypeInfo<float>::max;
+
+    //     float diff = (rect_y_pos - y_pos_start) / (y_pos_end - y_pos_start);
+
+    //     return diff;
+    // }
+
+    void OptionSet::set_selection_percentagem_related_to_valid_area()
+    {
+
+        // if (lrp >= MathCore::FloatTypeInfo<float>::max)
+        {
+            float rect_y_pos = -(float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+
+            auto size = screenManager->current_size;
+
+            auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
+                                              size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
+            float y_center = -ScreenOptions::top_bar_height * 0.5f;
+            float y_pos_start =
+                y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
+            float y_pos_end =
+                y_center - valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f;
+
+            float y_height_items = (float)(items.size() - 1) * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+
+            if (y_height_items + ScreenOptions::item_height < valid_size.height)
+            {
+                float y_final = -rect_y_pos;
+
+                ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + //
+                                                                            y_height_items * 0.5f,        //
+                                                                                                          // y_final,
+                                                                     -1));
+                // trigger shadow top OFF
+                // trigger shadow bottom OFF
+            }
+            else
+            {
+                float y_final = -rect_y_pos;
+
+                // auto ui_pos = ui->getTransform()->getLocalPosition();
+                // float first_real_pos = 0;
+                // rect_y_pos += ui_pos.y;
+                // float last_real_pos = -(float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+                // rect_y_pos += ui_pos.y;
+
+                // if (y_final < y_height_items * 0.5f)
+                float y_stick_top = valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f; // stick top
+
+                float y_stick_bottom = -valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f + // stick bottom
+                                       y_height_items;
+                if (y_final < y_stick_top)
+                {
+                    y_final = y_stick_top;
+                    // trigger shadow top OFF
+                    // trigger shadow bottom ON
+                }
+                else if (y_final > y_stick_bottom)
+                {
+                    y_final = y_stick_bottom;
+                    // trigger shadow top ON
+                    // trigger shadow bottom OFF
+                }
+
+                ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + //
+                                                                                                          // y_height_items * 0.5f +       //
+                                                                            y_final,
+                                                                     -1));
+            }
+        }
     }
 
 }
