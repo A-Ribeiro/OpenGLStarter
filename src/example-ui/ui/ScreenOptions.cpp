@@ -49,7 +49,6 @@ namespace ui
     void ScreenOptions::activeCurrentTab()
     {
         auto tab_name = topBar->getSelectedButtonName();
-
         for (auto &option : this->optionMap)
         {
             if (option.first == tab_name)
@@ -425,10 +424,14 @@ namespace ui
             }
             else if (event == UIEventEnum::UIEvent_InputDown)
             {
+                auto tab_name = topBar->getSelectedButtonName();
+                optionMap[tab_name]->downButton();
                 // nextButton();
             }
             else if (event == UIEventEnum::UIEvent_InputUp)
             {
+                auto tab_name = topBar->getSelectedButtonName();
+                optionMap[tab_name]->upButton();
                 // previousButton();
             }
             else if (event == UIEventEnum::UIEvent_InputActionBack)

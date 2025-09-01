@@ -7,6 +7,7 @@ namespace ui
 
     class OptionSet
     {
+        void set_selected_rect_pos();
     public:
         struct ItemDefinition
         {
@@ -28,6 +29,7 @@ namespace ui
         ScreenManager *screenManager;
 
         std::vector<ItemDefinition> items;
+        int selected_item_index;
 
         void initialize(
             const std::string &buttonSetName,

@@ -9,6 +9,7 @@ namespace ui
         ScreenManager *screenManager,
         std::shared_ptr<AppKit::GLEngine::Components::ComponentRectangle> &mask)
     {
+        selected_item_index = 0;
         this->mask = mask;
         this->screenManager = screenManager;
 
@@ -43,7 +44,7 @@ namespace ui
     void OptionSet::addOption(const std::string &option, const std::vector<std::string> &choices, const std::string &selected)
     {
 
-        float y_pos = -(float)items.size() * (ScreenOptions::item_height + ScreenOptions::item_hmargin);
+        float y_pos = -(float)items.size() * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
 
         ItemDefinition itemDefinition;
 
@@ -182,7 +183,7 @@ namespace ui
         float y_pos_end =
             y_center - valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f;
 
-        float y_height_items = (float)(items.size() - 1) * (ScreenOptions::item_height + ScreenOptions::item_hmargin);
+        float y_height_items = (float)(items.size() - 1) * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
 
         ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + y_height_items * 0.5f, -1));
 
@@ -241,9 +242,13 @@ namespace ui
 
     void OptionSet::upButton()
     {
+        selected_item_index = MathCore::OP<int>::clamp(selected_item_index - 1, 0, items.size() - 1);
+        set_selected_rect_pos();
     }
     void OptionSet::downButton()
     {
+        selected_item_index = MathCore::OP<int>::clamp(selected_item_index + 1, 0, items.size() - 1);
+        set_selected_rect_pos();
     }
 
     void OptionSet::show()
@@ -253,6 +258,20 @@ namespace ui
     void OptionSet::hide()
     {
         ui->getTransform()->skip_traversing = true;
+    }
+
+    void OptionSet::set_selected_rect_pos()
+    {
+        auto size = screenManager->current_size;
+        auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
+                                          size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
+        // float y_center = -ScreenOptions::top_bar_height * 0.5f;
+        // float y_pos_start =
+        //     y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
+
+        float rect_y_pos = - (float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+
+        selection_rect->getTransform()->setLocalPosition(MathCore::vec3f(0, rect_y_pos, -1));
     }
 
 }
