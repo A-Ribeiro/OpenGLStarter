@@ -39,6 +39,36 @@ namespace ui
                                "selection_rect")
                              .get<AppKit::GLEngine::Components::ComponentRectangle>();
         selection_rect->setMask(ui->resourceMap, screenManager->camera, mask);
+
+        auto rect = ui->addRectangle(
+                          center,                                                    // pos
+                          MathCore::vec2f(valid_size.x, ScreenOptions::item_height), // size
+                          MathCore::vec4f(0, 0, 0, 0.4f),                            // color
+                          MathCore::vec4f(32, 0, 0, 32),                             // radius
+                          AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
+                          screenManager->colorPalette.stroke_thickness,              // stroke thickness
+                          screenManager->colorPalette.active_stroke,                 // stroke color
+                          0,                                                         // drop shadow thickness
+                          MathCore::vec4f(0),                                        // drop shadow color
+                          -100,                                                      // z
+                          "top_rect")
+                        .get<AppKit::GLEngine::Components::ComponentRectangle>();
+        rect->setMask(ui->resourceMap, screenManager->camera, mask);
+
+        rect = ui->addRectangle(
+                     center,                                                    // pos
+                     MathCore::vec2f(valid_size.x, ScreenOptions::item_height), // size
+                     MathCore::vec4f(0, 0, 0, 0.4f),                            // color
+                     MathCore::vec4f(0, 32, 32, 0),                             // radius
+                     AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
+                     screenManager->colorPalette.stroke_thickness,              // stroke thickness
+                     screenManager->colorPalette.active_stroke,                 // stroke color
+                     0,                                                         // drop shadow thickness
+                     MathCore::vec4f(0),                                        // drop shadow color
+                     -100,                                                      // z
+                     "bottom_rect")
+                   .get<AppKit::GLEngine::Components::ComponentRectangle>();
+        rect->setMask(ui->resourceMap, screenManager->camera, mask);
     }
 
     void OptionSet::addOption(const std::string &option, const std::vector<std::string> &choices, const std::string &selected)
@@ -235,6 +265,61 @@ namespace ui
         );
 
         // printf("Selection Percent: %f\n", get_selection_percentagem_related_to_valid_area());
+
+        // float y_center = -ScreenOptions::top_bar_height * 0.5f;
+        // y_center -= ui->getTransform()->getLocalPosition().y;
+        // float y_pos_start =
+        //     y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
+        // float y_pos_end =
+        //     y_center - valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f;
+
+        {
+            auto &rect = ui->getItemByName("top_rect");
+
+            // rect.transform->setLocalPosition(MathCore::vec3f(0, y_pos_start, -10));
+
+            rect.get<AppKit::GLEngine::Components::ComponentRectangle>()->setQuad(
+                ui->resourceMap,
+                MathCore::vec2f(valid_size.x, ScreenOptions::item_height), // size
+                MathCore::vec4f(0, 0, 0, 0.4f),                            // color
+                MathCore::vec4f(32, 0, 0, 32),                             // radius
+                AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
+                screenManager->colorPalette.stroke_thickness,              // stroke thickness
+                screenManager->colorPalette.active_stroke,                 // stroke color
+                0,                                                         // drop shadow thickness
+                MathCore::vec4f(0),                                        // drop shadow color
+                AppKit::GLEngine::Components::MeshUploadMode_Direct        // meshUploadMode,
+            );
+
+            rect.get<AppKit::GLEngine::Components::ComponentRectangle>()->setLinearColorVertical(
+                (MathCore::vec4f)screenManager->colorPalette.scroll_gradient * MathCore::vec4f(1, 1, 1, 0), // bottom
+                screenManager->colorPalette.scroll_gradient                                                 // top
+            );
+        }
+
+        {
+            auto &rect = ui->getItemByName("bottom_rect");
+
+            // rect.transform->setLocalPosition(MathCore::vec3f(0, y_pos_end, -10));
+
+            rect.get<AppKit::GLEngine::Components::ComponentRectangle>()->setQuad(
+                ui->resourceMap,
+                MathCore::vec2f(valid_size.x, ScreenOptions::item_height), // size
+                MathCore::vec4f(0, 0, 0, 0.4f),                            // color
+                MathCore::vec4f(0, 32, 32, 0),                             // radius
+                AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
+                screenManager->colorPalette.stroke_thickness,              // stroke thickness
+                screenManager->colorPalette.active_stroke,                 // stroke color
+                0,                                                         // drop shadow thickness
+                MathCore::vec4f(0),                                        // drop shadow color
+                AppKit::GLEngine::Components::MeshUploadMode_Direct        // meshUploadMode,
+            );
+
+            rect.get<AppKit::GLEngine::Components::ComponentRectangle>()->setLinearColorVertical(
+                screenManager->colorPalette.scroll_gradient,                                               // bottom
+                (MathCore::vec4f)screenManager->colorPalette.scroll_gradient * MathCore::vec4f(1, 1, 1, 0) // top
+            );
+        }
     }
 
     void OptionSet::leftButton()
@@ -308,66 +393,85 @@ namespace ui
     {
 
         // if (lrp >= MathCore::FloatTypeInfo<float>::max)
+        //{
+        float rect_y_pos = -(float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+
+        auto size = screenManager->current_size;
+
+        auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
+                                          size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
+        float y_center = -ScreenOptions::top_bar_height * 0.5f;
+        float y_pos_start =
+            y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
+        float y_pos_end =
+            y_center - valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f;
+
+        float y_height_items = (float)(items.size() - 1) * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+
+        auto &top_rect = ui->getItemByName("top_rect");
+        auto &bottom_rect = ui->getItemByName("bottom_rect");
+
+        if (y_height_items + ScreenOptions::item_height < valid_size.height)
         {
-            float rect_y_pos = -(float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+            float y_final = -rect_y_pos;
 
-            auto size = screenManager->current_size;
+            ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + //
+                                                                        y_height_items * 0.5f,        //
+                                                                                                      // y_final,
+                                                                 -1));
+            // trigger shadow top OFF
+            // trigger shadow bottom OFF
+            top_rect.transform->skip_traversing = true;
+            bottom_rect.transform->skip_traversing = true;
+        }
+        else
+        {
+            float y_final = -rect_y_pos;
 
-            auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
-                                              size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);
-            float y_center = -ScreenOptions::top_bar_height * 0.5f;
-            float y_pos_start =
-                y_center + valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f;
-            float y_pos_end =
-                y_center - valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f;
+            // auto ui_pos = ui->getTransform()->getLocalPosition();
+            // float first_real_pos = 0;
+            // rect_y_pos += ui_pos.y;
+            // float last_real_pos = -(float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+            // rect_y_pos += ui_pos.y;
 
-            float y_height_items = (float)(items.size() - 1) * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
+            // if (y_final < y_height_items * 0.5f)
+            float y_stick_top = valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f; // stick top
 
-            if (y_height_items + ScreenOptions::item_height < valid_size.height)
+            float y_stick_bottom = -valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f + // stick bottom
+                                   y_height_items;
+            if (y_final < y_stick_top)
             {
-                float y_final = -rect_y_pos;
-
-                ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + //
-                                                                            y_height_items * 0.5f,        //
-                                                                                                          // y_final,
-                                                                     -1));
+                y_final = y_stick_top;
                 // trigger shadow top OFF
+                // trigger shadow bottom ON
+                top_rect.transform->skip_traversing = true;
+                bottom_rect.transform->skip_traversing = false;
+            }
+            else if (y_final > y_stick_bottom)
+            {
+                y_final = y_stick_bottom;
+                // trigger shadow top ON
                 // trigger shadow bottom OFF
+                top_rect.transform->skip_traversing = false;
+                bottom_rect.transform->skip_traversing = true;
             }
             else
             {
-                float y_final = -rect_y_pos;
-
-                // auto ui_pos = ui->getTransform()->getLocalPosition();
-                // float first_real_pos = 0;
-                // rect_y_pos += ui_pos.y;
-                // float last_real_pos = -(float)selected_item_index * (ScreenOptions::item_height + ScreenOptions::item_vmargin);
-                // rect_y_pos += ui_pos.y;
-
-                // if (y_final < y_height_items * 0.5f)
-                float y_stick_top = valid_size.height * 0.5f - ScreenOptions::item_height * 0.5f; // stick top
-
-                float y_stick_bottom = -valid_size.height * 0.5f + ScreenOptions::item_height * 0.5f + // stick bottom
-                                       y_height_items;
-                if (y_final < y_stick_top)
-                {
-                    y_final = y_stick_top;
-                    // trigger shadow top OFF
-                    // trigger shadow bottom ON
-                }
-                else if (y_final > y_stick_bottom)
-                {
-                    y_final = y_stick_bottom;
-                    // trigger shadow top ON
-                    // trigger shadow bottom OFF
-                }
-
-                ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + //
-                                                                                                          // y_height_items * 0.5f +       //
-                                                                            y_final,
-                                                                     -1));
+                top_rect.transform->skip_traversing = false;
+                bottom_rect.transform->skip_traversing = false;
             }
+
+            ui->getTransform()->setLocalPosition(MathCore::vec3f(0, (y_pos_start + y_pos_end) * 0.5 + //
+                                                                                                      // y_height_items * 0.5f +       //
+                                                                        y_final,
+                                                                 -1));
         }
+
+        float current_scroll = ui->getTransform()->getLocalPosition().y;
+        top_rect.transform->setLocalPosition(MathCore::vec3f(0, y_pos_start - current_scroll, -10));
+        bottom_rect.transform->setLocalPosition(MathCore::vec3f(0, y_pos_end - current_scroll, -10));
+
+        //}
     }
 
 }

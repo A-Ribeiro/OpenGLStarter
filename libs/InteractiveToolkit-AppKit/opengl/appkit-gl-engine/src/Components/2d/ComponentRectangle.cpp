@@ -678,6 +678,28 @@ namespace AppKit
                     mesh->color[0][i] = drop_shadow_color_middle;
             }
 
+            void ComponentRectangle::setLinearColorVertical(
+                const MathCore::vec4f &color_bottom,
+                const MathCore::vec4f &color_top)
+            {
+                float min_y = MathCore::FloatTypeInfo<float>::max;
+                float max_y = -MathCore::FloatTypeInfo<float>::max;
+
+                for (size_t i = 0; i < mesh->pos.size(); i++)
+                {
+                    min_y = MathCore::OP<float>::minimum(min_y, mesh->pos[i].y);
+                    max_y = MathCore::OP<float>::maximum(max_y, mesh->pos[i].y);
+                }
+
+                float delta_y = MathCore::OP<float>::maximum(max_y - min_y, MathCore::EPSILON<float>::low_precision);
+
+                for (size_t i = 0; i < mesh->pos.size(); i++)
+                {
+                    float lrp = MathCore::OP<float>::clamp((mesh->pos[i].y - min_y) / delta_y, 0, 1);
+                    mesh->color[0][i] = MathCore::OP<MathCore::vec4f>::lerp(color_bottom, color_top, lrp);
+                }
+            }
+
             void ComponentRectangle::setMask(AppKit::GLEngine::ResourceMap *resourceMap,
                                              std::shared_ptr<ComponentCamera> &camera,
                                              std::shared_ptr<ComponentRectangle> &mask)

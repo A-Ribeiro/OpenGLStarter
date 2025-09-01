@@ -143,6 +143,10 @@ namespace AppKit
                     const MathCore::vec4f &stroke_color,
                     const MathCore::vec4f &drop_shadow_color);
 
+                void setLinearColorVertical(
+                    const MathCore::vec4f &color_bottom,
+                    const MathCore::vec4f &color_top);
+
                 void setMask(AppKit::GLEngine::ResourceMap *resourceMap,
                              std::shared_ptr<ComponentCamera> &camera,
                              std::shared_ptr<ComponentRectangle> &mask);
