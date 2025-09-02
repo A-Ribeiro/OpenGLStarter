@@ -151,7 +151,7 @@ namespace ui
         if (uiComponent->items.size() == 0)
             return;
 
-        // float speed = osciloscope_normal_hz;
+        float speed = osciloscope_normal_hz;
 
         // if (increase_speed_for_secs_and_trigger_action > 0.0f)
         // {
@@ -165,19 +165,21 @@ namespace ui
         //     }
         // }
 
-        // if (!change_screen || increase_speed_for_secs_and_trigger_action > 0.0f)
-        // {
+        if (!change_screen || increase_speed_for_secs_and_trigger_action > 0.0f)
+        {
 
-        //     const float _360_pi = MathCore::CONSTANT<float>::PI * 2.0f;
-        //     osciloscope = MathCore::OP<float>::fmod(osciloscope + elapsed->unscaledDeltaTime * speed * _360_pi, _360_pi);
-        //     float sin = MathCore::OP<float>::sin(osciloscope) * 0.5f + 0.5f;
+            const float _360_pi = MathCore::CONSTANT<float>::PI * 2.0f;
+            osciloscope = MathCore::OP<float>::fmod(osciloscope + elapsed->unscaledDeltaTime * speed * _360_pi, _360_pi);
+            float sin = MathCore::OP<float>::sin(osciloscope) * 0.25f + 0.75f;
 
-        //     auto rect = uiComponent->items[selected_button].get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
-        //     rect->setColor(
-        //         screenManager->colorPalette.lrp_active(sin),
-        //         screenManager->colorPalette.lrp_active_stroke(sin),
-        //         0);
-        // }
+            // auto rect = uiComponent->items[selected_button].get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+            // rect->setColor(
+            //     screenManager->colorPalette.lrp_active(sin),
+            //     screenManager->colorPalette.lrp_active_stroke(sin),
+            //     0);
+            auto tab_name = topBar->getSelectedButtonName();
+            optionMap[tab_name]->update(elapsed, osciloscope, sin);
+        }
     }
 
     std::shared_ptr<AppKit::GLEngine::Transform> ScreenOptions::initializeTransform(
@@ -419,20 +421,28 @@ namespace ui
         {
             if (event == UIEventEnum::UIEvent_InputActionEnter)
             {
-                increase_speed_for_secs_and_trigger_action = 0.5f;
-                change_screen = true;
+                // increase_speed_for_secs_and_trigger_action = 0.5f;
+                // change_screen = true;
             }
             else if (event == UIEventEnum::UIEvent_InputDown)
             {
                 auto tab_name = topBar->getSelectedButtonName();
                 optionMap[tab_name]->downButton();
-                // nextButton();
             }
             else if (event == UIEventEnum::UIEvent_InputUp)
             {
                 auto tab_name = topBar->getSelectedButtonName();
                 optionMap[tab_name]->upButton();
-                // previousButton();
+            }
+            else if (event == UIEventEnum::UIEvent_InputLeft)
+            {
+                auto tab_name = topBar->getSelectedButtonName();
+                optionMap[tab_name]->leftButton();
+            }
+            else if (event == UIEventEnum::UIEvent_InputRight)
+            {
+                auto tab_name = topBar->getSelectedButtonName();
+                optionMap[tab_name]->rightButton();
             }
             else if (event == UIEventEnum::UIEvent_InputActionBack)
             {

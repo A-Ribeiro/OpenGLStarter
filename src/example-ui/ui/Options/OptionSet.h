@@ -51,5 +51,7 @@ namespace ui
         void hide();
 
         void addOption(const std::string &option, const std::vector<std::string> &choices, const std::string &selected);
+
+        void update(Platform::Time *elapsed, float osciloscope, float sin);
     };
 }
