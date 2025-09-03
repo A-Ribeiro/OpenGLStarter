@@ -335,7 +335,7 @@ namespace ui
         auto engine = AppKit::GLEngine::Engine::Instance();
 
         auto &item = items[selected_item_index];
-        item.selected_index = (item.selected_index - 1 + item.choices.size()) % item.choices.size();
+        item.selected_index = (item.selected_index - 1 + (int)item.choices.size()) % (int)item.choices.size();
         item.selected = item.choices[item.selected_index];
         item.ui->getItemByName("option-text").get<AppKit::GLEngine::Components::ComponentFont>()->setText( //
             ui->resourceMap,
@@ -393,12 +393,12 @@ namespace ui
 
     void OptionSet::upButton()
     {
-        selected_item_index = MathCore::OP<int>::clamp(selected_item_index - 1, 0, items.size() - 1);
+        selected_item_index = MathCore::OP<int>::clamp(selected_item_index - 1, 0, (int)items.size() - 1);
         set_selected_rect_pos();
     }
     void OptionSet::downButton()
     {
-        selected_item_index = MathCore::OP<int>::clamp(selected_item_index + 1, 0, items.size() - 1);
+        selected_item_index = MathCore::OP<int>::clamp(selected_item_index + 1, 0, (int)items.size() - 1);
         set_selected_rect_pos();
     }
 
