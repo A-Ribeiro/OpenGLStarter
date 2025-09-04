@@ -272,6 +272,8 @@ namespace ui
             auto optSet = STL_Tools::make_unique<OptionSet>();
             optSet->initialize(btn_set_name, uiComponent, screenManager, mask);
 
+            optSet->addOption("Language", {"English", "Português (BR)"}, "English");
+            optSet->addOption("ColorScheme", {"Purple", "Orange", "Green", "Blue"}, "Purple");
             optSet->addOption("MeshCrusher", {"ON", "OFF"}, "ON");
             optSet->addOption("Particles", {"Low", "Medium", "High", "Ultra"}, "High");
             optSet->addOption("On Game Stats", {"FPS", "OFF"}, "OFF");
