@@ -15,6 +15,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER "BIN")
 
 target_link_libraries(${PROJECT_NAME} 
     appkit-gl-engine
+    InteractiveToolkit-DPI
 )
 
 tool_copy_directory_after_build( ${PROJECT_NAME} resources )

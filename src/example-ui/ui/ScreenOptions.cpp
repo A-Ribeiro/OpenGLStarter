@@ -3,6 +3,8 @@
 #include "./Options/TopBar.h"
 #include "./Options/OptionSet.h"
 
+void save_options();
+
 namespace ui
 {
     void ScreenOptions::layoutElements(const MathCore::vec2i &size)
@@ -449,6 +451,7 @@ namespace ui
             else if (event == UIEventEnum::UIEvent_InputActionBack)
             {
                 // backButton();
+                save_options();
                 screenManager->open_screen("ScreenMain");
             }
             else if (event == UIEventEnum::UIEvent_InputShoulderRight)

@@ -1,8 +1,9 @@
 #include "AppOptions.h"
+#include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
 
 namespace AppOptions
 {
-    void generate_binary_data_v1(const AppOptions_v1 &options, Platform::ObjectBuffer *output)
+    void write_binary_data_v1(const AppOptions_v1 &options, Platform::ObjectBuffer *output)
     {
         ITKExtension::IO::Writer writer;
         writer.writeInt32(0x01); // version
@@ -10,7 +11,7 @@ namespace AppOptions
         writer.writeToBuffer(output);
     }
 
-    bool parse_binary_data_v1(const Platform::ObjectBuffer &data, AppOptions_v1 *out_options)
+    bool read_binary_data_v1(const Platform::ObjectBuffer &data, AppOptions_v1 *out_options)
     {
         ITKExtension::IO::Reader reader;
 
@@ -26,23 +27,265 @@ namespace AppOptions
     void create_default_binary_data_v1(AppOptions_v1 *options)
     {
         memset(options, 0, sizeof(AppOptions_v1));
-        snprintf(options->Control.Input, sizeof(options->Control.Input), "%s", options->ControlInput[2]);
-        snprintf(options->Control.Movement, sizeof(options->Control.Movement), "%s", options->ControlMovement[0]);
+        snprintf(options->Control.Input, sizeof(options->Control.Input), "%s", OptionsConstants::ControlInput[2]);
+        snprintf(options->Control.Movement, sizeof(options->Control.Movement), "%s", OptionsConstants::ControlMovement[0]);
 
-        snprintf(options->Audio.EffectsVolume, sizeof(options->Audio.EffectsVolume), "%s", options->AudioVolume[10]);
-        snprintf(options->Audio.MusicVolume, sizeof(options->Audio.MusicVolume), "%s", options->AudioVolume[10]);
+        snprintf(options->Audio.EffectsVolume, sizeof(options->Audio.EffectsVolume), "%s", OptionsConstants::AudioVolume[10]);
+        snprintf(options->Audio.MusicVolume, sizeof(options->Audio.MusicVolume), "%s", OptionsConstants::AudioVolume[10]);
 
-        snprintf(options->Video.WindowMode, sizeof(options->Video.WindowMode), "%s", options->VideoWindowMode[1]);
+        snprintf(options->Video.WindowMode, sizeof(options->Video.WindowMode), "%s", OptionsConstants::VideoWindowMode[1]);
         snprintf(options->Video.Resolution, sizeof(options->Video.Resolution), "%s", "");
-        snprintf(options->Video.Aspect, sizeof(options->Video.Aspect), "%s", options->VideoAspect[0]);
-        snprintf(options->Video.AntiAliasing, sizeof(options->Video.AntiAliasing), "%s", options->VideoAntiAliasing[0]);
-        snprintf(options->Video.VSync, sizeof(options->Video.VSync), "%s", options->VideoVSync[0]);
+        snprintf(options->Video.Aspect, sizeof(options->Video.Aspect), "%s", OptionsConstants::VideoAspect[0]);
+        snprintf(options->Video.AntiAliasing, sizeof(options->Video.AntiAliasing), "%s", OptionsConstants::VideoAntiAliasing[0]);
+        snprintf(options->Video.VSync, sizeof(options->Video.VSync), "%s", OptionsConstants::VideoVSync[0]);
 
-        snprintf(options->Extra.Language, sizeof(options->Extra.Language), "%s", options->ExtraLanguage[0]);
-        snprintf(options->Extra.ColorScheme, sizeof(options->Extra.ColorScheme), "%s", options->ExtraColorScheme[0]);
-        snprintf(options->Extra.MeshCrusher, sizeof(options->Extra.MeshCrusher), "%s", options->ExtraMeshCrusher[0]);
-        snprintf(options->Extra.Particles, sizeof(options->Extra.Particles), "%s", options->ExtraParticles[2]);
-        snprintf(options->Extra.OnGameStats, sizeof(options->Extra.OnGameStats), "%s", options->ExtraOnGameStats[0]);
-
+        snprintf(options->Extra.Language, sizeof(options->Extra.Language), "%s", OptionsConstants::ExtraLanguage[0]);
+        snprintf(options->Extra.ColorScheme, sizeof(options->Extra.ColorScheme), "%s", OptionsConstants::ExtraColorScheme[0]);
+        snprintf(options->Extra.MeshCrusher, sizeof(options->Extra.MeshCrusher), "%s", OptionsConstants::ExtraMeshCrusher[0]);
+        snprintf(options->Extra.Particles, sizeof(options->Extra.Particles), "%s", OptionsConstants::ExtraParticles[2]);
+        snprintf(options->Extra.OnGameStats, sizeof(options->Extra.OnGameStats), "%s", OptionsConstants::ExtraOnGameStats[0]);
     }
+
+    std::vector<std::string> OptionsManager::getGroups() const
+    {
+        return {std::begin(AppOptions::OptionsConstants::groups), std::end(AppOptions::OptionsConstants::groups)};
+    }
+    std::vector<std::string> OptionsManager::getGroupKeys(const std::string &group) const
+    {
+        if (group == "Control")
+        {
+            return {"Input", "Movement"};
+        }
+        else if (group == "Audio")
+        {
+            return {"EffectsVolume", "MusicVolume"};
+        }
+        else if (group == "Video")
+        {
+            return {"WindowMode", "Resolution", "Aspect", "AntiAliasing", "VSync"};
+        }
+        else if (group == "Extra")
+        {
+            return {"Language", "ColorScheme", "MeshCrusher", "Particles", "OnGameStats"};
+        }
+        return {};
+    }
+
+    std::vector<std::string> OptionsManager::getGroupValuesForKey(const std::string &group, const std::string &key) const
+    {
+        if (group == "Control")
+        {
+            if (key == "Input")
+                return {std::begin(AppOptions::OptionsConstants::ControlInput), std::end(AppOptions::OptionsConstants::ControlInput)};
+            if (key == "Movement")
+                return {std::begin(AppOptions::OptionsConstants::ControlMovement), std::end(AppOptions::OptionsConstants::ControlMovement)};
+        }
+        else if (group == "Audio")
+        {
+            if (key == "EffectsVolume")
+                return {std::begin(AppOptions::OptionsConstants::AudioVolume), std::end(AppOptions::OptionsConstants::AudioVolume)};
+            if (key == "MusicVolume")
+                return {std::begin(AppOptions::OptionsConstants::AudioVolume), std::end(AppOptions::OptionsConstants::AudioVolume)};
+        }
+        else if (group == "Video")
+        {
+            if (key == "WindowMode")
+                return {std::begin(AppOptions::OptionsConstants::VideoWindowMode), std::end(AppOptions::OptionsConstants::VideoWindowMode)};
+            if (key == "Resolution")
+            {
+                const char* currWindowMode = getGroupValueSelectedForKey("Video", "WindowMode");
+                if (strcmp(currWindowMode, "Borderless") == 0)
+                    return {ITKCommon::PrintfToStdString("%ix%i", this->mainMonitorResolution.x, this->mainMonitorResolution.y)};
+                else if (strcmp(currWindowMode, "Fullscreen") == 0)
+                {
+                    std::vector<std::string> res;
+                    for (const auto &mode : this->mainMonitorFullscreenResolutions)
+                        res.push_back(ITKCommon::PrintfToStdString("%ix%i", mode.x, mode.y));
+                    return res;
+                }
+                else // windowed
+                    return {"-"};
+            }
+            if (key == "Aspect")
+                return {std::begin(AppOptions::OptionsConstants::VideoAspect), std::end(AppOptions::OptionsConstants::VideoAspect)};
+            if (key == "AntiAliasing")
+                return {std::begin(AppOptions::OptionsConstants::VideoAntiAliasing), std::end(AppOptions::OptionsConstants::VideoAntiAliasing)};
+            if (key == "VSync")
+                return {std::begin(AppOptions::OptionsConstants::VideoVSync), std::end(AppOptions::OptionsConstants::VideoVSync)};
+        }
+        else if (group == "Extra")
+        {
+            if (key == "Language")
+                return {std::begin(AppOptions::OptionsConstants::ExtraLanguage), std::end(AppOptions::OptionsConstants::ExtraLanguage)};
+            if (key == "ColorScheme")
+                return {std::begin(AppOptions::OptionsConstants::ExtraColorScheme), std::end(AppOptions::OptionsConstants::ExtraColorScheme)};
+            if (key == "MeshCrusher")
+                return {std::begin(AppOptions::OptionsConstants::ExtraMeshCrusher), std::end(AppOptions::OptionsConstants::ExtraMeshCrusher)};
+            if (key == "Particles")
+                return {std::begin(AppOptions::OptionsConstants::ExtraParticles), std::end(AppOptions::OptionsConstants::ExtraParticles)};
+            if (key == "OnGameStats")
+                return {std::begin(AppOptions::OptionsConstants::ExtraOnGameStats), std::end(AppOptions::OptionsConstants::ExtraOnGameStats)};
+        }
+        return {};
+    }
+
+    const char *OptionsManager::getGroupValueSelectedForKey(const std::string &group, const std::string &key) const
+    {
+        if (group == "Control")
+        {
+            if (key == "Input")
+                return currentOptions.Control.Input;
+            if (key == "Movement")
+                return currentOptions.Control.Movement;
+        }
+        else if (group == "Audio")
+        {
+            if (key == "EffectsVolume")
+                return currentOptions.Audio.EffectsVolume;
+            if (key == "MusicVolume")
+                return currentOptions.Audio.MusicVolume;
+        }
+        else if (group == "Video")
+        {
+            if (key == "WindowMode")
+                return currentOptions.Video.WindowMode;
+            if (key == "Resolution")
+                return currentOptions.Video.Resolution;
+            if (key == "Aspect")
+                return currentOptions.Video.Aspect;
+            if (key == "AntiAliasing")
+                return currentOptions.Video.AntiAliasing;
+            if (key == "VSync")
+                return currentOptions.Video.VSync;
+        }
+        else if (group == "Extra")
+        {
+            if (key == "Language")
+                return currentOptions.Extra.Language;
+            if (key == "ColorScheme")
+                return currentOptions.Extra.ColorScheme;
+            if (key == "MeshCrusher")
+                return currentOptions.Extra.MeshCrusher;
+            if (key == "Particles")
+                return currentOptions.Extra.Particles;
+            if (key == "OnGameStats")
+                return currentOptions.Extra.OnGameStats;
+        }
+        return nullptr;
+    }
+
+    char *OptionsManager::getGroupValueSelectedForKey(const std::string &group, const std::string &key)
+    {
+        if (group == "Control")
+        {
+            if (key == "Input")
+                return currentOptions.Control.Input;
+            if (key == "Movement")
+                return currentOptions.Control.Movement;
+        }
+        else if (group == "Audio")
+        {
+            if (key == "EffectsVolume")
+                return currentOptions.Audio.EffectsVolume;
+            if (key == "MusicVolume")
+                return currentOptions.Audio.MusicVolume;
+        }
+        else if (group == "Video")
+        {
+            if (key == "WindowMode")
+                return currentOptions.Video.WindowMode;
+            if (key == "Resolution")
+                return currentOptions.Video.Resolution;
+            if (key == "Aspect")
+                return currentOptions.Video.Aspect;
+            if (key == "AntiAliasing")
+                return currentOptions.Video.AntiAliasing;
+            if (key == "VSync")
+                return currentOptions.Video.VSync;
+        }
+        else if (group == "Extra")
+        {
+            if (key == "Language")
+                return currentOptions.Extra.Language;
+            if (key == "ColorScheme")
+                return currentOptions.Extra.ColorScheme;
+            if (key == "MeshCrusher")
+                return currentOptions.Extra.MeshCrusher;
+            if (key == "Particles")
+                return currentOptions.Extra.Particles;
+            if (key == "OnGameStats")
+                return currentOptions.Extra.OnGameStats;
+        }
+        return nullptr;
+    }
+
+    bool OptionsManager::setGroupValueSelectedForKey(const std::string &group, const std::string &key, const std::string &value)
+    {
+        char *currentValue = getGroupValueSelectedForKey(group, key);
+        if (currentValue)
+        {
+            snprintf(currentValue, 64, "%s", value.c_str());
+            return true;
+        }
+        return false;
+    }
+
+    void OptionsManager::initializeDefaults()
+    {
+        AppOptions::create_default_binary_data_v1(&currentOptions);
+
+        int monitorDefault = 0;
+        auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
+
+        auto selectedMonitor = &allMonitors[monitorDefault];
+        mainMonitorPosition = selectedMonitor->Position();
+        mainMonitorResolution = selectedMonitor->SizePixels();
+
+        mainMonitorFullscreenResolutions.clear();
+        for (const auto &mode : selectedMonitor->modes)
+            mainMonitorFullscreenResolutions.push_back(MathCore::vec2i(mode.width, mode.height));
+
+        checkSystemCompatibilityAfterLoad();
+    }
+    bool OptionsManager::loadOptionsFromBuffer(const Platform::ObjectBuffer &data)
+    {
+        if (!AppOptions::read_binary_data_v1(data, &currentOptions))
+            return false;
+        checkSystemCompatibilityAfterLoad();
+        return true;
+    }
+    void OptionsManager::saveOptionsToBuffer(Platform::ObjectBuffer *output)
+    {
+        AppOptions::write_binary_data_v1(currentOptions, output);
+    }
+
+    void OptionsManager::checkSystemCompatibilityAfterLoad()
+    {
+        // needs to check the window mode and resolution
+        auto validWindowModeList = getGroupValuesForKey("Video", "WindowMode");
+        const char* currWindowMode = getGroupValueSelectedForKey("Video", "WindowMode");
+
+        auto sel_it = std::find(validWindowModeList.begin(), validWindowModeList.end(), currWindowMode);
+        if (sel_it == validWindowModeList.end())
+        {
+            // If the current window mode is not valid, reset to the first valid mode
+            setGroupValueSelectedForKey("Video", "WindowMode", validWindowModeList.front());
+        }
+
+        const char* currResolution = getGroupValueSelectedForKey("Video", "Resolution");
+        auto validResolutionList = getGroupValuesForKey("Video", "Resolution");
+        sel_it = std::find(validResolutionList.begin(), validResolutionList.end(), currResolution);
+        if (sel_it == validResolutionList.end())
+        {
+            // If the current resolution is not valid, reset to the first valid resolution
+            setGroupValueSelectedForKey("Video", "Resolution", validResolutionList.front());
+        }
+    }
+
+    OptionsManager *OptionsManager::Instance()
+    {
+        static OptionsManager instance;
+        return &instance;
+    }
+
 }
