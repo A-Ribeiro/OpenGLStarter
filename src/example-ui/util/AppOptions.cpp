@@ -33,7 +33,7 @@ namespace AppOptions
         snprintf(options->Audio.EffectsVolume, sizeof(options->Audio.EffectsVolume), "%s", OptionsConstants::AudioVolume[10]);
         snprintf(options->Audio.MusicVolume, sizeof(options->Audio.MusicVolume), "%s", OptionsConstants::AudioVolume[10]);
 
-        snprintf(options->Video.WindowMode, sizeof(options->Video.WindowMode), "%s", OptionsConstants::VideoWindowMode[1]);
+        snprintf(options->Video.WindowMode, sizeof(options->Video.WindowMode), "%s", OptionsConstants::VideoWindowMode[0]);
         snprintf(options->Video.Resolution, sizeof(options->Video.Resolution), "%s", "");
         snprintf(options->Video.Aspect, sizeof(options->Video.Aspect), "%s", OptionsConstants::VideoAspect[0]);
         snprintf(options->Video.AntiAliasing, sizeof(options->Video.AntiAliasing), "%s", OptionsConstants::VideoAntiAliasing[0]);

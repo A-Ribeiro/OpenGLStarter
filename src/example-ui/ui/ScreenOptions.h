@@ -50,6 +50,7 @@ namespace ui
         std::shared_ptr<TopBar> topBar;
         std::unordered_map<std::string, std::unique_ptr<OptionSet>> optionMap;
 
+        const static char *Name;
         std::string name() const;
         void resize(const MathCore::vec2i &size);
         void update(Platform::Time *elapsed);

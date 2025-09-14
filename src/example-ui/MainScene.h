@@ -13,6 +13,7 @@
 #include "./ui/ScreenManager.h"
 #include "./ui/ScreenMain.h"
 #include "./ui/ScreenOptions.h"
+#include "./ui/ScreenMessageBox.h"
 
 class App;
 

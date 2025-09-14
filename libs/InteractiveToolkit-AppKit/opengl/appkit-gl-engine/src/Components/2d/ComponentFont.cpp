@@ -66,6 +66,55 @@ namespace AppKit
                 }
             }
 
+            CollisionCore::AABB<MathCore::vec3f> ComponentFont::computeBox(
+                AppKit::GLEngine::ResourceMap *resourceMap,
+                const std::string &font_path,
+                // 0 = texture, > 0 = polygon
+                float polygon_size,
+                float polygon_distance_tolerance,
+                Platform::ThreadPool *polygon_threadPool,
+                bool is_srgb,
+
+                const std::string &text,
+                float size, ///< current state of the font size
+                float max_width,
+
+                AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+                AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+                float lineHeight,
+
+                AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+                char32_t wordSeparatorChar)
+            {
+                std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource;
+
+                if (polygon_size > 0.0f)
+                    fontResource = resourceMap->getPolygonFont(font_path, polygon_size, polygon_distance_tolerance, polygon_threadPool, is_srgb);
+                else
+                    fontResource = resourceMap->getTextureFont(font_path, is_srgb);
+
+                last_fontResource = fontResource;
+
+                auto builder = fontResource->fontBuilder.get();
+
+                builder->size = size;
+                // builder->faceColor = faceColor;
+                // builder->strokeColor = strokeColor;
+                // builder->strokeOffset = strokeOffset;
+                builder->horizontalAlign = horizontalAlign;
+                builder->verticalAlign = verticalAlign;
+                builder->lineHeight = lineHeight;
+                builder->wrapMode = wrapMode;
+                builder->firstLineHeightMode = firstLineHeightMode;
+                builder->wordSeparatorChar = wordSeparatorChar;
+
+                // builder->drawFace = faceColor.a > 0.0f;
+                // builder->drawStroke = strokeColor.a > 0.0f;
+
+                return builder->richComputeBox(text.c_str(), max_width);
+            }
+
             void ComponentFont::setText(
                 AppKit::GLEngine::ResourceMap *resourceMap,
 

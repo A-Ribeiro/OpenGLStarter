@@ -18,6 +18,27 @@ namespace ui
         MathCore::vec2f current_size;
         std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera;
 
+        template <typename T>
+        T *screen()
+        {
+            const char *name = T::Name;
+            auto it = screen_map.find(name);
+            if (it == screen_map.end())
+            {
+                printf("[ScreenManager] Screen %s not found\n", name);
+                return nullptr;
+            }
+            for (auto &item : screen_stack)
+            {
+                if (item->name().compare(name) == 0)
+                {
+                    printf("[ScreenManager] Screen %s already in stack\n", name);
+                    return nullptr;
+                }
+            }
+            return (T *)it->second.get();
+        }
+
         void open_screen(const std::string &name);
         void push_screen(const std::string &name);
         void pop_screen();

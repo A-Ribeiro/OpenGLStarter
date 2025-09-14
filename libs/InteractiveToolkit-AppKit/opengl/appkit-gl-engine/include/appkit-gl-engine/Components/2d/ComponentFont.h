@@ -85,6 +85,28 @@ namespace AppKit
                 void setMask(AppKit::GLEngine::ResourceMap *resourceMap,
                              std::shared_ptr<ComponentCamera> &camera,
                              std::shared_ptr<ComponentRectangle> &mask);
+
+                CollisionCore::AABB<MathCore::vec3f> computeBox(
+                    AppKit::GLEngine::ResourceMap *resourceMap,
+                    const std::string &font_path,
+                    // 0 = texture, > 0 = polygon
+                    float polygon_size,
+                    float polygon_distance_tolerance,
+                    Platform::ThreadPool *polygon_threadPool,
+                    bool is_srgb,
+
+                    const std::string &text,
+                    float size = 60.0f, ///< current state of the font size
+                    float max_width = -1.0f,
+
+                    AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_center,
+                    AppKit::OpenGL::GLFont2VerticalAlign verticalAlign = AppKit::OpenGL::GLFont2VerticalAlign_middle,
+                    float lineHeight = 1.5f,
+
+                    AppKit::OpenGL::GLFont2WrapMode wrapMode = AppKit::OpenGL::GLFont2WrapMode_Word,
+                    AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,
+                    char32_t wordSeparatorChar = U' ');
+
                 ComponentFont();
 
                 ~ComponentFont();

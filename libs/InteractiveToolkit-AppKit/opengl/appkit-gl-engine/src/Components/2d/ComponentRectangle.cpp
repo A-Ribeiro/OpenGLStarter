@@ -103,6 +103,8 @@ namespace AppKit
                 if (size.width <= 0.0f || size.height <= 0.0f)
                     return;
 
+                getTransform()->skip_traversing = false;
+
                 precomputeMaskParameters(
                     size,
                     radius,
@@ -205,6 +207,8 @@ namespace AppKit
                     MathCore::vec4f(0),
                     StrokeModeGrowInside,
                     0);
+                
+                getTransform()->skip_traversing = true;
             }
 
             void ComponentRectangle::precomputeMaskParameters(const MathCore::vec2f &size,

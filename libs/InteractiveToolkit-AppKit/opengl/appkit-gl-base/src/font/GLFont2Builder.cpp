@@ -634,8 +634,8 @@ namespace AppKit
                         // line.clear();
                         token_readed_but_not_used = false;
 
-                        if (max_width >= 0)
-                            total_length = max_width;
+                        // if (max_width >= 0)
+                        //     total_length = max_width;
 
                         // make x axis processing
                         if (horizontalAlign == GLFont2HorizontalAlign_left)
@@ -665,8 +665,8 @@ namespace AppKit
                     max_lineHeight_scaled = 0;
                     // lines.push_back(std::move(line));
 
-                    if (max_width >= 0)
-                        total_length = max_width;
+                    // if (max_width >= 0)
+                    //     total_length = max_width;
 
                     // make x axis processing
                     if (horizontalAlign == GLFont2HorizontalAlign_left)
