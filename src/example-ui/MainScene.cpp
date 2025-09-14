@@ -46,6 +46,7 @@ void MainScene::bindResourcesToGraph()
     std::vector<std::unique_ptr<ui::Screen>> screens;
     screens.push_back(STL_Tools::make_unique<ui::ScreenMain>());
     screens.push_back(STL_Tools::make_unique<ui::ScreenOptions>());
+    screens.push_back(STL_Tools::make_unique<ui::ScreenMessageBox>());
     
     screenManager->setColorPalette(ui::Pallete::Blush);
     screenManager->camera = camera;

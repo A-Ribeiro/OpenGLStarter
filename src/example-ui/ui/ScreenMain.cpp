@@ -99,9 +99,11 @@ namespace ui
         }
     }
 
+    const char * ScreenMain::Name = "ScreenMain";
+
     std::string ScreenMain::name() const
     {
-        return "ScreenMain";
+        return Name;
     }
 
     void ScreenMain::resize(const MathCore::vec2i &size)

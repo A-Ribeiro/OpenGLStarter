@@ -2,6 +2,7 @@
 #include "./ScreenManager.h"
 #include "./Options/TopBar.h"
 #include "./Options/OptionSet.h"
+#include "./ScreenMessageBox.h"
 
 void save_options();
 
@@ -137,9 +138,11 @@ namespace ui
     //     }
     // }
 
+    const char *ScreenOptions::Name = "ScreenOptions";
+
     std::string ScreenOptions::name() const
     {
-        return "ScreenOptions";
+        return Name;
     }
 
     void ScreenOptions::resize(const MathCore::vec2i &size)
@@ -451,8 +454,19 @@ namespace ui
             else if (event == UIEventEnum::UIEvent_InputActionBack)
             {
                 // backButton();
-                save_options();
-                screenManager->open_screen("ScreenMain");
+                // save_options();
+                // screenManager->open_screen("ScreenMain");
+                screenManager->screen<ScreenMessageBox>()->showMessageBox( //
+                    "Are you sure you want to go back?",
+                    {"Yes", "No"},
+                    [this](const std::string &option)
+                    {
+                        if (option == "Yes")
+                        {
+                            save_options();
+                            screenManager->open_screen("ScreenMain");
+                        }
+                    });
             }
             else if (event == UIEventEnum::UIEvent_InputShoulderRight)
             {
