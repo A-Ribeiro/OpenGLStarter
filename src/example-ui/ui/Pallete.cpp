@@ -7,6 +7,8 @@ namespace ui
     {
         const ColorPalette Blush{
             3.0f * 0,                      // float stroke_thickness;
+
+            colorFromHex("#9e9ed9ff"), // Color bg;
             colorFromHex("#bbbbff", 1.0f), // Color primary;
             colorFromHex("#610081", 1.0f), // Color primary_stroke;
             colorFromHex("#6192d1", 1.0f), // Color active;

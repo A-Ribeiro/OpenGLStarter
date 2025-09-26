@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./common.h"
+#include "./util/ButtonManager.h"
 
 namespace ui
 {
@@ -24,6 +25,8 @@ namespace ui
 
         std::string text;
 
+        ButtonManager buttonManager;
+
     public:
 
         enum MessageBoxType
@@ -41,6 +44,7 @@ namespace ui
         static constexpr float button_width = 256;
         static constexpr float button_height = 64;
         static constexpr float button_gap = 10;
+        static constexpr float button_text_size = 32;
 
         static constexpr float text_size = 32;
 

@@ -118,6 +118,8 @@ namespace ui
     struct ColorPalette {
         float stroke_thickness;
 
+        Color bg;
+
         Color primary;
         Color primary_stroke;
 
