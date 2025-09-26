@@ -103,8 +103,29 @@ namespace ui
         );
     }
 
-    void ButtonManager::layoutVisibleElements(const MathCore::vec2f &size,
-                                              ButtonDirectionEnum direction)
+    void ButtonManager::resetButtonColors()
+    {
+        for (auto &button : buttons)
+        {
+            auto bg = button->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+            bg->setColor(
+                screenManager->colorPalette.primary,
+                screenManager->colorPalette.primary_stroke,
+                colorFromHex("#000000", 0.0f));
+        }
+    }
+
+    void ButtonManager::setButtonColor(int idx, const MathCore::vec4f &color, const MathCore::vec4f &stroke_color) {
+        ITK_ABORT(idx < 0 || idx >= buttons.size(), "Index out of range");
+
+        auto bg = buttons[idx]->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+        bg->setColor(
+            color,
+            stroke_color,
+            colorFromHex("#000000", 0.0f));
+    }
+
+    void ButtonManager::layoutVisibleElements(ButtonDirectionEnum direction)
     {
         int visible_count = 0;
         for (int i = 0; i < buttons.size(); i++)
@@ -140,7 +161,6 @@ namespace ui
     }
 
     CollisionCore::AABB<MathCore::vec3f> ButtonManager::computeAABB(
-        const MathCore::vec2f &size,
         ButtonDirectionEnum direction)
     {
         int visible_count = 0;

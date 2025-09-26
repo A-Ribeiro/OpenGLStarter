@@ -39,6 +39,9 @@ namespace ui
             return (T *)it->second.get();
         }
 
+        bool screen_in_top_byName(const std::string &name) const;
+        bool screen_in_top_byInstance(const Screen *screen) const;
+
         void open_screen(const std::string &name);
         void push_screen(const std::string &name);
         void pop_screen();

@@ -155,6 +155,8 @@ namespace ui
     {
         if (uiComponent->items.size() == 0)
             return;
+        if (!screenManager->screen_in_top_byInstance(this))
+            return;
 
         float speed = osciloscope_normal_hz;
 
