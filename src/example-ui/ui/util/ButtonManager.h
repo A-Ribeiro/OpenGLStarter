@@ -34,8 +34,12 @@ namespace ui
 
         void setButtonText(int idx, const std::string &text);
 
-        void layoutVisibleElements(const MathCore::vec2i &size,
+        void layoutVisibleElements(const MathCore::vec2f &size,
                                    ButtonDirectionEnum direction);
+
+        CollisionCore::AABB<MathCore::vec3f> computeAABB(
+            const MathCore::vec2f &size,
+            ButtonDirectionEnum direction);
     };
 
 }

@@ -74,15 +74,23 @@ namespace ui
         bg->setQuad(
             uiComponent->resourceMap,
             MathCore::vec2f(text_size.x + ScreenMessageBox::text_margin * 2.0f, text_size.y + ScreenMessageBox::text_margin * 2.0f), // size
-            screenManager->colorPalette.primary,                                                                                     // color
+            screenManager->colorPalette.bg,                                                                                          // color
             MathCore::vec4f(32, 32, 32, 32),                                                                                         // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                                                      // stroke mode
-            screenManager->colorPalette.stroke_thickness,                                                                            // stroke thickness
-            screenManager->colorPalette.primary_stroke,                                                                              // stroke color
+            0,                                                                                                                       // stroke thickness
+            colorFromHex("#000000", 0.0f),                                                                                           // stroke color
             16.0f,                                                                                                                   // drop shadow thickness
             colorFromHex("#2a2a2a3d"),                                                                                               // drop shadow color
             AppKit::GLEngine::Components::MeshUploadMode_Direct                                                                      // meshUploadMode,
         );
+
+        buttonManager.layoutVisibleElements(
+            MathCore::OP<MathCore::vec2f>::maximum(max_size - ScreenMessageBox::text_margin * 2.0f, 0.0f),
+            ButtonDirection_horizontal);
+        text->getTransform()->setLocalPosition(
+            MathCore::vec3f(0, 0, -102));
+        buttonManager.node_ui->getTransform()->setLocalPosition(
+            MathCore::vec3f(0, 0, -103));
     }
 
     void ScreenMessageBox::previousButton()
@@ -109,6 +117,10 @@ namespace ui
         this->text = rich_message;
         this->onOptionSelected = onOptionSelected;
         printf("Show message box: %s\n", rich_message.c_str());
+
+        buttonManager.setButtonVisibleCount((int)options.size());
+        for (int i = 0; i < (int)options.size(); i++)
+            buttonManager.setButtonText(i, options[i]);
 
         layoutElements(screenManager->current_size);
 
@@ -165,11 +177,11 @@ namespace ui
         auto bg = uiComponent->addRectangle(
                                  MathCore::vec2f(0, 0),                              // pos
                                  MathCore::vec2f(max_size.x, max_size.y),            // size
-                                 screenManager->colorPalette.primary,                // color
+                                 screenManager->colorPalette.bg,                     // color
                                  MathCore::vec4f(32, 32, 32, 32),                    // radius
                                  AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
-                                 screenManager->colorPalette.stroke_thickness,       // stroke thickness
-                                 screenManager->colorPalette.primary_stroke,         // stroke color
+                                 0,                                                  // stroke thickness
+                                 colorFromHex("#000000", 0.0f),                      // stroke color
                                  0,                                                  // drop shadow thickness
                                  MathCore::vec4f(0),                                 // drop shadow color
                                  -101,                                               // z
@@ -194,6 +206,14 @@ namespace ui
                                   U' ',                                                             // wordSeparatorChar
                                   "text")
                        .get<AppKit::GLEngine::Components::ComponentFont>();
+
+        buttonManager.setParent(uiComponent, screenManager);
+        buttonManager.setButtonProperties(
+            ScreenMessageBox::button_width,
+            ScreenMessageBox::button_height,
+            ScreenMessageBox::button_gap,
+            ScreenMessageBox::button_text_size);
+        buttonManager.reserveButtonData(2);
 
         return uiNode;
     }

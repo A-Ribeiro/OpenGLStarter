@@ -11,6 +11,7 @@ namespace ui
         this->screenManager = screenManager;
 
         node_ui = this->parent->addComponentUI(MathCore::vec2f(0, 0), 0, "button_manager").get<AppKit::GLEngine::Components::ComponentUI>();
+        node_ui->getTransform()->skip_traversing = true; // start hidden
     }
 
     void ButtonManager::setButtonProperties(float button_width, float button_height, float button_gap, float font_size)
@@ -65,8 +66,10 @@ namespace ui
 
     void ButtonManager::setButtonVisibleCount(int count)
     {
+        reserveButtonData(count);
         for (int i = 0; i < buttons.size(); i++)
-            buttons[i]->getTransform()->skip_traversing = !(i >= count);
+            buttons[i]->getTransform()->skip_traversing = (i >= count);
+        node_ui->getTransform()->skip_traversing = count == 0;
     }
 
     void ButtonManager::setButtonText(int idx, const std::string &text)
@@ -100,7 +103,7 @@ namespace ui
         );
     }
 
-    void ButtonManager::layoutVisibleElements(const MathCore::vec2i &size,
+    void ButtonManager::layoutVisibleElements(const MathCore::vec2f &size,
                                               ButtonDirectionEnum direction)
     {
         int visible_count = 0;
@@ -120,9 +123,9 @@ namespace ui
 
         MathCore::vec2f start_pos;
         if (direction == ButtonDirection_horizontal)
-            start_pos = MathCore::vec2f(-total_width * 0.5f, 0);
+            start_pos = MathCore::vec2f(-total_width * 0.5f + button_width * 0.5f, 0);
         else
-            start_pos = MathCore::vec2f(0, total_height * 0.5f);
+            start_pos = MathCore::vec2f(0, total_height * 0.5f - button_height * 0.5f);
 
         for (int i = 0; i < visible_count; i++)
         {
@@ -134,6 +137,35 @@ namespace ui
 
             buttons[i]->getTransform()->setLocalPosition(MathCore::vec3f(pos, 0.0f));
         }
+    }
+
+    CollisionCore::AABB<MathCore::vec3f> ButtonManager::computeAABB(
+        const MathCore::vec2f &size,
+        ButtonDirectionEnum direction)
+    {
+        int visible_count = 0;
+        for (int i = 0; i < buttons.size(); i++)
+        {
+            if (!buttons[i]->getTransform()->skip_traversing)
+                visible_count++;
+            else
+                break;
+        }
+
+        if (visible_count == 0)
+            return CollisionCore::AABB<MathCore::vec3f>();
+
+        float total_width = button_width * visible_count + button_gap * (visible_count - 1);
+        float total_height = button_height * visible_count + button_gap * (visible_count - 1);
+
+        if (direction == ButtonDirection_horizontal)
+            return CollisionCore::AABB<MathCore::vec3f>(
+                MathCore::vec3f(-total_width * 0.5f, -button_height * 0.5f, 0.0f),
+                MathCore::vec3f(total_width * 0.5f, button_height * 0.5f, 0.0f));
+        else
+            return CollisionCore::AABB<MathCore::vec3f>(
+                MathCore::vec3f(-button_width * 0.5f, -total_height * 0.5f, 0.0f),
+                MathCore::vec3f(button_width * 0.5f, total_height * 0.5f, 0.0f));
     }
 
 }
