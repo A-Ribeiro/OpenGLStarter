@@ -70,27 +70,34 @@ namespace ui
         );
         MathCore::vec3f text_size = text_aabb.max_box - text_aabb.min_box;
 
+        CollisionCore::AABB<MathCore::vec3f> button_aabb = buttonManager.computeAABB(ButtonDirection_horizontal);
+        MathCore::vec3f button_size = button_aabb.max_box - button_aabb.min_box;
+
+        MathCore::vec2f box_bg_size = MathCore::vec2f(
+                                          MathCore::OP<float>::maximum(button_size.x, text_size.x) + ScreenMessageBox::text_margin * 2.0f,
+                                          text_size.y + button_size.y + ScreenMessageBox::text_margin * 3.0f);
+
         auto bg = uiComponent->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
         bg->setQuad(
             uiComponent->resourceMap,
-            MathCore::vec2f(text_size.x + ScreenMessageBox::text_margin * 2.0f, text_size.y + ScreenMessageBox::text_margin * 2.0f), // size
-            screenManager->colorPalette.bg,                                                                                          // color
-            MathCore::vec4f(32, 32, 32, 32),                                                                                         // radius
-            AppKit::GLEngine::Components::StrokeModeGrowInside,                                                                      // stroke mode
-            0,                                                                                                                       // stroke thickness
-            colorFromHex("#000000", 0.0f),                                                                                           // stroke color
-            16.0f,                                                                                                                   // drop shadow thickness
-            colorFromHex("#2a2a2a3d"),                                                                                               // drop shadow color
-            AppKit::GLEngine::Components::MeshUploadMode_Direct                                                                      // meshUploadMode,
+            box_bg_size,                                        // size
+            screenManager->colorPalette.bg,                     // color
+            MathCore::vec4f(32, 32, 32, 32),                    // radius
+            AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
+            0,                                                  // stroke thickness
+            colorFromHex("#000000", 0.0f),                      // stroke color
+            16.0f,                                              // drop shadow thickness
+            colorFromHex("#2a2a2a3d"),                          // drop shadow color
+            AppKit::GLEngine::Components::MeshUploadMode_Direct // meshUploadMode,
         );
 
-        buttonManager.layoutVisibleElements(
-            MathCore::OP<MathCore::vec2f>::maximum(max_size - ScreenMessageBox::text_margin * 2.0f, 0.0f),
-            ButtonDirection_horizontal);
+        buttonManager.layoutVisibleElements(ButtonDirection_horizontal);
+
         text->getTransform()->setLocalPosition(
-            MathCore::vec3f(0, 0, -102));
+            MathCore::vec3f(0, box_bg_size.y * 0.5f - ScreenMessageBox::text_margin - text_size.y * 0.5f, -102));
+
         buttonManager.node_ui->getTransform()->setLocalPosition(
-            MathCore::vec3f(0, 0, -103));
+            MathCore::vec3f(0, -box_bg_size.y * 0.5f + ScreenMessageBox::text_margin + button_size.y * 0.5f, -103));
     }
 
     void ScreenMessageBox::previousButton()

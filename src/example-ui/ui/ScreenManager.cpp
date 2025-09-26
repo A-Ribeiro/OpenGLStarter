@@ -4,6 +4,20 @@
 namespace ui
 {
 
+    bool ScreenManager::screen_in_top_byName(const std::string &name) const
+    {
+        if (screen_stack.size() == 0)
+            return false;
+        return screen_stack.back()->name() == name;
+    }
+
+    bool ScreenManager::screen_in_top_byInstance(const Screen *screen) const
+    {
+        if (screen_stack.size() == 0)
+            return false;
+        return screen_stack.back() == screen;
+    }
+
     void ScreenManager::open_screen(const std::string &name)
     {
         if (screen_map.find(name) == screen_map.end())
