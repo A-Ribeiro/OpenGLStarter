@@ -1,10 +1,11 @@
 #pragma once
 
 #include "./common.h"
+#include "./util/OsciloscopeWithTrigger.h"
 
 namespace ui
 {
-    class ScreenMain : public ui::Screen
+    class ScreenMain : public ui::Screen, public OsciloscopeWithTrigger
     {
         void layoutElements(const MathCore::vec2i &size);
         void addButton(const std::string &text);
@@ -14,11 +15,12 @@ namespace ui
         void selectOption(const std::string &name);
         void setPrimaryColorAll();
 
-        bool change_screen;
-        float increase_speed_for_secs_and_trigger_action;
-        float osciloscope;
         int selected_button;
         ui::ScreenManager *screenManager;
+
+    protected:
+        void onOsciloscopeAction();
+        void onOsciloscopeSinLerp(float osciloscope, float sin);
 
     public:
         static constexpr float width = 256;
@@ -29,11 +31,15 @@ namespace ui
 
         static constexpr float osciloscope_normal_hz = 1.0f;
         static constexpr float osciloscope_selected_hz = 6.0f;
+        static constexpr float osciloscope_countdown_trigger_secs = 0.5f;
 
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> uiComponent;
         std::shared_ptr<AppKit::GLEngine::Transform> uiNode;
 
         const static char *Name;
+
+        ScreenMain();
+        
         std::string name() const;
         void resize(const MathCore::vec2i &size);
         void update(Platform::Time *elapsed);
