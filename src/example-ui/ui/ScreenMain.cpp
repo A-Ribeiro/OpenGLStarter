@@ -57,21 +57,21 @@ namespace ui
     }
     void ScreenMain::previousButton()
     {
-        if (change_screen)
+        if (osciloscopeIsLocked())
             return;
         selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)uiComponent->items.size() - 1);
         setPrimaryColorAll();
     }
     void ScreenMain::nextButton()
     {
-        if (change_screen)
+        if (osciloscopeIsLocked())
             return;
         selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)uiComponent->items.size() - 1);
         setPrimaryColorAll();
     }
     void ScreenMain::backButton()
     {
-        if (change_screen)
+        if (osciloscopeIsLocked())
             return;
         selected_button = (int)uiComponent->items.size() - 1;
         setPrimaryColorAll();
@@ -99,7 +99,30 @@ namespace ui
         }
     }
 
-    const char * ScreenMain::Name = "ScreenMain";
+    const char *ScreenMain::Name = "ScreenMain";
+
+    void ScreenMain::onOsciloscopeAction()
+    {
+        printf("Action at selection end...");
+        selectOption(uiComponent->items[selected_button].transform->getName());
+    }
+    void ScreenMain::onOsciloscopeSinLerp(float osciloscope, float sin)
+    {
+        auto rect = uiComponent->items[selected_button].get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+        rect->setColor(
+            screenManager->colorPalette.lrp_active(sin),
+            screenManager->colorPalette.lrp_active_stroke(sin),
+            0);
+    }
+
+    ScreenMain::ScreenMain() : OsciloscopeWithTrigger(
+                                   ScreenMain::osciloscope_normal_hz,
+                                   ScreenMain::osciloscope_selected_hz,
+                                   ScreenMain::osciloscope_countdown_trigger_secs)
+    {
+        selected_button = 0;
+        screenManager = nullptr;
+    }
 
     std::string ScreenMain::name() const
     {
@@ -117,33 +140,7 @@ namespace ui
         if (uiComponent->items.size() == 0)
             return;
 
-        float speed = osciloscope_normal_hz;
-
-        if (increase_speed_for_secs_and_trigger_action > 0.0f)
-        {
-            speed = osciloscope_selected_hz;
-            increase_speed_for_secs_and_trigger_action -= elapsed->unscaledDeltaTime;
-            if (increase_speed_for_secs_and_trigger_action < 0.0f)
-            {
-                increase_speed_for_secs_and_trigger_action = -1.0f;
-                printf("Action at selection end...");
-                selectOption(uiComponent->items[selected_button].transform->getName());
-            }
-        }
-
-        if (!change_screen || increase_speed_for_secs_and_trigger_action > 0.0f)
-        {
-
-            const float _360_pi = MathCore::CONSTANT<float>::PI * 2.0f;
-            osciloscope = MathCore::OP<float>::fmod(osciloscope + elapsed->unscaledDeltaTime * speed * _360_pi, _360_pi);
-            float sin = MathCore::OP<float>::sin(osciloscope) * 0.5f + 0.5f;
-
-            auto rect = uiComponent->items[selected_button].get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
-            rect->setColor(
-                screenManager->colorPalette.lrp_active(sin),
-                screenManager->colorPalette.lrp_active_stroke(sin),
-                0);
-        }
+        osciloscopeUpdate(elapsed);
     }
 
     std::shared_ptr<AppKit::GLEngine::Transform> ScreenMain::initializeTransform(
@@ -157,9 +154,7 @@ namespace ui
             return uiNode;
         this->screenManager = screenManager;
         selected_button = 0;
-        osciloscope = 0.0f;
-        increase_speed_for_secs_and_trigger_action = -1.0f;
-        change_screen = false;
+
         printf("    [ScreenMain] initializeTransform\n");
         uiNode = AppKit::GLEngine::Transform::CreateShared("ScreenMain");
         uiNode->skip_traversing = true;
@@ -182,20 +177,17 @@ namespace ui
         {
             uiNode->skip_traversing = false;
 
-            osciloscope = 0.0f;
-            increase_speed_for_secs_and_trigger_action = -1.0f;
-            change_screen = false;
+            osciloscopeResetLock();
         }
         else if (event == UIEventEnum::UIEvent_ScreenPop)
         {
             uiNode->skip_traversing = true;
         }
-        else if (!change_screen && increase_speed_for_secs_and_trigger_action < 0.0f)
+        else if (!osciloscopeIsLocked())
         {
             if (event == UIEventEnum::UIEvent_InputActionEnter)
             {
-                increase_speed_for_secs_and_trigger_action = 0.5f;
-                change_screen = true;
+                osciloscopeTriggerAction();
             }
             else if (event == UIEventEnum::UIEvent_InputDown)
             {
