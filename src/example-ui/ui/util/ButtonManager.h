@@ -16,10 +16,11 @@ namespace ui
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> parent;
 
         float button_width, button_height, button_gap, font_size;
-
+        
     public:
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> node_ui;
         std::vector<std::shared_ptr<AppKit::GLEngine::Components::ComponentUI>> buttons;
+        int visible_count;
         ScreenManager *screenManager;
 
         ButtonManager() = default;
@@ -32,6 +33,7 @@ namespace ui
 
         void setButtonVisibleCount(int count);
 
+        const std::string &getButtonText(int idx) const;
         void setButtonText(int idx, const std::string &text);
 
         void resetButtonColors();

@@ -34,6 +34,8 @@ namespace AppKit
             class ComponentFont : public Component
             {
 
+                std::string last_text;
+
             public:
                 static const ComponentType Type;
 
@@ -52,6 +54,8 @@ namespace AppKit
                     AppKit::GLEngine::ResourceMap *resourceMap);
 
                 // if color.a == 0, skip this draw
+                const std::string &getText() const;
+
                 void setText(
                     AppKit::GLEngine::ResourceMap *resourceMap,
 
