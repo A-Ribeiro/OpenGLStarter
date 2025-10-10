@@ -460,13 +460,18 @@ namespace ui
                 // screenManager->open_screen("ScreenMain");
                 screenManager->screen<ScreenMessageBox>()->showMessageBox( //
                     "Are you sure you want to go back?",
-                    {"Yes", "No"},
+                    {"Yes", "No"}, // options
+                    "Yes",         // init selected
                     [this](const std::string &option)
                     {
                         if (option == "Yes")
                         {
                             save_options();
                             screenManager->open_screen("ScreenMain");
+                        }
+                        else
+                        {
+                            screenManager->pop_screen();
                         }
                     });
             }

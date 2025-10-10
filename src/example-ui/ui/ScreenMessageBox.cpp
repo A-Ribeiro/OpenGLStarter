@@ -74,8 +74,8 @@ namespace ui
         MathCore::vec3f button_size = button_aabb.max_box - button_aabb.min_box;
 
         MathCore::vec2f box_bg_size = MathCore::vec2f(
-                                          MathCore::OP<float>::maximum(button_size.x, text_size.x) + ScreenMessageBox::text_margin * 2.0f,
-                                          text_size.y + button_size.y + ScreenMessageBox::text_margin * 3.0f);
+            MathCore::OP<float>::maximum(button_size.x, text_size.x) + ScreenMessageBox::text_margin * 2.0f,
+            text_size.y + button_size.y + ScreenMessageBox::text_margin * 3.0f);
 
         auto bg = uiComponent->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
         bg->setQuad(
@@ -102,23 +102,54 @@ namespace ui
 
     void ScreenMessageBox::previousButton()
     {
+        if (osciloscopeIsLocked())
+            return;
+        selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)buttonManager.visible_count - 1);
+        setPrimaryColorAll();
     }
     void ScreenMessageBox::nextButton()
     {
+        if (osciloscopeIsLocked())
+            return;
+        selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)buttonManager.visible_count - 1);
+        setPrimaryColorAll();
     }
     void ScreenMessageBox::backButton()
     {
+        if (osciloscopeIsLocked())
+            return;
+        selected_button = (int)buttonManager.visible_count - 1;
+        setPrimaryColorAll();
     }
     void ScreenMessageBox::selectOption(const std::string &name)
     {
+        printf("Selected name: %s\n", name.c_str());
+        setPrimaryColorAll();
+        // if (name == "Exit Game")
+        //     AppKit::GLEngine::Engine::Instance()->app->exitApp();
+        // else if (name == "Options")
+        //     screenManager->open_screen("ScreenOptions");
+        // else
+        //     screenManager->open_screen("ScreenMain");
+
+        if (onOptionSelected != nullptr)
+            onOptionSelected(name);
     }
     void ScreenMessageBox::setPrimaryColorAll()
     {
+        for (int i = 0; i < buttonManager.visible_count; i++)
+        {
+            buttonManager.setButtonColor(
+                i,
+                screenManager->colorPalette.primary,
+                screenManager->colorPalette.primary_stroke);
+        }
     }
 
     void ScreenMessageBox::showMessageBox(
         const std::string &rich_message,
         const std::vector<std::string> &options,
+        const std::string &init_selected,
         EventCore::Callback<void(const std::string &)> onOptionSelected)
     {
         this->text = rich_message;
@@ -126,8 +157,13 @@ namespace ui
         printf("Show message box: %s\n", rich_message.c_str());
 
         buttonManager.setButtonVisibleCount((int)options.size());
-        for (int i = 0; i < (int)options.size(); i++)
+        selected_button = 0;
+        for (int i = 0; i < (int)options.size(); i++) 
+        {
+            if (options[i] == init_selected)
+                selected_button = i;
             buttonManager.setButtonText(i, options[i]);
+        }
 
         layoutElements(screenManager->current_size);
 
@@ -135,6 +171,35 @@ namespace ui
     }
 
     const char *ScreenMessageBox::Name = "ScreenMessageBox";
+
+    void ScreenMessageBox::onOsciloscopeAction()
+    {
+        printf("Action at selection end...");
+        // selectOption(uiComponent->items[selected_button].transform->getName());
+        selectOption(buttonManager.getButtonText(selected_button));
+    }
+
+    void ScreenMessageBox::onOsciloscopeSinLerp(float osciloscope, float sin)
+    {
+        buttonManager.setButtonColor(selected_button,
+                                     screenManager->colorPalette.lrp_active(sin),
+                                     screenManager->colorPalette.lrp_active_stroke(sin));
+        // auto rect = uiComponent->items[selected_button].get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+        // rect->setColor(
+        //     screenManager->colorPalette.lrp_active(sin),
+        //     screenManager->colorPalette.lrp_active_stroke(sin),
+        //     0);
+    }
+
+    ScreenMessageBox::ScreenMessageBox() : OsciloscopeWithTrigger(
+                                               ScreenMessageBox::osciloscope_normal_hz,
+                                               ScreenMessageBox::osciloscope_selected_hz,
+                                               ScreenMessageBox::osciloscope_countdown_trigger_secs)
+    {
+        selected_button = 0;
+        screenManager = nullptr;
+    }
+
     std::string ScreenMessageBox::name() const
     {
         return Name;
@@ -146,6 +211,10 @@ namespace ui
     }
     void ScreenMessageBox::update(Platform::Time *elapsed)
     {
+        if (buttonManager.visible_count == 0)
+            return;
+
+        osciloscopeUpdate(elapsed);
     }
 
     std::shared_ptr<AppKit::GLEngine::Transform> ScreenMessageBox::initializeTransform(
@@ -158,6 +227,7 @@ namespace ui
         if (uiNode)
             return uiNode;
         this->screenManager = screenManager;
+        selected_button = 0;
 
         uiNode = AppKit::GLEngine::Transform::CreateShared("ScreenOptions");
         uiNode->skip_traversing = true;
@@ -231,21 +301,30 @@ namespace ui
         {
             uiNode->skip_traversing = false;
 
-            osciloscope = 0.0f;
-            increase_speed_for_secs_and_trigger_action = -1.0f;
-            change_screen = false;
+            osciloscopeResetLock();
         }
         else if (event == UIEventEnum::UIEvent_ScreenPop)
         {
             uiNode->skip_traversing = true;
         }
-        else if (event == UIEventEnum::UIEvent_InputActionEnter)
+        else if (!osciloscopeIsLocked())
         {
-            if (onOptionSelected)
-                onOptionSelected("Yes");
-        }
-        else if (event == UIEventEnum::UIEvent_InputActionBack)
-        {
+            if (event == UIEventEnum::UIEvent_InputActionEnter)
+            {
+                osciloscopeTriggerAction();
+            }
+            else if (event == UIEventEnum::UIEvent_InputRight)
+            {
+                nextButton();
+            }
+            else if (event == UIEventEnum::UIEvent_InputLeft)
+            {
+                previousButton();
+            }
+            else if (event == UIEventEnum::UIEvent_InputActionBack)
+            {
+                backButton();
+            }
         }
     }
 }
