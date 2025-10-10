@@ -12,6 +12,8 @@ namespace ui
 
         node_ui = this->parent->addComponentUI(MathCore::vec2f(0, 0), 0, "button_manager").get<AppKit::GLEngine::Components::ComponentUI>();
         node_ui->getTransform()->skip_traversing = true; // start hidden
+
+        visible_count = 0;
     }
 
     void ButtonManager::setButtonProperties(float button_width, float button_height, float button_gap, float font_size)
@@ -70,6 +72,13 @@ namespace ui
         for (int i = 0; i < buttons.size(); i++)
             buttons[i]->getTransform()->skip_traversing = (i >= count);
         node_ui->getTransform()->skip_traversing = count == 0;
+        visible_count = count;
+    }
+
+    const std::string &ButtonManager::getButtonText(int idx) const {
+        ITK_ABORT(idx < 0 || idx >= buttons.size(), "Index out of range");
+        auto text_component = buttons[idx]->getItemByName("text").get<AppKit::GLEngine::Components::ComponentFont>();
+        return text_component->getText();        
     }
 
     void ButtonManager::setButtonText(int idx, const std::string &text)

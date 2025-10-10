@@ -2,13 +2,14 @@
 
 #include "./common.h"
 #include "./util/OsciloscopeWithTrigger.h"
+#include "./util/ButtonManager.h"
 
 namespace ui
 {
     class ScreenMain : public ui::Screen, public OsciloscopeWithTrigger
     {
         void layoutElements(const MathCore::vec2i &size);
-        void addButton(const std::string &text);
+        // void addButton(const std::string &text);
         void previousButton();
         void nextButton();
         void backButton();
@@ -18,14 +19,22 @@ namespace ui
         int selected_button;
         ui::ScreenManager *screenManager;
 
+        ButtonManager buttonManager;
+
     protected:
         void onOsciloscopeAction();
         void onOsciloscopeSinLerp(float osciloscope, float sin);
 
     public:
-        static constexpr float width = 256;
-        static constexpr float height = 64;
-        static constexpr float gap = 10;
+        // static constexpr float width = 256;
+        // static constexpr float height = 64;
+        // static constexpr float gap = 10;
+
+        static constexpr float button_width = 256;
+        static constexpr float button_height = 64;
+        static constexpr float button_gap = 10;
+        static constexpr float button_text_size = 32;
+
 
         static constexpr float margin_bottom = 64;
 

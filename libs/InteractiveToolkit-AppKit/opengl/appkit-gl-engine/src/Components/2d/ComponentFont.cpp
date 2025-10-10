@@ -115,6 +115,11 @@ namespace AppKit
                 return builder->richComputeBox(text.c_str(), max_width);
             }
 
+            const std::string &ComponentFont::getText() const
+            {
+                return last_text;
+            }
+
             void ComponentFont::setText(
                 AppKit::GLEngine::ResourceMap *resourceMap,
 
@@ -146,6 +151,7 @@ namespace AppKit
                 char32_t wordSeparatorChar,
                 MeshUploadMode meshUploadMode)
             {
+                this->last_text = text;
                 std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource;
 
                 if (polygon_size > 0.0f)
