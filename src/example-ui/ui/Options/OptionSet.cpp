@@ -328,6 +328,8 @@ namespace ui
                 (MathCore::vec4f)screenManager->colorPalette.scroll_gradient * MathCore::vec4f(1, 1, 1, 0) // top
             );
         }
+
+        set_selected_rect_pos();
     }
 
     void OptionSet::leftButton()
