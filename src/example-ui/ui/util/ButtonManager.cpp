@@ -88,6 +88,9 @@ namespace ui
         auto text_component = buttons[idx]->getItemByName("text").get<AppKit::GLEngine::Components::ComponentFont>();
         auto engine = AppKit::GLEngine::Engine::Instance();
 
+        if (text_component->getText() == text)
+            return;
+
         text_component->setText( //
             node_ui->resourceMap,
             "resources/Roboto-Regular-100.basof2", // const std::string &font_path,

@@ -21,14 +21,13 @@ namespace ui
 
         ButtonManager buttonManager;
 
+        EventCore::Callback<void(const std::string &)> onOptionSelected;
+
     protected:
         void onOsciloscopeAction();
-        void onOsciloscopeSinLerp(float osciloscope, float sin);
+        void onOsciloscopeSinLerp(Platform::Time *elapsed, float osciloscope, float sin);
 
     public:
-        // static constexpr float width = 256;
-        // static constexpr float height = 64;
-        // static constexpr float gap = 10;
 
         static constexpr float button_width = 256;
         static constexpr float button_height = 64;
@@ -61,5 +60,11 @@ namespace ui
             const MathCore::vec2i &size);
 
         void triggerEvent(ui::UIEventEnum event);
+
+        void show(
+            const std::vector<std::string> &options = {"New Game", "Options", "Exit Game"},
+            const std::string &init_selected = "New Game",
+            EventCore::Callback<void(const std::string &)> onOptionSelected = nullptr
+        );
     };
 }

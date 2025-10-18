@@ -179,7 +179,7 @@ namespace ui
         selectOption(buttonManager.getButtonText(selected_button));
     }
 
-    void ScreenMessageBox::onOsciloscopeSinLerp(float osciloscope, float sin)
+    void ScreenMessageBox::onOsciloscopeSinLerp(Platform::Time *elapsed, float osciloscope, float sin)
     {
         buttonManager.setButtonColor(selected_button,
                                      screenManager->colorPalette.lrp_active(sin),
@@ -229,7 +229,7 @@ namespace ui
         this->screenManager = screenManager;
         selected_button = 0;
 
-        uiNode = AppKit::GLEngine::Transform::CreateShared("ScreenOptions");
+        uiNode = AppKit::GLEngine::Transform::CreateShared(name());
         uiNode->skip_traversing = true;
 
         uiComponent = uiNode->addNewComponent<AppKit::GLEngine::Components::ComponentUI>();
