@@ -89,12 +89,31 @@ namespace ui
                 auto key_entries = localContext->getGroupValuesForKey(group, group_key);
                 auto key_selected_entry = localContext->getGroupValueSelectedForKey(group, group_key);
                 optSet->addOption(group_key, key_entries, key_selected_entry);
+
+                auto &optionItem = optSet->getItemByOptionName(group_key);
+                optionItem.onChange = [this, group, group_key](const std::string &selected)
+                {
+                    bool updated = localContext->setGroupValueSelectedForKey(group, group_key, selected);
+                    if (updated && group == "Video" && group_key == "WindowMode")
+                    {
+                        // update resolution options
+                        // try to keep the already set option from Global Context
+                        auto new_key_entries = localContext->getGroupValuesForKey("Video", "Resolution");
+                        const char* new_key_selected_entry = AppOptions::OptionsManager::Instance()->getGroupValueSelectedForKey("Video", "Resolution");
+                        if (std::find(new_key_entries.begin(), new_key_entries.end(), new_key_selected_entry) == new_key_entries.end())
+                            new_key_selected_entry = new_key_entries.back().c_str();
+                        optionMap["Video"]->updateOption("Resolution", new_key_entries, new_key_selected_entry);
+                    }
+                };
+
+                optionItem.onChange(optionItem.selected);
             }
 
             optionMap[group] = std::move(optSet);
         }
 
         activeCurrentTab();
+        layoutElements(screenManager->current_size);
     }
 
     void ScreenOptions::onOsciloscopeAction()
@@ -256,7 +275,6 @@ namespace ui
             uiNode->skip_traversing = true;
 
             releaseLocalContext();
-
         }
         else if (!osciloscopeIsLocked())
         {

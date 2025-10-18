@@ -211,6 +211,42 @@ namespace ui
         txt->setMask(itemDefinition.ui->resourceMap, screenManager->camera, mask);
     }
 
+    void OptionSet::updateOption(const std::string &option, const std::vector<std::string> &choices, const std::string &selected) 
+    {
+        auto& itemDefinition = getItemByOptionName(option);
+
+        itemDefinition.choices = choices;
+        auto sel_it = std::find(choices.begin(), choices.end(), selected);
+        if (sel_it == choices.end())
+        {
+            itemDefinition.selected = choices[0];
+            itemDefinition.selected_index = 0;
+        }
+        else
+        {
+            itemDefinition.selected = selected;
+            itemDefinition.selected_index = std::distance(choices.begin(), sel_it);
+        }
+
+        update_option_text(itemDefinition);
+        if (itemDefinition.onChange)
+            itemDefinition.onChange(itemDefinition.selected);
+    }
+
+
+    OptionSet::ItemDefinition &OptionSet::getItemByOptionName(const std::string &option)
+    {
+        for (auto &item : items)
+        {
+            if (item.option == option)
+            {
+                return item;
+            }
+        }
+        ITK_ABORT(true, "Option not found: %s", option.c_str());
+        return items[0];
+    }
+
     void OptionSet::layoutElements(const MathCore::vec2i &size)
     {
         auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
@@ -332,13 +368,9 @@ namespace ui
         set_selected_rect_pos();
     }
 
-    void OptionSet::leftButton()
-    {
+    void OptionSet::update_option_text(OptionSet::ItemDefinition &item) {
         auto engine = AppKit::GLEngine::Engine::Instance();
 
-        auto &item = items[selected_item_index];
-        item.selected_index = (item.selected_index - 1 + (int)item.choices.size()) % (int)item.choices.size();
-        item.selected = item.choices[item.selected_index];
         item.ui->getItemByName("option-text").get<AppKit::GLEngine::Components::ComponentFont>()->setText( //
             ui->resourceMap,
             "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
@@ -362,35 +394,74 @@ namespace ui
             AppKit::GLEngine::Components::MeshUploadMode_Direct               // MeshUploadMode meshUploadMode
         );
     }
+
+    void OptionSet::leftButton()
+    {
+        // auto engine = AppKit::GLEngine::Engine::Instance();
+
+        auto &item = items[selected_item_index];
+        item.selected_index = (item.selected_index - 1 + (int)item.choices.size()) % (int)item.choices.size();
+        bool changed = item.selected != item.choices[item.selected_index];
+        item.selected = item.choices[item.selected_index];
+        update_option_text(item);
+        // item.ui->getItemByName("option-text").get<AppKit::GLEngine::Components::ComponentFont>()->setText( //
+        //     ui->resourceMap,
+        //     "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
+        //     // 0 = texture, > 0 = polygon
+        //     0,                                                                // float polygon_size,
+        //     0,                                                                // float polygon_distance_tolerance,
+        //     nullptr,                                                          // Platform::ThreadPool *polygon_threadPool,
+        //     engine->sRGBCapable,                                              // bool is_srgb,
+        //     item.selected,                                                    // const std::string &text,
+        //     ScreenOptions::item_height * 0.5f,                                // float size, ///< current state of the font size
+        //     -1,                                                               // float max_width,
+        //     screenManager->colorPalette.text,                                 // const MathCore::vec4f &faceColor,   ///< current state of the face color // .a == 0 turn off the drawing
+        //     colorFromHex("#000000", 0.0f),                                    // const MathCore::vec4f &strokeColor, ///< current state of the stroke color
+        //     MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // const MathCore::vec3f &strokeOffset,
+        //     AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+        //     AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+        //     1.0f,                                                             // float lineHeight,
+        //     AppKit::OpenGL::GLFont2WrapMode_Word,                             // AppKit::OpenGL::GLFont2WrapMode wrapMode,
+        //     AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+        //     U' ',                                                             // char32_t wordSeparatorChar,
+        //     AppKit::GLEngine::Components::MeshUploadMode_Direct               // MeshUploadMode meshUploadMode
+        // );
+        if (changed && item.onChange)
+            item.onChange(item.selected);
+    }
     void OptionSet::rightButton()
     {
-        auto engine = AppKit::GLEngine::Engine::Instance();
+        // auto engine = AppKit::GLEngine::Engine::Instance();
 
         auto &item = items[selected_item_index];
         item.selected_index = (item.selected_index + 1) % item.choices.size();
+        bool changed = item.selected != item.choices[item.selected_index];
         item.selected = item.choices[item.selected_index];
-        item.ui->getItemByName("option-text").get<AppKit::GLEngine::Components::ComponentFont>()->setText( //
-            ui->resourceMap,
-            "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
-            // 0 = texture, > 0 = polygon
-            0,                                                                // float polygon_size,
-            0,                                                                // float polygon_distance_tolerance,
-            nullptr,                                                          // Platform::ThreadPool *polygon_threadPool,
-            engine->sRGBCapable,                                              // bool is_srgb,
-            item.selected,                                                    // const std::string &text,
-            ScreenOptions::item_height * 0.5f,                                // float size, ///< current state of the font size
-            -1,                                                               // float max_width,
-            screenManager->colorPalette.text,                                 // const MathCore::vec4f &faceColor,   ///< current state of the face color // .a == 0 turn off the drawing
-            colorFromHex("#000000", 0.0f),                                    // const MathCore::vec4f &strokeColor, ///< current state of the stroke color
-            MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // const MathCore::vec3f &strokeOffset,
-            AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
-            AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
-            1.0f,                                                             // float lineHeight,
-            AppKit::OpenGL::GLFont2WrapMode_Word,                             // AppKit::OpenGL::GLFont2WrapMode wrapMode,
-            AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
-            U' ',                                                             // char32_t wordSeparatorChar,
-            AppKit::GLEngine::Components::MeshUploadMode_Direct               // MeshUploadMode meshUploadMode
-        );
+        update_option_text(item);
+        // item.ui->getItemByName("option-text").get<AppKit::GLEngine::Components::ComponentFont>()->setText( //
+        //     ui->resourceMap,
+        //     "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
+        //     // 0 = texture, > 0 = polygon
+        //     0,                                                                // float polygon_size,
+        //     0,                                                                // float polygon_distance_tolerance,
+        //     nullptr,                                                          // Platform::ThreadPool *polygon_threadPool,
+        //     engine->sRGBCapable,                                              // bool is_srgb,
+        //     item.selected,                                                    // const std::string &text,
+        //     ScreenOptions::item_height * 0.5f,                                // float size, ///< current state of the font size
+        //     -1,                                                               // float max_width,
+        //     screenManager->colorPalette.text,                                 // const MathCore::vec4f &faceColor,   ///< current state of the face color // .a == 0 turn off the drawing
+        //     colorFromHex("#000000", 0.0f),                                    // const MathCore::vec4f &strokeColor, ///< current state of the stroke color
+        //     MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // const MathCore::vec3f &strokeOffset,
+        //     AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+        //     AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+        //     1.0f,                                                             // float lineHeight,
+        //     AppKit::OpenGL::GLFont2WrapMode_Word,                             // AppKit::OpenGL::GLFont2WrapMode wrapMode,
+        //     AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+        //     U' ',                                                             // char32_t wordSeparatorChar,
+        //     AppKit::GLEngine::Components::MeshUploadMode_Direct               // MeshUploadMode meshUploadMode
+        // );
+        if (changed && item.onChange)
+            item.onChange(item.selected);
     }
 
     void OptionSet::upButton()
