@@ -7,9 +7,6 @@ namespace ui
 
     class OptionSet
     {
-        void set_selected_rect_pos();
-        // float get_selection_percentagem_related_to_valid_area();
-        void set_selection_percentagem_related_to_valid_area();
     public:
         struct ItemDefinition
         {
@@ -20,8 +17,18 @@ namespace ui
             std::string selected;
 
             int selected_index;
+
+            EventCore::Callback<void(const std::string &)> onChange;
         };
 
+    private:
+        void set_selected_rect_pos();
+        // float get_selection_percentagem_related_to_valid_area();
+        void set_selection_percentagem_related_to_valid_area();
+
+        void update_option_text(OptionSet::ItemDefinition &item);
+
+    public:
         // std::shared_ptr<AppKit::GLEngine::Transform> uiNode;
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> ui;
 
@@ -51,6 +58,10 @@ namespace ui
         void hide();
 
         void addOption(const std::string &option, const std::vector<std::string> &choices, const std::string &selected);
+
+        void updateOption(const std::string &option, const std::vector<std::string> &choices, const std::string &selected);
+
+        ItemDefinition &getItemByOptionName(const std::string &option);
 
         void update(Platform::Time *elapsed, float osciloscope, float sin);
     };

@@ -222,7 +222,7 @@ namespace AppOptions
     bool OptionsManager::setGroupValueSelectedForKey(const std::string &group, const std::string &key, const std::string &value)
     {
         char *currentValue = getGroupValueSelectedForKey(group, key);
-        if (currentValue)
+        if (currentValue && strcmp(currentValue, value.c_str()) != 0)
         {
             snprintf(currentValue, 64, "%s", value.c_str());
             return true;
@@ -242,8 +242,9 @@ namespace AppOptions
         mainMonitorResolution = selectedMonitor->SizePixels();
 
         mainMonitorFullscreenResolutions.clear();
-        for (const auto &mode : selectedMonitor->modes)
+        for (const auto &mode : STL_Tools::Reversal(selectedMonitor->modes)) {
             mainMonitorFullscreenResolutions.push_back(MathCore::vec2i(mode.width, mode.height));
+        }
 
         checkSystemCompatibilityAfterLoad();
     }
