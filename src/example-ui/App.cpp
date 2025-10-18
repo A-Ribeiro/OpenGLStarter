@@ -109,7 +109,7 @@ void App::draw()
     if (this->fps_accumulator < 0)
     {
         this->fps_accumulator = App::fps_time_sec;
-        printf("%.2f FPS\n", fps);
+        // printf("%.2f FPS\n", fps);
     }
 
     // set min delta time (the passed time or the time to render at 24fps)

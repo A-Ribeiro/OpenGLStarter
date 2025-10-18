@@ -53,7 +53,25 @@ void MainScene::bindResourcesToGraph()
     screenManager->load_screens(engine, resourceMap, &mathRandom, screens, MathCore::vec2i(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h));
     auto ui = root->findTransformByName("ui");
     ui->addChild(screenManager->uiRoot);
-    screenManager->open_screen("ScreenMain");
+    
+    screenManager->screen<ui::ScreenMain>()->show(
+        {"New Game", "Options", "Exit Game"},
+        "New Game",
+        [&](const std::string &option)
+        {
+            if (option == "New Game")
+            {
+                screenManager->close_all();
+            }
+            else if (option == "Options")
+            {
+                screenManager->open_screen("ScreenOptions");
+            }
+            else if (option == "Exit Game")
+            {
+                AppKit::GLEngine::Engine::Instance()->app->exitApp();
+            }
+        });
 
     // renderWindow->CameraViewport.OnChange.add(EventCore::CallbackWrapper(&MainScene::resize, this));
     renderWindow->CameraViewport.forceTriggerOnChange();

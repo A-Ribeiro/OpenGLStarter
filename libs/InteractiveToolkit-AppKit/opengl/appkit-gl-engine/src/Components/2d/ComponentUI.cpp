@@ -32,6 +32,20 @@ namespace AppKit
                 return dummy;
             }
 
+            UIItem &ComponentUI::getItemByTransform(std::shared_ptr<Transform> &transform)
+            {
+                for (size_t i = 0; i < items.size(); i++)
+                {
+                    if (items[i].transform == transform)
+                    {
+                        return items[i];
+                    }
+                }
+                static UIItem dummy;
+                return dummy;
+            }
+
+
             UIItem ComponentUI::addComponentUI(const MathCore::vec2f &pos,
                                                float z,
                                                const std::string &name)

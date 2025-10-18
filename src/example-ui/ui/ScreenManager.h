@@ -62,5 +62,7 @@ namespace ui
 
         ColorPalette colorPalette;
         void setColorPalette(const ColorPalette &palette);
+
+        void printUIHierarchy();
     };
 }

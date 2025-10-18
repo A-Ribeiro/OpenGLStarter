@@ -33,7 +33,7 @@ namespace ui
             const float _360_pi = MathCore::CONSTANT<float>::PI * 2.0f;
             osciloscope = MathCore::OP<float>::fmod(osciloscope + elapsed->unscaledDeltaTime * speed * _360_pi, _360_pi);
             float sin = MathCore::OP<float>::sin(osciloscope) * 0.5f + 0.5f;
-            onOsciloscopeSinLerp(osciloscope, sin);
+            onOsciloscopeSinLerp(elapsed, osciloscope, sin);
         }
 
     }

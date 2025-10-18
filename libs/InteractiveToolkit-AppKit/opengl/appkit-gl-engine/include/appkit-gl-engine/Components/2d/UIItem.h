@@ -53,6 +53,9 @@ namespace AppKit
                 template <typename T>
                 void set(std::shared_ptr<T> v);
 
+                template <typename T>
+                bool equals(std::shared_ptr<T> &v);
+
                 UIItem();
 
                 UIItem(std::shared_ptr<Transform> transform,

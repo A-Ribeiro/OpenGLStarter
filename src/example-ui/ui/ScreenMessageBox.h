@@ -27,7 +27,7 @@ namespace ui
 
     protected:
         void onOsciloscopeAction();
-        void onOsciloscopeSinLerp(float osciloscope, float sin);
+        void onOsciloscopeSinLerp(Platform::Time *elapsed, float osciloscope, float sin);
 
     public:
 

@@ -18,7 +18,7 @@ namespace ui
 
     protected:
         virtual void onOsciloscopeAction() = 0;
-        virtual void onOsciloscopeSinLerp(float osciloscope, float sin) = 0;
+        virtual void onOsciloscopeSinLerp(Platform::Time *elapsed, float osciloscope, float sin) = 0;
     public:
 
         OsciloscopeWithTrigger(

@@ -51,6 +51,8 @@ namespace ui
         }
         screen_stack.push_back(screen_map[name].get());
         screen_stack.back()->triggerEvent(UIEventEnum::UIEvent_ScreenPush);
+
+        printUIHierarchy();
     }
 
     void ScreenManager::pop_screen()
@@ -60,6 +62,8 @@ namespace ui
             screen_stack.back()->triggerEvent(UIEventEnum::UIEvent_ScreenPop);
             screen_stack.pop_back();
         }
+
+        printUIHierarchy();
     }
 
     void ScreenManager::close_all()
@@ -125,4 +129,27 @@ namespace ui
         this->colorPalette = palette;
     }
 
+
+    void ScreenManager::printUIHierarchy() {
+
+        printf("[ScreenManager::printUIHierarchy]\n");
+
+        struct __internal_struct {
+            AppKit::GLEngine::Transform* node;
+            int depth;
+        };
+        std::vector<__internal_struct> nodes;
+        nodes.push_back({ uiRoot.get(), 0 });
+
+        while (nodes.size()>0){
+            auto node_struct = nodes.back();
+            nodes.pop_back();
+
+            printf("%*s[%c]%s\n", node_struct.depth * 4, "+", node_struct.node->skip_traversing ? 'X' : 'O', node_struct.node->getName().c_str());
+
+            for (auto &child : STL_Tools::Reversal(node_struct.node->getChildren()))
+                nodes.push_back({ child.get(), node_struct.depth + 1 });
+        }
+
+    }
 }
