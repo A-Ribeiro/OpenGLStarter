@@ -93,6 +93,14 @@ namespace AppOptions
         char *getGroupValueSelectedForKey(const std::string &group, const std::string &key);
         const char *getGroupValueSelectedForKey(const std::string &group, const std::string &key) const;
         bool setGroupValueSelectedForKey(const std::string &group, const std::string &key, const std::string &value);
+
+
+        // compare current options with Singleton Instance options
+        bool hasChanged(const std::string &group, const std::string &key);
+        // compare all available options with Singleton Instance options
+        bool hasAnyChange();
+        
+
     };
 
 }

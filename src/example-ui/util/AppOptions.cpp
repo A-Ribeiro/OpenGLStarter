@@ -93,7 +93,7 @@ namespace AppOptions
                 return {std::begin(AppOptions::OptionsConstants::VideoWindowMode), std::end(AppOptions::OptionsConstants::VideoWindowMode)};
             if (key == "Resolution")
             {
-                const char* currWindowMode = getGroupValueSelectedForKey("Video", "WindowMode");
+                const char *currWindowMode = getGroupValueSelectedForKey("Video", "WindowMode");
                 if (strcmp(currWindowMode, "Borderless") == 0)
                     return {ITKCommon::PrintfToStdString("%ix%i", this->mainMonitorResolution.x, this->mainMonitorResolution.y)};
                 else if (strcmp(currWindowMode, "Fullscreen") == 0)
@@ -242,7 +242,8 @@ namespace AppOptions
         mainMonitorResolution = selectedMonitor->SizePixels();
 
         mainMonitorFullscreenResolutions.clear();
-        for (const auto &mode : STL_Tools::Reversal(selectedMonitor->modes)) {
+        for (const auto &mode : STL_Tools::Reversal(selectedMonitor->modes))
+        {
             mainMonitorFullscreenResolutions.push_back(MathCore::vec2i(mode.width, mode.height));
         }
 
@@ -264,7 +265,7 @@ namespace AppOptions
     {
         // needs to check the window mode and resolution
         auto validWindowModeList = getGroupValuesForKey("Video", "WindowMode");
-        const char* currWindowMode = getGroupValueSelectedForKey("Video", "WindowMode");
+        const char *currWindowMode = getGroupValueSelectedForKey("Video", "WindowMode");
 
         auto sel_it = std::find(validWindowModeList.begin(), validWindowModeList.end(), currWindowMode);
         if (sel_it == validWindowModeList.end())
@@ -273,7 +274,7 @@ namespace AppOptions
             setGroupValueSelectedForKey("Video", "WindowMode", validWindowModeList.front());
         }
 
-        const char* currResolution = getGroupValueSelectedForKey("Video", "Resolution");
+        const char *currResolution = getGroupValueSelectedForKey("Video", "Resolution");
         auto validResolutionList = getGroupValuesForKey("Video", "Resolution");
         sel_it = std::find(validResolutionList.begin(), validResolutionList.end(), currResolution);
         if (sel_it == validResolutionList.end())
@@ -287,6 +288,34 @@ namespace AppOptions
     {
         static OptionsManager instance;
         return &instance;
+    }
+
+    // compare current options with Singleton Instance options
+    bool OptionsManager::hasChanged(const std::string &group, const std::string &key)
+    {
+        OptionsManager *globalOptions = OptionsManager::Instance();
+        const char *currentValue = getGroupValueSelectedForKey(group, key);
+        const char *globalValue = globalOptions->getGroupValueSelectedForKey(group, key);
+        if (currentValue && globalValue)
+        {
+            return strcmp(currentValue, globalValue) != 0;
+        }
+        return false;
+    }
+    // compare all available options with Singleton Instance options
+    bool OptionsManager::hasAnyChange()
+    {
+        for (const auto &group : OptionsConstants::groups)
+        {
+            for (const auto &key : getGroupKeys(group))
+            {
+                if (hasChanged(group, key))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

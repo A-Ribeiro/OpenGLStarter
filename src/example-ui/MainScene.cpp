@@ -12,6 +12,9 @@ using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
+void save_options();
+
+
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources()
 {
@@ -47,13 +50,13 @@ void MainScene::bindResourcesToGraph()
     screens.push_back(STL_Tools::make_unique<ui::ScreenMain>());
     screens.push_back(STL_Tools::make_unique<ui::ScreenOptions>());
     screens.push_back(STL_Tools::make_unique<ui::ScreenMessageBox>());
-    
+
     screenManager->setColorPalette(ui::Pallete::Blush);
     screenManager->camera = camera;
     screenManager->load_screens(engine, resourceMap, &mathRandom, screens, MathCore::vec2i(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h));
     auto ui = root->findTransformByName("ui");
     ui->addChild(screenManager->uiRoot);
-    
+
     screenManager->screen<ui::ScreenMain>()->show(
         {"New Game", "Options", "Exit Game"},
         "New Game",
@@ -65,7 +68,45 @@ void MainScene::bindResourcesToGraph()
             }
             else if (option == "Options")
             {
-                screenManager->open_screen("ScreenOptions");
+                screenManager->screen<ui::ScreenOptions>()->showOptions(
+                    [&](AppOptions::OptionsManager *localOptions)
+                    {
+                        // AppOptions::OptionsManager *appOptions = AppOptions::OptionsManager::Instance();
+                        // app->appOptions->applyOptionsFrom(localOptions);
+
+                        bool needs_save = localOptions->hasAnyChange();
+                        bool needsRestart = false;
+                        if (needs_save)
+                        {
+                            needsRestart = localOptions->hasChanged("Video", "Resolution") ||
+                                           localOptions->hasChanged("Video", "WindowMode") ||
+                                           localOptions->hasChanged("Video", "AntiAliasing");
+
+                            AppOptions::OptionsManager localOptionsCopy = *localOptions;
+
+                            screenManager->screen<ui::ScreenMessageBox>()->showMessageBox( //
+                                "Content changed! Do you want to apply?",
+                                {"Apply", "Discard"}, // options
+                                "Apply",              // init selected
+                                [this, localOptionsCopy](const std::string &option)
+                                {
+                                    if (option == "Apply")
+                                    {
+                                        *AppOptions::OptionsManager::Instance() = localOptionsCopy;
+                                        save_options();
+                                        screenManager->open_screen("ScreenMain");
+                                    }
+                                    else
+                                    {
+                                        screenManager->open_screen("ScreenMain");
+                                    }
+                                });
+                        }
+                        else
+                        {
+                            screenManager->open_screen("ScreenMain");
+                        }
+                    });
             }
             else if (option == "Exit Game")
             {

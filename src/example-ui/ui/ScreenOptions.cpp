@@ -99,7 +99,7 @@ namespace ui
                         // update resolution options
                         // try to keep the already set option from Global Context
                         auto new_key_entries = localContext->getGroupValuesForKey("Video", "Resolution");
-                        const char* new_key_selected_entry = AppOptions::OptionsManager::Instance()->getGroupValueSelectedForKey("Video", "Resolution");
+                        const char *new_key_selected_entry = AppOptions::OptionsManager::Instance()->getGroupValueSelectedForKey("Video", "Resolution");
                         if (std::find(new_key_entries.begin(), new_key_entries.end(), new_key_selected_entry) == new_key_entries.end())
                             new_key_selected_entry = new_key_entries.back().c_str();
                         optionMap["Video"]->updateOption("Resolution", new_key_entries, new_key_selected_entry);
@@ -316,22 +316,24 @@ namespace ui
             }
             else if (event == UIEventEnum::UIEvent_InputActionBack)
             {
-                screenManager->screen<ScreenMessageBox>()->showMessageBox( //
-                    "Are you sure you want to go back?",
-                    {"Yes", "No"}, // options
-                    "Yes",         // init selected
-                    [this](const std::string &option)
-                    {
-                        if (option == "Yes")
-                        {
-                            save_options();
-                            screenManager->open_screen("ScreenMain");
-                        }
-                        else
-                        {
-                            screenManager->pop_screen();
-                        }
-                    });
+                if (this->onTryToExitAction != nullptr)
+                    this->onTryToExitAction(localContext.get());
+                // screenManager->screen<ScreenMessageBox>()->showMessageBox( //
+                //     "Are you sure you want to go back?",
+                //     {"Yes", "No"}, // options
+                //     "Yes",         // init selected
+                //     [this](const std::string &option)
+                //     {
+                //         if (option == "Yes")
+                //         {
+                //             save_options();
+                //             screenManager->open_screen("ScreenMain");
+                //         }
+                //         else
+                //         {
+                //             screenManager->pop_screen();
+                //         }
+                //     });
             }
             else if (event == UIEventEnum::UIEvent_InputShoulderRight)
             {
@@ -346,6 +348,16 @@ namespace ui
                 activeCurrentTab();
             }
         }
+    }
+
+    void ScreenOptions::showOptions(
+        EventCore::Callback<void(AppOptions::OptionsManager *localOptions)> onTryToExitAction)
+    {
+        this->onTryToExitAction = onTryToExitAction;
+
+        // layoutElements(screenManager->current_size);
+
+        screenManager->open_screen("ScreenOptions");
     }
 
 }
