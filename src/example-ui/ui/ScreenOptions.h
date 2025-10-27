@@ -22,6 +22,8 @@ namespace ui
         void releaseLocalContext();
         void loadOptionsFromGlobalContext();
 
+        EventCore::Callback<void(AppOptions::OptionsManager *localOptions)> onTryToExitAction;
+
     protected:
         void onOsciloscopeAction();
         void onOsciloscopeSinLerp(Platform::Time *elapsed, float osciloscope, float sin);
@@ -63,6 +65,10 @@ namespace ui
             const MathCore::vec2i &size);
 
         void triggerEvent(ui::UIEventEnum event);
+
+        void showOptions(
+            EventCore::Callback<void(AppOptions::OptionsManager *localOptions)> onTryToExitAction
+        );
     };
 
 }
