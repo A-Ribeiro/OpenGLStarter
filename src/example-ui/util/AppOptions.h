@@ -74,10 +74,13 @@ namespace AppOptions
     {
         std::vector<MathCore::vec2i> mainMonitorFullscreenResolutions;
 
+        bool initialized;
     public:
         MathCore::vec2i mainMonitorPosition;
         MathCore::vec2i mainMonitorResolution;
         AppOptions_v1 currentOptions;
+
+        OptionsManager();
 
         void initializeDefaults();
         bool loadOptionsFromBuffer(const Platform::ObjectBuffer &data);

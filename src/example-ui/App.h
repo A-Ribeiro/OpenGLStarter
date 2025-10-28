@@ -36,4 +36,7 @@ public:
     void load();
     void onGainFocus();
     void onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue);
+
+
+    void applySettingsChanges();
 };

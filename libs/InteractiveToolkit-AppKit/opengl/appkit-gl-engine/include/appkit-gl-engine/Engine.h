@@ -53,6 +53,7 @@ namespace AppKit
             bool setNewWindowConfig;
 
             EventCore::Callback<AppBase *(void)> OnCreateInstanceFnc;
+            EventCore::Callback<void(AppKit::Window::GLWindow *window)> OnConfigureWindowDoneFnc;
 
             Engine();
 
@@ -84,7 +85,8 @@ namespace AppKit
             void initialize(const std::string &_companyName, const std::string &_gameName,
                             const EventCore::Callback<AppBase *(void)> &_OnCreateInstanceFnc);
             void configureWindow(
-                const EngineWindowConfig &windowConfig
+                const EngineWindowConfig &windowConfig,
+                const EventCore::Callback<void(AppKit::Window::GLWindow *window)> &_OnConfigureWindowDone
             );
 
             std::vector<AppKit::Window::VideoMode> getResolutionList() const;

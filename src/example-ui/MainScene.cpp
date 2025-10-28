@@ -12,8 +12,11 @@ using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
+void load_options();
 void save_options();
+void apply_settings_to_window(const EventCore::Callback<void()> &OnAfterAppCreation);
 
+MainScene *MainScene::currentInstance = nullptr;
 
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources()
@@ -85,16 +88,25 @@ void MainScene::bindResourcesToGraph()
                             AppOptions::OptionsManager localOptionsCopy = *localOptions;
 
                             screenManager->screen<ui::ScreenMessageBox>()->showMessageBox( //
-                                "Content changed! Do you want to apply?",
+                                "Do you want to apply the new settings?",
                                 {"Apply", "Discard"}, // options
                                 "Apply",              // init selected
-                                [this, localOptionsCopy](const std::string &option)
+                                [this, localOptionsCopy, needsRestart](const std::string &option)
                                 {
                                     if (option == "Apply")
                                     {
                                         *AppOptions::OptionsManager::Instance() = localOptionsCopy;
-                                        save_options();
-                                        screenManager->open_screen("ScreenMain");
+                                        if (needsRestart)
+                                            apply_settings_to_window(&MainScene::comes_from_app_recreation);
+                                        else
+                                        {
+                                            save_options();
+                                            
+                                            // apply global settings...
+                                            app->applySettingsChanges();
+
+                                            screenManager->open_screen("ScreenMain");
+                                        }
                                     }
                                     else
                                     {
@@ -200,9 +212,33 @@ MainScene::MainScene(
                                                                           transformPool(false)
 {
     this->app = app;
+    MainScene::currentInstance = this;
 }
 
 MainScene::~MainScene()
 {
     unload();
+    MainScene::currentInstance = nullptr;
+}
+
+void MainScene::comes_from_app_recreation()
+{
+    MainScene::currentInstance->screenManager->screen<ui::ScreenMessageBox>()->showMessageBox( //
+        "Keep this settings?",
+        {"Keep", "Roll Back"}, // options
+        "Keep",              // init selected
+        [](const std::string &option)
+        {
+            if (option == "Keep")
+            {
+                save_options();
+                MainScene::currentInstance->screenManager->pop_screen();
+            }
+            else
+            {
+                load_options();
+                apply_settings_to_window(nullptr);
+            }
+        });
+    
 }
