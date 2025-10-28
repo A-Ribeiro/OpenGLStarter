@@ -42,13 +42,13 @@ void save_options()
     ITKCommon::FileSystem::File::FromPath(optionsPath).writeContentFromObjectBuffer(&optionsDataRaw);
 }
 
-void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engineConfig)
+void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engineConfig, const EventCore::Callback<void()> &OnAfterAppCreation)
 {
     auto engine = AppKit::GLEngine::Engine::Instance();
 
     auto options = AppOptions::OptionsManager::Instance();
 
-    const char* currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
+    const char *currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
     if (strcmp(currWindowMode, "Borderless") == 0)
     {
         engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Borderless;
@@ -56,14 +56,16 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
     }
     else if (strcmp(currWindowMode, "Fullscreen") == 0)
     {
-        const char* fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
+        const char *fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
         int w = 1280;
         int h = 720;
         if (sscanf(fullscreenRes, "%ix%i", &w, &h) == 2)
         {
             engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::FullScreen;
             engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(w, h);
-        } else {
+        }
+        else
+        {
             options->setGroupValueSelectedForKey("Video", "WindowMode", "Window");
             currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
             engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Default;
@@ -76,24 +78,59 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
         engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(options->mainMonitorResolution.width / 2, options->mainMonitorResolution.height / 2);
     }
 
-    engine->configureWindow(*engineConfig);
+    {
+        const char *aaMode = options->getGroupValueSelectedForKey("Video", "AntiAliasing");
+        if (strcmp(aaMode, "MSAA") == 0)
+            engineConfig->glContextConfig.antialiasingLevel = 2;
+        else
+            engineConfig->glContextConfig.antialiasingLevel = 0;
+    }
 
-    if (strcmp(currWindowMode, "Borderless") == 0)
     {
-        engine->window->setMouseCursorVisible(false);
-        // set fullscreen attributes
-        int monitorDefault = 0;
-        auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
-        DPI::Display::setFullscreenAttribute(engine->window->getNativeWindowHandle(), &allMonitors[monitorDefault]);
+        const char *vsyncMode = options->getGroupValueSelectedForKey("Video", "VSync");
+        if (strcmp(vsyncMode, "ON") == 0)
+            engineConfig->glContextConfig.vSync = true;
+        else
+            engineConfig->glContextConfig.vSync = false;
     }
-    else if (strcmp(currWindowMode, "Fullscreen") == 0)
-    {
-    }
-    else
-    {
-        // set middle screen
-        engine->window->setPosition(options->mainMonitorPosition + options->mainMonitorResolution / 4);
-    }
+
+    engine->configureWindow( //
+        *engineConfig,
+        [engine, options, currWindowMode, OnAfterAppCreation](AppKit::Window::GLWindow *window)
+        {
+            if (strcmp(currWindowMode, "Borderless") == 0)
+            {
+                engine->window->setMouseCursorVisible(false);
+                // set fullscreen attributes
+                int monitorDefault = 0;
+                auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
+                DPI::Display::setFullscreenAttribute(engine->window->getNativeWindowHandle(), &allMonitors[monitorDefault]);
+            }
+            else if (strcmp(currWindowMode, "Fullscreen") == 0)
+            {
+            }
+            else
+            {
+                // set middle screen
+                engine->window->setPosition(options->mainMonitorPosition + options->mainMonitorResolution / 4);
+            }
+            if (OnAfterAppCreation != nullptr)
+                OnAfterAppCreation();
+        });
+}
+
+void apply_settings_to_window(const EventCore::Callback<void()> &OnAfterAppCreation)
+{
+    AppKit::GLEngine::EngineWindowConfig engineConfig = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
+
+    strcpy(engineConfig.windowConfig.windowName, "Opening");
+
+    engineConfig.glContextConfig.majorVersion = 2;
+    engineConfig.glContextConfig.minorVersion = 1;
+
+    engineConfig.glContextConfig.sRgbCapable = false;
+
+    apply_window_options_to_engine(&engineConfig, OnAfterAppCreation);
 }
 
 int main(int argc, char *argv[])
@@ -108,37 +145,39 @@ int main(int argc, char *argv[])
 
     engine->initialize("Alessandro Ribeiro", "Opening", &CreateAppInstance);
 
-    AppKit::GLEngine::EngineWindowConfig engineConfig = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
+    apply_settings_to_window(nullptr);
 
-    strcpy(engineConfig.windowConfig.windowName, "Opening");
+    // AppKit::GLEngine::EngineWindowConfig engineConfig = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
 
-    engineConfig.glContextConfig.majorVersion = 2;
-    engineConfig.glContextConfig.minorVersion = 1;
+    // strcpy(engineConfig.windowConfig.windowName, "Opening");
 
-    // #if (!defined(__APPLE__)) && (defined(ITK_RPI) || defined(NDEBUG))
-    //     engineConfig.windowConfig.windowStyle = AppKit::Window::WindowStyle::FullScreen;
-    //     engineConfig.windowConfig.videoMode = AppKit::Window::Window::getDesktopVideoMode();//AppKit::Window::VideoMode(1280, 720);
+    // engineConfig.glContextConfig.majorVersion = 2;
+    // engineConfig.glContextConfig.minorVersion = 1;
 
-    //     engineConfig.glContextConfig.antialiasingLevel = 0;
-    //     engineConfig.glContextConfig.sRgbCapable = false;
+    // // #if (!defined(__APPLE__)) && (defined(ITK_RPI) || defined(NDEBUG))
+    // //     engineConfig.windowConfig.windowStyle = AppKit::Window::WindowStyle::FullScreen;
+    // //     engineConfig.windowConfig.videoMode = AppKit::Window::Window::getDesktopVideoMode();//AppKit::Window::VideoMode(1280, 720);
 
-    //     engine->configureWindow(engineConfig);
-    // #else
-    // engineConfig.windowConfig.windowStyle = AppKit::Window::WindowStyle::Default;
-    // engineConfig.windowConfig.videoMode = AppKit::Window::VideoMode(1024, 768);
+    // //     engineConfig.glContextConfig.antialiasingLevel = 0;
+    // //     engineConfig.glContextConfig.sRgbCapable = false;
 
-    // engineConfig.glContextConfig.antialiasingLevel = 0;
-    engineConfig.glContextConfig.sRgbCapable = false;
+    // //     engine->configureWindow(engineConfig);
+    // // #else
+    // // engineConfig.windowConfig.windowStyle = AppKit::Window::WindowStyle::Default;
+    // // engineConfig.windowConfig.videoMode = AppKit::Window::VideoMode(1024, 768);
 
-    apply_window_options_to_engine(&engineConfig);
+    // // engineConfig.glContextConfig.antialiasingLevel = 0;
+    // engineConfig.glContextConfig.sRgbCapable = false;
 
-    // engine->configureWindow(engineConfig);
+    // apply_window_options_to_engine(&engineConfig, nullptr);
 
-    // AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
-    // engine->window->setPosition(
-    //     (MathCore::vec2i(vm.width, vm.height) - engine->window->getSize()) / 2);
+    // // engine->configureWindow(engineConfig);
 
-    // #endif
+    // // AppKit::Window::VideoMode vm = AppKit::Window::Window::getDesktopVideoMode();
+    // // engine->window->setPosition(
+    // //     (MathCore::vec2i(vm.width, vm.height) - engine->window->getSize()) / 2);
+
+    // // #endif
 
     engine->mainLoop();
 

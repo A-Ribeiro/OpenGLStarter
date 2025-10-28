@@ -19,8 +19,8 @@ App::App()
     GLRenderState *renderState = GLRenderState::Instance();
 
     // setup renderstate
-    //renderState->ClearColor = vec4f(0.129f, 0.129f, 0.129f, 1.0f);
-    renderState->ClearColor = vec4f(1,1,1,1);
+    // renderState->ClearColor = vec4f(0.129f, 0.129f, 0.129f, 1.0f);
+    renderState->ClearColor = vec4f(1, 1, 1, 1);
     renderState->FrontFace = FrontFaceCCW;
 #ifndef ITK_RPI
     // renderState->Wireframe = WireframeBack;
@@ -151,4 +151,16 @@ void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::G
     renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
     if (mainScene != nullptr)
         mainScene->resize(value, oldValue);
+}
+
+void App::applySettingsChanges()
+{
+
+    auto engine = AppKit::GLEngine::Engine::Instance();
+    auto options = AppOptions::OptionsManager::Instance();
+
+    {
+        const char *vsyncMode = options->getGroupValueSelectedForKey("Video", "VSync");
+        engine->window->glSetVSync(strcmp(vsyncMode, "ON") == 0);
+    }
 }

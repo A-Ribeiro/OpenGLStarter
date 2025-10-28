@@ -230,21 +230,31 @@ namespace AppOptions
         return false;
     }
 
+    OptionsManager::OptionsManager()
+    {
+        initialized = false;
+    }
+
     void OptionsManager::initializeDefaults()
     {
         AppOptions::create_default_binary_data_v1(&currentOptions);
 
-        int monitorDefault = 0;
-        auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
-
-        auto selectedMonitor = &allMonitors[monitorDefault];
-        mainMonitorPosition = selectedMonitor->Position();
-        mainMonitorResolution = selectedMonitor->SizePixels();
-
-        mainMonitorFullscreenResolutions.clear();
-        for (const auto &mode : STL_Tools::Reversal(selectedMonitor->modes))
+        if (!initialized)
         {
-            mainMonitorFullscreenResolutions.push_back(MathCore::vec2i(mode.width, mode.height));
+            int monitorDefault = 0;
+            auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
+
+            auto selectedMonitor = &allMonitors[monitorDefault];
+            mainMonitorPosition = selectedMonitor->Position();
+            mainMonitorResolution = selectedMonitor->SizePixels();
+
+            mainMonitorFullscreenResolutions.clear();
+            for (const auto &mode : STL_Tools::Reversal(selectedMonitor->modes))
+            {
+                mainMonitorFullscreenResolutions.push_back(MathCore::vec2i(mode.width, mode.height));
+            }
+
+            initialized = true;
         }
 
         checkSystemCompatibilityAfterLoad();

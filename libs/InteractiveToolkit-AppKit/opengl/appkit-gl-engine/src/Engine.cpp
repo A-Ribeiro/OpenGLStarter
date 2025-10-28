@@ -27,6 +27,7 @@ extern "C" __declspec(dllexport) int32_t AmdPowerXpressRequestHighPerformance = 
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 bool check_is_nvidia_or_amd_opengl()
 {
@@ -46,13 +47,27 @@ bool check_is_nvidia_or_amd_opengl()
     GLXContext glc = glXCreateContext(dpy, vi, nullptr, GL_TRUE);
     glXMakeCurrent(dpy, win, glc);
 
-#if defined(GLAD_GLES2)
-    gladLoaderUnloadGLES2();
-    gladLoaderLoadGLES2();
-#else
-    gladLoaderUnloadGL();
-    gladLoaderLoadGL();
-#endif
+    const GLubyte *(*custom_glGetString)(GLenum name);
+
+    void* handle = dlopen("libGL.so.1", RTLD_LAZY | RTLD_LOCAL);
+    if (!handle)
+        handle = dlopen("libGL.so", RTLD_LAZY | RTLD_LOCAL);
+    ITK_ABORT(!handle, "Cannot open libGL.so: %s\n", dlerror());
+
+    dlerror(); // Clear any existing error
+
+    custom_glGetString = (const GLubyte *(*)(GLenum))dlsym(handle, "glGetString");
+
+    char * err = dlerror();
+    ITK_ABORT(err != nullptr, "Cannot find glGetString in libGL.so: %s\n", err);
+
+// #if defined(GLAD_GLES2)
+//     gladLoaderUnloadGLES2();
+//     gladLoaderLoadGLES2();
+// #else
+//     gladLoaderUnloadGL();
+//     gladLoaderLoadGL();
+// #endif
 
     // while (true) {
     //     glClear(GL_COLOR_BUFFER_BIT);
@@ -60,10 +75,12 @@ bool check_is_nvidia_or_amd_opengl()
     //     usleep(16000); // ~60 FPS
     // }
 
-    std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)glGetString(GL_VENDOR)));
+    std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)custom_glGetString(GL_VENDOR)));
     bool isNVidiaCard = ITKCommon::StringUtil::contains(vendor_aux, "nvidia");
     bool isAMDCard = ITKCommon::StringUtil::contains(vendor_aux, "amd") || ITKCommon::StringUtil::contains(vendor_aux, "radeon");
     // bool isIntelCard = ITKCommon::StringUtil::contains(vendor_aux, "intel");
+
+    dlclose(handle);
 
     glXDestroyContext(dpy, glc);
     XFree(vi);
@@ -127,8 +144,10 @@ namespace AppKit
         }
 #endif
 
-        void Engine::configureWindow(const EngineWindowConfig &windowConfig)
+        void Engine::configureWindow(const EngineWindowConfig &windowConfig,
+                                     const EventCore::Callback<void(AppKit::Window::GLWindow *window)> &_OnConfigureWindowDone)
         {
+            OnConfigureWindowDoneFnc = _OnConfigureWindowDone;
 #if defined(__linux__)
 
             //             {
@@ -246,6 +265,8 @@ namespace AppKit
 #endif
 
             app = OnCreateInstanceFnc();
+            if (OnConfigureWindowDoneFnc != nullptr)
+                OnConfigureWindowDoneFnc(window);
         }
 
         void Engine::clear()
@@ -358,7 +379,7 @@ namespace AppKit
                 {
                     setNewWindowConfig = false;
                     clear();
-                    configureWindow(changeWindowConfig);
+                    configureWindow(changeWindowConfig, OnConfigureWindowDoneFnc);
                 }
             }
         }

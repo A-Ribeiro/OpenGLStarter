@@ -52,6 +52,10 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
+    static MainScene* currentInstance;
+
+    static void comes_from_app_recreation();
+
 public:
 
     App *app;
