@@ -94,8 +94,10 @@ namespace AppOptions
             if (key == "Resolution")
             {
                 const char *currWindowMode = getGroupValueSelectedForKey("Video", "WindowMode");
-                if (strcmp(currWindowMode, "Borderless") == 0)
-                    return {ITKCommon::PrintfToStdString("%ix%i", this->mainMonitorResolution.x, this->mainMonitorResolution.y)};
+                if (strcmp(currWindowMode, "Borderless") == 0) {
+                    auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
+                    return {ITKCommon::PrintfToStdString("%ix%i", defaultMonitor.width, defaultMonitor.height)};
+                }
                 else if (strcmp(currWindowMode, "Fullscreen") == 0)
                 {
                     std::vector<std::string> res;
@@ -241,15 +243,11 @@ namespace AppOptions
 
         if (!initialized)
         {
-            int monitorDefault = 0;
-            auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
-
-            auto selectedMonitor = &allMonitors[monitorDefault];
-            mainMonitorPosition = selectedMonitor->Position();
-            mainMonitorResolution = selectedMonitor->SizePixels();
+            auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
+            mainMonitor_InitialMode = defaultMonitor.getCurrentMode();
 
             mainMonitorFullscreenResolutions.clear();
-            for (const auto &mode : STL_Tools::Reversal(selectedMonitor->modes))
+            for (const auto &mode : STL_Tools::Reversal(defaultMonitor.modes))
             {
                 mainMonitorFullscreenResolutions.push_back(MathCore::vec2i(mode.width, mode.height));
             }

@@ -7,6 +7,8 @@
 
 #include "App.h"
 
+void reset_monitor_mode_to_default();
+
 static AppBase *CreateAppInstance()
 {
     App *app = new App();
@@ -51,31 +53,36 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
     const char *currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
     if (strcmp(currWindowMode, "Borderless") == 0)
     {
+        auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
+
         engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Borderless;
-        engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(options->mainMonitorResolution.width, options->mainMonitorResolution.height);
+        engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(defaultMonitor.width, defaultMonitor.height);
     }
     else if (strcmp(currWindowMode, "Fullscreen") == 0)
     {
         const char *fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
-        int w = 1280;
-        int h = 720;
+        int w, h;
         if (sscanf(fullscreenRes, "%ix%i", &w, &h) == 2)
         {
-            engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::FullScreen;
+            engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Borderless;
             engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(w, h);
         }
         else
         {
+            auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
+
             options->setGroupValueSelectedForKey("Video", "WindowMode", "Window");
             currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
             engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Default;
-            engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(options->mainMonitorResolution.width / 2, options->mainMonitorResolution.height / 2);
+            engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(defaultMonitor.width / 2, defaultMonitor.height / 2);
         }
     }
     else
     {
+        auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
+
         engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Default;
-        engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(options->mainMonitorResolution.width / 2, options->mainMonitorResolution.height / 2);
+        engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(defaultMonitor.width / 2, defaultMonitor.height / 2);
     }
 
     {
@@ -96,23 +103,54 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
 
     engine->configureWindow( //
         *engineConfig,
-        [engine, options, currWindowMode, OnAfterAppCreation](AppKit::Window::GLWindow *window)
+        []()
         {
-            if (strcmp(currWindowMode, "Borderless") == 0)
+            // This callback is called before the window is configured
+            auto engine = AppKit::GLEngine::Engine::Instance();
+            auto options = AppOptions::OptionsManager::Instance();
+
+            const char *currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
+            if (strcmp(currWindowMode, "Fullscreen") == 0)
             {
-                engine->window->setMouseCursorVisible(false);
-                // set fullscreen attributes
-                int monitorDefault = 0;
-                auto allMonitors = DPI::Display::QueryMonitors(&monitorDefault);
-                DPI::Display::setFullscreenAttribute(engine->window->getNativeWindowHandle(), &allMonitors[monitorDefault]);
-            }
-            else if (strcmp(currWindowMode, "Fullscreen") == 0)
-            {
+                // set the desired resolution with the most high FPS
+
+                const char *fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
+                int w, h;
+                if (sscanf(fullscreenRes, "%ix%i", &w, &h) == 2)
+                {
+
+                    auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
+                    auto modifiableMode = defaultMonitor.getMode(w, h);
+                    modifiableMode.setFrequency(options->mainMonitor_InitialMode.freqs[0]);
+
+                    defaultMonitor.setMode(modifiableMode);
+                }
             }
             else
             {
+                reset_monitor_mode_to_default();
+            }
+        },
+        [engine, options, currWindowMode, OnAfterAppCreation](AppKit::Window::GLWindow *window)
+        {
+            // This callback is called after the window is configured
+            if (strcmp(currWindowMode, "Borderless") == 0)
+            {
+                engine->window->setMouseCursorVisible(false);
+                auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
+                DPI::Display::setFullscreenAttribute(engine->window->getNativeWindowHandle(), &defaultMonitor);
+            }
+            else if (strcmp(currWindowMode, "Fullscreen") == 0)
+            {
+                engine->window->setMouseCursorVisible(false);
+                auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
+                DPI::Display::setFullscreenAttribute(engine->window->getNativeWindowHandle(), &defaultMonitor);
+            }
+            else
+            {
+                auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
                 // set middle screen
-                engine->window->setPosition(options->mainMonitorPosition + options->mainMonitorResolution / 4);
+                engine->window->setPosition(defaultMonitor.Position() + defaultMonitor.SizePixels() / 4);
             }
             if (OnAfterAppCreation != nullptr)
                 OnAfterAppCreation();
@@ -133,13 +171,99 @@ void apply_settings_to_window(const EventCore::Callback<void()> &OnAfterAppCreat
     apply_window_options_to_engine(&engineConfig, OnAfterAppCreation);
 }
 
+void reset_monitor_mode_to_default()
+{
+    auto options = AppOptions::OptionsManager::Instance();
+    if (!options->isInitialized())
+        return;
+    auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
+    defaultMonitor.setMode(options->mainMonitor_InitialMode);
+}
+
+#if defined(__linux__)
+#include <sys/prctl.h>
+
+void fork_and_wait_parent_to_exit_from_child(int argc, char *argv[])
+{
+    pid_t parent_pid = getpid();
+    pid_t pid = fork();
+    if (pid < 0)
+    {
+        // Fork failed
+        ITK_ABORT(true, "Fork failed in fork_and_wait_parent_to_exit()");
+    }
+    else if (pid > 0)
+    {
+        // Parent process
+        // // Wait for the child process to complete
+        // int status;
+        // waitpid(pid, &status, 0);
+        // // Exit the parent process
+        // exit(WEXITSTATUS(status));
+    }
+    else
+    {
+
+        // // method 1: keep watching the parent process until it dies
+        // {
+        //     while (getppid() == parent_pid)
+        //     {
+        //         printf(".");
+        //         fflush(stdout);
+        //         usleep(100000);
+        //     }
+
+        //     // Parent already dead
+        //     reset_monitor_mode_to_default();
+        //     _exit(0);
+        // }
+
+        // method 2: use the SIGTERM on parent death
+
+        {
+            // Child process continues execution
+            // Use prctl to set SIGTERM on parent death
+
+            prctl(PR_SET_PDEATHSIG, SIGTERM);
+
+            // Optionally, check if parent already exited before prctl
+            if (getppid() != parent_pid)
+            {
+                // Parent already dead
+                reset_monitor_mode_to_default();
+                _exit(0);
+            }
+
+            // Wait for SIGTERM (sent when parent dies)
+            // You can use pause() to wait for any signal
+            // printf("CHILD WAITING FOR PARENT TO EXIT...\n");
+            pause();
+
+            printf("PROGRAM ENDED, BACKING THE RESOLUTION TO DEFAULT NOW\n");
+            reset_monitor_mode_to_default();
+            _exit(0);
+        }
+    }
+}
+
+#endif
+
 int main(int argc, char *argv[])
 {
     ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
     Platform::Thread::staticInitialization();
     Platform::Signal::Set(&on_signal);
 
+    // ITKCommon::ITKAbort::Instance()->OnAbort.add([](const char *file, int line, const char *message)
+    // {
+    //     reset_monitor_mode_to_default();
+    // });
+
     load_options();
+
+#if defined(__linux__)
+    fork_and_wait_parent_to_exit_from_child(argc, argv);
+#endif
 
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
 
@@ -180,6 +304,8 @@ int main(int argc, char *argv[])
     // // #endif
 
     engine->mainLoop();
+
+    // reset_monitor_mode_to_default();
 
     return 0;
 }

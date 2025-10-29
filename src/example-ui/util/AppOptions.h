@@ -2,6 +2,7 @@
 
 #include <InteractiveToolkit-Extension/io/Writer.h>
 #include <InteractiveToolkit-Extension/io/Reader.h>
+#include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
 
 #include <vector>
 #include <inttypes.h>
@@ -76,12 +77,15 @@ namespace AppOptions
 
         bool initialized;
     public:
-        MathCore::vec2i mainMonitorPosition;
-        MathCore::vec2i mainMonitorResolution;
+
+        // DPI::Monitor mainMonitor;
+        DPI::Mode mainMonitor_InitialMode;
+
         AppOptions_v1 currentOptions;
 
         OptionsManager();
 
+        bool isInitialized() const { return initialized; }
         void initializeDefaults();
         bool loadOptionsFromBuffer(const Platform::ObjectBuffer &data);
         void saveOptionsToBuffer(Platform::ObjectBuffer *output);
