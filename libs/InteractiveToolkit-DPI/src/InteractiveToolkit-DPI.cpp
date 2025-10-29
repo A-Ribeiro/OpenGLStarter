@@ -16,7 +16,7 @@ namespace DPI
         Display::setMonitorResolution(port, mode.width, mode.height, mode.freqs[0]);
 #elif defined(_WIN32)
         // windows implementation
-        ITK_ABORT(true, "Not implemented yet on Windows...\n");
+        // ITK_ABORT(true, "Not implemented yet on Windows...\n");
 #endif
     }
 
@@ -997,9 +997,9 @@ namespace DPI
                 if (set_result != Success)
                 {
                     XRRSetCrtcConfig(dpy, res, crtc, CurrentTime,
-                            crtc_info->x, crtc_info->y,
-                            crtc_info->mode, crtc_info->rotation,
-                            crtc_info->outputs, crtc_info->noutput);
+                                     crtc_info->x, crtc_info->y,
+                                     crtc_info->mode, crtc_info->rotation,
+                                     crtc_info->outputs, crtc_info->noutput);
                     XSync(dpy, False);
                 }
                 ITK_ABORT(set_result != Success, "Failed to set new mode on given monitor.\n");
@@ -1339,7 +1339,167 @@ namespace DPI
         // return TRUE;
     }
 
-    std::vector<Monitor> Display::QueryMonitors(int *monitorDefaultIndex)
+    BOOL CALLBACK _FillMonitorVectorOnlyPrimary(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+    {
+        std::vector<Monitor> &allMonitors = *(std::vector<Monitor> *)dwData;
+
+        MONITORINFOEX miex;
+        memset(&miex, 0, sizeof(MONITORINFOEX));
+        miex.cbSize = sizeof(MONITORINFOEX);
+        if (GetMonitorInfo(hMonitor, &miex))
+        {
+            if (miex.dwFlags != MONITORINFOF_PRIMARY || allMonitors.size() > 0)
+                return TRUE;
+
+            Monitor this_monitor;
+
+            HDC dc = CreateDC(("DISPLAY"), miex.szDevice, nullptr, nullptr);
+            if (dc)
+            {
+
+                int width_virtual_pixels = GetDeviceCaps(dc, HORZRES);  // miex.rcMonitor.right - miex.rcMonitor.left;//GetDeviceCaps(dc, HORZRES);//
+                int height_virtual_pixels = GetDeviceCaps(dc, VERTRES); // miex.rcMonitor.bottom - miex.rcMonitor.top;//GetDeviceCaps(dc, VERTRES);//
+
+                this_monitor.mwidth = GetDeviceCaps(dc, HORZSIZE);
+                this_monitor.mheight = GetDeviceCaps(dc, VERTSIZE);
+
+                this_monitor.primary = (miex.dwFlags == MONITORINFOF_PRIMARY);
+
+                DEVMODE devMode;
+                memset(&devMode, 0, sizeof(DEVMODE));
+                devMode.dmSize = sizeof(DEVMODE);
+                if (!EnumDisplaySettings(miex.szDevice, ENUM_CURRENT_SETTINGS, &devMode))
+                {
+                    return FALSE;
+                }
+
+                this_monitor.x = devMode.dmPosition.x;
+                this_monitor.y = devMode.dmPosition.y;
+
+                this_monitor.width = devMode.dmPelsWidth;
+                this_monitor.height = devMode.dmPelsHeight;
+
+                // compute scale factor
+                {
+                    this_monitor.scaleFactor =
+                        ((float)this_monitor.width / (float)(width_virtual_pixels) +
+                         (float)this_monitor.height / (float)(height_virtual_pixels)) *
+                        0.5f;
+
+                    this_monitor.scaleFactor = MathCore::OP<float>::round(this_monitor.scaleFactor * 100.0f) / 100.0f;
+
+                    PROCESS_DPI_AWARENESS processDpiAwareness;
+                    if (SUCCEEDED(GetProcessDpiAwareness(GetCurrentProcess(), &processDpiAwareness)))
+                    {
+                        if (processDpiAwareness == PROCESS_PER_MONITOR_DPI_AWARE)
+                        {
+                            UINT dpiX, dpiY;
+                            if (SUCCEEDED(GetDpiForMonitor(hMonitor, (MONITOR_DPI_TYPE)MDT_EFFECTIVE_DPI, &dpiX, &dpiY)))
+                            {
+                                double scale_x = (double)dpiX;
+                                double scale_y = (double)dpiY;
+                                double scale = (scale_x + scale_y) * 0.5;
+                                scale = MathCore::OP<double>::round(scale);
+                                scale = scale / 96.0;
+                                this_monitor.scaleFactor = (float)scale;
+                            }
+                        }
+                        else if (processDpiAwareness == PROCESS_SYSTEM_DPI_AWARE)
+                        {
+                            int dpiX = GetDeviceCaps(dc, LOGPIXELSX);
+                            int dpiY = GetDeviceCaps(dc, LOGPIXELSY);
+                            double scale_x = (double)dpiX;
+                            double scale_y = (double)dpiY;
+                            double scale = (scale_x + scale_y) * 0.5;
+                            scale = MathCore::OP<double>::round(scale);
+                            scale = scale / 96.0;
+                            this_monitor.scaleFactor = (float)scale;
+                        }
+                    }
+                }
+
+                this_monitor.name = miex.szDevice;
+                this_monitor.port = (char *)devMode.dmDeviceName;
+                // printf("%f\n", this_monitor.scale_factor);
+
+                // fill modes
+                {
+                    DWORD mode_idx = 0;
+                    DEVMODE devMode_aux = {};
+                    memset(&devMode_aux, 0, sizeof(DEVMODE));
+                    devMode_aux.dmSize = sizeof(DEVMODE);
+                    while (EnumDisplaySettings(miex.szDevice, mode_idx, &devMode_aux))
+                    {
+                        if (devMode_aux.dmBitsPerPel != devMode.dmBitsPerPel
+                            //||(devMode_aux.dmDisplayFlags & DM_INTERLACED) != 0
+                            || devMode_aux.dmDisplayFixedOutput != DMDFO_DEFAULT)
+                        {
+                            mode_idx++;
+                            memset(&devMode_aux, 0, sizeof(DEVMODE));
+                            devMode_aux.dmSize = sizeof(DEVMODE);
+                            continue;
+                        }
+
+                        Mode &mode = this_monitor.getOrCreateMode(devMode_aux.dmPelsWidth, devMode_aux.dmPelsHeight);
+                        mode.freqs.push_back((float)devMode_aux.dmDisplayFrequency);
+
+                        mode_idx++;
+                        memset(&devMode_aux, 0, sizeof(DEVMODE));
+                        devMode_aux.dmSize = sizeof(DEVMODE);
+                    }
+
+                    // sort modes and freqs
+                    {
+                        std::sort(this_monitor.modes.begin(),
+                                  this_monitor.modes.end(),
+                                  [](const Mode &a, const Mode &b)
+                                  {
+                                      return b.width * b.height < a.width * a.height;
+                                  });
+
+                        for (auto &mode : this_monitor.modes)
+                        {
+                            std::sort(mode.freqs.begin(),
+                                      mode.freqs.end(),
+                                      [](const float &a, const float &b)
+                                      {
+                                          return b < a;
+                                      });
+                        }
+                    }
+
+                    {
+                        Mode &mode = this_monitor.getOrCreateMode(devMode.dmPelsWidth, devMode.dmPelsHeight);
+
+                        this_monitor.current_mode_index = this_monitor.getModeIndex(devMode.dmPelsWidth, devMode.dmPelsHeight);
+                        this_monitor.current_freq_index = 0;
+
+                        float nearest = MathCore::FloatTypeInfo<float>::max;
+
+                        for (int k = 0; k < (int)mode.freqs.size(); k++)
+                        {
+                            float dst = MathCore::OP<float>::abs((float)devMode.dmDisplayFrequency - mode.freqs[k]);
+                            if (dst < nearest)
+                            {
+                                nearest = dst;
+                                this_monitor.current_freq_index = k;
+                            }
+                        }
+                    }
+                }
+
+                allMonitors.push_back(this_monitor);
+
+                ReleaseDC(nullptr, dc);
+            }
+            else
+                return FALSE;
+        }
+
+        return TRUE;
+    }
+
+    std::vector<Monitor> Display::QueryMonitors(bool only_default, int *monitorDefaultIndex)
     {
         // GetProcessDpiAwareness()
         // SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
@@ -1348,13 +1508,20 @@ namespace DPI
         // SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
 
         std::vector<Monitor> allMonitors;
-        EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
-        *monitorDefaultIndex = 0;
+
+        if (only_default)
+            EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVectorOnlyPrimary, (LPARAM)&allMonitors);
+        else
+            EnumDisplayMonitors(nullptr, nullptr, _FillMonitorVector, (LPARAM)&allMonitors);
+
+        if (monitorDefaultIndex != nullptr)
+            *monitorDefaultIndex = 0;
         for (int i = 0; i < (int)allMonitors.size(); i++)
         {
             if (allMonitors[i].primary)
             {
-                *monitorDefaultIndex = i;
+                if (monitorDefaultIndex != nullptr)
+                    *monitorDefaultIndex = i;
                 break;
             }
         }

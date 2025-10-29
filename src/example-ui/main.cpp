@@ -64,7 +64,11 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
         int w, h;
         if (sscanf(fullscreenRes, "%ix%i", &w, &h) == 2)
         {
+#if defined(__linux__)
             engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Borderless;
+#elif defined(_WIN32)
+            engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::FullScreen;
+#endif
             engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(w, h);
         }
         else
@@ -105,6 +109,7 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
         *engineConfig,
         []()
         {
+#if defined(__linux__)
             // This callback is called before the window is configured
             auto engine = AppKit::GLEngine::Engine::Instance();
             auto options = AppOptions::OptionsManager::Instance();
@@ -113,7 +118,6 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
             if (strcmp(currWindowMode, "Fullscreen") == 0)
             {
                 // set the desired resolution with the most high FPS
-
                 const char *fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
                 int w, h;
                 if (sscanf(fullscreenRes, "%ix%i", &w, &h) == 2)
@@ -127,9 +131,9 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
                 }
             }
             else
-            {
                 reset_monitor_mode_to_default();
-            }
+
+#endif
         },
         [engine, options, currWindowMode, OnAfterAppCreation](AppKit::Window::GLWindow *window)
         {
@@ -142,9 +146,14 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
             }
             else if (strcmp(currWindowMode, "Fullscreen") == 0)
             {
+#if defined(__linux__)
                 engine->window->setMouseCursorVisible(false);
                 auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
                 DPI::Display::setFullscreenAttribute(engine->window->getNativeWindowHandle(), &defaultMonitor);
+#elif defined(_WIN32)
+                // windows fullscreen window seems to work fine
+                engine->window->setMouseCursorVisible(false);
+#endif
             }
             else
             {
