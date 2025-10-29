@@ -1531,7 +1531,15 @@ namespace DPI
 
     void Display::setFullscreenAttribute(const NativeWindowHandleType &nativeWindow, const Monitor *monitor)
     {
-        SetWindowPos(nativeWindow, nullptr, monitor->x, monitor->y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+        // make borderless window occupy the entire monitor area
+
+        DWORD style = WS_OVERLAPPEDWINDOW & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU);
+        SetWindowLongPtr(nativeWindow, GWL_STYLE, style);
+        SetWindowPos(nativeWindow, HWND_NOTOPMOST, monitor->x, monitor->y, monitor->width, monitor->height, SWP_FRAMECHANGED | SWP_SHOWWINDOW | SWP_NOZORDER);
+
+        //SetWindowPos(nativeWindow, HWND_NOTOPMOST, monitor->x, monitor->y, monitor->width, monitor->height, 0);//SWP_NOZORDER | SWP_SHOWWINDOW
+        //SetWindowPos(nativeWindow, HWND_TOP, monitor->x, monitor->y, monitor->width, monitor->height, SWP_NOZORDER);
 
         // if (m_cursorGrabbed)
         // grabCursor(true);
