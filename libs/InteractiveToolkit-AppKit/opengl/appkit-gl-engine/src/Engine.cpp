@@ -145,8 +145,10 @@ namespace AppKit
 #endif
 
         void Engine::configureWindow(const EngineWindowConfig &windowConfig,
+                                    const EventCore::Callback<void()> &_OnConfigureWindowBefore,
                                      const EventCore::Callback<void(AppKit::Window::GLWindow *window)> &_OnConfigureWindowDone)
         {
+            OnConfigureWindowBefore = _OnConfigureWindowBefore;
             OnConfigureWindowDoneFnc = _OnConfigureWindowDone;
 #if defined(__linux__)
 
@@ -194,6 +196,9 @@ namespace AppKit
                 setNewWindowConfig = true;
                 return;
             }
+
+            if (OnConfigureWindowBefore != nullptr)
+                OnConfigureWindowBefore();
 
             window = new AppKit::Window::GLWindow(windowConfig.windowConfig, windowConfig.glContextConfig);
             window->onWin32BlockState_WindowEvent = EventCore::CallbackWrapper(&Engine::onWin32BlockState_WindowEvent, this);
@@ -379,7 +384,7 @@ namespace AppKit
                 {
                     setNewWindowConfig = false;
                     clear();
-                    configureWindow(changeWindowConfig, OnConfigureWindowDoneFnc);
+                    configureWindow(changeWindowConfig, OnConfigureWindowBefore , OnConfigureWindowDoneFnc);
                 }
             }
         }
