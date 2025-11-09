@@ -34,6 +34,7 @@ namespace AppKit
 
             enum StrokeModeEnum
             {
+                StrokeModeNone,
                 StrokeModeGrowMiddle,
                 StrokeModeGrowInside,
                 StrokeModeGrowOutside
@@ -92,8 +93,10 @@ namespace AppKit
                                 const MathCore::vec4f &radius,
                                 StrokeModeEnum stroke_mode,
                                 float stroke_thickness,
-                                float stroke_offset,
+                                StrokeModeEnum base_offset_stroke_mode,
+                                float stroke_offset_array,
                                 uint32_t segment_count,
+                                float outside_stroke_thickness_ref,
                                 DrawStrokeEnum drawStrokeMode);
 
             public:

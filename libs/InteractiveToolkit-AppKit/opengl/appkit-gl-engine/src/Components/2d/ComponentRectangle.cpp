@@ -4,6 +4,7 @@
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
+#include "RectangleCorner.h"
 
 using namespace AppKit::GLEngine;
 
@@ -127,17 +128,19 @@ namespace AppKit
                                radius,
                                stroke_mode,
                                stroke_thickness,
+                               StrokeModeNone,
                                0.0f, // stroke offset
                                segment_count,
+                               stroke_thickness,
                                DrawStroke_Stroke);
 
                 if (drop_shadow_thickness > 0.0f && drop_shadow_color.a > 0.0f)
                 {
-                    float offset = stroke_thickness * 0.5f;
-                    if (stroke_mode == StrokeModeGrowOutside)
-                        offset = stroke_thickness;
-                    else if (stroke_mode == StrokeModeGrowInside)
-                        offset = 0.0f;
+                    // float offset = stroke_thickness * 0.5f;
+                    // if (stroke_mode == StrokeModeGrowOutside)
+                    //     offset = stroke_thickness;
+                    // else if (stroke_mode == StrokeModeGrowInside)
+                    //     offset = 0.0f;
 
                     // drawStroke(center,
                     //            size,
@@ -163,8 +166,10 @@ namespace AppKit
                                radius,
                                StrokeModeGrowOutside,
                                drop_shadow_thickness_40_percent,
-                               offset, // stroke offset
+                               stroke_mode,
+                               0.0f, // stroke offset
                                segment_count,
+                               stroke_thickness,
                                DrawStroke_DropShadow_Internal);
 
                     drawStroke(size,
@@ -173,8 +178,10 @@ namespace AppKit
                                radius,
                                StrokeModeGrowOutside,
                                drop_shadow_thickness_60_percent,
-                               offset + drop_shadow_thickness_40_percent, // stroke offset
+                               stroke_mode,
+                               drop_shadow_thickness_40_percent, // stroke offset
                                segment_count,
+                               stroke_thickness,
                                DrawStroke_DropShadow_External);
                 }
 
@@ -207,7 +214,7 @@ namespace AppKit
                     MathCore::vec4f(0),
                     StrokeModeGrowInside,
                     0);
-                
+
                 getTransform()->skip_traversing = true;
             }
 
@@ -216,137 +223,93 @@ namespace AppKit
                                                               StrokeModeEnum stroke_mode,
                                                               float ignore_stroke_thickness)
             {
-                enum Order
-                {
-                    Order_topRight = 0,
-                    Order_bottomRight,
-                    Order_bottomLeft,
-                    Order_topLeft,
-                    Order_Count
-                };
+                RectangleCorner corner;
+                corner.setSize(size);
 
-                auto size_half = size * 0.5f;
-
-                float min_size_half = MathCore::OP<MathCore::vec2f>::minimum(size_half);
-
-                // MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
-                MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::clamp(radius, 0, min_size_half);
-
-                float min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness * 0.5f);
-
-                MathCore::vec4f radius_min = radius_aux - min_ignore_stroke_subtract;
-                MathCore::vec4f radius_max = radius_aux + ignore_stroke_thickness * 0.5f;
+                MathCore::vec2f center_internal[Order_Count];
+                MathCore::vec4f radius_internal;
 
                 if (stroke_mode == StrokeModeGrowInside)
                 {
-                    min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness);
-                    radius_max = radius_aux;
-                    radius_min = radius_aux - min_ignore_stroke_subtract;
+                    corner.setRadius(radius);
+                    corner.applyOffset(-ignore_stroke_thickness);
+                    radius_internal = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_internal[i] = corner.output_center[i];
                 }
                 else if (stroke_mode == StrokeModeGrowOutside)
                 {
-                    radius_max = radius_aux + ignore_stroke_thickness;
-                    radius_min = radius_aux;
+                    corner.setRadius(radius);
+                    corner.applyOffset(0);
+                    radius_internal = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_internal[i] = corner.output_center[i];
                 }
-
-                radius_min = MathCore::OP<MathCore::vec4f>::minimum(radius_min, min_size_half);
-                // avoid negative radius
-                radius_min = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_min);
-
-                for (int i = 0; i < Order_Count; i++)
-                    if (radius_min[i] < 0.0f)
-                    {
-                        radius_aux[i] -= radius_min[i];
-                        radius_min[i] = 0.0f;
-                    }
-
-                // radius_aux = MathCore::OP<MathCore::vec4f>::maximum(0, radius_aux);
-
-                float start_deg[Order_Count] = {90, 0, -90, -180};
-                float end_deg[Order_Count] = {0, -90, -180, -270};
-                MathCore::vec2f rad_factor[Order_Count] = {MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1), MathCore::vec2f(1, 1), MathCore::vec2f(1, -1)};
-                MathCore::vec2f size_factor[Order_Count] = {MathCore::vec2f(1, 1), MathCore::vec2f(1, -1), MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1)};
+                else if (stroke_mode == StrokeModeGrowMiddle)
+                {
+                    corner.setRadius(radius);
+                    corner.applyOffset(-ignore_stroke_thickness * 0.5f);
+                    radius_internal = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_internal[i] = corner.output_center[i];
+                }
 
                 for (int i = 0; i < Order_Count; i++)
                 {
-                    mask_corner[i] = size_half * size_factor[i] + radius_aux[i] * rad_factor[i];
-                    mask_radius[i] = radius_min[i];
+                    mask_corner[i] = center_internal[i];
+                    mask_radius[i] = radius_internal[i];
                 }
             }
 
             void ComponentRectangle::drawInside(const MathCore::vec2f &size,
                                                 const MathCore::vec4f &color_internal,
                                                 const MathCore::vec4f &color_external,
-                                                const MathCore::vec4f &radius,
+                                                const MathCore::vec4f &radius_,
                                                 StrokeModeEnum stroke_mode,
                                                 float ignore_stroke_thickness,
                                                 uint32_t segment_count_ref)
             {
-                enum Order
-                {
-                    Order_topRight = 0,
-                    Order_bottomRight,
-                    Order_bottomLeft,
-                    Order_topLeft,
-                    Order_Count
-                };
 
-                // const float perimeter_90 = MathCore::OP<float>::deg_2_rad(90);
-                const float base_radius = 64.0f;
-                float segment_factor = (float)segment_count_ref / base_radius;
+                MathCore::vec4f radius = radius_;
+                MathCore::vec4u radius_segment_count_i = RectangleCorner::computeSegmentCounts(radius + ignore_stroke_thickness, segment_count_ref);
 
-                MathCore::vec4f radius_segment_count_f = radius * segment_factor;
-                radius_segment_count_f = MathCore::OP<MathCore::vec4f>::ceil(radius_segment_count_f) + 0.5f;
-                MathCore::vec4u radius_segment_count_i = (MathCore::vec4u)radius_segment_count_f;
-                // radius_segment_count_i = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i, segment_count_ref / 2);
-                // for (int i = 0; i < 4; i++)
-                //     if (radius_segment_count_i[i] == 0 && radius[i] == 0.0f)
-                //         radius_segment_count_i[i] = segment_count_ref / 2;
+                RectangleCorner corner;
+                corner.setSize(size);
 
-                // uint32_t segment_count = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i);
-
-                auto size_half = size * 0.5f;
-
-                float min_size_half = MathCore::OP<MathCore::vec2f>::minimum(size_half);
-
-                // MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::minimum(radius, min_size_half);
-                MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::clamp(radius, 0, min_size_half);
-
-                float min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness * 0.5f);
-
-                MathCore::vec4f radius_min = radius_aux - min_ignore_stroke_subtract;
-                MathCore::vec4f radius_max = radius_aux + ignore_stroke_thickness * 0.5f;
+                MathCore::vec2f center_internal[Order_Count];
+                MathCore::vec4f radius_internal;
 
                 if (stroke_mode == StrokeModeGrowInside)
                 {
-                    min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, ignore_stroke_thickness);
-                    radius_max = radius_aux;
-                    radius_min = radius_aux - min_ignore_stroke_subtract;
+                    corner.setRadius(radius);
+                    corner.applyOffset(-ignore_stroke_thickness);
+                    radius_internal = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_internal[i] = corner.output_center[i];
                 }
                 else if (stroke_mode == StrokeModeGrowOutside)
                 {
-                    radius_max = radius_aux + ignore_stroke_thickness;
-                    radius_min = radius_aux;
+                    corner.setRadius(radius);
+                    corner.applyOffset(0);
+                    radius_internal = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_internal[i] = corner.output_center[i];
                 }
-
-                radius_min = MathCore::OP<MathCore::vec4f>::minimum(radius_min, min_size_half);
-                // avoid negative radius
-                radius_min = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_min);
-
-                for (int i = 0; i < Order_Count; i++)
-                    if (radius_min[i] < 0.0f)
-                    {
-                        radius_aux[i] -= radius_min[i];
-                        radius_min[i] = 0.0f;
-                    }
-
-                // radius_aux = MathCore::OP<MathCore::vec4f>::maximum(0, radius_aux);
+                else if (stroke_mode == StrokeModeGrowMiddle)
+                {
+                    corner.setRadius(radius);
+                    corner.applyOffset(-ignore_stroke_thickness * 0.5f);
+                    radius_internal = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_internal[i] = corner.output_center[i];
+                }
 
                 auto genArc = [](std::vector<MathCore::vec3f> *polygon,
                                  const MathCore::vec2f &center,
                                  float angle_start_deg, float angle_end_deg,
                                  float radius_min,
-                                 uint32_t segment_count)
+                                 uint32_t segment_count,
+                                 MathCore::vec3f *centroid)
                 {
                     polygon->push_back(MathCore::vec3f(center, 0.0f));
 
@@ -358,23 +321,33 @@ namespace AppKit
                         float lrp = (float)i / (float)(segment_count ? segment_count : 1);
                         float angl = MathCore::OP<float>::lerp(angle_start_rad, angle_end_rad, lrp);
                         MathCore::vec2f pos = MathCore::vec2f(MathCore::OP<float>::cos(angl), MathCore::OP<float>::sin(angl)) * radius_min + center;
-                        polygon->push_back(MathCore::vec3f(pos, 0.0f));
+                        auto item = MathCore::vec3f(pos, 0.0f);
+                        *centroid += item;
+                        polygon->push_back(item);
                     }
                 };
 
                 std::vector<MathCore::vec3f> polygon;
-                float start_deg[Order_Count] = {90, 0, -90, -180};
-                float end_deg[Order_Count] = {0, -90, -180, -270};
-                MathCore::vec2f rad_factor[Order_Count] = {MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1), MathCore::vec2f(1, 1), MathCore::vec2f(1, -1)};
-                MathCore::vec2f size_factor[Order_Count] = {MathCore::vec2f(1, 1), MathCore::vec2f(1, -1), MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1)};
+
+                int centroid_places[Order_Count];
+                int total_centroid_elements = 0;
+                MathCore::vec3f centroid;
 
                 for (int i = 0; i < Order_Count; i++)
-                    genArc(&polygon, size_half * size_factor[i] + radius_aux[i] * rad_factor[i], start_deg[i], end_deg[i], radius_min[i], radius_segment_count_i[i]);
+                {
+                    centroid_places[i] = (int)polygon.size();
+                    total_centroid_elements += radius_segment_count_i[i] + 1;
+                    genArc(&polygon,
+                           center_internal[i],
+                           corner.start_deg[i], corner.end_deg[i],
+                           radius_internal[i], radius_segment_count_i[i],
+                           &centroid);
+                }
 
-                // genArc(&polygon, MathCore::vec2f(size_half.x - radius_aux, size_half.y - radius_aux), 90, 0, radius_min, segment_count);
-                // genArc(&polygon, MathCore::vec2f(size_half.x - radius_aux, -size_half.y + radius_aux), 0, -90, radius_min, segment_count);
-                // genArc(&polygon, MathCore::vec2f(-size_half.x + radius_aux, -size_half.y + radius_aux), -90, -180, radius_min, segment_count);
-                // genArc(&polygon, MathCore::vec2f(-size_half.x + radius_aux, size_half.y - radius_aux), -180, -270, radius_min, segment_count);
+                centroid /= total_centroid_elements;
+                for (int i = 0; i < Order_Count; i++)
+                    polygon[centroid_places[i]] = 0;
+
 
                 uint32_t total_verts_per_quadrant[Order_Count] = {
                     (radius_segment_count_i[Order_topRight] + 1) + 1,
@@ -454,100 +427,140 @@ namespace AppKit
             void ComponentRectangle::drawStroke(const MathCore::vec2f &size,
                                                 const MathCore::vec4f &color_internal,
                                                 const MathCore::vec4f &color_external,
-                                                const MathCore::vec4f &radius,
+                                                const MathCore::vec4f &radius_,
                                                 StrokeModeEnum stroke_mode,
                                                 float stroke_thickness,
-                                                float stroke_offset,
+                                                StrokeModeEnum base_offset_stroke_mode,
+                                                float stroke_drop_shadow_offset,
                                                 uint32_t segment_count_ref,
+                                                float outside_stroke_thickness_ref,
                                                 DrawStrokeEnum drawStrokeMode)
             {
-                enum Order
-                {
-                    Order_topRight = 0,
-                    Order_bottomRight,
-                    Order_bottomLeft,
-                    Order_topLeft,
-                    Order_Count
-                };
+                MathCore::vec4f radius = radius_;
+                MathCore::vec4u radius_segment_count_i = RectangleCorner::computeSegmentCounts(radius + outside_stroke_thickness_ref, segment_count_ref);
 
-                // const float perimeter_90 = MathCore::OP<float>::deg_2_rad(90);
-                const float base_radius = 64.0f;
-                float segment_factor = (float)segment_count_ref / base_radius;
+                RectangleCorner corner;
+                corner.setSize(size);
 
-                MathCore::vec4f radius_segment_count_f = radius * segment_factor;
-                radius_segment_count_f = MathCore::OP<MathCore::vec4f>::ceil(radius_segment_count_f) + 0.5f;
-                MathCore::vec4u radius_segment_count_i = (MathCore::vec4u)radius_segment_count_f;
-                // radius_segment_count_i = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i, segment_count_ref/2);
-                for (int i = 0; i < 4; i++)
-                    if (radius_segment_count_i[i] == 0 && radius[i] == 0.0f)
-                        radius_segment_count_i[i] = segment_count_ref / 2;
+                MathCore::vec2f center_internal[Order_Count];
+                MathCore::vec4f radius_internal;
 
-                // uint32_t segment_count = MathCore::OP<MathCore::vec4u>::maximum(radius_segment_count_i);
-
-                auto size_half = size * 0.5f;
-
-                float min_size_half = MathCore::OP<MathCore::vec2f>::minimum(size_half);
-
-                MathCore::vec4f radius_aux = MathCore::OP<MathCore::vec4f>::clamp(radius, 0, min_size_half);
-
-                float min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, stroke_thickness * 0.5f);
-
-                MathCore::vec4f radius_min = radius_aux - min_ignore_stroke_subtract;
-                MathCore::vec4f radius_max = radius_aux + stroke_thickness * 0.5f;
+                MathCore::vec2f center_external[Order_Count];
+                MathCore::vec4f radius_external;
 
                 if (stroke_mode == StrokeModeGrowInside)
                 {
-                    min_ignore_stroke_subtract = MathCore::OP<float>::minimum(min_size_half, stroke_thickness);
+                    corner.setRadius(radius);
+                    corner.applyOffset(-stroke_thickness);
+                    radius_internal = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_internal[i] = corner.output_center[i];
 
-                    radius_max = radius_aux;
-                    radius_min = radius_aux - min_ignore_stroke_subtract;
+                    corner.setRadius(radius * corner.output_radius_factor);
+                    corner.applyOffset(0);
+                    radius_external = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_external[i] = corner.output_center[i];
                 }
                 else if (stroke_mode == StrokeModeGrowOutside)
                 {
-                    radius_max = radius_aux + stroke_thickness;
-                    radius_min = radius_aux;
+                    float offset = 0;
+
+                    if (drawStrokeMode == DrawStroke_DropShadow_Internal)
+                    {
+                        if (base_offset_stroke_mode == StrokeModeGrowInside)
+                        {
+
+                            corner.setRadius(radius);
+                            corner.applyOffset(-outside_stroke_thickness_ref);
+                            // corner.setRadius(radius *= corner.output_radius_factor);
+                            // corner.applyOffset(0);
+                            radius *= corner.output_radius_factor;
+                            offset = 0;
+                        }
+                        else if (base_offset_stroke_mode == StrokeModeGrowOutside)
+                        {
+                            corner.setRadius(radius);
+                            corner.applyOffset(0);
+                            radius *= corner.output_radius_factor;
+                            offset = outside_stroke_thickness_ref;
+                        }
+                        if (base_offset_stroke_mode == StrokeModeGrowMiddle)
+                        {
+
+                            corner.setRadius(radius);
+                            corner.applyOffset(-outside_stroke_thickness_ref * 0.5f);
+                            // corner.setRadius(radius *= corner.output_radius_factor);
+                            // corner.applyOffset(outside_stroke_thickness_ref * 0.5f);
+                            radius *= corner.output_radius_factor;
+                            offset = outside_stroke_thickness_ref * 0.5f;
+                        }
+                    }
+                    else if (drawStrokeMode == DrawStroke_DropShadow_External)
+                    {
+                        if (base_offset_stroke_mode == StrokeModeGrowInside)
+                        {
+                            corner.setRadius(radius);
+                            corner.applyOffset(-outside_stroke_thickness_ref);
+                            corner.setRadius(radius *= corner.output_radius_factor);
+                            corner.applyOffset(0);
+                            corner.setRadius(radius *= corner.output_radius_factor);
+                            // corner.applyOffset(outside_stroke_thickness_ref);
+                            // corner.setRadius(radius *= corner.output_radius_factor);
+                            corner.applyOffset(stroke_drop_shadow_offset);
+                            radius *= corner.output_radius_factor;
+                            offset = stroke_drop_shadow_offset;
+                        }
+                        else if (base_offset_stroke_mode == StrokeModeGrowOutside)
+                        {
+                            corner.setRadius(radius);
+                            corner.applyOffset(0);
+                            corner.setRadius(radius *= corner.output_radius_factor);
+                            corner.applyOffset(outside_stroke_thickness_ref);
+                            corner.setRadius(radius *= corner.output_radius_factor);
+                            corner.applyOffset(stroke_drop_shadow_offset);
+                            radius *= corner.output_radius_factor;
+                            offset = outside_stroke_thickness_ref + stroke_drop_shadow_offset;
+                        }
+                        else if (base_offset_stroke_mode == StrokeModeGrowMiddle)
+                        {
+                            corner.setRadius(radius);
+                            corner.applyOffset(-outside_stroke_thickness_ref * 0.5f);
+                            corner.setRadius(radius *= corner.output_radius_factor);
+                            corner.applyOffset(outside_stroke_thickness_ref * 0.5f);
+                            corner.setRadius(radius *= corner.output_radius_factor);
+                            corner.applyOffset(stroke_drop_shadow_offset);
+                            radius *= corner.output_radius_factor;
+                            offset = outside_stroke_thickness_ref * 0.5f + stroke_drop_shadow_offset;
+                        }
+                    }
+
+                    corner.setRadius(radius);
+                    corner.applyOffset(offset);
+                    radius_internal = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_internal[i] = corner.output_center[i];
+
+                    corner.setRadius(radius * corner.output_radius_factor);
+                    corner.applyOffset(offset + stroke_thickness);
+                    radius_external = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_external[i] = corner.output_center[i];
                 }
-
-                radius_min = MathCore::OP<MathCore::vec4f>::minimum(radius_min, min_size_half);
-
-                radius_min += stroke_offset;
-                radius_max += stroke_offset;
-
-                // for(int i=0;i<Order_Count;i++)
-                //     if (radius_aux[i] < -0.5f)
-                //         radius_max = -radius_max;
-
-                // avoid negative radius
-                radius_min = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_min);
-                radius_max = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_max);
-
-                MathCore::vec4f radius_aux_max = radius_aux;
-                for (int i = 0; i < Order_Count; i++)
+                else if (stroke_mode == StrokeModeGrowMiddle)
                 {
-                    if (radius[i] < -0.5f)
-                    {
-                        radius_aux[i] -= radius_min[i];
-                        radius_aux_max[i] -= radius_max[i];
-                        radius_min[i] = 0.0f;
-                        radius_max[i] = 0.0f;
-                    }
-                    else
-                    {
-                        if (radius_min[i] < 0.0f)
-                        {
-                            radius_aux[i] -= radius_min[i];
-                            radius_min[i] = 0.0f;
-                        }
-                        if (radius_max[i] < 0.0f)
-                        {
-                            radius_aux_max[i] -= radius_max[i];
-                            radius_max[i] = 0.0f;
-                        }
-                    }
-                }
+                    corner.setRadius(radius);
+                    corner.applyOffset(-stroke_thickness * 0.5f);
+                    radius_internal = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_internal[i] = corner.output_center[i];
 
-                // radius_aux = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_aux);
-                // radius_aux_max = MathCore::OP<MathCore::vec4f>::maximum(-min_size_half, radius_aux_max);
+                    corner.setRadius(radius * corner.output_radius_factor);
+                    corner.applyOffset(stroke_thickness * 0.5f);
+                    radius_external = corner.output_radius;
+                    for (int i = 0; i < Order_Count; i++)
+                        center_external[i] = corner.output_center[i];
+                }
 
                 auto genArc = [](std::vector<MathCore::vec3f> *polygon,
                                  std::vector<MathCore::vec3f> *hole,
@@ -578,23 +591,13 @@ namespace AppKit
                 std::vector<MathCore::vec3f> polygon;
                 std::vector<MathCore::vec3f> hole;
 
-                float start_deg[Order_Count] = {90, 0, -90, -180};
-                float end_deg[Order_Count] = {0, -90, -180, -270};
-                MathCore::vec2f rad_factor[Order_Count] = {MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1), MathCore::vec2f(1, 1), MathCore::vec2f(1, -1)};
-                MathCore::vec2f size_factor[Order_Count] = {MathCore::vec2f(1, 1), MathCore::vec2f(1, -1), MathCore::vec2f(-1, -1), MathCore::vec2f(-1, 1)};
-
                 for (int i = 0; i < Order_Count; i++)
                     genArc(&polygon, &hole,
-                           size_half * size_factor[i] + radius_aux[i] * rad_factor[i],     // center
-                           size_half * size_factor[i] + radius_aux_max[i] * rad_factor[i], // center_max
-                           start_deg[i], end_deg[i], radius_min[i], radius_max[i], radius_segment_count_i[i]);
-
-                // genArc(&polygon, &hole, MathCore::vec2f(size_half.x - radius_aux, size_half.y - radius_aux), 90, 0, radius_min, radius_max, segment_count);
-                // genArc(&polygon, &hole, MathCore::vec2f(size_half.x - radius_aux, -size_half.y + radius_aux), 0, -90, radius_min, radius_max, segment_count);
-                // genArc(&polygon, &hole, MathCore::vec2f(-size_half.x + radius_aux, -size_half.y + radius_aux), -90, -180, radius_min, radius_max, segment_count);
-                // genArc(&polygon, &hole, MathCore::vec2f(-size_half.x + radius_aux, size_half.y - radius_aux), -180, -270, radius_min, radius_max, segment_count);
-
-                // int total_verts_per_quadrant = (segment_count + 1) + 1;
+                           center_internal[i], // center
+                           center_external[i], // center_max
+                           corner.start_deg[i], corner.end_deg[i],
+                           radius_internal[i], radius_external[i],
+                           radius_segment_count_i[i]);
 
                 uint32_t vert_start_idx = (uint32_t)mesh->pos.size();
 
