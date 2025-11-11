@@ -87,8 +87,8 @@ namespace AppKit
                             const EventCore::Callback<AppBase *(void)> &_OnCreateInstanceFnc);
             void configureWindow(
                 const EngineWindowConfig &windowConfig,
-                const EventCore::Callback<void()> &_OnConfigureWindowBefore,
-                const EventCore::Callback<void(AppKit::Window::GLWindow *window)> &_OnConfigureWindowDone
+                const EventCore::Callback<void()> &_OnConfigureWindowBefore = nullptr,
+                const EventCore::Callback<void(AppKit::Window::GLWindow *window)> &_OnConfigureWindowDone = nullptr
             );
 
             std::vector<AppKit::Window::VideoMode> getResolutionList() const;
