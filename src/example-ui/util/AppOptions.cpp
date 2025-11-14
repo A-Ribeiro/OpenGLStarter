@@ -94,7 +94,8 @@ namespace AppOptions
             if (key == "Resolution")
             {
                 const char *currWindowMode = getGroupValueSelectedForKey("Video", "WindowMode");
-                if (strcmp(currWindowMode, "Borderless") == 0) {
+                if (strcmp(currWindowMode, "Borderless") == 0)
+                {
                     auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
                     return {ITKCommon::PrintfToStdString("%ix%i", defaultMonitor.width, defaultMonitor.height)};
                 }
@@ -259,14 +260,58 @@ namespace AppOptions
     }
     bool OptionsManager::loadOptionsFromBuffer(const Platform::ObjectBuffer &data)
     {
-        if (!AppOptions::read_binary_data_v1(data, &currentOptions))
+        ITKExtension::IO::Reader reader;
+
+        if (!data.size || !reader.readFromBuffer(data, true))
             return false;
-        checkSystemCompatibilityAfterLoad();
+        // if (reader.readInt32() != 0x01)
+        //     return false;
+        // reader.readRaw(out_options, sizeof(AppOptions_v1));
+        int32_t groups = reader.readInt32();
+        for (int32_t g = 0; g < groups; g++)
+        {
+            std::string group = reader.readString();
+            int32_t keys = reader.readInt32();
+            for (int32_t k = 0; k < keys; k++)
+            {
+                std::string key = reader.readString();
+                std::string value = reader.readString();
+                setGroupValueSelectedForKey(group, key, value);
+            }
+        }
+
         return true;
+
+        // if (!AppOptions::read_binary_data_v1(data, &currentOptions))
+        //     return false;
+        // checkSystemCompatibilityAfterLoad();
+        // return true;
     }
     void OptionsManager::saveOptionsToBuffer(Platform::ObjectBuffer *output)
     {
-        AppOptions::write_binary_data_v1(currentOptions, output);
+        // AppOptions::write_binary_data_v1(currentOptions, output);
+
+        ITKExtension::IO::Writer writer;
+        // writer.writeInt32(0x01); // version
+        // writer.writeRaw(&options, sizeof(AppOptions_v1));
+
+        auto groups = getGroups();
+        writer.writeInt32((int32_t)groups.size());
+        for (auto group : groups)
+        {
+            writer.writeString(group);
+
+            auto keys = getGroupKeys(group);
+            writer.writeInt32((int32_t)keys.size());
+            for (auto key : keys)
+            {
+                const char* value = getGroupValueSelectedForKey(group, key);
+                writer.writeString(key);
+                writer.writeString(value);
+            }
+        }
+
+        writer.writeToBuffer(output, true);
     }
 
     void OptionsManager::checkSystemCompatibilityAfterLoad()
