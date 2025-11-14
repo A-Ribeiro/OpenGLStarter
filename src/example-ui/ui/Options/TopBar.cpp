@@ -122,7 +122,7 @@ namespace ui
             shoulder_text,                                                    // text
             ScreenOptions::top_bar_height * 0.5f,                             // size
             -1,                                                               // max_width
-            screenManager->colorPalette.text,                                 // faceColor
+            screenManager->colorPalette.text_disabled,                        // faceColor
             colorFromHex("#000000", 0.0f),                                    // strokeColor
             MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
             AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
@@ -179,6 +179,7 @@ namespace ui
         {
             auto btn = btns[i];
             auto bg = btn->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+            auto text = btn->getItemByName("text").get<AppKit::GLEngine::Components::ComponentFont>();
             if ((int)i == selected_button)
             {
                 bg->setColor(
@@ -186,6 +187,8 @@ namespace ui
                     screenManager->colorPalette.primary_stroke, // stroke color
                     MathCore::vec4f(0)                          // drop shadow color
                 );
+                text->setColor(screenManager->colorPalette.text,
+                               colorFromHex("#000000", 0.0f));
             }
             else
             {
@@ -194,6 +197,8 @@ namespace ui
                     screenManager->colorPalette.disabled_stroke, // stroke color
                     MathCore::vec4f(0)                           // drop shadow color
                 );
+                text->setColor(screenManager->colorPalette.text_disabled,
+                               colorFromHex("#000000", 0.0f));
             }
         }
     }

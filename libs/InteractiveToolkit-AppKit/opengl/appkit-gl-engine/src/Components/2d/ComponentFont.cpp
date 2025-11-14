@@ -120,6 +120,36 @@ namespace AppKit
                 return last_text;
             }
 
+            void ComponentFont::setColor(const MathCore::vec4f &faceColor,
+                                         const MathCore::vec4f &strokeColor)
+            {
+                if (hasDrawFace && hasDrawStroke)
+                {
+
+                    bool face_stroke = true;
+                    int count6 = 0;
+                    for (auto &v : mesh->color[0])
+                    {
+                        v = (face_stroke) ? faceColor : strokeColor;
+                        if (count6++ >= 6)
+                        {
+                            count6 = 0;
+                            face_stroke = !face_stroke;
+                        }
+                    }
+                }
+                else if (hasDrawFace)
+                {
+                    for (auto &v : mesh->color[0])
+                        v = faceColor;
+                }
+                else if (hasDrawStroke)
+                {
+                    for (auto &v : mesh->color[0])
+                        v = strokeColor;
+                }
+            }
+
             void ComponentFont::setText(
                 AppKit::GLEngine::ResourceMap *resourceMap,
 
@@ -204,6 +234,8 @@ namespace AppKit
 
                 if (builder->isConstructedFromPolygonCache())
                 {
+                    hasDrawFace = true;
+                    hasDrawStroke = false;
 
                     for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
                     {
@@ -225,6 +257,9 @@ namespace AppKit
                 }
                 else
                 {
+                    hasDrawFace = builder->drawFace;
+                    hasDrawStroke = builder->drawStroke;
+
                     for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
                     {
                         if (i == 0)
@@ -306,6 +341,8 @@ namespace AppKit
             ComponentFont::ComponentFont() : Component(ComponentFont::Type)
             {
                 always_clone = true;
+                hasDrawFace = false;
+                hasDrawStroke = false;
             }
 
             ComponentFont::~ComponentFont()
