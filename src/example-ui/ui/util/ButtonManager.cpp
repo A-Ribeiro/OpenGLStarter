@@ -75,10 +75,11 @@ namespace ui
         visible_count = count;
     }
 
-    const std::string &ButtonManager::getButtonText(int idx) const {
+    const std::string &ButtonManager::getButtonText(int idx) const
+    {
         ITK_ABORT(idx < 0 || idx >= buttons.size(), "Index out of range");
         auto text_component = buttons[idx]->getItemByName("text").get<AppKit::GLEngine::Components::ComponentFont>();
-        return text_component->getText();        
+        return text_component->getText();
     }
 
     void ButtonManager::setButtonText(int idx, const std::string &text)
@@ -124,10 +125,16 @@ namespace ui
                 screenManager->colorPalette.primary,
                 screenManager->colorPalette.primary_stroke,
                 colorFromHex("#000000", 0.0f));
+
+            auto text = button->getItemByName("text").get<AppKit::GLEngine::Components::ComponentFont>();
+            text->setColor(
+                screenManager->colorPalette.text,
+                colorFromHex("#000000", 0.0f));
         }
     }
 
-    void ButtonManager::setButtonColor(int idx, const MathCore::vec4f &color, const MathCore::vec4f &stroke_color) {
+    void ButtonManager::setButtonColor(int idx, const MathCore::vec4f &color, const MathCore::vec4f &stroke_color)
+    {
         ITK_ABORT(idx < 0 || idx >= buttons.size(), "Index out of range");
 
         auto bg = buttons[idx]->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();

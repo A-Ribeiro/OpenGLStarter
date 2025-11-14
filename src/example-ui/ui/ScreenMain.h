@@ -61,6 +61,8 @@ namespace ui
 
         void triggerEvent(ui::UIEventEnum event);
 
+        void updateColorPalette();
+
         void show(
             const std::vector<std::string> &options = {"New Game", "Options", "Exit Game"},
             const std::string &init_selected = "New Game",

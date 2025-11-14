@@ -127,6 +127,9 @@ namespace ui
     void ScreenManager::setColorPalette(const ColorPalette &palette)
     {
         this->colorPalette = palette;
+
+        for (auto &screen : screen_map)
+            screen.second->updateColorPalette();
     }
 
 
