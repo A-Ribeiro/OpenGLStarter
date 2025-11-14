@@ -45,6 +45,8 @@ namespace ui
         ) = 0;
 
         virtual void triggerEvent(UIEventEnum event) = 0;
+
+        virtual void updateColorPalette() = 0;
     };
 
     // Simple compile-time color structure for const variables

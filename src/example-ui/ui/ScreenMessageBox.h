@@ -77,5 +77,7 @@ namespace ui
             const MathCore::vec2i &size);
 
         void triggerEvent(ui::UIEventEnum event);
+
+        void updateColorPalette();
     };
 }

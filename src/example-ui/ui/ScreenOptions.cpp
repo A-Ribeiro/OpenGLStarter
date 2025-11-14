@@ -350,6 +350,10 @@ namespace ui
         }
     }
 
+    void ScreenOptions::updateColorPalette()
+    {
+    }
+
     void ScreenOptions::showOptions(
         EventCore::Callback<void(AppOptions::OptionsManager *localOptions)> onTryToExitAction)
     {

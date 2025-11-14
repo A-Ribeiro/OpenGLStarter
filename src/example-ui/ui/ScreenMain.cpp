@@ -161,6 +161,11 @@ namespace ui
         }
     }
 
+    void ScreenMain::updateColorPalette()
+    {
+        buttonManager.resetButtonColors();
+    }
+
     void ScreenMain::show(
         const std::vector<std::string> &options,
         const std::string &init_selected,

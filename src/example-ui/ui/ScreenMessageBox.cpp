@@ -158,7 +158,7 @@ namespace ui
 
         buttonManager.setButtonVisibleCount((int)options.size());
         selected_button = 0;
-        for (int i = 0; i < (int)options.size(); i++) 
+        for (int i = 0; i < (int)options.size(); i++)
         {
             if (options[i] == init_selected)
                 selected_button = i;
@@ -326,5 +326,21 @@ namespace ui
                 backButton();
             }
         }
+    }
+
+    void ScreenMessageBox::updateColorPalette()
+    {
+        buttonManager.resetButtonColors();
+
+        auto bg = uiComponent->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
+        bg->setColor(
+            screenManager->colorPalette.primary,
+            screenManager->colorPalette.primary_stroke,
+            colorFromHex("#000000", 0.0f));
+
+        auto text = uiComponent->getItemByName("text").get<AppKit::GLEngine::Components::ComponentFont>();
+        text->setColor(
+            screenManager->colorPalette.text,
+            colorFromHex("#000000", 0.0f));
     }
 }

@@ -66,6 +66,8 @@ namespace ui
 
         void triggerEvent(ui::UIEventEnum event);
 
+        void updateColorPalette();
+
         void showOptions(
             EventCore::Callback<void(AppOptions::OptionsManager *localOptions)> onTryToExitAction
         );
