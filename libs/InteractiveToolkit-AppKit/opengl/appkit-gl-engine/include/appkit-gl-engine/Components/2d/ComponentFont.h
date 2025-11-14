@@ -36,6 +36,9 @@ namespace AppKit
 
                 std::string last_text;
 
+                bool hasDrawFace;
+                bool hasDrawStroke;
+
             public:
                 static const ComponentType Type;
 
@@ -55,6 +58,9 @@ namespace AppKit
 
                 // if color.a == 0, skip this draw
                 const std::string &getText() const;
+
+                void setColor(const MathCore::vec4f &faceColor,
+                    const MathCore::vec4f &strokeColor);
 
                 void setText(
                     AppKit::GLEngine::ResourceMap *resourceMap,

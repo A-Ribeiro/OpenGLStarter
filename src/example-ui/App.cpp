@@ -163,4 +163,6 @@ void App::applySettingsChanges()
         const char *vsyncMode = options->getGroupValueSelectedForKey("Video", "VSync");
         engine->window->glSetVSync(strcmp(vsyncMode, "ON") == 0);
     }
+
+    mainScene->applySettingsChanges();
 }

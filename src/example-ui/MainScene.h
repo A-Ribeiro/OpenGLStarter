@@ -84,4 +84,6 @@ public:
     void resize(const AppKit::GLEngine::iRect &size, const AppKit::GLEngine::iRect &old_size);
 
     void update(Platform::Time *elapsed);
+
+    void applySettingsChanges();
 };

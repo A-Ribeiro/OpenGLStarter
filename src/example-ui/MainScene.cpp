@@ -36,6 +36,27 @@ void MainScene::loadGraph()
     root->addChild(Transform::CreateShared("ui"));
 }
 
+void MainScene::applySettingsChanges()
+{
+    AppOptions::OptionsManager *options = AppOptions::OptionsManager::Instance();
+
+    {
+        const char *colorScheme = options->getGroupValueSelectedForKey("Extra", "ColorScheme");
+        if (strcmp(colorScheme, "Blush") == 0)
+            screenManager->setColorPalette(ui::Pallete::Blush);
+        else if (strcmp(colorScheme, "Purple") == 0)
+            screenManager->setColorPalette(ui::Pallete::Purple);
+        else if (strcmp(colorScheme, "Orange") == 0)
+            screenManager->setColorPalette(ui::Pallete::Orange);
+        else if (strcmp(colorScheme, "Green") == 0)
+            screenManager->setColorPalette(ui::Pallete::Green);
+        else if (strcmp(colorScheme, "Blue") == 0)
+            screenManager->setColorPalette(ui::Pallete::Blue);
+        else if (strcmp(colorScheme, "Dark") == 0)
+            screenManager->setColorPalette(ui::Pallete::Dark);
+    }
+}
+
 // to bind the resources to the current graph
 void MainScene::bindResourcesToGraph()
 {
@@ -54,7 +75,8 @@ void MainScene::bindResourcesToGraph()
     screens.push_back(STL_Tools::make_unique<ui::ScreenOptions>());
     screens.push_back(STL_Tools::make_unique<ui::ScreenMessageBox>());
 
-    screenManager->setColorPalette(ui::Pallete::Blush);
+    applySettingsChanges();
+
     screenManager->camera = camera;
     screenManager->load_screens(engine, resourceMap, &mathRandom, screens, MathCore::vec2i(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h));
     auto ui = root->findTransformByName("ui");
@@ -101,7 +123,7 @@ void MainScene::bindResourcesToGraph()
                                         else
                                         {
                                             save_options();
-                                            
+
                                             // apply global settings...
                                             app->applySettingsChanges();
 
@@ -226,7 +248,7 @@ void MainScene::comes_from_app_recreation()
     MainScene::currentInstance->screenManager->screen<ui::ScreenMessageBox>()->showMessageBox( //
         "Keep this settings?",
         {"Keep", "Roll Back"}, // options
-        "Keep",              // init selected
+        "Keep",                // init selected
         [](const std::string &option)
         {
             if (option == "Keep")
@@ -240,5 +262,4 @@ void MainScene::comes_from_app_recreation()
                 apply_settings_to_window(nullptr);
             }
         });
-    
 }

@@ -130,6 +130,7 @@ namespace ui
         Color disabled_stroke;
 
         Color text;
+        Color text_disabled;
 
         Color scroll_gradient;
 
