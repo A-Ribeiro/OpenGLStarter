@@ -35,7 +35,7 @@ namespace ui
                 MathCore::vec2f(0, 0),                              // pos
                 MathCore::vec2f(button_width, button_height),       // size
                 screenManager->colorPalette.primary,                // color
-                MathCore::vec4f(32),                                // radius
+                screenManager->colorPalette.button_radius,          // radius
                 AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
                 screenManager->colorPalette.stroke_thickness,       // stroke thickness
                 screenManager->colorPalette.primary_stroke,         // stroke color

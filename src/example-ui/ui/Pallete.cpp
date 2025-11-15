@@ -59,7 +59,7 @@ namespace ui
             colorFromHex("#a3a3a3", 1.0f), // disabled_stroke
             colorFromHex("#1c1917", 1.0f), // text
             colorFromHex("#666666", 1.0f), // text_disabled
-            colorFromHex("#4ade80", 0.8f)  // scroll_gradient
+            colorFromHex("#8effb7ff", 0.8f)  // scroll_gradient
         };
 
         const ColorPalette Blue{
