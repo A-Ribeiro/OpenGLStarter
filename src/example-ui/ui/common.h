@@ -136,11 +136,30 @@ namespace ui
 
         Color scroll_gradient;
 
+        MathCore::vec4f button_radius;
+
         MathCore::vec4f lrp_active(float active_lrp) const {
             return MathCore::OP<MathCore::vec4f>::lerp(primary, active, active_lrp);
         }
         MathCore::vec4f lrp_active_stroke(float active_lrp) const {
             return MathCore::OP<MathCore::vec4f>::lerp(primary_stroke, active_stroke, active_lrp);
+        }
+
+        ColorPalette setAppearance(const char *appearance) const {
+            ColorPalette result = *this;
+            result.button_radius = MathCore::vec4f(32.0f);
+
+            // "Bend Up", "Bend Down", "Round", "Square"
+            if (strcmp(appearance, "Bend Up") == 0)
+                result.button_radius = MathCore::vec4f(16.0f, 64.0f, 16.0f, 64.0f);
+            if (strcmp(appearance, "Bend Down") == 0)
+                result.button_radius = MathCore::vec4f(64.0f, 16.0f, 64.0f, 16.0f);
+            if (strcmp(appearance, "Round") == 0)
+                result.button_radius = MathCore::vec4f(32.0f);
+            if (strcmp(appearance, "Square") == 0)
+                result.button_radius = MathCore::vec4f(0.0f);
+
+            return result;
         }
     };
 

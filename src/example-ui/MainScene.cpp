@@ -41,19 +41,20 @@ void MainScene::applySettingsChanges()
     AppOptions::OptionsManager *options = AppOptions::OptionsManager::Instance();
 
     {
+        const char *buttonAppearance = options->getGroupValueSelectedForKey("Extra", "ButtonAppearance");
         const char *colorScheme = options->getGroupValueSelectedForKey("Extra", "ColorScheme");
         if (strcmp(colorScheme, "Blush") == 0)
-            screenManager->setColorPalette(ui::Pallete::Blush);
+            screenManager->setColorPalette(ui::Pallete::Blush.setAppearance(buttonAppearance));
         else if (strcmp(colorScheme, "Purple") == 0)
-            screenManager->setColorPalette(ui::Pallete::Purple);
+            screenManager->setColorPalette(ui::Pallete::Purple.setAppearance(buttonAppearance));
         else if (strcmp(colorScheme, "Orange") == 0)
-            screenManager->setColorPalette(ui::Pallete::Orange);
+            screenManager->setColorPalette(ui::Pallete::Orange.setAppearance(buttonAppearance));
         else if (strcmp(colorScheme, "Green") == 0)
-            screenManager->setColorPalette(ui::Pallete::Green);
+            screenManager->setColorPalette(ui::Pallete::Green.setAppearance(buttonAppearance));
         else if (strcmp(colorScheme, "Blue") == 0)
-            screenManager->setColorPalette(ui::Pallete::Blue);
+            screenManager->setColorPalette(ui::Pallete::Blue.setAppearance(buttonAppearance));
         else if (strcmp(colorScheme, "Dark") == 0)
-            screenManager->setColorPalette(ui::Pallete::Dark);
+            screenManager->setColorPalette(ui::Pallete::Dark.setAppearance(buttonAppearance));
     }
 }
 
@@ -105,7 +106,8 @@ void MainScene::bindResourcesToGraph()
                         {
                             needsRestart = localOptions->hasChanged("Video", "Resolution") ||
                                            localOptions->hasChanged("Video", "WindowMode") ||
-                                           localOptions->hasChanged("Video", "AntiAliasing");
+                                           localOptions->hasChanged("Video", "AntiAliasing") ||
+                                           localOptions->hasChanged("Extra", "ButtonAppearance");
 
                             AppOptions::OptionsManager localOptionsCopy = *localOptions;
 
