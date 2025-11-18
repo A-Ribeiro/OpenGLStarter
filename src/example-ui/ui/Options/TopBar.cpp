@@ -53,7 +53,7 @@ namespace ui
                 ui->resourceMap,
                 button_size,                                        // size
                 screenManager->colorPalette.disabled,               // color
-                MathCore::vec4f(32, 0, 0, 32),                      // radius
+                screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32, 0, 0, 32),                      // radius
                 AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
                 screenManager->colorPalette.stroke_thickness,       // stroke thickness
                 screenManager->colorPalette.disabled_stroke,        // stroke color
@@ -95,6 +95,8 @@ namespace ui
         std::string shoulder_name = (side == 0) ? "shoulder_left" : "shoulder_right";
         std::string shoulder_text = (side == 0) ? "L" : "R";
         MathCore::vec4f shoulder_border = (side == 0) ? MathCore::vec4f(32, 32, 32, 32) : MathCore::vec4f(32, 32, 32, 32);
+
+        shoulder_border = screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : shoulder_border;
 
         auto btn_ui = ui->addComponentUI(MathCore::vec2f(0, 0), 0, shoulder_name).get<AppKit::GLEngine::Components::ComponentUI>();
         shoulders.push_back(btn_ui);

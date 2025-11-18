@@ -80,15 +80,15 @@ namespace ui
         auto bg = uiComponent->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
         bg->setQuad(
             uiComponent->resourceMap,
-            box_bg_size,                                        // size
-            screenManager->colorPalette.bg,                     // color
-            MathCore::vec4f(32, 32, 32, 32),                    // radius
-            AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
-            0,                                                  // stroke thickness
-            colorFromHex("#000000", 0.0f),                      // stroke color
-            16.0f,                                              // drop shadow thickness
-            colorFromHex("#2a2a2a3d"),                          // drop shadow color
-            AppKit::GLEngine::Components::MeshUploadMode_Direct // meshUploadMode,
+            box_bg_size,                                                                                  // size
+            screenManager->colorPalette.bg,                                                               // color
+            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
+            AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
+            0,                                                                                            // stroke thickness
+            colorFromHex("#000000", 0.0f),                                                                // stroke color
+            16.0f,                                                                                        // drop shadow thickness
+            colorFromHex("#2a2a2a3d"),                                                                    // drop shadow color
+            AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
         );
 
         buttonManager.layoutVisibleElements(ButtonDirection_horizontal);
@@ -252,16 +252,16 @@ namespace ui
                                    "fade")
                         .get<AppKit::GLEngine::Components::ComponentRectangle>();
         auto bg = uiComponent->addRectangle(
-                                 MathCore::vec2f(0, 0),                              // pos
-                                 MathCore::vec2f(max_size.x, max_size.y),            // size
-                                 screenManager->colorPalette.bg,                     // color
-                                 MathCore::vec4f(32, 32, 32, 32),                    // radius
-                                 AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
-                                 0,                                                  // stroke thickness
-                                 colorFromHex("#000000", 0.0f),                      // stroke color
-                                 0,                                                  // drop shadow thickness
-                                 MathCore::vec4f(0),                                 // drop shadow color
-                                 -101,                                               // z
+                                 MathCore::vec2f(0, 0),                                                                        // pos
+                                 MathCore::vec2f(max_size.x, max_size.y),                                                      // size
+                                 screenManager->colorPalette.bg,                                                               // color
+                                 screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
+                                 AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
+                                 0,                                                                                            // stroke thickness
+                                 colorFromHex("#000000", 0.0f),                                                                // stroke color
+                                 0,                                                                                            // drop shadow thickness
+                                 MathCore::vec4f(0),                                                                           // drop shadow color
+                                 -101,                                                                                         // z
                                  "bg")
                       .get<AppKit::GLEngine::Components::ComponentRectangle>();
 

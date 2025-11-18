@@ -18,15 +18,15 @@ namespace ui
         bg->getTransform()->setLocalPosition(MathCore::vec3f(0, -top_bar_height * 0.5f, 0));
         bg->setQuad(
             uiComponent->resourceMap,
-            MathCore::vec2f(valid_size.x, valid_size.y - top_bar_height), // size
-            screenManager->colorPalette.primary,                          // color
-            MathCore::vec4f(32, 32, 32, 32),                              // radius
-            AppKit::GLEngine::Components::StrokeModeGrowInside,           // stroke mode
-            screenManager->colorPalette.stroke_thickness,                 // stroke thickness
-            screenManager->colorPalette.primary_stroke,                   // stroke color
-            0,                                                            // drop shadow thickness
-            MathCore::vec4f(0),                                           // drop shadow color
-            AppKit::GLEngine::Components::MeshUploadMode_Direct           // meshUploadMode,
+            MathCore::vec2f(valid_size.x, valid_size.y - top_bar_height),                                 // size
+            screenManager->colorPalette.primary,                                                          // color
+            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
+            AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
+            screenManager->colorPalette.stroke_thickness,                                                 // stroke thickness
+            screenManager->colorPalette.primary_stroke,                                                   // stroke color
+            0,                                                                                            // drop shadow thickness
+            MathCore::vec4f(0),                                                                           // drop shadow color
+            AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
         );
 
         if (topBar)

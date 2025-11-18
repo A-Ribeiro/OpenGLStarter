@@ -101,9 +101,9 @@ namespace AppKit
                     MathCore::vec4f radius_segment_count_f = radius * segment_factor;
                     radius_segment_count_f = MathCore::OP<MathCore::vec4f>::ceil(radius_segment_count_f) + 0.5f;
                     MathCore::vec4u radius_segment_count_i = (MathCore::vec4u)radius_segment_count_f;
-                    // for (int i = 0; i < 4; i++)
-                    //     if (radius_segment_count_i[i] == 0 && radius[i] == 0.0f)
-                    //         radius_segment_count_i[i] = segment_count_ref / 2;
+                    for (int i = 0; i < 4; i++)
+                        if (radius_segment_count_i[i] == 0 && radius[i] == 0.0f)
+                            radius_segment_count_i[i] =  (int)(32.0f * segment_factor + 0.5f);// segment_count_ref / 2;
                     return radius_segment_count_i;
                 }
             };
