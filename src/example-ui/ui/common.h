@@ -41,8 +41,7 @@ namespace ui
             AppKit::GLEngine::ResourceMap *resourceMap,
             MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
             ScreenManager *screenManager,
-            const MathCore::vec2i &size
-        ) = 0;
+            const MathCore::vec2i &size) = 0;
 
         virtual void triggerEvent(UIEventEnum event) = 0;
 
@@ -50,65 +49,66 @@ namespace ui
     };
 
     // Simple compile-time color structure for const variables
-    struct Color {
+    struct Color
+    {
         float r, g, b, a;
-        
+
         constexpr Color()
             : r(0), g(0), b(0), a(1) {}
 
-        constexpr Color(float r, float g, float b, float a = 1.0f) 
+        constexpr Color(float r, float g, float b, float a = 1.0f)
             : r(r), g(g), b(b), a(a) {}
-        
+
         // Implicit conversion to vec4f
-        operator MathCore::vec4f() const {
+        operator MathCore::vec4f() const
+        {
             return MathCore::vec4f(r, g, b, a);
         }
     };
 
     // Helper function to convert hex digit to integer
-    static constexpr int hexDigitToInt(char c) {
-        return (c >= '0' && c <= '9') ? (c - '0') :
-               (c >= 'A' && c <= 'F') ? (c - 'A' + 10) :
-               (c >= 'a' && c <= 'f') ? (c - 'a' + 10) :
-               -1; // Invalid hex digit
+    static constexpr int hexDigitToInt(char c)
+    {
+        return (c >= '0' && c <= '9') ? (c - '0') : (c >= 'A' && c <= 'F') ? (c - 'A' + 10)
+                                                : (c >= 'a' && c <= 'f')   ? (c - 'a' + 10)
+                                                                           : -1; // Invalid hex digit
     }
-    
+
     // Helper function to convert two hex digits to byte value
-    static constexpr int hexToInt(char high, char low) {
-        return (hexDigitToInt(high) == -1 || hexDigitToInt(low) == -1) ? 
-               -1 : 
-               (hexDigitToInt(high) * 16 + hexDigitToInt(low));
+    static constexpr int hexToInt(char high, char low)
+    {
+        return (hexDigitToInt(high) == -1 || hexDigitToInt(low) == -1) ? -1 : (hexDigitToInt(high) * 16 + hexDigitToInt(low));
     }
-    
+
     // Helper function to count string length at compile time
-    static constexpr int constexpr_strlen(const char* str) {
+    static constexpr int constexpr_strlen(const char *str)
+    {
         return (*str == '\0') ? 0 : (1 + constexpr_strlen(str + 1));
     }
-    
-    static constexpr Color colorFromHex(const char* hex, float alpha = 1.0f)
+
+    static constexpr Color colorFromHex(const char *hex, float alpha = 1.0f)
     {
         // Basic validation - hex must start with # and be 7 or 9 characters
-        return (!hex || hex[0] != '#') ? 
-               Color(0.0f, 0.0f, 0.0f, alpha) : // Return black on error
-               
-               // Check length
-               (constexpr_strlen(hex) != 7 && constexpr_strlen(hex) != 9) ?
-               Color(0.0f, 0.0f, 0.0f, alpha) : // Return black on error
-               
-               // Parse RGB components
-               (hexToInt(hex[1], hex[2]) == -1 || 
-                hexToInt(hex[3], hex[4]) == -1 || 
-                hexToInt(hex[5], hex[6]) == -1) ?
-               Color(0.0f, 0.0f, 0.0f, alpha) : // Return black on error
-               
-               // Valid color - construct with alpha handling
-               Color(hexToInt(hex[1], hex[2]) / 255.0f,
-                     hexToInt(hex[3], hex[4]) / 255.0f,
-                     hexToInt(hex[5], hex[6]) / 255.0f,
-                     (constexpr_strlen(hex) == 9 && hexToInt(hex[7], hex[8]) != -1) ?
-                     (hexToInt(hex[7], hex[8]) / 255.0f) : alpha);
+        return (!hex || hex[0] != '#') ? Color(0.0f, 0.0f, 0.0f, alpha) : // Return black on error
+
+                   // Check length
+                   (constexpr_strlen(hex) != 7 && constexpr_strlen(hex) != 9) ? Color(0.0f, 0.0f, 0.0f, alpha)
+                                                                              : // Return black on error
+
+                   // Parse RGB components
+                   (hexToInt(hex[1], hex[2]) == -1 ||
+                    hexToInt(hex[3], hex[4]) == -1 ||
+                    hexToInt(hex[5], hex[6]) == -1)
+                   ? Color(0.0f, 0.0f, 0.0f, alpha)
+                   : // Return black on error
+
+                   // Valid color - construct with alpha handling
+                   Color(hexToInt(hex[1], hex[2]) / 255.0f,
+                         hexToInt(hex[3], hex[4]) / 255.0f,
+                         hexToInt(hex[5], hex[6]) / 255.0f,
+                         (constexpr_strlen(hex) == 9 && hexToInt(hex[7], hex[8]) != -1) ? (hexToInt(hex[7], hex[8]) / 255.0f) : alpha);
     }
-    
+
     // Convenience overload for std::string (not constexpr) - returns vec4f directly
     static MathCore::vec4f colorFromHex(const std::string &hex, float alpha = 1.0f)
     {
@@ -116,8 +116,8 @@ namespace ui
         return color; // Uses implicit conversion
     }
 
-
-    struct ColorPalette {
+    struct ColorPalette
+    {
         float stroke_thickness;
 
         Color bg;
@@ -137,17 +137,22 @@ namespace ui
         Color scroll_gradient;
 
         MathCore::vec4f button_radius;
+        bool button_radius_squared;
 
-        MathCore::vec4f lrp_active(float active_lrp) const {
+        MathCore::vec4f lrp_active(float active_lrp) const
+        {
             return MathCore::OP<MathCore::vec4f>::lerp(primary, active, active_lrp);
         }
-        MathCore::vec4f lrp_active_stroke(float active_lrp) const {
+        MathCore::vec4f lrp_active_stroke(float active_lrp) const
+        {
             return MathCore::OP<MathCore::vec4f>::lerp(primary_stroke, active_stroke, active_lrp);
         }
 
-        ColorPalette setAppearance(const char *appearance) const {
+        ColorPalette setAppearance(const char *appearance) const
+        {
             ColorPalette result = *this;
             result.button_radius = MathCore::vec4f(32.0f);
+            result.button_radius_squared = false;
 
             // "Bend Up", "Bend Down", "Round", "Square"
             if (strcmp(appearance, "Bend Up") == 0)
@@ -157,7 +162,18 @@ namespace ui
             if (strcmp(appearance, "Round") == 0)
                 result.button_radius = MathCore::vec4f(32.0f);
             if (strcmp(appearance, "Square") == 0)
+            {
                 result.button_radius = MathCore::vec4f(0.0f);
+                result.button_radius_squared = true;
+            }
+            if (strcmp(appearance, "Tip Front") == 0)
+                result.button_radius = MathCore::vec4f(32.0f, 32.0f, 0.0f, 0.0f);
+            if (strcmp(appearance, "Tip Back") == 0)
+                result.button_radius = MathCore::vec4f(0.0f, 0.0f, 32.0f, 32.0f);
+            if (strcmp(appearance, "Tip Up") == 0)
+                result.button_radius = MathCore::vec4f(32.0f, 0.0f, 0.0f, 32.0f);
+            if (strcmp(appearance, "Tip Down") == 0)
+                result.button_radius = MathCore::vec4f(0.0f, 32.0f, 32.0f, 0.0f);
 
             return result;
         }

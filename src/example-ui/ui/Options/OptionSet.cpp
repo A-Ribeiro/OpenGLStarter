@@ -211,9 +211,9 @@ namespace ui
         txt->setMask(itemDefinition.ui->resourceMap, screenManager->camera, mask);
     }
 
-    void OptionSet::updateOption(const std::string &option, const std::vector<std::string> &choices, const std::string &selected) 
+    void OptionSet::updateOption(const std::string &option, const std::vector<std::string> &choices, const std::string &selected)
     {
-        auto& itemDefinition = getItemByOptionName(option);
+        auto &itemDefinition = getItemByOptionName(option);
 
         itemDefinition.choices = choices;
         auto sel_it = std::find(choices.begin(), choices.end(), selected);
@@ -232,7 +232,6 @@ namespace ui
         if (itemDefinition.onChange)
             itemDefinition.onChange(itemDefinition.selected);
     }
-
 
     OptionSet::ItemDefinition &OptionSet::getItemByOptionName(const std::string &option)
     {
@@ -283,29 +282,29 @@ namespace ui
 
             bg.get<AppKit::GLEngine::Components::ComponentRectangle>()->setQuad(
                 ui->resourceMap,
-                option_sel_bg_size,                                                                    // size
-                (MathCore::vec4f)screenManager->colorPalette.primary * MathCore::vec4f(1, 1, 1, 0.4f), // color
-                MathCore::vec4f(16),                                                                   // radius
-                AppKit::GLEngine::Components::StrokeModeGrowInside,                                    // stroke mode
-                screenManager->colorPalette.stroke_thickness,                                          // stroke thickness
-                screenManager->colorPalette.primary_stroke,                                            // stroke color
-                0,                                                                                     // drop shadow thickness
-                MathCore::vec4f(0),                                                                    // drop shadow color
-                AppKit::GLEngine::Components::MeshUploadMode_Direct                                    // meshUploadMode,
+                option_sel_bg_size,                                                                           // size
+                (MathCore::vec4f)screenManager->colorPalette.primary * MathCore::vec4f(1, 1, 1, 0.4f),        // color
+                screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(16), // radius
+                AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
+                screenManager->colorPalette.stroke_thickness,                                                 // stroke thickness
+                screenManager->colorPalette.primary_stroke,                                                   // stroke color
+                0,                                                                                            // drop shadow thickness
+                MathCore::vec4f(0),                                                                           // drop shadow color
+                AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
             );
         }
 
         selection_rect->setQuad(
             ui->resourceMap,
-            MathCore::vec2f(valid_size.x, ScreenOptions::item_height), // size
-            screenManager->colorPalette.active,                        // color
-            MathCore::vec4f(32, 32, 32, 32),                           // radius
-            AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
-            screenManager->colorPalette.stroke_thickness,              // stroke thickness
-            screenManager->colorPalette.active_stroke,                 // stroke color
-            0,                                                         // drop shadow thickness
-            MathCore::vec4f(0),                                        // drop shadow color
-            AppKit::GLEngine::Components::MeshUploadMode_Direct        // meshUploadMode,
+            MathCore::vec2f(valid_size.x, ScreenOptions::item_height),                                                // size
+            screenManager->colorPalette.active,                                                                       // color
+            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32, 32, 32, 32), // radius
+            AppKit::GLEngine::Components::StrokeModeGrowInside,                                                       // stroke mode
+            screenManager->colorPalette.stroke_thickness,                                                             // stroke thickness
+            screenManager->colorPalette.active_stroke,                                                                // stroke color
+            0,                                                                                                        // drop shadow thickness
+            MathCore::vec4f(0),                                                                                       // drop shadow color
+            AppKit::GLEngine::Components::MeshUploadMode_Direct                                                       // meshUploadMode,
         );
 
         // printf("Selection Percent: %f\n", get_selection_percentagem_related_to_valid_area());
@@ -324,15 +323,15 @@ namespace ui
 
             rect.get<AppKit::GLEngine::Components::ComponentRectangle>()->setQuad(
                 ui->resourceMap,
-                MathCore::vec2f(valid_size.x, ScreenOptions::item_height), // size
-                MathCore::vec4f(0, 0, 0, 0.4f),                            // color
-                MathCore::vec4f(32, 0, 0, 32),                             // radius
-                AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
-                screenManager->colorPalette.stroke_thickness,              // stroke thickness
-                screenManager->colorPalette.active_stroke,                 // stroke color
-                0,                                                         // drop shadow thickness
-                MathCore::vec4f(0),                                        // drop shadow color
-                AppKit::GLEngine::Components::MeshUploadMode_Direct        // meshUploadMode,
+                MathCore::vec2f(valid_size.x, ScreenOptions::item_height),                                              // size
+                MathCore::vec4f(0, 0, 0, 0.4f),                                                                         // color
+                screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32, 0, 0, 32), // radius
+                AppKit::GLEngine::Components::StrokeModeGrowInside,                                                     // stroke mode
+                screenManager->colorPalette.stroke_thickness,                                                           // stroke thickness
+                screenManager->colorPalette.active_stroke,                                                              // stroke color
+                0,                                                                                                      // drop shadow thickness
+                MathCore::vec4f(0),                                                                                     // drop shadow color
+                AppKit::GLEngine::Components::MeshUploadMode_Direct                                                     // meshUploadMode,
             );
 
             rect.get<AppKit::GLEngine::Components::ComponentRectangle>()->setLinearColorVertical(
@@ -348,15 +347,15 @@ namespace ui
 
             rect.get<AppKit::GLEngine::Components::ComponentRectangle>()->setQuad(
                 ui->resourceMap,
-                MathCore::vec2f(valid_size.x, ScreenOptions::item_height), // size
-                MathCore::vec4f(0, 0, 0, 0.4f),                            // color
-                MathCore::vec4f(0, 32, 32, 0),                             // radius
-                AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
-                screenManager->colorPalette.stroke_thickness,              // stroke thickness
-                screenManager->colorPalette.active_stroke,                 // stroke color
-                0,                                                         // drop shadow thickness
-                MathCore::vec4f(0),                                        // drop shadow color
-                AppKit::GLEngine::Components::MeshUploadMode_Direct        // meshUploadMode,
+                MathCore::vec2f(valid_size.x, ScreenOptions::item_height),                                              // size
+                MathCore::vec4f(0, 0, 0, 0.4f),                                                                         // color
+                screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(0, 32, 32, 0), // radius
+                AppKit::GLEngine::Components::StrokeModeGrowInside,                                                     // stroke mode
+                screenManager->colorPalette.stroke_thickness,                                                           // stroke thickness
+                screenManager->colorPalette.active_stroke,                                                              // stroke color
+                0,                                                                                                      // drop shadow thickness
+                MathCore::vec4f(0),                                                                                     // drop shadow color
+                AppKit::GLEngine::Components::MeshUploadMode_Direct                                                     // meshUploadMode,
             );
 
             rect.get<AppKit::GLEngine::Components::ComponentRectangle>()->setLinearColorVertical(
@@ -368,7 +367,8 @@ namespace ui
         set_selected_rect_pos();
     }
 
-    void OptionSet::update_option_text(OptionSet::ItemDefinition &item) {
+    void OptionSet::update_option_text(OptionSet::ItemDefinition &item)
+    {
         auto engine = AppKit::GLEngine::Engine::Instance();
 
         item.ui->getItemByName("option-text").get<AppKit::GLEngine::Components::ComponentFont>()->setText( //
