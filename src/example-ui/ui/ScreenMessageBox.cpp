@@ -84,8 +84,8 @@ namespace ui
             screenManager->colorPalette.bg,                                                               // color
             screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
-            0,                                                                                            // stroke thickness
-            colorFromHex("#000000", 0.0f),                                                                // stroke color
+            screenManager->colorPalette.messagebox_stroke_thickness,                                                 // stroke thickness
+            screenManager->colorPalette.bg_stroke,                                                        // stroke color
             16.0f,                                                                                        // drop shadow thickness
             colorFromHex("#2a2a2a3d"),                                                                    // drop shadow color
             AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,

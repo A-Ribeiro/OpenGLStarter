@@ -118,9 +118,14 @@ namespace ui
 
     struct ColorPalette
     {
-        float stroke_thickness;
+        float avatar_stroke_thickness;
+        float dialog_stroke_thickness;
+        float options_stroke_thickness;
+        float messagebox_stroke_thickness;
+        float button_stroke_thickness;
 
         Color bg;
+        Color bg_stroke;
 
         Color primary;
         Color primary_stroke;

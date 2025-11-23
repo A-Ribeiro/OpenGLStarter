@@ -22,7 +22,7 @@ namespace ui
             screenManager->colorPalette.primary,                                                          // color
             screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
-            screenManager->colorPalette.stroke_thickness,                                                 // stroke thickness
+            screenManager->colorPalette.options_stroke_thickness,                                                 // stroke thickness
             screenManager->colorPalette.primary_stroke,                                                   // stroke color
             0,                                                                                            // drop shadow thickness
             MathCore::vec4f(0),                                                                           // drop shadow color
@@ -183,7 +183,7 @@ namespace ui
                                    screenManager->colorPalette.primary,                          // color
                                    MathCore::vec4f(0, 32, 32, 0),                                // radius
                                    AppKit::GLEngine::Components::StrokeModeGrowInside,           // stroke mode
-                                   screenManager->colorPalette.stroke_thickness,                 // stroke thickness
+                                   screenManager->colorPalette.options_stroke_thickness,                 // stroke thickness
                                    screenManager->colorPalette.primary_stroke,                   // stroke color
                                    0,                                                            // drop shadow thickness
                                    MathCore::vec4f(0),                                           // drop shadow color

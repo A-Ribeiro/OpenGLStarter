@@ -31,7 +31,7 @@ namespace ui
                                screenManager->colorPalette.active,                        // color
                                MathCore::vec4f(32, 32, 32, 32),                           // radius
                                AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
-                               screenManager->colorPalette.stroke_thickness,              // stroke thickness
+                               screenManager->colorPalette.options_stroke_thickness,              // stroke thickness
                                screenManager->colorPalette.active_stroke,                 // stroke color
                                0,                                                         // drop shadow thickness
                                MathCore::vec4f(0),                                        // drop shadow color
@@ -46,7 +46,7 @@ namespace ui
                           MathCore::vec4f(0, 0, 0, 0.4f),                            // color
                           MathCore::vec4f(32, 0, 0, 32),                             // radius
                           AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
-                          screenManager->colorPalette.stroke_thickness,              // stroke thickness
+                          screenManager->colorPalette.options_stroke_thickness,              // stroke thickness
                           screenManager->colorPalette.active_stroke,                 // stroke color
                           0,                                                         // drop shadow thickness
                           MathCore::vec4f(0),                                        // drop shadow color
@@ -61,7 +61,7 @@ namespace ui
                      MathCore::vec4f(0, 0, 0, 0.4f),                            // color
                      MathCore::vec4f(0, 32, 32, 0),                             // radius
                      AppKit::GLEngine::Components::StrokeModeGrowInside,        // stroke mode
-                     screenManager->colorPalette.stroke_thickness,              // stroke thickness
+                     screenManager->colorPalette.options_stroke_thickness,              // stroke thickness
                      screenManager->colorPalette.active_stroke,                 // stroke color
                      0,                                                         // drop shadow thickness
                      MathCore::vec4f(0),                                        // drop shadow color
@@ -141,7 +141,7 @@ namespace ui
                                          (MathCore::vec4f)screenManager->colorPalette.primary * MathCore::vec4f(1, 1, 1, 0.4f), // color
                                          MathCore::vec4f(16),                                                                   // radius
                                          AppKit::GLEngine::Components::StrokeModeGrowInside,                                    // stroke mode
-                                         screenManager->colorPalette.stroke_thickness,                                          // stroke thickness
+                                         screenManager->colorPalette.options_stroke_thickness,                                          // stroke thickness
                                          screenManager->colorPalette.primary_stroke,                                            // stroke color
                                          0,                                                                                     // drop shadow thickness
                                          MathCore::vec4f(0),                                                                    // drop shadow color
@@ -286,7 +286,7 @@ namespace ui
                 (MathCore::vec4f)screenManager->colorPalette.primary * MathCore::vec4f(1, 1, 1, 0.4f),        // color
                 screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(16), // radius
                 AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
-                screenManager->colorPalette.stroke_thickness,                                                 // stroke thickness
+                screenManager->colorPalette.options_stroke_thickness,                                                 // stroke thickness
                 screenManager->colorPalette.primary_stroke,                                                   // stroke color
                 0,                                                                                            // drop shadow thickness
                 MathCore::vec4f(0),                                                                           // drop shadow color
@@ -300,7 +300,7 @@ namespace ui
             screenManager->colorPalette.active,                                                                       // color
             screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32, 32, 32, 32), // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                                       // stroke mode
-            screenManager->colorPalette.stroke_thickness,                                                             // stroke thickness
+            screenManager->colorPalette.options_stroke_thickness,                                                             // stroke thickness
             screenManager->colorPalette.active_stroke,                                                                // stroke color
             0,                                                                                                        // drop shadow thickness
             MathCore::vec4f(0),                                                                                       // drop shadow color
@@ -327,7 +327,7 @@ namespace ui
                 MathCore::vec4f(0, 0, 0, 0.4f),                                                                         // color
                 screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32, 0, 0, 32), // radius
                 AppKit::GLEngine::Components::StrokeModeGrowInside,                                                     // stroke mode
-                screenManager->colorPalette.stroke_thickness,                                                           // stroke thickness
+                screenManager->colorPalette.options_stroke_thickness,                                                           // stroke thickness
                 screenManager->colorPalette.active_stroke,                                                              // stroke color
                 0,                                                                                                      // drop shadow thickness
                 MathCore::vec4f(0),                                                                                     // drop shadow color
@@ -351,7 +351,7 @@ namespace ui
                 MathCore::vec4f(0, 0, 0, 0.4f),                                                                         // color
                 screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(0, 32, 32, 0), // radius
                 AppKit::GLEngine::Components::StrokeModeGrowInside,                                                     // stroke mode
-                screenManager->colorPalette.stroke_thickness,                                                           // stroke thickness
+                screenManager->colorPalette.options_stroke_thickness,                                                           // stroke thickness
                 screenManager->colorPalette.active_stroke,                                                              // stroke color
                 0,                                                                                                      // drop shadow thickness
                 MathCore::vec4f(0),                                                                                     // drop shadow color

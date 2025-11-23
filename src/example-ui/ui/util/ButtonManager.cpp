@@ -37,7 +37,7 @@ namespace ui
                 screenManager->colorPalette.primary,                // color
                 screenManager->colorPalette.button_radius,          // radius
                 AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
-                screenManager->colorPalette.stroke_thickness,       // stroke thickness
+                screenManager->colorPalette.button_stroke_thickness,       // stroke thickness
                 screenManager->colorPalette.primary_stroke,         // stroke color
                 0,                                                  // drop shadow thickness
                 MathCore::vec4f(0),                                 // drop shadow color
