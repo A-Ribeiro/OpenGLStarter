@@ -100,18 +100,53 @@ namespace ui
         auto avatar_box = node_ui->getItemByName("avatar_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
         auto continue_box = node_ui->getItemByName("continue_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
 
+        MathCore::vec2f max_box_size = (MathCore::vec2f)size - 2.0f * screen_margin;
+        max_box_size = MathCore::OP<MathCore::vec2f>::maximum(0, max_box_size);
+        float reserved_height = text_margin * 2.0f;
+        max_box_size.y = (reserved_height < max_box_size.y) ? reserved_height : max_box_size.y;
+
         main_box->setQuad(
             node_ui->resourceMap,
-            MathCore::vec2f(size.x, size.y),                    // size
-            colorFromHex("#000000", 0.4f),                      // color
-            MathCore::vec4f(0, 0, 0, 0),                        // radius
-            AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
-            0,                                                  // stroke thickness
-            colorFromHex("#000000", 0.0f),                      // stroke color
-            0,                                                  // drop shadow thickness
-            MathCore::vec4f(0),                                 // drop shadow color
-            AppKit::GLEngine::Components::MeshUploadMode_Direct // meshUploadMode,
+            max_box_size,                                                                                 // size
+            screenManager->colorPalette.bg,                                                               // color
+            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
+            AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
+            screenManager->colorPalette.dialog_stroke_thickness,                                          // stroke thickness
+            screenManager->colorPalette.bg_stroke,                                                        // stroke color
+            0,                                                                                            // drop shadow thickness
+            MathCore::vec4f(0),                                                                           // drop shadow color
+            AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
         );
+
+
+        avatar_box->setQuad(
+            node_ui->resourceMap,
+            MathCore::vec2f(avatar_size),                                                                                 // size
+            screenManager->colorPalette.primary,                                                               // color
+            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
+            AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
+            screenManager->colorPalette.avatar_stroke_thickness,                                          // stroke thickness
+            screenManager->colorPalette.primary_stroke,                                                        // stroke color
+            0,                                                                                            // drop shadow thickness
+            MathCore::vec4f(0),                                                                           // drop shadow color
+            AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
+        );
+
+
+        continue_box->setQuad(
+            node_ui->resourceMap,
+            MathCore::vec2f(continue_button_size),                                                                                 // size
+            screenManager->colorPalette.primary,                                                               // color
+            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
+            AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
+            screenManager->colorPalette.avatar_stroke_thickness,                                          // stroke thickness
+            screenManager->colorPalette.primary_stroke,                                                        // stroke color
+            0,                                                                                            // drop shadow thickness
+            MathCore::vec4f(0),                                                                           // drop shadow color
+            AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
+        );
+        
+
     }
 
     CollisionCore::AABB<MathCore::vec3f> InGameDialog::computeAABB()
