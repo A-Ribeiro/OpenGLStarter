@@ -145,7 +145,51 @@ namespace ui
             MathCore::vec4f(0),                                                                           // drop shadow color
             AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
         );
+
+        MathCore::vec2f avatar_offset = MathCore::vec2f(
+            -max_box_size.x * 0.5f + avatar_size * 0.5f,
+            max_box_size.y * 0.5f + avatar_size * 0.5f
+        );
+
+        MathCore::vec2f continue_offset = MathCore::vec2f(
+            max_box_size.x * 0.5f - continue_button_size * 0.5f,
+            -max_box_size.y * 0.5f - continue_button_size * 0.5f
+        );
+
+        CollisionCore::AABB<MathCore::vec3f> aabb_main_box = CollisionCore::AABB<MathCore::vec3f>(
+            -max_box_size * 0.5f,
+            max_box_size * 0.5f
+        );
+
+        CollisionCore::AABB<MathCore::vec3f> aabb_avatar_box = CollisionCore::AABB<MathCore::vec3f>(
+            -MathCore::vec2f(avatar_size) * 0.5f + avatar_offset,
+            MathCore::vec2f(avatar_size) * 0.5f + avatar_offset
+        );
+
+        CollisionCore::AABB<MathCore::vec3f> aabb_continue_box = CollisionCore::AABB<MathCore::vec3f>(
+            -MathCore::vec2f(continue_button_size) * 0.5f + continue_offset,
+            MathCore::vec2f(continue_button_size) * 0.5f + continue_offset
+        );
+
+
+        avatar_box->getTransform()->setLocalPosition(MathCore::vec3f(
+            avatar_offset.x,
+            avatar_offset.y,
+            -10.0f
+        ));
+
+        continue_box->getTransform()->setLocalPosition(MathCore::vec3f(
+            continue_offset.x,
+            continue_offset.y,
+            -10.0f
+        ));
         
+
+        node_ui->getTransform()->setLocalPosition(MathCore::vec3f(
+            0.0f,
+            -size.y * 0.5f + screen_margin + max_box_size.y * 0.5f,
+            0.0f
+        ));
 
     }
 
