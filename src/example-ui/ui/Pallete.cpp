@@ -6,13 +6,13 @@ namespace ui
     namespace Pallete
     {
         const ColorPalette Blush{
-            5.0f,                          // float avatar_stroke_thickness;
+            7.0f,                          // float avatar_stroke_thickness;
             0.0f,                          // float dialog_stroke_thickness;
             0.0f,                          // float options_stroke_thickness;
             0.0f,                          // float messagebox_stroke_thickness;
             0.0f,                          // float button_stroke_thickness;
-            colorFromHex("#9e9ed9", 1.0f), // Color bg;
-            colorFromHex("#7e7ea9", 1.0f), // Color bg_stroke
+            colorFromHex("#8e8ec2ff", 1.0f), // Color bg;
+            colorFromHex("#6c6c92ff", 1.0f), // Color bg_stroke
             colorFromHex("#bbbbff", 1.0f), // Color primary;
             colorFromHex("#610081", 1.0f), // Color primary_stroke;
             colorFromHex("#6192d1", 1.0f), // Color active;
@@ -25,13 +25,13 @@ namespace ui
         };
 
         const ColorPalette Purple{
-            5.0f,                          // float avatar_stroke_thickness;
+            7.0f,                          // float avatar_stroke_thickness;
             0.0f,                          // float dialog_stroke_thickness;
             0.0f,                          // float options_stroke_thickness;
             0.0f,                          // float messagebox_stroke_thickness;
             0.0f,                          // float button_stroke_thickness;
-            colorFromHex("#a78bfa", 1.0f), // bg
-            colorFromHex("#7c3aed", 1.0f), // bg_stroke
+            colorFromHex("#7c3aed", 1.0f), // bg
+            colorFromHex("#5729a7ff", 1.0f), // bg_stroke
             colorFromHex("#a78bfa", 1.0f), // primary
             colorFromHex("#6d28d9", 1.0f), // primary_stroke
             colorFromHex("#c4b5fd", 1.0f), // active
@@ -44,13 +44,13 @@ namespace ui
         };
 
         const ColorPalette Orange{
-            5.0f,                          // float avatar_stroke_thickness;
+            7.0f,                          // float avatar_stroke_thickness;
             0.0f,                          // float dialog_stroke_thickness;
             0.0f,                          // float options_stroke_thickness;
             0.0f,                          // float messagebox_stroke_thickness;
             0.0f,                          // float button_stroke_thickness;
-            colorFromHex("#fdba74", 1.0f), // bg
-            colorFromHex("#fb923c", 1.0f), // bg_stroke
+            colorFromHex("#fb923c", 1.0f), // bg
+            colorFromHex("#bc6c2aff", 1.0f), // bg_stroke
             colorFromHex("#fdba74", 1.0f), // primary
             colorFromHex("#ea580c", 1.0f), // primary_stroke
             colorFromHex("#ffedd5", 1.0f), // active
@@ -63,13 +63,13 @@ namespace ui
         };
 
         const ColorPalette Green{
-            5.0f,                           // float avatar_stroke_thickness;
+            7.0f,                           // float avatar_stroke_thickness;
             0.0f,                           // float dialog_stroke_thickness;
             0.0f,                           // float options_stroke_thickness;
             0.0f,                           // float messagebox_stroke_thickness;
             0.0f,                           // float button_stroke_thickness;
-            colorFromHex("#4ade80", 1.0f),  // bg
-            colorFromHex("#22c55e", 1.0f),  // bg_stroke
+            colorFromHex("#22c55e", 1.0f),  // bg
+            colorFromHex("#199246ff", 1.0f),  // bg_stroke
             colorFromHex("#4ade80", 1.0f),  // primary
             colorFromHex("#16a34a", 1.0f),  // primary_stroke
             colorFromHex("#bbf7d0", 1.0f),  // active
@@ -82,13 +82,13 @@ namespace ui
         };
 
         const ColorPalette Blue{
-            5.0f,                          // float avatar_stroke_thickness;
+            7.0f,                          // float avatar_stroke_thickness;
             0.0f,                          // float dialog_stroke_thickness;
             0.0f,                          // float options_stroke_thickness;
             0.0f,                          // float messagebox_stroke_thickness;
             0.0f,                          // float button_stroke_thickness;
-            colorFromHex("#2563ebff"),     // bg
-            colorFromHex("#1e40af", 1.0f), // bg_stroke
+            colorFromHex("#1e40af"),     // bg
+            colorFromHex("#152d7bff", 1.0f), // bg_stroke
             colorFromHex("#60a5fa", 1.0f), // primary
             colorFromHex("#1d4ed8", 1.0f), // primary_stroke
             colorFromHex("#dbeafe", 1.0f), // active
@@ -101,7 +101,7 @@ namespace ui
         };
 
         const ColorPalette Dark{
-            5.0f,                          // float avatar_stroke_thickness;
+            7.0f,                          // float avatar_stroke_thickness;
             0.0f,                          // float dialog_stroke_thickness;
             0.0f,                          // float options_stroke_thickness;
             0.0f,                          // float messagebox_stroke_thickness;
