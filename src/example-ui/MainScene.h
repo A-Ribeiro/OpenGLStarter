@@ -14,6 +14,7 @@
 #include "./ui/ScreenMain.h"
 #include "./ui/ScreenOptions.h"
 #include "./ui/ScreenMessageBox.h"
+#include "./ui/ScreenHUD.h"
 
 class App;
 

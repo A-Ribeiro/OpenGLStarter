@@ -139,7 +139,7 @@ namespace ui
             screenManager->colorPalette.primary,                                                               // color
             screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
-            screenManager->colorPalette.avatar_stroke_thickness,                                          // stroke thickness
+            screenManager->colorPalette.dialog_stroke_thickness,                                          // stroke thickness
             screenManager->colorPalette.primary_stroke,                                                        // stroke color
             0,                                                                                            // drop shadow thickness
             MathCore::vec4f(0),                                                                           // drop shadow color
@@ -178,13 +178,22 @@ namespace ui
         DialogTextModeType mode,
         const std::string &rich_message,
         const std::string &rich_continue_char,
-
-        EventCore::Callback<void(const std::string &)> onContinuePressed)
+        
+        EventCore::Callback<void()> onAppeared,
+        EventCore::Callback<void()> onContinuePressed)
     {
+        createAllComponents();
+        layoutVisibleElements(screenManager->current_size);
+        node_ui->getTransform()->skip_traversing = false;
+        onAppeared();
     }
 
-    void InGameDialog::hideDialog(DialogAppearModeType appear_mode)
+    void InGameDialog::hideDialog(DialogAppearModeType appear_mode,
+        EventCore::Callback<void()> onDisapeared)
     {
+        node_ui->getTransform()->skip_traversing = true;
+        releaseAllComponents();
+        onDisapeared();
     }
 
     void InGameDialog::resetColors()

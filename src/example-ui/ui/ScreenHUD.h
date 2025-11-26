@@ -19,7 +19,7 @@ namespace ui
         void onOsciloscopeSinLerp(Platform::Time *elapsed, float osciloscope, float sin);
 
     public:
-        static constexpr float avatar_size = 256;
+        static constexpr float avatar_size = 180;
         static constexpr float continue_button_size = 64;
 
         static constexpr float text_size = 32;

@@ -28,15 +28,37 @@ namespace ui
                 printf("[ScreenManager] Screen %s not found\n", name);
                 return nullptr;
             }
+            // for (auto &item : screen_stack)
+            // {
+            //     if (item->name().compare(name) == 0)
+            //     {
+            //         printf("[ScreenManager] Screen %s already in stack\n", name);
+            //         return nullptr;
+            //     }
+            // }
+            return (T *)it->second.get();
+        }
+
+
+        template <typename T>
+        bool screenIsVisible()
+        {
+            const char *name = T::Name;
+            // auto it = screen_map.find(name);
+            // if (it == screen_map.end())
+            // {
+            //     printf("[ScreenManager] Screen %s not found\n", name);
+            //     return nullptr;
+            // }
             for (auto &item : screen_stack)
             {
                 if (item->name().compare(name) == 0)
                 {
-                    printf("[ScreenManager] Screen %s already in stack\n", name);
-                    return nullptr;
+                    return true;
                 }
             }
-            return (T *)it->second.get();
+            // return (T *)it->second.get();
+            return false;
         }
 
         bool screen_in_top_byName(const std::string &name) const;
