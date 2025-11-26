@@ -75,6 +75,7 @@ void MainScene::bindResourcesToGraph()
     screens.push_back(STL_Tools::make_unique<ui::ScreenMain>());
     screens.push_back(STL_Tools::make_unique<ui::ScreenOptions>());
     screens.push_back(STL_Tools::make_unique<ui::ScreenMessageBox>());
+    screens.push_back(STL_Tools::make_unique<ui::ScreenHUD>());
 
     applySettingsChanges();
 
@@ -90,7 +91,31 @@ void MainScene::bindResourcesToGraph()
         {
             if (option == "New Game")
             {
-                screenManager->close_all();
+                // screenManager->close_all();
+                screenManager->open_screen("ScreenHUD");
+                screenManager->screen<ui::ScreenHUD>()->inGameDialog.showDialog(
+                    ui::DialogAppearModeType_Scroll,
+                    ui::DialogAvatarSideType_Left,
+                    "avatar_knight",
+                    ui::DialogTextModeType_CharAppear,
+                    "Welcome to the <b>Example UI</b> demo!\nThis is a simple dialog box with <i>rich text</i> support.\n\nPress the <b>Continue</b> button to proceed.",
+                    "<b>Continue</b>",
+                    [&]()
+                    {
+                        // Dialog appeared callback
+                    },
+                    [&]()
+                    {
+                        // Dialog continue pressed
+                        screenManager->screen<ui::ScreenHUD>()->inGameDialog.hideDialog(
+                            ui::DialogAppearModeType_Scroll,
+                            [&]()
+                            {
+                                screenManager->open_screen("ScreenMain");
+                                // screenManager->close_all();
+                                // Dialog disapear callback
+                            });
+                    });
             }
             else if (option == "Options")
             {
@@ -198,10 +223,25 @@ void MainScene::unloadAll()
 
 void MainScene::update(Platform::Time *elapsed)
 {
+    bool HUD_visible = screenManager->screenIsVisible<ui::ScreenHUD>();
     while (uiCommands.size() > 0)
     {
         auto command = uiCommands.dequeue(nullptr, true);
+        
         screenManager->triggerEvent(command);
+
+        if (HUD_visible && command == ui::UIEvent_InputActionBack)
+        {
+            // Hide HUD on back
+            screenManager->screen<ui::ScreenHUD>()->inGameDialog.hideDialog(
+                ui::DialogAppearModeType_Scroll,
+                [&]()
+                {
+                    screenManager->open_screen("ScreenMain");
+                });
+        }
+
+
     }
 
     screenManager->update(elapsed);

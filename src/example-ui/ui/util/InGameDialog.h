@@ -87,9 +87,11 @@ namespace ui
             const std::string &rich_message,
             const std::string &rich_continue_char,
 
-            EventCore::Callback<void(const std::string &)> onContinuePressed);
+            EventCore::Callback<void()> onAppeared,
+            EventCore::Callback<void()> onContinuePressed);
 
-        void hideDialog(DialogAppearModeType appear_mode);
+        void hideDialog(DialogAppearModeType appear_mode,
+            EventCore::Callback<void()> onDisapeared);
 
         void resetColors();
     };
