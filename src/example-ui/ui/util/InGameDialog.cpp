@@ -109,7 +109,7 @@ namespace ui
             node_ui->resourceMap,
             max_box_size,                                                                                 // size
             screenManager->colorPalette.bg,                                                               // color
-            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
+            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(16), // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
             screenManager->colorPalette.dialog_stroke_thickness,                                          // stroke thickness
             screenManager->colorPalette.bg_stroke,                                                        // stroke color
@@ -123,7 +123,7 @@ namespace ui
             node_ui->resourceMap,
             MathCore::vec2f(avatar_size),                                                                                 // size
             screenManager->colorPalette.primary,                                                               // color
-            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
+            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(16), // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
             screenManager->colorPalette.avatar_stroke_thickness,                                          // stroke thickness
             screenManager->colorPalette.primary_stroke,                                                        // stroke color
@@ -137,7 +137,7 @@ namespace ui
             node_ui->resourceMap,
             MathCore::vec2f(continue_button_size),                                                                                 // size
             screenManager->colorPalette.primary,                                                               // color
-            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(32), // radius
+            screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(16), // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
             screenManager->colorPalette.dialog_stroke_thickness,                                          // stroke thickness
             screenManager->colorPalette.primary_stroke,                                                        // stroke color
