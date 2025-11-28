@@ -118,79 +118,84 @@ namespace ui
             AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
         );
 
-
         avatar_box->setQuad(
             node_ui->resourceMap,
-            MathCore::vec2f(avatar_size),                                                                                 // size
-            screenManager->colorPalette.primary,                                                               // color
+            MathCore::vec2f(avatar_size),                                                                 // size
+            screenManager->colorPalette.primary,                                                          // color
             screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(16), // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
             screenManager->colorPalette.avatar_stroke_thickness,                                          // stroke thickness
-            screenManager->colorPalette.primary_stroke,                                                        // stroke color
+            screenManager->colorPalette.primary_stroke,                                                   // stroke color
             0,                                                                                            // drop shadow thickness
             MathCore::vec4f(0),                                                                           // drop shadow color
             AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
         );
 
-
         continue_box->setQuad(
             node_ui->resourceMap,
-            MathCore::vec2f(continue_button_size),                                                                                 // size
-            screenManager->colorPalette.primary,                                                               // color
+            MathCore::vec2f(continue_button_size),                                                        // size
+            screenManager->colorPalette.primary,                                                          // color
             screenManager->colorPalette.button_radius_squared ? MathCore::vec4f(0) : MathCore::vec4f(16), // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside,                                           // stroke mode
             screenManager->colorPalette.dialog_stroke_thickness,                                          // stroke thickness
-            screenManager->colorPalette.primary_stroke,                                                        // stroke color
+            screenManager->colorPalette.primary_stroke,                                                   // stroke color
             0,                                                                                            // drop shadow thickness
             MathCore::vec4f(0),                                                                           // drop shadow color
             AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
         );
 
         MathCore::vec2f avatar_offset = MathCore::vec2f(
-            -max_box_size.x * 0.5f + avatar_size * 0.5f,
-            max_box_size.y * 0.5f + avatar_size * 0.5f
-        );
+            -max_box_size.x * 0.5f + avatar_size * 0.5f + text_margin * 0.75f,
+            max_box_size.y * 0.5f + avatar_size * 0.5f - text_margin * 0.75f);
 
         MathCore::vec2f continue_offset = MathCore::vec2f(
-            max_box_size.x * 0.5f - continue_button_size * 0.5f,
-            -max_box_size.y * 0.5f - continue_button_size * 0.5f
-        );
+            max_box_size.x * 0.5f - continue_button_size * 0.5f - text_margin * 0.75f,
+            -max_box_size.y * 0.5f - continue_button_size * 0.5f + text_margin * 0.75f);
 
         CollisionCore::AABB<MathCore::vec3f> aabb_main_box = CollisionCore::AABB<MathCore::vec3f>(
             -max_box_size * 0.5f,
-            max_box_size * 0.5f
-        );
+            max_box_size * 0.5f);
 
         CollisionCore::AABB<MathCore::vec3f> aabb_avatar_box = CollisionCore::AABB<MathCore::vec3f>(
             -MathCore::vec2f(avatar_size) * 0.5f + avatar_offset,
-            MathCore::vec2f(avatar_size) * 0.5f + avatar_offset
-        );
+            MathCore::vec2f(avatar_size) * 0.5f + avatar_offset);
 
         CollisionCore::AABB<MathCore::vec3f> aabb_continue_box = CollisionCore::AABB<MathCore::vec3f>(
             -MathCore::vec2f(continue_button_size) * 0.5f + continue_offset,
-            MathCore::vec2f(continue_button_size) * 0.5f + continue_offset
-        );
+            MathCore::vec2f(continue_button_size) * 0.5f + continue_offset);
 
+        CollisionCore::AABB<MathCore::vec3f> all_box;
+        all_box = CollisionCore::AABB<MathCore::vec3f>::joinAABB(aabb_main_box, aabb_avatar_box);
+        all_box = CollisionCore::AABB<MathCore::vec3f>::joinAABB(all_box, aabb_continue_box);
+
+        auto center_all = (all_box.min_box + all_box.max_box) * 0.5f;
+        auto size_all = (all_box.max_box - all_box.min_box);
+
+        MathCore::vec2f main_offset = MathCore::vec2f(-center_all.x, -center_all.y);
+
+        avatar_offset += main_offset;
+        continue_offset += main_offset;
+
+        main_box->getTransform()->setLocalPosition(MathCore::vec3f(
+            main_offset.x,
+            main_offset.y,
+            0.0f));
 
         avatar_box->getTransform()->setLocalPosition(MathCore::vec3f(
             avatar_offset.x,
             avatar_offset.y,
-            -10.0f
-        ));
+            -10.0f));
 
         continue_box->getTransform()->setLocalPosition(MathCore::vec3f(
             continue_offset.x,
             continue_offset.y,
-            -10.0f
-        ));
-        
+            -10.0f));
 
         node_ui->getTransform()->setLocalPosition(MathCore::vec3f(
             0.0f,
-            -size.y * 0.5f + screen_margin + max_box_size.y * 0.5f,
-            0.0f
-        ));
-
+            -size.y * 0.5f + size_all.y * 0.5f + screen_margin,
+            //-size.y * 0.5f + screen_margin + max_box_size.y * 0.5f,
+            0.0f));
     }
 
     CollisionCore::AABB<MathCore::vec3f> InGameDialog::computeAABB()
@@ -222,7 +227,7 @@ namespace ui
         DialogTextModeType mode,
         const std::string &rich_message,
         const std::string &rich_continue_char,
-        
+
         EventCore::Callback<void()> onAppeared,
         EventCore::Callback<void()> onContinuePressed)
     {
@@ -233,7 +238,7 @@ namespace ui
     }
 
     void InGameDialog::hideDialog(DialogAppearModeType appear_mode,
-        EventCore::Callback<void()> onDisapeared)
+                                  EventCore::Callback<void()> onDisapeared)
     {
         node_ui->getTransform()->skip_traversing = true;
         releaseAllComponents();
