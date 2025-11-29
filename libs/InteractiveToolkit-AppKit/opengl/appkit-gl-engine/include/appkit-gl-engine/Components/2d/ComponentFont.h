@@ -97,7 +97,7 @@ namespace AppKit
                              std::shared_ptr<ComponentCamera> &camera,
                              std::shared_ptr<ComponentRectangle> &mask);
 
-                CollisionCore::AABB<MathCore::vec3f> computeBox(
+                static CollisionCore::AABB<MathCore::vec3f> computeBox(
                     AppKit::GLEngine::ResourceMap *resourceMap,
                     const std::string &font_path,
                     // 0 = texture, > 0 = polygon

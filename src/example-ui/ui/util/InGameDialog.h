@@ -41,6 +41,11 @@ namespace ui
 
         bool components_created;
 
+
+        std::string rich_message;
+        std::string rich_continue_char;
+
+
     public:
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> node_ui;
 
