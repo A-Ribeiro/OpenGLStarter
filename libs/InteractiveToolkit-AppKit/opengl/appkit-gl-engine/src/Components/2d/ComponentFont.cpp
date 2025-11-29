@@ -94,7 +94,7 @@ namespace AppKit
                 else
                     fontResource = resourceMap->getTextureFont(font_path, is_srgb);
 
-                last_fontResource = fontResource;
+                // last_fontResource = fontResource;
 
                 auto builder = fontResource->fontBuilder.get();
 
