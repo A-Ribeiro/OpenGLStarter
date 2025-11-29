@@ -120,6 +120,11 @@ namespace AppKit
                 return last_text;
             }
 
+            const CollisionCore::AABB<MathCore::vec3f> &ComponentFont::currentBox() const
+            {
+                return last_box;
+            }
+
             void ComponentFont::setColor(const MathCore::vec4f &faceColor,
                                          const MathCore::vec4f &strokeColor)
             {
@@ -288,7 +293,9 @@ namespace AppKit
 
                 // meshWrapper->updateMeshAABB();
 
-                meshWrapper->setShapeAABB(CollisionCore::AABB<MathCore::vec3f>(min, max), true);
+                last_box = CollisionCore::AABB<MathCore::vec3f>(min, max);
+
+                meshWrapper->setShapeAABB(last_box, true);
             }
 
             void ComponentFont::setMask(AppKit::GLEngine::ResourceMap *resourceMap,
