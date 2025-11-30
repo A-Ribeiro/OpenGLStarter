@@ -221,7 +221,7 @@ namespace AppKit
             {
                 // Create a 60Hz timer (1000ms / 60 = ~16.67ms)
                 if (window->resizeTimerId == 0)
-                    window->resizeTimerId = SetTimer(handle, 1, 16, nullptr); // ~60 FPS
+                    window->resizeTimerId = SetTimer(handle, 1, USER_TIMER_MINIMUM, nullptr); // ~60 FPS
                 break;
             }
 
@@ -241,7 +241,7 @@ namespace AppKit
                 if (wParam == HTCAPTION || wParam == HTSYSMENU)
                 {
                     if (window->resizeTimerId == 0)
-                        window->resizeTimerId = SetTimer(handle, 1, 16, nullptr); // ~60 FPS
+                        window->resizeTimerId = SetTimer(handle, 1, USER_TIMER_MINIMUM, nullptr); // ~60 FPS
                 }
                 break;
             }
