@@ -870,5 +870,33 @@ namespace AppKit
             return triangles.size() > 0 && vertexAttrib.size() > 0;
         }
 
+        int GLFont2Builder::u32richCountLines(const char32_t *utf32_str, float max_width)
+        {
+            if (utf32_str == nullptr || *utf32_str == U'\0')
+                return 0;
+            // organize lines
+            int lines_count = 0;
+            {
+                RichTokenizer tokenizer(utf32_str, this, false); // srgb = false avoid color calculations
+                bool line_block_added = false;
+                while (auto token = tokenizer.next(max_width))
+                {
+                    line_block_added = true;
+                    if ((token->flag & RichFontVarBitFlag::new_line_at_end) != RichFontVarBitFlag::none)
+                    {
+                        lines_count++;
+                        line_block_added = false;
+                    }
+                }
+                if (line_block_added)
+                    lines_count++;
+            }
+            return lines_count;
+        }
+        int GLFont2Builder::richCountLines(const char *utf8_str, float max_width)
+        {
+            return u32richCountLines(ITKCommon::StringUtil::utf8_to_utf32(utf8_str).c_str(), max_width);
+        }
+
     }
 }
