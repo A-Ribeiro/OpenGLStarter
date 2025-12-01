@@ -117,6 +117,16 @@ namespace AppKit
                     AppKit::OpenGL::GLFont2WrapMode wrapMode = AppKit::OpenGL::GLFont2WrapMode_Word,
                     AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight,
                     char32_t wordSeparatorChar = U' ');
+                
+                static int countLines(
+                    AppKit::GLEngine::ResourceMap *resourceMap,
+                    const std::string &font_path,
+                    bool is_srgb,
+                    const std::string &text,
+                    float size = 60.0f, ///< current state of the font size
+                    float max_width = -1.0f,
+                    AppKit::OpenGL::GLFont2WrapMode wrapMode = AppKit::OpenGL::GLFont2WrapMode_Word,
+                    char32_t wordSeparatorChar = U' ');
 
                 const CollisionCore::AABB<MathCore::vec3f> &currentBox() const;
 

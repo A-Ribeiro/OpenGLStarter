@@ -84,6 +84,8 @@ namespace ui
         node_ui->getTransform()->skip_traversing = true; // start hidden
 
         components_created = false;
+
+        min_line_count = 0;
     }
 
     void InGameDialog::setProperties(float avatar_size, float continue_button_size, float text_size, float screen_margin, float text_margin)
@@ -118,10 +120,10 @@ namespace ui
         max_box_size.y = (reserved_height < max_box_size.y) ? reserved_height : max_box_size.y;
 
         // set text
+        auto engine = AppKit::GLEngine::Engine::Instance();
         {
             float text_max_width = MathCore::OP<float>::maximum(max_box_size.x - text_margin * 2.0f, 0.0f);
-            auto engine = AppKit::GLEngine::Engine::Instance();
-
+            
             main_box_text->setText( //
                 node_ui->resourceMap,
                 "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
@@ -146,8 +148,14 @@ namespace ui
             );
         }
 
+        auto fontResource = node_ui->resourceMap->getTextureFont("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
+
         auto main_box_text_box = main_box_text->currentBox();
         float size_text_y = main_box_text_box.max_box.y - main_box_text_box.min_box.y;
+
+        // set min_line_count
+        size_text_y = MathCore::OP<float>::maximum(size_text_y, min_line_count * fontResource->fontBuilder->glFont2.new_line_height * (text_size / fontResource->fontBuilder->glFont2.size));
+
         max_box_size.y += MathCore::OP<float>::maximum(0.0f, size_text_y);
 
         main_box->setQuad(
@@ -310,6 +318,12 @@ namespace ui
                 U' '                                                              // char32_t wordSeparatorChar
             );
             float size_text_y = main_box_text_box.max_box.y - main_box_text_box.min_box.y;
+
+            auto fontResource = node_ui->resourceMap->getTextureFont("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
+
+            // set min_line_count
+            size_text_y = MathCore::OP<float>::maximum(size_text_y, min_line_count * fontResource->fontBuilder->glFont2.new_line_height * (text_size / fontResource->fontBuilder->glFont2.size));
+
             max_box_size.y += MathCore::OP<float>::maximum(0.0f, size_text_y);
         }
 
@@ -322,12 +336,29 @@ namespace ui
 
     int InGameDialog::countLinesForText(const std::string &rich_message)
     {
-        return 0;
+        auto size = screenManager->current_size;
+        MathCore::vec2f max_box_size = (MathCore::vec2f)size - 2.0f * screen_margin;
+        max_box_size = MathCore::OP<MathCore::vec2f>::maximum(0, max_box_size);
+
+        float text_max_width = MathCore::OP<float>::maximum(max_box_size.x - text_margin * 2.0f, 0.0f);
+        auto engine = AppKit::GLEngine::Engine::Instance();
+
+        return AppKit::GLEngine::Components::ComponentFont::countLines(
+            node_ui->resourceMap,                  // AppKit::GLEngine::ResourceMap *resourceMap,
+            "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
+            engine->sRGBCapable,                   // bool is_srgb,
+            rich_message,                          // const std::string &text,
+            text_size,                             // float size, ///< current state of the font size
+            text_max_width,                        // float max_width,
+            AppKit::OpenGL::GLFont2WrapMode_Word,  // AppKit::OpenGL::GLFont2WrapMode wrapMode,
+            U' '                                   // char32_t wordSeparatorChar
+        );
     }
 
     void InGameDialog::setMinLineCount(int min_line_count)
     {
         // start dialog with empty lines to reserve space
+        this->min_line_count = min_line_count;
     }
 
     void InGameDialog::showDialog(
