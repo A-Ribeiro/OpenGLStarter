@@ -83,6 +83,12 @@ void MainScene::bindResourcesToGraph()
     screenManager->load_screens(engine, resourceMap, &mathRandom, screens, MathCore::vec2i(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h));
     auto ui = root->findTransformByName("ui");
     ui->addChild(screenManager->uiRoot);
+    screenManager->screen<ui::ScreenHUD>()->inGameDialog.setSpriteAvatars({
+        "resources/look_to_right_normal.png",
+        "resources/look_to_right_smile.png",
+        "resources/look_to_left_normal.png",
+        "resources/look_to_center_normal.png",
+    });
 
     screenManager->screen<ui::ScreenMain>()->show(
         {"New Game", "Options", "Exit Game"},
@@ -92,11 +98,12 @@ void MainScene::bindResourcesToGraph()
             if (option == "New Game")
             {
                 // screenManager->close_all();
+
                 screenManager->open_screen("ScreenHUD");
                 screenManager->screen<ui::ScreenHUD>()->inGameDialog.showDialog(
                     ui::DialogAppearModeType_Scroll,
                     ui::DialogAvatarSideType_Left,
-                    "avatar_knight",
+                    "resources/look_to_right_normal.png",
                     ui::DialogTextModeType_CharAppear,
                     "Welcome to the <b>Example UI</b> demo!\nThis is a simple dialog box with <i>rich text</i> support.\n\nPress the <b>Continue</b> button to proceed.",
                     "<b>Continue</b>",
@@ -227,7 +234,7 @@ void MainScene::update(Platform::Time *elapsed)
     while (uiCommands.size() > 0)
     {
         auto command = uiCommands.dequeue(nullptr, true);
-        
+
         screenManager->triggerEvent(command);
 
         if (HUD_visible && command == ui::UIEvent_InputActionBack)
@@ -240,8 +247,6 @@ void MainScene::update(Platform::Time *elapsed)
                     screenManager->open_screen("ScreenMain");
                 });
         }
-
-
     }
 
     screenManager->update(elapsed);

@@ -44,6 +44,7 @@ namespace ui
 
         std::string rich_message;
         std::string rich_continue_char;
+        std::string avatar;
 
         int min_line_count;
 
