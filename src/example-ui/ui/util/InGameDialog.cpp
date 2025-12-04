@@ -52,6 +52,7 @@ namespace ui
             MathCore::vec4f(0),                                 // drop shadow color
             -10,                                                // z
             "avatar_box");
+
         node_ui->addRectangle(
             MathCore::vec2f(0, 0),                              // pos
             MathCore::vec2f(256, 256),                          // size
@@ -123,7 +124,7 @@ namespace ui
         auto engine = AppKit::GLEngine::Engine::Instance();
         {
             float text_max_width = MathCore::OP<float>::maximum(max_box_size.x - text_margin * 2.0f, 0.0f);
-            
+
             main_box_text->setText( //
                 node_ui->resourceMap,
                 "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
@@ -332,6 +333,15 @@ namespace ui
 
     void InGameDialog::setSpriteAvatars(const std::vector<std::string> &sprite_list)
     {
+        using namespace AppKit::GLEngine;
+
+        SpriteAtlasGenerator gen;
+
+        for(const auto &sprite_path : sprite_list)
+            gen.addEntry(sprite_path);
+
+        auto engine = AppKit::GLEngine::Engine::Instance();
+        avatarAtlas = gen.generateAtlas(*node_ui->resourceMap, engine->sRGBCapable, true, 10);
     }
 
     int InGameDialog::countLinesForText(const std::string &rich_message)
