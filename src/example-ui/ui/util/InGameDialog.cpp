@@ -40,9 +40,15 @@ namespace ui
             U' ',                                                             // wordSeparatorChar
             "main_box_text");
 
-        node_ui->addRectangle(
+        auto avatar_pivot = node_ui->addComponentUI(
+                                       MathCore::vec2f(0, 0), // pos
+                                       -10,                   // z
+                                       "avatar_pivot")
+                                .get<AppKit::GLEngine::Components::ComponentUI>();
+
+        auto rect_mask = avatar_pivot->addRectangle(
             MathCore::vec2f(0, 0),                              // pos
-            MathCore::vec2f(256, 256),                          // size
+            MathCore::vec2f(avatar_size),                       // size
             colorFromHex("#000000", 0.4f),                      // color
             MathCore::vec4f(0, 0, 0, 0),                        // radius
             AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
@@ -50,8 +56,22 @@ namespace ui
             colorFromHex("#000000", 0.0f),                      // stroke color
             0,                                                  // drop shadow thickness
             MathCore::vec4f(0),                                 // drop shadow color
-            -10,                                                // z
-            "avatar_box");
+            0,                                                  // z
+            "avatar_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
+
+        auto avatar_sprite = avatar_pivot->addSpriteFromAtlas(
+            MathCore::vec2f(0, 0),         // pos
+            avatarAtlas,                   // atlas
+            "NON_EXISTING_SPRITE_NAME]",   // texture
+            MathCore::vec2f(0.5f, 0.5f),   // pivot
+            ui::colorFromHex("#ffffffff"), // color
+            MathCore::vec2f(avatar_size),  // size
+            -2,                            // z
+            "avatar_sprite").get<AppKit::GLEngine::Components::ComponentSprite>();
+        avatar_sprite->setMask(
+            node_ui->resourceMap,
+            screenManager->camera,
+            rect_mask);
 
         node_ui->addRectangle(
             MathCore::vec2f(0, 0),                              // pos
@@ -110,7 +130,10 @@ namespace ui
         // called on resize
 
         auto main_box = node_ui->getItemByName("main_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
-        auto avatar_box = node_ui->getItemByName("avatar_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
+        auto avatar_pivot = node_ui->getItemByName("avatar_pivot").get<AppKit::GLEngine::Components::ComponentUI>();
+        auto avatar_box = avatar_pivot->getItemByName("avatar_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
+        auto avatar_sprite = avatar_pivot->getItemByName("avatar_sprite").get<AppKit::GLEngine::Components::ComponentSprite>();
+
         auto continue_box = node_ui->getItemByName("continue_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
 
         auto main_box_text = node_ui->getItemByName("main_box_text").get<AppKit::GLEngine::Components::ComponentFont>();
@@ -185,6 +208,16 @@ namespace ui
             AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
         );
 
+        avatar_sprite->setTextureFromAtlas(
+            node_ui->resourceMap,
+            avatarAtlas,                                        // atlas,
+            this->avatar,                                       // name,
+            MathCore::vec2f(0.5f, 0.5f),                        // pivot,
+            ui::colorFromHex("#ffffffff"),                      // color,
+            MathCore::vec2f(avatar_size),                       // size_constraint = MathCore::vec2f(-1, -1),
+            AppKit::GLEngine::Components::MeshUploadMode_Direct // meshUploadMode
+        );
+
         continue_box->setQuad(
             node_ui->resourceMap,
             MathCore::vec2f(continue_button_size),                                                        // size
@@ -235,7 +268,7 @@ namespace ui
             main_offset.y,
             0.0f));
 
-        avatar_box->getTransform()->setLocalPosition(MathCore::vec3f(
+        avatar_pivot->getTransform()->setLocalPosition(MathCore::vec3f(
             avatar_offset.x,
             avatar_offset.y,
             -10.0f));
@@ -337,7 +370,7 @@ namespace ui
 
         SpriteAtlasGenerator gen;
 
-        for(const auto &sprite_path : sprite_list)
+        for (const auto &sprite_path : sprite_list)
             gen.addEntry(sprite_path);
 
         auto engine = AppKit::GLEngine::Engine::Instance();
@@ -387,6 +420,7 @@ namespace ui
     {
         this->rich_message = rich_message;
         this->rich_continue_char = rich_continue_char;
+        this->avatar = avatar;
 
         createAllComponents();
         layoutVisibleElements(screenManager->current_size);
