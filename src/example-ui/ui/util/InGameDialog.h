@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common.h"
+#include <appkit-gl-engine/util/SpriteAtlas.h>
 
 namespace ui
 {
@@ -60,6 +61,9 @@ namespace ui
         // std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> continue_box;
         // std::shared_ptr<AppKit::GLEngine::Components::ComponentRectangle> continue_box_bg;
         // std::shared_ptr<AppKit::GLEngine::Components::ComponentFont> continue_box_text;
+
+        std::shared_ptr<AppKit::GLEngine::SpriteAtlas> avatarAtlas;
+
 
         ScreenManager *screenManager;
 
