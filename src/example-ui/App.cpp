@@ -87,12 +87,12 @@ void App::draw()
     // 1000 hz protection code
     if (time.unscaledDeltaTime <= 1.0f / 1000.0f)
         time.rollback_and_set_zero();
-    // 5 hz protection code - for fallback from window move
-    if (time.unscaledDeltaTime > 1.0f / 5.0f)
+    // 2 hz protection code - for fallback from window move
+    if (time.unscaledDeltaTime > 1.0f / 2.0f)
         time.reset();
 
     fps_timer.update();
-    if (fps_timer.unscaledDeltaTime > 1.0f / 5.0f)
+    if (fps_timer.unscaledDeltaTime > 1.0f / 2.0f)
         fps_timer.reset();
 
     if (gain_focus)

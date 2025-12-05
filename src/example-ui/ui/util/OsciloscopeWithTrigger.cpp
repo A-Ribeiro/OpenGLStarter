@@ -8,7 +8,7 @@ namespace ui
         this->osciloscope_selected_hz = osciloscope_selected_hz;
         this->osciloscope_countdown_trigger_secs = osciloscope_countdown_trigger_secs;
         this->countdown_increase_speed_for_secs_and_trigger_action = -1.0f;
-        this->osciloscope = 0.0f;
+        this->osciloscope = MathCore::OP<float>::deg_2_rad(-90.0f);
         this->osciloscope_locked = false;
     }
     // OsciloscopeWithTrigger::~OsciloscopeWithTrigger() = default;
@@ -48,7 +48,7 @@ namespace ui
     void OsciloscopeWithTrigger::osciloscopeResetLock()
     {
         osciloscope_locked = false;
-        osciloscope = 0.0f;
+        osciloscope = MathCore::OP<float>::deg_2_rad(-90.0f);
         this->countdown_increase_speed_for_secs_and_trigger_action = -1.0f;
     }
 
