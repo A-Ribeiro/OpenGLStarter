@@ -1,6 +1,29 @@
 #include "InGameDialog.h"
 #include "../ScreenManager.h"
 
+//
+// Auto Generated: Exported Bitmaps inside the Font
+//
+#define  Font_xbox_a u8"\U00010000"
+#define  Font_xbox_b u8"\U00010001"
+#define  Font_xbox_x u8"\U00010002"
+#define  Font_xbox_y u8"\U00010003"
+#define  Font_ps_circle_color u8"\U00010004"
+#define  Font_ps_cross_color u8"\U00010005"
+#define  Font_ps_square_color u8"\U00010006"
+#define  Font_ps_triangle_color u8"\U00010007"
+#define  Font_ps_circle_white u8"\U00010008"
+#define  Font_ps_cross_white u8"\U00010009"
+#define  Font_ps_square_white u8"\U0001000a"
+#define  Font_ps_triangle_white u8"\U0001000b"
+#define  Font_L_stick u8"\U0001000c"
+#define  Font_R_stick u8"\U0001000d"
+#define  Font_Key_arrows u8"\U0001000e"
+#define  Font_Key_z u8"\U0001000f"
+#define  Font_Key_x u8"\U00010010"
+#define  Font_Key_c u8"\U00010011"
+
+
 namespace ui
 {
 
@@ -47,27 +70,29 @@ namespace ui
                                 .get<AppKit::GLEngine::Components::ComponentUI>();
 
         auto rect_mask = avatar_pivot->addRectangle(
-            MathCore::vec2f(0, 0),                              // pos
-            MathCore::vec2f(avatar_size),                       // size
-            colorFromHex("#000000", 0.4f),                      // color
-            MathCore::vec4f(0, 0, 0, 0),                        // radius
-            AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
-            0,                                                  // stroke thickness
-            colorFromHex("#000000", 0.0f),                      // stroke color
-            0,                                                  // drop shadow thickness
-            MathCore::vec4f(0),                                 // drop shadow color
-            0,                                                  // z
-            "avatar_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
+                                         MathCore::vec2f(0, 0),                              // pos
+                                         MathCore::vec2f(avatar_size),                       // size
+                                         colorFromHex("#000000", 0.4f),                      // color
+                                         MathCore::vec4f(0, 0, 0, 0),                        // radius
+                                         AppKit::GLEngine::Components::StrokeModeGrowInside, // stroke mode
+                                         0,                                                  // stroke thickness
+                                         colorFromHex("#000000", 0.0f),                      // stroke color
+                                         0,                                                  // drop shadow thickness
+                                         MathCore::vec4f(0),                                 // drop shadow color
+                                         0,                                                  // z
+                                         "avatar_box")
+                             .get<AppKit::GLEngine::Components::ComponentRectangle>();
 
         auto avatar_sprite = avatar_pivot->addSpriteFromAtlas(
-            MathCore::vec2f(0, 0),         // pos
-            avatarAtlas,                   // atlas
-            "NON_EXISTING_SPRITE_NAME]",   // texture
-            MathCore::vec2f(0.5f, 0.5f),   // pivot
-            ui::colorFromHex("#ffffffff"), // color
-            MathCore::vec2f(avatar_size),  // size
-            -2,                            // z
-            "avatar_sprite").get<AppKit::GLEngine::Components::ComponentSprite>();
+                                             MathCore::vec2f(0, 0),         // pos
+                                             avatarAtlas,                   // atlas
+                                             "NON_EXISTING_SPRITE_NAME]",   // texture
+                                             MathCore::vec2f(0.5f, 0.5f),   // pivot
+                                             ui::colorFromHex("#ffffffff"), // color
+                                             MathCore::vec2f(avatar_size),  // size
+                                             -2,                            // z
+                                             "avatar_sprite")
+                                 .get<AppKit::GLEngine::Components::ComponentSprite>();
         avatar_sprite->setMask(
             node_ui->resourceMap,
             screenManager->camera,
@@ -120,6 +145,59 @@ namespace ui
 
     void InGameDialog::blinkAmount(float lerp_factor)
     {
+        auto avatar_pivot = node_ui->getItemByName("avatar_pivot").get<AppKit::GLEngine::Components::ComponentUI>();
+
+        auto size = screenManager->current_size;
+
+        MathCore::vec2f max_box_size = (MathCore::vec2f)size - 2.0f * screen_margin;
+        max_box_size = MathCore::OP<MathCore::vec2f>::maximum(0, max_box_size);
+        float reserved_height = text_margin * 2.0f;
+        max_box_size.y = (reserved_height < max_box_size.y) ? reserved_height : max_box_size.y;
+
+        max_box_size.y += MathCore::OP<float>::maximum(0.0f, size_text_y);
+
+        float posicao_esquerda = -max_box_size.x * 0.5f + avatar_size * 0.5f + text_margin * 0.75f;
+        float posicao_direita = max_box_size.x * 0.5f - avatar_size * 0.5f - text_margin * 0.75f;
+        //float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, side_percentage); // posicao_esquerda * ( 1.0f - side_percentage ) + posicao_direita * side_percentage;
+        
+        
+        float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, lerp_factor);
+        
+        MathCore::vec2f avatar_offset = MathCore::vec2f(
+            pos_offset,
+            max_box_size.y * 0.5f + avatar_size * 0.5f - text_margin * 0.75f);
+
+        MathCore::vec2f continue_offset = MathCore::vec2f(
+            max_box_size.x * 0.5f - continue_button_size * 0.5f - text_margin * 0.75f,
+            -max_box_size.y * 0.5f - continue_button_size * 0.5f + text_margin * 0.75f);
+
+        CollisionCore::AABB<MathCore::vec3f> aabb_main_box = CollisionCore::AABB<MathCore::vec3f>(
+            -max_box_size * 0.5f,
+            max_box_size * 0.5f);
+
+        CollisionCore::AABB<MathCore::vec3f> aabb_avatar_box = CollisionCore::AABB<MathCore::vec3f>(
+            -MathCore::vec2f(avatar_size) * 0.5f + avatar_offset,
+            MathCore::vec2f(avatar_size) * 0.5f + avatar_offset);
+
+        CollisionCore::AABB<MathCore::vec3f> aabb_continue_box = CollisionCore::AABB<MathCore::vec3f>(
+            -MathCore::vec2f(continue_button_size) * 0.5f + continue_offset,
+            MathCore::vec2f(continue_button_size) * 0.5f + continue_offset);
+
+        CollisionCore::AABB<MathCore::vec3f> all_box;
+        all_box = CollisionCore::AABB<MathCore::vec3f>::joinAABB(aabb_main_box, aabb_avatar_box);
+        all_box = CollisionCore::AABB<MathCore::vec3f>::joinAABB(all_box, aabb_continue_box);
+
+        auto center_all = (all_box.min_box + all_box.max_box) * 0.5f;
+        auto size_all = (all_box.max_box - all_box.min_box);
+
+        MathCore::vec2f main_offset = MathCore::vec2f(-center_all.x, -center_all.y);
+
+        avatar_offset += main_offset;
+
+        avatar_pivot->getTransform()->setLocalPosition(MathCore::vec3f(
+            avatar_offset.x,
+            avatar_offset.y,
+            -10.0f));
     }
 
     void InGameDialog::layoutVisibleElements(const MathCore::vec2i &size)
@@ -175,7 +253,7 @@ namespace ui
         auto fontResource = node_ui->resourceMap->getTextureFont("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
 
         auto main_box_text_box = main_box_text->currentBox();
-        float size_text_y = main_box_text_box.max_box.y - main_box_text_box.min_box.y;
+        size_text_y = main_box_text_box.max_box.y - main_box_text_box.min_box.y;
 
         // set min_line_count
         size_text_y = MathCore::OP<float>::maximum(size_text_y, min_line_count * fontResource->fontBuilder->glFont2.new_line_height * (text_size / fontResource->fontBuilder->glFont2.size));
@@ -231,8 +309,11 @@ namespace ui
             AppKit::GLEngine::Components::MeshUploadMode_Direct                                           // meshUploadMode,
         );
 
+        float posicao_esquerda = -max_box_size.x * 0.5f + avatar_size * 0.5f + text_margin * 0.75f;
+        float posicao_direita = max_box_size.x * 0.5f - avatar_size * 0.5f - text_margin * 0.75f;
+        float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, side_percentage); // posicao_esquerda * ( 1.0f - side_percentage ) + posicao_direita * side_percentage;
         MathCore::vec2f avatar_offset = MathCore::vec2f(
-            -max_box_size.x * 0.5f + avatar_size * 0.5f + text_margin * 0.75f,
+            pos_offset,
             max_box_size.y * 0.5f + avatar_size * 0.5f - text_margin * 0.75f);
 
         MathCore::vec2f continue_offset = MathCore::vec2f(
@@ -408,7 +489,7 @@ namespace ui
 
         DialogAppearModeType appear_mode,
 
-        DialogAvatarSideType side,
+        float side_percentage, // DialogAvatarSideType
         const std::string &avatar,
 
         DialogTextModeType mode,
@@ -421,6 +502,7 @@ namespace ui
         this->rich_message = rich_message;
         this->rich_continue_char = rich_continue_char;
         this->avatar = avatar;
+        this->side_percentage = side_percentage;
 
         createAllComponents();
         layoutVisibleElements(screenManager->current_size);

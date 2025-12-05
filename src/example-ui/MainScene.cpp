@@ -6,6 +6,28 @@
 // #include <InteractiveToolkit/EaseCore/EaseCore.h>
 // #include "components/ComponentGrow.h"
 
+//
+// Auto Generated: Exported Bitmaps inside the Font
+//
+#define  Font_xbox_a u8"\U00010000"
+#define  Font_xbox_b u8"\U00010001"
+#define  Font_xbox_x u8"\U00010002"
+#define  Font_xbox_y u8"\U00010003"
+#define  Font_ps_circle_color u8"\U00010004"
+#define  Font_ps_cross_color u8"\U00010005"
+#define  Font_ps_square_color u8"\U00010006"
+#define  Font_ps_triangle_color u8"\U00010007"
+#define  Font_ps_circle_white u8"\U00010008"
+#define  Font_ps_cross_white u8"\U00010009"
+#define  Font_ps_square_white u8"\U0001000a"
+#define  Font_ps_triangle_white u8"\U0001000b"
+#define  Font_L_stick u8"\U0001000c"
+#define  Font_R_stick u8"\U0001000d"
+#define  Font_Key_arrows u8"\U0001000e"
+#define  Font_Key_z u8"\U0001000f"
+#define  Font_Key_x u8"\U00010010"
+#define  Font_Key_c u8"\U00010011"
+
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
 using namespace AppKit::OpenGL;
@@ -102,11 +124,13 @@ void MainScene::bindResourcesToGraph()
                 screenManager->open_screen("ScreenHUD");
                 screenManager->screen<ui::ScreenHUD>()->inGameDialog.showDialog(
                     ui::DialogAppearModeType_Scroll,
-                    ui::DialogAvatarSideType_Left,
+                    0.5f,
                     "resources/look_to_right_normal.png",
                     ui::DialogTextModeType_CharAppear,
-                    "Welcome to the <b>Example UI</b> demo!\nThis is a simple dialog box with <i>rich text</i> support.\n\nPress the <b>Continue</b> button to proceed.",
-                    "<b>Continue</b>",
+                    "Welcome to the <b>Example UI</b> demo!\nThis is a simple dialog box with <i>rich text</i> support.\n\nPress the "
+                    "{push;lineHeight:0.8;faceColor:ffffffff;size:40.0;}" Font_Key_z "{pop;}"
+                    " button to proceed.",
+                    Font_Key_z,
                     [&]()
                     {
                         // Dialog appeared callback

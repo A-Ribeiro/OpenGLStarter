@@ -12,12 +12,12 @@ namespace ui
         DialogAppearModeType_Fade,
     };
 
-    enum DialogAvatarSideType
-    {
-        DialogAvatarSideType_None = 0,
-        DialogAvatarSideType_Left,
-        DialogAvatarSideType_Right,
-    };
+    // enum DialogAvatarSideType
+    // {
+    //     DialogAvatarSideType_None = 0,
+    //     DialogAvatarSideType_Left,
+    //     DialogAvatarSideType_Right,
+    // };
 
     enum DialogTextModeType
     {
@@ -45,6 +45,8 @@ namespace ui
         std::string rich_message;
         std::string rich_continue_char;
         std::string avatar;
+        float side_percentage;
+        float size_text_y;
 
         int min_line_count;
 
@@ -90,7 +92,7 @@ namespace ui
 
             DialogAppearModeType appear_mode,
 
-            DialogAvatarSideType side,
+            float side_percentage, // DialogAvatarSideType
             const std::string &avatar,
 
             DialogTextModeType mode,
