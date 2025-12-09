@@ -135,7 +135,7 @@ namespace DPI
 
         for (int i = 0; i < nmonitors; i++)
         {
-            if (only_default && monitor_info_array[i].primary == 0)
+            if (only_default && !(monitor_info_array[i].primary != 0 || nmonitors == 1))
                 continue;
             auto monitor_info = &monitor_info_array[i];
 
@@ -148,7 +148,7 @@ namespace DPI
             }
 
             monitor.scaleFactor = 1.0f;
-            monitor.primary = monitor_info->primary != 0;
+            monitor.primary = monitor_info->primary != 0 || nmonitors == 1;
 
             if (monitorDefaultIndex && monitor.primary)
                 *monitorDefaultIndex = (int)result.size();
@@ -1538,8 +1538,8 @@ namespace DPI
         SetWindowLongPtr(nativeWindow, GWL_STYLE, style);
         SetWindowPos(nativeWindow, HWND_NOTOPMOST, monitor->x, monitor->y, monitor->width, monitor->height, SWP_FRAMECHANGED | SWP_SHOWWINDOW | SWP_NOZORDER);
 
-        //SetWindowPos(nativeWindow, HWND_NOTOPMOST, monitor->x, monitor->y, monitor->width, monitor->height, 0);//SWP_NOZORDER | SWP_SHOWWINDOW
-        //SetWindowPos(nativeWindow, HWND_TOP, monitor->x, monitor->y, monitor->width, monitor->height, SWP_NOZORDER);
+        // SetWindowPos(nativeWindow, HWND_NOTOPMOST, monitor->x, monitor->y, monitor->width, monitor->height, 0);//SWP_NOZORDER | SWP_SHOWWINDOW
+        // SetWindowPos(nativeWindow, HWND_TOP, monitor->x, monitor->y, monitor->width, monitor->height, SWP_NOZORDER);
 
         // if (m_cursorGrabbed)
         // grabCursor(true);
