@@ -4,25 +4,24 @@
 //
 // Auto Generated: Exported Bitmaps inside the Font
 //
-#define  Font_xbox_a u8"\U00010000"
-#define  Font_xbox_b u8"\U00010001"
-#define  Font_xbox_x u8"\U00010002"
-#define  Font_xbox_y u8"\U00010003"
-#define  Font_ps_circle_color u8"\U00010004"
-#define  Font_ps_cross_color u8"\U00010005"
-#define  Font_ps_square_color u8"\U00010006"
-#define  Font_ps_triangle_color u8"\U00010007"
-#define  Font_ps_circle_white u8"\U00010008"
-#define  Font_ps_cross_white u8"\U00010009"
-#define  Font_ps_square_white u8"\U0001000a"
-#define  Font_ps_triangle_white u8"\U0001000b"
-#define  Font_L_stick u8"\U0001000c"
-#define  Font_R_stick u8"\U0001000d"
-#define  Font_Key_arrows u8"\U0001000e"
-#define  Font_Key_z u8"\U0001000f"
-#define  Font_Key_x u8"\U00010010"
-#define  Font_Key_c u8"\U00010011"
-
+#define Font_xbox_a u8"\U00010000"
+#define Font_xbox_b u8"\U00010001"
+#define Font_xbox_x u8"\U00010002"
+#define Font_xbox_y u8"\U00010003"
+#define Font_ps_circle_color u8"\U00010004"
+#define Font_ps_cross_color u8"\U00010005"
+#define Font_ps_square_color u8"\U00010006"
+#define Font_ps_triangle_color u8"\U00010007"
+#define Font_ps_circle_white u8"\U00010008"
+#define Font_ps_cross_white u8"\U00010009"
+#define Font_ps_square_white u8"\U0001000a"
+#define Font_ps_triangle_white u8"\U0001000b"
+#define Font_L_stick u8"\U0001000c"
+#define Font_R_stick u8"\U0001000d"
+#define Font_Key_arrows u8"\U0001000e"
+#define Font_Key_z u8"\U0001000f"
+#define Font_Key_x u8"\U00010010"
+#define Font_Key_c u8"\U00010011"
 
 namespace ui
 {
@@ -143,61 +142,23 @@ namespace ui
         this->text_margin = text_margin;
     }
 
-    void InGameDialog::blinkAmount(float lerp_factor)
+    void InGameDialog::update(Platform::Time *elapsed, float blink_01_lerp_factor)
     {
-        auto avatar_pivot = node_ui->getItemByName("avatar_pivot").get<AppKit::GLEngine::Components::ComponentUI>();
+        // auto avatar_pivot = node_ui->getItemByName("avatar_pivot").get<AppKit::GLEngine::Components::ComponentUI>();
 
-        auto size = screenManager->current_size;
+        // float posicao_esquerda = -max_box_size.x * 0.5f + avatar_size * 0.5f + text_margin * 0.75f;
+        // float posicao_direita = max_box_size.x * 0.5f - avatar_size * 0.5f - text_margin * 0.75f;
+        // //float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, side_percentage); // posicao_esquerda * ( 1.0f - side_percentage ) + posicao_direita * side_percentage;
 
-        MathCore::vec2f max_box_size = (MathCore::vec2f)size - 2.0f * screen_margin;
-        max_box_size = MathCore::OP<MathCore::vec2f>::maximum(0, max_box_size);
-        float reserved_height = text_margin * 2.0f;
-        max_box_size.y = (reserved_height < max_box_size.y) ? reserved_height : max_box_size.y;
+        // float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, lerp_factor);
+        // pos_offset += main_offset.x;
 
-        max_box_size.y += MathCore::OP<float>::maximum(0.0f, size_text_y);
+        // avatar_offset.x = pos_offset;
 
-        float posicao_esquerda = -max_box_size.x * 0.5f + avatar_size * 0.5f + text_margin * 0.75f;
-        float posicao_direita = max_box_size.x * 0.5f - avatar_size * 0.5f - text_margin * 0.75f;
-        //float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, side_percentage); // posicao_esquerda * ( 1.0f - side_percentage ) + posicao_direita * side_percentage;
-        
-        
-        float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, lerp_factor);
-        
-        MathCore::vec2f avatar_offset = MathCore::vec2f(
-            pos_offset,
-            max_box_size.y * 0.5f + avatar_size * 0.5f - text_margin * 0.75f);
-
-        MathCore::vec2f continue_offset = MathCore::vec2f(
-            max_box_size.x * 0.5f - continue_button_size * 0.5f - text_margin * 0.75f,
-            -max_box_size.y * 0.5f - continue_button_size * 0.5f + text_margin * 0.75f);
-
-        CollisionCore::AABB<MathCore::vec3f> aabb_main_box = CollisionCore::AABB<MathCore::vec3f>(
-            -max_box_size * 0.5f,
-            max_box_size * 0.5f);
-
-        CollisionCore::AABB<MathCore::vec3f> aabb_avatar_box = CollisionCore::AABB<MathCore::vec3f>(
-            -MathCore::vec2f(avatar_size) * 0.5f + avatar_offset,
-            MathCore::vec2f(avatar_size) * 0.5f + avatar_offset);
-
-        CollisionCore::AABB<MathCore::vec3f> aabb_continue_box = CollisionCore::AABB<MathCore::vec3f>(
-            -MathCore::vec2f(continue_button_size) * 0.5f + continue_offset,
-            MathCore::vec2f(continue_button_size) * 0.5f + continue_offset);
-
-        CollisionCore::AABB<MathCore::vec3f> all_box;
-        all_box = CollisionCore::AABB<MathCore::vec3f>::joinAABB(aabb_main_box, aabb_avatar_box);
-        all_box = CollisionCore::AABB<MathCore::vec3f>::joinAABB(all_box, aabb_continue_box);
-
-        auto center_all = (all_box.min_box + all_box.max_box) * 0.5f;
-        auto size_all = (all_box.max_box - all_box.min_box);
-
-        MathCore::vec2f main_offset = MathCore::vec2f(-center_all.x, -center_all.y);
-
-        avatar_offset += main_offset;
-
-        avatar_pivot->getTransform()->setLocalPosition(MathCore::vec3f(
-            avatar_offset.x,
-            avatar_offset.y,
-            -10.0f));
+        // avatar_pivot->getTransform()->setLocalPosition(MathCore::vec3f(
+        //     avatar_offset.x,
+        //     avatar_offset.y,
+        //     -10.0f));
     }
 
     void InGameDialog::layoutVisibleElements(const MathCore::vec2i &size)
@@ -216,7 +177,7 @@ namespace ui
 
         auto main_box_text = node_ui->getItemByName("main_box_text").get<AppKit::GLEngine::Components::ComponentFont>();
 
-        MathCore::vec2f max_box_size = (MathCore::vec2f)size - 2.0f * screen_margin;
+        max_box_size = (MathCore::vec2f)size - 2.0f * screen_margin;
         max_box_size = MathCore::OP<MathCore::vec2f>::maximum(0, max_box_size);
         float reserved_height = text_margin * 2.0f;
         max_box_size.y = (reserved_height < max_box_size.y) ? reserved_height : max_box_size.y;
@@ -312,7 +273,7 @@ namespace ui
         float posicao_esquerda = -max_box_size.x * 0.5f + avatar_size * 0.5f + text_margin * 0.75f;
         float posicao_direita = max_box_size.x * 0.5f - avatar_size * 0.5f - text_margin * 0.75f;
         float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, side_percentage); // posicao_esquerda * ( 1.0f - side_percentage ) + posicao_direita * side_percentage;
-        MathCore::vec2f avatar_offset = MathCore::vec2f(
+        avatar_offset = MathCore::vec2f(
             pos_offset,
             max_box_size.y * 0.5f + avatar_size * 0.5f - text_margin * 0.75f);
 
@@ -339,7 +300,7 @@ namespace ui
         auto center_all = (all_box.min_box + all_box.max_box) * 0.5f;
         auto size_all = (all_box.max_box - all_box.min_box);
 
-        MathCore::vec2f main_offset = MathCore::vec2f(-center_all.x, -center_all.y);
+        main_offset = MathCore::vec2f(-center_all.x, -center_all.y);
 
         avatar_offset += main_offset;
         continue_offset += main_offset;

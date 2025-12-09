@@ -47,6 +47,10 @@ namespace ui
         std::string avatar;
         float side_percentage;
         float size_text_y;
+        MathCore::vec2f avatar_offset;
+        MathCore::vec2f max_box_size;
+        MathCore::vec2f main_offset;
+
 
         int min_line_count;
 
@@ -76,7 +80,7 @@ namespace ui
         void setParent(std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> &parent, ScreenManager *screenManager);
         void setProperties(float avatar_size, float continue_button_size, float text_size, float screen_margin, float text_margin);
         
-        void blinkAmount(float lerp_factor);
+        void update(Platform::Time *elapsed, float blink_01_lerp_factor);
 
         void layoutVisibleElements(const MathCore::vec2i &size);// called on resize
 

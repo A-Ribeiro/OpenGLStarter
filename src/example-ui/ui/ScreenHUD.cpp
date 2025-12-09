@@ -12,7 +12,7 @@ namespace ui
     }
     void ScreenHUD::onOsciloscopeSinLerp(Platform::Time *elapsed, float osciloscope, float sin)
     {
-        inGameDialog.blinkAmount(sin);
+        inGameDialog.update(elapsed, sin);
     }
 
     const char *ScreenHUD::Name = "ScreenHUD";
