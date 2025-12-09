@@ -1,0 +1,21 @@
+{
+    "cmake.debugConfig": {
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            },
+            {
+                "description": "Ignore SIGUSR1",
+                "text": "handle SIGUSR1 nostop noprint pass",
+                "ignoreFailures": false
+            },
+            {
+                "description": "Ignore SIGUSR2",
+                "text": "handle SIGUSR2 nostop noprint pass",
+                "ignoreFailures": false
+            }
+        ]
+    }
+}
