@@ -150,7 +150,7 @@ namespace ui
         // float posicao_direita = max_box_size.x * 0.5f - avatar_size * 0.5f - text_margin * 0.75f;
         // //float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, side_percentage); // posicao_esquerda * ( 1.0f - side_percentage ) + posicao_direita * side_percentage;
 
-        // float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, lerp_factor);
+        // float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, blink_01_lerp_factor);
         // pos_offset += main_offset.x;
 
         // avatar_offset.x = pos_offset;

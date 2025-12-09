@@ -50,6 +50,7 @@ App::App()
     // screenRenderWindow.setEventForwardingEnabled(true);
 
     fps = 0;
+    below_min_hz_count = 0;
 }
 
 void App::load()
@@ -88,11 +89,14 @@ void App::draw()
     if (time.unscaledDeltaTime <= 1.0f / 1000.0f)
         time.rollback_and_set_zero();
     // 2 hz protection code - for fallback from window move
-    if (time.unscaledDeltaTime > 1.0f / 2.0f)
+    if (time.unscaledDeltaTime > 1.0f / 2.0f && below_min_hz_count < 2){
+        below_min_hz_count++;
         time.reset();
+    } else
+        below_min_hz_count = 0;
 
     fps_timer.update();
-    if (fps_timer.unscaledDeltaTime > 1.0f / 2.0f)
+    if (fps_timer.unscaledDeltaTime > 1.0f / 5.0f)
         fps_timer.reset();
 
     if (gain_focus)
