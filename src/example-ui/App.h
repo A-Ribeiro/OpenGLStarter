@@ -13,6 +13,7 @@ using namespace AppKit::OpenGL;
 
 class App : public AppBase {
     RenderPipeline renderPipeline;
+    uint32_t below_min_hz_count;
     Platform::Time time;
     Platform::Time fps_timer;
     ResourceHelper resourceHelper;
