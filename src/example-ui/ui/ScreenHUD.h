@@ -19,13 +19,13 @@ namespace ui
         void onOsciloscopeSinLerp(Platform::Time *elapsed, float osciloscope, float sin);
 
     public:
-        static constexpr float avatar_size = 180;
-        static constexpr float continue_button_size = 64;
+        //static constexpr float avatar_size = 180;
+        //static constexpr float continue_button_size = 64;
 
-        static constexpr float text_size = 32;
+        //static constexpr float text_size = 32;
 
-        static constexpr float screen_margin = 64;
-        static constexpr float text_margin = 32; // margin from main_box
+        //static constexpr float screen_margin = 64;
+        //static constexpr float text_margin = 32; // margin from main_box
 
         static constexpr float osciloscope_normal_hz = 1.0f;
         static constexpr float osciloscope_selected_hz = 6.0f;
