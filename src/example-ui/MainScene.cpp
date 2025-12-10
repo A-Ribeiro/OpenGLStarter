@@ -9,24 +9,24 @@
 //
 // Auto Generated: Exported Bitmaps inside the Font
 //
-#define  Font_xbox_a u8"\U00010000"
-#define  Font_xbox_b u8"\U00010001"
-#define  Font_xbox_x u8"\U00010002"
-#define  Font_xbox_y u8"\U00010003"
-#define  Font_ps_circle_color u8"\U00010004"
-#define  Font_ps_cross_color u8"\U00010005"
-#define  Font_ps_square_color u8"\U00010006"
-#define  Font_ps_triangle_color u8"\U00010007"
-#define  Font_ps_circle_white u8"\U00010008"
-#define  Font_ps_cross_white u8"\U00010009"
-#define  Font_ps_square_white u8"\U0001000a"
-#define  Font_ps_triangle_white u8"\U0001000b"
-#define  Font_L_stick u8"\U0001000c"
-#define  Font_R_stick u8"\U0001000d"
-#define  Font_Key_arrows u8"\U0001000e"
-#define  Font_Key_z u8"\U0001000f"
-#define  Font_Key_x u8"\U00010010"
-#define  Font_Key_c u8"\U00010011"
+#define Font_xbox_a u8"\U00010000"
+#define Font_xbox_b u8"\U00010001"
+#define Font_xbox_x u8"\U00010002"
+#define Font_xbox_y u8"\U00010003"
+#define Font_ps_circle_color u8"\U00010004"
+#define Font_ps_cross_color u8"\U00010005"
+#define Font_ps_square_color u8"\U00010006"
+#define Font_ps_triangle_color u8"\U00010007"
+#define Font_ps_circle_white u8"\U00010008"
+#define Font_ps_cross_white u8"\U00010009"
+#define Font_ps_square_white u8"\U0001000a"
+#define Font_ps_triangle_white u8"\U0001000b"
+#define Font_L_stick u8"\U0001000c"
+#define Font_R_stick u8"\U0001000d"
+#define Font_Key_arrows u8"\U0001000e"
+#define Font_Key_z u8"\U0001000f"
+#define Font_Key_x u8"\U00010010"
+#define Font_Key_c u8"\U00010011"
 
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
@@ -261,15 +261,22 @@ void MainScene::update(Platform::Time *elapsed)
 
         screenManager->triggerEvent(command);
 
-        if (HUD_visible && command == ui::UIEvent_InputActionBack)
+        if (HUD_visible)
         {
-            // Hide HUD on back
-            screenManager->screen<ui::ScreenHUD>()->inGameDialog.hideDialog(
-                ui::DialogAppearModeType_Scroll,
-                [&]()
-                {
-                    screenManager->open_screen("ScreenMain");
-                });
+            if (command == ui::UIEvent_InputActionEnter)
+            {
+                screenManager->screen<ui::ScreenHUD>()->inGameDialog.pressContinue();
+            }
+            else if (command == ui::UIEvent_InputActionBack)
+            {
+                // Hide HUD on back
+                screenManager->screen<ui::ScreenHUD>()->inGameDialog.hideDialog(
+                    ui::DialogAppearModeType_Scroll,
+                    [&]()
+                    {
+                        screenManager->open_screen("ScreenMain");
+                    });
+            }
         }
     }
 
