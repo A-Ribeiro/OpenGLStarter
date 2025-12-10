@@ -2,6 +2,7 @@
 
 #include "../common.h"
 #include <appkit-gl-engine/util/SpriteAtlas.h>
+#include "RichMessageTokenizer.h"
 
 namespace ui
 {
@@ -21,7 +22,8 @@ namespace ui
 
     enum DialogTextModeType
     {
-        DialogTextModeType_CharAppear = 0,
+        DialogTextModeType_None = 0,
+        DialogTextModeType_CharAppear,
         DialogTextModeType_AppearAtOnce,
     };
 
@@ -53,6 +55,15 @@ namespace ui
 
 
         int min_line_count;
+
+        std::string rich_message_source;
+        AppKit::OpenGL::RichMessageTokenizer text_tokenizer;
+
+        DialogTextModeType text_mode;
+
+        float count_up_aux;
+        float char_per_sec;
+        float char_per_sec_fast;
 
     public:
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> node_ui;
@@ -99,7 +110,7 @@ namespace ui
             float side_percentage, // DialogAvatarSideType
             const std::string &avatar,
 
-            DialogTextModeType mode,
+            DialogTextModeType text_mode,
             const std::string &rich_message,
             const std::string &rich_continue_char,
 
