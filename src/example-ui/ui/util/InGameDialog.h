@@ -62,6 +62,7 @@ namespace ui
         DialogTextModeType text_mode;
 
         float count_up_aux;
+        float seconds_per_character;
         float char_per_sec;
         float char_per_sec_fast;
 
@@ -89,7 +90,7 @@ namespace ui
         ~InGameDialog() = default;
 
         void setParent(std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> &parent, ScreenManager *screenManager);
-        void setProperties(float avatar_size, float continue_button_size, float text_size, float screen_margin, float text_margin);
+        void setProperties(float avatar_size, float continue_button_size, float text_size, float screen_margin, float text_margin, float char_per_sec, float char_per_sec_fast);
         
         void update(Platform::Time *elapsed, float blink_01_lerp_factor);
 
@@ -119,6 +120,8 @@ namespace ui
 
         void hideDialog(DialogAppearModeType appear_mode,
             EventCore::Callback<void()> onDisapeared);
+
+        void pressContinue();
 
         void resetColors();
     };

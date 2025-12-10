@@ -56,11 +56,13 @@ namespace ui
 
         inGameDialog.setParent(uiComponent, screenManager);
         inGameDialog.setProperties(
-            ScreenHUD::avatar_size, 
-            ScreenHUD::continue_button_size, 
-            ScreenHUD::text_size, 
-            ScreenHUD::screen_margin, 
-            ScreenHUD::text_margin);
+            ScreenHUD::avatar_size,
+            ScreenHUD::continue_button_size,
+            ScreenHUD::text_size,
+            ScreenHUD::screen_margin,
+            ScreenHUD::text_margin,
+            20,// char per sec
+            20*20);// char per sec fast -> 20x normal speed
 
         return uiNode;
     }
