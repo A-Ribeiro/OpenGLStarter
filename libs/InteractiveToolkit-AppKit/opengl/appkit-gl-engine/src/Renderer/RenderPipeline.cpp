@@ -48,6 +48,9 @@ namespace AppKit
                 {
                     mesh = (Components::ComponentMesh *)component.get();
 
+                    if (mesh->indices.size() == 0)
+                        continue;
+
                     if (!mesh->usesVBO() && mesh->indices.size() <= agregateMesh_ConcatenateLowerThanIndexCount)
                     {
                         // flush if more than the triangles limit
@@ -122,6 +125,9 @@ namespace AppKit
                 else if (material != nullptr && component->compareType(Components::ComponentMesh::Type))
                 {
                     mesh = (Components::ComponentMesh *)component.get();
+
+                    if (mesh->indices.size() == 0)
+                        continue;
 
                     if (!mesh->usesVBO() && mesh->indices.size() <= agregateMesh_ConcatenateLowerThanIndexCount)
                     {
@@ -228,8 +234,10 @@ namespace AppKit
 
         void RenderPipeline::renderMeshAgregatorAndClear(ResourceMap *resourceMap, Components::ComponentCamera *camera)
         {
-            if (meshAgregator->indices.size() == 0)
+            if (meshAgregator->indices.size() == 0) {
+                meshAgregator->format = 0; // format reset
                 return;
+            }
 
             MathCore::mat4f *mvp;
             MathCore::mat4f *mv;

@@ -140,6 +140,8 @@ namespace ui
         this->text_size = text_size;
         this->screen_margin = screen_margin;
         this->text_margin = text_margin;
+        this->char_per_sec = 20.0f;
+        this->char_per_sec_fast = 40.0f;
     }
 
     void InGameDialog::update(Platform::Time *elapsed, float blink_01_lerp_factor)
@@ -159,6 +161,56 @@ namespace ui
         //     avatar_offset.x,
         //     avatar_offset.y,
         //     -10.0f));
+
+        if (text_mode == DialogTextModeType_AppearAtOnce)
+        {
+            // this->rich_message = rich_message_source;
+        }
+        else if (text_mode == DialogTextModeType_CharAppear)
+        {
+            this->count_up_aux += elapsed->deltaTime;
+            if (count_up_aux > 1.0f / char_per_sec)
+            {
+                count_up_aux = 0.0f;
+                // add next char to rich_message
+                bool ended = false;
+                auto element_str = text_tokenizer.nextChar(&ended);
+                if (ended)
+                    text_mode == DialogTextModeType_None;
+                else
+                {
+                    rich_message += element_str;
+                    if (components_created)
+                    {
+                        auto engine = AppKit::GLEngine::Engine::Instance();
+                        auto main_box_text = node_ui->getItemByName("main_box_text").get<AppKit::GLEngine::Components::ComponentFont>();
+                        float text_max_width = MathCore::OP<float>::maximum(max_box_size.x - text_margin * 2.0f, 0.0f);
+                        main_box_text->setText( //
+                            node_ui->resourceMap,
+                            "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
+                            // 0 = texture, > 0 = polygon
+                            0,                                                                // float polygon_size,
+                            0,                                                                // float polygon_distance_tolerance,
+                            nullptr,                                                          // Platform::ThreadPool *polygon_threadPool,
+                            engine->sRGBCapable,                                              // bool is_srgb,
+                            this->rich_message,                                               // const std::string &text,
+                            text_size,                                                        // float size, ///< current state of the font size
+                            text_max_width,                                                   // float max_width,
+                            screenManager->colorPalette.text,                                 // const MathCore::vec4f &faceColor,   ///< current state of the face color // .a == 0 turn off the drawing
+                            colorFromHex("#000000", 0.0f),                                    // const MathCore::vec4f &strokeColor, ///< current state of the stroke color
+                            MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // const MathCore::vec3f &strokeOffset,
+                            AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+                            AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+                            1.0f,                                                             // float lineHeight,
+                            AppKit::OpenGL::GLFont2WrapMode_Word,                             // AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                            AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+                            U' ',                                                             // char32_t wordSeparatorChar,
+                            AppKit::GLEngine::Components::MeshUploadMode_Direct               // MeshUploadMode meshUploadMode
+                        );
+                    }
+                }
+            }
+        }
     }
 
     void InGameDialog::layoutVisibleElements(const MathCore::vec2i &size)
@@ -453,19 +505,79 @@ namespace ui
         float side_percentage, // DialogAvatarSideType
         const std::string &avatar,
 
-        DialogTextModeType mode,
+        DialogTextModeType text_mode,
         const std::string &rich_message,
         const std::string &rich_continue_char,
 
         EventCore::Callback<void()> onAppeared,
         EventCore::Callback<void()> onContinuePressed)
     {
-        this->rich_message = rich_message;
+        // this->rich_message = rich_message;
         this->rich_continue_char = rich_continue_char;
         this->avatar = avatar;
         this->side_percentage = side_percentage;
 
         createAllComponents();
+        // set line count before layout
+
+        int line_count = 1;
+        rich_message_source = "";
+        AppKit::OpenGL::RichMessageTokenizer line_tokenizer(rich_message);
+        std::vector<std::string> line_output;
+        bool ended = false;
+        line_tokenizer.nextLine(&line_output, &ended);
+        while (!ended)
+        {
+            if (!rich_message_source.empty())
+            {
+                rich_message_source += "\n";
+                line_count++;
+            }
+
+            std::string aux_current_line;
+            bool first_word = true;
+            for (const auto &word : line_output)
+            {
+                if (first_word)
+                {
+                    first_word = false;
+                    aux_current_line = word;
+                }
+                else
+                {
+                    std::string line_with_word = aux_current_line + " " + word;
+                    int new_line_count = countLinesForText(line_with_word);
+                    if (new_line_count > 1)
+                    {
+                        // line break needed
+                        rich_message_source += aux_current_line + "\n";
+                        line_count++;
+                        aux_current_line = word;
+                    }
+                    else
+                        aux_current_line = line_with_word;
+                }
+            }
+            if (!aux_current_line.empty())
+                rich_message_source += aux_current_line;
+
+            line_tokenizer.nextLine(&line_output, &ended);
+        }
+
+        setMinLineCount(line_count);
+
+        this->text_mode = text_mode;
+        if (text_mode == DialogTextModeType_AppearAtOnce)
+        {
+            this->rich_message = rich_message_source;
+        }
+        else if (text_mode == DialogTextModeType_CharAppear)
+        {
+            this->rich_message = "";
+            this->text_tokenizer = AppKit::OpenGL::RichMessageTokenizer(rich_message_source);
+            this->count_up_aux = 0.0f;
+        }
+
         layoutVisibleElements(screenManager->current_size);
         node_ui->getTransform()->skip_traversing = false;
         onAppeared();

@@ -297,6 +297,9 @@ namespace AppKit
                     mesh->indices.insert(mesh->indices.end(),
                                          builder->triangles.begin(),
                                          builder->triangles.end());
+
+                    //mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_COLOR0;
+
                 }
                 else
                 {
@@ -325,6 +328,8 @@ namespace AppKit
                             mesh->indices.push_back((uint16_t)(i + 2));
                         }
                     }
+
+                    //mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
                 }
 
                 mesh->ComputeFormat(false);

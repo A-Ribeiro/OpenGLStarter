@@ -273,17 +273,18 @@ namespace AppKit
         {
             line_output->clear();
             bool local_ended = false;
+            *ended = true;
             while (!local_ended)
             {
                 std::string token = nextWord(&local_ended);
                 if (!local_ended)
                 {
+                    *ended = false;
                     if (token == "\n")
                         break;
                     line_output->push_back(token);
                 }
             }
-            *ended = line_output->size() == 0;
         }
     }
 }

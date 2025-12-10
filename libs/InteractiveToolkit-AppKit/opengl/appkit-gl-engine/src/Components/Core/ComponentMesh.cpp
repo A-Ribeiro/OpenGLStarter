@@ -226,6 +226,9 @@ namespace AppKit
             }
             void ComponentMesh::concatenate(Transform *toApply, const ComponentMesh *other, const DefaultEngineShader *shader)
             {
+                if (other->indices.size() == 0)
+                    return;
+
                 ITK_ABORT((format != 0 && format != shader->format), "Mesh incompatible format for concatenation.\n");
 
                 format = shader->format;
