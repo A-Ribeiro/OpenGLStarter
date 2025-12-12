@@ -239,8 +239,9 @@ namespace ui
 
         // set text
         auto engine = AppKit::GLEngine::Engine::Instance();
+        float text_max_width = MathCore::OP<float>::maximum(max_box_size.x - text_margin * 2.0f, 0.0f);
+
         {
-            float text_max_width = MathCore::OP<float>::maximum(max_box_size.x - text_margin * 2.0f, 0.0f);
 
             main_box_text->setText( //
                 node_ui->resourceMap,
@@ -268,8 +269,32 @@ namespace ui
 
         auto fontResource = node_ui->resourceMap->getTextureFont("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
 
-        auto main_box_text_box = main_box_text->currentBox();
-        size_text_y = main_box_text_box.max_box.y - main_box_text_box.min_box.y;
+        // auto main_box_text_box = main_box_text->currentBox();
+        // size_text_y = main_box_text_box.max_box.y - main_box_text_box.min_box.y;
+
+        {
+            auto main_box_text_box = AppKit::GLEngine::Components::ComponentFont::computeBox(
+                node_ui->resourceMap,                  // AppKit::GLEngine::ResourceMap *resourceMap,
+                "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
+                // 0 = texture, > 0 = polygon
+                0,                   // float polygon_size,
+                0,                   // float polygon_distance_tolerance,
+                nullptr,             // Platform::ThreadPool *polygon_threadPool,
+                engine->sRGBCapable, // bool is_srgb,
+                this->rich_message_source,  // const std::string &text,
+                text_size,           // float size, ///< current state of the font size
+                text_max_width,      // float max_width,
+
+                AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+                AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+                1.0f,                                                             // float lineHeight,
+                AppKit::OpenGL::GLFont2WrapMode_Word,                             // AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+                U' '                                                              // char32_t wordSeparatorChar
+            );
+
+            size_text_y = main_box_text_box.max_box.y - main_box_text_box.min_box.y;
+        }
 
         // set min_line_count
         size_text_y = MathCore::OP<float>::maximum(size_text_y, min_line_count * fontResource->fontBuilder->glFont2.new_line_height * (text_size / fontResource->fontBuilder->glFont2.size));
@@ -588,7 +613,8 @@ namespace ui
         layoutVisibleElements(screenManager->current_size);
         node_ui->getTransform()->skip_traversing = false;
 
-        if (this->onAppeared != nullptr){
+        if (this->onAppeared != nullptr)
+        {
             auto tmp_onAppeared = this->onAppeared;
             this->onAppeared = nullptr;
             tmp_onAppeared();
@@ -602,7 +628,8 @@ namespace ui
 
         node_ui->getTransform()->skip_traversing = true;
         releaseAllComponents();
-        if (this->onDisapeared != nullptr){
+        if (this->onDisapeared != nullptr)
+        {
             auto tmp_onDisapeared = this->onDisapeared;
             this->onDisapeared = nullptr;
             tmp_onDisapeared();
@@ -619,7 +646,8 @@ namespace ui
         if (text_mode == DialogTextModeType_None)
         {
             // continue pressed
-            if (this->onContinuePressed != nullptr){
+            if (this->onContinuePressed != nullptr)
+            {
                 auto tmp_onContinuePressed = this->onContinuePressed;
                 this->onContinuePressed = nullptr;
                 tmp_onContinuePressed();
