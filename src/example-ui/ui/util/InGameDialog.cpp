@@ -97,7 +97,13 @@ namespace ui
             screenManager->camera,
             rect_mask);
 
-        node_ui->addRectangle(
+        auto continue_pivot = node_ui->addComponentUI(
+                                         MathCore::vec2f(0, 0), // pos
+                                         -10,                   // z
+                                         "continue_pivot")
+                                  .get<AppKit::GLEngine::Components::ComponentUI>();
+
+        continue_pivot->addRectangle(
             MathCore::vec2f(0, 0),                              // pos
             MathCore::vec2f(256, 256),                          // size
             colorFromHex("#000000", 0.4f),                      // color
@@ -109,6 +115,24 @@ namespace ui
             MathCore::vec4f(0),                                 // drop shadow color
             -10,                                                // z
             "continue_box");
+
+        continue_pivot->addTextureText(
+            "resources/Roboto-Regular-100.basof2",                    // font_path
+            MathCore::vec2f(0, 0),                                    // pos
+            -15,                                                      // z
+            this->rich_continue_char,                                 // text
+            text_size,                                                // size
+            -1,                                                       // max_width
+            screenManager->colorPalette.text,                         // faceColor
+            colorFromHex("#000000", 0.0f),                            // strokeColor
+            MathCore::vec3f(0.0f, 0.0f, -0.02f),                      // strokeOffset
+            AppKit::OpenGL::GLFont2HorizontalAlign_center,            // horizontalAlign
+            AppKit::OpenGL::GLFont2VerticalAlign_middle,              // verticalAlign
+            1.0f,                                                     // lineHeight
+            AppKit::OpenGL::GLFont2WrapMode_Word,                     // wrapMode
+            AppKit::OpenGL::GLFont2FirstLineHeightMode_UseLineHeight, // firstLineHeightMode
+            U' ',                                                     // wordSeparatorChar
+            "continue_char");
 
         components_created = true;
     }
@@ -178,7 +202,16 @@ namespace ui
                 bool ended = false;
                 auto element_str = text_tokenizer.nextChar(&ended);
                 if (ended)
+                {
                     text_mode = DialogTextModeType_None;
+                    if (components_created)
+                    {
+                        auto continue_pivot = node_ui->getItemByName("continue_pivot").get<AppKit::GLEngine::Components::ComponentUI>();
+                        // auto continue_box = continue_pivot->getItemByName("continue_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
+                        auto continue_char = continue_pivot->getItemByName("continue_char").get<AppKit::GLEngine::Components::ComponentFont>();
+                        continue_char->getTransform()->skip_traversing = false;
+                    }
+                }
                 else
                 {
                     rich_message += element_str;
@@ -224,13 +257,25 @@ namespace ui
         // called on resize
 
         auto main_box = node_ui->getItemByName("main_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
+        auto main_box_text = node_ui->getItemByName("main_box_text").get<AppKit::GLEngine::Components::ComponentFont>();
+
         auto avatar_pivot = node_ui->getItemByName("avatar_pivot").get<AppKit::GLEngine::Components::ComponentUI>();
         auto avatar_box = avatar_pivot->getItemByName("avatar_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
         auto avatar_sprite = avatar_pivot->getItemByName("avatar_sprite").get<AppKit::GLEngine::Components::ComponentSprite>();
 
-        auto continue_box = node_ui->getItemByName("continue_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
+        auto continue_pivot = node_ui->getItemByName("continue_pivot").get<AppKit::GLEngine::Components::ComponentUI>();
+        auto continue_box = continue_pivot->getItemByName("continue_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
+        auto continue_char = continue_pivot->getItemByName("continue_char").get<AppKit::GLEngine::Components::ComponentFont>();
 
-        auto main_box_text = node_ui->getItemByName("main_box_text").get<AppKit::GLEngine::Components::ComponentFont>();
+        if (text_mode == DialogTextModeType_CharAppear)
+        {
+            // auto continue_pivot = node_ui->getItemByName("continue_pivot").get<AppKit::GLEngine::Components::ComponentUI>();
+            // auto continue_box = continue_pivot->getItemByName("continue_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
+            // auto continue_char = continue_pivot->getItemByName("continue_char").get<AppKit::GLEngine::Components::ComponentFont>();
+            continue_char->getTransform()->skip_traversing = true;
+        }
+        else
+            continue_char->getTransform()->skip_traversing = false;
 
         max_box_size = (MathCore::vec2f)size - 2.0f * screen_margin;
         max_box_size = MathCore::OP<MathCore::vec2f>::maximum(0, max_box_size);
@@ -277,13 +322,13 @@ namespace ui
                 node_ui->resourceMap,                  // AppKit::GLEngine::ResourceMap *resourceMap,
                 "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
                 // 0 = texture, > 0 = polygon
-                0,                   // float polygon_size,
-                0,                   // float polygon_distance_tolerance,
-                nullptr,             // Platform::ThreadPool *polygon_threadPool,
-                engine->sRGBCapable, // bool is_srgb,
-                this->rich_message_source,  // const std::string &text,
-                text_size,           // float size, ///< current state of the font size
-                text_max_width,      // float max_width,
+                0,                         // float polygon_size,
+                0,                         // float polygon_distance_tolerance,
+                nullptr,                   // Platform::ThreadPool *polygon_threadPool,
+                engine->sRGBCapable,       // bool is_srgb,
+                this->rich_message_source, // const std::string &text,
+                text_size,                 // float size, ///< current state of the font size
+                text_max_width,            // float max_width,
 
                 AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
                 AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
@@ -395,7 +440,7 @@ namespace ui
             avatar_offset.y,
             -10.0f));
 
-        continue_box->getTransform()->setLocalPosition(MathCore::vec3f(
+        continue_pivot->getTransform()->setLocalPosition(MathCore::vec3f(
             continue_offset.x,
             continue_offset.y,
             -10.0f));
