@@ -178,7 +178,7 @@ namespace ui
                 bool ended = false;
                 auto element_str = text_tokenizer.nextChar(&ended);
                 if (ended)
-                    text_mode == DialogTextModeType_None;
+                    text_mode = DialogTextModeType_None;
                 else
                 {
                     rich_message += element_str;
