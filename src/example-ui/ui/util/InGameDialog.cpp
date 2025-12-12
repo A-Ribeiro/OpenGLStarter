@@ -515,6 +515,9 @@ namespace ui
         EventCore::Callback<void()> onAppeared,
         EventCore::Callback<void()> onContinuePressed)
     {
+        this->onAppeared = onAppeared;
+        this->onContinuePressed = onContinuePressed;
+
         // this->rich_message = rich_message;
         this->rich_continue_char = rich_continue_char;
         this->avatar = avatar;
@@ -585,15 +588,25 @@ namespace ui
         layoutVisibleElements(screenManager->current_size);
         node_ui->getTransform()->skip_traversing = false;
 
-        onAppeared();
+        if (this->onAppeared != nullptr){
+            auto tmp_onAppeared = this->onAppeared;
+            this->onAppeared = nullptr;
+            tmp_onAppeared();
+        }
     }
 
     void InGameDialog::hideDialog(DialogAppearModeType appear_mode,
                                   EventCore::Callback<void()> onDisapeared)
     {
+        this->onDisapeared = onDisapeared;
+
         node_ui->getTransform()->skip_traversing = true;
         releaseAllComponents();
-        onDisapeared();
+        if (this->onDisapeared != nullptr){
+            auto tmp_onDisapeared = this->onDisapeared;
+            this->onDisapeared = nullptr;
+            tmp_onDisapeared();
+        }
     }
 
     void InGameDialog::pressContinue()
@@ -601,6 +614,16 @@ namespace ui
         if (text_mode == DialogTextModeType_CharAppear)
         {
             this->seconds_per_character = 1.0f / char_per_sec_fast;
+        }
+
+        if (text_mode == DialogTextModeType_None)
+        {
+            // continue pressed
+            if (this->onContinuePressed != nullptr){
+                auto tmp_onContinuePressed = this->onContinuePressed;
+                this->onContinuePressed = nullptr;
+                tmp_onContinuePressed();
+            }
         }
     }
 
