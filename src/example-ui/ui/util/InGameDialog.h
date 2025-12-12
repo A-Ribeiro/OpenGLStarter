@@ -66,6 +66,10 @@ namespace ui
         float char_per_sec;
         float char_per_sec_fast;
 
+        EventCore::Callback<void()> onAppeared;
+        EventCore::Callback<void()> onContinuePressed;
+        EventCore::Callback<void()> onDisapeared;
+
     public:
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> node_ui;
 
