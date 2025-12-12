@@ -130,7 +130,7 @@ void MainScene::bindResourcesToGraph()
                     "Welcome to the <b>Example UI</b> demo!\nThis is a simple dialog box with <i>rich text</i> support.\n\nPress the "
                     "{push;lineHeight:0.8;faceColor:ffffffff;size:40.0;}" Font_Key_z "{pop;}"
                     " button to proceed.",
-                    "{push;lineHeight:0.8;faceColor:ffffffff;size:80.0;}" Font_Key_z "{pop;}",
+                    "{push;lineHeight:0.6;faceColor:ffffffff;size:60.0;}" Font_Key_z "{pop;}",
                     [&]()
                     {
                         // Dialog appeared callback
