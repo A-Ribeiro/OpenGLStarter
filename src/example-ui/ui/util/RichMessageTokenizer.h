@@ -25,8 +25,8 @@ namespace AppKit
                 if (this != &other)
                 {
                     this->generator = other.generator;
-                    this->rich_message_it = other.rich_message_it;
-                    this->rich_message_it_end = other.rich_message_it_end;
+                    this->rich_message_it = this->generator.copyChangeRef(other.rich_message_it);
+                    this->rich_message_it_end = this->generator.copyChangeRef(other.rich_message_it_end);
                     this->separator_char = other.separator_char;
                     this->last_char_input = other.last_char_input;
                 }
@@ -38,8 +38,8 @@ namespace AppKit
                 if (this != &other)
                 {
                     this->generator = std::move(other.generator);
-                    this->rich_message_it = std::move(other.rich_message_it);
-                    this->rich_message_it_end = std::move(other.rich_message_it_end);
+                    this->rich_message_it = this->generator.copyChangeRef(other.rich_message_it);
+                    this->rich_message_it_end = this->generator.copyChangeRef(other.rich_message_it_end);
                     this->separator_char = other.separator_char;
                     this->last_char_input = other.last_char_input;
                 }

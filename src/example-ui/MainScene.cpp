@@ -122,30 +122,75 @@ void MainScene::bindResourcesToGraph()
                 // screenManager->close_all();
 
                 screenManager->open_screen("ScreenHUD");
-                screenManager->screen<ui::ScreenHUD>()->inGameDialog.showDialog(
-                    ui::DialogAppearModeType_Scroll,
-                    0.5f,
-                    "resources/look_to_right_normal.png",
-                    ui::DialogTextModeType_CharAppear,
-                    "Welcome to the <b>Example UI</b> demo!\nThis is a simple dialog box with <i>rich text</i> support.\n\nPress the "
-                    "{push;lineHeight:0.8;faceColor:ffffffff;size:40.0;}" Font_Key_z "{pop;}"
-                    " button to proceed.",
+
+                // screenManager->screen<ui::ScreenHUD>()->inGameDialog.showDialog(
+                //     ui::DialogAppearModeType_Scroll,
+                //     0.5f,
+                //     "resources/look_to_right_normal.png",
+                //     ui::DialogTextModeType_CharAppear,
+                //     "Welcome to the <b>Example UI</b> demo!\nThis is a simple dialog box with <i>rich text</i> support.\n\nPress the "
+                //     "{push;lineHeight:0.8;faceColor:ffffffff;size:40.0;}" Font_Key_z "{pop;}"
+                //     " button to proceed.",
+                //     "{push;lineHeight:0.6;faceColor:ffffffff;size:60.0;}" Font_Key_z "{pop;}",
+                //     [&]()
+                //     {
+                //         // Dialog appeared callback
+                //     },
+                //     [&]()
+                //     {
+                //         // Dialog continue pressed
+                //         screenManager->screen<ui::ScreenHUD>()->inGameDialog.hideDialog(
+                //             ui::DialogAppearModeType_Scroll,
+                //             [&]()
+                //             {
+                //                 screenManager->open_screen("ScreenMain");
+                //                 // screenManager->close_all();
+                //                 // Dialog disapear callback
+                //             });
+                //     });
+
+                screenManager->screen<ui::ScreenHUD>()->inGameDialog.smartShowDialog(
+                    ui::DialogAppearModeType_Scroll, // appear_mode
+                    ui::DialogAppearModeType_Scroll, // disappear_mode
+                    
                     "{push;lineHeight:0.6;faceColor:ffffffff;size:60.0;}" Font_Key_z "{pop;}",
-                    [&]()
+
                     {
-                        // Dialog appeared callback
+                        {
+                            0.0f,
+                            "resources/look_to_right_normal.png",
+                            ui::DialogTextModeType_CharAppear,
+                            "Big Moves Causes Big Wins.",
+                        },
+                        {
+                            0.1f,
+                            "resources/look_to_right_smile.png",
+                            ui::DialogTextModeType_CharAppear,
+                            "Big Moves Causes Big Wins!",
+                        },
+                        {
+                            1.0f,
+                            "resources/look_to_left_normal.png",
+                            ui::DialogTextModeType_CharAppear,
+                            "Big Moves Causes Big Wins.",
+                        },
+                        {
+                            -1.0f,
+                            "NO_IMAGE",
+                            ui::DialogTextModeType_CharAppear,
+                            "He deeply thoughts...",
+                        },
+                        {
+                            0.5f,
+                            "resources/look_to_center_normal.png",
+                            ui::DialogTextModeType_CharAppear,
+                            "Shure it does!",
+                        },
                     },
                     [&]()
                     {
-                        // Dialog continue pressed
-                        screenManager->screen<ui::ScreenHUD>()->inGameDialog.hideDialog(
-                            ui::DialogAppearModeType_Scroll,
-                            [&]()
-                            {
-                                screenManager->open_screen("ScreenMain");
-                                // screenManager->close_all();
-                                // Dialog disapear callback
-                            });
+                        // Dialog ended callback
+                        screenManager->open_screen("ScreenMain");
                     });
             }
             else if (option == "Options")

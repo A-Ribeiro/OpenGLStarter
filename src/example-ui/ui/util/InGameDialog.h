@@ -9,7 +9,8 @@ namespace ui
 
     enum DialogAppearModeType
     {
-        DialogAppearModeType_Scroll = 0,
+        DialogAppearModeType_None = 0,
+        DialogAppearModeType_Scroll,
         DialogAppearModeType_Fade,
     };
 
@@ -27,7 +28,15 @@ namespace ui
         DialogTextModeType_AppearAtOnce,
     };
 
-    class InGameDialog
+    struct DialogProperties
+    {
+        float side_percentage;
+        std::string avatar;
+        DialogTextModeType text_mode;
+        std::string rich_message;
+    };
+
+    class InGameDialog : public EventCore::HandleCallback
     {
 
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> parent;
@@ -69,6 +78,11 @@ namespace ui
         EventCore::Callback<void()> onAppeared;
         EventCore::Callback<void()> onContinuePressed;
         EventCore::Callback<void()> onDisapeared;
+
+        std::vector<DialogProperties> dialog_pages;
+        DialogAppearModeType appear_mode;
+        DialogAppearModeType disappear_mode;
+        EventCore::Callback<void()> onDialogEnded;
 
     public:
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> node_ui;
@@ -125,9 +139,21 @@ namespace ui
         void hideDialog(DialogAppearModeType appear_mode,
             EventCore::Callback<void()> onDisapeared);
 
+
+        void smartShowDialog(
+            DialogAppearModeType appear_mode,
+            DialogAppearModeType disappear_mode,
+            const std::string &rich_continue_char,
+            const std::vector<DialogProperties> &dialog_pages,
+            EventCore::Callback<void()> onDialogEnded);
+        
+
         void pressContinue();
 
         void resetColors();
+
+        private:
+        void show_next_page();
     };
 
 }
