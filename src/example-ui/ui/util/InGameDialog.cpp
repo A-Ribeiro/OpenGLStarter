@@ -267,6 +267,8 @@ namespace ui
         auto continue_box = continue_pivot->getItemByName("continue_box").get<AppKit::GLEngine::Components::ComponentRectangle>();
         auto continue_char = continue_pivot->getItemByName("continue_char").get<AppKit::GLEngine::Components::ComponentFont>();
 
+        avatar_pivot->getTransform()->skip_traversing = side_percentage < 0.0f || side_percentage > 1.0f;
+
         if (text_mode == DialogTextModeType_CharAppear)
         {
             // auto continue_pivot = node_ui->getItemByName("continue_pivot").get<AppKit::GLEngine::Components::ComponentUI>();
@@ -397,7 +399,8 @@ namespace ui
 
         float posicao_esquerda = -max_box_size.x * 0.5f + avatar_size * 0.5f + text_margin * 0.75f;
         float posicao_direita = max_box_size.x * 0.5f - avatar_size * 0.5f - text_margin * 0.75f;
-        float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita, side_percentage); // posicao_esquerda * ( 1.0f - side_percentage ) + posicao_direita * side_percentage;
+        float pos_offset = MathCore::OP<float>::lerp(posicao_esquerda, posicao_direita,
+                                                     MathCore::OP<float>::clamp(side_percentage, 0, 1)); // posicao_esquerda * ( 1.0f - side_percentage ) + posicao_direita * side_percentage;
         avatar_offset = MathCore::vec2f(
             pos_offset,
             max_box_size.y * 0.5f + avatar_size * 0.5f - text_margin * 0.75f);
@@ -585,6 +588,7 @@ namespace ui
         EventCore::Callback<void()> onAppeared,
         EventCore::Callback<void()> onContinuePressed)
     {
+
         this->onAppeared = onAppeared;
         this->onContinuePressed = onContinuePressed;
 
@@ -664,6 +668,53 @@ namespace ui
             this->onAppeared = nullptr;
             tmp_onAppeared();
         }
+    }
+
+    void InGameDialog::smartShowDialog(
+        DialogAppearModeType appear_mode,
+        DialogAppearModeType disappear_mode,
+        const std::string &rich_continue_char,
+        const std::vector<DialogProperties> &dialog_pages,
+        EventCore::Callback<void()> onDialogEnded)
+    {
+        this->dialog_pages = dialog_pages;
+        this->appear_mode = appear_mode;
+        this->disappear_mode = disappear_mode;
+        this->rich_continue_char = rich_continue_char;
+        this->onDialogEnded = onDialogEnded;
+        show_next_page();
+    }
+    void InGameDialog::show_next_page()
+    {
+        if (dialog_pages.empty())
+        {
+            hideDialog(
+                this->disappear_mode,
+                [this]()
+                {
+                    if (this->onDialogEnded != nullptr)
+                    {
+                        auto tmp_onDialogEnded = this->onDialogEnded;
+                        this->onDialogEnded = nullptr;
+                        tmp_onDialogEnded();
+                    }
+                });
+            return;
+        }
+        auto current_page = dialog_pages.front();
+        dialog_pages.erase(dialog_pages.begin());
+
+        showDialog(
+            this->appear_mode,
+            current_page.side_percentage,
+            current_page.avatar,
+            current_page.text_mode,
+            current_page.rich_message,
+            this->rich_continue_char,
+            // onAppeared
+            nullptr,
+            // onContinuePressed
+            EventCore::CallbackWrapper(&InGameDialog::show_next_page, this));
     }
 
     void InGameDialog::hideDialog(DialogAppearModeType appear_mode,
