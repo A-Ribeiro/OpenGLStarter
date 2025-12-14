@@ -155,6 +155,7 @@ namespace ui
         components_created = false;
 
         min_line_count = 0;
+        min_text_height = 0.0f;
     }
 
     void InGameDialog::setProperties(float avatar_size, float continue_button_size, float text_size, float screen_margin, float text_margin, float char_per_sec, float char_per_sec_fast)
@@ -345,6 +346,7 @@ namespace ui
 
         // set min_line_count
         size_text_y = MathCore::OP<float>::maximum(size_text_y, min_line_count * fontResource->fontBuilder->glFont2.new_line_height * (text_size / fontResource->fontBuilder->glFont2.size));
+        size_text_y = MathCore::OP<float>::maximum(size_text_y, min_text_height);
 
         max_box_size.y += MathCore::OP<float>::maximum(0.0f, size_text_y);
 
@@ -527,6 +529,7 @@ namespace ui
 
             // set min_line_count
             size_text_y = MathCore::OP<float>::maximum(size_text_y, min_line_count * fontResource->fontBuilder->glFont2.new_line_height * (text_size / fontResource->fontBuilder->glFont2.size));
+            size_text_y = MathCore::OP<float>::maximum(size_text_y, min_text_height);
 
             max_box_size.y += MathCore::OP<float>::maximum(0.0f, size_text_y);
         }
@@ -547,7 +550,7 @@ namespace ui
         avatarAtlas = gen.generateAtlas(*node_ui->resourceMap, engine->sRGBCapable, true, 10);
     }
 
-    int InGameDialog::countLinesForText(const std::string &rich_message)
+    int InGameDialog::countLinesForText(const std::string &rich_message) const
     {
         auto size = screenManager->current_size;
         MathCore::vec2f max_box_size = (MathCore::vec2f)size - 2.0f * screen_margin;
@@ -572,6 +575,51 @@ namespace ui
     {
         // start dialog with empty lines to reserve space
         this->min_line_count = min_line_count;
+    }
+
+    CollisionCore::AABB<MathCore::vec3f> InGameDialog::computeTextAABB(const std::string &rich_message) const
+    {
+        auto size = screenManager->current_size;
+
+        MathCore::vec2f max_box_size = (MathCore::vec2f)size - 2.0f * screen_margin;
+        max_box_size = MathCore::OP<MathCore::vec2f>::maximum(0, max_box_size);
+        // float reserved_height = text_margin * 2.0f;
+        // max_box_size.y = (reserved_height < max_box_size.y) ? reserved_height : max_box_size.y;
+
+        auto engine = AppKit::GLEngine::Engine::Instance();
+        float text_max_width = MathCore::OP<float>::maximum(max_box_size.x - text_margin * 2.0f, 0.0f);
+
+        auto main_box_text_box = AppKit::GLEngine::Components::ComponentFont::computeBox(
+            node_ui->resourceMap,                  // AppKit::GLEngine::ResourceMap *resourceMap,
+            "resources/Roboto-Regular-100.basof2", // const std::string &font_path,
+            // 0 = texture, > 0 = polygon
+            0,                   // float polygon_size,
+            0,                   // float polygon_distance_tolerance,
+            nullptr,             // Platform::ThreadPool *polygon_threadPool,
+            engine->sRGBCapable, // bool is_srgb,
+            rich_message,        // const std::string &text,
+            text_size,           // float size, ///< current state of the font size
+            text_max_width,      // float max_width,
+
+            AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+            AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+            1.0f,                                                             // float lineHeight,
+            AppKit::OpenGL::GLFont2WrapMode_Word,                             // AppKit::OpenGL::GLFont2WrapMode wrapMode,
+            AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+            U' '                                                              // char32_t wordSeparatorChar
+        );
+        return main_box_text_box;
+    }
+
+    float InGameDialog::computeTextHeight(const std::string &rich_message) const
+    {
+        auto aabb = computeTextAABB(rich_message);
+        return aabb.max_box.y - aabb.min_box.y;
+    }
+
+    void InGameDialog::setMinTextHeight(float h)
+    {
+        this->min_text_height = h;
     }
 
     void InGameDialog::showDialog(
@@ -644,7 +692,7 @@ namespace ui
             line_tokenizer.nextLine(&line_output, &ended);
         }
 
-        setMinLineCount(line_count);
+        // setMinLineCount(line_count);
 
         this->text_mode = text_mode;
         if (text_mode == DialogTextModeType_AppearAtOnce)
@@ -677,32 +725,38 @@ namespace ui
         const std::vector<DialogProperties> &dialog_pages,
         EventCore::Callback<void()> onDialogEnded)
     {
-        this->dialog_pages = dialog_pages;
+        smart_dialog_pages.assign(dialog_pages.begin(), dialog_pages.end());
+
+        float max_height = 0;
+        for (const auto &v : smart_dialog_pages)
+            max_height = MathCore::OP<float>::maximum(max_height, computeTextHeight(v.rich_message));
+        setMinTextHeight(max_height);
+
         this->appear_mode = appear_mode;
         this->disappear_mode = disappear_mode;
         this->rich_continue_char = rich_continue_char;
-        this->onDialogEnded = onDialogEnded;
+        this->smart_OnDialogEnded = onDialogEnded;
         show_next_page();
     }
     void InGameDialog::show_next_page()
     {
-        if (dialog_pages.empty())
+        if (smart_dialog_pages.empty())
         {
             hideDialog(
                 this->disappear_mode,
                 [this]()
                 {
-                    if (this->onDialogEnded != nullptr)
+                    if (this->smart_OnDialogEnded != nullptr)
                     {
-                        auto tmp_onDialogEnded = this->onDialogEnded;
-                        this->onDialogEnded = nullptr;
+                        auto tmp_onDialogEnded = this->smart_OnDialogEnded;
+                        this->smart_OnDialogEnded = nullptr;
                         tmp_onDialogEnded();
                     }
                 });
             return;
         }
-        auto current_page = dialog_pages.front();
-        dialog_pages.erase(dialog_pages.begin());
+        auto current_page = smart_dialog_pages.front();
+        smart_dialog_pages.erase(smart_dialog_pages.begin());
 
         showDialog(
             this->appear_mode,

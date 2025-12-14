@@ -166,7 +166,7 @@ void MainScene::bindResourcesToGraph()
                             0.1f,
                             "resources/look_to_right_smile.png",
                             ui::DialogTextModeType_CharAppear,
-                            "Big Moves Causes Big Wins!",
+                            "Big Moves Causes Big Wins!\nNew line here.",
                         },
                         {
                             1.0f,

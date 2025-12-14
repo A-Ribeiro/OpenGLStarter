@@ -64,6 +64,7 @@ namespace ui
 
 
         int min_line_count;
+        float min_text_height;
 
         std::string rich_message_source;
         AppKit::OpenGL::RichMessageTokenizer text_tokenizer;
@@ -79,10 +80,11 @@ namespace ui
         EventCore::Callback<void()> onContinuePressed;
         EventCore::Callback<void()> onDisapeared;
 
-        std::vector<DialogProperties> dialog_pages;
+        Platform::SmartVector<DialogProperties> smart_dialog_pages;
         DialogAppearModeType appear_mode;
         DialogAppearModeType disappear_mode;
-        EventCore::Callback<void()> onDialogEnded;
+
+        EventCore::Callback<void()> smart_OnDialogEnded;
 
     public:
         std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> node_ui;
@@ -118,9 +120,13 @@ namespace ui
 
         void setSpriteAvatars(const std::vector<std::string> &sprite_list);
 
-        int countLinesForText(const std::string &rich_message);
-
+        int countLinesForText(const std::string &rich_message) const;
         void setMinLineCount(int min_line_count); // start dialog with empty lines to reserve space
+
+        CollisionCore::AABB<MathCore::vec3f> computeTextAABB(const std::string &rich_message) const;
+        float computeTextHeight(const std::string &rich_message) const;
+        void setMinTextHeight(float h);
+        
 
         void showDialog(
 
