@@ -74,6 +74,7 @@ namespace ui
             uiNode->skip_traversing = false;
 
             osciloscopeResetLock();
+            inGameDialog.pushScreen_ResetAll();
         }
         else if (event == UIEventEnum::UIEvent_ScreenPop)
         {

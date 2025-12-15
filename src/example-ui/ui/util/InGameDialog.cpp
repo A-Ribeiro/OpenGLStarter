@@ -168,6 +168,10 @@ namespace ui
         this->char_per_sec = char_per_sec;
         this->char_per_sec_fast = char_per_sec_fast;
         this->seconds_per_character = 1.0f / char_per_sec;
+
+        this->time_to_appear_main_box_sec = 0.2f;
+        this->curr_lrp_main_box = 0.0f;
+        this->dialogAppearUpdateState = DialogAppearUpdateState_None;
     }
 
     void InGameDialog::update(Platform::Time *elapsed, float blink_01_lerp_factor)
@@ -188,7 +192,68 @@ namespace ui
         //     avatar_offset.y,
         //     -10.0f));
 
-        if (text_mode == DialogTextModeType_AppearAtOnce)
+        if (this->dialogAppearUpdateState == DialogAppearUpdateState_ToOne)
+        {
+            // this->time_to_appear_main_box_sec = 5.0f;
+            this->curr_lrp_main_box += elapsed->deltaTime / this->time_to_appear_main_box_sec;
+            if (this->curr_lrp_main_box >= 1.0f)
+            {
+                this->curr_lrp_main_box = 1.0f;
+                this->dialogAppearUpdateState = DialogAppearUpdateState_None;
+                if (this->onAppeared != nullptr)
+                {
+                    auto tmp_onAppeared = this->onAppeared;
+                    this->onAppeared = nullptr;
+                    tmp_onAppeared();
+                }
+            }
+
+            auto size = screenManager->current_size;
+            auto size_all = (all_box.max_box - all_box.min_box);
+
+            float dialog_position_y = MathCore::OP<float>::lerp(
+                -size.y * 0.5f - size_all.y * 0.5f,
+                -size.y * 0.5f + size_all.y * 0.5f + screen_margin,
+                curr_lrp_main_box);
+
+            node_ui->getTransform()->setLocalPosition(MathCore::vec3f(
+                0.0f,
+                dialog_position_y,
+                0.0f));
+        }
+        if (this->dialogAppearUpdateState == DialogAppearUpdateState_ToZero)
+        {
+            this->curr_lrp_main_box -= elapsed->deltaTime / this->time_to_appear_main_box_sec;
+            if (this->curr_lrp_main_box <= 0.0f)
+            {
+                this->curr_lrp_main_box = 0.0f;
+                this->dialogAppearUpdateState = DialogAppearUpdateState_None;
+                node_ui->getTransform()->skip_traversing = true;
+                releaseAllComponents();
+                if (this->onDisapeared != nullptr)
+                {
+                    auto tmp_onDisapeared = this->onDisapeared;
+                    this->onDisapeared = nullptr;
+                    tmp_onDisapeared();
+                }
+            }
+            else
+            {
+                auto size = screenManager->current_size;
+                auto size_all = (all_box.max_box - all_box.min_box);
+
+                float dialog_position_y = MathCore::OP<float>::lerp(
+                    -size.y * 0.5f - size_all.y * 0.5f,
+                    -size.y * 0.5f + size_all.y * 0.5f + screen_margin,
+                    curr_lrp_main_box);
+
+                node_ui->getTransform()->setLocalPosition(MathCore::vec3f(
+                    0.0f,
+                    dialog_position_y,
+                    0.0f));
+            }
+        }
+        else if (text_mode == DialogTextModeType_AppearAtOnce)
         {
             // this->rich_message = rich_message_source;
         }
@@ -423,7 +488,7 @@ namespace ui
             -MathCore::vec2f(continue_button_size) * 0.5f + continue_offset,
             MathCore::vec2f(continue_button_size) * 0.5f + continue_offset);
 
-        CollisionCore::AABB<MathCore::vec3f> all_box;
+        // CollisionCore::AABB<MathCore::vec3f> all_box;
         all_box = CollisionCore::AABB<MathCore::vec3f>::joinAABB(aabb_main_box, aabb_avatar_box);
         all_box = CollisionCore::AABB<MathCore::vec3f>::joinAABB(all_box, aabb_continue_box);
 
@@ -450,16 +515,20 @@ namespace ui
             continue_offset.y,
             -10.0f));
 
-        node_ui->getTransform()->setLocalPosition(MathCore::vec3f(
-            0.0f,
-            -size.y * 0.5f + size_all.y * 0.5f + screen_margin,
-            //-size.y * 0.5f + screen_margin + max_box_size.y * 0.5f,
-            0.0f));
-
         main_box_text->getTransform()->setLocalPosition(MathCore::vec3f(
             main_offset.x,
             main_offset.y,
             -5.0f));
+
+        float dialog_position_y = MathCore::OP<float>::lerp(
+            -size.y * 0.5f - size_all.y * 0.5f,
+            -size.y * 0.5f + size_all.y * 0.5f + screen_margin,
+            curr_lrp_main_box);
+
+        node_ui->getTransform()->setLocalPosition(MathCore::vec3f(
+            0.0f,
+            dialog_position_y,
+            0.0f));
     }
 
     CollisionCore::AABB<MathCore::vec3f> InGameDialog::computeAABB()
@@ -710,12 +779,16 @@ namespace ui
         layoutVisibleElements(screenManager->current_size);
         node_ui->getTransform()->skip_traversing = false;
 
-        if (this->onAppeared != nullptr)
-        {
-            auto tmp_onAppeared = this->onAppeared;
-            this->onAppeared = nullptr;
-            tmp_onAppeared();
-        }
+        // this->time_to_appear_main_box_sec = 5.0f;
+        // this->curr_lrp_main_box = 0.0f;
+        this->dialogAppearUpdateState = DialogAppearUpdateState_ToOne;
+
+        // if (this->onAppeared != nullptr)
+        // {
+        //     auto tmp_onAppeared = this->onAppeared;
+        //     this->onAppeared = nullptr;
+        //     tmp_onAppeared();
+        // }
     }
 
     void InGameDialog::smartShowDialog(
@@ -775,15 +848,16 @@ namespace ui
                                   EventCore::Callback<void()> onDisapeared)
     {
         this->onDisapeared = onDisapeared;
+        this->dialogAppearUpdateState = DialogAppearUpdateState_ToZero;
 
-        node_ui->getTransform()->skip_traversing = true;
-        releaseAllComponents();
-        if (this->onDisapeared != nullptr)
-        {
-            auto tmp_onDisapeared = this->onDisapeared;
-            this->onDisapeared = nullptr;
-            tmp_onDisapeared();
-        }
+        // node_ui->getTransform()->skip_traversing = true;
+        // releaseAllComponents();
+        // if (this->onDisapeared != nullptr)
+        // {
+        //     auto tmp_onDisapeared = this->onDisapeared;
+        //     this->onDisapeared = nullptr;
+        //     tmp_onDisapeared();
+        // }
     }
 
     void InGameDialog::pressContinue()
@@ -807,6 +881,11 @@ namespace ui
 
     void InGameDialog::resetColors()
     {
+    }
+
+    void InGameDialog::pushScreen_ResetAll()
+    {
+        this->curr_lrp_main_box = 0.0f;
     }
 
 }
