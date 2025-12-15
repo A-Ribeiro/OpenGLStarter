@@ -28,6 +28,14 @@ namespace ui
         DialogTextModeType_AppearAtOnce,
     };
 
+
+    enum DialogAppearUpdateState
+    {
+        DialogAppearUpdateState_None = 0,
+        DialogAppearUpdateState_ToOne,
+        DialogAppearUpdateState_ToZero,
+    };
+
     struct DialogProperties
     {
         float side_percentage;
@@ -61,6 +69,11 @@ namespace ui
         MathCore::vec2f avatar_offset;
         MathCore::vec2f max_box_size;
         MathCore::vec2f main_offset;
+        CollisionCore::AABB<MathCore::vec3f> all_box;
+
+        float time_to_appear_main_box_sec;
+        float curr_lrp_main_box;
+        DialogAppearUpdateState dialogAppearUpdateState;
 
 
         int min_line_count;
@@ -157,6 +170,8 @@ namespace ui
         void pressContinue();
 
         void resetColors();
+
+        void pushScreen_ResetAll();
 
         private:
         void show_next_page();
