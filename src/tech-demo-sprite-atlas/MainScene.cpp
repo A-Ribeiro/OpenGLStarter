@@ -64,6 +64,8 @@ void MainScene::bindResourcesToGraph()
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
             MathCore::vec2f(-1, 256),                // size constraint
+            false,                                   // x_invert
+            false,                                   // y_invert
             MeshUploadMode_Direct                    // direct draw, causes better performance on old hardware
         );
         auto componentGrow = spriteNode->addNewComponent<ComponentGrow>();
@@ -82,6 +84,8 @@ void MainScene::bindResourcesToGraph()
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
             MathCore::vec2f(-1, 256),                // size constraint
+            false,                                   // x_invert
+            false,                                   // y_invert
             MeshUploadMode_Direct                    // direct draw, causes better performance on old hardware
         );
         auto componentGrow = logoNode->addNewComponent<ComponentGrow>();
@@ -103,6 +107,8 @@ void MainScene::bindResourcesToGraph()
         MathCore::vec2f(0.5f, 0.5f),             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
         MathCore::vec2f(-1, 1024),               // size constraint
+        false,                                   // x_invert
+        false,                                   // y_invert
         MeshUploadMode_Static                    // static mesh
     );
 
