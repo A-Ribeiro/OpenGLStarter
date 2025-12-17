@@ -71,6 +71,8 @@ namespace AppKit
                     DrawStroke_DropShadow_External
                 };
 
+                CollisionCore::AABB<MathCore::vec3f> last_local_box;
+
             private:
                 void clearMesh();
 
@@ -140,6 +142,8 @@ namespace AppKit
                     const MathCore::vec4f &drop_shadow_color,
                     MeshUploadMode meshUploadMode,
                     uint32_t segment_count = 10);
+                
+                const CollisionCore::AABB<MathCore::vec3f> &getLastLocalBox() const;
                 
                 void setColor(
                     const MathCore::vec4f &color,

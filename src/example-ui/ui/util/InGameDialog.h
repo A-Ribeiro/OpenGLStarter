@@ -40,6 +40,7 @@ namespace ui
     {
         float side_percentage;
         std::string avatar;
+        bool x_invert;
         DialogTextModeType text_mode;
         std::string rich_message;
     };
@@ -65,6 +66,7 @@ namespace ui
         std::string rich_continue_char;
         std::string avatar;
         float side_percentage;
+        bool x_invert;
         float size_text_y;
         MathCore::vec2f avatar_offset;
         MathCore::vec2f max_box_size;
@@ -147,6 +149,7 @@ namespace ui
 
             float side_percentage, // DialogAvatarSideType
             const std::string &avatar,
+            bool x_invert,
 
             DialogTextModeType text_mode,
             const std::string &rich_message,

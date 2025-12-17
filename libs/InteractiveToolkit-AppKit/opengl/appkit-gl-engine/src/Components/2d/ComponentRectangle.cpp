@@ -102,7 +102,10 @@ namespace AppKit
                 clearMesh();
 
                 if (size.width <= 0.0f || size.height <= 0.0f)
+                {
+                    last_local_box.makeEmpty();
                     return;
+                }
 
                 getTransform()->skip_traversing = false;
 
@@ -186,11 +189,20 @@ namespace AppKit
                 }
 
                 auto size_half = size * 0.5f;
+                last_local_box = CollisionCore::AABB<MathCore::vec3f>(
+                    -MathCore::vec3f(size_half, 0.0f),
+                    MathCore::vec3f(size_half, 0.0f));
+
                 meshWrapper->setShapeAABB(
                     CollisionCore::AABB<MathCore::vec3f>(
                         -size_half,
                         size_half),
                     true);
+            }
+
+            const CollisionCore::AABB<MathCore::vec3f> &ComponentRectangle::getLastLocalBox() const
+            {
+                return last_local_box;
             }
 
             void ComponentRectangle::clearMesh()
@@ -216,6 +228,8 @@ namespace AppKit
                     0);
 
                 getTransform()->skip_traversing = true;
+
+                last_local_box.makeEmpty();
             }
 
             void ComponentRectangle::precomputeMaskParameters(const MathCore::vec2f &size,
@@ -347,7 +361,6 @@ namespace AppKit
                 centroid /= total_centroid_elements;
                 for (int i = 0; i < Order_Count; i++)
                     polygon[centroid_places[i]] = 0;
-
 
                 uint32_t total_verts_per_quadrant[Order_Count] = {
                     (radius_segment_count_i[Order_topRight] + 1) + 1,
@@ -766,6 +779,17 @@ namespace AppKit
                 for (int i = 0; i < MaskOrder_Count; i++)
                     result->mask_corner[i] = this->mask_corner[i];
                 result->mask_radius = this->mask_radius;
+
+                result->last_local_box = this->last_local_box;
+
+                result->idx_start_inside = this->idx_start_inside;
+                result->idx_start_stroke_external = this->idx_start_stroke_external;
+                result->idx_start_stroke_internal = this->idx_start_stroke_internal;
+                result->idx_start_drop_shadow_min_external = this->idx_start_drop_shadow_min_external;
+                result->idx_start_drop_shadow_min_internal = this->idx_start_drop_shadow_min_internal;
+                result->idx_start_drop_shadow_max_external = this->idx_start_drop_shadow_max_external;
+                result->idx_start_drop_shadow_max_internal = this->idx_start_drop_shadow_max_internal;
+                result->idx_end = this->idx_end;
 
                 return result;
             }

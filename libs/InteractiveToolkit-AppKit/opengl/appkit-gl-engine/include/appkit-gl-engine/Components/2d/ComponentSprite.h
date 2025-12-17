@@ -32,6 +32,9 @@ namespace AppKit
 
             class ComponentSprite : public Component
             {
+            private:
+                CollisionCore::AABB<MathCore::vec3f> last_local_box;
+
             public:
                 static const ComponentType Type;
 
@@ -48,16 +51,17 @@ namespace AppKit
 
                 void checkOrCreateAuxiliaryComponents(
                     AppKit::GLEngine::ResourceMap *resourceMap,
-                    std::shared_ptr<AppKit::OpenGL::GLTexture> texture
-                );
+                    std::shared_ptr<AppKit::OpenGL::GLTexture> texture);
 
                 void setTexture(
                     AppKit::GLEngine::ResourceMap *resourceMap,
                     std::shared_ptr<AppKit::OpenGL::GLTexture> texture,
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
-                    const MathCore::vec2f &size_constraint = MathCore::vec2f(-1, -1),
-                    MeshUploadMode meshUploadMode = MeshUploadMode_Static
+                    const MathCore::vec2f &size_constraint, // = MathCore::vec2f(-1, -1),
+                    bool x_invert,                          // = false,
+                    bool y_invert,                          // = false,
+                    MeshUploadMode meshUploadMode           // = MeshUploadMode_Static
                 );
 
                 void setTextureFromAtlas(
@@ -66,9 +70,13 @@ namespace AppKit
                     const std::string &name,
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
-                    const MathCore::vec2f &size_constraint = MathCore::vec2f(-1, -1),
-                    MeshUploadMode meshUploadMode = MeshUploadMode_Static
+                    const MathCore::vec2f &size_constraint, // = MathCore::vec2f(-1, -1),
+                    bool x_invert,                          // = false,
+                    bool y_invert,                          // = false,
+                    MeshUploadMode meshUploadMode           //= MeshUploadMode_Static
                 );
+
+                const CollisionCore::AABB<MathCore::vec3f> &getLastLocalBox() const;
 
                 // void setTextureFromAtlas(
                 //     std::shared_ptr<AppKit::OpenGL::GLTexture> altas_texture,

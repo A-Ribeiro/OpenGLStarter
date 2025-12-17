@@ -89,6 +89,8 @@ namespace ui
                                              MathCore::vec2f(0.5f, 0.5f),   // pivot
                                              ui::colorFromHex("#ffffffff"), // color
                                              MathCore::vec2f(avatar_size),  // size
+                                             false,                         // x_invert
+                                             false,                         // y_invert
                                              -2,                            // z
                                              "avatar_sprite")
                                  .get<AppKit::GLEngine::Components::ComponentSprite>();
@@ -448,6 +450,8 @@ namespace ui
             MathCore::vec2f(0.5f, 0.5f),                        // pivot,
             ui::colorFromHex("#ffffffff"),                      // color,
             MathCore::vec2f(avatar_size),                       // size_constraint = MathCore::vec2f(-1, -1),
+            x_invert,                                           // x_invert
+            false,                                              // y_invert
             AppKit::GLEngine::Components::MeshUploadMode_Direct // meshUploadMode
         );
 
@@ -697,6 +701,7 @@ namespace ui
 
         float side_percentage, // DialogAvatarSideType
         const std::string &avatar,
+        bool x_invert,
 
         DialogTextModeType text_mode,
         const std::string &rich_message,
@@ -713,6 +718,7 @@ namespace ui
         this->rich_continue_char = rich_continue_char;
         this->avatar = avatar;
         this->side_percentage = side_percentage;
+        this->x_invert = x_invert;
 
         createAllComponents();
         // set line count before layout
@@ -835,6 +841,7 @@ namespace ui
             this->appear_mode,
             current_page.side_percentage,
             current_page.avatar,
+            current_page.x_invert,
             current_page.text_mode,
             current_page.rich_message,
             this->rich_continue_char,

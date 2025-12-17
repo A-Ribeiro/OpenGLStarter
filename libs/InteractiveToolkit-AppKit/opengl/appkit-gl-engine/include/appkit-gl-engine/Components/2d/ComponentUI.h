@@ -140,6 +140,8 @@ namespace AppKit
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
                     const MathCore::vec2f &size_constraint,
+                    bool x_invert,
+                    bool y_invert,
                     float z,
                     const std::string &name = "_sprite");
 
@@ -150,8 +152,12 @@ namespace AppKit
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
                     const MathCore::vec2f &size_constraint,
+                    bool x_invert,
+                    bool y_invert,
                     float z,
                     const std::string &name = "_sprite");
+
+                CollisionCore::AABB<MathCore::vec3f> getLastLocalBox() const;
 
                 void setVisible(bool visible);
 

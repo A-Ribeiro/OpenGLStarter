@@ -14,6 +14,12 @@ namespace AppKit
                 return font;
             }
             template <>
+            inline std::shared_ptr<ComponentFont> UIItem::get<ComponentFont>() const
+            {
+                ITK_ABORT(type != UIItemFont, "This is not a font item");
+                return font;
+            }
+            template <>
             inline void UIItem::set<ComponentFont>(std::shared_ptr<ComponentFont> v)
             {
                 setType(UIItemFont);
@@ -26,6 +32,12 @@ namespace AppKit
             }
             template <>
             inline std::shared_ptr<ComponentRectangle> &UIItem::get<ComponentRectangle>()
+            {
+                ITK_ABORT(type != UIItemRectangle, "This is not a rectangle item");
+                return rectangle;
+            }
+            template <>
+            inline std::shared_ptr<ComponentRectangle> UIItem::get<ComponentRectangle>() const
             {
                 ITK_ABORT(type != UIItemRectangle, "This is not a rectangle item");
                 return rectangle;
@@ -47,6 +59,13 @@ namespace AppKit
                 ITK_ABORT(type != UIItemSprite, "This is not a sprite item");
                 return sprite;
             }
+            template <>
+            inline std::shared_ptr<ComponentSprite> UIItem::get<ComponentSprite>() const
+            {
+                ITK_ABORT(type != UIItemSprite, "This is not a sprite item");
+                return sprite;
+            }
+            
             template <>
             inline void UIItem::set<ComponentSprite>(std::shared_ptr<ComponentSprite> v)
             {
@@ -73,6 +92,12 @@ namespace AppKit
             // }
             template <>
             inline std::shared_ptr<ComponentUI> &UIItem::get<ComponentUI>()
+            {
+                ITK_ABORT(type != UIItemUI, "This is not a UI item");
+                return ui;
+            }
+            template <>
+            inline std::shared_ptr<ComponentUI> UIItem::get<ComponentUI>() const
             {
                 ITK_ABORT(type != UIItemUI, "This is not a UI item");
                 return ui;

@@ -35,7 +35,7 @@ namespace AppKit
             {
 
                 std::string last_text;
-                CollisionCore::AABB<MathCore::vec3f> last_box;
+                CollisionCore::AABB<MathCore::vec3f> last_local_box;
 
                 bool hasDrawFace;
                 bool hasDrawStroke;
@@ -128,7 +128,7 @@ namespace AppKit
                     AppKit::OpenGL::GLFont2WrapMode wrapMode = AppKit::OpenGL::GLFont2WrapMode_Word,
                     char32_t wordSeparatorChar = U' ');
 
-                const CollisionCore::AABB<MathCore::vec3f> &currentBox() const;
+                const CollisionCore::AABB<MathCore::vec3f> &getLastLocalBox() const;
 
 
                 ComponentFont();
