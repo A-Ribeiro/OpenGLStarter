@@ -210,19 +210,25 @@ namespace AppKit
                 fbo->setSize(sizei.width, sizei.height);
             }
 
+            auto new_camera_viewport = AppKit::GLEngine::iRect(
+                //viewport.x, viewport.y,
+                sizei.width,
+                sizei.height
+            );
+
+            windowToCameraScale.width = (float)new_camera_viewport.w / (float)viewport.w;
+            windowToCameraScale.height = (float)new_camera_viewport.h / (float)viewport.h;
+
+            cameraToWindowScale.width = (float)viewport.w / (float)new_camera_viewport.w;
+            cameraToWindowScale.height = (float)viewport.h / (float)new_camera_viewport.h;
+            //cameraToWindowScale
+
             CameraViewport = AppKit::GLEngine::iRect(
                 //viewport.x, viewport.y,
                 sizei.width,
                 sizei.height
             );
 
-            windowToCameraScale.width = (float)CameraViewport.c_ptr()->w / (float)viewport.w;
-            windowToCameraScale.height = (float)CameraViewport.c_ptr()->h / (float)viewport.h;
-
-            cameraToWindowScale.width = (float)viewport.w / (float)CameraViewport.c_ptr()->w;
-            cameraToWindowScale.height = (float)viewport.h / (float)CameraViewport.c_ptr()->h;
-
-            //cameraToWindowScale
         }
 
         AppKit::GLEngine::iRect RenderWindowRegion::getWindowViewport() const

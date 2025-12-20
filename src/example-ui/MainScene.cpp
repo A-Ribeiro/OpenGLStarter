@@ -78,6 +78,14 @@ void MainScene::applySettingsChanges()
         else if (strcmp(colorScheme, "Dark") == 0)
             screenManager->setColorPalette(ui::Pallete::Dark.setAppearance(buttonAppearance));
     }
+
+    // handle viewport
+
+    // renderWindow->CameraViewport
+    //    renderWindow->viewportScaleFactor = 0.5f;
+    // renderWindow->forceViewportFromRealWindowSize();
+    MathCore::vec2i size = app->window->getSize();
+    renderWindow->setWindowViewport(AppKit::GLEngine::iRect(0, 0, size.width, size.height));
 }
 
 // to bind the resources to the current graph
@@ -152,7 +160,7 @@ void MainScene::bindResourcesToGraph()
                 screenManager->screen<ui::ScreenHUD>()->inGameDialog.smartShowDialog(
                     ui::DialogAppearModeType_Scroll, // appear_mode
                     ui::DialogAppearModeType_Scroll, // disappear_mode
-                    
+
                     "{push;lineHeight:0.6;faceColor:ffffffff;size:60.0;}" Font_Key_z "{pop;}",
 
                     {
@@ -277,8 +285,12 @@ void MainScene::bindResourcesToGraph()
             }
         });
 
-    // renderWindow->CameraViewport.OnChange.add(EventCore::CallbackWrapper(&MainScene::resize, this));
-    renderWindow->CameraViewport.forceTriggerOnChange();
+    // renderWindow->inputManager.onWindowEvent.add(&MainScene::window_event, this);
+    //  renderWindow->CameraViewport.OnChange.add(EventCore::CallbackWrapper(&MainScene::resize, this));
+    //  renderWindow->WindowViewport.forceTriggerOnChange();
+    //  renderWindow->CameraViewport.forceTriggerOnChange();
+    auto windowViewport = renderWindow->WindowViewport.c_val();
+    onWindowResized(MathCore::vec2i(windowViewport.w, windowViewport.h));
 
     renderWindow->inputManager.onKeyboardEvent.add([&](const AppKit::Window::KeyboardEvent &evt)
                                                    {
@@ -307,7 +319,8 @@ void MainScene::bindResourcesToGraph()
 // clear all loaded scene
 void MainScene::unloadAll()
 {
-    // renderWindow->CameraViewport.OnChange.remove(EventCore::CallbackWrapper(&MainScene::resize, this));
+    // renderWindow->inputManager.onWindowEvent.remove(&MainScene::window_event, this);
+    //  renderWindow->CameraViewport.OnChange.remove(EventCore::CallbackWrapper(&MainScene::resize, this));
     renderWindow->OnUpdate.remove(&MainScene::update, this);
 
     root = nullptr;
@@ -361,14 +374,26 @@ void MainScene::draw()
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, false);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
-void MainScene::resize(const AppKit::GLEngine::iRect &size, const AppKit::GLEngine::iRect &old_size)
+void MainScene::onWindowResized(const MathCore::vec2i &new_size)
 {
-    screenManager->resize(MathCore::vec2i(size.w, size.h));
+    renderWindow->setWindowViewport(AppKit::GLEngine::iRect(100, 100, new_size.x - 200, new_size.y - 200));
+
+    auto cameraViewport = renderWindow->CameraViewport.c_val();
+    screenManager->resize(MathCore::vec2i(cameraViewport.w, cameraViewport.h));
+
+    auto windowViewport = renderWindow->WindowViewport.c_val();
+
+    GLRenderState *renderState = GLRenderState::Instance();
+    renderState->Viewport = AppKit::GLEngine::iRect(
+        windowViewport.x,
+        new_size.height - 1 - (windowViewport.h - 1 + windowViewport.y),
+        windowViewport.w,
+        windowViewport.h);
 }
 
 MainScene::MainScene(
