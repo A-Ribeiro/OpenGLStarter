@@ -14,7 +14,10 @@ namespace AppKit
 
 #define MASKSHADER_COMPUTE_MASK_FUNCTION                                                                                                                                      \
     "float compute_mask(){\n"                                                                                                                                                 \
-    "  vec2 ptn_local_space = (uTransformToMask * vec4(gl_FragCoord.x - uWindowViewportPx.x, gl_FragCoord.y - uWindowViewportPx.y, (gl_FragCoord.z - 0.5) * 2.0, 1.0)).xy;\n" \
+    "  vec2 ptn_local_space = (uTransformToMask * vec4( " \
+    "       (gl_FragCoord.x - uWindowViewportPx.x), " \
+    "       (gl_FragCoord.y - uWindowViewportPx.y), " \
+    "       (gl_FragCoord.z - 0.5) * 2.0, 1.0)).xy;\n" \
     "  vec2 box_min = uMask_corner[2] - uMask_radius[2];\n"                                                                                                                   \
     "  vec2 box_max = uMask_corner[0] + uMask_radius[0];\n"                                                                                                                   \
     "  vec2 box_size_half = (box_max - box_min) * 0.5;\n"                                                                                                                     \

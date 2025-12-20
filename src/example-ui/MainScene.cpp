@@ -385,15 +385,39 @@ void MainScene::onWindowResized(const MathCore::vec2i &new_size)
 
     MathCore::vec2i target_size;
 
+    MathCore::vec2i ui_screen_size = MathCore::vec2i(1920, 1080);
+
     AppOptions::OptionsManager *options = AppOptions::OptionsManager::Instance();
     {
+        const char *uiSize = options->getGroupValueSelectedForKey("Extra", "UiSize");
+        printf ("UI Size Selected: %s\n", uiSize);
+        if (strcmp(uiSize, "Extra Small") == 0)
+            ui_screen_size.x = 3840;
+        else if (strcmp(uiSize, "Small") == 0)
+            ui_screen_size.x = 2560;
+        else if (strcmp(uiSize, "Medium") == 0)
+            ui_screen_size.x = 1920;
+        else if (strcmp(uiSize, "Large") == 0)
+            ui_screen_size.x = 1280;
+        else if (strcmp(uiSize, "Extra Large") == 0)
+            ui_screen_size.x = 1024;
+
         const char *videoAspect = options->getGroupValueSelectedForKey("Video", "Aspect");
+
         float target_aspect = 16.0f / 9.0f;
 
         if (strcmp(videoAspect, "16:9") == 0)
+        {
             target_aspect = 16.0f / 9.0f;
-        else if (strcmp(videoAspect, "16:10") == 0)
+            ui_screen_size.y = (9 * ui_screen_size.x) / 16;
+        }
+        else if (strcmp(videoAspect, "16:10") == 0) {
             target_aspect = 16.0f / 10.0f;
+            ui_screen_size.y = (10 * ui_screen_size.x) / 16;
+        }
+
+        printf ("UI Size Resolution: %ix%i\n", ui_screen_size.x, ui_screen_size.y);
+
 
         float window_aspect = (float)new_size.width / (float)new_size.height;
 
@@ -402,17 +426,25 @@ void MainScene::onWindowResized(const MathCore::vec2i &new_size)
             // fit width
             target_size.x = new_size.x;
             target_size.y = (int)((float)new_size.x / target_aspect + 0.5f);
+
+            renderWindow->viewportScaleFactor = (float)target_size.x / (float)ui_screen_size.x;
         }
         else
         {
             // fit height
             target_size.y = new_size.y;
             target_size.x = (int)((float)new_size.y * target_aspect + 0.5f);
+
+            renderWindow->viewportScaleFactor = (float)target_size.y / (float)ui_screen_size.y;
         }
     }
 
     MathCore::vec2i centering_aux = (new_size - target_size) / 2;
-    renderWindow->setWindowViewport(AppKit::GLEngine::iRect(centering_aux.x, centering_aux.y, target_size.x, target_size.y));
+    auto new_viewport = AppKit::GLEngine::iRect(centering_aux.x, centering_aux.y, target_size.x, target_size.y);
+    if (renderWindow->WindowViewport != new_viewport)
+        renderWindow->WindowViewport = new_viewport;
+    else
+        renderWindow->WindowViewport.forceTriggerOnChange();
 
     auto cameraViewport = renderWindow->CameraViewport.c_val();
     screenManager->resize(MathCore::vec2i(cameraViewport.w, cameraViewport.h));
