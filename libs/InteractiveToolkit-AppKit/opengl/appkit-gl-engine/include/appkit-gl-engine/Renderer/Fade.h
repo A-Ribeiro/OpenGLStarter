@@ -51,6 +51,8 @@ namespace AppKit
             void fadeOut(float _sec, const EventCore::Callback<void()> &_OnEndCall);
 
             void draw();
+
+            AppKit::OpenGL::GLShaderColor *getShaderColor() { return &shaderColor; }
         };
 
     }
