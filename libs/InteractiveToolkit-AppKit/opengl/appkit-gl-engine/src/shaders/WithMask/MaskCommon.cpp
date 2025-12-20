@@ -15,10 +15,12 @@ namespace AppKit
 
         void AddShaderRectangleMask::mask_query_uniform_locations_and_set_default_values()
         {
+            u_window_viewport_px = getUniformLocation("uWindowViewportPx");
             u_transform_to_mask = getUniformLocation("uTransformToMask");
             u_mask_corner = getUniformLocation("uMask_corner");
             u_mask_radius = getUniformLocation("uMask_radius");
 
+            setUniform(u_window_viewport_px, uWindowViewportPx);
             setUniform(u_transform_to_mask, uTransformToMask);
             setUniform(u_mask_radius, uMask_radius);
             // array uniform upload
@@ -57,6 +59,42 @@ namespace AppKit
 
                     setMask_ScreenToLocalTransform(transform_mask);
                 }
+            }
+
+            // check gl scissor is enabled
+            // GLboolean scissor_enabled = GL_FALSE;
+            // glGetBooleanv(GL_SCISSOR_TEST, &scissor_enabled);
+            // AppKit::GLEngine::iRect scissor_viewport;
+            // if (scissor_enabled == GL_TRUE)
+            // {
+            //     // get current gl scissor box
+            //     GLint scissor_box[4] = {0, 0, 0, 0};
+            //     glGetIntegerv(GL_SCISSOR_BOX, scissor_box);
+            //     scissor_viewport = AppKit::GLEngine::iRect(scissor_box[0], scissor_box[1], scissor_box[2], scissor_box[3]);
+            // }
+            // else
+            // {
+            //     // full viewport
+            //     GLRenderState *state = GLRenderState::Instance();
+            //     scissor_viewport = state->Viewport;
+            // }
+
+            GLRenderState *state = GLRenderState::Instance();
+            AppKit::GLEngine::iRect scissor_viewport = state->Viewport;
+            setMask_WindowViewportPx(MathCore::vec4f(
+                (float)scissor_viewport.x,
+                (float)scissor_viewport.y,
+                (float)scissor_viewport.w,
+                (float)scissor_viewport.h));
+            
+        }
+
+        void AddShaderRectangleMask::setMask_WindowViewportPx(const MathCore::vec4f &uWindowViewportPx)
+        {
+            if (this->uWindowViewportPx != uWindowViewportPx)
+            {
+                this->uWindowViewportPx = uWindowViewportPx;
+                setUniform(u_window_viewport_px, this->uWindowViewportPx);
             }
         }
 

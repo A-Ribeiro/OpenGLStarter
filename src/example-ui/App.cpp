@@ -34,6 +34,7 @@ App::App()
 
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
     AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->inputManager.onWindowEvent.add(&App::onWindowEvent, this);
 
     fade = new Fade(&time);
 
@@ -46,7 +47,7 @@ App::App()
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
 
     screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
-    screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
+    // screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
     // screenRenderWindow.setEventForwardingEnabled(true);
 
     fps = 0;
@@ -89,10 +90,12 @@ void App::draw()
     if (time.unscaledDeltaTime <= 1.0f / 1000.0f)
         time.rollback_and_set_zero();
     // 2 hz protection code - for fallback from window move
-    if (time.unscaledDeltaTime > 1.0f / 2.0f && below_min_hz_count < 2){
+    if (time.unscaledDeltaTime > 1.0f / 2.0f && below_min_hz_count < 2)
+    {
         below_min_hz_count++;
         time.reset();
-    } else
+    }
+    else
         below_min_hz_count = 0;
 
     fps_timer.update();
@@ -131,6 +134,35 @@ void App::draw()
 
     screenRenderWindow->OnAfterGraphPrecompute(&time);
 
+
+    // smart clear stage
+    {
+        GLRenderState *renderState = GLRenderState::Instance();
+
+        MathCore::vec4f clearColor = renderState->ClearColor;
+        AppKit::GLEngine::iRect viewport = renderState->Viewport;
+        
+        // renderState->Viewport = screenRenderWindow->getCameraViewport();
+
+        renderState->ClearColor = MathCore::vec4f(0, 0, 0, 1);
+        //MathCore::vec2i windowSize = window->getSize();
+        //renderState->Viewport = AppKit::GLEngine::iRect(0, 0, windowSize.x, windowSize.y);
+        glDisable(GL_SCISSOR_TEST);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        renderState->ClearColor = clearColor;
+        // renderState->Viewport = viewport;
+
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(viewport.x,
+            viewport.y,
+            viewport.w,
+            viewport.h);
+
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    }
+
+
     if (mainScene != nullptr)
         mainScene->draw();
 
@@ -151,10 +183,19 @@ void App::onGainFocus()
 
 void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue)
 {
-    GLRenderState *renderState = GLRenderState::Instance();
-    renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
-    if (mainScene != nullptr)
-        mainScene->resize(value, oldValue);
+    // GLRenderState *renderState = GLRenderState::Instance();
+    // renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
+    // if (mainScene != nullptr)
+    //     mainScene->resize(value, oldValue);
+}
+
+void App::onWindowEvent(const AppKit::Window::WindowEvent &evt)
+{
+    if (evt.type == AppKit::Window::WindowEventType::Resized)
+    {
+        if (mainScene != nullptr)
+            mainScene->onWindowResized(MathCore::vec2i(evt.resized.width, evt.resized.height));
+    }
 }
 
 void App::applySettingsChanges()
