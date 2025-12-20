@@ -85,7 +85,8 @@ void MainScene::applySettingsChanges()
     //    renderWindow->viewportScaleFactor = 0.5f;
     // renderWindow->forceViewportFromRealWindowSize();
     MathCore::vec2i size = app->window->getSize();
-    renderWindow->setWindowViewport(AppKit::GLEngine::iRect(0, 0, size.width, size.height));
+    // renderWindow->setWindowViewport(AppKit::GLEngine::iRect(0, 0, size.width, size.height));
+    onWindowResized(size);
 }
 
 // to bind the resources to the current graph
@@ -381,7 +382,37 @@ void MainScene::draw()
 
 void MainScene::onWindowResized(const MathCore::vec2i &new_size)
 {
-    renderWindow->setWindowViewport(AppKit::GLEngine::iRect(100, 100, new_size.x - 200, new_size.y - 200));
+
+    MathCore::vec2i target_size;
+
+    AppOptions::OptionsManager *options = AppOptions::OptionsManager::Instance();
+    {
+        const char *videoAspect = options->getGroupValueSelectedForKey("Video", "Aspect");
+        float target_aspect = 16.0f / 9.0f;
+
+        if (strcmp(videoAspect, "16:9") == 0)
+            target_aspect = 16.0f / 9.0f;
+        else if (strcmp(videoAspect, "16:10") == 0)
+            target_aspect = 16.0f / 10.0f;
+
+        float window_aspect = (float)new_size.width / (float)new_size.height;
+
+        if (target_aspect >= window_aspect)
+        {
+            // fit width
+            target_size.x = new_size.x;
+            target_size.y = (int)((float)new_size.x / target_aspect + 0.5f);
+        }
+        else
+        {
+            // fit height
+            target_size.y = new_size.y;
+            target_size.x = (int)((float)new_size.y * target_aspect + 0.5f);
+        }
+    }
+
+    MathCore::vec2i centering_aux = (new_size - target_size) / 2;
+    renderWindow->setWindowViewport(AppKit::GLEngine::iRect(centering_aux.x, centering_aux.y, target_size.x, target_size.y));
 
     auto cameraViewport = renderWindow->CameraViewport.c_val();
     screenManager->resize(MathCore::vec2i(cameraViewport.w, cameraViewport.h));

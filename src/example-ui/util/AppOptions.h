@@ -39,6 +39,7 @@ namespace AppOptions
             char Language[64];
             char ColorScheme[64];
             char ButtonAppearance[64];
+            char UiSize[64];
             char MeshCrusher[64];
             char Particles[64];
             char OnGameStats[64];
@@ -61,6 +62,7 @@ namespace AppOptions
         static constexpr const char *ExtraLanguage[2] = {"English", "Português (BR)"};
         static constexpr const char *ExtraColorScheme[6] = {"Blush", "Purple", "Orange", "Green", "Blue", "Dark"};
         static constexpr const char *ExtraButtonAppearance[8] = {"Bend Up", "Bend Down", "Round", "Tip Front", "Tip Back", "Tip Up", "Tip Down", "Square"};
+        static constexpr const char *ExtraUiSize[5] = {"Extra Small", "Small", "Medium", "Large", "Extra Large"};
         static constexpr const char *ExtraMeshCrusher[2] = {"ON", "OFF"};
         static constexpr const char *ExtraParticles[4] = {"Low", "Medium", "High", "Ultra"};
         static constexpr const char *ExtraOnGameStats[2] = {"OFF", "FPS"};
