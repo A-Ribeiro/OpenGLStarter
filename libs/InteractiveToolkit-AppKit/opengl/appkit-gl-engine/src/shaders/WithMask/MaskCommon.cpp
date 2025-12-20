@@ -35,6 +35,11 @@ namespace AppKit
 
             if (componentRectangleRaw != nullptr && componentCameraRaw != nullptr)
             {
+                GLRenderState *state = GLRenderState::Instance();
+                AppKit::GLEngine::iRect window_viewport = state->Viewport;
+
+                auto camera = (Components::ComponentCamera *)componentCameraRaw.get();
+
                 auto componentRectangle = (Components::ComponentRectangle *)(componentRectangleRaw.get());
                 auto componentRectangle_transform = componentRectangle->getTransform().get();
 
@@ -44,21 +49,25 @@ namespace AppKit
                 // mask screen to local space mapping
                 if (componentRectangle_transform != nullptr)
                 {
-                    auto camera = (Components::ComponentCamera *)componentCameraRaw.get();
-
                     MathCore::mat4f *mvp;
                     MathCore::mat4f *mv;
                     MathCore::mat4f *mvIT;
                     MathCore::mat4f *mvInv;
                     componentRectangle_transform->computeRenderMatrix(camera->viewProjection, camera->view, camera->viewIT, camera->viewInv,
                                                                       &mvp, &mv, &mvIT, &mvInv);
-                    MathCore::vec3f scale = 2.0f / MathCore::vec3f(camera->viewport.w, camera->viewport.h, 2.0f);
+                    MathCore::vec3f scale = 2.0f / MathCore::vec3f(window_viewport.w, window_viewport.h, 2.0f);
                     MathCore::mat4f transform_mask = mvp->inverse() *
                                                      MathCore::GEN<MathCore::mat4f>::translateHomogeneous(-1.0f, -1.0f, 0.0f) *
                                                      MathCore::GEN<MathCore::mat4f>::scaleHomogeneous(scale);
 
                     setMask_ScreenToLocalTransform(transform_mask);
                 }
+
+                setMask_WindowViewportPx(MathCore::vec4f(
+                                             (float)window_viewport.x,
+                                             (float)window_viewport.y,
+                                             (float)window_viewport.w,
+                                             (float)window_viewport.h));
             }
 
             // check gl scissor is enabled
@@ -78,15 +87,6 @@ namespace AppKit
             //     GLRenderState *state = GLRenderState::Instance();
             //     scissor_viewport = state->Viewport;
             // }
-
-            GLRenderState *state = GLRenderState::Instance();
-            AppKit::GLEngine::iRect scissor_viewport = state->Viewport;
-            setMask_WindowViewportPx(MathCore::vec4f(
-                (float)scissor_viewport.x,
-                (float)scissor_viewport.y,
-                (float)scissor_viewport.w,
-                (float)scissor_viewport.h));
-            
         }
 
         void AddShaderRectangleMask::setMask_WindowViewportPx(const MathCore::vec4f &uWindowViewportPx)

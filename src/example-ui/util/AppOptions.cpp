@@ -42,6 +42,7 @@ namespace AppOptions
         snprintf(options->Extra.Language, sizeof(options->Extra.Language), "%s", OptionsConstants::ExtraLanguage[0]);
         snprintf(options->Extra.ColorScheme, sizeof(options->Extra.ColorScheme), "%s", OptionsConstants::ExtraColorScheme[0]);
         snprintf(options->Extra.ButtonAppearance, sizeof(options->Extra.ButtonAppearance), "%s", OptionsConstants::ExtraButtonAppearance[0]);
+        snprintf(options->Extra.UiSize, sizeof(options->Extra.UiSize), "%s", OptionsConstants::ExtraUiSize[2]);
         snprintf(options->Extra.MeshCrusher, sizeof(options->Extra.MeshCrusher), "%s", OptionsConstants::ExtraMeshCrusher[0]);
         snprintf(options->Extra.Particles, sizeof(options->Extra.Particles), "%s", OptionsConstants::ExtraParticles[2]);
         snprintf(options->Extra.OnGameStats, sizeof(options->Extra.OnGameStats), "%s", OptionsConstants::ExtraOnGameStats[0]);
@@ -67,7 +68,7 @@ namespace AppOptions
         }
         else if (group == "Extra")
         {
-            return {"Language", "ColorScheme", "ButtonAppearance", "MeshCrusher", "Particles", "OnGameStats"};
+            return {"Language", "ColorScheme", "ButtonAppearance", "UiSize", "MeshCrusher", "Particles", "OnGameStats"};
         }
         return {};
     }
@@ -125,6 +126,8 @@ namespace AppOptions
                 return {std::begin(AppOptions::OptionsConstants::ExtraColorScheme), std::end(AppOptions::OptionsConstants::ExtraColorScheme)};
             if (key == "ButtonAppearance")
                 return {std::begin(AppOptions::OptionsConstants::ExtraButtonAppearance), std::end(AppOptions::OptionsConstants::ExtraButtonAppearance)};
+            if (key == "UiSize")
+                return {std::begin(AppOptions::OptionsConstants::ExtraUiSize), std::end(AppOptions::OptionsConstants::ExtraUiSize)};
             if (key == "MeshCrusher")
                 return {std::begin(AppOptions::OptionsConstants::ExtraMeshCrusher), std::end(AppOptions::OptionsConstants::ExtraMeshCrusher)};
             if (key == "Particles")
@@ -172,6 +175,8 @@ namespace AppOptions
                 return currentOptions.Extra.ColorScheme;
             if (key == "ButtonAppearance")
                 return currentOptions.Extra.ButtonAppearance;
+            if (key == "UiSize")
+                return currentOptions.Extra.UiSize;
             if (key == "MeshCrusher")
                 return currentOptions.Extra.MeshCrusher;
             if (key == "Particles")
@@ -219,6 +224,8 @@ namespace AppOptions
                 return currentOptions.Extra.ColorScheme;
             if (key == "ButtonAppearance")
                 return currentOptions.Extra.ButtonAppearance;
+            if (key == "UiSize")
+                return currentOptions.Extra.UiSize;
             if (key == "MeshCrusher")
                 return currentOptions.Extra.MeshCrusher;
             if (key == "Particles")
