@@ -205,8 +205,16 @@ void App::applySettingsChanges()
     auto options = AppOptions::OptionsManager::Instance();
 
     {
-        const char *vsyncMode = options->getGroupValueSelectedForKey("Video", "VSync");
-        engine->window->glSetVSync(strcmp(vsyncMode, "ON") == 0);
+        const char *vSync = options->getGroupValueSelectedForKey("Video", "VSync");
+        engine->window->glSetVSync(strcmp(vSync, "ON") == 0);
+    }
+
+    {
+        const char *meshCrusher = options->getGroupValueSelectedForKey("Extra", "MeshCrusher");
+        if (strcmp(meshCrusher, "ON") == 0)
+            renderPipeline.agregateMesh_ConcatenateLowerThanTriangleCount = 1024;
+        else
+            renderPipeline.agregateMesh_ConcatenateLowerThanTriangleCount = 0;
     }
 
     mainScene->applySettingsChanges();
