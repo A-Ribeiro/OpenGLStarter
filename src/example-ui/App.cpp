@@ -111,7 +111,7 @@ void App::draw()
     }
 
     if (fps_timer.unscaledDeltaTime > EPSILON<float>::high_precision)
-        fps = MathCore::OP<float>::lerp(fps, 1.0f / fps_timer.unscaledDeltaTime, 0.1f);
+        fps = MathCore::OP<float>::lerp(fps, 1.0f / fps_timer.unscaledDeltaTime, 0.05f);
 
     // set min delta time (the passed time or the time to render at 24fps)
     // time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);

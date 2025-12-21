@@ -224,6 +224,7 @@ namespace AppKit
                 skin_index.clear();
                 skin_weights.clear();
             }
+
             void ComponentMesh::concatenate(Transform *toApply, const ComponentMesh *other, const DefaultEngineShader *shader)
             {
                 if (other->indices.size() == 0)
@@ -247,11 +248,13 @@ namespace AppKit
                     for (size_t i = 0; i < other->uv[1].size(); i++)
                     {
                         if ((i & 0x07) == 0)
-                        {
                             a = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(other->uv[1][i]));
-                            b = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(other->uv[2][i]));
-                        }
                         uv[1].push_back(a);
+                    }
+                    for (size_t i = 0; i < other->uv[2].size(); i++)
+                    {
+                        if ((i & 0x07) == 0)
+                            b = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(other->uv[2][i]));
                         uv[2].push_back(b);
                     }
 
@@ -319,6 +322,210 @@ namespace AppKit
                 {
                     skin_index.insert(skin_index.end(), other->skin_index.begin(), other->skin_index.end());
                     skin_weights.insert(skin_weights.end(), other->skin_weights.begin(), other->skin_weights.end());
+                }
+            }
+
+            void ComponentMesh::concatenation_reserve(Transform *toApply, const ComponentMesh *other, const DefaultEngineShader *shader)
+            {
+                if (other->indices.size() == 0)
+                    return;
+
+                ITK_ABORT((format != 0 && format != shader->format), "Mesh incompatible format for concatenation.\n");
+
+                format = shader->format;
+
+                if (shader->compareType(LineShader::Type))
+                {
+                    pos.resize(pos.size() + other->pos.size());
+                    uv[1].reserve(uv[1].size() + other->uv[1].size());
+                    uv[2].reserve(uv[2].size() + other->uv[2].size());
+                    uv[3].reserve(uv[3].size() + other->uv[3].size());
+                    color[0].reserve(color[0].size() + other->color[0].size());
+                }
+                else
+                {
+                    // normal case
+
+                    if (format & ITKExtension::Model::CONTAINS_POS)
+                        pos.resize(pos.size() + other->pos.size());
+                    if (format & ITKExtension::Model::CONTAINS_NORMAL)
+                    {
+                        normals.resize(normals.size() + other->normals.size());
+                        if (format & ITKExtension::Model::CONTAINS_TANGENT)
+                        {
+                            tangent.resize(tangent.size() + other->tangent.size());
+                            if (format & ITKExtension::Model::CONTAINS_BINORMAL)
+                                binormal.resize(binormal.size() + other->binormal.size());
+                        }
+                    }
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        if (format & (ITKExtension::Model::CONTAINS_UV0 << i))
+                            uv[i].resize(uv[i].size() + other->uv[i].size());
+                        if (format & (ITKExtension::Model::CONTAINS_COLOR0 << i))
+                            color[i].resize(color[i].size() + other->color[i].size());
+                    }
+                }
+
+                indices.resize(indices.size() + other->indices.size());
+
+                // concatenate the structure for vertex skinning
+                // bones.insert(bones.end(), other->bones.begin(), other->bones.end());
+                if (format & ITKExtension::Model::CONTAINS_VERTEX_WEIGHT_ANY)
+                {
+                    skin_index.resize(skin_index.size() + other->skin_index.size());
+                    skin_weights.resize(skin_weights.size() + other->skin_weights.size());
+                }
+            }
+
+            void ComponentMesh::concatenation_inplace(Transform *toApply, const ComponentMesh *other, const DefaultEngineShader *shader, uint32_t pos_offset, uint32_t pos_count, uint32_t indices_offset, uint32_t indices_count)
+            {
+                if (other->indices.size() == 0)
+                    return;
+
+                ITK_ABORT((format != 0 && format != shader->format), "Mesh incompatible format for concatenation.\n");
+
+                format = shader->format;
+
+                // concatenate the vertex data
+                auto m = toApply->getMatrix(true);
+
+                uint32_t idx_offset = pos_offset; //(uint32_t)pos.size();
+
+                if (shader->compareType(LineShader::Type))
+                {
+                    // line shader case
+                    for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                    {
+                        int write_pos = pos_offset + read_pos;
+                        pos[write_pos] = other->pos[read_pos];
+                    }
+
+                    MathCore::vec3f a, b;
+                    for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                    {
+                        int write_pos = pos_offset + read_pos;
+                        {
+                            if ((read_pos & 0x07) == 0)
+                                a = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(other->uv[1][read_pos]));
+                            uv[1][write_pos] = a;
+                        }
+                    }
+
+                    for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                    {
+                        int write_pos = pos_offset + read_pos;
+                        {
+                            if ((read_pos & 0x07) == 0)
+                                b = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(other->uv[2][read_pos]));
+                            uv[2][write_pos] = b;
+                        }
+                    }
+
+                    for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                    {
+                        int write_pos = pos_offset + read_pos;
+                        uv[3][write_pos] = other->uv[3][read_pos];
+                    }
+
+                    for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                    {
+                        int write_pos = pos_offset + read_pos;
+                        color[0][write_pos] = other->color[0][read_pos];
+                    }
+                }
+                else
+                {
+                    // normal case
+                    if (format & ITKExtension::Model::CONTAINS_POS)
+                        for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                        {
+                            int write_pos = pos_offset + read_pos;
+                            pos[write_pos] = MathCore::CVT<MathCore::vec4f>::toVec3(m * MathCore::CVT<MathCore::vec3f>::toPtn4(other->pos[read_pos]));
+                        }
+
+                    if (format & ITKExtension::Model::CONTAINS_NORMAL)
+                    {
+                        MathCore::mat3f m_it_3x3 = MathCore::GEN<MathCore::mat3f>::fromMat4(m.inverse_transpose_3x3());
+
+                        for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                        {
+                            int write_pos = pos_offset + read_pos;
+                            normals[write_pos] = MathCore::OP<MathCore::vec3f>::normalize(m_it_3x3 * other->normals[read_pos]);
+                        }
+
+                        if (format & ITKExtension::Model::CONTAINS_TANGENT)
+                        {
+                            MathCore::mat3f m_3x3 = MathCore::GEN<MathCore::mat3f>::fromMat4(m);
+
+                            for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                            {
+                                int write_pos = pos_offset + read_pos;
+                                tangent[write_pos] = MathCore::OP<MathCore::vec3f>::normalize(m_3x3 * other->tangent[read_pos]);
+                            }
+
+                            // fix orthogonallity
+                            for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                            {
+                                int write_pos = pos_offset + read_pos;
+
+                                MathCore::vec3f &T = tangent[write_pos];
+                                MathCore::vec3f &N = normals[write_pos];
+                                T = MathCore::OP<MathCore::vec3f>::normalize(T - MathCore::OP<MathCore::vec3f>::dot(T, N) * N);
+                            }
+
+                            if (format & ITKExtension::Model::CONTAINS_BINORMAL)
+                            {
+                                for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                                {
+                                    int write_pos = pos_offset + read_pos;
+                                    MathCore::vec3f &T = tangent[write_pos];
+                                    MathCore::vec3f &N = normals[write_pos];
+                                    binormal[write_pos] = (MathCore::OP<MathCore::vec3f>::cross(T, N));
+                                }
+                            }
+                        }
+                    }
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        if (format & (ITKExtension::Model::CONTAINS_UV0 << i))
+                            for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                            {
+                                int write_pos = pos_offset + read_pos;
+                                uv[i][write_pos] = other->uv[i][read_pos];
+                            }
+                        if (format & (ITKExtension::Model::CONTAINS_COLOR0 << i))
+                            for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                            {
+                                int write_pos = pos_offset + read_pos;
+                                color[i][write_pos] = other->color[i][read_pos];
+                            }
+                    }
+                }
+
+                for (int read_idx = 0; read_idx < indices_count; read_idx++)
+                {
+                    int write_idx = indices_offset + read_idx;
+                    indices[write_idx] = other->indices[read_idx] + idx_offset;
+                }
+
+                // concatenate the structure for vertex skinning
+                // bones.insert(bones.end(), other->bones.begin(), other->bones.end());
+                if (format & ITKExtension::Model::CONTAINS_VERTEX_WEIGHT_ANY)
+                {
+                    for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                    {
+                        int write_pos = pos_offset + read_pos;
+                        skin_index[write_pos] = other->skin_index[read_pos];
+                    }
+
+                    for (int read_pos = 0; read_pos < pos_count; read_pos++)
+                    {
+                        int write_pos = pos_offset + read_pos;
+                        skin_weights[write_pos] = other->skin_weights[read_pos];
+                    }
                 }
             }
 

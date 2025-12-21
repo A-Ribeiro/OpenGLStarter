@@ -375,7 +375,7 @@ void MainScene::draw()
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, false);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, false, OrthographicFilter_UsingAABB, &app->threadPool);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
