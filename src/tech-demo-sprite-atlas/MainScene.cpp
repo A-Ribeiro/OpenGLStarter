@@ -159,7 +159,9 @@ void MainScene::bindResourcesToGraph()
                                  vec2f(0.5f),                             // pivot
                                  MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
                                  MathCore::vec2f(256, -1),                // size constraint
-                                 -1                                       // z
+                                 -1,                                       // z
+                                 false,
+                                 false
                                  )
                       .get<ComponentSprite>();
     sprite->setMask(resourceMap, camera, base_mask);
@@ -373,7 +375,7 @@ void MainScene::draw()
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true, OrthographicFilter_UsingAABB, &app->threadPool);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 }

@@ -43,7 +43,7 @@ namespace AppOptions
         snprintf(options->Extra.ColorScheme, sizeof(options->Extra.ColorScheme), "%s", OptionsConstants::ExtraColorScheme[0]);
         snprintf(options->Extra.ButtonAppearance, sizeof(options->Extra.ButtonAppearance), "%s", OptionsConstants::ExtraButtonAppearance[0]);
         snprintf(options->Extra.UiSize, sizeof(options->Extra.UiSize), "%s", OptionsConstants::ExtraUiSize[2]);
-        snprintf(options->Extra.MeshCrusher, sizeof(options->Extra.MeshCrusher), "%s", OptionsConstants::ExtraMeshCrusher[0]);
+        snprintf(options->Extra.MeshCrusher, sizeof(options->Extra.MeshCrusher), "%s", OptionsConstants::ExtraMeshCrusher[1]);
         snprintf(options->Extra.Particles, sizeof(options->Extra.Particles), "%s", OptionsConstants::ExtraParticles[2]);
         snprintf(options->Extra.OnGameStats, sizeof(options->Extra.OnGameStats), "%s", OptionsConstants::ExtraOnGameStats[0]);
     }

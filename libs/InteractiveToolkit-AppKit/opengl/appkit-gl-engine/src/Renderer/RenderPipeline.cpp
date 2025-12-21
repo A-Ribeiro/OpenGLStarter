@@ -58,7 +58,30 @@ namespace AppKit
                             renderMeshAgregatorAndClear(resourceMap, camera);
 
                         meshAgregatorMaterial = material;
-                        meshAgregator->concatenate(element, mesh, material->shader.get());
+                        if (threadPool != nullptr)
+                        {
+                            concatenation_parallel task;
+                            task.toApply = element;
+                            task.other = mesh;
+                            task.shader = material->shader.get();
+                            task.pos_offset = (uint32_t)meshAgregator->pos.size();
+                            task.indices_offset = (uint32_t)meshAgregator->indices.size();
+                            task.pos_count = (uint32_t)mesh->pos.size();
+                            task.indices_count = (uint32_t)mesh->indices.size();
+
+                            // call reserve...
+                            meshAgregator->concatenation_reserve(element, mesh, material->shader.get());
+
+                            concatenation_parallel_total_tasks++;
+                            threadPool->postTask([this, task]()
+                                         {
+                                meshAgregator->concatenation_inplace(task.toApply, task.other, task.shader,
+                                                                 task.pos_offset, task.pos_count,
+                                                                 task.indices_offset, task.indices_count);
+                                concatenation_parallel_semaphore.release(); });
+                        }
+                        else
+                            meshAgregator->concatenate(element, mesh, material->shader.get());
                         setCurrentMesh(meshAgregator, resourceMap, camera);
                         continue;
                     }
@@ -202,6 +225,8 @@ namespace AppKit
 
             agregateMesh_ConcatenateLowerThanTriangleCount = 1024;
             agregateMesh_FlushMoreThanTriangleCount = 65536; // 64K
+
+            concatenation_parallel_total_tasks = 0;
         }
 
         RenderPipeline::~RenderPipeline()
@@ -234,7 +259,16 @@ namespace AppKit
 
         void RenderPipeline::renderMeshAgregatorAndClear(ResourceMap *resourceMap, Components::ComponentCamera *camera)
         {
-            if (meshAgregator->indices.size() == 0) {
+
+            if (threadPool != nullptr)
+            {
+                for (int i = 0; i < concatenation_parallel_total_tasks; i++)
+                    concatenation_parallel_semaphore.blockingAcquire();
+                concatenation_parallel_total_tasks = 0;
+            }
+
+            if (meshAgregator->indices.size() == 0)
+            {
                 meshAgregator->format = 0; // format reset
                 return;
             }
@@ -288,7 +322,7 @@ namespace AppKit
                 if (currentMesh == meshAgregator && currentMesh->indices.size() > 0)
                     renderMeshAgregatorAndClear(resourceMap, camera);
                 else
-                    currentMesh->unsetLayoutPointers(shaderMeshLastSet); // don't need to unset if is a mesh agregator... 
+                    currentMesh->unsetLayoutPointers(shaderMeshLastSet); // don't need to unset if is a mesh agregator...
             }
 
             if (mesh != nullptr && currentMaterial != nullptr)
@@ -318,8 +352,11 @@ namespace AppKit
             std::shared_ptr<Transform> rootp,
             std::shared_ptr<Components::ComponentCamera> camerap,
             bool clear,
-            OrthographicFilterEnum orthoFilter)
+            OrthographicFilterEnum orthoFilter,
+            Platform::ThreadPool *threadPool)
         {
+            this->threadPool = threadPool;
+
             agregateMesh_ConcatenateLowerThanIndexCount = agregateMesh_ConcatenateLowerThanTriangleCount * 3;
             agregateMesh_FlushMoreThanIndexCount = agregateMesh_FlushMoreThanTriangleCount * 3;
 
