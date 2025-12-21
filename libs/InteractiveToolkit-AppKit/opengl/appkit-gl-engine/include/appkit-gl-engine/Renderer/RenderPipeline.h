@@ -108,9 +108,9 @@ namespace AppKit
                 uint32_t pos_count;
                 uint32_t indices_count;
             };
-            // Platform::ObjectQueue<concatenation_parallel> concatenation_parallel_queue;
+            Platform::ObjectQueue<concatenation_parallel> concatenation_parallel_queue;
             Platform::Semaphore concatenation_parallel_semaphore;
-            int concatenation_parallel_total_tasks;
+            // int concatenation_parallel_total_tasks;
 
 
             void renderMeshAgregatorAndClear(ResourceMap *resourceMap, Components::ComponentCamera *camera);
