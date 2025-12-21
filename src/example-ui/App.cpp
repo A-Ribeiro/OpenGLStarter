@@ -52,6 +52,9 @@ App::App()
 
     fps = 0;
     below_min_hz_count = 0;
+    draw_stats_enabled = false;
+
+    applySettingsChanges();
 }
 
 void App::load()
@@ -85,6 +88,7 @@ void App::draw()
         callback();
     }
 
+    fps_timer.update();
     time.update();
     // 1000 hz protection code
     if (time.unscaledDeltaTime <= 1.0f / 1000.0f)
@@ -94,13 +98,10 @@ void App::draw()
     {
         below_min_hz_count++;
         time.reset();
+        fps_timer.reset();
     }
     else
         below_min_hz_count = 0;
-
-    fps_timer.update();
-    if (fps_timer.unscaledDeltaTime > 1.0f / 5.0f)
-        fps_timer.reset();
 
     if (gain_focus)
     {
@@ -111,13 +112,6 @@ void App::draw()
 
     if (fps_timer.unscaledDeltaTime > EPSILON<float>::high_precision)
         fps = MathCore::OP<float>::lerp(fps, 1.0f / fps_timer.unscaledDeltaTime, 0.1f);
-
-    this->fps_accumulator -= fps_timer.unscaledDeltaTime;
-    if (this->fps_accumulator < 0)
-    {
-        this->fps_accumulator = App::fps_time_sec;
-        printf("%.2f FPS\n", fps);
-    }
 
     // set min delta time (the passed time or the time to render at 24fps)
     // time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
@@ -142,7 +136,7 @@ void App::draw()
         AppKit::GLEngine::iRect viewport = renderState->Viewport;
 
         renderState->ClearColor = MathCore::vec4f(0, 0, 0, 1);
-        
+
         // glDisable(GL_SCISSOR_TEST);
         // glClear(GL_COLOR_BUFFER_BIT);
 
@@ -161,6 +155,9 @@ void App::draw()
         mainScene->draw();
 
     fade->draw();
+
+    if (draw_stats_enabled)
+        drawStats();
 
     // draw black bars
     {
@@ -181,13 +178,12 @@ void App::draw()
             MathCore::vec3f(windowSize.x, 0, 0),
             MathCore::vec3f(windowSize.x, windowSize.y, 0),
             MathCore::vec3f(0, windowSize.y, 0),
-        
+
             MathCore::vec3f(viewport.x, viewport.y, 0),
             MathCore::vec3f(viewport.x + viewport.w, viewport.y, 0),
             MathCore::vec3f(viewport.x + viewport.w, viewport.y + viewport.h, 0),
-            MathCore::vec3f(viewport.x, viewport.y + viewport.h, 0)
-        };
-        
+            MathCore::vec3f(viewport.x, viewport.y + viewport.h, 0)};
+
         /*
         3     2
           7 6
@@ -205,8 +201,7 @@ void App::draw()
             2, 7, 6,
 
             3, 0, 4,
-            3, 4, 7
-        };
+            3, 4, 7};
 
         AppKit::OpenGL::GLShaderColor *shaderColor = fade->getShaderColor();
 
@@ -246,6 +241,110 @@ void App::draw()
 
     if (fade->isFading)
         return;
+}
+
+void App::drawStats()
+{
+    auto engine = AppKit::GLEngine::Engine::Instance();
+
+    std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource =
+        resourceMap.getTextureFont("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
+
+    if (!fontResource->material->shader->compareType(AppKit::GLEngine::ShaderUnlitTextureVertexColorAlpha::Type))
+        return;
+
+    auto renderState = GLRenderState::Instance();
+    // AppKit::GLEngine::iRect viewport = renderState->Viewport;
+    AppKit::GLEngine::iRect viewport = screenRenderWindow->CameraViewport;
+
+    auto builder = fontResource->fontBuilder.get();
+
+    builder->size = 64.0f;
+    builder->faceColor = ui::colorFromHex("#FFFF00FF");
+    builder->strokeColor = ui::colorFromHex("#000000ff");
+    builder->strokeOffset = MathCore::vec3f(0, 0, 0.001f);
+    builder->horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_left;
+    builder->verticalAlign = AppKit::OpenGL::GLFont2VerticalAlign_bottom;
+    builder->lineHeight = 1.0f;
+    builder->wrapMode = AppKit::OpenGL::GLFont2WrapMode_NoWrap;
+    builder->firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight;
+    builder->wordSeparatorChar = U' ';
+    builder->drawFace = true;
+    builder->drawStroke = true;
+
+    builder->richBuild(
+        ITKCommon::PrintfToStdString("%i FPS", (int)(fps + 0.5f)).c_str(),
+        engine->sRGBCapable,
+        -1,
+        fontResource->polygonFontCache);
+
+    if (builder->vertexAttrib.size() == 0)
+        return;
+
+    auto shader = (AppKit::GLEngine::ShaderUnlitTextureVertexColorAlpha *)fontResource->material->shader.get();
+
+    shader->ActiveShader_And_SetUniformsFromMaterial(
+        renderState, &resourceMap,
+        &renderPipeline,
+        fontResource->material.get());
+
+    shader->setMVP(
+        MathCore::GEN<MathCore::mat4f>::projection_ortho_lh_negative_one(
+            0.0f,              // Left
+            (float)viewport.w, // Right
+            0.0f,              // Bottom
+            (float)viewport.h, // Top
+            -1.0f,             // ZNear
+            1.0f               // ZFar
+            ) *
+        MathCore::GEN<MathCore::mat4f>::translateHomogeneous(
+            16.0f,
+            16.0f));
+
+    AppKit::GLEngine::DepthTestType oldDepthTest = renderState->DepthTest;
+    bool oldDepthTestEnabled = renderState->DepthWrite;
+
+    renderState->DepthTest = AppKit::GLEngine::DepthTestDisabled;
+    renderState->DepthWrite = false;
+
+    int aPos = shader->queryAttribLocation("aPosition");
+    int aUV = shader->queryAttribLocation("aUV0");
+    int aColor = shader->queryAttribLocation("aColor0");
+
+    OPENGL_CMD(glEnableVertexAttribArray(aPos));
+    OPENGL_CMD(glVertexAttribPointer(aPos, 3, GL_FLOAT, false, sizeof(AppKit::OpenGL::GLFont2Builder_VertexAttrib), builder->vertexAttrib[0].pos.array));
+    OPENGL_CMD(glEnableVertexAttribArray(aUV));
+    OPENGL_CMD(glVertexAttribPointer(aUV, 2, GL_FLOAT, false, sizeof(AppKit::OpenGL::GLFont2Builder_VertexAttrib), builder->vertexAttrib[0].uv.array));
+    OPENGL_CMD(glEnableVertexAttribArray(aColor));
+    OPENGL_CMD(glVertexAttribPointer(aColor, 4, GL_FLOAT, false, sizeof(AppKit::OpenGL::GLFont2Builder_VertexAttrib), builder->vertexAttrib[0].color.array));
+
+    OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, (GLsizei)builder->vertexAttrib.size()));
+    // OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)(sizeof(indices) / sizeof(indices[0])), GL_UNSIGNED_INT, &indices[0]));
+
+    OPENGL_CMD(glDisableVertexAttribArray(aPos));
+    OPENGL_CMD(glDisableVertexAttribArray(aUV));
+    OPENGL_CMD(glDisableVertexAttribArray(aColor));
+
+    renderState->DepthTest = oldDepthTest;
+    renderState->DepthWrite = oldDepthTestEnabled;
+
+    renderState->clearTextureUnitActivationArray();
+    renderState->CurrentShader = nullptr;
+
+    // for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
+    // {
+    //     mesh->pos.push_back(builder->vertexAttrib[i].pos);
+    //     mesh->uv[0].push_back(MathCore::vec3f(builder->vertexAttrib[i].uv, 0.0f));
+    //     mesh->color[0].push_back(builder->vertexAttrib[i].color);
+
+    //     // keep CCW orientation
+    //     if ((i % 3) == 0)
+    //     {
+    //         mesh->indices.push_back((uint16_t)i);
+    //         mesh->indices.push_back((uint16_t)(i + 1));
+    //         mesh->indices.push_back((uint16_t)(i + 2));
+    //     }
+    // }
 }
 
 void App::onGainFocus()
@@ -290,5 +389,11 @@ void App::applySettingsChanges()
             renderPipeline.agregateMesh_ConcatenateLowerThanTriangleCount = 0;
     }
 
-    mainScene->applySettingsChanges();
+    {
+        const char *onGameStats = options->getGroupValueSelectedForKey("Extra", "OnGameStats");
+        draw_stats_enabled = strcmp(onGameStats, "FPS") == 0;
+    }
+
+    if (mainScene != nullptr)
+        mainScene->applySettingsChanges();
 }
