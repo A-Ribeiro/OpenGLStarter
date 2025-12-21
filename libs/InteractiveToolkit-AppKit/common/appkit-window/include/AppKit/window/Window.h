@@ -57,6 +57,7 @@ namespace AppKit
             Window();
 
 #if defined(_WIN32)
+            MathCore::vec2i resizeTimerId_last_size;
             UINT_PTR resizeTimerId;
             static void _win32_draw_on_resize_or_move(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
 #endif
