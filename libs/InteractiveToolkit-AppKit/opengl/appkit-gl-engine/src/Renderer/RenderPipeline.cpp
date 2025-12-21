@@ -71,14 +71,7 @@ namespace AppKit
 
                             // call reserve...
                             meshAgregator->concatenation_reserve(element, mesh, material->shader.get());
-
-                            concatenation_parallel_total_tasks++;
-                            threadPool->postTask([this, task]()
-                                         {
-                                meshAgregator->concatenation_inplace(task.toApply, task.other, task.shader,
-                                                                 task.pos_offset, task.pos_count,
-                                                                 task.indices_offset, task.indices_count);
-                                concatenation_parallel_semaphore.release(); });
+                            concatenation_parallel_queue.enqueue(task);
                         }
                         else
                             meshAgregator->concatenate(element, mesh, material->shader.get());
@@ -192,7 +185,7 @@ namespace AppKit
                 traverse_depth_render_only_mesh(child.get(), camera, resourceMap);
         }
 
-        RenderPipeline::RenderPipeline()
+        RenderPipeline::RenderPipeline() : concatenation_parallel_queue(false)
         {
             cubeSkyBox = nullptr;
             cubeAmbientLight_1x1 = nullptr;
@@ -225,8 +218,6 @@ namespace AppKit
 
             agregateMesh_ConcatenateLowerThanTriangleCount = 1024;
             agregateMesh_FlushMoreThanTriangleCount = 65536; // 64K
-
-            concatenation_parallel_total_tasks = 0;
         }
 
         RenderPipeline::~RenderPipeline()
@@ -262,9 +253,20 @@ namespace AppKit
 
             if (threadPool != nullptr)
             {
+                int concatenation_parallel_total_tasks = concatenation_parallel_queue.size();
+                for (int i = 0; i < concatenation_parallel_total_tasks; i++)
+                {
+                    auto task = concatenation_parallel_queue.dequeue(nullptr, true);
+                    threadPool->postTask([this, task]()
+                                         {
+                                meshAgregator->concatenation_inplace(task.toApply, task.other, task.shader,
+                                                                 task.pos_offset, task.pos_count,
+                                                                 task.indices_offset, task.indices_count);
+                                concatenation_parallel_semaphore.release(); });
+                }
+
                 for (int i = 0; i < concatenation_parallel_total_tasks; i++)
                     concatenation_parallel_semaphore.blockingAcquire();
-                concatenation_parallel_total_tasks = 0;
             }
 
             if (meshAgregator->indices.size() == 0)

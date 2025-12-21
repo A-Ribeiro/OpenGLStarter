@@ -337,10 +337,10 @@ namespace AppKit
                 if (shader->compareType(LineShader::Type))
                 {
                     pos.resize(pos.size() + other->pos.size());
-                    uv[1].reserve(uv[1].size() + other->uv[1].size());
-                    uv[2].reserve(uv[2].size() + other->uv[2].size());
-                    uv[3].reserve(uv[3].size() + other->uv[3].size());
-                    color[0].reserve(color[0].size() + other->color[0].size());
+                    uv[1].resize(uv[1].size() + other->uv[1].size());
+                    uv[2].resize(uv[2].size() + other->uv[2].size());
+                    uv[3].resize(uv[3].size() + other->uv[3].size());
+                    color[0].resize(color[0].size() + other->color[0].size());
                 }
                 else
                 {
