@@ -290,8 +290,9 @@ void MainScene::bindResourcesToGraph()
     //  renderWindow->CameraViewport.OnChange.add(EventCore::CallbackWrapper(&MainScene::resize, this));
     //  renderWindow->WindowViewport.forceTriggerOnChange();
     //  renderWindow->CameraViewport.forceTriggerOnChange();
-    auto windowViewport = renderWindow->WindowViewport.c_val();
-    onWindowResized(MathCore::vec2i(windowViewport.w, windowViewport.h));
+    
+    // auto windowSize = app->window->getSize();
+    // onWindowResized(MathCore::vec2i(windowSize.x, windowSize.y));
 
     renderWindow->inputManager.onKeyboardEvent.add([&](const AppKit::Window::KeyboardEvent &evt)
                                                    {
