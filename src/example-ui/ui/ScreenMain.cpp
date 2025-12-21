@@ -5,101 +5,82 @@ namespace ui
 {
     void ScreenMain::layoutElements(const MathCore::vec2i &size)
     {
-        float total_size = ScreenMain::height * (float)uiComponent->items.size() + ScreenMain::gap * (float)(uiComponent->items.size() - 1);
-        float total_size_half = total_size * 0.5f;
-        float current_y = total_size_half - ScreenMain::height * 0.5f;
+        float y_start = -size.height * 0.5f + ScreenMain::margin_bottom;
 
-        current_y -= (float)size.height * 0.5f;
+        buttonManager.layoutVisibleElements(ButtonDirection_vertical);
 
-        current_y += margin_bottom + total_size_half;
+        CollisionCore::AABB<MathCore::vec3f> button_aabb = buttonManager.computeAABB(ButtonDirection_vertical);
 
-        for (const auto &item : uiComponent->items)
-        {
-            item.transform->setLocalPosition(MathCore::vec3f(0, current_y, 0));
-            current_y -= ScreenMain::height + ScreenMain::gap;
-        }
-    }
-    void ScreenMain::addButton(const std::string &text)
-    {
-
-        auto ui = uiComponent->addComponentUI(MathCore::vec2f(0, 0), 0, text).get<AppKit::GLEngine::Components::ComponentUI>();
-
-        ui->addRectangle(
-            MathCore::vec2f(0, 0),                                  // pos
-            MathCore::vec2f(ScreenMain::width, ScreenMain::height), // size
-            screenManager->colorPalette.primary,                    // color
-            MathCore::vec4f(32),                                    // radius
-            AppKit::GLEngine::Components::StrokeModeGrowInside,     // stroke mode
-            screenManager->colorPalette.stroke_thickness,           // stroke thickness
-            screenManager->colorPalette.primary_stroke,             // stroke color
-            0,                                                      // drop shadow thickness
-            MathCore::vec4f(0),                                     // drop shadow color
-            0,                                                      // z
-            "bg");
-
-        ui->addTextureText(
-            "resources/Roboto-Regular-100.basof2",                            // font_path
-            MathCore::vec2f(0, 0),                                            // pos
-            -1,                                                               // z
-            text,                                                             // text
-            ScreenMain::height * 0.5f,                                        // size
-            ScreenMain::width,                                                // max_width
-            screenManager->colorPalette.text,                                 // faceColor
-            colorFromHex("#000000", 0.0f),                                    // strokeColor
-            MathCore::vec3f(0.0f, 0.0f, -0.02f),                              // strokeOffset
-            AppKit::OpenGL::GLFont2HorizontalAlign_center,                    // horizontalAlign
-            AppKit::OpenGL::GLFont2VerticalAlign_middle,                      // verticalAlign
-            1.0f,                                                             // lineHeight
-            AppKit::OpenGL::GLFont2WrapMode_Word,                             // wrapMode
-            AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight, // firstLineHeightMode
-            U' ',                                                             // wordSeparatorChar
-            "text");
+        buttonManager.node_ui->getTransform()->setLocalPosition(
+            MathCore::vec3f(0, -button_aabb.min_box.y + y_start, 0));
     }
     void ScreenMain::previousButton()
     {
-        if (change_screen)
+        if (osciloscopeIsLocked())
             return;
-        selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, uiComponent->items.size() - 1);
+        selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)buttonManager.visible_count - 1);
         setPrimaryColorAll();
     }
     void ScreenMain::nextButton()
     {
-        if (change_screen)
+        if (osciloscopeIsLocked())
             return;
-        selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, uiComponent->items.size() - 1);
+        selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)buttonManager.visible_count - 1);
         setPrimaryColorAll();
     }
     void ScreenMain::backButton()
     {
-        if (change_screen)
+        if (osciloscopeIsLocked())
             return;
-        selected_button = uiComponent->items.size() - 1;
+        selected_button = (int)buttonManager.visible_count - 1;
         setPrimaryColorAll();
     }
     void ScreenMain::selectOption(const std::string &name)
     {
         printf("Selected name: %s\n", name.c_str());
         setPrimaryColorAll();
-        if (name == "Exit Game")
-            AppKit::GLEngine::Engine::Instance()->app->exitApp();
-        else
-            screenManager->open_screen("ScreenMain");
+
+        if (onOptionSelected != nullptr)
+            onOptionSelected(name);
     }
     void ScreenMain::setPrimaryColorAll()
     {
-        for (auto &entry : uiComponent->items)
+        for (int i = 0; i < buttonManager.visible_count; i++)
         {
-            auto rect = entry.get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
-            rect->setColor(
+            buttonManager.setButtonColor(
+                i,
                 screenManager->colorPalette.primary,
-                screenManager->colorPalette.primary_stroke,
-                0);
+                screenManager->colorPalette.primary_stroke);
         }
+    }
+
+    const char *ScreenMain::Name = "ScreenMain";
+
+    void ScreenMain::onOsciloscopeAction()
+    {
+        printf("Action at selection end...");
+        // selectOption(uiComponent->items[selected_button].transform->getName());
+        selectOption(buttonManager.getButtonText(selected_button));
+    }
+    void ScreenMain::onOsciloscopeSinLerp(Platform::Time *elapsed, float osciloscope, float sin)
+    {
+        buttonManager.setButtonColor(selected_button,
+                                     screenManager->colorPalette.lrp_active(sin),
+                                     screenManager->colorPalette.lrp_active_stroke(sin));
+    }
+
+    ScreenMain::ScreenMain() : OsciloscopeWithTrigger(
+                                   ScreenMain::osciloscope_normal_hz,
+                                   ScreenMain::osciloscope_selected_hz,
+                                   ScreenMain::osciloscope_countdown_trigger_secs)
+    {
+        selected_button = 0;
+        screenManager = nullptr;
     }
 
     std::string ScreenMain::name() const
     {
-        return "ScreenMain";
+        return Name;
     }
 
     void ScreenMain::resize(const MathCore::vec2i &size)
@@ -110,62 +91,38 @@ namespace ui
 
     void ScreenMain::update(Platform::Time *elapsed)
     {
-        if (uiComponent->items.size() == 0)
+        if (buttonManager.visible_count == 0)
             return;
 
-        float speed = osciloscope_normal_hz;
-
-        if (increase_speed_for_secs_and_trigger_action > 0.0f)
-        {
-            speed = osciloscope_selected_hz;
-            increase_speed_for_secs_and_trigger_action -= elapsed->unscaledDeltaTime;
-            if (increase_speed_for_secs_and_trigger_action < 0.0f)
-            {
-                increase_speed_for_secs_and_trigger_action = -1.0f;
-                printf("Action at selection end...");
-                selectOption(uiComponent->items[selected_button].transform->getName());
-            }
-        }
-
-        if (!change_screen || increase_speed_for_secs_and_trigger_action > 0.0f)
-        {
-
-            const float _360_pi = MathCore::CONSTANT<float>::PI * 2.0f;
-            osciloscope = MathCore::OP<float>::fmod(osciloscope + elapsed->unscaledDeltaTime * speed * _360_pi, _360_pi);
-            float sin = MathCore::OP<float>::sin(osciloscope) * 0.5f + 0.5f;
-
-            auto rect = uiComponent->items[selected_button].get<AppKit::GLEngine::Components::ComponentUI>()->getItemByName("bg").get<AppKit::GLEngine::Components::ComponentRectangle>();
-            rect->setColor(
-                screenManager->colorPalette.lrp_active(sin),
-                screenManager->colorPalette.lrp_active_stroke(sin),
-                0);
-        }
+        osciloscopeUpdate(elapsed);
     }
 
     std::shared_ptr<AppKit::GLEngine::Transform> ScreenMain::initializeTransform(
         AppKit::GLEngine::Engine *engine,
         AppKit::GLEngine::ResourceMap *resourceMap,
         MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
-        ui::ScreenManager *screenManager)
+        ui::ScreenManager *screenManager,
+        const MathCore::vec2i &size)
     {
         if (uiNode)
             return uiNode;
         this->screenManager = screenManager;
         selected_button = 0;
-        osciloscope = 0.0f;
-        increase_speed_for_secs_and_trigger_action = -1.0f;
-        change_screen = false;
+
         printf("    [ScreenMain] initializeTransform\n");
-        uiNode = AppKit::GLEngine::Transform::CreateShared("ScreenMain");
+        uiNode = AppKit::GLEngine::Transform::CreateShared(name());
         uiNode->skip_traversing = true;
 
         uiComponent = uiNode->addNewComponent<AppKit::GLEngine::Components::ComponentUI>();
         uiComponent->Initialize(resourceMap);
 
-        addButton("Continue");
-        addButton("New Game");
-        addButton("Options");
-        addButton("Exit Game");
+        buttonManager.setParent(uiComponent, screenManager);
+        buttonManager.setButtonProperties(
+            ScreenMain::button_width,
+            ScreenMain::button_height,
+            ScreenMain::button_gap,
+            ScreenMain::button_text_size);
+        buttonManager.reserveButtonData(4);
 
         return uiNode;
     }
@@ -177,20 +134,17 @@ namespace ui
         {
             uiNode->skip_traversing = false;
 
-            osciloscope = 0.0f;
-            increase_speed_for_secs_and_trigger_action = -1.0f;
-            change_screen = false;
+            osciloscopeResetLock();
         }
         else if (event == UIEventEnum::UIEvent_ScreenPop)
         {
             uiNode->skip_traversing = true;
         }
-        else if (!change_screen && increase_speed_for_secs_and_trigger_action < 0.0f)
+        else if (!osciloscopeIsLocked())
         {
             if (event == UIEventEnum::UIEvent_InputActionEnter)
             {
-                increase_speed_for_secs_and_trigger_action = 0.5f;
-                change_screen = true;
+                osciloscopeTriggerAction();
             }
             else if (event == UIEventEnum::UIEvent_InputDown)
             {
@@ -205,6 +159,32 @@ namespace ui
                 backButton();
             }
         }
+    }
+
+    void ScreenMain::updateColorPalette()
+    {
+        buttonManager.resetButtonColors();
+    }
+
+    void ScreenMain::show(
+        const std::vector<std::string> &options,
+        const std::string &init_selected,
+        EventCore::Callback<void(const std::string &)> onOptionSelected)
+    {
+        this->onOptionSelected = onOptionSelected;
+
+        buttonManager.setButtonVisibleCount((int)options.size());
+        selected_button = 0;
+        for (int i = 0; i < (int)options.size(); i++)
+        {
+            if (options[i] == init_selected)
+                selected_button = i;
+            buttonManager.setButtonText(i, options[i]);
+        }
+
+        layoutElements(screenManager->current_size);
+
+        screenManager->open_screen("ScreenMain");
     }
 
 }

@@ -43,6 +43,20 @@ namespace AppKit
 
                 UIItem &getItemByName(const std::string &name);
 
+                UIItem &getItemByTransform(std::shared_ptr<Transform> &transform);
+
+                template <typename T>
+                UIItem &getItemByComponent(std::shared_ptr<T> &component)
+                {
+                    for (size_t i = 0; i < items.size(); i++)
+                    {
+                        if (items[i].equals(component))
+                            return items[i];
+                    }
+                    static UIItem dummy;
+                    return dummy;
+                }
+
                 UIItem addComponentUI(const MathCore::vec2f &pos,
                                       float z,
                                       const std::string &name = "_ui");
@@ -126,6 +140,8 @@ namespace AppKit
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
                     const MathCore::vec2f &size_constraint,
+                    bool x_invert,
+                    bool y_invert,
                     float z,
                     const std::string &name = "_sprite");
 
@@ -136,8 +152,12 @@ namespace AppKit
                     const MathCore::vec2f &pivot,
                     const MathCore::vec4f &color,
                     const MathCore::vec2f &size_constraint,
+                    bool x_invert,
+                    bool y_invert,
                     float z,
                     const std::string &name = "_sprite");
+
+                CollisionCore::AABB<MathCore::vec3f> getLastLocalBox() const;
 
                 void setVisible(bool visible);
 

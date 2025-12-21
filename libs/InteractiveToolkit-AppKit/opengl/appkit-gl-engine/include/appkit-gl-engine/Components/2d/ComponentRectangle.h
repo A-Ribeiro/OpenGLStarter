@@ -34,6 +34,7 @@ namespace AppKit
 
             enum StrokeModeEnum
             {
+                StrokeModeNone,
                 StrokeModeGrowMiddle,
                 StrokeModeGrowInside,
                 StrokeModeGrowOutside
@@ -70,6 +71,8 @@ namespace AppKit
                     DrawStroke_DropShadow_External
                 };
 
+                CollisionCore::AABB<MathCore::vec3f> last_local_box;
+
             private:
                 void clearMesh();
 
@@ -92,8 +95,10 @@ namespace AppKit
                                 const MathCore::vec4f &radius,
                                 StrokeModeEnum stroke_mode,
                                 float stroke_thickness,
-                                float stroke_offset,
+                                StrokeModeEnum base_offset_stroke_mode,
+                                float stroke_offset_array,
                                 uint32_t segment_count,
+                                float outside_stroke_thickness_ref,
                                 DrawStrokeEnum drawStrokeMode);
 
             public:
@@ -138,10 +143,16 @@ namespace AppKit
                     MeshUploadMode meshUploadMode,
                     uint32_t segment_count = 10);
                 
+                const CollisionCore::AABB<MathCore::vec3f> &getLastLocalBox() const;
+                
                 void setColor(
                     const MathCore::vec4f &color,
                     const MathCore::vec4f &stroke_color,
                     const MathCore::vec4f &drop_shadow_color);
+
+                void setLinearColorVertical(
+                    const MathCore::vec4f &color_bottom,
+                    const MathCore::vec4f &color_top);
 
                 void setMask(AppKit::GLEngine::ResourceMap *resourceMap,
                              std::shared_ptr<ComponentCamera> &camera,

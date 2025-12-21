@@ -7,7 +7,10 @@ namespace AppKit
     namespace GLEngine
     {
 
-        ShaderUnlitTextureVertexColorAlpha::ShaderUnlitTextureVertexColorAlpha()
+        const AppKit::OpenGL::ShaderType ShaderUnlitTextureVertexColorAlpha::Type = "ShaderUnlitTextureVertexColorAlpha";
+
+        ShaderUnlitTextureVertexColorAlpha::ShaderUnlitTextureVertexColorAlpha():
+            DefaultEngineShader(ShaderUnlitTextureVertexColorAlpha::Type)
         {
             format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
 

@@ -45,7 +45,7 @@ namespace AppKit
             AppKit::Window::GLContextConfig glContextConfig;
         };
 
-        class Engine
+        class Engine : public EventCore::HandleCallback
         {
 
             EngineWindowConfig changeWindowConfig;
@@ -53,10 +53,14 @@ namespace AppKit
             bool setNewWindowConfig;
 
             EventCore::Callback<AppBase *(void)> OnCreateInstanceFnc;
+            EventCore::Callback<void()> OnConfigureWindowBefore;
+            EventCore::Callback<void(AppKit::Window::GLWindow *window)> OnConfigureWindowDoneFnc;
 
             Engine();
 
             void clear();
+
+            void onWin32BlockState_WindowEvent(const AppKit::Window::WindowEvent&);
 
         public:
             std::string companyName;
@@ -82,7 +86,9 @@ namespace AppKit
             void initialize(const std::string &_companyName, const std::string &_gameName,
                             const EventCore::Callback<AppBase *(void)> &_OnCreateInstanceFnc);
             void configureWindow(
-                const EngineWindowConfig &windowConfig
+                const EngineWindowConfig &windowConfig,
+                const EventCore::Callback<void()> &_OnConfigureWindowBefore = nullptr,
+                const EventCore::Callback<void(AppKit::Window::GLWindow *window)> &_OnConfigureWindowDone = nullptr
             );
 
             std::vector<AppKit::Window::VideoMode> getResolutionList() const;

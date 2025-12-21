@@ -18,6 +18,9 @@ namespace AppKit
             int uTexture;
 
         public:
+
+            static const AppKit::OpenGL::ShaderType Type;
+
             ShaderUnlitTextureVertexColorAlpha();
 
             void setMVP(const MathCore::mat4f &mvp);

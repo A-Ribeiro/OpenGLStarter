@@ -15,10 +15,12 @@ namespace AppKit
 
         void AddShaderRectangleMask::mask_query_uniform_locations_and_set_default_values()
         {
+            u_window_viewport_px = getUniformLocation("uWindowViewportPx");
             u_transform_to_mask = getUniformLocation("uTransformToMask");
             u_mask_corner = getUniformLocation("uMask_corner");
             u_mask_radius = getUniformLocation("uMask_radius");
 
+            setUniform(u_window_viewport_px, uWindowViewportPx);
             setUniform(u_transform_to_mask, uTransformToMask);
             setUniform(u_mask_radius, uMask_radius);
             // array uniform upload
@@ -33,6 +35,11 @@ namespace AppKit
 
             if (componentRectangleRaw != nullptr && componentCameraRaw != nullptr)
             {
+                GLRenderState *state = GLRenderState::Instance();
+                AppKit::GLEngine::iRect window_viewport = state->Viewport;
+
+                auto camera = (Components::ComponentCamera *)componentCameraRaw.get();
+
                 auto componentRectangle = (Components::ComponentRectangle *)(componentRectangleRaw.get());
                 auto componentRectangle_transform = componentRectangle->getTransform().get();
 
@@ -42,21 +49,52 @@ namespace AppKit
                 // mask screen to local space mapping
                 if (componentRectangle_transform != nullptr)
                 {
-                    auto camera = (Components::ComponentCamera *)componentCameraRaw.get();
-
                     MathCore::mat4f *mvp;
                     MathCore::mat4f *mv;
                     MathCore::mat4f *mvIT;
                     MathCore::mat4f *mvInv;
                     componentRectangle_transform->computeRenderMatrix(camera->viewProjection, camera->view, camera->viewIT, camera->viewInv,
                                                                       &mvp, &mv, &mvIT, &mvInv);
-                    MathCore::vec3f scale = 2.0f / MathCore::vec3f(camera->viewport.w, camera->viewport.h, 2.0f);
+                    MathCore::vec3f scale = 2.0f / MathCore::vec3f(window_viewport.w, window_viewport.h, 2.0f);
                     MathCore::mat4f transform_mask = mvp->inverse() *
                                                      MathCore::GEN<MathCore::mat4f>::translateHomogeneous(-1.0f, -1.0f, 0.0f) *
                                                      MathCore::GEN<MathCore::mat4f>::scaleHomogeneous(scale);
 
                     setMask_ScreenToLocalTransform(transform_mask);
                 }
+
+                setMask_WindowViewportPx(MathCore::vec4f(
+                                             (float)window_viewport.x,
+                                             (float)window_viewport.y,
+                                             (float)window_viewport.w,
+                                             (float)window_viewport.h));
+            }
+
+            // check gl scissor is enabled
+            // GLboolean scissor_enabled = GL_FALSE;
+            // glGetBooleanv(GL_SCISSOR_TEST, &scissor_enabled);
+            // AppKit::GLEngine::iRect scissor_viewport;
+            // if (scissor_enabled == GL_TRUE)
+            // {
+            //     // get current gl scissor box
+            //     GLint scissor_box[4] = {0, 0, 0, 0};
+            //     glGetIntegerv(GL_SCISSOR_BOX, scissor_box);
+            //     scissor_viewport = AppKit::GLEngine::iRect(scissor_box[0], scissor_box[1], scissor_box[2], scissor_box[3]);
+            // }
+            // else
+            // {
+            //     // full viewport
+            //     GLRenderState *state = GLRenderState::Instance();
+            //     scissor_viewport = state->Viewport;
+            // }
+        }
+
+        void AddShaderRectangleMask::setMask_WindowViewportPx(const MathCore::vec4f &uWindowViewportPx)
+        {
+            if (this->uWindowViewportPx != uWindowViewportPx)
+            {
+                this->uWindowViewportPx = uWindowViewportPx;
+                setUniform(u_window_viewport_px, this->uWindowViewportPx);
             }
         }
 

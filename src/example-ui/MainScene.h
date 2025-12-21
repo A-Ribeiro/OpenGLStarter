@@ -12,7 +12,9 @@
 
 #include "./ui/ScreenManager.h"
 #include "./ui/ScreenMain.h"
-
+#include "./ui/ScreenOptions.h"
+#include "./ui/ScreenMessageBox.h"
+#include "./ui/ScreenHUD.h"
 
 class App;
 
@@ -51,6 +53,10 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
+    static MainScene* currentInstance;
+
+    static void comes_from_app_recreation();
+
 public:
 
     App *app;
@@ -76,7 +82,9 @@ public:
 
     virtual void draw();
 
-    void resize(const AppKit::GLEngine::iRect &size, const AppKit::GLEngine::iRect &old_size);
+    void onWindowResized(const MathCore::vec2i &new_size);
 
     void update(Platform::Time *elapsed);
+
+    void applySettingsChanges();
 };

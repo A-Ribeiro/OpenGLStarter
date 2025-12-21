@@ -87,6 +87,8 @@ namespace AppKit
 
                 void clear();
                 void concatenate( Transform *toApply, const ComponentMesh *other, const DefaultEngineShader *shader);
+                void concatenation_reserve( Transform *toApply, const ComponentMesh *other, const DefaultEngineShader *shader);
+                void concatenation_inplace( Transform *toApply, const ComponentMesh *other, const DefaultEngineShader *shader, uint32_t pos_offset, uint32_t pos_count, uint32_t indices_offset, uint32_t indices_count);
 
                 void releaseVBO();
 

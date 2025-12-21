@@ -66,6 +66,133 @@ namespace AppKit
                 }
             }
 
+            CollisionCore::AABB<MathCore::vec3f> ComponentFont::computeBox(
+                AppKit::GLEngine::ResourceMap *resourceMap,
+                const std::string &font_path,
+                // 0 = texture, > 0 = polygon
+                float polygon_size,
+                float polygon_distance_tolerance,
+                Platform::ThreadPool *polygon_threadPool,
+                bool is_srgb,
+
+                const std::string &text,
+                float size, ///< current state of the font size
+                float max_width,
+
+                AppKit::OpenGL::GLFont2HorizontalAlign horizontalAlign,
+                AppKit::OpenGL::GLFont2VerticalAlign verticalAlign,
+                float lineHeight,
+
+                AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                AppKit::OpenGL::GLFont2FirstLineHeightMode firstLineHeightMode,
+                char32_t wordSeparatorChar)
+            {
+                std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource;
+
+                if (polygon_size > 0.0f)
+                    fontResource = resourceMap->getPolygonFont(font_path, polygon_size, polygon_distance_tolerance, polygon_threadPool, is_srgb);
+                else
+                    fontResource = resourceMap->getTextureFont(font_path, is_srgb);
+
+                // last_fontResource = fontResource;
+
+                auto builder = fontResource->fontBuilder.get();
+
+                builder->size = size;
+                // builder->faceColor = faceColor;
+                // builder->strokeColor = strokeColor;
+                // builder->strokeOffset = strokeOffset;
+                builder->horizontalAlign = horizontalAlign;
+                builder->verticalAlign = verticalAlign;
+                builder->lineHeight = lineHeight;
+                builder->wrapMode = wrapMode;
+                builder->firstLineHeightMode = firstLineHeightMode;
+                builder->wordSeparatorChar = wordSeparatorChar;
+
+                // builder->drawFace = faceColor.a > 0.0f;
+                // builder->drawStroke = strokeColor.a > 0.0f;
+
+                return builder->richComputeBox(text.c_str(), max_width);
+            }
+
+            int ComponentFont::countLines(
+                AppKit::GLEngine::ResourceMap *resourceMap,
+                const std::string &font_path,
+                bool is_srgb,
+                const std::string &text,
+                float size, ///< current state of the font size
+                float max_width,
+                AppKit::OpenGL::GLFont2WrapMode wrapMode,
+                char32_t wordSeparatorChar)
+            {
+                std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource;
+
+                // if (polygon_size > 0.0f)
+                //     fontResource = resourceMap->getPolygonFont(font_path, polygon_size, polygon_distance_tolerance, polygon_threadPool, is_srgb);
+                // else
+                    fontResource = resourceMap->getTextureFont(font_path, is_srgb);
+
+                // last_fontResource = fontResource;
+
+                auto builder = fontResource->fontBuilder.get();
+
+                builder->size = size;
+                // builder->faceColor = faceColor;
+                // builder->strokeColor = strokeColor;
+                // builder->strokeOffset = strokeOffset;
+                // builder->horizontalAlign = horizontalAlign;
+                // builder->verticalAlign = verticalAlign;
+                // builder->lineHeight = lineHeight;
+                builder->wrapMode = wrapMode;
+                // builder->firstLineHeightMode = firstLineHeightMode;
+                builder->wordSeparatorChar = wordSeparatorChar;
+
+                // builder->drawFace = faceColor.a > 0.0f;
+                // builder->drawStroke = strokeColor.a > 0.0f;
+
+                return builder->richCountLines(text.c_str(), max_width);
+            }
+
+            const std::string &ComponentFont::getText() const
+            {
+                return last_text;
+            }
+
+            const CollisionCore::AABB<MathCore::vec3f> &ComponentFont::getLastLocalBox() const
+            {
+                return last_local_box;
+            }
+
+            void ComponentFont::setColor(const MathCore::vec4f &faceColor,
+                                         const MathCore::vec4f &strokeColor)
+            {
+                if (hasDrawFace && hasDrawStroke)
+                {
+
+                    bool face_stroke = true;
+                    int count6 = 0;
+                    for (auto &v : mesh->color[0])
+                    {
+                        v = (face_stroke) ? faceColor : strokeColor;
+                        if (count6++ >= 6)
+                        {
+                            count6 = 0;
+                            face_stroke = !face_stroke;
+                        }
+                    }
+                }
+                else if (hasDrawFace)
+                {
+                    for (auto &v : mesh->color[0])
+                        v = faceColor;
+                }
+                else if (hasDrawStroke)
+                {
+                    for (auto &v : mesh->color[0])
+                        v = strokeColor;
+                }
+            }
+
             void ComponentFont::setText(
                 AppKit::GLEngine::ResourceMap *resourceMap,
 
@@ -97,6 +224,7 @@ namespace AppKit
                 char32_t wordSeparatorChar,
                 MeshUploadMode meshUploadMode)
             {
+                this->last_text = text;
                 std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource;
 
                 if (polygon_size > 0.0f)
@@ -149,6 +277,8 @@ namespace AppKit
 
                 if (builder->isConstructedFromPolygonCache())
                 {
+                    hasDrawFace = true;
+                    hasDrawStroke = false;
 
                     for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
                     {
@@ -167,9 +297,15 @@ namespace AppKit
                     mesh->indices.insert(mesh->indices.end(),
                                          builder->triangles.begin(),
                                          builder->triangles.end());
+
+                    //mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_COLOR0;
+
                 }
                 else
                 {
+                    hasDrawFace = builder->drawFace;
+                    hasDrawStroke = builder->drawStroke;
+
                     for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
                     {
                         if (i == 0)
@@ -192,13 +328,16 @@ namespace AppKit
                             mesh->indices.push_back((uint16_t)(i + 2));
                         }
                     }
+
+                    //mesh->format = ITKExtension::Model::CONTAINS_POS | ITKExtension::Model::CONTAINS_UV0 | ITKExtension::Model::CONTAINS_COLOR0;
                 }
 
                 mesh->ComputeFormat(false);
 
                 // meshWrapper->updateMeshAABB();
+                last_local_box = CollisionCore::AABB<MathCore::vec3f>(min, max);
 
-                meshWrapper->setShapeAABB(CollisionCore::AABB<MathCore::vec3f>(min, max), true);
+                meshWrapper->setShapeAABB(last_local_box, true);
             }
 
             void ComponentFont::setMask(AppKit::GLEngine::ResourceMap *resourceMap,
@@ -251,6 +390,8 @@ namespace AppKit
             ComponentFont::ComponentFont() : Component(ComponentFont::Type)
             {
                 always_clone = true;
+                hasDrawFace = false;
+                hasDrawStroke = false;
             }
 
             ComponentFont::~ComponentFont()
@@ -274,6 +415,8 @@ namespace AppKit
                 result->mask = this->mask;
 
                 result->last_fontResource = this->last_fontResource;
+
+                result->last_local_box = this->last_local_box;
 
                 return result;
             }
