@@ -32,6 +32,19 @@ namespace AppKit
                 return dummy;
             }
 
+            UIItem &ComponentUI::getItemByTransform(std::shared_ptr<Transform> &transform)
+            {
+                for (size_t i = 0; i < items.size(); i++)
+                {
+                    if (items[i].transform == transform)
+                    {
+                        return items[i];
+                    }
+                }
+                static UIItem dummy;
+                return dummy;
+            }
+
             UIItem ComponentUI::addComponentUI(const MathCore::vec2f &pos,
                                                float z,
                                                const std::string &name)
@@ -211,6 +224,8 @@ namespace AppKit
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
                 const MathCore::vec2f &size_constraint,
+                bool x_invert,
+                bool y_invert,
                 float z,
                 const std::string &name)
             {
@@ -225,6 +240,8 @@ namespace AppKit
                     pivot,
                     color,
                     size_constraint,
+                    x_invert,
+                    y_invert,
                     MeshUploadMode_Direct);
                 auto item = UIItem(
                     getTransform()->addChild(transform),
@@ -241,6 +258,8 @@ namespace AppKit
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
                 const MathCore::vec2f &size_constraint,
+                bool x_invert,
+                bool y_invert,
                 float z,
                 const std::string &name)
             {
@@ -256,6 +275,8 @@ namespace AppKit
                     pivot,
                     color,
                     size_constraint,
+                    x_invert,
+                    y_invert,
                     MeshUploadMode_Direct);
                 auto item = UIItem(
                     getTransform()->addChild(transform),
@@ -263,6 +284,36 @@ namespace AppKit
                 item.set<ComponentSprite>(sprite);
                 items.push_back(item);
                 return item;
+            }
+
+            CollisionCore::AABB<MathCore::vec3f> ComponentUI::getLastLocalBox() const
+            {
+                CollisionCore::AABB<MathCore::vec3f> result;
+                result.makeEmpty();
+
+                CollisionCore::AABB<MathCore::vec3f> item_box;
+
+                for (auto &item : items)
+                {
+                    if (item.type == UIItemFont)
+                        item_box = item.get<ComponentFont>()->getLastLocalBox();
+                    else if (item.type == UIItemRectangle)
+                        item_box = item.get<ComponentRectangle>()->getLastLocalBox();
+                    else if (item.type == UIItemSprite)
+                        item_box = item.get<ComponentSprite>()->getLastLocalBox();
+                    else if (item.type == UIItemUI)
+                        item_box = item.get<ComponentUI>()->getLastLocalBox();
+                    MathCore::mat4f transform_mat = item.transform->getMatrix();
+
+                    item_box.min_box = MathCore::CVT<MathCore::vec4f>::toVec3(
+                        transform_mat * MathCore::CVT<MathCore::vec3f>::toPtn4(item_box.min_box));
+                    item_box.max_box = MathCore::CVT<MathCore::vec4f>::toVec3(
+                        transform_mat * MathCore::CVT<MathCore::vec3f>::toPtn4(item_box.max_box));
+
+                    result = CollisionCore::AABB<MathCore::vec3f>::joinAABB(result, item_box);
+                }
+
+                return result;
             }
 
             void ComponentUI::setVisible(bool visible)

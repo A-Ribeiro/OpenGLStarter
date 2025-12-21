@@ -71,6 +71,8 @@ namespace AppKit
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
                 const MathCore::vec2f &size_constraint,
+                bool x_invert,
+                bool y_invert,
                 MeshUploadMode meshUploadMode)
             {
                 // directTexture.texture = texture;
@@ -101,6 +103,16 @@ namespace AppKit
                 float ymin = -pivot.y;
                 float ymax = 1.0f - pivot.y;
 
+                float uvMin_x = 0.0f;
+                float uvMax_x = 1.0f;
+                float uvMin_y = 0.0f;
+                float uvMax_y = 1.0f;
+
+                if (x_invert)
+                    std::swap(uvMin_x, uvMax_x);
+                if (y_invert)
+                    std::swap(uvMin_y, uvMax_y);
+
                 mesh->pos.clear();
                 mesh->pos.push_back(size * MathCore::vec3f(xmax, ymax, 0.0f));
                 mesh->pos.push_back(size * MathCore::vec3f(xmax, ymin, 0.0f));
@@ -108,10 +120,10 @@ namespace AppKit
                 mesh->pos.push_back(size * MathCore::vec3f(xmin, ymax, 0.0f));
 
                 mesh->uv[0].clear();
-                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(1.0f, 0.0f), 0));
-                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(1.0f, 1.0f), 0));
-                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(0.0f, 1.0f), 0));
-                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(0.0f, 0.0f), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(uvMax_x, uvMin_y), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(uvMax_x, uvMax_y), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(uvMin_x, uvMax_y), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(uvMin_x, uvMin_y), 0));
 
                 mesh->color[0].clear();
                 mesh->color[0].push_back(color);
@@ -151,6 +163,10 @@ namespace AppKit
                 else if (meshUploadMode == MeshUploadMode_Dynamic || meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify)
                     mesh->syncVBO(0xffffffff, 0);
 
+                last_local_box = CollisionCore::AABB<MathCore::vec3f>(
+                    mesh->pos[0],
+                    mesh->pos[2]);
+
                 meshWrapper->setShapeAABB(
                     CollisionCore::AABB<MathCore::vec3f>(
                         mesh->pos[0],
@@ -165,6 +181,8 @@ namespace AppKit
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
                 const MathCore::vec2f &size_constraint,
+                bool x_invert,
+                bool y_invert,
                 MeshUploadMode meshUploadMode)
             {
                 checkOrCreateAuxiliaryComponents(resourceMap, atlas->texture);
@@ -177,7 +195,7 @@ namespace AppKit
                 mesh->always_clone = !onCloneNoModify;
                 this->always_clone = !onCloneNoModify;
 
-                auto entry = atlas->getSprite(name);
+                SpriteAtlas::Entry entry = atlas->getSprite(name);
 
                 MathCore::vec3f size((float)entry.spriteSize.width, (float)entry.spriteSize.height, 0.0f);
                 if (size_constraint.x > 0.0f && size_constraint.y > 0.0f)
@@ -192,6 +210,11 @@ namespace AppKit
 
                 float ymin = -pivot.y;
                 float ymax = 1.0f - pivot.y;
+
+                if (x_invert)
+                    std::swap(entry.uvMin.x, entry.uvMax.x);
+                if (y_invert)
+                    std::swap(entry.uvMin.y, entry.uvMax.y);
 
                 mesh->pos.clear();
                 mesh->pos.push_back(size * MathCore::vec3f(xmax, ymax, 0.0f));
@@ -243,11 +266,20 @@ namespace AppKit
                 else if (meshUploadMode == MeshUploadMode_Dynamic || meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify)
                     mesh->syncVBO(0xffffffff, 0);
 
+                last_local_box = CollisionCore::AABB<MathCore::vec3f>(
+                    mesh->pos[0],
+                    mesh->pos[2]);
+
                 meshWrapper->setShapeAABB(
                     CollisionCore::AABB<MathCore::vec3f>(
                         mesh->pos[0],
                         mesh->pos[2]),
                     true);
+            }
+
+            const CollisionCore::AABB<MathCore::vec3f> &ComponentSprite::getLastLocalBox() const
+            {
+                return last_local_box;
             }
 
             void ComponentSprite::setMask(AppKit::GLEngine::ResourceMap *resourceMap,
@@ -335,6 +367,8 @@ namespace AppKit
                 result->mask = this->mask;
 
                 result->last_SpriteInfo = this->last_SpriteInfo;
+
+                result->last_local_box = this->last_local_box;
 
                 // if (this->mask)
                 //{

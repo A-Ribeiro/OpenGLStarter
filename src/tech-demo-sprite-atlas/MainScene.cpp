@@ -64,6 +64,8 @@ void MainScene::bindResourcesToGraph()
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
             MathCore::vec2f(-1, 256),                // size constraint
+            false,                                   // x_invert
+            false,                                   // y_invert
             MeshUploadMode_Direct                    // direct draw, causes better performance on old hardware
         );
         auto componentGrow = spriteNode->addNewComponent<ComponentGrow>();
@@ -82,6 +84,8 @@ void MainScene::bindResourcesToGraph()
             MathCore::vec2f(0.5f, 0.5f),             // pivot
             MathCore::vec4f(1.0f, 1.0f, 1.0f, 0.4f), // color
             MathCore::vec2f(-1, 256),                // size constraint
+            false,                                   // x_invert
+            false,                                   // y_invert
             MeshUploadMode_Direct                    // direct draw, causes better performance on old hardware
         );
         auto componentGrow = logoNode->addNewComponent<ComponentGrow>();
@@ -103,6 +107,8 @@ void MainScene::bindResourcesToGraph()
         MathCore::vec2f(0.5f, 0.5f),             // pivot
         MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
         MathCore::vec2f(-1, 1024),               // size constraint
+        false,                                   // x_invert
+        false,                                   // y_invert
         MeshUploadMode_Static                    // static mesh
     );
 
@@ -153,7 +159,9 @@ void MainScene::bindResourcesToGraph()
                                  vec2f(0.5f),                             // pivot
                                  MathCore::vec4f(1.0f, 1.0f, 1.0f, 1.0f), // color
                                  MathCore::vec2f(256, -1),                // size constraint
-                                 -1                                       // z
+                                 -1,                                       // z
+                                 false,
+                                 false
                                  )
                       .get<ComponentSprite>();
     sprite->setMask(resourceMap, camera, base_mask);
@@ -367,7 +375,7 @@ void MainScene::draw()
         glDisable(GL_FRAMEBUFFER_SRGB);
     GLRenderState *state = GLRenderState::Instance();
     state->DepthTest = DepthTestDisabled;
-    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true);
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true, OrthographicFilter_UsingAABB, &app->threadPool);
     if (engine->sRGBCapable)
         glEnable(GL_FRAMEBUFFER_SRGB);
 }

@@ -94,6 +94,25 @@ namespace AppKit
             size_t agregateMesh_ConcatenateLowerThanIndexCount;
             size_t agregateMesh_FlushMoreThanIndexCount;
 
+            Platform::ThreadPool *threadPool;
+
+            struct concatenation_parallel
+            {
+                Transform *toApply;
+                const Components::ComponentMesh *other;
+                const DefaultEngineShader *shader;
+
+                uint32_t pos_offset;
+                uint32_t indices_offset;
+
+                uint32_t pos_count;
+                uint32_t indices_count;
+            };
+            // Platform::ObjectQueue<concatenation_parallel> concatenation_parallel_queue;
+            Platform::Semaphore concatenation_parallel_semaphore;
+            int concatenation_parallel_total_tasks;
+
+
             void renderMeshAgregatorAndClear(ResourceMap *resourceMap, Components::ComponentCamera *camera);
 
             // supported shaders in this Render Pipeline
@@ -142,7 +161,8 @@ namespace AppKit
                 std::shared_ptr<Transform> root, 
                 std::shared_ptr<Components::ComponentCamera> camera, 
                 bool clear = true,
-                OrthographicFilterEnum orthoFilter = OrthographicFilter_UsingAABB);
+                OrthographicFilterEnum orthoFilter = OrthographicFilter_UsingAABB,
+                Platform::ThreadPool *threadPool = nullptr);
 
             friend class PBRShaderSelector;
         };

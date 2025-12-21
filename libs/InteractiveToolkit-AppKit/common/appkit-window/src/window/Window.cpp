@@ -14,6 +14,12 @@
 
 #include <InteractiveToolkit/Platform/Sleep.h>
 
+// declared inside SFML
+#if defined(_WIN32)
+std::unordered_map<HWND, AppKit::Window::Window *> AppKit_Window_win32_map;
+extern void (*AppKit_Window_win32_draw_on_resize_or_move)(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
+#endif
+
 namespace AppKit
 {
 
@@ -86,10 +92,20 @@ namespace AppKit
             libraryHandle = window;
             usr1Handle = reinterpret_cast<sf::WindowBase *>(window);
             usr2Handle = reinterpret_cast<sf::RenderWindow *>(window);
+
+#if defined(_WIN32)
+            AppKit_Window_win32_map[this->getNativeWindowHandle()] = this;
+            AppKit_Window_win32_draw_on_resize_or_move = &AppKit::Window::Window::_win32_draw_on_resize_or_move;
+#endif
         }
 
         GLWindow::~GLWindow()
         {
+#if defined(_WIN32)
+            AppKit_Window_win32_map.erase(this->getNativeWindowHandle());
+            if (AppKit_Window_win32_map.empty())
+                AppKit_Window_win32_draw_on_resize_or_move = nullptr;
+#endif
             sf::RenderWindow *window = static_cast<sf::RenderWindow *>(usr2Handle);
             libraryHandle = nullptr;
             if (window->isOpen())
@@ -170,10 +186,123 @@ namespace AppKit
         }
 
 #endif
+
+#if defined(_WIN32)
+        void Window::_win32_draw_on_resize_or_move(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
+        {
+            auto it = AppKit_Window_win32_map.find(handle);
+            if (it == AppKit_Window_win32_map.end())
+                return;
+            auto window = it->second;
+            if (!window)
+                return;
+
+            switch (message)
+            {
+            case WM_SIZE:
+            {
+                if (window->resizeTimerId != 0)
+                {
+                    RECT rect;
+                    GetClientRect(handle, &rect);
+
+                    window->resizeTimerId_last_size = MathCore::vec2i(rect.right - rect.left, rect.bottom - rect.top);
+                    if (window->onWin32BlockState_WindowEvent != nullptr)
+                    {
+                        AppKit::Window::WindowEvent windowEventg;
+                        windowEventg.window = window;
+                        windowEventg.type = AppKit::Window::WindowEventType::Resized;
+                        windowEventg.resized = window->resizeTimerId_last_size;
+
+                        window->onWin32BlockState_WindowEvent(windowEventg);
+                        // this->app->screenRenderWindow->inputManager.onWindowEvent(windowEventg);
+                    }
+                }
+                break;
+            }
+            case WM_ENTERSIZEMOVE:
+            {
+                // Create a 60Hz timer (1000ms / 60 = ~16.67ms)
+                if (window->resizeTimerId == 0)
+                    window->resizeTimerId = SetTimer(handle, 1, USER_TIMER_MINIMUM, nullptr); // ~60 FPS
+                break;
+            }
+
+            case WM_EXITSIZEMOVE:
+            {
+                // Destroy the timer
+                if (window->resizeTimerId != 0)
+                {
+                    KillTimer(handle, window->resizeTimerId);
+                    window->resizeTimerId = 0;
+                }
+                break;
+            }
+
+            case WM_NCLBUTTONDOWN:
+            {
+                if (wParam == HTCAPTION || wParam == HTSYSMENU)
+                {
+                    if (window->resizeTimerId == 0)
+                        window->resizeTimerId = SetTimer(handle, 1, USER_TIMER_MINIMUM, nullptr); // ~60 FPS
+                }
+                break;
+            }
+            case WM_NCLBUTTONUP:
+            {
+                if (wParam == HTCAPTION || wParam == HTSYSMENU) // Title bar or system menu
+                {
+                    // Only stop timer if we're not in a size/move operation
+                    // WM_EXITSIZEMOVE will handle stopping the timer in that case
+                    if (window->resizeTimerId != 0)
+                    {
+                        // Small delay to ensure any pending operations complete
+                        SetTimer(handle, 2, 100, nullptr); // 100ms delay before stopping
+                    }
+                }
+                break;
+            }
+
+            case WM_TIMER:
+            {
+                if (!wParam)
+                    break;
+                auto window = it->second;
+                // Handle the 60Hz timer during resize
+                if (wParam == window->resizeTimerId)
+                {
+                    if (window->onWin32BlockState_WindowEvent != nullptr)
+                    {
+                        AppKit::Window::WindowEvent windowEventg;
+                        windowEventg.window = window;
+                        windowEventg.type = AppKit::Window::WindowEventType::Win32RedrawOnResize;
+
+                        window->onWin32BlockState_WindowEvent(windowEventg);
+                    }
+                }
+                else if (wParam == 2)
+                {
+                    // Delayed timer cleanup
+                    KillTimer(handle, 2);
+                    if (window->resizeTimerId != 0)
+                    {
+                        KillTimer(handle, window->resizeTimerId);
+                        window->resizeTimerId = 0;
+                    }
+                }
+
+                break;
+            }
+            }
+        }
+#endif
+
         Window::Window()
         {
-
             memset(key_states, 0, sizeof(bool) * (int)Devices::KeyCode::Count);
+#if defined(_WIN32)
+            resizeTimerId = 0;
+#endif
         }
 
         const WindowConfig &Window::getConfig() const
@@ -202,6 +331,16 @@ namespace AppKit
         void Window::close()
         {
             sf::WindowBase *window = static_cast<sf::WindowBase *>(usr1Handle);
+
+#if defined(_WIN32)
+            // Clean up resize timer if it exists
+            if (resizeTimerId != 0 && window->isOpen())
+            {
+                KillTimer(this->getNativeWindowHandle(), resizeTimerId);
+                resizeTimerId = 0;
+            }
+#endif
+
             window->close();
         }
         bool Window::isOpen()
@@ -822,6 +961,10 @@ namespace AppKit
 
         MathCore::vec2i Window::getSize() const
         {
+#if defined(_WIN32)
+            if (resizeTimerId != 0)
+                return resizeTimerId_last_size;
+#endif
             sf::WindowBase *window = static_cast<sf::WindowBase *>(usr1Handle);
             sf::Vector2u size = window->getSize();
             return MathCore::vec2i(size.x, size.y);

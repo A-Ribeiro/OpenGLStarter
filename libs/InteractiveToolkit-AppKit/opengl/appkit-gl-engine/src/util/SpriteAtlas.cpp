@@ -28,7 +28,13 @@ namespace AppKit
             auto it = sprites.find(name);
             if (it != sprites.end())
                 return it->second;
-            throw std::runtime_error("Sprite not found in atlas: " + name);
+            static SpriteAtlas::Entry dummy{
+                MathCore::vec2f(1, 1), // atlasEntry.spriteSize = ;
+                MathCore::vec2f(0,0), // atlasEntry.uvMin = ;
+                MathCore::vec2f(0,0), // atlasEntry.uvMax = ;
+            };
+            return dummy;
+            //throw std::runtime_error("Sprite not found in atlas: " + name);
         }
         const void SpriteAtlas::addSprite(const std::string &name, const Entry &entry)
         {

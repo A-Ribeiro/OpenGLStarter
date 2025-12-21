@@ -195,6 +195,9 @@ namespace AppKit
             ///
             std::shared_ptr<GLFont2PolygonCache> createPolygonCache(float size, float max_distance_tolerance, Platform::ThreadPool *threadPool = nullptr) const;
 
+            int u32richCountLines(const char32_t *utf32_str, float max_width = -1);
+            int richCountLines(const char *utf8_str, float max_width = -1);
+
             bool isConstructedFromPolygonCache() const;
         };
 

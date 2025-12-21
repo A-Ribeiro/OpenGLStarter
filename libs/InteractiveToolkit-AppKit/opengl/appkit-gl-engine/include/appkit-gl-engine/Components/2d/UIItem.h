@@ -51,7 +51,12 @@ namespace AppKit
                 template <typename T>
                 std::shared_ptr<T> &get();
                 template <typename T>
+                std::shared_ptr<T> get() const;
+                template <typename T>
                 void set(std::shared_ptr<T> v);
+
+                template <typename T>
+                bool equals(std::shared_ptr<T> &v);
 
                 UIItem();
 

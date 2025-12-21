@@ -27,14 +27,15 @@ extern "C" __declspec(dllexport) int32_t AmdPowerXpressRequestHighPerformance = 
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 bool check_is_nvidia_or_amd_opengl()
 {
     bool result = false;
 
-    Display* dpy = XOpenDisplay(nullptr);
-    int attribs[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-    XVisualInfo* vi = glXChooseVisual(dpy, 0, attribs);
+    Display *dpy = XOpenDisplay(nullptr);
+    int attribs[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None};
+    XVisualInfo *vi = glXChooseVisual(dpy, 0, attribs);
     Colormap cmap = XCreateColormap(dpy, RootWindow(dpy, vi->screen), vi->visual, AllocNone);
     XSetWindowAttributes swa;
     swa.colormap = cmap;
@@ -46,26 +47,40 @@ bool check_is_nvidia_or_amd_opengl()
     GLXContext glc = glXCreateContext(dpy, vi, nullptr, GL_TRUE);
     glXMakeCurrent(dpy, win, glc);
 
-#if defined(GLAD_GLES2)
-                gladLoaderUnloadGLES2();
-                gladLoaderLoadGLES2();
-#else
-                gladLoaderUnloadGL();
-                gladLoaderLoadGL();
-#endif
+    const GLubyte *(*custom_glGetString)(GLenum name);
 
+    void* handle = dlopen("libGL.so.1", RTLD_LAZY | RTLD_LOCAL);
+    if (!handle)
+        handle = dlopen("libGL.so", RTLD_LAZY | RTLD_LOCAL);
+    ITK_ABORT(!handle, "Cannot open libGL.so: %s\n", dlerror());
 
-// while (true) {
-//     glClear(GL_COLOR_BUFFER_BIT);
-//     glXSwapBuffers(dpy, win);
-//     usleep(16000); // ~60 FPS
-// }
+    dlerror(); // Clear any existing error
 
-    std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)glGetString(GL_VENDOR)));
+    custom_glGetString = (const GLubyte *(*)(GLenum))dlsym(handle, "glGetString");
+
+    char * err = dlerror();
+    ITK_ABORT(err != nullptr, "Cannot find glGetString in libGL.so: %s\n", err);
+
+// #if defined(GLAD_GLES2)
+//     gladLoaderUnloadGLES2();
+//     gladLoaderLoadGLES2();
+// #else
+//     gladLoaderUnloadGL();
+//     gladLoaderLoadGL();
+// #endif
+
+    // while (true) {
+    //     glClear(GL_COLOR_BUFFER_BIT);
+    //     glXSwapBuffers(dpy, win);
+    //     usleep(16000); // ~60 FPS
+    // }
+
+    std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)custom_glGetString(GL_VENDOR)));
     bool isNVidiaCard = ITKCommon::StringUtil::contains(vendor_aux, "nvidia");
     bool isAMDCard = ITKCommon::StringUtil::contains(vendor_aux, "amd") || ITKCommon::StringUtil::contains(vendor_aux, "radeon");
     // bool isIntelCard = ITKCommon::StringUtil::contains(vendor_aux, "intel");
-    
+
+    dlclose(handle);
 
     glXDestroyContext(dpy, glc);
     XFree(vi);
@@ -129,28 +144,32 @@ namespace AppKit
         }
 #endif
 
-        void Engine::configureWindow(const EngineWindowConfig &windowConfig)
+        void Engine::configureWindow(const EngineWindowConfig &windowConfig,
+                                    const EventCore::Callback<void()> &_OnConfigureWindowBefore,
+                                     const EventCore::Callback<void(AppKit::Window::GLWindow *window)> &_OnConfigureWindowDone)
         {
+            OnConfigureWindowBefore = _OnConfigureWindowBefore;
+            OnConfigureWindowDoneFnc = _OnConfigureWindowDone;
 #if defined(__linux__)
 
-//             {
-//                 auto test_config = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
-//                 test_config.windowConfig.videoMode = AppKit::Window::VideoMode(32, 32);
+            //             {
+            //                 auto test_config = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
+            //                 test_config.windowConfig.videoMode = AppKit::Window::VideoMode(32, 32);
 
-//                 auto test_window_ext = STL_Tools::make_unique<AppKit::Window::GLWindow>(test_config.windowConfig, test_config.glContextConfig);
+            //                 auto test_window_ext = STL_Tools::make_unique<AppKit::Window::GLWindow>(test_config.windowConfig, test_config.glContextConfig);
 
-// #if defined(GLAD_GLES2)
-//                 gladLoaderUnloadGLES2();
-//                 gladLoaderLoadGLES2();
-// #else
-//                 gladLoaderUnloadGL();
-//                 gladLoaderLoadGL();
-// #endif
-//                 std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)glGetString(GL_VENDOR)));
-//                 isNVidiaCard = ITKCommon::StringUtil::contains(vendor_aux, "nvidia");
-//                 isAMDCard = ITKCommon::StringUtil::contains(vendor_aux, "amd") || ITKCommon::StringUtil::contains(vendor_aux, "radeon");
-//                 isIntelCard = ITKCommon::StringUtil::contains(vendor_aux, "intel");
-//             }
+            // #if defined(GLAD_GLES2)
+            //                 gladLoaderUnloadGLES2();
+            //                 gladLoaderLoadGLES2();
+            // #else
+            //                 gladLoaderUnloadGL();
+            //                 gladLoaderLoadGL();
+            // #endif
+            //                 std::string vendor_aux = ITKCommon::StringUtil::toLower(std::string((const char *)glGetString(GL_VENDOR)));
+            //                 isNVidiaCard = ITKCommon::StringUtil::contains(vendor_aux, "nvidia");
+            //                 isAMDCard = ITKCommon::StringUtil::contains(vendor_aux, "amd") || ITKCommon::StringUtil::contains(vendor_aux, "radeon");
+            //                 isIntelCard = ITKCommon::StringUtil::contains(vendor_aux, "intel");
+            //             }
 
             auto instaled_videocard = execCommand("lspci | grep VGA");
             if (!check_is_nvidia_or_amd_opengl())
@@ -178,7 +197,11 @@ namespace AppKit
                 return;
             }
 
+            if (OnConfigureWindowBefore != nullptr)
+                OnConfigureWindowBefore();
+
             window = new AppKit::Window::GLWindow(windowConfig.windowConfig, windowConfig.glContextConfig);
+            window->onWin32BlockState_WindowEvent = EventCore::CallbackWrapper(&Engine::onWin32BlockState_WindowEvent, this);
 
             // set first level of the event managers...
             // window->inputManager.onWindowEvent.add(this, &Engine::onWindowEvent);
@@ -247,6 +270,8 @@ namespace AppKit
 #endif
 
             app = OnCreateInstanceFnc();
+            if (OnConfigureWindowDoneFnc != nullptr)
+                OnConfigureWindowDoneFnc(window);
         }
 
         void Engine::clear()
@@ -265,10 +290,32 @@ namespace AppKit
 
             if (window != nullptr)
             {
+                window->onWin32BlockState_WindowEvent = nullptr;
                 window->close();
                 delete window;
                 window = nullptr;
             }
+        }
+
+        void Engine::onWin32BlockState_WindowEvent(const AppKit::Window::WindowEvent &evt)
+        {
+            if (!window)
+                return;
+            if (evt.type == AppKit::Window::WindowEventType::Win32RedrawOnResize)
+            {
+                window->glSetActivate(true);
+                app->draw();
+                window->glSwapBuffers();
+                // force terminate all GL commands after swap buffers...
+                //  reduces a bit of stuttering
+                glFinish();
+                return;
+            }
+            // only handles the resize and redraw...
+            AppKit::Window::InputManager *inputManager = (app != nullptr)
+                                                             ? &app->screenRenderWindow->inputManager
+                                                             : &window->inputManager;
+            inputManager->onWindowEvent(evt);
         }
 
         void Engine::mainLoop()
@@ -337,7 +384,7 @@ namespace AppKit
                 {
                     setNewWindowConfig = false;
                     clear();
-                    configureWindow(changeWindowConfig);
+                    configureWindow(changeWindowConfig, OnConfigureWindowBefore , OnConfigureWindowDoneFnc);
                 }
             }
         }
