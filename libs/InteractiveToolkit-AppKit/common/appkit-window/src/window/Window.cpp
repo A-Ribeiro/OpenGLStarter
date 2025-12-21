@@ -201,19 +201,22 @@ namespace AppKit
             {
             case WM_SIZE:
             {
-                if (window->resizeTimerId != 0 && window->onWin32BlockState_WindowEvent != nullptr)
+                if (window->resizeTimerId != 0)
                 {
-
                     RECT rect;
                     GetClientRect(handle, &rect);
 
-                    AppKit::Window::WindowEvent windowEventg;
-                    windowEventg.window = window;
-                    windowEventg.type = AppKit::Window::WindowEventType::Resized;
-                    windowEventg.resized = MathCore::vec2i(rect.right - rect.left, rect.bottom - rect.top);
+                    window->resizeTimerId_last_size = MathCore::vec2i(rect.right - rect.left, rect.bottom - rect.top);
+                    if (window->onWin32BlockState_WindowEvent != nullptr)
+                    {
+                        AppKit::Window::WindowEvent windowEventg;
+                        windowEventg.window = window;
+                        windowEventg.type = AppKit::Window::WindowEventType::Resized;
+                        windowEventg.resized = window->resizeTimerId_last_size;
 
-                    window->onWin32BlockState_WindowEvent(windowEventg);
-                    // this->app->screenRenderWindow->inputManager.onWindowEvent(windowEventg);
+                        window->onWin32BlockState_WindowEvent(windowEventg);
+                        // this->app->screenRenderWindow->inputManager.onWindowEvent(windowEventg);
+                    }
                 }
                 break;
             }
@@ -958,6 +961,10 @@ namespace AppKit
 
         MathCore::vec2i Window::getSize() const
         {
+#if defined(_WIN32)
+            if (resizeTimerId != 0)
+                return resizeTimerId_last_size;
+#endif
             sf::WindowBase *window = static_cast<sf::WindowBase *>(usr1Handle);
             sf::Vector2u size = window->getSize();
             return MathCore::vec2i(size.x, size.y);
