@@ -89,6 +89,8 @@ namespace AppKit
             window->setFramerateLimit(0);
             window->setMouseCursorVisible(true);
 
+            window->setMinimumSize(sf::Vector2u(1, 1));
+
             libraryHandle = window;
             usr1Handle = reinterpret_cast<sf::WindowBase *>(window);
             usr2Handle = reinterpret_cast<sf::RenderWindow *>(window);
