@@ -152,7 +152,23 @@ namespace AppKit
                             renderMeshAgregatorAndClear(resourceMap, camera);
 
                         meshAgregatorMaterial = material;
-                        meshAgregator->concatenate(element, mesh, material->shader.get());
+                        if (threadPool != nullptr)
+                        {
+                            concatenation_parallel task;
+                            task.toApply = element;
+                            task.other = mesh;
+                            task.shader = material->shader.get();
+                            task.pos_offset = (uint32_t)meshAgregator->pos.size();
+                            task.indices_offset = (uint32_t)meshAgregator->indices.size();
+                            task.pos_count = (uint32_t)mesh->pos.size();
+                            task.indices_count = (uint32_t)mesh->indices.size();
+
+                            // call reserve...
+                            meshAgregator->concatenation_reserve(element, mesh, material->shader.get());
+                            concatenation_parallel_queue.enqueue(task);
+                        }
+                        else
+                            meshAgregator->concatenate(element, mesh, material->shader.get());
                         setCurrentMesh(meshAgregator, resourceMap, camera);
                         continue;
                     }
