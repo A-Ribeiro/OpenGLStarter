@@ -12,15 +12,19 @@ using namespace AppKit::GLEngine::Components;
 using namespace AppKit::OpenGL;
 
 class App : public AppBase {
+
     RenderPipeline renderPipeline;
+
     uint32_t below_min_hz_count;
+
     Platform::Time time;
     Platform::Time fps_timer;
+
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
 
-    const float fps_time_sec = 0.5f;
-    float fps_accumulator;
+    bool draw_stats_enabled;
+    void drawStats();
 public:
     Fade *fade;
     MainScene *mainScene;
