@@ -5,6 +5,7 @@
 #include <appkit-gl-engine/Renderer/Fade.h>
 
 #include "MainScene.h"
+#include "GameScene.h"
 
 //using namespace aRibeiro;
 using namespace AppKit::GLEngine;
@@ -26,8 +27,11 @@ class App : public AppBase {
     bool draw_stats_enabled;
     void drawStats();
 public:
-    Fade *fade;
-    MainScene *mainScene;
+
+    std::unique_ptr<Fade> fade;
+    std::unique_ptr<MainScene> mainScene;
+    std::unique_ptr<GameScene> gameScene;
+
     Platform::ThreadPool threadPool;
     Platform::ObjectQueue<EventCore::Callback<void(void)>> executeOnMainThread;
 
@@ -45,4 +49,6 @@ public:
 
 
     void applySettingsChanges();
+
+    void createGameScene();
 };

@@ -36,13 +36,14 @@ App::App()
     AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
     AppBase::screenRenderWindow->inputManager.onWindowEvent.add(&App::onWindowEvent, this);
 
-    fade = new Fade(&time);
+    fade = STL_Tools::make_unique<Fade>(&time);
 
     // fade->fadeOut(5.0f, nullptr);
     // time.update();
     gain_focus = true;
 
     mainScene = nullptr;
+    gameScene = nullptr;
 
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
 
@@ -59,23 +60,37 @@ App::App()
 
 void App::load()
 {
-    mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+    mainScene = STL_Tools::make_unique<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     mainScene->load();
 }
 
 App::~App()
 {
-    if (mainScene != nullptr)
-    {
-        mainScene->unload();
-        delete mainScene;
-        mainScene = nullptr;
-    }
-    if (fade != nullptr)
-    {
-        delete fade;
-        fade = nullptr;
-    }
+    gameScene.reset();
+    // if (gameScene != nullptr)
+    // {
+    //     gameScene->unload();
+    //     gameScene.reset();
+    //     // delete gameScene;
+    //     // gameScene = nullptr;
+    // }
+
+    mainScene.reset();
+    // if (mainScene != nullptr)
+    // {
+    //     mainScene->unload();
+    //     mainScene.reset();
+    //     delete mainScene;
+    //     mainScene = nullptr;
+    // }
+
+    fade.reset();
+    // if (fade != nullptr)
+    // {
+    //     delete fade;
+    //     fade = nullptr;
+    // }
+
     resourceMap.clear();
     resourceHelper.finalize();
 }
@@ -123,6 +138,8 @@ void App::draw()
     screenRenderWindow->OnLateUpdate(&time);
 
     // pre process all scene graphs
+    if (gameScene != nullptr)
+        gameScene->precomputeSceneGraphAndCamera();
     if (mainScene != nullptr)
         mainScene->precomputeSceneGraphAndCamera();
 
@@ -151,6 +168,8 @@ void App::draw()
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
 
+    if (gameScene != nullptr)
+        gameScene->draw();
     if (mainScene != nullptr)
         mainScene->draw();
 
@@ -359,6 +378,8 @@ void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::G
     // renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
     // if (mainScene != nullptr)
     //     mainScene->resize(value, oldValue);
+    if (gameScene != nullptr)
+        gameScene->onCameraViewportUpdate(MathCore::vec2i(value.w, value.h));
 }
 
 void App::onWindowEvent(const AppKit::Window::WindowEvent &evt)
@@ -396,4 +417,10 @@ void App::applySettingsChanges()
 
     if (mainScene != nullptr)
         mainScene->applySettingsChanges();
+}
+
+void App::createGameScene()
+{
+    gameScene = STL_Tools::make_unique<GameScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+    gameScene->load();
 }

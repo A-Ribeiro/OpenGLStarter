@@ -32,6 +32,18 @@ void GameScene::bindResourcesToGraph()
         auto mainCamera = root->findTransformByName("Main Camera");
         camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
     }
+
+    const auto &camera_viewport = renderWindow->CameraViewport.c_val();
+
+    screen_custom_size.x = 1920.0f;
+    screen_custom_size.y = (screen_custom_size.x * camera_viewport.h) / camera_viewport.w;
+
+    componentCameraOrthographic->sizeX = screen_custom_size.x;
+    componentCameraOrthographic->sizeY = screen_custom_size.y;
+
+    componentCameraOrthographic->useSizeX = true;
+    componentCameraOrthographic->useSizeY = true;
+
 }
 
 // clear all loaded scene
@@ -77,6 +89,18 @@ void GameScene::draw()
 
 void GameScene::onCameraViewportUpdate(const MathCore::vec2i &viewport_size)
 {
+    const auto &camera_viewport = renderWindow->CameraViewport.c_val();
+
+    screen_custom_size.x = 1920.0f;
+    screen_custom_size.y = (screen_custom_size.x * camera_viewport.h) / camera_viewport.w;
+
+    auto componentCameraOrthographic = std::dynamic_pointer_cast<ComponentCameraOrthographic>(camera);
+
+    componentCameraOrthographic->sizeX = screen_custom_size.x;
+    componentCameraOrthographic->sizeY = screen_custom_size.y;
+
+    componentCameraOrthographic->useSizeX = true;
+    componentCameraOrthographic->useSizeY = true;
 }
 
 void GameScene::update(Platform::Time *elapsed)

@@ -73,6 +73,8 @@ public:
 
     std::vector<PlayerInputState> players;
 
+    MathCore::vec2f screen_custom_size;
+
     GameScene(
         App *app,
         Platform::Time *_time,
