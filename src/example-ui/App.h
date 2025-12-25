@@ -35,6 +35,9 @@ public:
     Platform::ThreadPool threadPool;
     Platform::ObjectQueue<EventCore::Callback<void(void)>> executeOnMainThread;
 
+    Platform::Semaphore semaphore_aux;
+
+
     float fps;
     bool gain_focus;
 
