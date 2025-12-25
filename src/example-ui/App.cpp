@@ -138,10 +138,26 @@ void App::draw()
     screenRenderWindow->OnLateUpdate(&time);
 
     // pre process all scene graphs
-    if (gameScene != nullptr)
-        gameScene->precomputeSceneGraphAndCamera();
-    if (mainScene != nullptr)
-        mainScene->precomputeSceneGraphAndCamera();
+    SceneBase *scenes[] = {
+        (SceneBase *)gameScene.get(),
+        (SceneBase *)mainScene.get()};
+
+    for (auto scene : scenes)
+        if (scene != nullptr)
+            threadPool.postTask([this, scene]()
+                                {
+                scene->precomputeSceneGraphAndCamera();
+                semaphore_aux.release(); });
+
+    // blocking until all scenes are precomputed
+    for (auto scene : scenes)
+        if (scene != nullptr)
+            semaphore_aux.blockingAcquire();
+
+    // if (gameScene != nullptr)
+    //     gameScene->precomputeSceneGraphAndCamera();
+    // if (mainScene != nullptr)
+    //     mainScene->precomputeSceneGraphAndCamera();
 
     screenRenderWindow->OnAfterGraphPrecompute(&time);
 
