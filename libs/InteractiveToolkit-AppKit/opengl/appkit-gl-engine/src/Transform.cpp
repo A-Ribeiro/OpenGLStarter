@@ -1757,6 +1757,7 @@ namespace AppKit
             result->setLocalRotation(getLocalRotation());
             result->setLocalScale(getLocalScale());
             result->skip_traversing = skip_traversing;
+            result->renderWindowRegion = renderWindowRegion;
 
             for (auto &src_component : getComponents())
             {

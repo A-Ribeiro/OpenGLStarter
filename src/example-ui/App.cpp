@@ -165,15 +165,15 @@ void App::draw()
     {
         GLRenderState *renderState = GLRenderState::Instance();
 
-        MathCore::vec4f clearColor = renderState->ClearColor;
+        // MathCore::vec4f clearColor = renderState->ClearColor;
         AppKit::GLEngine::iRect viewport = renderState->Viewport;
 
-        renderState->ClearColor = MathCore::vec4f(0, 0, 0, 1);
+        // renderState->ClearColor = MathCore::vec4f(0, 0, 0, 1);
 
         // glDisable(GL_SCISSOR_TEST);
         // glClear(GL_COLOR_BUFFER_BIT);
 
-        renderState->ClearColor = clearColor;
+        // renderState->ClearColor = clearColor;
 
         glEnable(GL_SCISSOR_TEST);
         glScissor(viewport.x,
@@ -437,6 +437,10 @@ void App::applySettingsChanges()
 
 void App::createGameScene()
 {
-    gameScene = STL_Tools::make_unique<GameScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
-    gameScene->load();
+    executeOnMainThread.enqueue([this]() {
+        if (gameScene == nullptr) {
+            gameScene = STL_Tools::make_unique<GameScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+            gameScene->load();
+        }
+    });
 }
