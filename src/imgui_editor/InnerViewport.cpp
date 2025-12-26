@@ -89,17 +89,14 @@ void InnerViewport::OnUpdate(Platform::Time *time)
     for (auto scene : scenes)
         if (scene != nullptr)
         {
+            scene->startEventManager.processAllComponentsWithTransform();
+
             scene->OnPreUpdate(time);
             scene->OnUpdate(time);
             scene->OnLateUpdate(time);
 
             // pre process all scene graphs
-            /*if (sceneJesusCross != nullptr)
-                sceneJesusCross->precomputeSceneGraphAndCamera();*/
-            if (scene != nullptr)
-                scene->precomputeSceneGraphAndCamera();
-            if (scene != nullptr)
-                scene->precomputeSceneGraphAndCamera();
+            scene->precomputeSceneGraphAndCamera();
 
             scene->OnAfterGraphPrecompute(time);
         }
@@ -132,17 +129,18 @@ void InnerViewport::OnUpdate(Platform::Time *time)
     else
     {
         auto wViewport = renderWindow->WindowViewport.c_ptr();
-        renderState->Viewport = AppKit::GLEngine::iRect(
+        auto new_window_viewport = AppKit::GLEngine::iRect(
             wViewport->x,
             app->screenRenderWindow->WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
             wViewport->w,
             wViewport->h);
+        renderState->Viewport = new_window_viewport;
 
         glEnable(GL_SCISSOR_TEST);
-        glScissor(renderState->Viewport.c_ptr()->x,
-                  renderState->Viewport.c_ptr()->y,
-                  renderState->Viewport.c_ptr()->w,
-                  renderState->Viewport.c_ptr()->h);
+        glScissor(new_window_viewport.x,
+                  new_window_viewport.y,
+                  new_window_viewport.w,
+                  new_window_viewport.h);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         glDisable(GL_SCISSOR_TEST);
     }

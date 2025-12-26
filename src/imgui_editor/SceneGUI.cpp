@@ -129,7 +129,7 @@ void SceneGUI::draw() {
 
 void SceneGUI::OnViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue) {
 
-    //printf("OnViewportChange %i %i\n", rect->value.w,rect->value.h);
+    printf("OnViewportChange %i %i\n", value.w,value.h);
 
     MathCore::vec2i size = MathCore::vec2i(value.w,value.h);
 
@@ -152,15 +152,15 @@ AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelp
     cursorTexture = nullptr;
     cursorTransform = nullptr;
 
-    AppKit::GLEngine::EventHandlerSet::OnUpdate.add(&SceneGUI::OnUpdate, this);
+    this->OnUpdate.add(&SceneGUI::OnUpdateImpl, this);
 }
 
 SceneGUI::~SceneGUI() {
-    AppKit::GLEngine::EventHandlerSet::OnUpdate.remove(&SceneGUI::OnUpdate, this);
+    this->OnUpdate.remove(&SceneGUI::OnUpdateImpl, this);
     unload();
 }
 
-void SceneGUI::OnUpdate(Platform::Time* time) {
+void SceneGUI::OnUpdateImpl(Platform::Time* time) {
 
     if (time->unscaledDeltaTime > 1.0 / 10000.0f)
         f_fps = MathCore::OP<float>::move(f_fps, 1.0f / time->unscaledDeltaTime, time->unscaledDeltaTime * 100.0f);

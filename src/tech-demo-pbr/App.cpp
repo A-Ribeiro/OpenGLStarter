@@ -72,8 +72,6 @@ void App::load()
 
 App::~App()
 {
-    mainThread_EventHandlerSet.reset();
-
     AppBase::OnGainFocus.remove(&App::onGainFocus, this);
     AppBase::screenRenderWindow->CameraViewport.OnChange.remove(&App::onViewportChange, this);
     AppBase::screenRenderWindow->inputManager.onMouseEvent.remove(&App::OnMouseEvent, this);
@@ -84,6 +82,8 @@ App::~App()
     fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw()
