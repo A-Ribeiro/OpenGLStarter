@@ -14,7 +14,7 @@ InnerViewport::InnerViewport(App *app, bool createFBO)
 
     this->visible = true;
     this->app = app;
-    this->fade = std::make_unique<Fade>(&app->time, app->mainThread_EventHandlerSet);
+    this->fade = STL_Tools::make_unique<Fade>(&app->time, app->mainThread_EventHandlerSet);
 
     renderWindow->WindowViewport = iRect(100, 100, 300, 200);
     renderWindow->viewportScaleFactor = ImGuiManager::Instance()->GlobalScale;

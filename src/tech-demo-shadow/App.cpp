@@ -65,7 +65,7 @@ void App::load()
     sceneSplash = SceneBase::CreateShared<SceneSplash>(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
     sceneSplash->load();
 
-    fade = std::make_unique<Fade>(&time, mainThread_EventHandlerSet);
+    fade = STL_Tools::make_unique<Fade>(&time, mainThread_EventHandlerSet);
 
     fade->fadeOut(2.0f * 0.01f, nullptr);
     time.update();
