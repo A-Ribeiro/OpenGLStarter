@@ -59,16 +59,16 @@ void App::load()
 
 App::~App()
 {
+    if (fade != nullptr)
+    {
+        delete fade;
+        fade = nullptr;
+    }
     if (mainScene != nullptr)
     {
         mainScene->unload();
         delete mainScene;
         mainScene = nullptr;
-    }
-    if (fade != nullptr)
-    {
-        delete fade;
-        fade = nullptr;
     }
     resourceMap.clear();
     resourceHelper.finalize();

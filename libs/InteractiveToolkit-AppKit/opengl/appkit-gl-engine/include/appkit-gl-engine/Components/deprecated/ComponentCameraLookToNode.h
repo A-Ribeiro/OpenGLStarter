@@ -24,6 +24,7 @@ namespace AppKit
             {
 
                 std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                std::weak_ptr<EventHandlerSet> eventHandlerSetRef;
 
                 std::shared_ptr<ComponentCameraPerspective> camera;
                 EventCore::PressReleaseDetector up, down;

@@ -29,7 +29,7 @@ namespace AppKit
                 useSizeX = false;
                 sizeX = 1.0f;
 
-                renderWindowRegionRef.reset();// = nullptr;
+                // renderWindowRegionRef.reset();// = nullptr;
 
                 // renderWindowRegion = transform[0]->renderWindowRegion;
 

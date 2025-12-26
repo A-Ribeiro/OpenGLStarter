@@ -23,8 +23,10 @@ namespace AppKit
                 cameraRef = camera;
 
                 renderWindowRegionRef = transform->renderWindowRegion;
+                eventHandlerSetRef = transform->eventHandlerSet;
 
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                auto eventHandlerSet = ToShared(eventHandlerSetRef);
 
                 renderWindowRegion->MousePos = renderWindowRegion->screenCenterF; // set app state do cursor center
                 renderWindowRegion->moveMouseToScreenCenter();                    // queue update to screen center
@@ -32,10 +34,10 @@ namespace AppKit
                 renderWindowRegion->MousePos.OnChange.add(&ComponentCameraMove::OnMousePosChanged, this);
                 renderWindowRegion->WindowViewport.OnChange.add(&ComponentCameraMove::OnViewportChanged, this);
 
-                renderWindowRegion->OnLateUpdate.add(&ComponentCameraMove::OnLateUpdate, this);
+                eventHandlerSet->OnLateUpdate.add(&ComponentCameraMove::OnLateUpdate, this);
 
-                OnViewportChanged(renderWindowRegion->WindowViewport,renderWindowRegion->WindowViewport);
-                OnMousePosChanged(renderWindowRegion->MousePos,renderWindowRegion->MousePos);
+                OnViewportChanged(renderWindowRegion->WindowViewport, renderWindowRegion->WindowViewport);
+                OnMousePosChanged(renderWindowRegion->MousePos, renderWindowRegion->MousePos);
 
                 // AppBase* app = Engine::Instance()->app;
 
@@ -72,7 +74,7 @@ namespace AppKit
             {
                 auto transform = getTransform();
                 auto camera = ToShared(cameraRef);
-                
+
                 if (camera == nullptr)
                     return;
 
@@ -153,24 +155,28 @@ namespace AppKit
                 strafeSpeed = 1.0f;
                 angleSpeed = MathCore::OP<float>::deg_2_rad(0.10f);
                 renderWindowRegionRef.reset();
+                eventHandlerSetRef.reset();
             }
 
             ComponentCameraMove::~ComponentCameraMove()
             {
                 // AppBase* app = Engine::Instance()->app;
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                auto eventHandlerSet = eventHandlerSetRef.lock();
+
+                if (eventHandlerSet != nullptr)
+                    eventHandlerSet->OnLateUpdate.remove(&ComponentCameraMove::OnLateUpdate, this);
 
                 if (renderWindowRegion != nullptr)
                 {
-                    renderWindowRegion->OnLateUpdate.remove(&ComponentCameraMove::OnLateUpdate, this);
-
                     renderWindowRegion->MousePos.OnChange.remove(&ComponentCameraMove::OnMousePosChanged, this);
                     renderWindowRegion->WindowViewport.OnChange.remove(&ComponentCameraMove::OnViewportChanged, this);
                 }
             }
 
             // always clone
-            std::shared_ptr<Component> ComponentCameraMove::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone){
+            std::shared_ptr<Component> ComponentCameraMove::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
+            {
                 auto result = Component::CreateShared<ComponentCameraMove>();
 
                 result->forwardSpeed = this->forwardSpeed;
@@ -185,7 +191,8 @@ namespace AppKit
                 return result;
             }
 
-            void ComponentCameraMove::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap){
+            void ComponentCameraMove::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
+            {
                 // start() will set cameraRef
                 // auto camera_shared = ToShared(this->cameraRef);
                 // auto found = componentMap.find(camera_shared);
@@ -193,14 +200,14 @@ namespace AppKit
                 //     this->cameraRef = std::dynamic_pointer_cast<ComponentCameraPerspective>( found->second );
             }
 
-            void ComponentCameraMove::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer){
+            void ComponentCameraMove::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
+            {
                 writer.StartObject();
                 writer.String("type");
                 writer.String(ComponentCameraMove::Type);
                 writer.String("id");
                 writer.Uint64((intptr_t)self().get());
                 writer.EndObject();
-                
             }
             void ComponentCameraMove::Deserialize(rapidjson::Value &_value,
                                                   std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
@@ -211,7 +218,6 @@ namespace AppKit
                     return;
                 if (!strcmp(_value["type"].GetString(), ComponentCameraMove::Type) == 0)
                     return;
-                
             }
 
         }

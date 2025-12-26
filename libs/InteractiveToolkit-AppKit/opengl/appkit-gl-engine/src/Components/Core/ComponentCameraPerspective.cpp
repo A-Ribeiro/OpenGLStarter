@@ -25,7 +25,7 @@ namespace AppKit
                 leftHanded = true;
                 rightHanded = false;
 
-                renderWindowRegionRef.reset();
+                // renderWindowRegionRef.reset();
 
                 fovDegrees.OnChange.add(&ComponentCameraPerspective::OnUpdateCameraFloatParameter, this);
                 nearPlane.OnChange.add(&ComponentCameraPerspective::OnUpdateCameraFloatParameter, this);

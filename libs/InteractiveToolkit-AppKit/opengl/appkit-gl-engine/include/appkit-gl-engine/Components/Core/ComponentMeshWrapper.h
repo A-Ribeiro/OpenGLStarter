@@ -28,7 +28,7 @@ namespace AppKit
             class ComponentMeshWrapper : public Component
             {
 
-                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                std::weak_ptr<EventHandlerSet> eventHandlerSetRef;
 
                 std::unordered_map<Component *, bool> visibleFromCameras;
 

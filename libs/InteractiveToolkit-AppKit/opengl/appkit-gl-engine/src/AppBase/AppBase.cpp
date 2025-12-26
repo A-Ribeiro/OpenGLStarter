@@ -34,6 +34,7 @@ namespace AppKit
             // //screenRenderWindow.setEventForwardingEnabled(true);
 
             screenRenderWindow = RenderWindowRegion::CreateShared();
+            eventHandlerSet = std::make_shared<EventHandlerSet>();
         }
 
         AppBase::~AppBase()
