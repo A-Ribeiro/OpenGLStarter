@@ -89,7 +89,7 @@ void App::load()
 
     Editor::Instance()->init();
 
-    fade = std::make_unique<Fade>(&time, mainThread_EventHandlerSet);
+    fade = STL_Tools::make_unique<Fade>(&time, mainThread_EventHandlerSet);
 
     //fade->fadeOut(5.0f, nullptr);
     time.update();
