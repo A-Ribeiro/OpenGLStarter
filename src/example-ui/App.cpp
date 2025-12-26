@@ -5,7 +5,9 @@
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
-App::App()
+App::App() : threadPool( // set the minimum thread count to avoid stalling the main thread when there are few threads
+                 MathCore::OP<int>::maximum(8,
+                                            Platform::Thread::QueryNumberOfSystemThreads()))
 {
     // forward app reference that could be used by newly created components
     Engine::Instance()->app = this;
