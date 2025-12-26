@@ -19,18 +19,22 @@ namespace AppKit
             start_registered = false;
         }
 
-        void Component::registerStart()
+        void Component::registerStart(std::shared_ptr<EventHandlerSet> eventHandlerSet)
         {
             if (start_registered)
                 return;
             start_registered = true;
-            StartEventManager::Instance()->registerNewComponent(this);
+            eventHandlerSet->startEventManager.registerNewComponent(this);
+            eventHandlerSet_lastSet = eventHandlerSet;
         }
         void Component::unregisterStart()
         {
             if (!start_registered)
                 return;
-            if (StartEventManager::Instance()->unregisterComponent(this))
+            if (auto eventHandlerSet = eventHandlerSet_lastSet.lock()){
+                if (eventHandlerSet->startEventManager.unregisterComponent(this))
+                    start_registered = false;
+            } else
                 start_registered = false;
         }
 
@@ -51,7 +55,8 @@ namespace AppKit
         Component::~Component()
         {
             // SharedPointerDatabase::Instance()->notifyDeletion(this);
-            StartEventManager::Instance()->unregisterComponent(this);
+            //StartEventManager::Instance()->unregisterComponent(this);
+            unregisterStart();
         }
 
         void Component::start()

@@ -57,6 +57,7 @@ void SceneJesusCross::loadResources() {
 //to load the scene graph
 void SceneJesusCross::loadGraph() {
     root = loadSceneroot();
+    root->setRootPropertiesFromDefaultScene(this->self());
 }
 
 //to bind the resources to the current graph
@@ -253,7 +254,7 @@ void SceneJesusCross::draw(){
 std::shared_ptr<Transform> loadSceneroot()
 {
 	auto _0 = Transform::CreateShared();
-    _0->affectComponentStart = true;
+    // _0->affectComponentStart = true;
 	_0->Name = std::string("root");
 	_0->LocalPosition = MathCore::vec3f(0,0,0);
 	_0->LocalRotation = quatf(0,0,0,1);

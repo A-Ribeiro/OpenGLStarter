@@ -28,8 +28,9 @@ void MainScene::loadResources()
 // to load the scene graph
 void MainScene::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
 
     auto main_camera = root->addChild(Transform::CreateShared());
     main_camera->Name = "Main Camera";
@@ -281,7 +282,7 @@ void MainScene::bindResourcesToGraph()
             // new_element->addNewComponent<ComponentGrow>();
         } });
 
-    renderWindow->OnUpdate.add(&MainScene::update, this);
+    this->OnUpdate.add(&MainScene::update, this);
 
     // initialize pool
     for (int i = 0; i < 75; i++)
@@ -294,7 +295,7 @@ void MainScene::bindResourcesToGraph()
 // clear all loaded scene
 void MainScene::unloadAll()
 {
-    renderWindow->OnUpdate.remove(&MainScene::update, this);
+    this->OnUpdate.remove(&MainScene::update, this);
 
     root = nullptr;
     camera = nullptr;

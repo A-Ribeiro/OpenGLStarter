@@ -15,6 +15,8 @@ namespace AppKit
 
         class Transform;
         class RenderWindowRegion;
+        class EventHandlerSet;
+        class SceneBase;
 
         // BEGIN_DECLARE_DELEGATE(TransformVisitedEvent, Transform *t)
         // CALL_PATTERN(t) END_DECLARE_DELEGATE;
@@ -412,7 +414,16 @@ namespace AppKit
 
             std::weak_ptr<RenderWindowRegion> renderWindowRegion;
             std::shared_ptr<Transform> setRenderWindowRegion(std::shared_ptr<RenderWindowRegion> renderWindowRegion);
+            std::weak_ptr<EventHandlerSet> eventHandlerSet;
+            std::shared_ptr<Transform> setEventHandlerSet(std::shared_ptr<EventHandlerSet> eventHandlerSet);
 
+            std::shared_ptr<Transform> setRootPropertiesFromDefaultScene(std::shared_ptr<SceneBase> defaultScene);
+            std::shared_ptr<Transform> setRootPropertiesFrom_RenderWindow_and_EventHandlerSet(std::shared_ptr<RenderWindowRegion> renderWindowRegion, std::shared_ptr<EventHandlerSet> eventHandlerSet);
+
+        private:
+            void setChildRightEventsRef();
+
+        public:
             ///////////////////////////////////////////////////////
             //
             //

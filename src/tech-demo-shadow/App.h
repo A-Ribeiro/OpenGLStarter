@@ -18,8 +18,6 @@ class App : public AppBase {
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
 
-    Fade *fade;
-
     float timer;
     int state;
 
@@ -27,9 +25,13 @@ class App : public AppBase {
     float fps_accumulator;
 public:
 
-    SceneJesusCross *sceneJesusCross;
-    SceneGUI *sceneGUI;
-    SceneSplash *sceneSplash;
+    std::shared_ptr<SceneJesusCross> sceneJesusCross;
+    std::shared_ptr<SceneGUI> sceneGUI;
+    std::shared_ptr<SceneSplash> sceneSplash;
+
+    std::unique_ptr<Fade> fade;
+
+    std::shared_ptr<EventHandlerSet> mainThread_EventHandlerSet;
 
     bool mousePressed;
 

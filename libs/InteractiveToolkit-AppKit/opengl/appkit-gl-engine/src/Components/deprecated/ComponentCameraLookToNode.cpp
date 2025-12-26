@@ -27,8 +27,11 @@ namespace AppKit
                 app->moveMouseToScreenCenter();//queue update to screen center
                 */
                 renderWindowRegionRef = transform->renderWindowRegion;
+                eventHandlerSetRef = transform->eventHandlerSet;
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                renderWindowRegion->OnLateUpdate.add(&ComponentCameraLookToNode::OnLateUpdate, this);
+                auto eventHandlerSet = ToShared(eventHandlerSetRef);
+
+                eventHandlerSet->OnLateUpdate.add(&ComponentCameraLookToNode::OnLateUpdate, this);
                 renderWindowRegion->MousePos.OnChange.add(&ComponentCameraLookToNode::OnMousePosChanged, this);
                 renderWindowRegion->WindowViewport.OnChange.add(&ComponentCameraLookToNode::OnViewportChanged, this);
 
@@ -180,9 +183,11 @@ namespace AppKit
             {
                 // AppBase* app = Engine::Instance()->app;
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                auto eventHandlerSet = ToShared(eventHandlerSetRef);
+                if (eventHandlerSet != nullptr)
+                    eventHandlerSet->OnLateUpdate.remove(&ComponentCameraLookToNode::OnLateUpdate, this);
                 if (renderWindowRegion != nullptr)
                 {
-                    renderWindowRegion->OnLateUpdate.remove(&ComponentCameraLookToNode::OnLateUpdate, this);
                     renderWindowRegion->MousePos.OnChange.remove(&ComponentCameraLookToNode::OnMousePosChanged, this);
                     renderWindowRegion->WindowViewport.OnChange.remove(&ComponentCameraLookToNode::OnViewportChanged, this);
                 }

@@ -22,7 +22,9 @@ protected:
     //clear all loaded scene
     virtual void unloadAll();
     
+    Scene3D(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
 public:
+    friend class AppKit::GLEngine::SceneBase;
 
     App *app;
     std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow;
@@ -36,7 +38,6 @@ public:
     MathCore::vec2i savedMouseCoordi;
 
 
-    Scene3D(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
     ~Scene3D();
 
     virtual void draw();
@@ -49,7 +50,7 @@ public:
 
     void printHierarchy();
 
-    void OnUpdate(Platform::Time *time);
+    void OnUpdateImpl(Platform::Time *time);
 
     void setMainCamera(std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera);
 

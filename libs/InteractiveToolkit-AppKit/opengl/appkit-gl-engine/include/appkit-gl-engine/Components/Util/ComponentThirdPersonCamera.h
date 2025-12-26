@@ -37,7 +37,8 @@ namespace AppKit
 
                 std::weak_ptr<Transform> Player_ForwardRef;
 
-                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                // std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                std::weak_ptr<EventHandlerSet> eventHandlerSetRef;
 
                 // Transform *debugSphere;
                 // Transform *debugSphere2;
@@ -50,7 +51,7 @@ namespace AppKit
                     pos_speed = 2.0f;
                     rotacional_speed_y = 50.0f;
                     rotacional_speed_x = 10.0f;
-                    renderWindowRegionRef.reset();
+                    // renderWindowRegionRef.reset();
                 }
 
                 void start()
@@ -58,9 +59,9 @@ namespace AppKit
                     auto transform = getTransform();
 
                     // AppBase* app = Engine::Instance()->app;
-                    renderWindowRegionRef = transform->renderWindowRegion;
-                    auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                    renderWindowRegion->OnLateUpdate.add(&ComponentThirdPersonCamera::OnLateUpdate, this);
+                    eventHandlerSetRef = transform->eventHandlerSet;
+                    auto eventHandlerSet = ToShared(eventHandlerSetRef);
+                    eventHandlerSet->OnLateUpdate.add(&ComponentThirdPersonCamera::OnLateUpdate, this);
 
                     transform_position_target = transform->Position;
 
@@ -122,12 +123,10 @@ namespace AppKit
                 ~ComponentThirdPersonCamera()
                 {
                     // AppBase* app = Engine::Instance()->app;
-                    auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                    auto eventHandlerSet = ToShared(eventHandlerSetRef);
 
-                    if (renderWindowRegion != nullptr)
-                    {
-                        renderWindowRegion->OnLateUpdate.remove(&ComponentThirdPersonCamera::OnLateUpdate, this);
-                    }
+                    if (eventHandlerSet != nullptr)
+                        eventHandlerSet->OnLateUpdate.remove(&ComponentThirdPersonCamera::OnLateUpdate, this);
 
                     auto Target = ToShared(TargetRef);
 

@@ -50,8 +50,10 @@ void MainScene::loadResources()
 // to load the scene graph
 void MainScene::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
+    // root->affectComponentStart = true;
+    // root->setRenderWindowRegion(renderWindow);
+    // root->setEventHandlerSet(this->self());
 
     auto main_camera = root->addChild(Transform::CreateShared("Main Camera"));
 
@@ -290,7 +292,7 @@ void MainScene::bindResourcesToGraph()
     //  renderWindow->CameraViewport.OnChange.add(EventCore::CallbackWrapper(&MainScene::resize, this));
     //  renderWindow->WindowViewport.forceTriggerOnChange();
     //  renderWindow->CameraViewport.forceTriggerOnChange();
-    
+
     // auto windowSize = app->window->getSize();
     // onWindowResized(MathCore::vec2i(windowSize.x, windowSize.y));
 
@@ -315,7 +317,7 @@ void MainScene::bindResourcesToGraph()
                 uiCommands.enqueue(ui::UIEvent_InputActionBack);
         } });
 
-    renderWindow->OnUpdate.add(&MainScene::update, this);
+    this->OnUpdate.add(&MainScene::update, this);
 }
 
 // clear all loaded scene
@@ -323,7 +325,7 @@ void MainScene::unloadAll()
 {
     // renderWindow->inputManager.onWindowEvent.remove(&MainScene::window_event, this);
     //  renderWindow->CameraViewport.OnChange.remove(EventCore::CallbackWrapper(&MainScene::resize, this));
-    renderWindow->OnUpdate.remove(&MainScene::update, this);
+    this->OnUpdate.remove(&MainScene::update, this);
 
     root = nullptr;
     camera = nullptr;
@@ -391,7 +393,7 @@ void MainScene::onWindowResized(const MathCore::vec2i &new_size)
     AppOptions::OptionsManager *options = AppOptions::OptionsManager::Instance();
     {
         const char *uiSize = options->getGroupValueSelectedForKey("Extra", "UiSize");
-        printf ("UI Size Selected: %s\n", uiSize);
+        printf("UI Size Selected: %s\n", uiSize);
         if (strcmp(uiSize, "Extra Small") == 0)
             ui_screen_size.x = 3840;
         else if (strcmp(uiSize, "Small") == 0)
@@ -412,13 +414,13 @@ void MainScene::onWindowResized(const MathCore::vec2i &new_size)
             target_aspect = 16.0f / 9.0f;
             ui_screen_size.y = (9 * ui_screen_size.x) / 16;
         }
-        else if (strcmp(videoAspect, "16:10") == 0) {
+        else if (strcmp(videoAspect, "16:10") == 0)
+        {
             target_aspect = 16.0f / 10.0f;
             ui_screen_size.y = (10 * ui_screen_size.x) / 16;
         }
 
-        printf ("UI Size Resolution: %ix%i\n", ui_screen_size.x, ui_screen_size.y);
-
+        printf("UI Size Resolution: %ix%i\n", ui_screen_size.x, ui_screen_size.y);
 
         float window_aspect = (float)new_size.width / (float)new_size.height;
 

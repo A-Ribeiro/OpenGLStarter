@@ -140,10 +140,10 @@ void Scene::RenderAndLogic()
                 if (OnImGuiDrawOverlay != nullptr)
                     OnImGuiDrawOverlay(pos / io.DisplayFramebufferScale, size / io.DisplayFramebufferScale);
             }
-            else
-            {
-                RenderWindowRegion->WindowViewport = newViewport;
-            }
+            // else
+            // {
+            //     RenderWindowRegion->WindowViewport = newViewport;
+            // }
         }
         else
         {

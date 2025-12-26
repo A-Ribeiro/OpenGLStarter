@@ -213,7 +213,15 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
+    MainScene(
+        Platform::Time *_time,
+        AppKit::GLEngine::RenderPipeline *_renderPipeline,
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap,
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
 public:
+    friend class AppKit::GLEngine::SceneBase;
+
     YUV2RGB_Multithread m_YUV2RGB_Multithread;
 
     Platform::IPC::LowLatencyQueueIPC yuy2_queue;
@@ -232,12 +240,6 @@ public:
     float text_size;
     float text_margin;
 
-    MainScene(
-        Platform::Time *_time,
-        AppKit::GLEngine::RenderPipeline *_renderPipeline,
-        AppKit::GLEngine::ResourceHelper *_resourceHelper,
-        AppKit::GLEngine::ResourceMap *_resourceMap,
-        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
     ~MainScene();
 
     virtual void draw();

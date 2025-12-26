@@ -30,12 +30,13 @@ public:
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
     
-    Fade *fade;
+    std::unique_ptr<Fade> fade;
 
     // EventCore::PressReleaseDetector CtrlO_Detector;
     EventCore::PressReleaseDetector CtrlQ_Detector;
     EventCore::PressReleaseDetector CtrlS_Detector;
 
+    std::shared_ptr<EventHandlerSet> mainThread_EventHandlerSet;
 
     App();
     ~App();

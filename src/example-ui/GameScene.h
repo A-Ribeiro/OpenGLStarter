@@ -63,7 +63,16 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
+    GameScene(
+        App *app,
+        Platform::Time *_time,
+        AppKit::GLEngine::RenderPipeline *_renderPipeline,
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap,
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
 public:
+    friend class AppKit::GLEngine::SceneBase;
+
     static GameScene *currentInstance;
 
     App *app;
@@ -75,13 +84,7 @@ public:
 
     MathCore::vec2f screen_custom_size;
 
-    GameScene(
-        App *app,
-        Platform::Time *_time,
-        AppKit::GLEngine::RenderPipeline *_renderPipeline,
-        AppKit::GLEngine::ResourceHelper *_resourceHelper,
-        AppKit::GLEngine::ResourceMap *_resourceMap,
-        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
+
     ~GameScene();
 
     virtual void draw();

@@ -485,9 +485,9 @@ namespace AppKit
                 // AppBase* app = Engine::Instance()->app;
                 auto transform = getTransform();
 
-                renderWindowRegionRef = transform->renderWindowRegion;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                renderWindowRegion->OnPreUpdate.add(&ComponentSkinnedMesh::OnPreUpdate, this);
+                eventHandlerSetRef = transform->eventHandlerSet;
+                auto eventHandlerSet = ToShared(eventHandlerSetRef);
+                eventHandlerSet->OnPreUpdate.add(&ComponentSkinnedMesh::OnPreUpdate, this);
             }
 
             void ComponentSkinnedMesh::OnPreUpdate(Platform::Time *time)
@@ -504,12 +504,10 @@ namespace AppKit
             ComponentSkinnedMesh::~ComponentSkinnedMesh()
             {
                 // AppBase* app = Engine::Instance()->app;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                auto eventHandlerSet = ToShared(eventHandlerSetRef);
 
-                if (renderWindowRegion != nullptr)
-                {
-                    renderWindowRegion->OnPreUpdate.remove(&ComponentSkinnedMesh::OnPreUpdate, this);
-                }
+                if (eventHandlerSet != nullptr)
+                    eventHandlerSet->OnPreUpdate.remove(&ComponentSkinnedMesh::OnPreUpdate, this);
 
                 // release model_base
                 model_base = nullptr;

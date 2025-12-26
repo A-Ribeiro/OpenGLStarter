@@ -23,14 +23,17 @@ void SceneGUI::loadResources()
         "button_SoftParticles", //_id,
         "Soft Particles ON",    //_text,
         &fontBuilder,            //_fontBuilder
-        resourceMap             // resourceMap
+        resourceMap,             // resourceMap
+        renderWindow,
+        this->self()
     );
 }
 // to load the scene graph
 void SceneGUI::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
 
     auto t = root->addChild(Transform::CreateShared());
     t->Name = "Main Camera";

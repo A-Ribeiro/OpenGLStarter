@@ -25,8 +25,10 @@ void MainScene::loadResources()
 // to load the scene graph
 void MainScene::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
+
     root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
     root->addChild(scaleNode = Transform::CreateShared());
@@ -143,23 +145,16 @@ void MainScene::bindResourcesToGraph()
             resize(MathCore::vec2i(rect->w, rect->h));
         } });
 
-    renderWindow->OnUpdate.add(&MainScene::update, this);
 }
 
 // clear all loaded scene
 void MainScene::unloadAll()
 {
-    renderWindow->OnUpdate.remove(&MainScene::update, this);
-
     root = nullptr;
     camera = nullptr;
     font_line1 = nullptr;
     scaleNode = nullptr;
     bgNode = nullptr;
-}
-
-void MainScene::update(Platform::Time *elapsed)
-{
 }
 
 void MainScene::draw()

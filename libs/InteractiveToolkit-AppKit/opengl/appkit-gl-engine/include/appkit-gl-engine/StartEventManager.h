@@ -15,7 +15,7 @@ namespace AppKit
             Platform::SmartVector<Component *> componentList;
 
         public:
-            static StartEventManager *Instance();
+            // static StartEventManager *Instance();
             void registerNewComponent(Component *c);
             bool unregisterComponent(Component *c);
             void processAllComponentsWithTransform();

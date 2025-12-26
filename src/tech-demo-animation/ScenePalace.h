@@ -42,13 +42,15 @@ protected:
     std::shared_ptr<AppKit::GLEngine::Components::ComponentThirdPersonPlayerController> thirdPersonPlayerController;
     std::shared_ptr<AppKit::GLEngine::Components::ComponentThirdPersonCamera> thirdPersonCamera;
 
-public:
     ScenePalace(
         Platform::Time *_time,
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
         AppKit::GLEngine::ResourceHelper *_resourceHelper,
         AppKit::GLEngine::ResourceMap *_resourceMap,
         std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
+public:
+    friend class AppKit::GLEngine::SceneBase;
+
     ~ScenePalace();
     
     virtual void draw();

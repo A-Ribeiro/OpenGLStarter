@@ -7,7 +7,7 @@
 
 #include <InteractiveToolkit/Platform/Time.h>
 
-#include <appkit-gl-engine/AppBase/RenderWindowRegion.h>
+#include <appkit-gl-engine/AppBase/EventHandlerSet.h>
 
 namespace AppKit
 {
@@ -38,12 +38,13 @@ namespace AppKit
 
             void createScreenVertex();
 
-            std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+            // std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+            std::weak_ptr<EventHandlerSet> eventHandlerSetRef;
 
         public:
             bool isFading;
 
-            Fade(Platform::Time *_time, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindowRegion = nullptr);
+            Fade(Platform::Time *_time, std::shared_ptr<EventHandlerSet> eventHandlerSetRef);
             ~Fade();
 
             void fadeIn(float _sec, const EventCore::Callback<void()> &_OnEndCall);

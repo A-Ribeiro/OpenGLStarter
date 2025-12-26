@@ -23,8 +23,10 @@ void MainScene::loadResources()
 // to load the scene graph
 void MainScene::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
+
     root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
     deprecated_lines_transform = root->addChild(Transform::CreateShared());
@@ -88,13 +90,13 @@ void MainScene::bindResourcesToGraph()
         resourceHelper->addAABBMesh(root);
     }
 
-    renderWindow->OnUpdate.add(&MainScene::update, this);
+    this->OnUpdate.add(&MainScene::update, this);
 }
 
 // clear all loaded scene
 void MainScene::unloadAll()
 {
-    renderWindow->OnUpdate.remove(&MainScene::update, this);
+    this->OnUpdate.remove(&MainScene::update, this);
 
     root = nullptr;
     camera = nullptr;

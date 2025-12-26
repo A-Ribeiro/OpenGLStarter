@@ -84,7 +84,7 @@ class App : public AppBase {
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
 
-    Fade *fade;
+    std::unique_ptr<Fade> fade;
     
     //fade aux variables
     float timer;

@@ -30,7 +30,9 @@ namespace AppKit
             class ComponentThirdPersonPlayerController : public Component
             {
 
-                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                // std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+
+                std::weak_ptr<EventHandlerSet> eventHandlerSetRef;
 
             public:
                 static const ComponentType Type;
@@ -64,7 +66,7 @@ namespace AppKit
                     animation_str_walk = "walk";
                     animation_str_run = "run";
 
-                    renderWindowRegionRef.reset();// = nullptr;
+                    // renderWindowRegionRef.reset();// = nullptr;
                 }
 
                 void setCameraLook(std::shared_ptr<Transform> camera_look)
@@ -92,9 +94,9 @@ namespace AppKit
                     auto transform = getTransform();
 
                     // AppBase* app = Engine::Instance()->app;
-                    renderWindowRegionRef = transform->renderWindowRegion;
-                    auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                    renderWindowRegion->OnUpdate.add(&ComponentThirdPersonPlayerController::OnUpdate, this);
+                    eventHandlerSetRef = transform->eventHandlerSet;
+                    auto eventHandlerSet = ToShared(eventHandlerSetRef);
+                    eventHandlerSet->OnUpdate.add(&ComponentThirdPersonPlayerController::OnUpdate, this);
 
                     animationMotion = transform->findComponent<ComponentAnimationMotion>();
                     ITK_ABORT(animationMotion == nullptr, "Failed to query animationMotion\n.");
@@ -107,11 +109,9 @@ namespace AppKit
                 ~ComponentThirdPersonPlayerController()
                 {
                     // AppBase* app = Engine::Instance()->app;
-                    auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                    if (renderWindowRegion != nullptr)
-                    {
-                        renderWindowRegion->OnUpdate.remove(&ComponentThirdPersonPlayerController::OnUpdate, this);
-                    }
+                    auto eventHandlerSet = ToShared(eventHandlerSetRef);
+                    if (eventHandlerSet != nullptr)
+                        eventHandlerSet->OnUpdate.remove(&ComponentThirdPersonPlayerController::OnUpdate, this);
 
                     if (animationMotion != nullptr)
                         animationMotion = nullptr;

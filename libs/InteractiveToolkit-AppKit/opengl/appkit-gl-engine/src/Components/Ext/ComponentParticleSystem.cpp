@@ -92,12 +92,11 @@ namespace AppKit
                     {
                         // AppBase* app = Engine::Instance()->app;
 
-                        auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                        //auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                        auto eventHandlerSet = ToShared(eventHandlerSetRef);
 
-                        if (renderWindowRegion != nullptr)
-                        {
-                            renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
-                        }
+                        if (eventHandlerSet != nullptr)
+                            eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
                     }
 
                     return;
@@ -152,19 +151,17 @@ namespace AppKit
 
                 soft = true;
 
-                renderWindowRegionRef.reset();
+                // renderWindowRegionRef.reset();
             }
 
             ComponentParticleSystem::~ComponentParticleSystem()
             {
                 // AppBase* app = Engine::Instance()->app;
 
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-
-                if (renderWindowRegion != nullptr)
-                {
-                    renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
-                }
+                auto eventHandlerSet = ToShared(eventHandlerSetRef);
+                
+                if (eventHandlerSet != nullptr)
+                    eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
 
                 // ReferenceCounter<AppKit::OpenGL::GLTexture *> *texRefCounter = &Engine::Instance()->textureReferenceCounter;
 
@@ -220,10 +217,10 @@ namespace AppKit
                 // AppBase* app = Engine::Instance()->app;
                 auto transform = getTransform();
 
-                renderWindowRegionRef = transform->renderWindowRegion;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
-                renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
+                eventHandlerSetRef = transform->eventHandlerSet;
+                auto eventHandlerSet = ToShared(eventHandlerSetRef);
+                eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
+                eventHandlerSet->OnAfterGraphPrecompute.add(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
 
                 elapsed_sec = 0.0f;
                 rateElapsed_sec = 0.0f;
@@ -250,10 +247,10 @@ namespace AppKit
                 }
 
                 // AppBase* app = Engine::Instance()->app;
-                renderWindowRegionRef = transform->renderWindowRegion;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
-                renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
+                eventHandlerSetRef = transform->eventHandlerSet;
+                auto eventHandlerSet = ToShared(eventHandlerSetRef);
+                eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
+                eventHandlerSet->OnAfterGraphPrecompute.add(&ComponentParticleSystem::OnAfterGraphPrecompute, this);
 
                 elapsed_sec = 0.0f;
                 rateElapsed_sec = 0.0f;

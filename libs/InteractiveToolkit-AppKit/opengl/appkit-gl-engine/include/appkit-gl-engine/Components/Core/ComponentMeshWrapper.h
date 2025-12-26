@@ -28,7 +28,7 @@ namespace AppKit
             class ComponentMeshWrapper : public Component
             {
 
-                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                std::weak_ptr<EventHandlerSet> eventHandlerSetRef;
 
                 std::unordered_map<Component *, bool> visibleFromCameras;
 
@@ -50,9 +50,9 @@ namespace AppKit
 
                 EventCore::Callback<void(ComponentMeshWrapper*)> OnBeforeComputeFinalPositions;
 
-                void setShapeSphere(const MathCore::vec3f &sphereCenter, float sphereRadius, float ignore_after_graph_precompute_call = false);
-                void setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &aabb, float ignore_after_graph_precompute_call = false);
-                void setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &aabb, float ignore_after_graph_precompute_call = false);
+                void setShapeSphere(const MathCore::vec3f &sphereCenter, float sphereRadius, bool ignore_after_graph_precompute_call = false);
+                void setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &aabb, bool ignore_after_graph_precompute_call = false);
+                void setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &aabb, bool ignore_after_graph_precompute_call = false);
 
                 void clearShape();
 

@@ -23,12 +23,13 @@ class App : public AppBase {
     const float fps_time_sec = 0.5f;
     float fps_accumulator;
 public:
-    Fade *fade;
-    MainScene *mainScene;
-    Platform::ThreadPool threadPool;
-    SceneGUI *sceneGUI;
-    Platform::ObjectQueue<EventCore::Callback<void(void)>> executeOnMainThread;
+    std::unique_ptr<Fade> fade;
+    std::shared_ptr<MainScene> mainScene;
+    std::shared_ptr<SceneGUI> sceneGUI;
 
+    Platform::ThreadPool threadPool;
+    Platform::ObjectQueue<EventCore::Callback<void(void)>> executeOnMainThread;
+    std::shared_ptr<EventHandlerSet> mainThread_EventHandlerSet;
 
     App();
     ~App();

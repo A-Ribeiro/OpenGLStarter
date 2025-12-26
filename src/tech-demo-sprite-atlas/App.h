@@ -21,8 +21,8 @@ class App : public AppBase {
     const float fps_time_sec = 0.5f;
     float fps_accumulator;
 public:
-    Fade *fade;
-    MainScene *mainScene;
+    std::unique_ptr<Fade> fade;
+    std::shared_ptr<MainScene> mainScene;
     Platform::ThreadPool threadPool;
     Platform::ObjectQueue<EventCore::Callback<void(void)>> executeOnMainThread;
 

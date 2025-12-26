@@ -27,8 +27,6 @@ class App : public AppBase {
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
 
-    Fade *fade;
-    
     //fade aux variables
     float timer;
     int state;
@@ -39,9 +37,14 @@ class App : public AppBase {
     float fps_accumulator;
 public:
 
-    SceneGUI *sceneGUI;
-    SceneSplash *sceneSplash;
-    AppKit::GLEngine::SceneBase *activeScene;
+    std::shared_ptr<SceneGUI> sceneGUI;
+    std::shared_ptr<SceneSplash> sceneSplash;
+
+    std::shared_ptr<AppKit::GLEngine::SceneBase> activeScene;
+
+    std::unique_ptr<Fade> fade;
+
+    std::shared_ptr<EventHandlerSet> mainThread_EventHandlerSet;
 
     App();
     ~App();

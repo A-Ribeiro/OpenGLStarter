@@ -29,7 +29,7 @@ namespace AppKit
                 useSizeX = false;
                 sizeX = 1.0f;
 
-                renderWindowRegionRef.reset();// = nullptr;
+                // renderWindowRegionRef.reset();// = nullptr;
 
                 // renderWindowRegion = transform[0]->renderWindowRegion;
 
@@ -61,22 +61,18 @@ namespace AppKit
             ComponentCameraOrthographic::~ComponentCameraOrthographic()
             {
                 // AppBase* appBase = Engine::Instance()->app;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-
-                if (renderWindowRegion != nullptr)
-                {
+                if (auto renderWindowRegion = renderWindowRegionRef.lock())
                     renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
-                }
             }
 
             void ComponentCameraOrthographic::start()
             {
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-
-                //renderWindowRegion = transform[0]->renderWindowRegion;
-                renderWindowRegion->CameraViewport.OnChange.add(&ComponentCameraOrthographic::OnViewportChanged, this);
-                // call the first setup
-                OnViewportChanged(renderWindowRegion->CameraViewport, renderWindowRegion->CameraViewport);
+                if (auto renderWindowRegion = renderWindowRegionRef.lock())
+                {
+                    renderWindowRegion->CameraViewport.OnChange.add(&ComponentCameraOrthographic::OnViewportChanged, this);
+                    // call the first setup
+                    OnViewportChanged(renderWindowRegion->CameraViewport, renderWindowRegion->CameraViewport);
+                }
             }
 
             void ComponentCameraOrthographic::OnUpdateCameraFloatParameter(const float &value, const float &oldValue)
@@ -111,9 +107,7 @@ namespace AppKit
                 // AppBase* appBase = Engine::Instance()->app;
                 MathCore::vec2i size;
 
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-
-                if (renderWindowRegion != nullptr)
+                if (auto renderWindowRegion = renderWindowRegionRef.lock())
                     size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
                 else
                     size = Engine::Instance()->app->window->getSize();
@@ -276,14 +270,14 @@ namespace AppKit
             }
             void ComponentCameraOrthographic::detachFromTransform(std::shared_ptr<Transform> t)
             {
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                if (renderWindowRegion != nullptr)
+                if (auto renderWindowRegion = renderWindowRegionRef.lock())
                     renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
                 renderWindowRegionRef.reset();
             }
 
             // always clone
-            std::shared_ptr<Component> ComponentCameraOrthographic::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone){
+            std::shared_ptr<Component> ComponentCameraOrthographic::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
+            {
                 auto result = Component::CreateShared<ComponentCameraOrthographic>();
 
                 result->nearPlane.setValueNoCallback(this->nearPlane);
@@ -303,25 +297,24 @@ namespace AppKit
                 return result;
             }
 
-            void ComponentCameraOrthographic::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer){
+            void ComponentCameraOrthographic::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
+            {
                 writer.StartObject();
                 writer.String("type");
                 writer.String(ComponentCameraOrthographic::Type);
                 writer.String("id");
                 writer.Uint64((intptr_t)self().get());
                 writer.EndObject();
-                
             }
             void ComponentCameraOrthographic::Deserialize(rapidjson::Value &_value,
-                                                  std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                                                  std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                                                  ResourceSet &resourceSet)
+                                                          std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                                          std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                                          ResourceSet &resourceSet)
             {
                 if (!_value.HasMember("type") || !_value["type"].IsString())
                     return;
                 if (!strcmp(_value["type"].GetString(), ComponentCameraOrthographic::Type) == 0)
                     return;
-                
             }
         }
     }

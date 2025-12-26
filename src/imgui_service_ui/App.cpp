@@ -49,11 +49,6 @@ App::App()
 
     AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
 
-    fade = new Fade(&time);
-
-    fade->fadeOut(5.0f, nullptr);
-    time.update();
-
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
 
     screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
@@ -81,6 +76,8 @@ App::App()
         mainMonitorCenter = selectedMonitor->Position() + screen_size_pixels / 2;
         windowResolution = window->getSize();
     }
+
+    mainThread_EventHandlerSet = std::make_shared<EventHandlerSet>();
 }
 
 void App::load() {
@@ -150,6 +147,12 @@ void App::load() {
 
     this->applyGlobalScale();
 
+    
+    fade = STL_Tools::make_unique<Fade>(&time, mainThread_EventHandlerSet);
+
+    //fade->fadeOut(5.0f, nullptr);
+    time.update();
+
     fade->fadeOut(3.0f,nullptr);
 }
 
@@ -186,18 +189,16 @@ void App::applyGlobalScale() {
 
 
 App::~App(){
-    
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_WindowGL_Shutdown();
     ImGui::DestroyContext();
 
-    if (fade != nullptr){
-        delete fade;
-        fade = nullptr;
-    }
+    fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw() {
@@ -206,11 +207,12 @@ void App::draw() {
     //set min delta time (the passed time or the time to render at 24fps)
     time.deltaTime = OP<float>::minimum(time.deltaTime,1.0f/24.0f);
 
-    StartEventManager::Instance()->processAllComponentsWithTransform();
     
-    screenRenderWindow->OnPreUpdate(&time);
-    screenRenderWindow->OnUpdate(&time);
-    screenRenderWindow->OnLateUpdate(&time);
+    mainThread_EventHandlerSet->startEventManager.processAllComponentsWithTransform();
+    
+    mainThread_EventHandlerSet->OnPreUpdate(&time);
+    mainThread_EventHandlerSet->OnUpdate(&time);
+    mainThread_EventHandlerSet->OnLateUpdate(&time);
 
     // pre process all scene graphs
     /*if (sceneJesusCross != nullptr)
@@ -218,7 +220,7 @@ void App::draw() {
     if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();*/
 
-    screenRenderWindow->OnAfterGraphPrecompute(&time);
+    mainThread_EventHandlerSet->OnAfterGraphPrecompute(&time);
 
     /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();
@@ -376,14 +378,15 @@ void App::draw() {
     renderState->FrontFace = FrontFaceCCW;
     renderState->DepthTest = DepthTestLessEqual;
 
-    fade->draw();
+    if (fade != nullptr)
+        fade->draw();
     bool ctrl_pressed = Keyboard::isPressed(KeyCode::LControl) || Keyboard::isPressed(KeyCode::RControl);
     if (
         //Keyboard::isPressed(KeyCode::Escape) || 
         (ctrl_pressed && Keyboard::isPressed(KeyCode::Q))
         )
         exitApp();
-    if (fade->isFading)
+    if (fade != nullptr && fade->isFading)
         return;
 }
 

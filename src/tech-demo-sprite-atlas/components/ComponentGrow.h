@@ -19,7 +19,8 @@ namespace AppKit
             class ComponentGrow : public Component
             {
 
-                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                //std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                std::weak_ptr<EventHandlerSet> eventHandlerSetRef;
 
                 void OnUpdate(Platform::Time *time);
 

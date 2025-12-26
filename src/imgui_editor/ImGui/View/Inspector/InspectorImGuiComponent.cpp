@@ -18,7 +18,7 @@ void InspectorImGuiComponent::renderAndLogic(int count) {
     opened = ImGui::CollapsingHeader(aux,
         ImGuiTreeNodeFlags_None |
         ImGuiTreeNodeFlags_OpenOnArrow |
-        ImGuiTreeNodeFlags_AllowItemOverlap |
+        ImGuiTreeNodeFlags_AllowOverlap |
         ImGuiTreeNodeFlags_Framed);
 
     snprintf(aux, 64, "[x]##%s_%i", this->title.c_str(), count);
