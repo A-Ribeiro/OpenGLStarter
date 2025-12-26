@@ -21,17 +21,19 @@ protected:
 
     AppKit::OpenGL::GLFont2Builder fontBuilder;
 
-public:
-    AppKit::GLEngine::Button* button;
-
-    std::shared_ptr<AppKit::GLEngine::Transform> cursorTransform;
-
     SceneGUI(
         Platform::Time *_time,
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
         AppKit::GLEngine::ResourceHelper *_resourceHelper,
         AppKit::GLEngine::ResourceMap *_resourceMap,
         std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
+public:
+    friend class AppKit::GLEngine::SceneBase;
+
+    AppKit::GLEngine::Button* button;
+
+    std::shared_ptr<AppKit::GLEngine::Transform> cursorTransform;
+
     ~SceneGUI();
 
     virtual void draw();

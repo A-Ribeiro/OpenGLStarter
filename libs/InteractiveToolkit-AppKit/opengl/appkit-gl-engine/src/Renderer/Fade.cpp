@@ -8,157 +8,159 @@
 
 namespace AppKit
 {
-    namespace GLEngine
-    {
+	namespace GLEngine
+	{
 
-        void Fade::setColor(Platform::Time *time)
-        {
+		void Fade::setColor(Platform::Time* time)
+		{
 
-            if (completeOnNextFrame)
-            {
-                AppBase *app = Engine::Instance()->app;
+			if (completeOnNextFrame)
+			{
+				AppBase* app = Engine::Instance()->app;
 
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+				if (auto eventHandlerSet = eventHandlerSetRef.lock())
+					eventHandlerSet->OnUpdate.remove(&Fade::setColor, this);
 
-                renderWindowRegion->OnUpdate.remove(&Fade::setColor, this);
+				if (reset_draw_visible)
+					draw_visible = false;
+				isFading = false;
+				time->timeScale = oldTimeScale;
 
-                if (reset_draw_visible)
-                    draw_visible = false;
-                isFading = false;
-                time->timeScale = oldTimeScale;
+				if (OnEndCall != nullptr)
+					OnEndCall();
+				return;
+			}
 
-                if (OnEndCall != nullptr)
-                    OnEndCall();
-                return;
-            }
+			lrp = MathCore::OP<float>::move(lrp, 1.0f, time->unscaledDeltaTime / sec);
+			color = MathCore::OP<MathCore::vec4f>::lerp(colorSrc, colorTarget, lrp);
 
-            lrp = MathCore::OP<float>::move(lrp, 1.0f, time->unscaledDeltaTime / sec);
-            color = MathCore::OP<MathCore::vec4f>::lerp(colorSrc, colorTarget, lrp);
+			// textTransform->setLocalPosition( lerp(src, target,easeOutExpo(0.0f, 1.0f, lrp)) );
+			if (lrp == 1.0f)
+			{
+				completeOnNextFrame = true;
+			}
+		}
 
-            // textTransform->setLocalPosition( lerp(src, target,easeOutExpo(0.0f, 1.0f, lrp)) );
-            if (lrp == 1.0f)
-            {
-                completeOnNextFrame = true;
-            }
-        }
+		void Fade::createScreenVertex()
+		{
+			vertex.clear();
 
-        void Fade::createScreenVertex()
-        {
-            vertex.clear();
+			vertex.push_back(MathCore::vec3f(-1, -1, 0));
+			vertex.push_back(MathCore::vec3f(1, -1, 0));
+			vertex.push_back(MathCore::vec3f(1, 1, 0));
 
-            vertex.push_back(MathCore::vec3f(-1, -1, 0));
-            vertex.push_back(MathCore::vec3f(1, -1, 0));
-            vertex.push_back(MathCore::vec3f(1, 1, 0));
+			vertex.push_back(MathCore::vec3f(-1, -1, 0));
+			vertex.push_back(MathCore::vec3f(1, 1, 0));
+			vertex.push_back(MathCore::vec3f(-1, 1, 0));
+		}
 
-            vertex.push_back(MathCore::vec3f(-1, -1, 0));
-            vertex.push_back(MathCore::vec3f(1, 1, 0));
-            vertex.push_back(MathCore::vec3f(-1, 1, 0));
-        }
+		Fade::Fade(Platform::Time* _time, std::shared_ptr<EventHandlerSet> eventHandlerSet)
+		{
+			this->eventHandlerSetRef = eventHandlerSet;
+			// if (eventHandlerSet == nullptr)
+			//     this->eventHandlerSetRef = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
 
-        Fade::Fade(Platform::Time *_time, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindowRegion)
-        {
-            this->renderWindowRegionRef = renderWindowRegion;
-            if (renderWindowRegion == nullptr)
-                this->renderWindowRegionRef = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
+			time = _time;
+			createScreenVertex();
+			isFading = false;
+			draw_visible = false;
+			completeOnNextFrame = false;
+		}
 
-            time = _time;
-            createScreenVertex();
-            isFading = false;
-            draw_visible = false;
-            completeOnNextFrame = false;
-        }
+		Fade::~Fade()
+		{
+			// AppBase *app = Engine::Instance()->app;
+			if (auto eventHandlerSet = eventHandlerSetRef.lock())
+				eventHandlerSet->OnUpdate.remove(&Fade::setColor, this);
+		}
 
-        Fade::~Fade()
-        {
-            // AppBase *app = Engine::Instance()->app;
-            auto renderWindowRegion = ToShared(renderWindowRegionRef);
+		void Fade::fadeIn(float _sec, const EventCore::Callback<void()>& _OnEndCall)
+		{
+			auto eventHandlerSet = eventHandlerSetRef.lock();
 
-            renderWindowRegion->OnUpdate.remove(&Fade::setColor, this);
-        }
+			if (!isFading)
+				oldTimeScale = time->timeScale;
 
-        void Fade::fadeIn(float _sec, const EventCore::Callback<void()> &_OnEndCall)
-        {
-            auto renderWindowRegion = ToShared(renderWindowRegionRef);
+			time->timeScale = 0.0f;
 
-            if (!isFading)
-                oldTimeScale = time->timeScale;
+			OnEndCall = _OnEndCall;
+			AppKit::GLEngine::AppBase* app = AppKit::GLEngine::Engine::Instance()->app;
+			if (eventHandlerSet != nullptr) {
+				eventHandlerSet->OnUpdate.remove(&Fade::setColor, this);
+				eventHandlerSet->OnUpdate.add(&Fade::setColor, this);
+			}
+			lrp = 0.0f;
+			sec = _sec;
+			colorSrc = MathCore::vec4f(0, 0, 0, 0);
+			colorTarget = MathCore::vec4f(0, 0, 0, 1);
+			color = MathCore::OP<MathCore::vec4f>::lerp(colorSrc, colorTarget, lrp);
+			reset_draw_visible = false;
+			draw_visible = true;
+			isFading = true;
+			completeOnNextFrame = false;
+		}
 
-            time->timeScale = 0.0f;
+		void Fade::fadeOut(float _sec, const EventCore::Callback<void()>& _OnEndCall)
+		{
+			auto eventHandlerSet = eventHandlerSetRef.lock();
 
-            OnEndCall = _OnEndCall;
-            AppKit::GLEngine::AppBase *app = AppKit::GLEngine::Engine::Instance()->app;
-            renderWindowRegion->OnUpdate.remove(&Fade::setColor, this);
-            renderWindowRegion->OnUpdate.add(&Fade::setColor, this);
-            lrp = 0.0f;
-            sec = _sec;
-            colorSrc = MathCore::vec4f(0, 0, 0, 0);
-            colorTarget = MathCore::vec4f(0, 0, 0, 1);
-            color = MathCore::OP<MathCore::vec4f>::lerp(colorSrc, colorTarget, lrp);
-            reset_draw_visible = false;
-            draw_visible = true;
-            isFading = true;
-            completeOnNextFrame = false;
-        }
+			if (!isFading)
+				oldTimeScale = time->timeScale;
 
-        void Fade::fadeOut(float _sec, const EventCore::Callback<void()> &_OnEndCall)
-        {
-            auto renderWindowRegion = ToShared(renderWindowRegionRef);
+			time->timeScale = 0.0f;
 
-            if (!isFading)
-                oldTimeScale = time->timeScale;
+			OnEndCall = _OnEndCall;
+			AppKit::GLEngine::AppBase* app = AppKit::GLEngine::Engine::Instance()->app;
+			if (eventHandlerSet != nullptr) {
+				eventHandlerSet->OnUpdate.remove(&Fade::setColor, this);
+				eventHandlerSet->OnUpdate.add(&Fade::setColor, this);
+			}
+			lrp = 0.0f;
+			sec = _sec;
+			colorTarget = MathCore::vec4f(0, 0, 0, 0);
+			colorSrc = MathCore::vec4f(0, 0, 0, 1);
+			color = MathCore::OP<MathCore::vec4f>::lerp(colorSrc, colorTarget, lrp);
+			reset_draw_visible = true;
+			draw_visible = true;
+			isFading = true;
+			completeOnNextFrame = false;
+		}
 
-            time->timeScale = 0.0f;
+		void Fade::draw()
+		{
 
-            OnEndCall = _OnEndCall;
-            AppKit::GLEngine::AppBase *app = AppKit::GLEngine::Engine::Instance()->app;
-            renderWindowRegion->OnUpdate.remove(&Fade::setColor, this);
-            renderWindowRegion->OnUpdate.add(&Fade::setColor, this);
-            lrp = 0.0f;
-            sec = _sec;
-            colorTarget = MathCore::vec4f(0, 0, 0, 0);
-            colorSrc = MathCore::vec4f(0, 0, 0, 1);
-            color = MathCore::OP<MathCore::vec4f>::lerp(colorSrc, colorTarget, lrp);
-            reset_draw_visible = true;
-            draw_visible = true;
-            isFading = true;
-            completeOnNextFrame = false;
-        }
+			if (!draw_visible)
+				return;
 
-        void Fade::draw()
-        {
+			AppKit::GLEngine::GLRenderState* renderstate = AppKit::GLEngine::GLRenderState::Instance();
 
-            if (!draw_visible)
-                return;
+			// AppKit::OpenGL::GLShader* oldShader = renderstate->CurrentShader;
+			AppKit::GLEngine::DepthTestType oldDepthTest = renderstate->DepthTest;
+			bool oldDepthTestEnabled = renderstate->DepthWrite;
+			AppKit::GLEngine::BlendModeType oldBlendMode = renderstate->BlendMode;
 
-            AppKit::GLEngine::GLRenderState *renderstate = AppKit::GLEngine::GLRenderState::Instance();
+			renderstate->CurrentShader = &shaderColor;
+			renderstate->DepthTest = AppKit::GLEngine::DepthTestDisabled;
+			renderstate->DepthWrite = false;
+			renderstate->BlendMode = AppKit::GLEngine::BlendModeAlpha;
 
-            // AppKit::OpenGL::GLShader* oldShader = renderstate->CurrentShader;
-            AppKit::GLEngine::DepthTestType oldDepthTest = renderstate->DepthTest;
-            bool oldDepthTestEnabled = renderstate->DepthWrite;
-            AppKit::GLEngine::BlendModeType oldBlendMode = renderstate->BlendMode;
+			shaderColor.setMatrix(MathCore::mat4f());
+			shaderColor.setColor(color);
 
-            renderstate->CurrentShader = &shaderColor;
-            renderstate->DepthTest = AppKit::GLEngine::DepthTestDisabled;
-            renderstate->DepthWrite = false;
-            renderstate->BlendMode = AppKit::GLEngine::BlendModeAlpha;
+			// direct draw commands
+			OPENGL_CMD(glEnableVertexAttribArray(shaderColor.vPosition));
+			OPENGL_CMD(glVertexAttribPointer(shaderColor.vPosition, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertex[0]));
 
-            shaderColor.setMatrix(MathCore::mat4f());
-            shaderColor.setColor(color);
+			OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, 6));
 
-            // direct draw commands
-            OPENGL_CMD(glEnableVertexAttribArray(shaderColor.vPosition));
-            OPENGL_CMD(glVertexAttribPointer(shaderColor.vPosition, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertex[0]));
+			OPENGL_CMD(glDisableVertexAttribArray(shaderColor.vPosition));
 
-            OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, 6));
+			// renderstate->CurrentShader = oldShader;
+			renderstate->DepthTest = oldDepthTest;
+			renderstate->DepthWrite = oldDepthTestEnabled;
+			renderstate->BlendMode = oldBlendMode;
+		}
 
-            OPENGL_CMD(glDisableVertexAttribArray(shaderColor.vPosition));
-
-            // renderstate->CurrentShader = oldShader;
-            renderstate->DepthTest = oldDepthTest;
-            renderstate->DepthWrite = oldDepthTestEnabled;
-            renderstate->BlendMode = oldBlendMode;
-        }
-
-    }
+	}
 
 }

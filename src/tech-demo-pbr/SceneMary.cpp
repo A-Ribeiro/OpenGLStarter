@@ -76,6 +76,7 @@ void SceneMary::loadResources()
 void SceneMary::loadGraph()
 {
     root = loadSceneroot_Mary();
+    root->setRootPropertiesFromDefaultScene(this->self());
 }
 
 // to bind the resources to the current graph
@@ -259,7 +260,7 @@ void SceneMary::draw()
 std::shared_ptr<Transform> loadSceneroot_Mary()
 {
     auto _0 = Transform::CreateShared();
-    _0->affectComponentStart = true;
+    //_0->affectComponentStart = true;
     _0->Name = std::string("root");
     _0->LocalPosition = MathCore::vec3f(0, 0, 0);
     _0->LocalRotation = MathCore::quatf(0, 0, 0, 1);

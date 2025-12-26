@@ -164,10 +164,10 @@ void OnKeyboardEvent(const KeyboardEvent &event)
     ImGuiIO &io = ImGui::GetIO();
 
     // update modifiers
-    io.AddKeyEvent(ImGuiKey_ModCtrl, event.control);
-    io.AddKeyEvent(ImGuiKey_ModShift, event.shift);
-    io.AddKeyEvent(ImGuiKey_ModAlt, event.alt);
-    io.AddKeyEvent(ImGuiKey_ModSuper, event.system);
+    io.AddKeyEvent(ImGuiMod_Ctrl, event.control);
+    io.AddKeyEvent(ImGuiMod_Shift, event.shift);
+    io.AddKeyEvent(ImGuiMod_Alt, event.alt);
+    io.AddKeyEvent(ImGuiMod_Super, event.system);
 
     // send key efectivelly
     io.AddKeyEvent(key, down);
@@ -179,10 +179,10 @@ void OnMouseEvent(const MouseEvent &event)
     ImGuiIO &io = ImGui::GetIO();
 
     // update modifiers
-    io.AddKeyEvent(ImGuiKey_ModCtrl, Devices::Keyboard::isPressed(Devices::KeyCode::LControl) || Devices::Keyboard::isPressed(Devices::KeyCode::RControl));
-    io.AddKeyEvent(ImGuiKey_ModShift, Devices::Keyboard::isPressed(Devices::KeyCode::LShift) || Devices::Keyboard::isPressed(Devices::KeyCode::RShift));
-    io.AddKeyEvent(ImGuiKey_ModAlt, Devices::Keyboard::isPressed(Devices::KeyCode::LAlt) || Devices::Keyboard::isPressed(Devices::KeyCode::RAlt));
-    io.AddKeyEvent(ImGuiKey_ModSuper, Devices::Keyboard::isPressed(Devices::KeyCode::LSystem) || Devices::Keyboard::isPressed(Devices::KeyCode::RSystem));
+    io.AddKeyEvent(ImGuiMod_Ctrl, Devices::Keyboard::isPressed(Devices::KeyCode::LControl) || Devices::Keyboard::isPressed(Devices::KeyCode::RControl));
+    io.AddKeyEvent(ImGuiMod_Shift, Devices::Keyboard::isPressed(Devices::KeyCode::LShift) || Devices::Keyboard::isPressed(Devices::KeyCode::RShift));
+    io.AddKeyEvent(ImGuiMod_Alt, Devices::Keyboard::isPressed(Devices::KeyCode::LAlt) || Devices::Keyboard::isPressed(Devices::KeyCode::RAlt));
+    io.AddKeyEvent(ImGuiMod_Super, Devices::Keyboard::isPressed(Devices::KeyCode::LSystem) || Devices::Keyboard::isPressed(Devices::KeyCode::RSystem));
 
     switch (event.type)
     {

@@ -34,8 +34,6 @@ App::App() : executeOnMainThread(false)
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
     AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
 
-    fade = new Fade(&time);
-
     // fade->fadeOut(5.0f, nullptr);
     time.update();
 
@@ -47,14 +45,18 @@ App::App() : executeOnMainThread(false)
     screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
     screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
     // screenRenderWindow.setEventForwardingEnabled(true);
+
+    mainThread_EventHandlerSet = std::make_shared<EventHandlerSet>();
 }
 
 void App::load()
 {
-    mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow, false);
+    mainScene = SceneBase::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow, false);
     mainScene->load();
-    sceneGUI = new SceneGUI(&time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+    sceneGUI = SceneBase::CreateShared<SceneGUI>(&time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     sceneGUI->load();
+
+    fade = STL_Tools::make_unique<Fade>(&time, mainThread_EventHandlerSet);
 
     screenRenderWindow->inputManager.onMouseEvent.add(
         [this](const AppKit::Window::MouseEvent &evt)
@@ -69,21 +71,16 @@ void App::load()
                     {
                         if (sceneGUI->button->selected)
                         {
-                            if (mainScene != nullptr)
-                            {
-                                mainScene->unload();
-                                delete mainScene;
-                                mainScene = nullptr;
-                            }
+                            mainScene.reset();
                             if (sceneGUI->button->rendered_text.compare("View in 2D") == 0)
                             {
-                                mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow, false);
+                                mainScene = SceneBase::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow, false);
                                 mainScene->load();
                                 sceneGUI->button->updateText("View in 3D");
                             }
                             else
                             {
-                                mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow, true);
+                                mainScene = SceneBase::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow, true);
                                 mainScene->load();
                                 sceneGUI->button->updateText("View in 2D");
                             }
@@ -96,25 +93,13 @@ void App::load()
 App::~App()
 {
     screenRenderWindow->inputManager.onMouseEvent.clear();
-    if (mainScene != nullptr)
-    {
-        mainScene->unload();
-        delete mainScene;
-        mainScene = nullptr;
-    }
-    if (sceneGUI != nullptr)
-    {
-        sceneGUI->unload();
-        delete sceneGUI;
-        sceneGUI = nullptr;
-    }
-    if (fade != nullptr)
-    {
-        delete fade;
-        fade = nullptr;
-    }
+    mainScene.reset();
+    sceneGUI.reset();
+    fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw()
@@ -126,7 +111,8 @@ void App::draw()
     }
     time.update();
     this->fps_accumulator -= time.deltaTime;
-    if (this->fps_accumulator < 0){
+    if (this->fps_accumulator < 0)
+    {
         this->fps_accumulator = App::fps_time_sec;
         if (time.deltaTime > EPSILON<float>::high_precision)
             printf("%.2f FPS\n", 1.0f / time.deltaTime);
@@ -135,31 +121,38 @@ void App::draw()
     // set min delta time (the passed time or the time to render at 24fps)
     // time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
 
-    StartEventManager::Instance()->processAllComponentsWithTransform();
+    SceneBase *scenes[] = {
+        (SceneBase *)mainScene.get(),
+        (SceneBase *)sceneGUI.get()};
 
-    screenRenderWindow->OnPreUpdate(&time);
-    screenRenderWindow->OnUpdate(&time);
-    screenRenderWindow->OnLateUpdate(&time);
+    for (auto scene : scenes)
+        if (scene != nullptr)
+        {
+            scene->startEventManager.processAllComponentsWithTransform();
 
-    // pre process all scene graphs
-    if (mainScene != nullptr)
-        mainScene->precomputeSceneGraphAndCamera();
-    if (sceneGUI != nullptr)
-        sceneGUI->precomputeSceneGraphAndCamera();
+            scene->OnPreUpdate(&time);
+            scene->OnUpdate(&time);
+            scene->OnLateUpdate(&time);
 
-    screenRenderWindow->OnAfterGraphPrecompute(&time);
+            // pre process all scene graphs
+            scene->precomputeSceneGraphAndCamera();
 
-    if (mainScene != nullptr)
-        mainScene->draw();
-    if (sceneGUI != nullptr)
-        sceneGUI->draw();
+            scene->OnAfterGraphPrecompute(&time);
+        }
 
-    fade->draw();
+    mainThread_EventHandlerSet->OnUpdate(&time);
+
+    for (auto scene : scenes)
+        if (scene != nullptr)
+            scene->draw();
+
+    if (fade != nullptr)
+        fade->draw();
 
     if (Keyboard::isPressed(KeyCode::Escape))
         exitApp();
 
-    if (fade->isFading)
+    if (fade != nullptr && fade->isFading)
         return;
 }
 

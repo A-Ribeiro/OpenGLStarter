@@ -7,7 +7,7 @@ using namespace MathCore;
 
 App::App()
 {
-    //forward app reference that could be used by newly created components
+    // forward app reference that could be used by newly created components
     Engine::Instance()->app = this;
 
     resourceHelper.initialize();
@@ -18,12 +18,12 @@ App::App()
 
     GLRenderState *renderState = GLRenderState::Instance();
 
-    //setup renderstate
-    renderState->ClearColor = vec4f(0.129f,0.129f,0.129f,1.0f);
+    // setup renderstate
+    renderState->ClearColor = vec4f(0.129f, 0.129f, 0.129f, 1.0f);
     renderState->FrontFace = FrontFaceCCW;
 #ifndef ITK_RPI
-    //renderState->Wireframe = WireframeBack;
-    //renderState->CullFace = CullFaceNone;
+    // renderState->Wireframe = WireframeBack;
+    // renderState->CullFace = CullFaceNone;
 
     renderState->Wireframe = WireframeDisabled;
     renderState->CullFace = CullFaceBack;
@@ -34,9 +34,9 @@ App::App()
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
     AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
 
-    fade = new Fade(&time);
+    // fade = new Fade(&time);
 
-    //fade->fadeOut(5.0f, nullptr);
+    // fade->fadeOut(5.0f, nullptr);
     time.update();
 
     mainScene = nullptr;
@@ -48,66 +48,75 @@ App::App()
     // screenRenderWindow.setEventForwardingEnabled(true);
 }
 
-void App::load() {
-    mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+void App::load()
+{
+    mainScene = SceneBase::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     mainScene->load();
+
+    fade = STL_Tools::make_unique<Fade>(&time, mainScene);
 }
 
-App::~App(){
-    if (mainScene != nullptr){
-        mainScene->unload();
-        delete mainScene;
-        mainScene = nullptr;
-    }
-    if (fade != nullptr){
-        delete fade;
-        fade = nullptr;
-    }
+App::~App()
+{
+    mainScene.reset();
+    fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
 }
 
-void App::draw() {
+void App::draw()
+{
     time.update();
     this->fps_accumulator -= time.deltaTime;
-    if (this->fps_accumulator < 0){
+    if (this->fps_accumulator < 0)
+    {
         this->fps_accumulator = App::fps_time_sec;
         if (time.deltaTime > EPSILON<float>::high_precision)
             printf("%.2f FPS\n", 1.0f / time.deltaTime);
     }
 
-    //set min delta time (the passed time or the time to render at 24fps)
-    //time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
+    // set min delta time (the passed time or the time to render at 24fps)
+    // time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
 
-    StartEventManager::Instance()->processAllComponentsWithTransform();
+    SceneBase *scenes[] = {
+        (SceneBase *)mainScene.get()};
 
-    screenRenderWindow->OnPreUpdate(&time);
-    screenRenderWindow->OnUpdate(&time);
-    screenRenderWindow->OnLateUpdate(&time);
+    for (auto scene : scenes)
+        if (scene != nullptr)
+        {
+            scene->startEventManager.processAllComponentsWithTransform();
 
-    // pre process all scene graphs
-    if (mainScene != nullptr)
-        mainScene->precomputeSceneGraphAndCamera();
+            scene->OnPreUpdate(&time);
+            scene->OnUpdate(&time);
+            scene->OnLateUpdate(&time);
 
-    screenRenderWindow->OnAfterGraphPrecompute(&time);
+            // pre process all scene graphs
+            scene->precomputeSceneGraphAndCamera();
 
-    if (mainScene != nullptr)
-        mainScene->draw();
+            scene->OnAfterGraphPrecompute(&time);
+        }
 
-    fade->draw();
+    for (auto scene : scenes)
+        if (scene != nullptr)
+            scene->draw();
+
+    if (fade != nullptr)
+        fade->draw();
 
     if (Keyboard::isPressed(KeyCode::Escape))
         exitApp();
 
-    if (fade->isFading)
+    if (fade != nullptr && fade->isFading)
         return;
 }
 
-void App::onGainFocus() {
+void App::onGainFocus()
+{
     time.update();
 }
 
-void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue) {
+void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue)
+{
     GLRenderState *renderState = GLRenderState::Instance();
     renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
     if (mainScene != nullptr)

@@ -4,6 +4,7 @@
 #include <AppKit/window/Window.h>
 
 #include <appkit-gl-engine/AppBase/RenderWindowRegion.h>
+#include <appkit-gl-engine/AppBase/EventHandlerSet.h>
 
 // #ifndef AppBase__H_
 // #define AppBase__H_
@@ -76,6 +77,7 @@ namespace AppKit
 
             AppKit::Window::GLWindow *window;
             std::shared_ptr<RenderWindowRegion> screenRenderWindow;
+            //std::shared_ptr<EventHandlerSet> eventHandlerSet;
 
             AppBase();
 

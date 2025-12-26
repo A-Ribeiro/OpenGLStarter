@@ -27,6 +27,7 @@ namespace AppKit
             CollisionCore::AABB<MathCore::vec3f> aabb;
 
             std::shared_ptr<Components::ComponentCameraOrthographic> camera;
+            std::weak_ptr<RenderWindowRegion> renderWindowRegion;
 
             // alignment
             int position;
@@ -40,14 +41,16 @@ namespace AppKit
                    const std::string &_id,
                    const std::string &_text,
                    AppKit::OpenGL::GLFont2Builder *_fontBuilder,
-                ResourceMap *resourceMap);
+                ResourceMap *resourceMap,
+            std::shared_ptr<RenderWindowRegion> renderWindowRegion, std::shared_ptr<EventHandlerSet> eventHandlerSet);
 
             Button(int _position, bool _left,
                    const std::string &_id,
                    const std::string &_text,
                    std::shared_ptr<Components::ComponentCameraOrthographic> camera,
                    AppKit::OpenGL::GLFont2Builder * _fontBuilder,
-                   ResourceMap *resourceMap);
+                   ResourceMap *resourceMap,
+                std::shared_ptr<RenderWindowRegion> renderWindowRegion, std::shared_ptr<EventHandlerSet> eventHandlerSet);
 
             void update(const MathCore::vec3f &mousePosition);
 

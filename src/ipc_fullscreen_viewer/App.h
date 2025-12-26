@@ -17,9 +17,9 @@ class App : public AppBase {
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
 
-    Fade *fade;
+    std::unique_ptr<Fade> fade;
 public:
-    MainScene *mainScene;
+    std::shared_ptr<MainScene> mainScene;
 
     App();
     ~App();

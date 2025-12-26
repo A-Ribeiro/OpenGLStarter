@@ -22,7 +22,7 @@ namespace AppKit
             {
                 wrapShape = WrapShapeNone;
                 debugCollisionShapes = false;
-                renderWindowRegionRef.reset();
+                // eventHandlerSetRef.reset();
             }
 
             ComponentMeshWrapper::~ComponentMeshWrapper()
@@ -36,15 +36,14 @@ namespace AppKit
                         transform->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
                     }
                 }
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                if (renderWindowRegion != nullptr)
-                    renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                ;
+                if (auto eventHandlerSet = eventHandlerSetRef.lock())
+                    eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
             void ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty(Platform::Time *time)
             {
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                eventHandlerSetRef.lock()->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
                 computeFinalPositions(true);
             }
 
@@ -199,10 +198,9 @@ namespace AppKit
             {
                 t->OnVisited.remove(&ComponentMeshWrapper::OnTransformVisited, this);
 
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                if (renderWindowRegion != nullptr)
-                    renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
-                renderWindowRegionRef.reset();
+                if (auto eventHandlerSet = eventHandlerSetRef.lock())
+                    eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                eventHandlerSetRef.reset();
             }
 
             void ComponentMeshWrapper::OnTransformVisited(std::shared_ptr<Transform> t)
@@ -214,16 +212,16 @@ namespace AppKit
             {
                 auto transform = getTransform();
 
-                renderWindowRegionRef = transform->renderWindowRegion;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
+                eventHandlerSetRef = transform->eventHandlerSet;
+                auto eventHandlerSet = eventHandlerSetRef.lock();
 
-                renderWindowRegion->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
                 if (only_remove)
                     return;
-                renderWindowRegion->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                eventHandlerSet->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
-            void ComponentMeshWrapper::setShapeSphere(const MathCore::vec3f &_sphereCenter, float _sphereRadius, float ignore_after_graph_precompute_call)
+            void ComponentMeshWrapper::setShapeSphere(const MathCore::vec3f &_sphereCenter, float _sphereRadius, bool ignore_after_graph_precompute_call)
             {
                 wrapShape = WrapShapeSphere;
                 sphereCenter = _sphereCenter;
@@ -233,7 +231,7 @@ namespace AppKit
                     makeDirtyToComputeFinalPositions(false);
             }
 
-            void ComponentMeshWrapper::setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, float ignore_after_graph_precompute_call)
+            void ComponentMeshWrapper::setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, bool ignore_after_graph_precompute_call)
             {
                 wrapShape = WrapShapeAABB;
                 aabbCenter = (_aabb.min_box + _aabb.max_box) * 0.5f;
@@ -243,7 +241,7 @@ namespace AppKit
                     makeDirtyToComputeFinalPositions(false);
             }
 
-            void ComponentMeshWrapper::setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, float ignore_after_graph_precompute_call)
+            void ComponentMeshWrapper::setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, bool ignore_after_graph_precompute_call)
             {
                 wrapShape = WrapShapeOBB;
                 aabbCenter = (_aabb.min_box + _aabb.max_box) * 0.5f;

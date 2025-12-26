@@ -47,16 +47,13 @@ App::App()
     AppBase::OnLostFocus.add(&App::onLostFocus, this);
     // AppBase::WindowSize.OnChange.add(this, &App::onWindowSizeChange);
 
-    fade = new Fade(&time);
-
-    fade->fadeOut(5.0f, nullptr);
-    time.update();
-
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
 
     screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
     screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
     screenRenderWindow->setEventForwardingEnabled(true);
+
+    mainThread_EventHandlerSet = std::make_shared<EventHandlerSet>();
 }
 
 void App::load()
@@ -91,6 +88,11 @@ void App::load()
     
 
     Editor::Instance()->init();
+
+    fade = STL_Tools::make_unique<Fade>(&time, mainThread_EventHandlerSet);
+
+    //fade->fadeOut(5.0f, nullptr);
+    time.update();
     
     fade->fadeOut(0.5f, nullptr);
 }
@@ -102,12 +104,11 @@ App::~App()
     ImGuiManager::Instance()->SaveLayout();
     ImGuiManager::Instance()->Finalize();
 
-    if (fade != nullptr){
-        delete fade;
-        fade = nullptr;
-    }
+    fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw()
@@ -117,11 +118,11 @@ void App::draw()
     // set min delta time (the passed time or the time to render at 24fps)
     time.deltaTime = OP<float>::minimum(time.deltaTime, 1.0f / 24.0f);
 
-    StartEventManager::Instance()->processAllComponentsWithTransform();
+    mainThread_EventHandlerSet->startEventManager.processAllComponentsWithTransform();
 
-    screenRenderWindow->OnPreUpdate(&time);
-    screenRenderWindow->OnUpdate(&time);
-    screenRenderWindow->OnLateUpdate(&time);
+    mainThread_EventHandlerSet->OnPreUpdate(&time);
+    mainThread_EventHandlerSet->OnUpdate(&time);
+    mainThread_EventHandlerSet->OnLateUpdate(&time);
 
     // pre process all scene graphs
     /*if (sceneJesusCross != nullptr)
@@ -129,7 +130,7 @@ void App::draw()
     if (sceneGUI != nullptr)
         sceneGUI->precomputeSceneGraphAndCamera();*/
 
-    screenRenderWindow->OnAfterGraphPrecompute(&time);
+    mainThread_EventHandlerSet->OnAfterGraphPrecompute(&time);
 
     /*if (sceneJesusCross != nullptr)
         sceneJesusCross->draw();
@@ -146,9 +147,10 @@ void App::draw()
 
     ImGuiManager::Instance()->RenderAndLogic(window, &time);
 
-    screenRenderWindow->OnAfterOverlayDraw(&time);
+    mainThread_EventHandlerSet->OnAfterOverlayDraw(&time);
 
-    fade->draw();
+    if (fade != nullptr)
+        fade->draw();
     bool ctrl_pressed = Keyboard::isPressed(KeyCode::LControl) || Keyboard::isPressed(KeyCode::RControl);
     CtrlQ_Detector.setState(ctrl_pressed && Keyboard::isPressed(KeyCode::Q));
     CtrlS_Detector.setState(ctrl_pressed && Keyboard::isPressed(KeyCode::S));
@@ -158,7 +160,7 @@ void App::draw()
     if (CtrlQ_Detector.down)
         exitApp();
     
-    if (fade->isFading)
+    if (fade != nullptr && fade->isFading)
         return;
 }
 

@@ -43,7 +43,16 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
+    MainScene(
+        App *app,
+        Platform::Time *_time,
+        AppKit::GLEngine::RenderPipeline *_renderPipeline,
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap,
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
+    );
 public:
+    friend class AppKit::GLEngine::SceneBase;
 
     App *app;
 
@@ -55,14 +64,6 @@ public:
 
     std::shared_ptr<AppKit::GLEngine::Transform> bgNode;
     
-    MainScene(
-        App *app,
-        Platform::Time *_time,
-        AppKit::GLEngine::RenderPipeline *_renderPipeline,
-        AppKit::GLEngine::ResourceHelper *_resourceHelper,
-        AppKit::GLEngine::ResourceMap *_resourceMap,
-        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
-    );
     ~MainScene();
 
     virtual void draw();
@@ -70,6 +71,4 @@ public:
     void resize(const MathCore::vec2i &size);
 
     void setTextWithWidth(float width);
-
-    void update(Platform::Time *elapsed);
 };

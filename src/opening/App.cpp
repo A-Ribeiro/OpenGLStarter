@@ -34,8 +34,6 @@ App::App()
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
     AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
 
-    fade = new Fade(&time);
-
     // fade->fadeOut(5.0f, nullptr);
     time.update();
 
@@ -50,23 +48,16 @@ App::App()
 
 void App::load()
 {
-    mainScene = new MainScene(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+    mainScene = SceneBase::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     mainScene->load();
+
+    fade = STL_Tools::make_unique<Fade>(&time, mainScene);
 }
 
 App::~App()
 {
-    if (mainScene != nullptr)
-    {
-        mainScene->unload();
-        delete mainScene;
-        mainScene = nullptr;
-    }
-    if (fade != nullptr)
-    {
-        delete fade;
-        fade = nullptr;
-    }
+    mainScene.reset();
+    fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
 }
@@ -78,27 +69,34 @@ void App::draw()
     // set min delta time (the passed time or the time to render at 24fps)
     // time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
 
-    StartEventManager::Instance()->processAllComponentsWithTransform();
+    SceneBase *scenes[] = {
+        (SceneBase *)mainScene.get()};
 
-    screenRenderWindow->OnPreUpdate(&time);
-    screenRenderWindow->OnUpdate(&time);
-    screenRenderWindow->OnLateUpdate(&time);
+    for (auto scene : scenes)
+        if (scene != nullptr)
+        {
+            scene->startEventManager.processAllComponentsWithTransform();
 
-    // pre process all scene graphs
-    if (mainScene != nullptr)
-        mainScene->precomputeSceneGraphAndCamera();
+            scene->OnPreUpdate(&time);
+            scene->OnUpdate(&time);
+            scene->OnLateUpdate(&time);
 
-    screenRenderWindow->OnAfterGraphPrecompute(&time);
+            // pre process all scene graphs
+            scene->precomputeSceneGraphAndCamera();
 
-    if (mainScene != nullptr)
-        mainScene->draw();
+            scene->OnAfterGraphPrecompute(&time);
+        }
+
+    for (auto scene : scenes)
+        if (scene != nullptr)
+            scene->draw();
 
     fade->draw();
 
     if (Keyboard::isPressed(KeyCode::Escape))
         exitApp();
 
-    if (fade->isFading)
+    if (fade != nullptr && fade->isFading)
         return;
 }
 

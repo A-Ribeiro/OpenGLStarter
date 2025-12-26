@@ -24,9 +24,11 @@ void SceneGUI::loadResources(){
 }
 //to load the scene graph
 void SceneGUI::loadGraph(){
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
-    root->setRenderWindowRegion(this->renderWindow);
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    // root->setRenderWindowRegion(this->renderWindow);
+
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
 
     auto t = root->addChild( Transform::CreateShared() );
     t->Name = "Main Camera";
@@ -127,7 +129,7 @@ void SceneGUI::draw() {
 
 void SceneGUI::OnViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue) {
 
-    //printf("OnViewportChange %i %i\n", rect->value.w,rect->value.h);
+    printf("OnViewportChange %i %i\n", value.w,value.h);
 
     MathCore::vec2i size = MathCore::vec2i(value.w,value.h);
 
@@ -150,15 +152,15 @@ AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelp
     cursorTexture = nullptr;
     cursorTransform = nullptr;
 
-    this->renderWindow->OnUpdate.add(&SceneGUI::OnUpdate, this);
+    this->OnUpdate.add(&SceneGUI::OnUpdateImpl, this);
 }
 
 SceneGUI::~SceneGUI() {
-    this->renderWindow->OnUpdate.remove(&SceneGUI::OnUpdate, this);
+    this->OnUpdate.remove(&SceneGUI::OnUpdateImpl, this);
     unload();
 }
 
-void SceneGUI::OnUpdate(Platform::Time* time) {
+void SceneGUI::OnUpdateImpl(Platform::Time* time) {
 
     if (time->unscaledDeltaTime > 1.0 / 10000.0f)
         f_fps = MathCore::OP<float>::move(f_fps, 1.0f / time->unscaledDeltaTime, time->unscaledDeltaTime * 100.0f);

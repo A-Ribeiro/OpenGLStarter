@@ -53,11 +53,6 @@ App::App()
 
     mousePressed = false;
 
-    fade = new Fade(&time);
-
-    fade->fadeOut(2.0f, nullptr);
-    time.update();
-
     timer = 0.0f;
     state = 0;
 
@@ -71,6 +66,8 @@ App::App()
     // screenRenderWindow.setEventForwardingEnabled(true);
 
     this->fps_accumulator = App::fps_time_sec;
+
+    mainThread_EventHandlerSet = std::make_shared<EventHandlerSet>();
 }
 
 void App::load()
@@ -78,44 +75,24 @@ void App::load()
     // sceneJesusCross = new SceneJesusCross(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
     // sceneJesusCross->load();
 
-    sceneSplash = new SceneSplash(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
+    sceneSplash = SceneBase::CreateShared<SceneSplash>(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
     sceneSplash->load();
+
+    fade = STL_Tools::make_unique<Fade>(&time, mainThread_EventHandlerSet);
+
+    fade->fadeOut(2.0f, nullptr);
+    time.update();
 }
 
 App::~App()
 {
-
-    /*
-    if (sceneJesusCross != nullptr)
-        sceneJesusCross->unload();
-    delete sceneJesusCross);
-
-    if (sceneGUI != nullptr)
-        sceneGUI->unload();
-    delete sceneGUI);
-    */
-
-    if (scenePalace != nullptr)
-    {
-        scenePalace->unload();
-        delete scenePalace;
-        scenePalace = nullptr;
-    }
-
-    if (sceneSplash != nullptr)
-    {
-        sceneSplash->unload();
-        delete sceneSplash;
-        sceneSplash = nullptr;
-    }
-
-    if (fade != nullptr)
-    {
-        delete fade;
-        fade = nullptr;
-    }
+    scenePalace.reset();
+    sceneSplash.reset();
+    fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw()
@@ -123,7 +100,8 @@ void App::draw()
     time.update();
 
     this->fps_accumulator -= time.deltaTime;
-    if (this->fps_accumulator < 0){
+    if (this->fps_accumulator < 0)
+    {
         this->fps_accumulator = App::fps_time_sec;
         if (time.deltaTime > EPSILON<float>::high_precision)
             printf("%.2f FPS\n", 1.0f / time.deltaTime);
@@ -138,39 +116,37 @@ void App::draw()
     time.deltaTime = fakeFPS.deltaTime;
     */
 
-    StartEventManager::Instance()->processAllComponentsWithTransform();
+    SceneBase *scenes[] = {
+        (SceneBase *)sceneSplash.get(),
+        (SceneBase *)scenePalace.get()};
 
-    screenRenderWindow->OnPreUpdate(&time);
-    screenRenderWindow->OnUpdate(&time);
-    screenRenderWindow->OnLateUpdate(&time);
+    for (auto scene : scenes)
+        if (scene != nullptr)
+        {
+            scene->startEventManager.processAllComponentsWithTransform();
 
-    // pre process all scene graphs
-    /*if (sceneJesusCross != nullptr)
-        sceneJesusCross->precomputeSceneGraphAndCamera();
-    if (sceneGUI != nullptr)
-        sceneGUI->precomputeSceneGraphAndCamera();*/
-    if (sceneSplash != nullptr)
-        sceneSplash->precomputeSceneGraphAndCamera();
-    if (scenePalace != nullptr)
-        scenePalace->precomputeSceneGraphAndCamera();
+            scene->OnPreUpdate(&time);
+            scene->OnUpdate(&time);
+            scene->OnLateUpdate(&time);
 
-    screenRenderWindow->OnAfterGraphPrecompute(&time);
+            scene->precomputeSceneGraphAndCamera();
 
-    /*if (sceneJesusCross != nullptr)
-        sceneJesusCross->draw();
-    if (sceneGUI != nullptr)
-        sceneGUI->draw();*/
-    if (sceneSplash != nullptr)
-        sceneSplash->draw();
-    if (scenePalace != nullptr)
-        scenePalace->draw();
+            scene->OnAfterGraphPrecompute(&time);
+        }
 
-    fade->draw();
+    mainThread_EventHandlerSet->OnUpdate(&time);
+
+    for (auto scene : scenes)
+        if (scene != nullptr)
+            scene->draw();
+
+    if (fade != nullptr)
+        fade->draw();
 
     if (Keyboard::isPressed(KeyCode::Escape))
         exitApp();
 
-    if (fade->isFading)
+    if (fade != nullptr && fade->isFading)
         return;
     else
     {
@@ -191,39 +167,10 @@ void App::draw()
             state = 2;
             fade->fadeOut(2.0f, nullptr);
 
-            /*
-            if (sceneJesusCross != nullptr)
-                sceneJesusCross->unload();
-            delete sceneJesusCross);
+            scenePalace.reset();
+            sceneSplash.reset();
 
-            if (sceneGUI != nullptr)
-                sceneGUI->unload();
-            delete sceneGUI);
-            */
-
-            if (scenePalace != nullptr)
-            {
-                scenePalace->unload();
-                delete scenePalace;
-                scenePalace = nullptr;
-            }
-
-            if (sceneSplash != nullptr)
-            {
-                sceneSplash->unload();
-                delete sceneSplash;
-                sceneSplash = nullptr;
-            }
-
-            /*
-            sceneJesusCross = new SceneJesusCross(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
-            sceneJesusCross->load();
-
-            sceneGUI = new SceneGUI(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
-            sceneGUI->load();
-            */
-
-            scenePalace = new ScenePalace(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
+            scenePalace = SceneBase::CreateShared<ScenePalace>(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
             scenePalace->load();
 
             break;

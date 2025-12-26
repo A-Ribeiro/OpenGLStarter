@@ -47,7 +47,16 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
+    MainScene(
+        App *app,
+        Platform::Time *_time,
+        AppKit::GLEngine::RenderPipeline *_renderPipeline,
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap,
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
+    );
 public:
+    friend class AppKit::GLEngine::SceneBase;
 
     App *app;
 
@@ -69,14 +78,6 @@ public:
 
     Platform::ObjectQueue<std::shared_ptr<AppKit::GLEngine::Transform>> transformPool;
 
-    MainScene(
-        App *app,
-        Platform::Time *_time,
-        AppKit::GLEngine::RenderPipeline *_renderPipeline,
-        AppKit::GLEngine::ResourceHelper *_resourceHelper,
-        AppKit::GLEngine::ResourceMap *_resourceMap,
-        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
-    );
     ~MainScene();
 
     virtual void draw();

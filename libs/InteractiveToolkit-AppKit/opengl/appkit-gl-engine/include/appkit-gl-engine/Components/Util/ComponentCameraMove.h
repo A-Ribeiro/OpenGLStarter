@@ -29,6 +29,7 @@ namespace AppKit
                 MathCore::vec3f euler;
 
                 std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                std::weak_ptr<EventHandlerSet> eventHandlerSetRef;
 
             protected:
                 void start();
