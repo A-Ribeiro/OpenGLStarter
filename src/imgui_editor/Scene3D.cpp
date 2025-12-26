@@ -61,17 +61,18 @@ void Scene3D::bindResourcesToGraph()
     }
 }
 
-void Scene3D::setMainCamera(std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera) {
+void Scene3D::setMainCamera(std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera)
+{
     this->camera = camera;
 }
 
-void Scene3D::ensureCameraExists(){
-    auto camera_perspective = mainCamera->findComponent< Components::ComponentCameraPerspective >();
-    auto camera_ortho = mainCamera->findComponent< Components::ComponentCameraOrthographic>();
+void Scene3D::ensureCameraExists()
+{
+    auto camera_perspective = mainCamera->findComponent<Components::ComponentCameraPerspective>();
+    auto camera_ortho = mainCamera->findComponent<Components::ComponentCameraOrthographic>();
     if (camera_perspective == nullptr && camera_ortho == nullptr)
         bindResourcesToGraph();
 }
-
 
 // clear all loaded scene
 void Scene3D::unloadAll()
@@ -87,12 +88,12 @@ Scene3D::Scene3D(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion>
     this->app = app;
     this->renderWindow = renderWindow;
 
-    AppKit::GLEngine::EventHandlerSet::OnUpdate.add(&Scene3D::OnUpdate, this);
+    this->OnUpdate.add(&Scene3D::OnUpdateImpl, this);
 }
 
 Scene3D::~Scene3D()
 {
-    AppKit::GLEngine::EventHandlerSet::OnUpdate.remove(&Scene3D::OnUpdate, this);
+    this->OnUpdate.remove(&Scene3D::OnUpdateImpl, this);
     unload();
 }
 
@@ -114,7 +115,16 @@ void Scene3D::draw()
     // if (num2.down)
     //     light->sun.smartSunLightCalculation(695.7 * 20.0, 150000.0,  500.0f);
 
-    SceneBase::draw();
+    // SceneBase::draw();
+
+    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+    if (engine->sRGBCapable)
+        glEnable(GL_FRAMEBUFFER_SRGB);
+
+    renderPipeline->runSinglePassPipeline(resourceMap, root, camera, false);
+
+    if (engine->sRGBCapable)
+        glDisable(GL_FRAMEBUFFER_SRGB);
 }
 
 std::shared_ptr<AppKit::GLEngine::Components::ComponentCameraPerspective> Scene3D::getCamera()
@@ -158,7 +168,8 @@ void Scene3D::printHierarchy()
     }
 }
 
-void Scene3D::OnUpdate(Platform::Time* time) {
+void Scene3D::OnUpdateImpl(Platform::Time *time)
+{
     // MathCore::vec3f pos3D = MathCore::vec3f(this->renderWindow->MousePosRelatedToCenter * this->renderWindow->windowToCameraScale, 0.0f);
     // if (cursorTransform != nullptr)
     //     cursorTransform->setLocalPosition(pos3D);
@@ -174,15 +185,18 @@ void Scene3D::OnUpdate(Platform::Time* time) {
 
     bool inputBlocked = ImGuiManager::Instance()->shortcutManager.input_blocked;
 
-
     m_to_move.setState(Keyboard::isPressed(KeyCode::M) && !inputBlocked);
-    if (m_to_move.down) {
+    if (m_to_move.down)
+    {
         auto cameraMove = mainCamera->findComponent<Components::ComponentCameraMove>();
-        if (cameraMove == nullptr){
+        if (cameraMove == nullptr)
+        {
             mainCamera->addComponent(Component::CreateShared<Components::ComponentCameraMove>());
             is_to_hide_mouse.setState(true);
             savedMouseCoordi = this->renderWindow->screenCenterI;
-        } else {
+        }
+        else
+        {
             mainCamera->removeComponent(cameraMove);
             is_to_hide_mouse.setState(false);
         }
@@ -190,27 +204,32 @@ void Scene3D::OnUpdate(Platform::Time* time) {
 
     // right button mouse logic...
     mouse_right_btn_to_move.setState(Mouse::isPressed(MouseButton::Right) && !inputBlocked);
-    if (mouse_right_btn_to_move.down) {
-        
+    if (mouse_right_btn_to_move.down)
+    {
+
         auto window_rect = this->renderWindow->WindowViewport.c_val();
         auto mouse_relative_to_window = this->renderWindow->MousePos.c_val();
-        if (window_rect.contains(mouse_relative_to_window)){
+        if (window_rect.contains(mouse_relative_to_window))
+        {
             // force camera movement
             auto cameraMove = mainCamera->findComponent<Components::ComponentCameraMove>();
-            if (cameraMove == nullptr){
+            if (cameraMove == nullptr)
+            {
                 mainCamera->addComponent(Component::CreateShared<Components::ComponentCameraMove>());
                 is_to_hide_mouse.setState(true);
                 savedMouseCoordi = this->renderWindow->iMousePosLocal;
             }
         }
-    } else if (mouse_right_btn_to_move.up) {
+    }
+    else if (mouse_right_btn_to_move.up)
+    {
         // force end camera movement
         auto cameraMove = mainCamera->findComponent<Components::ComponentCameraMove>();
-        if (cameraMove != nullptr){
+        if (cameraMove != nullptr)
+        {
             mainCamera->removeComponent(cameraMove);
             is_to_hide_mouse.setState(false);
-            this->renderWindow->forceMouseToCoord( savedMouseCoordi ); 
+            this->renderWindow->forceMouseToCoord(savedMouseCoordi);
         }
     }
-
 }

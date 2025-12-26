@@ -50,7 +50,7 @@ public:
 
     void printHierarchy();
 
-    void OnUpdate(Platform::Time *time);
+    void OnUpdateImpl(Platform::Time *time);
 
     void setMainCamera(std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera);
 

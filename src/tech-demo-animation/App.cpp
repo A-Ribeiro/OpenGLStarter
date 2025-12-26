@@ -86,12 +86,13 @@ void App::load()
 
 App::~App()
 {
-    mainThread_EventHandlerSet.reset();
     scenePalace.reset();
     sceneSplash.reset();
     fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw()

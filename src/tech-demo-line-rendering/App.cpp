@@ -92,14 +92,14 @@ void App::load()
 
 App::~App()
 {
-    mainThread_EventHandlerSet.reset();
-
     screenRenderWindow->inputManager.onMouseEvent.clear();
     mainScene.reset();
     sceneGUI.reset();
     fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw()

@@ -73,9 +73,6 @@ void App::load()
 
 App::~App()
 {
-
-    mainThread_EventHandlerSet.reset();
-
     AppBase::screenRenderWindow->inputManager.onMouseEvent.remove(&App::OnMouseEvent, this);
 
     sceneJesusCross.reset();
@@ -84,6 +81,8 @@ App::~App()
     fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw()

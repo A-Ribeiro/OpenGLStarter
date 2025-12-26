@@ -189,8 +189,6 @@ void App::applyGlobalScale() {
 
 
 App::~App(){
-    mainThread_EventHandlerSet.reset();
-
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_WindowGL_Shutdown();
@@ -199,6 +197,8 @@ App::~App(){
     fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw() {

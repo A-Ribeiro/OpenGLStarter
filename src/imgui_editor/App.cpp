@@ -99,8 +99,6 @@ void App::load()
 
 App::~App()
 {
-    mainThread_EventHandlerSet.reset();
-
     Editor::Instance()->finalize();
 
     ImGuiManager::Instance()->SaveLayout();
@@ -109,6 +107,8 @@ App::~App()
     fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
+
+    mainThread_EventHandlerSet.reset();
 }
 
 void App::draw()

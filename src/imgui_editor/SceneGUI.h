@@ -38,7 +38,7 @@ public:
 
     virtual void draw();
 
-    void OnUpdate(Platform::Time *time);
+    void OnUpdateImpl(Platform::Time *time);
 
     void OnViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue);
 };
