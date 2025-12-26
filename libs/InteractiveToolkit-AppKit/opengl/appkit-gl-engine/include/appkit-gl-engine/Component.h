@@ -14,6 +14,7 @@
 
 #include <appkit-gl-engine/Serializer/SerializerUtil.h>
 // #include <appkit-gl-engine/ResourceMap.h>
+#include <appkit-gl-engine/AppBase/EventHandlerSet.h>
 
 namespace AppKit
 {
@@ -52,7 +53,8 @@ namespace AppKit
 
             bool start_registered;
 
-            void registerStart();
+            std::weak_ptr<EventHandlerSet> eventHandlerSet_lastSet;
+            void registerStart(std::shared_ptr<EventHandlerSet> eventHandlerSet);
             void unregisterStart();
 
         public:

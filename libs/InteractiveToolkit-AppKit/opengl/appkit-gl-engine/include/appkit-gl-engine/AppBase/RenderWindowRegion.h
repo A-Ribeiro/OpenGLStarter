@@ -101,13 +101,13 @@ namespace AppKit
 
             AppKit::Window::InputManager inputManager;
 
-            EventCore::Event<void(Platform::Time *)> OnPreUpdate;
-            EventCore::Event<void(Platform::Time *)> OnUpdate;
-            EventCore::Event<void(Platform::Time *)> OnLateUpdate;
+            // EventCore::Event<void(Platform::Time *)> OnPreUpdate;
+            // EventCore::Event<void(Platform::Time *)> OnUpdate;
+            // EventCore::Event<void(Platform::Time *)> OnLateUpdate;
 
-            EventCore::Event<void(Platform::Time *)> OnAfterGraphPrecompute;
+            // EventCore::Event<void(Platform::Time *)> OnAfterGraphPrecompute;
 
-            EventCore::Event<void(Platform::Time *)> OnAfterOverlayDraw;
+            // EventCore::Event<void(Platform::Time *)> OnAfterOverlayDraw;
 
             RenderWindowRegion();
             ~RenderWindowRegion();

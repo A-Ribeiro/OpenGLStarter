@@ -16,8 +16,10 @@ void GameScene::loadResources()
 // to load the scene graph
 void GameScene::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
+    // root->affectComponentStart = true;
+    // root->setRenderWindowRegion(renderWindow);
+    // root->setEventHandlerSet(this->self());
 
     auto main_camera = root->addChild(Transform::CreateShared("Main Camera"));
 }

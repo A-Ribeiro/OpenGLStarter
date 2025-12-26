@@ -29,8 +29,9 @@ class App : public AppBase {
 public:
 
     std::unique_ptr<Fade> fade;
-    std::unique_ptr<MainScene> mainScene;
-    std::unique_ptr<GameScene> gameScene;
+    
+    std::shared_ptr<MainScene> mainScene;
+    std::shared_ptr<GameScene> gameScene;
 
     Platform::ThreadPool threadPool;
     Platform::ObjectQueue<EventCore::Callback<void(void)>> executeOnMainThread;

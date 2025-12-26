@@ -2,6 +2,8 @@
 #include <appkit-gl-engine/Component.h>
 #include <appkit-gl-engine/Engine.h>
 #include <appkit-gl-engine/AppBase/RenderWindowRegion.h>
+#include <appkit-gl-engine/AppBase/EventHandlerSet.h>
+#include <appkit-gl-engine/AppBase/SceneBase.h>
 #include <InteractiveToolkit/ITKCommon/STL_Tools.h>
 
 // #include <appkit-gl-engine/SharedPointer/SharedPointerDatabase.h>
@@ -67,9 +69,11 @@ namespace AppKit
 
         void Transform::registerComponentStartRecursive()
         {
+
             affectComponentStart = true;
+            auto evtHandlerSet = this->eventHandlerSet.lock();
             for (auto &component : components)
-                component->registerStart();
+                component->registerStart(evtHandlerSet);
             for (auto &child : children)
                 child->registerComponentStartRecursive();
         }
@@ -159,12 +163,15 @@ namespace AppKit
                 children.push_back(transform);
 
             transform->renderWindowRegion = this->renderWindowRegion;
+            transform->eventHandlerSet = this->eventHandlerSet;
 
             // force recalculate the transform matrix on next update.
             transform->renderDirty = true;
             transform->visited = false;
 
             // insertMapName(transform);
+
+            transform->setChildRightEventsRef();
 
             if (affectComponentStart)
                 transform->registerComponentStartRecursive();
@@ -857,7 +864,7 @@ namespace AppKit
             c->attachToTransform(this_self);
 
             if (affectComponentStart)
-                c->registerStart();
+                c->registerStart(this->eventHandlerSet.lock());
 
             return c;
         }
@@ -896,6 +903,8 @@ namespace AppKit
 
         std::shared_ptr<Component> Transform::replaceComponent(std::shared_ptr<Component> search, std::shared_ptr<Component> replace)
         {
+            auto evtHandlerSet = this->eventHandlerSet.lock();
+
             for (int i = 0; i < components.size(); i++)
             {
                 if (components[i] == search)
@@ -911,7 +920,7 @@ namespace AppKit
                     components[i] = replace;
                     replace->attachToTransform(t_self);
                     if (affectComponentStart)
-                        replace->registerStart();
+                        replace->registerStart(evtHandlerSet);
 
                     return replace;
                 }
@@ -1167,9 +1176,11 @@ namespace AppKit
             renderDirty = true;
 
             // renderWindowRegion = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
-            auto app = AppKit::GLEngine::Engine::Instance()->app;
-            if (app != nullptr)
-                renderWindowRegion = app->screenRenderWindow;
+            // auto app = AppKit::GLEngine::Engine::Instance()->app;
+            // if (app != nullptr)
+            //     renderWindowRegion = app->screenRenderWindow;
+            renderWindowRegion.reset();
+            eventHandlerSet.reset();
 
             skip_traversing = false;
 
@@ -1189,12 +1200,33 @@ namespace AppKit
             clearChildren();
 
             renderWindowRegion.reset(); // = nullptr;
+            eventHandlerSet.reset();    // = nullptr;
         }
 
         std::shared_ptr<Transform> Transform::setRenderWindowRegion(std::shared_ptr<RenderWindowRegion> renderWindowRegion)
         {
             this->renderWindowRegion = renderWindowRegion;
             return this->self();
+        }
+        std::shared_ptr<Transform> Transform::setEventHandlerSet(std::shared_ptr<EventHandlerSet> eventHandlerSet)
+        {
+            this->eventHandlerSet = eventHandlerSet;
+            return this->self();
+        }
+        std::shared_ptr<Transform> Transform::setRootPropertiesFromDefaultScene(std::shared_ptr<SceneBase> defaultScene) 
+        {
+            this->affectComponentStart = true;
+            this->renderWindowRegion = defaultScene->renderWindow;
+            this->eventHandlerSet = defaultScene;
+            return this->self();
+        }
+
+        void Transform::setChildRightEventsRef() {
+            for (auto &child : children) {
+                child->renderWindowRegion = this->renderWindowRegion;
+                child->eventHandlerSet = this->eventHandlerSet;
+                child->setChildRightEventsRef();
+            }
         }
 
         bool Transform::traversePreOrder_DepthFirst(
@@ -1758,6 +1790,7 @@ namespace AppKit
             result->setLocalScale(getLocalScale());
             result->skip_traversing = skip_traversing;
             result->renderWindowRegion = renderWindowRegion;
+            result->eventHandlerSet = eventHandlerSet;
 
             for (auto &src_component : getComponents())
             {

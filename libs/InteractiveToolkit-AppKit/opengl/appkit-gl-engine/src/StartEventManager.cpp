@@ -8,11 +8,11 @@ namespace AppKit
     {
 
         // std::vector<Component *> componentList;
-        StartEventManager *StartEventManager::Instance()
-        {
-            static StartEventManager startEventManager;
-            return &startEventManager;
-        }
+        // StartEventManager *StartEventManager::Instance()
+        // {
+        //     static StartEventManager startEventManager;
+        //     return &startEventManager;
+        // }
 
         void StartEventManager::registerNewComponent(Component *c)
         {

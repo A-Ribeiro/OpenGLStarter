@@ -56,7 +56,8 @@ namespace AppKit
             {
 
             protected:
-                std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                // std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
+                std::weak_ptr<EventHandlerSet> eventHandlerSetRef;
 
                 float lifetime_sec;
                 float lifetime_sec_inv;

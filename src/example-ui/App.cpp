@@ -36,7 +36,7 @@ App::App()
     AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
     AppBase::screenRenderWindow->inputManager.onWindowEvent.add(&App::onWindowEvent, this);
 
-    fade = STL_Tools::make_unique<Fade>(&time);
+    // fade = STL_Tools::make_unique<Fade>(&time, this->eventHandlerSet);
 
     // fade->fadeOut(5.0f, nullptr);
     // time.update();
@@ -60,36 +60,17 @@ App::App()
 
 void App::load()
 {
-    mainScene = STL_Tools::make_unique<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+    mainScene = GameScene::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     mainScene->load();
+
+    fade = STL_Tools::make_unique<Fade>(&time, mainScene);
 }
 
 App::~App()
 {
     gameScene.reset();
-    // if (gameScene != nullptr)
-    // {
-    //     gameScene->unload();
-    //     gameScene.reset();
-    //     // delete gameScene;
-    //     // gameScene = nullptr;
-    // }
-
     mainScene.reset();
-    // if (mainScene != nullptr)
-    // {
-    //     mainScene->unload();
-    //     mainScene.reset();
-    //     delete mainScene;
-    //     mainScene = nullptr;
-    // }
-
     fade.reset();
-    // if (fade != nullptr)
-    // {
-    //     delete fade;
-    //     fade = nullptr;
-    // }
 
     resourceMap.clear();
     resourceHelper.finalize();
@@ -131,13 +112,6 @@ void App::draw()
     // set min delta time (the passed time or the time to render at 24fps)
     // time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
 
-    StartEventManager::Instance()->processAllComponentsWithTransform();
-
-    screenRenderWindow->OnPreUpdate(&time);
-    screenRenderWindow->OnUpdate(&time);
-    screenRenderWindow->OnLateUpdate(&time);
-
-    // pre process all scene graphs
     SceneBase *scenes[] = {
         (SceneBase *)gameScene.get(),
         (SceneBase *)mainScene.get()};
@@ -146,20 +120,28 @@ void App::draw()
         if (scene != nullptr)
             threadPool.postTask([this, scene]()
                                 {
+                // component start event
+                scene->startEventManager.processAllComponentsWithTransform();
+                
+                scene->OnPreUpdate(&time);
+                scene->OnUpdate(&time);
+                scene->OnLateUpdate(&time);
+
+                // pre process scene graph
                 scene->precomputeSceneGraphAndCamera();
+
+                scene->OnAfterGraphPrecompute(&time);
+
                 semaphore_aux.release(); });
+
+    // global event for fade FX
+    // eventHandlerSet->OnUpdate(&time);
+    // parallel tasks on Main Loop
 
     // blocking until all scenes are precomputed
     for (auto scene : scenes)
         if (scene != nullptr)
             semaphore_aux.blockingAcquire();
-
-    // if (gameScene != nullptr)
-    //     gameScene->precomputeSceneGraphAndCamera();
-    // if (mainScene != nullptr)
-    //     mainScene->precomputeSceneGraphAndCamera();
-
-    screenRenderWindow->OnAfterGraphPrecompute(&time);
 
     // smart clear stage
     {
@@ -189,12 +171,14 @@ void App::draw()
     if (mainScene != nullptr)
         mainScene->draw();
 
-    fade->draw();
+    if (fade != nullptr)
+        fade->draw();
 
     if (draw_stats_enabled)
         drawStats();
 
     // draw black bars
+    if (fade != nullptr)
     {
 
         glDisable(GL_SCISSOR_TEST);
@@ -274,7 +258,7 @@ void App::draw()
     // if (Keyboard::isPressed(KeyCode::Escape))
     //     exitApp();
 
-    if (fade->isFading)
+    if (fade != nullptr && fade->isFading)
         return;
 }
 
@@ -437,10 +421,10 @@ void App::applySettingsChanges()
 
 void App::createGameScene()
 {
-    executeOnMainThread.enqueue([this]() {
+    executeOnMainThread.enqueue([this]()
+                                {
         if (gameScene == nullptr) {
-            gameScene = STL_Tools::make_unique<GameScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+            gameScene = GameScene::CreateShared<GameScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
             gameScene->load();
-        }
-    });
+        } });
 }

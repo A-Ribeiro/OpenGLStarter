@@ -50,8 +50,10 @@ void MainScene::loadResources()
 // to load the scene graph
 void MainScene::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
+    // root->affectComponentStart = true;
+    // root->setRenderWindowRegion(renderWindow);
+    // root->setEventHandlerSet(this->self());
 
     auto main_camera = root->addChild(Transform::CreateShared("Main Camera"));
 
@@ -315,7 +317,7 @@ void MainScene::bindResourcesToGraph()
                 uiCommands.enqueue(ui::UIEvent_InputActionBack);
         } });
 
-    renderWindow->OnUpdate.add(&MainScene::update, this);
+    this->OnUpdate.add(&MainScene::update, this);
 }
 
 // clear all loaded scene
@@ -323,7 +325,7 @@ void MainScene::unloadAll()
 {
     // renderWindow->inputManager.onWindowEvent.remove(&MainScene::window_event, this);
     //  renderWindow->CameraViewport.OnChange.remove(EventCore::CallbackWrapper(&MainScene::resize, this));
-    renderWindow->OnUpdate.remove(&MainScene::update, this);
+    this->OnUpdate.remove(&MainScene::update, this);
 
     root = nullptr;
     camera = nullptr;
