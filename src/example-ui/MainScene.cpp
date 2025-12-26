@@ -259,16 +259,17 @@ void MainScene::bindResourcesToGraph()
                                     {
                                         *AppOptions::OptionsManager::Instance() = localOptionsCopy;
                                         if (needsRestart)
-                                            apply_settings_to_window(&MainScene::comes_from_app_recreation);
+                                            app->executeOnMainThread.enqueue([this]()
+                                                                             { apply_settings_to_window(&MainScene::comes_from_app_recreation); });
                                         else
-                                        {
-                                            save_options();
+                                            app->executeOnMainThread.enqueue([this]()
+                                                                             {
+                                                                         save_options();
 
-                                            // apply global settings...
-                                            app->applySettingsChanges();
+                                                                         // apply global settings...
+                                                                         app->applySettingsChanges();
 
-                                            screenManager->open_screen("ScreenMain");
-                                        }
+                                                                         screenManager->open_screen("ScreenMain"); });
                                     }
                                     else
                                     {
