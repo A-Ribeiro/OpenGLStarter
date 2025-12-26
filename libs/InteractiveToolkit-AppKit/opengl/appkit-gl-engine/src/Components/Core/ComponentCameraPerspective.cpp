@@ -231,6 +231,8 @@ namespace AppKit
 
                 result->fovDegrees.setValueNoCallback(this->fovDegrees);
 
+                result->renderWindowRegionRef = this->renderWindowRegionRef;
+
                 // configureProjection() is called once the start command is called
 
                 return result;

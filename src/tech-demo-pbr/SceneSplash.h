@@ -16,12 +16,14 @@ protected:
     
     std::shared_ptr<AppKit::OpenGL::GLTexture> Milky_512_512;
 
-public:
     SceneSplash(
         Platform::Time *_time,
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
         AppKit::GLEngine::ResourceHelper *_resourceHelper,
         AppKit::GLEngine::ResourceMap *_resourceMap,
         std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
+public:
+    friend class AppKit::GLEngine::SceneBase;
+
     ~SceneSplash();
 };

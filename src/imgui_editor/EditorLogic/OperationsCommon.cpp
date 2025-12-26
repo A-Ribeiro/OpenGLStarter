@@ -14,8 +14,8 @@ OperationsCommon::OperationsCommon() {
 void OperationsCommon::init() {
     imGuiManager = ImGuiManager::Instance();
     imGuiMenu = ImGuiMenu::Instance();
-    sceneGUI = imGuiManager->innerViewport->sceneGUI;
-    scene3D = imGuiManager->innerViewport->scene3D;
+    sceneGUI = imGuiManager->innerViewport->sceneGUI.get();
+    scene3D = imGuiManager->innerViewport->scene3D.get();
 }
 
 void OperationsCommon::finalize() {

@@ -20,8 +20,6 @@ class App : public AppBase {
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
 
-    Fade *fade;
-
     // Our state
     bool show_demo_window;
     bool show_another_window;
@@ -32,6 +30,10 @@ public:
     ImGuiStyle imGuiStyleBackup;
     MathCore::vec2i mainMonitorCenter;
     MathCore::vec2i windowResolution;
+
+    std::unique_ptr<Fade> fade;
+
+    std::shared_ptr<EventHandlerSet> mainThread_EventHandlerSet;
 
     App();
     ~App();

@@ -11,8 +11,10 @@ namespace AppKit
                        const std::string &_id,
                        const std::string &_text,
                        AppKit::OpenGL::GLFont2Builder *_fontBuilder,
-                    ResourceMap *resourceMap)
+                       ResourceMap *resourceMap,
+                       std::shared_ptr<RenderWindowRegion> renderWindowRegion, std::shared_ptr<EventHandlerSet> eventHandlerSet)
         {
+            this->renderWindowRegion = renderWindowRegion;
             this->resourceMap = resourceMap;
 
             position = _position;
@@ -23,14 +25,17 @@ namespace AppKit
             // rendered_text = GlobalButtonState.StateToString(text);
             rendered_text = _text;
 
-            root = Transform::CreateShared();
+            root = Transform::CreateShared()->setRootPropertiesFrom_RenderWindow_and_EventHandlerSet(renderWindowRegion, eventHandlerSet);
 
             materialBackground = nullptr;
             componentFontToMesh = nullptr;
 
             // resize(AppKit::GLEngine::Engine::Instance()->app->WindowSize);
-            auto renderWindowRegion = ToShared(root->renderWindowRegion);
-            resize(MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h));
+            // auto renderWindowRegion = ToShared(root->renderWindowRegion);
+            if (auto renderWindow = this->renderWindowRegion.lock())
+                resize(MathCore::vec2i(renderWindow->CameraViewport.c_ptr()->w, renderWindow->CameraViewport.c_ptr()->h));
+
+            // resize(MathCore::vec2i(camera->viewport.w, camera->viewport.h));
 
             selected = false;
         }
@@ -40,8 +45,10 @@ namespace AppKit
                        const std::string &_text,
                        std::shared_ptr<Components::ComponentCameraOrthographic> camera,
                        AppKit::OpenGL::GLFont2Builder *_fontBuilder,
-                    ResourceMap *resourceMap)
+                       ResourceMap *resourceMap,
+                       std::shared_ptr<RenderWindowRegion> renderWindowRegion, std::shared_ptr<EventHandlerSet> eventHandlerSet)
         {
+            this->renderWindowRegion = renderWindowRegion;
             this->resourceMap = resourceMap;
             this->camera = camera;
             position = _position;
@@ -52,14 +59,17 @@ namespace AppKit
             // rendered_text = GlobalButtonState.StateToString(text);
             rendered_text = _text;
 
-            root = Transform::CreateShared();
+            root = Transform::CreateShared()->setRootPropertiesFrom_RenderWindow_and_EventHandlerSet(renderWindowRegion, eventHandlerSet);
 
             materialBackground = nullptr;
             componentFontToMesh = nullptr;
 
             // resize(AppKit::GLEngine::Engine::Instance()->app->WindowSize);
-            auto renderWindowRegion = ToShared(root->renderWindowRegion);
-            resize(MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h));
+            // auto renderWindowRegion = ToShared(root->renderWindowRegion);
+            // resize(MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h));
+            // resize(MathCore::vec2i(camera->viewport.w, camera->viewport.h));
+            if (auto renderWindow = this->renderWindowRegion.lock())
+                resize(MathCore::vec2i(renderWindow->CameraViewport.c_ptr()->w, renderWindow->CameraViewport.c_ptr()->h));
 
             selected = false;
         }
@@ -68,7 +78,7 @@ namespace AppKit
         {
             if (CollisionCore::AABB<MathCore::vec3f>::pointInsideAABB(mousePosition, aabb))
             {
-                //materialBackground->unlit.color = MathCore::vec4f(1, 1, 0, 0.5);
+                // materialBackground->unlit.color = MathCore::vec4f(1, 1, 0, 0.5);
                 materialBackground->property_bag.getProperty("uColor").set(MathCore::vec4f(1, 1, 0, 0.5));
                 selected = true;
             }
@@ -82,16 +92,22 @@ namespace AppKit
         void Button::updateText(const std::string &newText)
         {
             rendered_text = newText;
-            auto renderWindowRegion = ToShared(root->renderWindowRegion);
-            resize(MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h));
+            // auto renderWindowRegion = ToShared(root->renderWindowRegion);
+            // resize(MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h));
             // resize(AppKit::GLEngine::Engine::Instance()->app->WindowSize);
+
+            // resize(MathCore::vec2i(camera->viewport.w, camera->viewport.h));
+            if (auto renderWindow = this->renderWindowRegion.lock())
+                resize(MathCore::vec2i(renderWindow->CameraViewport.c_ptr()->w, renderWindow->CameraViewport.c_ptr()->h));
         }
 
         void Button::resize(const MathCore::vec2i &size_)
         {
-            auto renderWindowRegion = ToShared(root->renderWindowRegion);
-
-            MathCore::vec2i size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
+            // auto renderWindowRegion = ToShared(root->renderWindowRegion);
+            // MathCore::vec2i size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
+            MathCore::vec2i size(512, 512); // = MathCore::vec2i(camera->viewport.w, camera->viewport.h);
+            if (auto renderWindow = this->renderWindowRegion.lock())
+                size = MathCore::vec2i(renderWindow->CameraViewport.c_ptr()->w, renderWindow->CameraViewport.c_ptr()->h);
 
             // auto camera = root->findComponentInChildren<Components::ComponentCameraOrthographic>();
             if (camera != nullptr)

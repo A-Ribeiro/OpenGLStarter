@@ -46,7 +46,17 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
+    MainScene(
+        App *app,
+        Platform::Time *_time,
+        AppKit::GLEngine::RenderPipeline *_renderPipeline,
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap,
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow,
+        bool _3d
+    );
 public:
+    friend class AppKit::GLEngine::SceneBase;
 
     bool use3DSet;
 
@@ -64,15 +74,6 @@ public:
 
     MathCore::MathRandomExt<ITKCommon::Random> mathRnd;
     
-    MainScene(
-        App *app,
-        Platform::Time *_time,
-        AppKit::GLEngine::RenderPipeline *_renderPipeline,
-        AppKit::GLEngine::ResourceHelper *_resourceHelper,
-        AppKit::GLEngine::ResourceMap *_resourceMap,
-        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow,
-        bool _3d
-    );
     ~MainScene();
 
     virtual void draw();

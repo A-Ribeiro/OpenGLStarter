@@ -18,8 +18,9 @@ void SceneGUI::loadResources()
 // to load the scene graph
 void SceneGUI::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
 
     auto t = root->addChild(Transform::CreateShared());
     t->Name = "Main Camera";
@@ -46,7 +47,8 @@ void SceneGUI::bindResourcesToGraph()
         "View in 3D",                //_text,
         componentCameraOrthographic, // camera,
         &fontBuilder,                 //_fontBuilder
-        resourceMap
+        resourceMap,
+        this->renderWindow, this->self()
     );
 
     root->addChild(button->getTransform());

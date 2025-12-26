@@ -1218,6 +1218,26 @@ namespace AppKit
             this->affectComponentStart = true;
             this->renderWindowRegion = defaultScene->renderWindow;
             this->eventHandlerSet = defaultScene;
+
+            this->setChildRightEventsRef();
+
+            this->unregisterComponentStartRecursive();
+            this->registerComponentStartRecursive();
+
+            return this->self();
+        }
+
+        std::shared_ptr<Transform> Transform::setRootPropertiesFrom_RenderWindow_and_EventHandlerSet(std::shared_ptr<RenderWindowRegion> renderWindowRegion, std::shared_ptr<EventHandlerSet> eventHandlerSet) 
+        {
+            this->affectComponentStart = true;
+            this->renderWindowRegion = renderWindowRegion;
+            this->eventHandlerSet = eventHandlerSet;
+
+            this->setChildRightEventsRef();
+            
+            this->unregisterComponentStartRecursive();
+            this->registerComponentStartRecursive();
+
             return this->self();
         }
 

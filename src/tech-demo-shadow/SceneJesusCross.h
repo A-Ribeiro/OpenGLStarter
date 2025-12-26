@@ -20,16 +20,17 @@ protected:
     
     std::shared_ptr<AppKit::GLEngine::Components::ComponentCameraRotateOnTarget> componentCameraRotateOnTarget;
 
-public:
-
-    std::shared_ptr<AppKit::GLEngine::Components::ComponentLight> light;
-
     SceneJesusCross(
         Platform::Time *_time,
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
         AppKit::GLEngine::ResourceHelper *_resourceHelper,
         AppKit::GLEngine::ResourceMap *_resourceMap,
         std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
+public:
+    friend class AppKit::GLEngine::SceneBase;
+
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentLight> light;
+
     ~SceneJesusCross();
     
     virtual void draw();
