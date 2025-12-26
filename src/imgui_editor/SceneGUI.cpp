@@ -24,9 +24,11 @@ void SceneGUI::loadResources(){
 }
 //to load the scene graph
 void SceneGUI::loadGraph(){
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
-    root->setRenderWindowRegion(this->renderWindow);
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    // root->setRenderWindowRegion(this->renderWindow);
+
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
 
     auto t = root->addChild( Transform::CreateShared() );
     t->Name = "Main Camera";
@@ -150,11 +152,11 @@ AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelp
     cursorTexture = nullptr;
     cursorTransform = nullptr;
 
-    this->renderWindow->OnUpdate.add(&SceneGUI::OnUpdate, this);
+    AppKit::GLEngine::EventHandlerSet::OnUpdate.add(&SceneGUI::OnUpdate, this);
 }
 
 SceneGUI::~SceneGUI() {
-    this->renderWindow->OnUpdate.remove(&SceneGUI::OnUpdate, this);
+    AppKit::GLEngine::EventHandlerSet::OnUpdate.remove(&SceneGUI::OnUpdate, this);
     unload();
 }
 

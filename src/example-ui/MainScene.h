@@ -57,7 +57,16 @@ protected:
 
     static void comes_from_app_recreation();
 
+    MainScene(
+        App *app,
+        Platform::Time *_time,
+        AppKit::GLEngine::RenderPipeline *_renderPipeline,
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap,
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
+    );
 public:
+    friend class AppKit::GLEngine::SceneBase;
 
     App *app;
 
@@ -70,14 +79,6 @@ public:
 
     Platform::ObjectQueue<ui::UIEventEnum> uiCommands;
 
-    MainScene(
-        App *app,
-        Platform::Time *_time,
-        AppKit::GLEngine::RenderPipeline *_renderPipeline,
-        AppKit::GLEngine::ResourceHelper *_resourceHelper,
-        AppKit::GLEngine::ResourceMap *_resourceMap,
-        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
-    );
     ~MainScene();
 
     virtual void draw();

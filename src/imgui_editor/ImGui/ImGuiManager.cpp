@@ -79,7 +79,7 @@ void ImGuiManager::Initialize(App *app, AppKit::Window::GLWindow* window,
 		}
 	}
 
-	innerViewport = new InnerViewport((App*)AppKit::GLEngine::Engine::Instance()->app, true);
+	innerViewport = new InnerViewport((App*)AppKit::GLEngine::Engine::Instance()->app, false);
 
 	this->base_path = base_path;
 

@@ -83,7 +83,8 @@ namespace AppKit
                           bool>::type = true>
             static inline std::shared_ptr<_SceneType> CreateShared(_param_args &&...args)
             {
-                auto result = std::make_shared<_SceneType>(std::forward<_param_args>(args)...);
+                //auto result = std::make_shared<_SceneType>(std::forward<_param_args>(args)...);
+                auto result = std::shared_ptr<_SceneType>( new  _SceneType(std::forward<_param_args>(args)...) );
                 result->mSelf = std::weak_ptr<SceneBase>(result);
                 return result;
             }

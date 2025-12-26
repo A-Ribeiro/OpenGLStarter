@@ -19,8 +19,10 @@ namespace AppKit
 
             void RotatingCross::start()
             {
-                AppBase *app = Engine::Instance()->app;
-                app->screenRenderWindow->OnUpdate.add(&RotatingCross::OnUpdate, this);
+                eventHandlerSet = getTransform()->eventHandlerSet;
+
+                if (auto lockedEventHandlerSet = eventHandlerSet.lock())
+                    lockedEventHandlerSet->OnUpdate.add(&RotatingCross::OnUpdate, this);
             }
 
             void RotatingCross::OnUpdate(Platform::Time *time)
@@ -68,8 +70,8 @@ namespace AppKit
 
             RotatingCross::~RotatingCross()
             {
-                AppBase *app = Engine::Instance()->app;
-                app->screenRenderWindow->OnUpdate.remove(&RotatingCross::OnUpdate, this);
+                if (auto lockedEventHandlerSet = eventHandlerSet.lock())
+                    lockedEventHandlerSet->OnUpdate.remove(&RotatingCross::OnUpdate, this);
             }
 
         }

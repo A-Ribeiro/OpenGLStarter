@@ -16,6 +16,7 @@ namespace AppKit
 
             class RotatingCross : public Component
             {
+                std::weak_ptr<EventHandlerSet> eventHandlerSet;
             public:
                 static const ComponentType Type;
 

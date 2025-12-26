@@ -35,11 +35,6 @@ App::App()
 
     // AppBase::OnMouseDown.add(this, &App::onMouseDown);
 
-    fade = new Fade(&time);
-
-    fade->fadeOut(2.0f, nullptr);
-    time.update();
-
     timer = 0.0f;
     state = 0;
 
@@ -57,6 +52,8 @@ App::App()
     // screenRenderWindow.setEventForwardingEnabled(true);
 
     this->fps_accumulator = App::fps_time_sec;
+
+    mainThread_EventHandlerSet = std::make_shared<EventHandlerSet>();
 }
 
 void App::load()
@@ -64,39 +61,27 @@ void App::load()
     // sceneJesusCross = new SceneJesusCross(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
     // sceneJesusCross->load();
 
-    sceneSplash = new SceneSplash(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
+    sceneSplash = SceneBase::CreateShared<SceneSplash>(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
     sceneSplash->load();
+
+    fade = std::make_unique<Fade>(&time, mainThread_EventHandlerSet);
+
+    fade->fadeOut(2.0f, nullptr);
+    time.update();
 }
 
 App::~App()
 {
+    mainThread_EventHandlerSet.reset();
 
     AppBase::OnGainFocus.remove(&App::onGainFocus, this);
     AppBase::screenRenderWindow->CameraViewport.OnChange.remove(&App::onViewportChange, this);
     AppBase::screenRenderWindow->inputManager.onMouseEvent.remove(&App::OnMouseEvent, this);
 
-    if (activeScene != nullptr)
-    {
-        activeScene->unload();
-        delete activeScene;
-    }
-
-    if (sceneGUI != nullptr)
-    {
-        sceneGUI->unload();
-        delete sceneGUI;
-    }
-
-    if (sceneSplash != nullptr)
-    {
-        sceneSplash->unload();
-        delete sceneSplash;
-    }
-
-    if (fade != nullptr)
-    {
-        delete fade;
-    }
+    activeScene.reset();
+    sceneGUI.reset();
+    sceneSplash.reset();
+    fade.reset();
     resourceMap.clear();
     resourceHelper.finalize();
 }
@@ -106,7 +91,8 @@ void App::draw()
     time.update();
 
     this->fps_accumulator -= time.deltaTime;
-    if (this->fps_accumulator < 0){
+    if (this->fps_accumulator < 0)
+    {
         this->fps_accumulator = App::fps_time_sec;
         if (time.deltaTime > EPSILON<float>::high_precision)
             printf("%.2f FPS\n", 1.0f / time.deltaTime);
@@ -115,35 +101,39 @@ void App::draw()
     // set min delta time (the passed time or the time to render at 24fps)
     time.deltaTime = OP<float>::minimum(time.deltaTime, 1.0f / 24.0f);
 
-    StartEventManager::Instance()->processAllComponentsWithTransform();
+    SceneBase *scenes[] = {
+        (SceneBase *)activeScene.get(),
+        (SceneBase *)sceneGUI.get(),
+        (SceneBase *)sceneSplash.get()};
 
-    screenRenderWindow->OnPreUpdate(&time);
-    screenRenderWindow->OnUpdate(&time);
-    screenRenderWindow->OnLateUpdate(&time);
+    for (auto scene : scenes)
+        if (scene != nullptr)
+        {
+            scene->startEventManager.processAllComponentsWithTransform();
 
-    // pre process all scene graphs
-    if (activeScene != nullptr)
-        activeScene->precomputeSceneGraphAndCamera();
-    if (sceneGUI != nullptr)
-        sceneGUI->precomputeSceneGraphAndCamera();
-    if (sceneSplash != nullptr)
-        sceneSplash->precomputeSceneGraphAndCamera();
+            scene->OnPreUpdate(&time);
+            scene->OnUpdate(&time);
+            scene->OnLateUpdate(&time);
 
-    screenRenderWindow->OnAfterGraphPrecompute(&time);
+            // pre process all scene graphs
+            scene->precomputeSceneGraphAndCamera();
 
-    if (activeScene != nullptr)
-        activeScene->draw();
-    if (sceneGUI != nullptr)
-        sceneGUI->draw();
-    if (sceneSplash != nullptr)
-        sceneSplash->draw();
+            scene->OnAfterGraphPrecompute(&time);
+        }
 
-    fade->draw();
+    mainThread_EventHandlerSet->OnUpdate(&time);
+
+    for (auto scene : scenes)
+        if (scene != nullptr)
+            scene->draw();
+
+    if (fade != nullptr)
+        fade->draw();
 
     if (Keyboard::isPressed(KeyCode::Escape))
         exitApp();
 
-    if (fade->isFading)
+    if (fade != nullptr && fade->isFading)
         return;
     else
     {
@@ -161,28 +151,11 @@ void App::draw()
         case 1:        // load GUI
             state = 3; // load Mary Scene
 
-            if (activeScene != nullptr)
-            {
-                activeScene->unload();
-                delete activeScene;
-                activeScene = nullptr;
-            }
+            activeScene.reset();
+            sceneGUI.reset();
+            sceneSplash.reset();
 
-            if (sceneGUI != nullptr)
-            {
-                sceneGUI->unload();
-                delete sceneGUI;
-                sceneGUI = nullptr;
-            }
-
-            if (sceneSplash != nullptr)
-            {
-                sceneSplash->unload();
-                delete sceneSplash;
-                sceneSplash = nullptr;
-            }
-
-            sceneGUI = new SceneGUI(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
+            sceneGUI = SceneBase::CreateShared<SceneGUI>(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
             sceneGUI->load();
 
             break;
@@ -195,17 +168,12 @@ void App::draw()
             state = 1000;
             fade->fadeOut(2.0f, nullptr);
 
-            if (activeScene != nullptr)
-            {
-                activeScene->unload();
-                delete activeScene;
-                activeScene = nullptr;
-            }
+            activeScene.reset();
 
-            activeScene = new SceneMary(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
+            activeScene = SceneBase::CreateShared<SceneMary>(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
             activeScene->load();
 
-            sceneGUI->setText(((SceneMary *)activeScene)->getDescription());
+            sceneGUI->setText(((SceneMary *)activeScene.get())->getDescription());
 
             currentScene = LoadActions_Mary;
             time.update(); // avoid long time advance in fade interpolation
@@ -219,17 +187,11 @@ void App::draw()
             state = 1000;
             fade->fadeOut(2.0f, nullptr);
 
-            if (activeScene != nullptr)
-            {
-                activeScene->unload();
-                delete activeScene;
-                activeScene = nullptr;
-            }
-
-            activeScene = new SceneJesus(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
+            activeScene.reset();
+            activeScene = SceneBase::CreateShared<SceneJesus>(&time, &renderPipeline, &resourceHelper, &resourceMap, screenRenderWindow);
             activeScene->load();
 
-            sceneGUI->setText(((SceneJesus *)activeScene)->getDescription());
+            sceneGUI->setText(((SceneJesus *)activeScene.get())->getDescription());
 
             currentScene = LoadActions_Jesus;
             time.update(); // avoid long time advance in fade interpolation

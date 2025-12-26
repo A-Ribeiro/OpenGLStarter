@@ -17,9 +17,6 @@ protected:
     
     std::shared_ptr<AppKit::GLEngine::Transform> Jesus3DModel;
     std::shared_ptr<AppKit::OpenGL::GLTexture> JesusTextures[2];//diffuse + normal
-    
-public:
-    std::shared_ptr<AppKit::GLEngine::Components::ComponentCameraRotateOnTarget> componentCameraRotateOnTarget;
 
     SceneJesus(
         Platform::Time *_time,
@@ -27,6 +24,11 @@ public:
         AppKit::GLEngine::ResourceHelper *_resourceHelper,
         AppKit::GLEngine::ResourceMap *_resourceMap,
         std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
+public:
+    friend class AppKit::GLEngine::SceneBase;
+
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentCameraRotateOnTarget> componentCameraRotateOnTarget;
+
     ~SceneJesus();
 
     void draw();

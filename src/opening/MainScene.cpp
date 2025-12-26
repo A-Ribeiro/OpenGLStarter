@@ -21,8 +21,10 @@ void MainScene::loadResources()
 // to load the scene graph
 void MainScene::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
+
     root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
     scaleNode = root->addChild(Transform::CreateShared());
@@ -246,13 +248,13 @@ void MainScene::bindResourcesToGraph()
     fbo.checkAttachment();
     fbo.disable();
 
-    renderWindow->OnUpdate.add(&MainScene::update, this);
+    this->OnUpdate.add(&MainScene::update, this);
 }
 
 // clear all loaded scene
 void MainScene::unloadAll()
 {
-    renderWindow->OnUpdate.remove(&MainScene::update, this);
+    this->OnUpdate.remove(&MainScene::update, this);
 
     // ResourceHelper::releaseTransformRecursive(&root);
     root = nullptr;

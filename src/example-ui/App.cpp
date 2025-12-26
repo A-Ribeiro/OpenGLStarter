@@ -60,7 +60,7 @@ App::App()
 
 void App::load()
 {
-    mainScene = GameScene::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+    mainScene = SceneBase::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     mainScene->load();
 
     fade = STL_Tools::make_unique<Fade>(&time, mainScene);
@@ -424,7 +424,7 @@ void App::createGameScene()
     executeOnMainThread.enqueue([this]()
                                 {
         if (gameScene == nullptr) {
-            gameScene = GameScene::CreateShared<GameScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
+            gameScene = SceneBase::CreateShared<GameScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
             gameScene->load();
         } });
 }

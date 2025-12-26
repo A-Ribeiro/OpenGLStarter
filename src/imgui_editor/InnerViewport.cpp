@@ -5,7 +5,8 @@
 #include "ImGui/ImGuiManager.h"
 #include <InteractiveToolkit-Extension/image/PNG.h>
 
-InnerViewport::InnerViewport(App *app, bool createFBO){
+InnerViewport::InnerViewport(App *app, bool createFBO)
+{
     sceneGUI = nullptr;
     scene3D = nullptr;
 
@@ -13,146 +14,148 @@ InnerViewport::InnerViewport(App *app, bool createFBO){
 
     this->visible = true;
     this->app = app;
-    this->fade = new Fade(&app->time, this->renderWindow);
+    this->fade = std::make_unique<Fade>(&app->time, app->mainThread_EventHandlerSet);
 
-    renderWindow->WindowViewport = iRect(100,100,300,200);
+    renderWindow->WindowViewport = iRect(100, 100, 300, 200);
     renderWindow->viewportScaleFactor = ImGuiManager::Instance()->GlobalScale;
     app->screenRenderWindow->addChild(renderWindow);
 
-    if (createFBO) {
-        app->screenRenderWindow->OnUpdate.add(&InnerViewport::OnUpdate, this);
+    if (createFBO)
+    {
+        app->mainThread_EventHandlerSet->OnUpdate.add(&InnerViewport::OnUpdate, this);
         renderWindow->createFBO();
     }
-    else {
-        app->screenRenderWindow->OnAfterOverlayDraw.add(&InnerViewport::OnUpdate, this);
+    else
+    {
+        app->mainThread_EventHandlerSet->OnAfterOverlayDraw.add(&InnerViewport::OnUpdate, this);
     }
 
-    sceneGUI = new SceneGUI(app, renderWindow);
+    sceneGUI = SceneBase::CreateShared<SceneGUI>(app, renderWindow);
     sceneGUI->load();
 
-    scene3D = new Scene3D(app, renderWindow);
+    scene3D = SceneBase::CreateShared<Scene3D>(app, renderWindow);
     scene3D->load();
 }
 
-InnerViewport::~InnerViewport(){
+InnerViewport::~InnerViewport()
+{
 
-    if (sceneGUI != nullptr){
-        sceneGUI->unload();
-        delete sceneGUI;
-        sceneGUI = nullptr;
-    }
-    if (scene3D != nullptr){
-        scene3D->unload();
-        delete scene3D;
-        scene3D = nullptr;
-    }
+    sceneGUI.reset();
+    scene3D.reset();
 
     app->screenRenderWindow->removeChild(renderWindow);
-    app->screenRenderWindow->OnUpdate.remove(&InnerViewport::OnUpdate, this);
-    app->screenRenderWindow->OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
+    app->mainThread_EventHandlerSet->OnUpdate.remove(&InnerViewport::OnUpdate, this);
+    app->mainThread_EventHandlerSet->OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
 
-    if (fade != nullptr){
-        delete fade;
-        fade = nullptr;
-    }
+    fade.reset();
 }
 
-void InnerViewport::setVisible(bool v){
-    if (visible != v){
-        //printf("visible change...\n");
+void InnerViewport::setVisible(bool v)
+{
+    if (visible != v)
+    {
+        // printf("visible change...\n");
         visible = v;
 
+        app->mainThread_EventHandlerSet->OnUpdate.remove(&InnerViewport::OnUpdate, this);
+        app->mainThread_EventHandlerSet->OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
 
-        app->screenRenderWindow->OnUpdate.remove(&InnerViewport::OnUpdate, this);
-        app->screenRenderWindow->OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
+        if (visible)
+        {
+            // attach from onUpdate event
+            if (renderWindow->fbo != nullptr)
+            {
+                app->mainThread_EventHandlerSet->OnUpdate.add(&InnerViewport::OnUpdate, this);
 
-        if (visible){
-            //attach from onUpdate event
-            if (renderWindow->fbo!=nullptr) {
-                app->screenRenderWindow->OnUpdate.add(&InnerViewport::OnUpdate, this);
-
-                //printf("Re-Render Update\n");
+                // printf("Re-Render Update\n");
                 Platform::Time time_aux;
                 this->OnUpdate(&time_aux);
             }
-            else {
-                app->screenRenderWindow->OnAfterOverlayDraw.add(&InnerViewport::OnUpdate, this);
+            else
+            {
+                app->mainThread_EventHandlerSet->OnAfterOverlayDraw.add(&InnerViewport::OnUpdate, this);
             }
         }
-
     }
 }
 
-void InnerViewport::OnUpdate(Platform::Time *time){
+void InnerViewport::OnUpdate(Platform::Time *time)
+{
 
-    renderWindow->OnPreUpdate(time);
-    renderWindow->OnUpdate(time);
-    renderWindow->OnLateUpdate(time);
+    SceneBase *scenes[] = {
+        (SceneBase *)scene3D.get(),
+        (SceneBase *)sceneGUI.get()};
 
-    // pre process all scene graphs
-    /*if (sceneJesusCross != nullptr)
-        sceneJesusCross->precomputeSceneGraphAndCamera();*/
-    if (scene3D != nullptr)
-        scene3D->precomputeSceneGraphAndCamera();
-    if (sceneGUI != nullptr)
-        sceneGUI->precomputeSceneGraphAndCamera();
-    
-    renderWindow->OnAfterGraphPrecompute(time);
+    for (auto scene : scenes)
+        if (scene != nullptr)
+        {
+            scene->OnPreUpdate(time);
+            scene->OnUpdate(time);
+            scene->OnLateUpdate(time);
+
+            // pre process all scene graphs
+            /*if (sceneJesusCross != nullptr)
+                sceneJesusCross->precomputeSceneGraphAndCamera();*/
+            if (scene != nullptr)
+                scene->precomputeSceneGraphAndCamera();
+            if (scene != nullptr)
+                scene->precomputeSceneGraphAndCamera();
+
+            scene->OnAfterGraphPrecompute(time);
+        }
 
     bool isFBO = renderWindow->fbo != nullptr;
 
-
     GLRenderState *renderState = GLRenderState::Instance();
-    
-    //renderState->ClearColor = vec4(0.4f, 0.4f, 1.0f, 1.0f);
+
+    // renderState->ClearColor = vec4(0.4f, 0.4f, 1.0f, 1.0f);
     renderState->ClearColor = MathCore::vec4f(0.8f, 0.8f, 0.8f, 1.0f);
     // renderState->BlendMode = BlendModeAlpha;
     // renderState->ColorWrite = ColorWriteAll;
 
     // renderState->BlendMode.forceTriggerOnChange();
     // renderState->ColorWrite.forceTriggerOnChange();
-    
+
     FrontFaceType old_front_face = renderState->FrontFace;
     DepthTestType old_depth_test = renderState->DepthTest;
     iRect old_viewport = renderState->Viewport;
-    
+
     renderState->FrontFace = FrontFaceCCW;
     renderState->DepthTest = DepthTestLess;
 
-    if (isFBO) {
+    if (isFBO)
+    {
         renderState->Viewport = AppKit::GLEngine::iRect(renderWindow->fbo->width, renderWindow->fbo->height);
         renderWindow->fbo->enable();
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
-    else {
+    else
+    {
         auto wViewport = renderWindow->WindowViewport.c_ptr();
         renderState->Viewport = AppKit::GLEngine::iRect(
             wViewport->x,
             app->screenRenderWindow->WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
             wViewport->w,
-            wViewport->h
-        );
+            wViewport->h);
 
         glEnable(GL_SCISSOR_TEST);
         glScissor(renderState->Viewport.c_ptr()->x,
-            renderState->Viewport.c_ptr()->y,
-            renderState->Viewport.c_ptr()->w,
-            renderState->Viewport.c_ptr()->h);
+                  renderState->Viewport.c_ptr()->y,
+                  renderState->Viewport.c_ptr()->w,
+                  renderState->Viewport.c_ptr()->h);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         glDisable(GL_SCISSOR_TEST);
     }
 
-    /*if (sceneJesusCross != nullptr)
-        sceneJesusCross->draw();*/
-    if (scene3D != nullptr)
-        scene3D->draw();
-    if (sceneGUI != nullptr)
-        sceneGUI->draw();
-        
+    for (auto scene : scenes)
+        if (scene != nullptr)
+            scene->draw();
 
-    fade->draw();
-    
-    if (isFBO) {
+    if (fade != nullptr)
+        fade->draw();
+
+    if (isFBO)
+    {
         // // Debug FBO output
         // {
         //     auto tex = renderWindow.fbo->readPixels();
@@ -180,11 +183,11 @@ void InnerViewport::OnUpdate(Platform::Time *time){
     renderState->FrontFace = old_front_face;
     renderState->DepthTest = old_depth_test;
 
-    if (fade->isFading)
+    if (fade != nullptr && fade->isFading)
         return;
 }
 
-void InnerViewport::fadeFromBlack(float time_sec) {
+void InnerViewport::fadeFromBlack(float time_sec)
+{
     fade->fadeOut(time_sec, nullptr);
 }
-

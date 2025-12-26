@@ -23,7 +23,9 @@ void SceneGUI::loadResources()
         "button_NormalMap", //_id,
         "Normal Map ON",    //_text,
         &fontBuilder,        //_fontBuilder
-        resourceMap
+        resourceMap,
+        renderWindow,
+        this->self()
     );
 
     button_AmbientLight = new Button(
@@ -32,7 +34,9 @@ void SceneGUI::loadResources()
         "button_AmbientLight",     //_id,
         "Ambient Light SphereMap", //_text,
         &fontBuilder,               //_fontBuilder
-        resourceMap
+        resourceMap,
+        renderWindow,
+        this->self()
     );
 
     button_SunLight = new Button(
@@ -41,7 +45,9 @@ void SceneGUI::loadResources()
         "button_SunLight", //_id,
         "Sun Light ON",    //_text,
         &fontBuilder,       //_fontBuilder
-        resourceMap
+        resourceMap,
+        renderWindow,
+        this->self()
     );
 
     button_SunLightRotate = new Button(
@@ -50,7 +56,9 @@ void SceneGUI::loadResources()
         "button_SunLightRotate", //_id,
         "Sun Light Rotate OFF",  //_text,
         &fontBuilder,             //_fontBuilder
-        resourceMap
+        resourceMap,
+        renderWindow,
+        this->self()
     );
 
     // right
@@ -60,7 +68,9 @@ void SceneGUI::loadResources()
         "button_NextScene", //_id,
         "Next Scene",       //_text,
         &fontBuilder,        //_fontBuilder
-        resourceMap
+        resourceMap,
+        renderWindow,
+        this->self()
     );
 
     allButtons.push_back(button_NormalMap);
@@ -72,8 +82,9 @@ void SceneGUI::loadResources()
 // to load the scene graph
 void SceneGUI::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
 
     auto t = root->addChild(Transform::CreateShared());
     t->Name = "Main Camera";

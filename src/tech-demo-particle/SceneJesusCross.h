@@ -41,13 +41,14 @@ protected:
     bool mouseMoving;
     */
 
-public:
     SceneJesusCross(
         Platform::Time *_time,
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
         AppKit::GLEngine::ResourceHelper *_resourceHelper,
         AppKit::GLEngine::ResourceMap *_resourceMap,
         std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
+public:
+    friend class AppKit::GLEngine::SceneBase;
     ~SceneJesusCross();
     
     virtual void draw();

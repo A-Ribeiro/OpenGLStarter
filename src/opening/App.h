@@ -19,8 +19,8 @@ class App : public AppBase {
 
     
 public:
-    Fade *fade;
-    MainScene *mainScene;
+    std::unique_ptr<Fade> fade;
+    std::shared_ptr<MainScene> mainScene;
 
     App();
     ~App();

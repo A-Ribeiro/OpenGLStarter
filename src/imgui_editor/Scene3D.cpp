@@ -34,9 +34,11 @@ void Scene3D::loadResources()
 // to load the scene graph
 void Scene3D::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
-    root->setRenderWindowRegion(this->renderWindow);
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    // root->setRenderWindowRegion(this->renderWindow);
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
+
     root->setName("realRoot");
 }
 
@@ -85,12 +87,12 @@ Scene3D::Scene3D(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion>
     this->app = app;
     this->renderWindow = renderWindow;
 
-    this->renderWindow->OnUpdate.add(&Scene3D::OnUpdate, this);
+    AppKit::GLEngine::EventHandlerSet::OnUpdate.add(&Scene3D::OnUpdate, this);
 }
 
 Scene3D::~Scene3D()
 {
-    this->renderWindow->OnUpdate.remove(&Scene3D::OnUpdate, this);
+    AppKit::GLEngine::EventHandlerSet::OnUpdate.remove(&Scene3D::OnUpdate, this);
     unload();
 }
 

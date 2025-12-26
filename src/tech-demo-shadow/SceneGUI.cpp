@@ -31,8 +31,9 @@ void SceneGUI::loadResources()
 // to load the scene graph
 void SceneGUI::loadGraph()
 {
-    root = Transform::CreateShared();
-    root->affectComponentStart = true;
+    // root = Transform::CreateShared();
+    // root->affectComponentStart = true;
+    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
 
     auto t = root->addChild(Transform::CreateShared());
     t->Name = "Main Camera";

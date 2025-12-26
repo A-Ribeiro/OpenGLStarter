@@ -77,7 +77,7 @@ namespace AppKit
 
             AppKit::Window::GLWindow *window;
             std::shared_ptr<RenderWindowRegion> screenRenderWindow;
-            std::shared_ptr<EventHandlerSet> eventHandlerSet;
+            //std::shared_ptr<EventHandlerSet> eventHandlerSet;
 
             AppBase();
 

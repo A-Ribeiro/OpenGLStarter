@@ -16,10 +16,10 @@ class InnerViewport: public EventCore::HandleCallback
 public:
     App *app;
     std::shared_ptr<RenderWindowRegion> renderWindow;
-    Fade *fade;
+    std::unique_ptr<Fade> fade;
 
-    SceneGUI *sceneGUI;
-    Scene3D *scene3D;
+    std::shared_ptr<SceneGUI> sceneGUI;
+    std::shared_ptr<Scene3D> scene3D;
 
     InnerViewport(App *app, bool createFBO);
 

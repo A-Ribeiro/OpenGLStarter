@@ -26,10 +26,8 @@ namespace AppKit
 
             ComponentGrow::~ComponentGrow()
             {
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                if (renderWindowRegion == nullptr)
-                    return;
-                renderWindowRegion->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
+                if (auto eventHandlerSet = eventHandlerSetRef.lock())
+                    eventHandlerSet->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
             }
 
             void ComponentGrow::OnUpdate(Platform::Time *time)
@@ -49,9 +47,8 @@ namespace AppKit
 
                         // allow call start event again
                         this->start_registered = false;
-                        auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                        if (renderWindowRegion != nullptr)
-                            renderWindowRegion->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
+                        if (auto eventHandlerSet = eventHandlerSetRef.lock())
+                            eventHandlerSet->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
         
                         transformPool->enqueue(transform);
                     }
@@ -76,10 +73,8 @@ namespace AppKit
 
             void ComponentGrow::detachFromTransform(std::shared_ptr<Transform> t)
             {
-                auto renderWindowRegion = ToShared(t->renderWindowRegion);
-                if (renderWindowRegion == nullptr)
-                    return;
-                renderWindowRegion->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
+                if (auto eventHandlerSet = t->eventHandlerSet.lock())
+                    eventHandlerSet->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
             }
 
             void ComponentGrow::start()
@@ -88,9 +83,9 @@ namespace AppKit
                 transform->setLocalScale(MathCore::vec3f(0));
                 lrp = 0.0f;
 
-                renderWindowRegionRef = transform->renderWindowRegion;
-                auto renderWindowRegion = ToShared(renderWindowRegionRef);
-                renderWindowRegion->OnUpdate.add(&ComponentGrow::OnUpdate, this);
+                eventHandlerSetRef = transform->eventHandlerSet;
+                if (auto eventHandlerSet = eventHandlerSetRef.lock())
+                    eventHandlerSet->OnUpdate.add(&ComponentGrow::OnUpdate, this);
             }
 
             // always clone

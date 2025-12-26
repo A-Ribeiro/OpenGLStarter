@@ -23,7 +23,16 @@ protected:
 
     Platform::ThreadPool mThreadPool;
 
+    MainScene(
+        App *app,
+        Platform::Time *_time,
+        AppKit::GLEngine::RenderPipeline *_renderPipeline,
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap,
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
+    );
 public:
+    friend class AppKit::GLEngine::SceneBase;
 
     App *app;
 
@@ -49,14 +58,6 @@ public:
     // float text_size;
     // float text_margin;
 
-    MainScene(
-        App *app,
-        Platform::Time *_time,
-        AppKit::GLEngine::RenderPipeline *_renderPipeline,
-        AppKit::GLEngine::ResourceHelper *_resourceHelper,
-        AppKit::GLEngine::ResourceMap *_resourceMap,
-        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
-    );
     ~MainScene();
 
     virtual void draw();

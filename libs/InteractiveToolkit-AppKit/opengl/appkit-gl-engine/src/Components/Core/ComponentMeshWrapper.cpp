@@ -221,7 +221,7 @@ namespace AppKit
                 eventHandlerSet->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
-            void ComponentMeshWrapper::setShapeSphere(const MathCore::vec3f &_sphereCenter, float _sphereRadius, float ignore_after_graph_precompute_call)
+            void ComponentMeshWrapper::setShapeSphere(const MathCore::vec3f &_sphereCenter, float _sphereRadius, bool ignore_after_graph_precompute_call)
             {
                 wrapShape = WrapShapeSphere;
                 sphereCenter = _sphereCenter;
@@ -231,7 +231,7 @@ namespace AppKit
                     makeDirtyToComputeFinalPositions(false);
             }
 
-            void ComponentMeshWrapper::setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, float ignore_after_graph_precompute_call)
+            void ComponentMeshWrapper::setShapeAABB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, bool ignore_after_graph_precompute_call)
             {
                 wrapShape = WrapShapeAABB;
                 aabbCenter = (_aabb.min_box + _aabb.max_box) * 0.5f;
@@ -241,7 +241,7 @@ namespace AppKit
                     makeDirtyToComputeFinalPositions(false);
             }
 
-            void ComponentMeshWrapper::setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, float ignore_after_graph_precompute_call)
+            void ComponentMeshWrapper::setShapeOBB(const CollisionCore::AABB<MathCore::vec3f> &_aabb, bool ignore_after_graph_precompute_call)
             {
                 wrapShape = WrapShapeOBB;
                 aabbCenter = (_aabb.min_box + _aabb.max_box) * 0.5f;
