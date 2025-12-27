@@ -224,7 +224,9 @@ namespace DPI
                               monitor.modes.end(),
                               [](const Mode &a, const Mode &b)
                               {
-                                  return b.width * b.height < a.width * a.height;
+                                  if (b.width == a.width)
+                                      return b.height < a.height;
+                                  return b.width < a.width;
                               });
 
                     for (auto &mode : monitor.modes)
@@ -1208,7 +1210,9 @@ namespace DPI
                                   this_monitor.modes.end(),
                                   [](const Mode &a, const Mode &b)
                                   {
-                                      return b.width * b.height < a.width * a.height;
+                                      if (b.width == a.width)
+                                          return b.height < a.height;
+                                      return b.width < a.width;
                                   });
 
                         for (auto &mode : this_monitor.modes)
@@ -1454,7 +1458,9 @@ namespace DPI
                                   this_monitor.modes.end(),
                                   [](const Mode &a, const Mode &b)
                                   {
-                                      return b.width * b.height < a.width * a.height;
+                                      if (b.width == a.width)
+                                          return b.height < a.height;
+                                      return b.width < a.width;
                                   });
 
                         for (auto &mode : this_monitor.modes)
