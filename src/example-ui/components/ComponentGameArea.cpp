@@ -3,6 +3,7 @@
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 #include <InteractiveToolkit/CollisionCore/CollisionCore.h>
+#include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 
 namespace AppKit
 {
@@ -35,6 +36,41 @@ namespace AppKit
             {
                 if (auto eventHandlerSet = eventHandlerSetRef.lock())
                     eventHandlerSet->OnUpdate.add(&ComponentGameArea::OnUpdate, this);
+
+                if (debugDrawEnabled)
+                {
+                    auto transform = getTransform();
+                    if (transform->findTransformByName("DebugDrawAABB", 1) != nullptr)
+                        return; // already created
+                    auto self_ref = this->self<ComponentGameArea>();
+                    app->executeOnMainThread.enqueue([this, self_ref, transform]()
+                                                     {
+                                                         auto stage_box = self_ref->StageArea.c_val();
+                                                         auto stage_center = (stage_box.min_box + stage_box.max_box) * 0.5f;
+                                                         auto stage_size = (stage_box.max_box - stage_box.min_box);
+
+                                                         auto debugDrawTransform = transform->addChild(Transform::CreateShared("DebugDrawAABB"));
+                                                         debugDrawTransform->setLocalPosition(MathCore::vec3f(
+                                                             stage_box.min_box.x + stage_size.x * 0.5f,
+                                                             stage_box.min_box.y + stage_size.y * 0.5f,
+                                                             10.0f));
+                                                         auto rect = debugDrawTransform->addNewComponent<ComponentRectangle>();
+                                                         rect->setQuad(
+                                                             &self_ref->app->resourceMap, // use app's resource map
+                                                             MathCore::vec2f(
+                                                                 stage_size.x,
+                                                                 stage_size.y),           // size
+                                                             self_ref->debugDrawColor,    // color
+                                                             MathCore::vec4f(0, 0, 0, 0), // radius
+                                                             StrokeModeGrowOutside,       // stroke mode
+                                                             0.0f,                        // stroke thickness
+                                                             MathCore::vec4f(0, 0, 0, 0), // stroke color
+                                                             0.0f,                        // drop shadow thickness
+                                                             MathCore::vec4f(0, 0, 0, 0), // drop shadow color
+                                                             MeshUploadMode_Direct,       // mesh upload mode
+                                                             4);                          // segment count
+                                                        app->gameScene->printHierarchy(); });
+                }
             }
 
             void ComponentGameArea::attachToTransform(std::shared_ptr<Transform> t)

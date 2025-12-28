@@ -92,4 +92,6 @@ public:
     void onCameraViewportUpdate(const MathCore::vec2i &viewport_size);
 
     void update(Platform::Time *elapsed);
+
+    void printHierarchy();
 };

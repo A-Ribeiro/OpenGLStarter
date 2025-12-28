@@ -22,11 +22,12 @@ class App : public AppBase {
     Platform::Time fps_timer;
 
     ResourceHelper resourceHelper;
-    ResourceMap resourceMap;
-
+    
     bool draw_stats_enabled;
     void drawStats();
 public:
+
+    ResourceMap resourceMap;
 
     std::unique_ptr<Fade> fade;
     

@@ -168,10 +168,9 @@ void App::draw()
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
 
-    if (gameScene != nullptr)
-        gameScene->draw();
-    if (mainScene != nullptr)
-        mainScene->draw();
+    for (auto scene : scenes)
+        if (scene != nullptr)
+            scene->draw();
 
     if (fade != nullptr)
         fade->draw();
