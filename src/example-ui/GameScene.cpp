@@ -2,6 +2,7 @@
 #include "App.h"
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
+#include "components/ComponentGameArea.h"
 
 PlayerInputState::PlayerInputState(RawInputFromDevice input_device)
 {
@@ -16,12 +17,14 @@ void GameScene::loadResources()
 // to load the scene graph
 void GameScene::loadGraph()
 {
-    root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
+    root = Transform::CreateShared("Game Scene")->setRootPropertiesFromDefaultScene(this->self());
     // root->affectComponentStart = true;
     // root->setRenderWindowRegion(renderWindow);
     // root->setEventHandlerSet(this->self());
 
     auto main_camera = root->addChild(Transform::CreateShared("Main Camera"));
+
+    auto game_area = root->addChild(Transform::CreateShared("Game Area"));
 }
 // to bind the resources to the current graph
 void GameScene::bindResourcesToGraph()
@@ -46,6 +49,17 @@ void GameScene::bindResourcesToGraph()
     componentCameraOrthographic->useSizeX = true;
     componentCameraOrthographic->useSizeY = true;
 
+    {
+        auto gameArea = root->findTransformByName("Game Area");
+        auto componentGameArea = gameArea->addNewComponent<ComponentGameArea>();
+        componentGameArea->debugDrawEnabled = true;
+        componentGameArea->debugDrawColor = ui::colorFromHex("#00FF00FF");
+        componentGameArea->StageArea = CollisionCore::AABB<MathCore::vec3f>(
+            MathCore::vec3f(0.0f, 0.0f, 0.0f),
+            MathCore::vec3f(600.0f, 300.0f, 0.0f));
+        componentGameArea->LockCameraMove = false;
+        componentGameArea->app = app;
+    }
 }
 
 // clear all loaded scene
@@ -107,4 +121,26 @@ void GameScene::onCameraViewportUpdate(const MathCore::vec2i &viewport_size)
 
 void GameScene::update(Platform::Time *elapsed)
 {
+}
+
+void GameScene::printHierarchy()
+{
+    struct __internal_struct
+    {
+        AppKit::GLEngine::Transform *node;
+        int depth;
+    };
+    std::vector<__internal_struct> nodes;
+    nodes.push_back({root.get(), 0});
+
+    while (nodes.size() > 0)
+    {
+        auto node_struct = nodes.back();
+        nodes.pop_back();
+
+        printf("%*s[%s]%s\n", node_struct.depth * 4, "+", node_struct.node->skip_traversing ? "skip" : "draw", node_struct.node->getName().c_str());
+
+        for (auto &child : STL_Tools::Reversal(node_struct.node->getChildren()))
+            nodes.push_back({child.get(), node_struct.depth + 1});
+    }
 }
