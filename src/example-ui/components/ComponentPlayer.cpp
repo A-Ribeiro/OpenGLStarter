@@ -61,7 +61,7 @@ namespace AppKit
 
                                                         line_mounter->addCircle(
                                                             MathCore::vec3f(0,0,0), // pos
-                                                            self_ref->Radius.c_val(),    // radius
+                                                            self_ref->Radius.c_val() - self_ref->debugDrawThickness * 0.5f,    // radius
                                                             self_ref->debugDrawThickness, // thickness
                                                             self_ref->debugDrawColor, // color
                                                             32, // segment_count

@@ -31,8 +31,9 @@ namespace AppKit
                 "uniform vec2 uScreenSizePx;\n"
                 "uniform vec2 uScreenSizePx_inv;\n"
                 "uniform mat4 uMVP;\n"
+                "uniform vec4 uWindowViewportPx;\n"
 
-                "varying vec2 screenSizePx;\n"
+                "varying vec4 windowViewportToScreenSizePx;\n"
                 "varying vec4 color;\n"
                 "varying vec2 p1_px;\n"
                 "varying float p1p2_length_px;\n"
@@ -102,7 +103,8 @@ namespace AppKit
                 "}\n"
 
                 "void main() {\n"
-                "  screenSizePx = uScreenSizePx;\n"
+                "  windowViewportToScreenSizePx.xy = uWindowViewportPx.xy;\n"
+                "  windowViewportToScreenSizePx.zw = uWindowViewportPx.zw * uScreenSizePx.xy;\n"
 
                 "  vec4 line_p1_clip = uMVP * aUV1;\n"
                 "  vec4 line_p2_clip = uMVP * aUV2;\n"
@@ -177,10 +179,9 @@ namespace AppKit
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
-                "uniform vec4 uWindowViewportPx;\n"
                 "uniform vec4 uColor;\n"
 
-                "varying vec2 screenSizePx;\n"
+                "varying vec4 windowViewportToScreenSizePx;\n"
                 "varying vec4 color;\n"
                 "varying vec2 p1_px;\n"
                 "varying float p1p2_length_px;\n"
@@ -189,7 +190,7 @@ namespace AppKit
                 "varying float aa_px;\n"
 
                 "void main() {\n"
-                "  vec2 pixel_pos_window = (gl_FragCoord.xy - uWindowViewportPx.xy) * uWindowViewportPx.zw * screenSizePx;\n"
+                "  vec2 pixel_pos_window = (gl_FragCoord.xy - windowViewportToScreenSizePx.xy) * windowViewportToScreenSizePx.zw;\n"
                 "  float aux = dot( pixel_pos_window - p1_px, p1p2_dir_normalized);\n"
                 "  aux = clamp(aux, 0.0, p1p2_length_px );\n"
                 "  vec2 closest_point_on_line = p1_px + aux * p1p2_dir_normalized;\n"
