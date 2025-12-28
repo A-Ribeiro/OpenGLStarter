@@ -32,18 +32,15 @@ namespace AppKit
 
             class ComponentLineMounter : public Component
             {
-                // make possible to the component to fiz the aabb according the pixel size of the 
+                // make possible to the component to fiz the aabb according the pixel size of the
                 // line segments and the camera projection type
-                void OnBeforeComputeFinalPositions(ComponentMeshWrapper* meshWrapper);
+                void OnBeforeComputeFinalPositions(ComponentMeshWrapper *meshWrapper);
 
                 void OnCameraTransformVisit(std::shared_ptr<Transform> transform);
-
-                
 
                 bool dirty;
                 // for orthographic camera, the last max scaled value
                 float last_max_scaled;
-
 
                 // for perspective camera, the last camera projection matrix
                 MathCore::vec3f last_dir;
@@ -72,7 +69,6 @@ namespace AppKit
                 std::shared_ptr<ComponentMaterial> material;
                 std::shared_ptr<ComponentMesh> mesh;
                 std::shared_ptr<ComponentMeshWrapper> meshWrapper;
-                
 
                 using AABBType = CollisionCore::AABB<MathCore::vec3f>;
 
@@ -93,6 +89,13 @@ namespace AppKit
                 void addLine(const MathCore::vec3f &a, const MathCore::vec3f &b,
                              float thickness,
                              const MathCore::vec4f &color);
+
+                void addCircle(const MathCore::vec3f &center, float radius,
+                               float thickness,
+                               const MathCore::vec4f &color,
+                               int segment_count = 16,
+                               const MathCore::quatf &rotation = MathCore::quatf());
+
                 // always clone
                 std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone) { return nullptr; }
                 void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap) {}

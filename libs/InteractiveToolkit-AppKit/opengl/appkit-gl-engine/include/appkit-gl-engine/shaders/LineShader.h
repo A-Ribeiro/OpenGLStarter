@@ -13,12 +13,14 @@ namespace AppKit
             int u_screenSizePx;
             int u_screenSizePx_inv;
             int u_mvp;
+            int u_window_viewport_px;
             int u_color;
             int u_antialias;
 
             MathCore::vec2f uScreenSizePx;
             MathCore::vec2f uScreenSizePx_inv;
             MathCore::mat4f uMVP;
+            MathCore::vec4f uWindowViewportPx;
             MathCore::vec4f uColor;
             float uAntialias;
 
@@ -28,6 +30,7 @@ namespace AppKit
             LineShader();
 
             void setMVP(const MathCore::mat4f &mvp);
+            void setWindowViewportPx(const MathCore::vec4f &uWindowViewportPx);
             void setColor(const MathCore::vec4f &color);
             void setScreenSizePx(const MathCore::vec2f &screenSizePx);
             void setAntialias(float antialias);

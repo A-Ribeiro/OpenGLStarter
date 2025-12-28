@@ -32,6 +32,7 @@ namespace AppKit
                 "uniform vec2 uScreenSizePx_inv;\n"
                 "uniform mat4 uMVP;\n"
 
+                "varying vec2 screenSizePx;\n"
                 "varying vec4 color;\n"
                 "varying vec2 p1_px;\n"
                 "varying float p1p2_length_px;\n"
@@ -101,6 +102,8 @@ namespace AppKit
                 "}\n"
 
                 "void main() {\n"
+                "  screenSizePx = uScreenSizePx;\n"
+
                 "  vec4 line_p1_clip = uMVP * aUV1;\n"
                 "  vec4 line_p2_clip = uMVP * aUV2;\n"
 
@@ -174,8 +177,10 @@ namespace AppKit
 
             const char fragmentShaderCode[] = {
                 SHADER_HEADER_120
+                "uniform vec4 uWindowViewportPx;\n"
                 "uniform vec4 uColor;\n"
 
+                "varying vec2 screenSizePx;\n"
                 "varying vec4 color;\n"
                 "varying vec2 p1_px;\n"
                 "varying float p1p2_length_px;\n"
@@ -184,7 +189,7 @@ namespace AppKit
                 "varying float aa_px;\n"
 
                 "void main() {\n"
-                "  vec2 pixel_pos_window = gl_FragCoord.xy;\n"
+                "  vec2 pixel_pos_window = (gl_FragCoord.xy - uWindowViewportPx.xy) * uWindowViewportPx.zw * screenSizePx;\n"
                 "  float aux = dot( pixel_pos_window - p1_px, p1p2_dir_normalized);\n"
                 "  aux = clamp(aux, 0.0, p1p2_length_px );\n"
                 "  vec2 closest_point_on_line = p1_px + aux * p1p2_dir_normalized;\n"
@@ -208,6 +213,7 @@ namespace AppKit
             u_screenSizePx = getUniformLocation("uScreenSizePx");
             u_screenSizePx_inv = getUniformLocation("uScreenSizePx_inv");
             u_mvp = getUniformLocation("uMVP");
+            u_window_viewport_px = getUniformLocation("uWindowViewportPx");
             u_color = getUniformLocation("uColor");
             u_antialias = getUniformLocation("uAntialias");
 
@@ -233,6 +239,7 @@ namespace AppKit
             setUniform(u_screenSizePx, uScreenSizePx);
             setUniform(u_screenSizePx_inv, uScreenSizePx_inv);
             setUniform(u_mvp, uMVP);
+            setUniform(u_window_viewport_px, uWindowViewportPx);
             setUniform(u_color, uColor);
             setUniform(u_antialias, uAntialias);
 
@@ -245,6 +252,15 @@ namespace AppKit
             {
                 uMVP = mvp;
                 setUniform(u_mvp, uMVP);
+            }
+        }
+
+        void LineShader::setWindowViewportPx(const MathCore::vec4f &windowViewportPx)
+        {
+            if (uWindowViewportPx != windowViewportPx)
+            {
+                uWindowViewportPx = windowViewportPx;
+                setUniform(u_window_viewport_px, uWindowViewportPx);
             }
         }
 
@@ -293,6 +309,14 @@ namespace AppKit
                 state->BlendMode = AppKit::GLEngine::BlendModeAlpha;
             setAntialias(aa);
             setColor(materialBag.getProperty<MathCore::vec4f>("uColor"));
+
+            AppKit::GLEngine::iRect window_viewport = state->Viewport;
+
+            setWindowViewportPx(MathCore::vec4f(
+                (float)window_viewport.x,
+                (float)window_viewport.y,
+                1.0f / (float)window_viewport.w,
+                1.0f / (float)window_viewport.h));
         }
 
         void LineShader::setUniformsFromMatrices(

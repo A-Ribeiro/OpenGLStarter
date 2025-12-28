@@ -97,6 +97,7 @@ namespace AppKit
             {
                 auto result = Component::CreateShared<ComponentGameArea>();
 
+                result->eventHandlerSetRef = this->eventHandlerSetRef;
                 result->debugDrawEnabled = this->debugDrawEnabled;
                 result->debugDrawColor = this->debugDrawColor;
 
