@@ -3,6 +3,7 @@
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 #include "components/ComponentGameArea.h"
+#include "components/ComponentPlayer.h"
 
 PlayerInputState::PlayerInputState(RawInputFromDevice input_device)
 {
@@ -25,6 +26,9 @@ void GameScene::loadGraph()
     auto main_camera = root->addChild(Transform::CreateShared("Main Camera"));
 
     auto game_area = root->addChild(Transform::CreateShared("Game Area"));
+
+    auto player_0 = game_area->addChild(Transform::CreateShared("Player 0"));
+
 }
 // to bind the resources to the current graph
 void GameScene::bindResourcesToGraph()
@@ -59,6 +63,16 @@ void GameScene::bindResourcesToGraph()
             MathCore::vec3f(600.0f, 300.0f, 0.0f));
         componentGameArea->LockCameraMove = false;
         componentGameArea->app = app;
+    }
+
+    {
+        auto player_0 = root->findTransformByName("Player 0");
+        auto componentPlayer = player_0->addNewComponent<ComponentPlayer>();
+        componentPlayer->debugDrawEnabled = true;
+        componentPlayer->debugDrawThickness = 5.0f;
+        componentPlayer->debugDrawColor = ui::colorFromHex("#0000ffFF");
+        componentPlayer->Radius = 50.0f;
+        componentPlayer->app = app;
     }
 }
 

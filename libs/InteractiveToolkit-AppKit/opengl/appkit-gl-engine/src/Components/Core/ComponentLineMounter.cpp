@@ -234,7 +234,7 @@ namespace AppKit
                 auto transform = getTransform();
                 if (material == nullptr)
                 {
-                    material = transform->addComponent<ComponentMaterial>( resourceMap->defaultLineMaterial );
+                    material = transform->addComponent<ComponentMaterial>(resourceMap->defaultLineMaterial);
                 }
                 if (mesh == nullptr)
                 {
@@ -585,6 +585,26 @@ namespace AppKit
 
                 if (!use_max_scale_update_on_change_self_scale)
                     dirty = true;
+            }
+
+            void ComponentLineMounter::addCircle(const MathCore::vec3f &center, float radius,
+                                                 float thickness,
+                                                 const MathCore::vec4f &color,
+                                                 int segment_count,
+                                                 const MathCore::quatf &rotation)
+            {
+                addLine(center, center + MathCore::vec3f(radius, 0, 0), thickness, color);
+
+                for (int i = 0; i < segment_count; i++)
+                {
+                    float angle_a = ((float)i / (float)segment_count) * MathCore::CONSTANT<float>::PI * 2.0f;
+                    float angle_b = ((float)((i + 1) % segment_count) / (float)segment_count) * MathCore::CONSTANT<float>::PI * 2.0f;
+
+                    auto a = center + (rotation * (MathCore::vec3f(MathCore::OP<float>::cos(angle_a), MathCore::OP<float>::sin(angle_a), 0) * radius));
+                    auto b = center + (rotation * (MathCore::vec3f(MathCore::OP<float>::cos(angle_b), MathCore::OP<float>::sin(angle_b), 0) * radius));
+
+                    addLine(a, b, thickness, color);
+                }
             }
 
         }

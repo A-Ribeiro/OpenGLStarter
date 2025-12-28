@@ -94,4 +94,12 @@ public:
     void update(Platform::Time *elapsed);
 
     void printHierarchy();
+
+    std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> getCamera() {
+        return camera;
+    }
+    std::shared_ptr<AppKit::GLEngine::Transform> getRoot() {
+        return root;
+    }
+
 };
