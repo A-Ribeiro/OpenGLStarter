@@ -28,7 +28,6 @@ void GameScene::loadGraph()
     auto game_area = root->addChild(Transform::CreateShared("Game Area"));
 
     auto player_0 = game_area->addChild(Transform::CreateShared("Player 0"));
-
 }
 // to bind the resources to the current graph
 void GameScene::bindResourcesToGraph()
@@ -53,9 +52,9 @@ void GameScene::bindResourcesToGraph()
     componentCameraOrthographic->useSizeX = true;
     componentCameraOrthographic->useSizeY = true;
 
+    auto gameArea = root->findTransformByName("Game Area");
+    auto componentGameArea = gameArea->addNewComponent<ComponentGameArea>();
     {
-        auto gameArea = root->findTransformByName("Game Area");
-        auto componentGameArea = gameArea->addNewComponent<ComponentGameArea>();
         componentGameArea->debugDrawEnabled = true;
         componentGameArea->debugDrawColor = ui::colorFromHex("#00FF00FF");
         componentGameArea->StageArea = CollisionCore::AABB<MathCore::vec3f>(
@@ -65,14 +64,15 @@ void GameScene::bindResourcesToGraph()
         componentGameArea->app = app;
     }
 
+    auto player_0 = root->findTransformByName("Player 0");
+    auto componentPlayer = player_0->addNewComponent<ComponentPlayer>();
     {
-        auto player_0 = root->findTransformByName("Player 0");
-        auto componentPlayer = player_0->addNewComponent<ComponentPlayer>();
         componentPlayer->debugDrawEnabled = true;
         componentPlayer->debugDrawThickness = 5.0f;
         componentPlayer->debugDrawColor = ui::colorFromHex("#0000ffFF");
         componentPlayer->Radius = 50.0f;
         componentPlayer->app = app;
+        componentPlayer->gameArea = componentGameArea;
         player_0->setLocalPosition(MathCore::vec3f(componentPlayer->Radius.c_val(), componentPlayer->Radius.c_val(), 0.0f));
     }
 }
