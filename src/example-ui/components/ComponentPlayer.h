@@ -15,6 +15,8 @@ namespace AppKit
     {
         namespace Components
         {
+            class ComponentGameArea;
+
             class ComponentPlayer : public Component
             {
 
@@ -32,7 +34,12 @@ namespace AppKit
                 float debugDrawThickness;
                 MathCore::vec4f debugDrawColor;
                 EventCore::Property<float> Radius;
-                
+
+                std::weak_ptr<ComponentGameArea> gameArea;
+
+                MathCore::vec3f velocity;
+                MathCore::vec3f acceleration;
+
                 App *app;
                 // Platform::ObjectQueue<std::shared_ptr<AppKit::GLEngine::Transform>> *transformPool;
 

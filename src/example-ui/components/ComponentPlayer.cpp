@@ -6,6 +6,8 @@
 // #include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 #include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
 
+#include "ComponentGameArea.h"
+
 namespace AppKit
 {
     namespace GLEngine
@@ -96,7 +98,53 @@ namespace AppKit
 
             void ComponentPlayer::OnUpdate(Platform::Time *time)
             {
-                
+                MathCore::vec3f position = getTransform()->getLocalPosition();
+
+                const MathCore::vec3f gravity_px_per_sec = MathCore::vec3f(0, -1000.0f, 0.0f);
+
+                acceleration = MathCore::vec3f(0.0f, 0.0f, 0.0f); // reset acceleration
+                acceleration += gravity_px_per_sec;
+
+                velocity += acceleration * time->deltaTime;
+
+                const float max_velocity = 5000.0f;
+                velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), velocity, max_velocity);
+
+                position += velocity * time->deltaTime;
+
+                // stage limits
+                auto gameAreaShared = gameArea.lock();
+                if (gameAreaShared == nullptr)
+                    return;
+
+                auto stageArea = gameAreaShared->StageArea.c_val();
+
+                auto sphere = CollisionCore::Sphere<MathCore::vec3f>(position, Radius.c_val());
+                auto lower_limit_plane = CollisionCore::Plane<MathCore::vec3f>(
+                    stageArea.min_box,       // point
+                    MathCore::vec3f(0, 1, 0) // normal
+                );
+
+                MathCore::vec3f penetration;
+                if (CollisionCore::Plane<MathCore::vec3f>::sphereIntersectsPlane(sphere, lower_limit_plane, &penetration))
+                {
+                    position -= penetration;
+                    
+                    auto penetration_dir = MathCore::OP<MathCore::vec3f>::normalize(penetration);
+                    auto parallel_penetration = MathCore::OP<MathCore::vec3f>::parallelComponent(
+                        velocity,
+                        penetration_dir
+                    );
+
+                    // remove velocity component in the plane direction from velocity vector
+                    velocity -= parallel_penetration;
+                }
+
+                // force 2d logic
+                position.z = 0.0f;
+                velocity.z = 0;
+
+                getTransform()->setLocalPosition(position);
             }
 
             // always clone
@@ -110,6 +158,7 @@ namespace AppKit
                 result->debugDrawColor = this->debugDrawColor;
                 result->app = this->app;
                 result->Radius.setValueNoCallback(this->Radius.c_val());
+                result->gameArea = this->gameArea;
 
                 return result;
             }
