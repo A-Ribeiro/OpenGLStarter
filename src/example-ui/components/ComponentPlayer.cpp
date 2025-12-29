@@ -53,22 +53,29 @@ namespace AppKit
                     auto self_ref = this->self<ComponentPlayer>();
                     app->executeOnMainThread.enqueue([self_ref, transform]()
                                                      {
-                                                         auto debugDrawTransform = transform->addChild(Transform::CreateShared("DebugDrawCircle"));
-                                                         //debugDrawTransform->setLocalPosition(MathCore::vec3f(0,0,-1.0f));
+                        auto debugDrawTransform = transform->addChild(Transform::CreateShared("DebugDrawCircle"));
+                        //debugDrawTransform->setLocalPosition(MathCore::vec3f(0,0,-1.0f));
 
-                                                         std::shared_ptr<ComponentLineMounter> line_mounter = debugDrawTransform->addNewComponent<ComponentLineMounter>();
-                                                        line_mounter->setCamera(&self_ref->app->resourceMap, self_ref->app->gameScene->getCamera(), true);
+                        std::shared_ptr<ComponentLineMounter> line_mounter = debugDrawTransform->addNewComponent<ComponentLineMounter>();
+                        line_mounter->setCamera(&self_ref->app->resourceMap, self_ref->app->gameScene->getCamera(), true);
 
-                                                        line_mounter->addCircle(
-                                                            MathCore::vec3f(0,0,0), // pos
-                                                            self_ref->Radius.c_val() - self_ref->debugDrawThickness * 0.5f,    // radius
-                                                            self_ref->debugDrawThickness, // thickness
-                                                            self_ref->debugDrawColor, // color
-                                                            32, // segment_count
-                                                            MathCore::quatf() // rotation
-                                                        );
-                                                         
-                                                        self_ref->app->gameScene->printHierarchy(); });
+                        float inner_radius = self_ref->Radius.c_val() - self_ref->debugDrawThickness * 0.5f;
+                        line_mounter->addLine(
+                            MathCore::vec3f(0,0,0), // a
+                            MathCore::vec3f(inner_radius, 0, 0), // b
+                            self_ref->debugDrawThickness, // thickness
+                            self_ref->debugDrawColor // color
+                        );
+                        line_mounter->addCircle(
+                            MathCore::vec3f(0,0,0), // pos
+                            inner_radius,    // radius
+                            self_ref->debugDrawThickness, // thickness
+                            self_ref->debugDrawColor, // color
+                            32, // segment_count
+                            MathCore::quatf() // rotation
+                        );
+
+                        self_ref->app->gameScene->printHierarchy(); });
                 }
             }
 
@@ -89,6 +96,7 @@ namespace AppKit
 
             void ComponentPlayer::OnUpdate(Platform::Time *time)
             {
+                
             }
 
             // always clone

@@ -593,8 +593,7 @@ namespace AppKit
                                                  int segment_count,
                                                  const MathCore::quatf &rotation)
             {
-                addLine(center, center + MathCore::vec3f(radius, 0, 0), thickness, color);
-
+                //addLine(center, center + MathCore::vec3f(radius, 0, 0), thickness, color);
                 for (int i = 0; i < segment_count; i++)
                 {
                     float angle_a = ((float)i / (float)segment_count) * MathCore::CONSTANT<float>::PI * 2.0f;
