@@ -73,6 +73,7 @@ void GameScene::bindResourcesToGraph()
         componentPlayer->debugDrawColor = ui::colorFromHex("#0000ffFF");
         componentPlayer->Radius = 50.0f;
         componentPlayer->app = app;
+        player_0->setLocalPosition(MathCore::vec3f(componentPlayer->Radius.c_val(), componentPlayer->Radius.c_val(), 0.0f));
     }
 }
 
