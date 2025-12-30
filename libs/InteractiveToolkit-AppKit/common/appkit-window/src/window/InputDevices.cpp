@@ -40,7 +40,7 @@ namespace AppKit
             {
                 if (!sf::Joystick::hasAxis(id, joy_axis_mapping[(int)axis]))
                     return 0.0f;
-                return sf::Joystick::getAxisPosition(id, joy_axis_mapping[(int)axis]);
+                return sf::Joystick::getAxisPosition(id, joy_axis_mapping[(int)axis]) * 0.01f;
             }
             bool Joystick::isButtonPressed(uint32_t button)
             {
