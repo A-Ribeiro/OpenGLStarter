@@ -120,7 +120,6 @@ namespace AppKit
 
                 if (abs(x) > 0.02f)
                 {
-                    printf("%f\n", x);
                     velocity.x = 400.0f * x;
                     stop_player = false;
                 }
