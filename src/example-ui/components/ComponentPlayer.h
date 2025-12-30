@@ -45,6 +45,8 @@ namespace AppKit
 
                 CollisionCore::Sphere<MathCore::vec3f> getSphere();
 
+                AppKit::Window::Devices::Joystick inputJoy;
+
                 ComponentPlayer();
                 ~ComponentPlayer();
 

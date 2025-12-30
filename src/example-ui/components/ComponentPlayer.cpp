@@ -24,7 +24,7 @@ namespace AppKit
                 return CollisionCore::Sphere<MathCore::vec3f>(position, Radius.c_val());
             }
 
-            ComponentPlayer::ComponentPlayer() : Component(ComponentPlayer::Type)
+            ComponentPlayer::ComponentPlayer() : Component(ComponentPlayer::Type), inputJoy(0)
             {
 
                 debugDrawEnabled = false;
@@ -100,7 +100,7 @@ namespace AppKit
             {
                 MathCore::vec3f position = getTransform()->getLocalPosition();
 
-                const MathCore::vec3f gravity_px_per_sec = MathCore::vec3f(0, -1000.0f, 0.0f);
+                const MathCore::vec3f gravity_px_per_sec = MathCore::vec3f(0, -3000.0f, 0.0f);
 
                 acceleration = MathCore::vec3f(0.0f, 0.0f, 0.0f); // reset acceleration
                 acceleration += gravity_px_per_sec;
@@ -109,6 +109,35 @@ namespace AppKit
 
                 const float max_velocity = 5000.0f;
                 velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), velocity, max_velocity);
+
+                if (AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Space) ||
+                    inputJoy.isButtonPressed(0))
+                    velocity.y = 600.0f;
+
+                float x = inputJoy.getAxis(AppKit::Window::Devices::JoystickAxis::X);
+
+                bool stop_player = true;
+
+                if (abs(x) > 0.02f)
+                {
+                    printf("%f\n", x);
+                    velocity.x = 400.0f * x;
+                    stop_player = false;
+                }
+
+                if (AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Right))
+                {
+                    velocity.x = 400.0f;
+                    stop_player = false;
+                }
+                else if (AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Left))
+                {
+                    velocity.x = -400.0f;
+                    stop_player = false;
+                }
+
+                if (stop_player)
+                    velocity.x = 0;
 
                 position += velocity * time->deltaTime;
 
@@ -129,12 +158,11 @@ namespace AppKit
                 if (CollisionCore::Plane<MathCore::vec3f>::sphereIntersectsPlane(sphere, lower_limit_plane, &penetration))
                 {
                     position -= penetration;
-                    
+
                     auto penetration_dir = MathCore::OP<MathCore::vec3f>::normalize(penetration);
                     auto parallel_penetration = MathCore::OP<MathCore::vec3f>::parallelComponent(
                         velocity,
-                        penetration_dir
-                    );
+                        penetration_dir);
 
                     // remove velocity component in the plane direction from velocity vector
                     velocity -= parallel_penetration;
