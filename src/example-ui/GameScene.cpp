@@ -5,12 +5,6 @@
 #include "components/ComponentGameArea.h"
 #include "components/ComponentPlayer.h"
 
-PlayerInputState::PlayerInputState(RawInputFromDevice input_device)
-{
-    this->input_device = input_device;
-    state = InputState_None;
-}
-
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void GameScene::loadResources()
 {

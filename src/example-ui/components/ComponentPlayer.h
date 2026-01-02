@@ -7,6 +7,8 @@
 #include <appkit-gl-engine/Engine.h>
 #include <InteractiveToolkit/Platform/Core/ObjectQueue.h>
 
+#include "PlayerInputState.h"
+
 class App;
 
 namespace AppKit
@@ -45,7 +47,7 @@ namespace AppKit
 
                 CollisionCore::Sphere<MathCore::vec3f> getSphere();
 
-                AppKit::Window::Devices::Joystick inputJoy;
+                PlayerInputState inputState;
 
                 ComponentPlayer();
                 ~ComponentPlayer();
