@@ -7,48 +7,7 @@
 
 #include <appkit-gl-engine/util/SpriteAtlas.h>
 
-#include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
-
 class App;
-
-enum RawInputFromDevice
-{
-    Joystick0,
-    Joystick1,
-    Joystick2,
-    Joystick3,
-};
-
-enum IntInputState
-{
-    InputState_None = 0,
-    InputState_Up = 1,
-    InputState_Down = 1 << 1,
-    InputState_Left = 1 << 2,
-    InputState_Right = 1 << 3,
-    InputState_Action = 1 << 4,
-    InputState_Jump = 1 << 5,
-};
-
-class PlayerInputState
-{
-public:
-    RawInputFromDevice input_device;
-
-    EventCore::PressReleaseDetector up;
-    EventCore::PressReleaseDetector down;
-    EventCore::PressReleaseDetector left;
-    EventCore::PressReleaseDetector right;
-
-    EventCore::PressReleaseDetector jump;
-    EventCore::PressReleaseDetector action;
-
-    IntInputState state;
-
-    PlayerInputState(RawInputFromDevice input_device);
-
-
-};
 
 class GameScene : public AppKit::GLEngine::SceneBase
 {
@@ -80,7 +39,7 @@ public:
     ITKCommon::Random32 random32;
     MathCore::MathRandomExt<ITKCommon::Random32> mathRandom;
 
-    std::vector<PlayerInputState> players;
+    // std::vector<PlayerInputState> players;
 
     MathCore::vec2f screen_custom_size;
 

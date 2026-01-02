@@ -24,7 +24,7 @@ namespace AppKit
                 return CollisionCore::Sphere<MathCore::vec3f>(position, Radius.c_val());
             }
 
-            ComponentPlayer::ComponentPlayer() : Component(ComponentPlayer::Type), inputJoy(0)
+            ComponentPlayer::ComponentPlayer() : Component(ComponentPlayer::Type), inputState(RawInputFromDevice::Keyboard)
             {
 
                 debugDrawEnabled = false;
@@ -98,6 +98,9 @@ namespace AppKit
 
             void ComponentPlayer::OnUpdate(Platform::Time *time)
             {
+                inputState.fillState();
+
+
                 MathCore::vec3f position = getTransform()->getLocalPosition();
 
                 const MathCore::vec3f gravity_px_per_sec = MathCore::vec3f(0, -3000.0f, 0.0f);
@@ -110,28 +113,16 @@ namespace AppKit
                 const float max_velocity = 5000.0f;
                 velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), velocity, max_velocity);
 
-                if (AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Space) ||
-                    inputJoy.isButtonPressed(0))
+                if (inputState.jump.down)
                     velocity.y = 600.0f;
 
-                float x = inputJoy.getAxis(AppKit::Window::Devices::JoystickAxis::X);
+                float x = inputState.x_axis;
 
                 bool stop_player = true;
 
                 if (abs(x) > 0.02f)
                 {
                     velocity.x = 400.0f * x;
-                    stop_player = false;
-                }
-
-                if (AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Right))
-                {
-                    velocity.x = 400.0f;
-                    stop_player = false;
-                }
-                else if (AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Left))
-                {
-                    velocity.x = -400.0f;
                     stop_player = false;
                 }
 
