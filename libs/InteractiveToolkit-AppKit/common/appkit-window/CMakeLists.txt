@@ -5,7 +5,7 @@ find_package(InteractiveToolkit REQUIRED QUIET)
 set( APPKIT_WINDOW_GL ON CACHE BOOL "Make Available GLWindow" )
 set( APPKIT_WINDOW_VULKAN OFF CACHE BOOL "Make Available VulkanWindow" )
 
-set( APPKIT_WINDOW AutoDetect CACHE STRING "Choose the base window library." )
+set( APPKIT_WINDOW SFML CACHE STRING "Choose the base window library." )
 set_property(CACHE APPKIT_WINDOW PROPERTY STRINGS None AutoDetect SFML GLFW Raspberry_Pi)
 
 if (ITK_RPI)
