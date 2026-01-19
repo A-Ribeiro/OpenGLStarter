@@ -37,7 +37,8 @@ namespace AppKit
 
                 jumpState.setMinJumpHeight(300.0f);   // Set desired jump height
                 jumpState.setMaxJumpHeight(500.0f);   // Set desired jump height
-                jumpState.setRisingVelocity(600.0f); // Set constant rising velocity
+                jumpState.setRisingVelocity(1200.0f); // Set constant rising velocity
+                jumpState.computeConstants(-3000.0f); // gravity
             }
 
             ComponentPlayer::~ComponentPlayer()
