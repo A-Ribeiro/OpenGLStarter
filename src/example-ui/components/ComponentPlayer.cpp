@@ -24,7 +24,7 @@ namespace AppKit
                 return CollisionCore::Sphere<MathCore::vec3f>(position, Radius.c_val());
             }
 
-            ComponentPlayer::ComponentPlayer() : Component(ComponentPlayer::Type), inputState(RawInputFromDevice::Keyboard)
+            ComponentPlayer::ComponentPlayer() : Component(ComponentPlayer::Type), inputState(RawInputFromDevice::Joystick0)
             {
 
                 debugDrawEnabled = false;
@@ -34,6 +34,10 @@ namespace AppKit
                 app = nullptr;
 
                 Radius.OnChange.add(&ComponentPlayer::OnRadiusParameter, this);
+
+                jumpState.setMinJumpHeight(300.0f);   // Set desired jump height
+                jumpState.setMaxJumpHeight(500.0f);   // Set desired jump height
+                jumpState.setRisingVelocity(600.0f); // Set constant rising velocity
             }
 
             ComponentPlayer::~ComponentPlayer()
@@ -100,7 +104,6 @@ namespace AppKit
             {
                 inputState.fillState();
 
-
                 MathCore::vec3f position = getTransform()->getLocalPosition();
 
                 const MathCore::vec3f gravity_px_per_sec = MathCore::vec3f(0, -3000.0f, 0.0f);
@@ -113,8 +116,34 @@ namespace AppKit
                 const float max_velocity = 5000.0f;
                 velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), velocity, max_velocity);
 
+                // check is grounded before update velocity for jump
+                // stage limits
+                auto gameAreaShared = gameArea.lock();
+                if (gameAreaShared == nullptr)
+                    return;
+                // {
+                //     auto stageArea = gameAreaShared->StageArea.c_val();
+
+                //     auto sphere = CollisionCore::Sphere<MathCore::vec3f>(position + velocity * time->deltaTime, Radius.c_val());
+                //     auto lower_limit_plane = CollisionCore::Plane<MathCore::vec3f>(
+                //         stageArea.min_box,       // point
+                //         MathCore::vec3f(0, 1, 0) // normal
+                //     );
+
+                //     MathCore::vec3f penetration;
+                //     if (CollisionCore::Plane<MathCore::vec3f>::sphereIntersectsPlane(sphere, lower_limit_plane, &penetration))
+                //     {
+                //         velocity.y = 0.0f;
+                //         jumpState.setState(JumpState::Grounded);
+                //     }
+                // }
+                jumpState.setJumpPressed(inputState.jump.pressed);
                 if (inputState.jump.down)
-                    velocity.y = 600.0f;
+                    jumpState.jump(&velocity.y);
+
+                jumpState.updateVelocity(&velocity.y, time->deltaTime);
+                if (velocity.y > 0)
+                    printf("JumpState: %s, Velocity Y: %.2f\n", JumpState::stateToString(jumpState.getState()), velocity.y);
 
                 float x = inputState.x_axis;
 
@@ -131,31 +160,30 @@ namespace AppKit
 
                 position += velocity * time->deltaTime;
 
-                // stage limits
-                auto gameAreaShared = gameArea.lock();
-                if (gameAreaShared == nullptr)
-                    return;
-
-                auto stageArea = gameAreaShared->StageArea.c_val();
-
-                auto sphere = CollisionCore::Sphere<MathCore::vec3f>(position, Radius.c_val());
-                auto lower_limit_plane = CollisionCore::Plane<MathCore::vec3f>(
-                    stageArea.min_box,       // point
-                    MathCore::vec3f(0, 1, 0) // normal
-                );
-
-                MathCore::vec3f penetration;
-                if (CollisionCore::Plane<MathCore::vec3f>::sphereIntersectsPlane(sphere, lower_limit_plane, &penetration))
                 {
-                    position -= penetration;
+                    auto stageArea = gameAreaShared->StageArea.c_val();
 
-                    auto penetration_dir = MathCore::OP<MathCore::vec3f>::normalize(penetration);
-                    auto parallel_penetration = MathCore::OP<MathCore::vec3f>::parallelComponent(
-                        velocity,
-                        penetration_dir);
+                    auto sphere = CollisionCore::Sphere<MathCore::vec3f>(position, Radius.c_val());
+                    auto lower_limit_plane = CollisionCore::Plane<MathCore::vec3f>(
+                        stageArea.min_box,       // point
+                        MathCore::vec3f(0, 1, 0) // normal
+                    );
 
-                    // remove velocity component in the plane direction from velocity vector
-                    velocity -= parallel_penetration;
+                    MathCore::vec3f penetration;
+                    if (CollisionCore::Plane<MathCore::vec3f>::sphereIntersectsPlane(sphere, lower_limit_plane, &penetration))
+                    {
+                        jumpState.setGrounded();
+
+                        position -= penetration;
+
+                        auto penetration_dir = MathCore::OP<MathCore::vec3f>::normalize(penetration);
+                        auto parallel_penetration = MathCore::OP<MathCore::vec3f>::parallelComponent(
+                            velocity,
+                            penetration_dir);
+
+                        // remove velocity component in the plane direction from velocity vector
+                        velocity -= parallel_penetration;
+                    }
                 }
 
                 // force 2d logic

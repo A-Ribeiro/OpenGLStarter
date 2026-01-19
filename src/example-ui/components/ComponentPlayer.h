@@ -7,7 +7,8 @@
 #include <appkit-gl-engine/Engine.h>
 #include <InteractiveToolkit/Platform/Core/ObjectQueue.h>
 
-#include "PlayerInputState.h"
+#include "util/PlayerInputState.h"
+#include "util/JumpState.h"
 
 class App;
 
@@ -48,6 +49,7 @@ namespace AppKit
                 CollisionCore::Sphere<MathCore::vec3f> getSphere();
 
                 PlayerInputState inputState;
+                JumpState jumpState;
 
                 ComponentPlayer();
                 ~ComponentPlayer();
