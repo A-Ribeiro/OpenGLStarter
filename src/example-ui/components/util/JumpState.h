@@ -1,6 +1,56 @@
 #pragma once
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
+#include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
+
+namespace HeightAndTime
+{
+    static MathCore::vec3f IntegrateAcceleration(const MathCore::vec3f &v0, const MathCore::vec3f &acceleration, float deltaTime)
+    {
+        // Use kinematic equation: height_delta = v*dt + 0.5*g*dt²
+        // This matches HeightAndTime::CalcHeightAtTime formula
+        return v0 * deltaTime + 0.5f * acceleration * deltaTime * deltaTime;
+    }
+
+    // what is the height_delta after apply gravity during deltaTime?
+    // returns the distance traveled during deltatime
+    static float IntegrateAcceleration(float v0, float acceleration, float deltaTime)
+    {
+        // Use kinematic equation: height_delta = v*dt + 0.5*g*dt²
+        // This matches HeightAndTime::CalcHeightAtTime formula
+        return v0 * deltaTime + 0.5f * acceleration * deltaTime * deltaTime;
+    }
+
+    static float CalcVelocityToReachHeight(float height, float gravity)
+    {
+        // v = sqrt(2 * g * h)
+        return MathCore::OP<float>::sqrt(2.0f * MathCore::OP<float>::abs(gravity) * height);
+    }
+
+    static float CalcHeightFromVelocity(float velocity, float gravity)
+    {
+        // h = v^2 / (2 * g)
+        return (velocity * velocity) / (2.0f * MathCore::OP<float>::abs(gravity));
+    }
+
+    static float CalcTimeToReachHeight(float height, float gravity)
+    {
+        // t = sqrt(2 * h / g)
+        return MathCore::OP<float>::sqrt((2.0f * height) / MathCore::OP<float>::abs(gravity));
+    }
+
+    static float CalcTimeToReachVelocity(float velocity, float gravity)
+    {
+        // t = v / g
+        return MathCore::OP<float>::abs(velocity / gravity);
+    }
+
+    static float CalcHeightAtTime(float initialVelocity, float gravity, float time)
+    {
+        // d = v0 * t + 0.5 * g * t^2
+        return initialVelocity * time + 0.5f * gravity * time * time;
+    }
+}
 
 class JumpState
 {
@@ -8,12 +58,11 @@ public:
     enum State
     {
         Grounded,
-
+        StartJump,
         Rising,
-        RisingButtonReleased,
-
-        DoubleJumping,
-        DoubleJumpingButtonReleased,
+        RisingBeforeNoUpImpulsion,
+        RisingNoUpImpulsion,
+        SetVelocityZeroBeforeFalling,
 
         Falling,
     };
@@ -22,16 +71,18 @@ public:
     {
         switch (state)
         {
+        case RisingBeforeNoUpImpulsion:
+            return "RisingBeforeNoUpImpulsion";
         case Grounded:
             return "Grounded";
         case Rising:
             return "Rising";
-        case RisingButtonReleased:
+        case StartJump:
+            return "StartJump";
+        case RisingNoUpImpulsion:
             return "RisingButtonReleased";
-        case DoubleJumping:
-            return "DoubleJumping";
-        case DoubleJumpingButtonReleased:
-            return "DoubleJumpingButtonReleased";
+        case SetVelocityZeroBeforeFalling:
+            return "SetVelocityZeroBeforeFalling";
         case Falling:
             return "Falling";
         default:
@@ -40,37 +91,54 @@ public:
     }
 
 private:
-    State currentState;
-    bool canDoubleJump;
+    State state;
 
-    float maxJumpHeight;
+    // input variables
+    float risingVelocity;
+    // float maxJumpHeight;
     float minJumpHeight;
 
-    float currentJumpHeight; // Track how high we've jumped so far
-    bool jumpButtonHeld;     // Track if jump button is still pressed
+    // variables computed after computeConstants
+    float rising_velocity_with_impulse;
+    
+    // store the value of velocity needed to reach the minJumpHeight_height_without_impulse
+    float rising_velocity_without_impulse;
 
-    float risingVelocity;
+    // float maxJumpHeightFinal;
+    float minJumpHeight_keep_impulse_until_height;
+    float minJumpHeight_max_height;
+    float minJumpHeight_time_to_reach_max_height_without_impulse;
+    float minJumpHeight_height_without_impulse;
 
-    float time_to_reach_zero_velocity;
-    float time_advance;
+    EventCore::PressReleaseDetector jump_trigger_detector;
 
-    float maxJumpHeightFinal;
-    float minJumpHeightFinal;
+    float velocity_replacer;
+    float estimated_jump_height;
+    float time_aux;
 
-    float initialRisingVelocity;
-
+    float initial_pos;
 public:
-    JumpState() : currentState(Grounded), canDoubleJump(true), maxJumpHeight(0.0f),
-                  currentJumpHeight(0.0f), jumpButtonHeld(false), risingVelocity(0.0f) {}
-    State getState() const { return currentState; }
+    JumpState()
+    {
+        state = Grounded;
+        risingVelocity = 0.0f;
+        // maxJumpHeight = 0.0f;
+        minJumpHeight = 0.0f;
+
+        rising_velocity_with_impulse = 0.0f;
+        rising_velocity_without_impulse = 0.0f;
+        // maxJumpHeightFinal = 0.0f;
+        minJumpHeight_keep_impulse_until_height = 0.0f;
+        minJumpHeight_max_height = 0.0f;
+        minJumpHeight_time_to_reach_max_height_without_impulse = 0.0f;
+        minJumpHeight_height_without_impulse = 0.0f;
+    }
+    State getState() const { return state; }
 
     bool canJump() const
     {
-        return currentState == Grounded || (canDoubleJump && currentState == Falling);
+        return state == Grounded; // || (canDoubleJump && currentState == Falling);
     }
-
-    bool getCanDoubleJump() const { return canDoubleJump; }
-    void setCanDoubleJump(bool value) { canDoubleJump = value; }
 
     // set the constant up rising velocity during jump
     void setRisingVelocity(float value) { risingVelocity = value; }
@@ -79,115 +147,118 @@ public:
     void setMinJumpHeight(float value) { minJumpHeight = value; }
     float getMinJumpHeight() const { return minJumpHeight; }
 
-    void setMaxJumpHeight(float value) { maxJumpHeight = value; }
-    float getMaxJumpHeight() const { return maxJumpHeight; }
+    void setMaxJumpHeight(float value) { /* maxJumpHeight = value; */ }
+    float getMaxJumpHeight() const { return 0.0f; /* return maxJumpHeight; */ }
 
     void computeConstants(float gravity)
     {
-        // acceleration is linear and constant
-        time_to_reach_zero_velocity = MathCore::OP<float>::abs(risingVelocity / gravity);
+        minJumpHeight_max_height = minJumpHeight;
 
-        // the velocity(d) is a quadratic function on time
-        // d = v0 * t + 0.5 * gravity * t^2
-        // y = x^2 0.5 g * 1/g^2 + x^2 * 1/g
-        float height_rising_max = risingVelocity * time_to_reach_zero_velocity + 0.5f * gravity * time_to_reach_zero_velocity * time_to_reach_zero_velocity;
+        rising_velocity_with_impulse = risingVelocity;
 
-        maxJumpHeightFinal = maxJumpHeight - height_rising_max;
-        minJumpHeightFinal = minJumpHeight - height_rising_max;
+        float required_initial_velocity = HeightAndTime::CalcVelocityToReachHeight(minJumpHeight_max_height, gravity);
+        rising_velocity_without_impulse = MathCore::OP<float>::minimum(risingVelocity, required_initial_velocity);
 
-        initialRisingVelocity = risingVelocity;
+        minJumpHeight_height_without_impulse = HeightAndTime::CalcHeightFromVelocity(rising_velocity_without_impulse, gravity);
+        minJumpHeight_keep_impulse_until_height = minJumpHeight_max_height - minJumpHeight_height_without_impulse;
 
-        if (minJumpHeightFinal < 0)
-        {
-            // need to decrease rising velocity according the height offset
-            // d = v0 * (v0/gravity) + 0.5 * gravity * (v0/gravity)^2
-
-            // x = ± (sqrt(d) 1 g 0.816/sqrt(g)) and 1.225 sqrt(g) != 0 and g !=0
-
-            float d = minJumpHeight;
-            
-            float sqrt_d = MathCore::OP<float>::sqrt(d);
-            float sqrt_g = MathCore::OP<float>::sqrt(MathCore::OP<float>::abs(gravity));
-            const float sqrt_2 = MathCore::OP<float>::sqrt(2.0f);
-
-            initialRisingVelocity = sqrt_d * sqrt_g * sqrt_2;
-
-            minJumpHeightFinal = 0;
-            maxJumpHeightFinal = maxJumpHeight - d;
-        }
-    }
-
-    // when hits jump button down event occurs
-    void jump(float *velocityY)
-    {
-        if (currentState == Grounded)
-        {
-            currentState = Rising;
-            *velocityY = 0.0f;
-            canDoubleJump = true;
-            jumpButtonHeld = true;
-            currentJumpHeight = 0.0f;
-            time_advance = 0.0f;
-        }
-        else if (canDoubleJump && currentState == Falling)
-        {
-            currentState = DoubleJumping;
-            *velocityY = 0.0f;
-            canDoubleJump = false;
-            jumpButtonHeld = true;
-            currentJumpHeight = 0.0f;
-            time_advance = 0.0f;
-        }
+        minJumpHeight_time_to_reach_max_height_without_impulse = HeightAndTime::CalcTimeToReachHeight(minJumpHeight_height_without_impulse, gravity);
     }
 
     void setGrounded()
     {
-        if (currentState == Grounded)
+        if (state == Grounded)
             return;
-        currentState = Grounded;
-        canDoubleJump = true;
-        currentJumpHeight = 0.0f;
+        state = Grounded;
     }
 
-    void setJumpPressed(bool pressed)
+    bool isJumping() const
     {
-        jumpButtonHeld = jumpButtonHeld && pressed;
+        return state == Rising || state == RisingNoUpImpulsion || state == RisingBeforeNoUpImpulsion;
     }
 
-    // updates velocity until reachs max height
-    void updateVelocity(float *velocityY, float deltaTime)
+    void update(float *velocityY, float deltaTime, float gravity, bool jump_pressed, float *posY)
     {
-        if (currentState == JumpState::Grounded)
+        jump_trigger_detector.setState(jump_pressed);
+
+        if (jump_trigger_detector.down && state == Grounded)
+            state = StartJump;
+
+        if (deltaTime <= 0.0f)
+            return;
+
+        if (state == StartJump)
         {
+            estimated_jump_height = 0.0f;
+            state = Rising;
+            velocity_replacer = rising_velocity_with_impulse;
+            *velocityY = velocity_replacer;
+            initial_pos = *posY;
+        }
+        else if (state == RisingBeforeNoUpImpulsion)
+        {
+            state = RisingNoUpImpulsion;
+            velocity_replacer = rising_velocity_without_impulse;
+            time_aux = 0.0f;
+
+            printf("[RisingBeforeNoUpImpulsion] \n");
+        }
+
+        if (state == Rising)
+        {
+            float height_delta = velocity_replacer * deltaTime;
+
+            float new_estimated_height = estimated_jump_height + height_delta;
+
+            if (new_estimated_height >= minJumpHeight_keep_impulse_until_height)
+            {
+                state = RisingBeforeNoUpImpulsion;
+                height_delta = minJumpHeight_keep_impulse_until_height - estimated_jump_height;
+                new_estimated_height = estimated_jump_height + height_delta;
+
+                velocity_replacer = height_delta / deltaTime;
+            }
+
+            estimated_jump_height = new_estimated_height;
+            *velocityY = velocity_replacer;
+
+            printf("[Rising] new_estimated_height: %f keep_impulse_until: %f\n", new_estimated_height, minJumpHeight_keep_impulse_until_height);
+            printf("                      position after apply velocity: %f\n", (*posY) - initial_pos + (*velocityY) * deltaTime);
+        }
+        else if (state == RisingNoUpImpulsion)
+        {
+            time_aux += deltaTime;
+
+            // what is the height_delta after apply gravity during deltaTime?
+            float height_delta = HeightAndTime::IntegrateAcceleration(velocity_replacer, gravity, deltaTime);
+            
+            velocity_replacer += gravity * deltaTime;
+            
+            float new_estimated_height = estimated_jump_height + height_delta;
+
+            if (time_aux >= minJumpHeight_time_to_reach_max_height_without_impulse)
+            {
+                state = SetVelocityZeroBeforeFalling;
+                height_delta = minJumpHeight_max_height - estimated_jump_height;
+                new_estimated_height = estimated_jump_height + height_delta;
+                printf("[RisingNoUpImpulsion] (reach top) estimated_jump_height: %f max_height: %f\n", estimated_jump_height, minJumpHeight_max_height);
+            }
+
+            estimated_jump_height = new_estimated_height;
+            // Output effective velocity so external system gets: position += (height_delta/deltaTime) * deltaTime = height_delta
+            *velocityY = height_delta / deltaTime;
+
+            printf("[RisingNoUpImpulsion] new_estimated_height: %f keep_impulse_until: %f\n", new_estimated_height, minJumpHeight_max_height);
+            printf("                      position after apply velocity: %f\n", (*posY) - initial_pos + (*velocityY) * deltaTime);
+            
+        }
+        else if (state == SetVelocityZeroBeforeFalling)
+        {
+            state = Falling;
             *velocityY = 0.0f;
-            canDoubleJump = true;
-            currentJumpHeight = 0.0f;
-        }
-        else if (*velocityY < -0.5f)
-        {
-            currentState = Falling;
-        }
 
-        if (currentState == Rising)
-        {
-            *velocityY = initialRisingVelocity;
-            currentJumpHeight += initialRisingVelocity * deltaTime;
-            printf("JumpState: %s, Velocity Y: %.2f, currentJumpHeight: %.2f\n", stateToString(currentState), *velocityY, currentJumpHeight);
-            if (currentJumpHeight >= minJumpHeightFinal)
-            {
-                if (currentJumpHeight >= maxJumpHeightFinal || !jumpButtonHeld)
-                    currentState = RisingButtonReleased;
-            }
-        }
-        else if (currentState == DoubleJumping)
-        {
-            *velocityY = initialRisingVelocity;
-            currentJumpHeight += initialRisingVelocity * deltaTime;
-            printf("JumpState: %s, Velocity Y: %.2f, currentJumpHeight: %.2f\n", stateToString(currentState), *velocityY, currentJumpHeight);
-            if (currentJumpHeight >= minJumpHeightFinal)
-            {
-                currentState = DoubleJumpingButtonReleased;
-            }
+            printf("[SetVelocityZeroBeforeFalling] \n");
         }
     }
+
 };
