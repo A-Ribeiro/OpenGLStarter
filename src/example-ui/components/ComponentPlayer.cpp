@@ -35,10 +35,13 @@ namespace AppKit
 
                 Radius.OnChange.add(&ComponentPlayer::OnRadiusParameter, this);
 
-                jumpState.setMinJumpHeight(300.0f);   // Set desired jump height
-                jumpState.setMaxJumpHeight(500.0f);   // Set desired jump height
-                jumpState.setRisingVelocity(12000.0f); // Set constant rising velocity
-                jumpState.computeConstants(-3000.0f); // gravity
+                jumpState.configureJump(
+                    1000.0f, // risingVelocity
+                    150.0f,  // minJumpHeight
+                    300.0f,  // maxJumpHeight
+                    200.0f,  // secondJumpHeight
+                    -5000.0f // gravity
+                );
             }
 
             ComponentPlayer::~ComponentPlayer()
@@ -58,7 +61,7 @@ namespace AppKit
                     if (transform->findTransformByName("DebugDrawCircle", 1) != nullptr)
                         return; // already created
                     auto self_ref = this->self<ComponentPlayer>();
-                    app->executeOnMainThread.enqueue([this, self_ref, transform]()
+                    app->executeOnMainThread.enqueue([self_ref, transform]()
                                                      {
                         auto debugDrawTransform = transform->addChild(Transform::CreateShared("DebugDrawCircle"));
                         //debugDrawTransform->setLocalPosition(MathCore::vec3f(0,0,-1.0f));
@@ -82,11 +85,26 @@ namespace AppKit
                             MathCore::quatf() // rotation
                         );
 
+                        float radius_to_draw = inner_radius * 20.0f;
                         line_mounter->addLine(
-                            MathCore::vec3f(0, jumpState.getMinJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(inner_radius, jumpState.getMinJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->jumpState.getMinJumpHeight() - inner_radius,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->jumpState.getMinJumpHeight() - inner_radius, 0), // b
                             self_ref->debugDrawThickness, // thickness
                             ui::colorFromHex("#FF0000FF") // color
+                        );
+
+                        line_mounter->addLine(
+                            MathCore::vec3f(-radius_to_draw, self_ref->jumpState.getMaxJumpHeight() - inner_radius,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->jumpState.getMaxJumpHeight() - inner_radius, 0), // b
+                            self_ref->debugDrawThickness, // thickness
+                            ui::colorFromHex("#FF0000FF") // color
+                        );
+
+                        line_mounter->addLine(
+                            MathCore::vec3f(-radius_to_draw, self_ref->jumpState.getSecondJumpHeight() - inner_radius,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->jumpState.getSecondJumpHeight() - inner_radius, 0), // b
+                            self_ref->debugDrawThickness * 0.5f, // thickness
+                            ui::colorFromHex("#f700ffff") // color
                         );
 
                         self_ref->app->gameScene->printHierarchy(); });
@@ -114,7 +132,7 @@ namespace AppKit
 
                 MathCore::vec3f position = getTransform()->getLocalPosition();
 
-                const MathCore::vec3f gravity_px_per_sec = MathCore::vec3f(0, -3000.0f, 0.0f);
+                const MathCore::vec3f gravity_px_per_sec = MathCore::vec3f(0, -5000.0f, 0.0f);
 
                 acceleration = MathCore::vec3f(0.0f, 0.0f, 0.0f); // reset acceleration
                 acceleration += gravity_px_per_sec;
@@ -135,7 +153,11 @@ namespace AppKit
                 if (gameAreaShared == nullptr)
                     return;
 
-                jumpState.update(&velocity.y, time->deltaTime, gravity_px_per_sec.y, inputState.jump.pressed, &position.y);
+                jumpState.update(&velocity.y,             // velocityY
+                                 time->deltaTime,         // deltaTime
+                                 gravity_px_per_sec.y,    // gravity
+                                 inputState.jump.pressed, // jump_pressed
+                                 true);                   // allow_double_jump
 
                 float x = inputState.x_axis;
 
@@ -143,7 +165,7 @@ namespace AppKit
 
                 if (abs(x) > 0.02f)
                 {
-                    velocity.x = 400.0f * x;
+                    velocity.x = 600.0f * x;
                     stop_player = false;
                 }
 
@@ -183,6 +205,36 @@ namespace AppKit
                 velocity.z = 0;
 
                 getTransform()->setLocalPosition(position);
+
+                auto debugDrawTransform = getTransform()->findTransformByName("DebugDrawCircle");
+                if (debugDrawTransform)
+                {
+                    auto mesh_line_drawer = debugDrawTransform->findComponent<ComponentMesh>();
+                    MathCore::vec4f color;
+                    auto state = jumpState.getState();
+                    switch (state)
+                    {
+                    case JumpState::Grounded:
+                        color = ui::colorFromHex("#ff8800ff");
+                        break;
+                    case JumpState::StartJump:
+                    case JumpState::Rising:
+                        color = ui::colorFromHex("#FFFF00FF");
+                        break;
+                    case JumpState::RisingBeforeNoUpImpulsion:
+                    case JumpState::RisingNoUpImpulsion:
+                        color = ui::colorFromHex("#0091ffff");
+                        break;
+                    case JumpState::Falling:
+                        color = ui::colorFromHex("#000000ff");
+                        break;
+                    default:
+                        color = ui::colorFromHex("#FFFFFFFF");
+                        break;
+                    }
+                    for( size_t i=0 ; i<mesh_line_drawer->color[0].size() - 8*3; i++ )
+                        mesh_line_drawer->color[0][i] = color;
+                }
             }
 
             // always clone
