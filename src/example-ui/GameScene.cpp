@@ -35,7 +35,7 @@ void GameScene::bindResourcesToGraph()
         camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
     }
 
-    const auto &camera_viewport = renderWindow->CameraViewport.c_val();
+    const auto &camera_viewport = renderWindow->WindowViewport.c_val();
 
     screen_custom_size.x = 1920.0f;
     screen_custom_size.y = (screen_custom_size.x * camera_viewport.h) / camera_viewport.w;
@@ -114,7 +114,7 @@ void GameScene::draw()
 
 void GameScene::onCameraViewportUpdate(const MathCore::vec2i &viewport_size)
 {
-    const auto &camera_viewport = renderWindow->CameraViewport.c_val();
+    const auto &camera_viewport = renderWindow->WindowViewport.c_val();
 
     screen_custom_size.x = 1920.0f;
     screen_custom_size.y = (screen_custom_size.x * camera_viewport.h) / camera_viewport.w;

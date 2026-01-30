@@ -132,6 +132,8 @@ namespace AppKit
                         float aspectX = (float)viewport.w / (float)viewport.h;
                         x = y * aspectX;
                     }
+
+                    viewport = AppKit::GLEngine::iRect(x, y);
                 }
 
                 if (rightHanded)

@@ -361,13 +361,14 @@ namespace AppKit
         {
             return innerWindowList[at];
         }
-        void RenderWindowRegion::addChild(std::shared_ptr<RenderWindowRegion>child)
+        std::shared_ptr<RenderWindowRegion> RenderWindowRegion::addChild(std::shared_ptr<RenderWindowRegion>child)
         {
             auto child_parent = ToShared(child->parentRef);
             ITK_ABORT(child_parent != nullptr, "This child has been added as child of another render window");
 
             innerWindowList.push_back(child);
             child->parentRef = this->self();
+            return child;
         }
         void RenderWindowRegion::removeChild(std::shared_ptr<RenderWindowRegion>child)
         {
