@@ -125,7 +125,7 @@ namespace AppKit
 
             int getChildCount() const;
             std::shared_ptr<RenderWindowRegion> getChild(int at) const;
-            void addChild(std::shared_ptr<RenderWindowRegion> child);
+            std::shared_ptr<RenderWindowRegion> addChild(std::shared_ptr<RenderWindowRegion> child);
             void removeChild(std::shared_ptr<RenderWindowRegion> child);
             void clearChildren();
 
