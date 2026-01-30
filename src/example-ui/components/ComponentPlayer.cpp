@@ -228,6 +228,9 @@ namespace AppKit
                     case JumpState::Falling:
                         color = ui::colorFromHex("#000000ff");
                         break;
+                    case JumpState::SetVelocityZeroBeforeFalling:
+                        color = ui::colorFromHex("#ff0000ff");
+                        break;
                     default:
                         color = ui::colorFromHex("#FFFFFFFF");
                         break;

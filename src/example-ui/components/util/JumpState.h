@@ -58,10 +58,13 @@ public:
     enum State
     {
         Grounded,
+
         StartJump,
         Rising,
+
         RisingBeforeNoUpImpulsion,
         RisingNoUpImpulsion,
+
         SetVelocityZeroBeforeFalling,
 
         Falling,
@@ -188,9 +191,9 @@ public:
         state = Grounded;
     }
 
-    void update(float *velocityY, float deltaTime, float gravity, bool jump_pressed, bool allow_double_jump)
+    void update(float *velocityY, float deltaTime, float gravity, bool jump_pressedp, bool allow_double_jump)
     {
-        jump_trigger_detector.setState(jump_pressed);
+        jump_trigger_detector.setState(jump_pressedp);
 
         if (jump_trigger_detector.down)
         {
@@ -226,6 +229,21 @@ public:
             state = RisingNoUpImpulsion;
             velocity_replacer = rising_velocity_without_impulse;
             time_aux = 0.0f;
+
+            float base_line_jump_height = dynamic_max_height - minJumpHeight_height_without_impulse;
+            float height_from_baseline = estimated_jump_height - base_line_jump_height;
+            if (height_from_baseline > 0.0f)
+            {
+                // Calculate remaining height to reach max
+                float remaining_height = minJumpHeight_height_without_impulse - height_from_baseline;
+                // force remaining height to be non-negative
+                if (remaining_height < 0.0f)
+                    remaining_height = 0.0f;
+                // Time to travel remaining distance (from current position to max, ending at rest)
+                float time_remaining = HeightAndTime::CalcTimeToReachHeight(remaining_height, gravity);
+                // Time elapsed = total time - remaining time
+                time_aux = minJumpHeight_time_to_reach_max_height_without_impulse - time_remaining;
+            }
         }
 
         if (state == Rising)
@@ -239,10 +257,21 @@ public:
                 if (new_estimated_height >= secondJumpHeight_keep_impulse_until_height)
                 {
                     state = RisingBeforeNoUpImpulsion;
-                    height_delta = secondJumpHeight_keep_impulse_until_height - estimated_jump_height;
-                    new_estimated_height = estimated_jump_height + height_delta;
 
-                    velocity_replacer = height_delta / deltaTime;
+                    if (new_estimated_height >= secondJumpHeight)
+                    {
+                        height_delta = secondJumpHeight - estimated_jump_height;
+                        new_estimated_height = estimated_jump_height + height_delta;
+                        velocity_replacer = height_delta / deltaTime;
+
+                        {
+                            state = Falling;
+                        }
+                    }
+
+                    // height_delta = secondJumpHeight_keep_impulse_until_height - estimated_jump_height;
+                    // new_estimated_height = estimated_jump_height + height_delta;
+                    // velocity_replacer = height_delta / deltaTime;
 
                     dynamic_max_height = secondJumpHeight;
                 }
@@ -252,10 +281,20 @@ public:
                 if (new_estimated_height >= maxJumpHeight_keep_impulse_until_height)
                 {
                     state = RisingBeforeNoUpImpulsion;
-                    height_delta = maxJumpHeight_keep_impulse_until_height - estimated_jump_height;
-                    new_estimated_height = estimated_jump_height + height_delta;
+                    if (new_estimated_height >= maxJumpHeight)
+                    {
+                        height_delta = maxJumpHeight - estimated_jump_height;
+                        new_estimated_height = estimated_jump_height + height_delta;
+                        velocity_replacer = height_delta / deltaTime;
 
-                    velocity_replacer = height_delta / deltaTime;
+                        {
+                            state = Falling;
+                        }
+                    }
+
+                    // height_delta = maxJumpHeight_keep_impulse_until_height - estimated_jump_height;
+                    // new_estimated_height = estimated_jump_height + height_delta;
+                    // velocity_replacer = height_delta / deltaTime;
 
                     dynamic_max_height = maxJumpHeight;
                 }
@@ -296,6 +335,9 @@ public:
             estimated_jump_height = new_estimated_height;
             // Output effective velocity so external system gets: position += (height_delta/deltaTime) * deltaTime = height_delta
             *velocityY = height_delta / deltaTime;
+
+            if (time_aux >= minJumpHeight_time_to_reach_max_height_without_impulse && *velocityY == 0.0f)
+                state = Falling;
         }
         else if (state == SetVelocityZeroBeforeFalling)
         {
