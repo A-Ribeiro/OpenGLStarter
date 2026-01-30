@@ -266,7 +266,7 @@ public:
                         new_estimated_height = estimated_jump_height + height_delta;
                         velocity_replacer = height_delta / deltaTime;
 
-                        if (velocity_replacer == 0.0f)
+                        if (velocity_replacer <= 0.0f)
                             state = Falling;
                         else
                             state = SetVelocityZeroBeforeFalling;
@@ -290,7 +290,7 @@ public:
                         new_estimated_height = estimated_jump_height + height_delta;
                         velocity_replacer = height_delta / deltaTime;
 
-                        if (velocity_replacer == 0.0f)
+                        if (velocity_replacer <= 0.0f)
                             state = Falling;
                         else
                             state = SetVelocityZeroBeforeFalling;
@@ -340,7 +340,7 @@ public:
             // Output effective velocity so external system gets: position += (height_delta/deltaTime) * deltaTime = height_delta
             *velocityY = height_delta / deltaTime;
 
-            if (time_aux >= minJumpHeight_time_to_reach_max_height_without_impulse && *velocityY == 0.0f)
+            if (time_aux >= minJumpHeight_time_to_reach_max_height_without_impulse && *velocityY <= 0.0f)
                 state = Falling;
         }
         else if (state == SetVelocityZeroBeforeFalling)
