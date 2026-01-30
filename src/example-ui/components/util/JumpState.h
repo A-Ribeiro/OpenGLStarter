@@ -243,6 +243,8 @@ public:
                 float time_remaining = HeightAndTime::CalcTimeToReachHeight(remaining_height, gravity);
                 // Time elapsed = total time - remaining time
                 time_aux = minJumpHeight_time_to_reach_max_height_without_impulse - time_remaining;
+
+                velocity_replacer += gravity * time_aux;
             }
         }
 
@@ -264,9 +266,10 @@ public:
                         new_estimated_height = estimated_jump_height + height_delta;
                         velocity_replacer = height_delta / deltaTime;
 
-                        {
+                        if (velocity_replacer == 0.0f)
                             state = Falling;
-                        }
+                        else
+                            state = SetVelocityZeroBeforeFalling;
                     }
 
                     // height_delta = secondJumpHeight_keep_impulse_until_height - estimated_jump_height;
@@ -287,9 +290,10 @@ public:
                         new_estimated_height = estimated_jump_height + height_delta;
                         velocity_replacer = height_delta / deltaTime;
 
-                        {
+                        if (velocity_replacer == 0.0f)
                             state = Falling;
-                        }
+                        else
+                            state = SetVelocityZeroBeforeFalling;
                     }
 
                     // height_delta = maxJumpHeight_keep_impulse_until_height - estimated_jump_height;
