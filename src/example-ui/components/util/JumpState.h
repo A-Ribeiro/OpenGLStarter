@@ -191,7 +191,7 @@ public:
         state = Grounded;
     }
 
-    void update(float *velocityY, float deltaTime, float gravity, bool jump_pressedp, bool allow_double_jump)
+    void update(float *velocityY, float deltaTime, float gravity, bool jump_pressedp, bool allow_double_jump, bool double_jump_at_any_time = true)
     {
         jump_trigger_detector.setState(jump_pressedp);
 
@@ -203,7 +203,7 @@ public:
                 can_double_jump = true;
                 double_jump_used = false;
             }
-            else if (allow_double_jump && can_double_jump && state == Falling)
+            else if (allow_double_jump && can_double_jump && (state == Falling || double_jump_at_any_time))
             {
                 can_double_jump = false;
                 double_jump_used = true;
