@@ -2,6 +2,90 @@
 
 #define PBR_MODE_OPTIMIZED
 
+
+// custom inverse trigonometric inspired from:
+// https://seblagarde.wordpress.com/2014/12/01/inverse-trigonometric-functions-gpu-optimization-for-amd-gcn-architecture/
+
+#define TRIGONOMETRIC_CONSTANTS  \
+    "#define fast_pi 3.141593\n" \
+    "#define fast_half_pi 1.570796\n"
+
+// max absolute error 9.0x10^-3
+// Eberly's polynomial degree 1 - respect bounds
+
+#define TRIGONOMETRIC_LOW_RES_ACOS_ASIN                                 \
+    "// input [-1, 1] and output [0, PI]\n"                             \
+    "float fast_acos1(float _x)\n"                                      \
+    "{\n"                                                               \
+    "    float x = abs(_x);\n"                                          \
+    "    float t = -0.156583 * x + fast_half_pi;\n"                     \
+    "    t *= sqrt(1.0 - x);\n"                                         \
+    "    return (_x < 0) ? fast_pi - t : t;\n"                          \
+    "}\n"                                                               \
+    "// input [-1, 1] and output [-PI/2, PI/2]\n"                       \
+    "float fast_asin1(float x)\n"                                       \
+    "{\n"                                                               \
+    "    return fast_half_pi - fast_acos1(x);\n"                        \
+    "}\n"                                                               \
+    "vec2 fast_acos1(vec2 x)\n"                                         \
+    "{\n"                                                               \
+    "    vec2 ax = abs(x);\n"                                           \
+    "    vec2 t  = (-0.156583 * ax + fast_half_pi) * sqrt(1.0 - ax);\n" \
+    "    // step(0.0, x) = 0 if x < 0, 1 otherwise\n"                   \
+    "    return mix(fast_pi - t, t, step(0.0, x));\n"                   \
+    "}\n"
+
+#define TRIGONOMETRIC_HIGH_RES_ACOS_ASIN          \
+    "// input [-1, 1] and output [0, PI]\n"       \
+    "float fast_acos3(float _x)\n"                \
+    "{\n"                                         \
+    "    float x = abs(_x);\n"                    \
+    "    float t = -0.0188236;  // a3\n"          \
+    "    t = t * x + 0.0747737; // a2\n"          \
+    "    t = t * x - 0.2125329; // a1\n"          \
+    "    t = t * x + 1.570796;  // a0\n"          \
+    "    t = t * sqrt(1.0 - x);\n"                \
+    "    return (_x < 0) ? fast_pi - t : t;\n"    \
+    "}\n"                                         \
+    "// input [-1, 1] and output [-PI/2, PI/2]\n" \
+    "float fast_asin3(float x)\n"                 \
+    "{\n"                                         \
+    "    return fast_half_pi - fast_acos3(x);\n"  \
+    "}\n"
+
+// Eberly's odd polynomial degree 5 - respect bounds
+#define TRIGONOMETRIC_ATAN                                                    \
+    "// input [0, infinity] and output [0, PI/2]\n"                           \
+    "float fast_atan_positive(float _x)\n"                                    \
+    "{\n"                                                                     \
+    "    float x = (_x < 1.0) ? _x : 1.0 / _x;\n"                             \
+    "    float x2 = x * x;\n"                                                 \
+    "    float t = 0.0872929;\n"                                              \
+    "    t = t * x2 - 0.301895;\n"                                            \
+    "    t = t * x2 + 1.0;\n"                                                 \
+    "    t = t * x;\n"                                                        \
+    "    return (_x < 1.0) ? t : fast_half_pi - t;\n"                         \
+    "}\n"                                                                     \
+    "// input [-infinity, infinity] and output [-PI/2, PI/2]\n"               \
+    "float fast_atan(float x)\n"                                              \
+    "{\n"                                                                     \
+    "    float tn = fast_atan_positive(abs(x));\n"                            \
+    "    return (x < 0.0) ? -tn : tn;\n"                                      \
+    "}\n"                                                                     \
+    "float fast_atan2(float y, float x)\n"                                    \
+    "{\n"                                                                     \
+    "    float ax = abs(x);\n"                                                \
+    "    float ay = abs(y);\n"                                                \
+    "    float inv = 1.0 / max(ax, 1e-8);\n"                                  \
+    "    float t = fast_atan_positive(ay * inv);\n"                           \
+    "    float sy = sign(y); // returns 0 on y == 0.0 case\n"                 \
+    "    float angle = (x < 0.0) ? fast_pi - t : t;\n"                        \
+    "    angle *= sy;\n"                                                      \
+    "    angle = (ax < 1e-8) ? sy * fast_half_pi : angle; // x == 0.0 case\n" \
+    "    return angle;\n"                                                     \
+    "}\n"
+
+
 namespace AppKit
 {
     namespace GLEngine
@@ -813,6 +897,21 @@ namespace AppKit
                                   "SHADER_CODE");
             }
             */
+            if (frankenFormat & (ShaderAlgorithms_AmbientLightSpheremap | ShaderAlgorithms_AmbientLightSkybox))
+            {
+                findAndReplaceAll(&fragmentShader,
+                                  "FUNCTIONS",
+                                  TRIGONOMETRIC_CONSTANTS
+                                  TRIGONOMETRIC_LOW_RES_ACOS_ASIN
+                                  "FUNCTIONS");
+                if (frankenFormat & ShaderAlgorithms_AmbientLightSpheremap)
+                {
+                    findAndReplaceAll(&fragmentShader,
+                                  "FUNCTIONS",
+                                  TRIGONOMETRIC_ATAN
+                                  "FUNCTIONS");
+                }
+            }
 
             // ambient light
             if (frankenFormat & ShaderAlgorithms_AmbientLightSpheremap)
@@ -836,8 +935,8 @@ namespace AppKit
                                   "    return result;\n"
                                   "}\n"*/
                                   "vec2 normal2st(vec3 normal) {\n"
-                                  "    float t = acos(normal.y) / 3.14159265358;// PI\n"
-                                  "    float s = atan(normal.z, normal.x) / 6.28318530716;// 2.0 * PI;\n"
+                                  "    float t = fast_acos1(normal.y) * 0.318309886; // / 3.14159265358;// PI\n"
+                                  "    float s = fast_atan2(normal.z, normal.x) * 0.159154943; // / 6.28318530716;// 2.0 * PI;\n"
                                   "    s = fract(s + 1.0);\n"
                                   "    return vec2(s, t);\n"
                                   "}\n"
@@ -904,7 +1003,7 @@ namespace AppKit
                                   "  vec2 polarSignX = vec2(1.57079637051,signXxZz.x );\n"
                                   "  vec2 polarSignY = vec2(1.57079637051);\n"
                                   "  vec2 polarSignZ = vec2(signXxZz.y,1.57079637051);\n"
-                                  "  vec2 polarNormal = acos(normal.zx);\n"
+                                  "  vec2 polarNormal = fast_acos1(normal.zx);\n"
                                   "  vec3 bariCentricCoord = baricentricCoordvec2(\n"
                                   "    polarSignX,polarSignY,polarSignZ,polarNormal\n"
                                   "  );\n"
