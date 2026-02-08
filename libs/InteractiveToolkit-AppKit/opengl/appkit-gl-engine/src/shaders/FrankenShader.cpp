@@ -5,9 +5,9 @@
 // custom inverse trigonometric inspired from:
 // https://seblagarde.wordpress.com/2014/12/01/inverse-trigonometric-functions-gpu-optimization-for-amd-gcn-architecture/
 
-#define TRIGONOMETRIC_CONSTANTS       \
-    "#define fast_pi 3.14159265358\n" \
-    "#define fast_half_pi 1.57079632679\n"
+#define TRIGONOMETRIC_CONSTANTS  \
+    "#define fast_pi 3.141593\n" \
+    "#define fast_half_pi 1.570796\n"
 
 // max absolute error 9.0x10^-3
 // Eberly's polynomial degree 1 - respect bounds
