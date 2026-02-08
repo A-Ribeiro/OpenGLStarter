@@ -1,6 +1,8 @@
 #include <appkit-gl-engine/util/CubeMapHelper.h>
 #include <appkit-gl-base/GLCubeMap.h>
 
+#include <appkit-gl-engine/shaders/BasicShadersDefinitions.inl>
+
 namespace AppKit
 {
     namespace GLEngine
@@ -8,6 +10,84 @@ namespace AppKit
 
         const AppKit::OpenGL::ShaderType ShaderCopyCubeMap::Type = "ShaderCopyCubeMap";
         const AppKit::OpenGL::ShaderType ShaderRender1x1CubeMap::Type = "ShaderRender1x1CubeMap";
+
+        ShaderRender1x1CubeMap::ShaderRender1x1CubeMap() : GLShader(ShaderRender1x1CubeMap::Type)
+        {
+            const char vertexShaderCode[] = {
+                "attribute vec4 vPosition;\n"
+                //"attribute vec2 vUV;\n"
+                "varying vec2 uv;\n"
+                "void main() {\n"
+                "  uv = vPosition.xy*0.5 + vec2(0.5);\n"
+                "  gl_Position = vPosition;\n"
+                "}\n"};
+
+            const char fragmentShaderCode[] = {
+                //"precision mediump float;"
+                "varying vec2 uv;\n"
+                "uniform samplerCube cubeTexture;\n"
+                // "vec3 baricentricCoordvec2(vec2 a, vec2 b, vec2 c, vec2 p){\n"
+                // "  vec3 bc = vec3(c-b,0);\n"
+                // "  vec3 ba = vec3(a-b,0);\n"
+                // "  float areaTriangle_inv = 1.0/cross(bc,ba).z;\n"
+                // "  vec3 bp = vec3(p-b,0);\n"
+                // "  vec3 uvw;\n"
+                // "  uvw.x = cross(bc,bp).z;\n"
+                // "  uvw.z = cross(bp,ba).z;\n"
+                // "  uvw.xz = uvw.xz * areaTriangle_inv;\n"
+                // "  uvw.y = 1.0 - uvw.x - uvw.z;\n"
+                // "  return uvw;\n"
+                // "}\n"
+                // "vec3 sampleEnvironmentCubeBaryLerp(vec3 normal){\n"
+                // "  vec3 sign = sign(normal);\n"
+                // "  vec3 signX = vec3(sign.x,0,0);\n"
+                // "  vec3 signY = vec3(0,sign.y,0);\n"
+                // "  vec3 signZ = vec3(0,0,sign.z);\n"
+                // "  mat3 tex = mat3(\n"
+                // "    textureCube(cubeTexture, signX).rgb,\n"
+                // "    textureCube(cubeTexture, signY).rgb,\n"
+                // "    textureCube(cubeTexture, signZ).rgb\n"
+                // "  );\n"
+                // "  vec2 signXxZz = step( sign.xz, vec2(-0.5) );\n"
+                // "  signXxZz = signXxZz * 3.14159265359;\n"
+                // "  vec2 polarSignX = vec2(1.57079637051,signXxZz.x );\n"
+                // "  vec2 polarSignY = vec2(1.57079637051);\n"
+                // "  vec2 polarSignZ = vec2(signXxZz.y,1.57079637051);\n"
+                // "  vec2 polarNormal = acos(normal.zx);\n"
+                // "  vec3 bariCentricCoord = baricentricCoordvec2(\n"
+                // "    polarSignX,polarSignY,polarSignZ,polarNormal\n"
+                // "  );\n"
+                // "  return tex * bariCentricCoord;\n"
+                // "}\n"
+                "" TRIGONOMETRIC_CONSTANTS
+                "" TRIGONOMETRIC_LOW_RES_ACOS_ASIN_GENTYPE(vec2) //
+                "" CROSS_VEC2
+                "" BARYCENTRIC_VEC2
+                "" Shader_sampleEnvironmentCubeBaryLerp
+                "" Shader_Spherical_st2normal
+                "void main() {\n"
+                "  vec2 _uv = uv;\n"
+                "  _uv.y = 1.0 - abs( (_uv.y - 0.5 ) * 2.0 );\n"
+                "  vec3 result = sampleEnvironmentCubeBaryLerp(cubeTexture, st2normal(_uv) );\n"
+                "  gl_FragColor = vec4(result, 1.0);\n"
+                "}\n"};
+
+            compile(vertexShaderCode, fragmentShaderCode, __FILE__, __LINE__);
+            bindAttribLocation(ShaderCopyCubeMap::vPosition, "vPosition");
+            bindAttribLocation(ShaderCopyCubeMap::vUV, "vUV");
+            link(__FILE__, __LINE__);
+
+            cubeTexture = getUniformLocation("cubeTexture");
+        }
+
+        void ShaderRender1x1CubeMap::setCubeTexture(int texunit)
+        {
+            setUniform(cubeTexture, texunit);
+        }
+
+        ShaderRender1x1CubeMap::~ShaderRender1x1CubeMap()
+        {
+        }
 
         // AppKit::OpenGL::GLDynamicFBO dinamicFBO_1x1;
         // ShaderCopyCubeMap shaderCopyCubeMap;
@@ -209,8 +289,7 @@ namespace AppKit
             // render code
             const MathCore::vec3f vertex[] = {
                 MathCore::vec3f(-1, -1, 0), MathCore::vec3f(1, 1, 0), MathCore::vec3f(-1, 1, 0),
-                MathCore::vec3f(-1, -1, 0), MathCore::vec3f(1, -1, 0), MathCore::vec3f(1, 1, 0)
-            };
+                MathCore::vec3f(-1, -1, 0), MathCore::vec3f(1, -1, 0), MathCore::vec3f(1, 1, 0)};
 
             OPENGL_CMD(glEnableVertexAttribArray(ShaderRender1x1CubeMap::vPosition));
             OPENGL_CMD(glVertexAttribPointer(ShaderRender1x1CubeMap::vPosition, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertex[0]));
