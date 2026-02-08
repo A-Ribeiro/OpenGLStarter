@@ -172,7 +172,7 @@ namespace AppKit
                             sunShadowCount,
                             shadow->light->sun.finalIntensity, shadow->light->sun.worldDirection,
                             shadow->obb.dimension_2 * 2.0f, MathCore::vec3f(shadow->light->sun.cone_cos, shadow->light->sun.cone_sin, shadow->light->sun.cone_tangent),
-                            shadow->viewProjection, &shadow->depthTexture);
+                            shadow->castFromTextureViewProjection, &shadow->depthTexture);
                         sunShadowCount++;
                     }
                     break;

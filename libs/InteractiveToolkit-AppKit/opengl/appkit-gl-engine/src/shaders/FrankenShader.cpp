@@ -484,6 +484,23 @@ namespace AppKit
                 if (has_shadow)
                 {
                     findAndReplaceAll(&vertexShader,
+                                      "FUNCTIONS",
+                                      "float is_position_inside_clip_space(vec4 pos_homogeneous) {\n"
+                                      "  // w < 0 means outside of the shadow frustum, so we can skip the shadow sampling\n"
+                                      "  float w = pos_homogeneous.w;\n"
+                                      "  // Clip test in light clip space (after bias matrix application)\n"
+                                      "  // opengl clip test is -w < x < w. With bias matrix it is 0 < x < w\n"
+                                      "  if (w <= 0.0 ||\n"
+                                      "      pos_homogeneous.x < 0.0 || pos_homogeneous.x > w ||\n"
+                                      "      pos_homogeneous.y < 0.0 || pos_homogeneous.y > w ||\n"
+                                      "      pos_homogeneous.z < 0.0 || pos_homogeneous.z > w) {\n"
+                                      "      return 0.0;\n"
+                                      "  }\n"
+                                      "  return 1.0;\n"
+                                      "}\n"
+                                      "FUNCTIONS");
+
+                    findAndReplaceAll(&vertexShader,
                                       "VARIABLES",
                                       "uniform vec3 uCameraPosWorld;\n"
                                       "varying vec3 viewWorld;\n"
@@ -508,6 +525,8 @@ namespace AppKit
                                               findAndReplaceAllExt(
                                                   "uniform mat4 uShadowProjMatrix_ID;\n"
                                                   "varying vec4 vShadowLight_proj_ID;\n"
+                                                  "varying float vShadowLight_proj_inside_clipspace_ID;\n"
+                                                  "varying vec3 vShadowLight_proj_projected_ID;\n"
                                                   "VARIABLES",
                                                   "_ID", out_num));
 
@@ -515,8 +534,12 @@ namespace AppKit
                                               "SHADER_CODE",
                                               findAndReplaceAllExt(
                                                   "  vShadowLight_proj_ID = uShadowProjMatrix_ID * inputPositionWorld;\n"
-                                                  "  vShadowLight_proj_ID = vShadowLight_proj_ID / vShadowLight_proj_ID.w;\n"
-                                                  "  vShadowLight_proj_ID = vShadowLight_proj_ID * 0.5 + 0.5;\n"
+                                                  "  vShadowLight_proj_inside_clipspace_ID = is_position_inside_clip_space(vShadowLight_proj_ID);\n"
+                                                  "  vShadowLight_proj_projected_ID = (vShadowLight_proj_inside_clipspace_ID < 0.5) ? vec3(0.0) : vShadowLight_proj_ID.xyz / vShadowLight_proj_ID.w;\n"
+                                                  "  vShadowLight_proj_projected_ID = clamp(vShadowLight_proj_projected_ID, 0.0, 1.0);\n"
+
+                                                  // "  vShadowLight_proj_ID = vShadowLight_proj_ID / vShadowLight_proj_ID.w;\n"
+                                                  // "  vShadowLight_proj_ID = vShadowLight_proj_ID * 0.5 + 0.5;\n"
                                                   "SHADER_CODE",
                                                   "_ID", out_num));
                         }
@@ -1427,6 +1450,8 @@ namespace AppKit
                                               "uniform vec3 uShadowCone_ID;\n" // cos, sin, tan
                                               "uniform sampler2D uShadowTextureDepth_ID;\n"
                                               "varying vec4 vShadowLight_proj_ID;\n"
+                                              "varying float vShadowLight_proj_inside_clipspace_ID;\n"
+                                              "varying vec3 vShadowLight_proj_projected_ID;\n"
                                               "VARIABLES",
                                               "_ID", out_num));
                     }
@@ -1439,6 +1464,8 @@ namespace AppKit
                                               "uniform vec3 uShadowLightDir_ID;\n"
                                               "uniform sampler2DShadow uShadowTextureDepth_ID;\n"
                                               "varying vec4 vShadowLight_proj_ID;\n"
+                                              "varying float vShadowLight_proj_inside_clipspace_ID;\n"
+                                              "varying vec3 vShadowLight_proj_projected_ID;\n"
                                               "VARIABLES",
                                               "_ID", out_num));
                     }
@@ -1454,7 +1481,9 @@ namespace AppKit
                                               //"  shadow_depth_ID = step(vShadowLight_proj_ID.z, shadow_depth_ID);\n"
 
                                               // basic / 2x2 PCF
-                                              "  float shadow_depth_ID = shadow2D(uShadowTextureDepth_ID, vShadowLight_proj_ID.xyz).r;\n"
+                                              "  float shadow_depth_ID = 1.0;\n"
+                                              "  if (vShadowLight_proj_inside_clipspace_ID > 0.5)\n"
+                                              "    shadow_depth_ID = shadow2D(uShadowTextureDepth_ID, vShadowLight_proj_projected_ID).r;\n"
                                               "SHADER_CODE",
                                               "_ID", out_num));
                     }
@@ -1466,14 +1495,17 @@ namespace AppKit
                                           findAndReplaceAllExt(
 
                                               // 4x4 PCF naive
-                                              "  vec3 shadow_coord_ID_3d = vShadowLight_proj_ID.xyz;\n"
-                                              "  float shadow_texel_size_ID = 1.0/2048.0;\n"
-                                              "  vec4 shadow_samples_ID;\n"
-                                              "  shadow_samples_ID.x = shadow2D(uShadowTextureDepth_ID, shadow_coord_ID_3d + vec3( -shadow_texel_size_ID, -shadow_texel_size_ID, 0 ) ).r;\n"
-                                              "  shadow_samples_ID.y = shadow2D(uShadowTextureDepth_ID, shadow_coord_ID_3d + vec3(  shadow_texel_size_ID, -shadow_texel_size_ID, 0 ) ).r;\n"
-                                              "  shadow_samples_ID.z = shadow2D(uShadowTextureDepth_ID, shadow_coord_ID_3d + vec3(  shadow_texel_size_ID,  shadow_texel_size_ID, 0 ) ).r;\n"
-                                              "  shadow_samples_ID.w = shadow2D(uShadowTextureDepth_ID, shadow_coord_ID_3d + vec3( -shadow_texel_size_ID,  shadow_texel_size_ID, 0 ) ).r;\n"
-                                              "  float shadow_depth_ID = dot( shadow_samples_ID, vec4(0.25) );\n"
+                                              //"  vec3 shadow_coord_ID_3d = vShadowLight_proj_ID.xyz;\n"
+                                              "  float shadow_depth_ID = 1.0;\n"
+                                              "  if (vShadowLight_proj_inside_clipspace_ID > 0.5) {\n"
+                                              "    float shadow_texel_size_ID = 1.0 / 2048.0;\n"
+                                              "    vec4 shadow_samples_ID;\n"
+                                              "    shadow_samples_ID.x = shadow2D(uShadowTextureDepth_ID, vShadowLight_proj_projected_ID + vec3( -shadow_texel_size_ID, -shadow_texel_size_ID, 0 ) ).r;\n"
+                                              "    shadow_samples_ID.y = shadow2D(uShadowTextureDepth_ID, vShadowLight_proj_projected_ID + vec3(  shadow_texel_size_ID, -shadow_texel_size_ID, 0 ) ).r;\n"
+                                              "    shadow_samples_ID.z = shadow2D(uShadowTextureDepth_ID, vShadowLight_proj_projected_ID + vec3(  shadow_texel_size_ID,  shadow_texel_size_ID, 0 ) ).r;\n"
+                                              "    shadow_samples_ID.w = shadow2D(uShadowTextureDepth_ID, vShadowLight_proj_projected_ID + vec3( -shadow_texel_size_ID,  shadow_texel_size_ID, 0 ) ).r;\n"
+                                              "    shadow_depth_ID = dot( shadow_samples_ID, vec4(0.25) );\n"
+                                              "  }\n"
                                               //*/
 
                                               /*
@@ -1507,7 +1539,9 @@ namespace AppKit
                         findAndReplaceAll(&fragmentShader,
                                           "SHADER_CODE",
                                           findAndReplaceAllExt(
-                                              "  float shadow_depth_ID = smart_blocker_sampler_pcss_pcf(vShadowLight_proj_ID.z, uShadowTextureDepth_ID, vShadowLight_proj_ID.xy, uShadowDimension_ID, uShadowDimension_inv_ID, uShadowCone_ID.x, uShadowCone_ID.z);\n"
+                                              "  float shadow_depth_ID = 1.0;\n"
+                                              "  if (vShadowLight_proj_inside_clipspace_ID > 0.5)\n"
+                                              "    shadow_depth_ID = smart_blocker_sampler_pcss_pcf(vShadowLight_proj_projected_ID.z, uShadowTextureDepth_ID, vShadowLight_proj_projected_ID.xy, uShadowDimension_ID, uShadowDimension_inv_ID, uShadowCone_ID.x, uShadowCone_ID.z);\n"
                                               "SHADER_CODE",
                                               "_ID", out_num));
                     }
@@ -1517,7 +1551,9 @@ namespace AppKit
                         findAndReplaceAll(&fragmentShader,
                                           "SHADER_CODE",
                                           findAndReplaceAllExt(
-                                              "  float shadow_depth_ID = smart_blocker_sampler_pcss_dst_center(vShadowLight_proj_ID.z, uShadowTextureDepth_ID, vShadowLight_proj_ID.xy, uShadowDimension_ID, uShadowDimension_inv_ID, uShadowCone_ID.x, uShadowCone_ID.z);\n"
+                                              "  float shadow_depth_ID = 1.0;\n"
+                                              "  if (vShadowLight_proj_inside_clipspace_ID > 0.5)\n"
+                                              "    shadow_depth_ID = smart_blocker_sampler_pcss_dst_center(vShadowLight_proj_projected_ID.z, uShadowTextureDepth_ID, vShadowLight_proj_projected_ID.xy, uShadowDimension_ID, uShadowDimension_inv_ID, uShadowCone_ID.x, uShadowCone_ID.z);\n"
                                               "SHADER_CODE",
                                               "_ID", out_num));
                     }
