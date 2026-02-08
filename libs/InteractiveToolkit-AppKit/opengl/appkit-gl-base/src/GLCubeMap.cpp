@@ -470,7 +470,7 @@ namespace AppKit
         {
 
 #if !defined(GLAD_GLES2)
-            ITK_ABORT(!GLAD_GL_SGIS_generate_mipmap, "SGIS_generate_mipmap not supported.");
+            // ITK_ABORT(!GLAD_GL_SGIS_generate_mipmap, "SGIS_generate_mipmap not supported.");
 #endif
 
             active(0);
