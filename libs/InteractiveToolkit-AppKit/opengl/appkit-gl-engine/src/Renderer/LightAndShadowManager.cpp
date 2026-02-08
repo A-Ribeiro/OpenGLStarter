@@ -2,7 +2,7 @@
 
 #include <appkit-gl-engine/Renderer/RenderPipeline.h>
 
-//using namespace aRibeiro;
+// using namespace aRibeiro;
 
 namespace AppKit
 {
@@ -12,7 +12,7 @@ namespace AppKit
         ComponentType ShadowCache::Type = "ShadowCache";
 
         ShadowCache::ShadowCache() : Components::ComponentCamera(ShadowCache::Type),
-                                     frustum( MathCore::CONSTANT<MathCore::mat4f>::Identity() )
+                                     frustum(MathCore::CONSTANT<MathCore::mat4f>::Identity())
         {
         }
 
@@ -67,6 +67,14 @@ namespace AppKit
                 viewIT = MathCore::OP<MathCore::mat4f>::transpose(viewInv);
 
                 viewProjection = projection * view;
+                // this bias matrix is used to convert the depth values to the [0,1] range
+                // in order to be able to store them in a texture and sample it later in the shader
+                const MathCore::mat4f biasMatrix(
+                    0.5f, 0.0f, 0.0f, 0.5f,
+                    0.0f, 0.5f, 0.0f, 0.5f,
+                    0.0f, 0.0f, 0.5f, 0.5f,
+                    0.0f, 0.0f, 0.0f, 1.0f);
+                castFromTextureViewProjection = biasMatrix * viewProjection;
             }
             break;
             default:
@@ -151,7 +159,7 @@ namespace AppKit
         void LightAndShadowManager::computeShadowParametersForMesh(Components::ComponentMeshWrapper *meshWrapper,
                                                                    bool use_shadow,
                                                                    ShaderShadowAlgorithmEnum shaderShadowAlgorithm,
-                                                                    ResourceMap *resourceMap)
+                                                                   ResourceMap *resourceMap)
         {
 
             std::unordered_map<Components::ComponentLight *, ShadowCache *>::iterator it;
@@ -241,7 +249,7 @@ namespace AppKit
                 glClear(GL_DEPTH_BUFFER_BIT);
 
                 // render the depth buffer
-                for(auto &transform: sceneTraverseHelper_aux.transformList)
+                for (auto &transform : sceneTraverseHelper_aux.transformList)
                     renderPipeline->traverse_depth_render_only_mesh(transform, shadowCache, resourceMap);
 
                 state->ColorWrite = ColorWriteAll;

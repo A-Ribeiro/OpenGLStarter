@@ -50,6 +50,10 @@ namespace AppKit
             CollisionCore::OBB<MathCore::vec3f> obb;         // sun light
             //};
 
+            // the shadow matrix from the casting shader, needs to be multiplied by the bias matrix to be used in the shader
+            // to garantee the access range [0,1] in the depth texture
+            MathCore::mat4f castFromTextureViewProjection;
+
             ShadowCache();
             ~ShadowCache();
 
