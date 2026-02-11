@@ -20,6 +20,16 @@ namespace SimplePhysics
         return closestPointToSegment(p, a, b);
     }
 
+    bool Segment2D::intersects(const Segment2D &segment) const
+    {
+        return segmentsIntersect(a, b, segment.a, segment.b);
+    }
+
+    bool Segment2D::intersects(const MathCore::vec2f &a, const MathCore::vec2f &b) const 
+    {
+        return segmentsIntersect(this->a, this->b, a, b);
+    }
+
     MathCore::vec2f Segment2D::closestPointToSegment(const MathCore::vec2f &p, const MathCore::vec2f &a, const MathCore::vec2f &b)
     {
         using namespace MathCore;
