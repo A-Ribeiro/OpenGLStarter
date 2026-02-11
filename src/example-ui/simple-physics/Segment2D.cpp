@@ -20,14 +20,14 @@ namespace SimplePhysics
         return closestPointToSegment(p, a, b);
     }
 
-    MathCore::vec2f Segment2D::closestPointSegmentToSegment(const Segment2D &segment) const
+    MathCore::vec2f Segment2D::closestPointSegmentToSegment(const Segment2D &segment, MathCore::vec2f *self_src_point_output) const
     {
-        return closestPointSegmentToSegment(a, b, segment.a, segment.b);
+        return closestPointSegmentToSegment(a, b, segment.a, segment.b, self_src_point_output);
     }
 
-    MathCore::vec2f Segment2D::closestPointSegmentToSegment(const MathCore::vec2f &a, const MathCore::vec2f &b) const
+    MathCore::vec2f Segment2D::closestPointSegmentToSegment(const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *self_src_point_output) const
     {
-        return closestPointSegmentToSegment(this->a, this->b, a, b);
+        return closestPointSegmentToSegment(this->a, this->b, a, b, self_src_point_output);
     }
 
     bool Segment2D::intersects(const Segment2D &segment) const
@@ -98,13 +98,17 @@ namespace SimplePhysics
         return false;
     }
 
-    MathCore::vec2f Segment2D::closestPointSegmentToSegment(const MathCore::vec2f &a1, const MathCore::vec2f &b1, const MathCore::vec2f &a2, const MathCore::vec2f &b2)
+    MathCore::vec2f Segment2D::closestPointSegmentToSegment(const MathCore::vec2f &a1, const MathCore::vec2f &b1, const MathCore::vec2f &a2, const MathCore::vec2f &b2, MathCore::vec2f *a1b1_src_point_output)
     {
         using namespace MathCore;
 
         vec2f aux_intersect_point;
         if (segmentsIntersectionPoint(a1, b1, a2, b2, &aux_intersect_point))
+        {
+            if (a1b1_src_point_output)
+                *a1b1_src_point_output = aux_intersect_point;
             return aux_intersect_point;
+        }
 
         // Find closest point on segment2 to segment1
         // We need to check 4 candidates:
@@ -120,31 +124,43 @@ namespace SimplePhysics
         vec2f candidate3 = a2;
         vec2f candidate4 = b2;
 
+        vec2f a1b1_src_point1 = closestPointToSegment(candidate1, a1, b1);
+        vec2f a1b1_src_point2 = closestPointToSegment(candidate2, a1, b1);
+        vec2f a1b1_src_point3 = closestPointToSegment(candidate3, a1, b1);
+        vec2f a1b1_src_point4 = closestPointToSegment(candidate4, a1, b1);
+
         // Calculate squared distances
-        float dist1 = OP<vec2f>::sqrDistance(candidate1, closestPointToSegment(candidate1, a1, b1));
-        float dist2 = OP<vec2f>::sqrDistance(candidate2, closestPointToSegment(candidate2, a1, b1));
-        float dist3 = OP<vec2f>::sqrDistance(candidate3, closestPointToSegment(candidate3, a1, b1));
-        float dist4 = OP<vec2f>::sqrDistance(candidate4, closestPointToSegment(candidate4, a1, b1));
+        float dist1 = OP<vec2f>::sqrDistance(candidate1, a1b1_src_point1);
+        float dist2 = OP<vec2f>::sqrDistance(candidate2, a1b1_src_point2);
+        float dist3 = OP<vec2f>::sqrDistance(candidate3, a1b1_src_point3);
+        float dist4 = OP<vec2f>::sqrDistance(candidate4, a1b1_src_point4);
 
         // Find minimum distance and return corresponding point on segment2
         float minDist = dist1;
         vec2f result = candidate1;
+        vec2f src_point = a1b1_src_point1;
 
         if (dist2 < minDist)
         {
             minDist = dist2;
             result = candidate2;
+            src_point = a1b1_src_point2;
         }
         if (dist3 < minDist)
         {
             minDist = dist3;
             result = candidate3;
+            src_point = a1b1_src_point3;
         }
         if (dist4 < minDist)
         {
+            minDist = dist4;
             result = candidate4;
+            src_point = a1b1_src_point4;
         }
 
+        if (a1b1_src_point_output)
+            *a1b1_src_point_output = src_point;
         return result;
     }
 }
