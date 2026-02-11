@@ -16,8 +16,8 @@ namespace SimplePhysics
 
         MathCore::vec2f closestPoint(const MathCore::vec2f &p) const;
 
-        MathCore::vec2f closestPointSegmentToSegment(const Segment2D &segment) const;
-        MathCore::vec2f closestPointSegmentToSegment(const MathCore::vec2f &a, const MathCore::vec2f &b) const;
+        MathCore::vec2f closestPointSegmentToSegment(const Segment2D &segment, MathCore::vec2f *self_src_point_output = nullptr) const;
+        MathCore::vec2f closestPointSegmentToSegment(const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *self_src_point_output = nullptr) const;
 
         bool intersects(const Segment2D &segment) const;
         bool intersects(const MathCore::vec2f &a, const MathCore::vec2f &b) const;
@@ -26,7 +26,7 @@ namespace SimplePhysics
         bool intersectionPoint(const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *output) const;
 
         static MathCore::vec2f closestPointToSegment(const MathCore::vec2f &p, const MathCore::vec2f &a, const MathCore::vec2f &b);
-        static MathCore::vec2f closestPointSegmentToSegment(const MathCore::vec2f &a1, const MathCore::vec2f &b1, const MathCore::vec2f &a2, const MathCore::vec2f &b2);
+        static MathCore::vec2f closestPointSegmentToSegment(const MathCore::vec2f &a1, const MathCore::vec2f &b1, const MathCore::vec2f &a2, const MathCore::vec2f &b2, MathCore::vec2f *a1b1_src_point_output = nullptr);
         static bool segmentsIntersect(const MathCore::vec2f &a1, const MathCore::vec2f &b1, const MathCore::vec2f &a2, const MathCore::vec2f &b2);
         static bool segmentsIntersectionPoint(const MathCore::vec2f &a1, const MathCore::vec2f &b1, const MathCore::vec2f &a2, const MathCore::vec2f &b2, MathCore::vec2f *output);
 
