@@ -152,10 +152,10 @@ namespace SimplePhysics
         vec2f edge_top_left = vec2f(min.x, max.y);
 
         // Get closest point on each box edge to the segment
-        vec2f candidate1 = Segment2D::closestPointSegmentToSegment(a, b, edge_bottom_left, edge_bottom_right, nullptr);
-        vec2f candidate2 = Segment2D::closestPointSegmentToSegment(a, b, edge_bottom_right, edge_top_right, nullptr);
-        vec2f candidate3 = Segment2D::closestPointSegmentToSegment(a, b, edge_top_right, edge_top_left, nullptr);
-        vec2f candidate4 = Segment2D::closestPointSegmentToSegment(a, b, edge_top_left, edge_bottom_left, nullptr);
+        vec2f candidate1 = Segment2D::closestPointSegmentToSegment(edge_bottom_left, edge_bottom_right, a, b, nullptr);
+        vec2f candidate2 = Segment2D::closestPointSegmentToSegment(edge_bottom_right, edge_top_right, a, b, nullptr);
+        vec2f candidate3 = Segment2D::closestPointSegmentToSegment(edge_top_right, edge_top_left, a, b, nullptr);
+        vec2f candidate4 = Segment2D::closestPointSegmentToSegment(edge_top_left, edge_bottom_left, a, b, nullptr);
 
         // Find which box edge point is closest to the segment
         vec2f seg_point1 = Segment2D::closestPointToSegment(candidate1, a, b);
