@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Segment2D.h"
+#include "Box2D.h"
 
 namespace SimplePhysics
 {
@@ -20,14 +21,34 @@ namespace SimplePhysics
         return closestPointToSegment(p, a, b);
     }
 
-    MathCore::vec2f Segment2D::closestPointSegmentToSegment(const Segment2D &segment, MathCore::vec2f *self_src_point_output) const
+    int Segment2D::closestPointInSegmentToBox(const Box2D &box, MathCore::vec2f *output_array) const
     {
-        return closestPointSegmentToSegment(a, b, segment.a, segment.b, self_src_point_output);
+        return closestPointInSegmentToBox(a, b, box.min, box.max, output_array);
     }
 
-    MathCore::vec2f Segment2D::closestPointSegmentToSegment(const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *self_src_point_output) const
+    int Segment2D::closestPointInSegmentToBox(const MathCore::vec2f &min, const MathCore::vec2f &max, MathCore::vec2f *output_array) const
     {
-        return closestPointSegmentToSegment(this->a, this->b, a, b, self_src_point_output);
+        return closestPointInSegmentToBox(a, b, min, max, output_array);
+    }
+
+    MathCore::vec2f Segment2D::closestPointInSegmentToSegment(const Segment2D &segment, MathCore::vec2f *segment_point_output) const
+    {
+        return closestPointSegmentToSegment(segment.a, segment.b, a, b, segment_point_output);
+    }
+
+    MathCore::vec2f Segment2D::closestPointInSegmentToSegment(const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *segment_point_output) const
+    {
+        return closestPointSegmentToSegment(a, b, this->a, this->b, segment_point_output);
+    }
+
+    bool Segment2D::intersectsBox(const Box2D &box) const
+    {
+        return segmentIntersectBox(a, b, box.min, box.max);
+    }
+
+    bool Segment2D::intersectsBox(const MathCore::vec2f &min, const MathCore::vec2f &max) const
+    {
+        return segmentIntersectBox(a, b, min, max);
     }
 
     bool Segment2D::intersects(const Segment2D &segment) const
@@ -163,4 +184,182 @@ namespace SimplePhysics
             *a1b1_src_point_output = src_point;
         return result;
     }
+
+    bool Segment2D::segmentIntersectBox(const MathCore::vec2f &a, const MathCore::vec2f &b, const MathCore::vec2f &min, const MathCore::vec2f &max)
+    {
+        using namespace MathCore;
+
+        const float EPSILON = (float)1e-4;
+
+        vec2f c = (min + max) * (float)0.5; // Box center-point
+        vec2f e = max - c;                  // Box halflength extents
+        vec2f m = (a + b) * (float)0.5;     // Segment midpoint
+        vec2f d = b - m;                    // Segment halflength vector
+        m = m - c;                          // Translate box and segment to origin
+        // Try world coordinate axes as separating axes
+        float adx = OP<float>::abs(d.x);
+        if (OP<float>::abs(m.x) > e.x + adx)
+            return false;
+        float ady = OP<float>::abs(d.y);
+        if (OP<float>::abs(m.y) > e.y + ady)
+            return false;
+        // Add in an epsilon term to counteract arithmetic errors when segment is
+        // (near) parallel to a coordinate axis (see text for detail)
+        adx += EPSILON;
+        ady += EPSILON;
+        // Try cross products of segment direction vector with coordinate axes
+        // cross on xy plane
+        if (OP<float>::abs(OP<vec2f>::cross_z_mag(m, d)) > e.x * ady + e.y * adx)
+            return false;
+        // No separating axis found; segment must be overlapping AABB
+        return true;
+    }
+
+    int Segment2D::segmentIntersectBox(const MathCore::vec2f &a, const MathCore::vec2f &b, const MathCore::vec2f &min, const MathCore::vec2f &max, MathCore::vec2f *output_array)
+    {
+        if (!segmentIntersectBox(a, b, min, max))
+            return 0;
+
+        using namespace MathCore;
+
+        const float EPSILON = (float)1e-4;
+
+        vec2f dir = b - a;
+        float length_dir = OP<vec2f>::length(dir);
+        dir *= 1.0f / length_dir;
+
+        const float tmin_start = -EPSILON;
+        float tmax_start = length_dir + EPSILON;
+
+        float tmin = tmin_start; // set to -FLT_MAX to get first hit on line
+        float tmax = tmax_start; // FLT_MAX; // set to max distance ray can travel (for segment)
+        // For all three slabs
+        for (int i = 0; i < 2; i++)
+        {
+            if (OP<float>::abs(dir[i]) < EPSILON)
+            {
+                // Ray is parallel to slab. No hit if origin not within slab
+                if (a[i] < min[i] || a[i] > max[i])
+                    return 0;
+            }
+            else
+            {
+                // Compute intersection t value of ray with near and far plane of slab
+                float ood = (float)1 / dir[i];
+                float t1 = (min[i] - a[i]) * ood;
+                float t2 = (max[i] - a[i]) * ood;
+                // Make t1 be intersection with near plane, t2 with far plane
+                if (t1 > t2)
+                {
+                    // Swap(t1, t2);
+                    float taux = t1;
+                    t1 = t2;
+                    t2 = taux;
+                }
+                // Compute the intersection of slab intersection intervals
+                if (t1 > tmin)
+                    tmin = t1;
+                if (t2 < tmax)
+                    tmax = t2;
+                // Exit with no collision as soon as slab intersection becomes empty
+                if (tmin > tmax)
+                    return 0;
+            }
+        }
+        // Ray intersects all 3 slabs. Return point (q) and intersection t value (tmin)
+
+        int collision_count = 0;
+        if (tmin >= 0.0f)
+        {
+            output_array[collision_count] = a + dir * tmin;
+            collision_count++;
+        }
+
+        if (tmax <= length_dir)
+        {
+            output_array[collision_count] = a + dir * tmax;
+            collision_count++;
+        }
+
+        //*outQ = p + d * tmin;
+
+        return collision_count;
+    }
+
+
+    int Segment2D::closestPointInSegmentToBox(const MathCore::vec2f &a, const MathCore::vec2f &b, const MathCore::vec2f &min, const MathCore::vec2f &max, MathCore::vec2f *output_array)
+    {
+        using namespace MathCore;
+
+        int rc = segmentIntersectBox(a, b, min, max, output_array);
+        if (rc == 2)
+            return rc;
+        else if (rc == 1)
+        {
+            if (Box2D::isPointInside(a, min, max))
+            {
+                output_array[1] = a;
+                return 2;
+            }
+            else if (Box2D::isPointInside(b, min, max))
+            {
+                output_array[1] = b;
+                return 2;
+            }
+        }
+        else if (rc == 0)
+        {
+            if (Box2D::isPointInside(a, min, max))
+            {
+                output_array[rc] = a;
+                rc++;
+            }
+            if (Box2D::isPointInside(b, min, max))
+            {
+                output_array[rc] = b;
+                rc++;
+            }
+            if (rc > 0)
+                return rc;
+        }
+
+        vec2f candidate1 = closestPointToSegment(min, a, b);
+        vec2f candidate2 = closestPointToSegment(vec2f(max.x, min.y), a, b);
+        vec2f candidate3 = closestPointToSegment(max, a, b);
+        vec2f candidate4 = closestPointToSegment(vec2f(min.x, max.y), a, b);
+
+        vec2f box_point1 = Box2D::closestPointToBox(candidate1, min, max);
+        vec2f box_point2 = Box2D::closestPointToBox(candidate2, min, max);
+        vec2f box_point3 = Box2D::closestPointToBox(candidate3, min, max);
+        vec2f box_point4 = Box2D::closestPointToBox(candidate4, min, max);
+
+        float dist1 = OP<vec2f>::sqrDistance(candidate1, box_point1);
+        float dist2 = OP<vec2f>::sqrDistance(candidate2, box_point2);
+        float dist3 = OP<vec2f>::sqrDistance(candidate3, box_point3);
+        float dist4 = OP<vec2f>::sqrDistance(candidate4, box_point4);
+
+        float minDist = dist1;
+        vec2f result = candidate1;
+
+        if (dist2 < minDist)
+        {
+            minDist = dist2;
+            result = candidate2;
+        }
+        if (dist3 < minDist)
+        {
+            minDist = dist3;
+            result = candidate3;
+        }
+        if (dist4 < minDist)
+        {
+            minDist = dist4;
+            result = candidate4;
+        }
+
+        output_array[0] = result;
+
+        return 1;
+    }
+
 }
