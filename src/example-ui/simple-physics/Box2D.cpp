@@ -42,6 +42,25 @@ namespace SimplePhysics
         max = MathCore::vec2f(-MathCore::FloatTypeInfo<float>::max);
     }
 
+    bool Box2D::isEmpty() const 
+    {
+        return (min.x > max.x || min.y > max.y);
+    }
+
+    bool Box2D::isPointInside(const MathCore::vec2f &point) const
+    {
+        return (point.x < max.x && point.x > min.x &&
+                point.y < max.y && point.y > min.y);
+    }
+
+    bool Box2D::overlaps(const Box2D &other) const {
+        if (max.x < other.min.x || min.x > other.max.x)
+            return false;
+        if (max.y < other.min.y || min.y > other.max.y)
+            return false;
+        return true;
+    }
+
     MathCore::vec2f Box2D::getCenter() const
     {
         return (min + max) * 0.5f;

@@ -12,7 +12,8 @@ namespace SimplePhysics
         None,
         Segment,
         Box,
-        Circle
+        Circle,
+        ClosedPolygon
     };
 
     class Structure2D
@@ -43,6 +44,11 @@ namespace SimplePhysics
             const char *tag,
             float friction,
             const std::vector<Segment2D> &segments);
+        
+        static Structure2D FromClosedPolygon(
+            const char *tag,
+            float friction,
+            const std::vector<MathCore::vec2f> &vertices);
 
         static Structure2D FromBoxCenterSize(
             const char *tag,
@@ -72,6 +78,9 @@ namespace SimplePhysics
 
         MathCore::vec2f getCenter() const;
         MathCore::vec2f getSize() const;
+
+        // valid for: Box, Circle, and ClosedPolygon
+        bool checkPointInside(const MathCore::vec2f &point) const;
     };
 
 }
