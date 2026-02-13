@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Segment2D.h"
 #include "Box2D.h"
 
