@@ -1,7 +1,6 @@
 #include <appkit-gl-base/font/GLShaderFont2.h>
 #include <appkit-gl-base/platform/PlatformGL.h>
 
-// using namespace aRibeiro;
 
 namespace AppKit
 {

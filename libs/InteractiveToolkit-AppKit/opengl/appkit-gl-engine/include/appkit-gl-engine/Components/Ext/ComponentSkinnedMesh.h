@@ -12,8 +12,6 @@
 #include <appkit-gl-engine/Components/Core/ComponentMesh.h>
 #include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 
-// #include <aRibeiroData/Animation.h>
-
 #include <appkit-gl-engine/util/Animation.h>
 // #include "../util/Animation.h"
 

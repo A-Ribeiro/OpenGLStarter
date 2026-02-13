@@ -1,8 +1,6 @@
 #include <appkit-gl-engine/util/Basof2ToResource.h>
 
 // #include <appkit-gl-engine/mini-gl-engine.h>
-// #include <aRibeiroData/aRibeiroData.h>
-// #include <aRibeiroCore/aRibeiroCore.h>
 
 #include <appkit-gl-engine/util/ResourceHelper.h>
 #include <appkit-gl-engine/ResourceMap.h>

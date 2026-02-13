@@ -6,14 +6,9 @@
 #include <vector>
 // #include <convertutf/ConvertUTF.h>
 
-//#include <aRibeiroCore/all_math.h>
-// #include <aribeiro/GLStripText.h>
-//#include <appkit-gl-base/Font.h>
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/shaders/GLShaderFont.h>
 #include <appkit-gl-base/GLVertexBufferObject.h>
-
-//#include <aRibeiroData/aRibeiroData.h>
 
 #include <InteractiveToolkit-Extension/atlas/AtlasRect.h>
 #include <InteractiveToolkit-Extension/font/FontReaderSize.h>

@@ -20,9 +20,7 @@ namespace AppKit
         /// Example without index buffer:
         ///
         /// \code
-        /// #include <aRibeiroCore/aRibeiroCore.h>
         /// #include <appkit-gl-base/opengl-wrapper.h>
-        /// using namespace aRibeiro;
         /// using namespace AppKit::OpenGL;
         ///
         /// struct VertexAttrib {
@@ -48,9 +46,7 @@ namespace AppKit
         /// Example with index buffer:
         ///
         /// \code
-        /// #include <aRibeiroCore/aRibeiroCore.h>
         /// #include <appkit-gl-base/opengl-wrapper.h>
-        /// using namespace aRibeiro;
         /// using namespace AppKit::OpenGL;
         ///
         /// struct VertexAttrib {
@@ -102,10 +98,8 @@ namespace AppKit
             /// Example:
             ///
             /// \code
-            /// #include <aRibeiroCore/aRibeiroCore.h>
-            /// #include <appkit-gl-base/opengl-wrapper.h>
-            /// using namespace aRibeiro;
-            /// using namespace AppKit::OpenGL;
+                /// #include <appkit-gl-base/opengl-wrapper.h>
+                /// using namespace AppKit::OpenGL;
             ///
             /// struct VertexAttrib {
             ///     vec3 position;
@@ -130,10 +124,8 @@ namespace AppKit
             /// Example:
             ///
             /// \code
-            /// #include <aRibeiroCore/aRibeiroCore.h>
-            /// #include <appkit-gl-base/opengl-wrapper.h>
-            /// using namespace aRibeiro;
-            /// using namespace AppKit::OpenGL;
+                /// #include <appkit-gl-base/opengl-wrapper.h>
+                /// using namespace AppKit::OpenGL;
             ///
             /// std::vector<unsigned short> indices;
             ///

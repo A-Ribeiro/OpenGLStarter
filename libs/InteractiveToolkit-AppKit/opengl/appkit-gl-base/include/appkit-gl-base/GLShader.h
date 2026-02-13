@@ -2,7 +2,6 @@
 
 #include <appkit-gl-base/platform/PlatformGL.h>
 // #include <glew/glew.h> // extensions here
-// #include <aRibeiroCore/all_math.h>
 
 namespace AppKit
 {
@@ -18,9 +17,7 @@ namespace AppKit
         /// Example:
         ///
         /// \code
-        /// #include <aRibeiroCore/aRibeiroCore.h>
         /// #include <appkit-gl-base/opengl-wrapper.h>
-        /// using namespace aRibeiro;
         /// using namespace AppKit::OpenGL;
         ///
         /// class ShaderTwoTextures : public GLShader {

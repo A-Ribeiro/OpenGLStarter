@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 
-// using namespace aRibeiro;
 using namespace AppKit::Window::Devices;
 
 namespace AppKit

@@ -4,7 +4,6 @@
 #include <appkit-gl-engine/util/ResourceHelper.h>
 #include <appkit-gl-engine/Renderer/Fade.h>
 
-//using namespace aRibeiro;
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
 using namespace AppKit::OpenGL;

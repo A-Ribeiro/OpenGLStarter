@@ -6,7 +6,6 @@
 #include <appkit-gl-engine/Renderer/RenderPipeline.h>
 #include <appkit-gl-engine/util/ResourceHelper.h>
 
-// #include <aRibeiroCore/aRibeiroCore.h>
 
 #include <InteractiveToolkit/Platform/Time.h>
 #include <appkit-gl-engine/ResourceMap.h>

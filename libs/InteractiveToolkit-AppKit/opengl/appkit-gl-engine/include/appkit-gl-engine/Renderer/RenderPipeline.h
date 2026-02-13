@@ -7,8 +7,6 @@
 
 #include <appkit-gl-engine/Transform.h>
 
-//#include <aRibeiroData/aRibeiroData.h>
-
 #include <appkit-gl-engine/GL/GLCubeMapSkyBox.h>
 #include <appkit-gl-engine/Components/Core/ComponentCamera.h>
 

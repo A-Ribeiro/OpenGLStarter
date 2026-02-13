@@ -1,7 +1,6 @@
 #include <appkit-gl-base/font/GLFont2.h>
 
 #include <InteractiveToolkit-Extension/font/FontReader.h>
-// using namespace aRibeiro;
 
 namespace AppKit
 {

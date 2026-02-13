@@ -1,6 +1,5 @@
 #pragma once
 
-// #include <aRibeiroCore/aRibeiroCore.h>
 // #include <appkit-gl-engine/SharedPointer.h>
 // #include "StartEventManager.h"
 #include <vector>

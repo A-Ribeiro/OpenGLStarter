@@ -16,7 +16,6 @@
 
 #include <assert.h>
 
-// using namespace aRibeiro;
 
 namespace AppKit
 {

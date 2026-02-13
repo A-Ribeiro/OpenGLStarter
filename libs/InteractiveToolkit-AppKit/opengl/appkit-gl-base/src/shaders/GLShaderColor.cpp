@@ -1,7 +1,6 @@
 #include <appkit-gl-base/shaders/GLShaderColor.h>
 #include <appkit-gl-base/platform/PlatformGL.h>
 
-// using namespace aRibeiro;
 
 namespace AppKit
 {

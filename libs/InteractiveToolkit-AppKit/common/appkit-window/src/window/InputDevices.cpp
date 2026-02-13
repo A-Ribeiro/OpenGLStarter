@@ -260,7 +260,7 @@ namespace AppKit
 
 #elif defined(APPKIT_WINDOW_RPI)
 
-#include <aRibeiroPlatform/aRibeiroPlatform.h>
+#include <InteractiveToolkit/Platform/Platform.h>
 
 #include <sstream>
 #include <string>

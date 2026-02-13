@@ -2,7 +2,6 @@
 
 #include <appkit-gl-engine/Renderer/RenderPipeline.h>
 
-// using namespace aRibeiro;
 
 namespace AppKit
 {

@@ -199,16 +199,16 @@ namespace Native
 
             printf("[OpenFolderDialog]%s %s\n", "osascript", parameter.c_str());
 
-            aRibeiro::UnixPipe child_stdout;
+            Platform::UnixPipe child_stdout;
             child_stdout.setReadBlocking(false);
 
-            aRibeiro::PlatformProcess process("osascript",
+            Platform::Process process("osascript",
                                               ITKCommon::StringUtil::parseArgv(parameter),
                                               INT32_MAX,
                                               nullptr, &child_stdout, nullptr);
 
             std::vector<uint8_t> raw_output;
-            aRibeiro::ObjectBuffer buffer;
+            Platform::ObjectBuffer buffer;
             while (!child_stdout.isReadSignaled())
             {
                 if (child_stdout.read(&buffer))
@@ -219,7 +219,7 @@ namespace Native
                 // process window events - avoid window not responding error...
                 AppKit::GLEngine::Engine::Instance()->window->forwardWindowEventsToInputManager(true);
 
-                aRibeiro::PlatformSleep::sleepMillis(100);
+                Platform::Sleep::millis(100);
             }
             //printf("\n");
             raw_output.push_back(0);

@@ -7,7 +7,6 @@
 
 // #include "ComponentColorMesh.h"
 
-// using namespace aRibeiro;
 
 namespace AppKit
 {
