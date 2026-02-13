@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Structure2D.h"
 #include <InteractiveToolkit/AlgorithmCore/Polygon/Polygon2D.h>
 
