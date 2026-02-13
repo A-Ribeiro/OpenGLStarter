@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <aRibeiroCore/aRibeiroCore.h>
 #include <InteractiveToolkit/Platform/Time.h>
 
 #include <appkit-gl-engine/Component.h>

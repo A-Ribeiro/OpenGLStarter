@@ -1,7 +1,6 @@
 #include <appkit-gl-base/GLVertexBufferObject.h>
 
 #include <appkit-gl-base/platform/PlatformGL.h>
-// #include <aRibeiroCore/common.h>
 
 #if defined(_WIN32)
 #include <inttypes.h>

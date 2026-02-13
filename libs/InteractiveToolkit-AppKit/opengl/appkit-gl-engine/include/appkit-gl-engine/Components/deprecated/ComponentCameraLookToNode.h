@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <aRibeiroCore/aRibeiroCore.h>
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
 

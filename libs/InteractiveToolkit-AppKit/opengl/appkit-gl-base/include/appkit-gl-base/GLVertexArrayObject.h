@@ -18,9 +18,7 @@ namespace AppKit
         /// Example without index buffer:
         ///
         /// \code
-        /// #include <aRibeiroCore/aRibeiroCore.h>
         /// #include <appkit-gl-base/opengl-wrapper.h>
-        /// using namespace aRibeiro;
         /// using namespace AppKit::OpenGL;
         ///
         /// struct VertexAttrib {
@@ -52,9 +50,7 @@ namespace AppKit
         /// Example with index buffer:
         ///
         /// \code
-        /// #include <aRibeiroCore/aRibeiroCore.h>
         /// #include <appkit-gl-base/opengl-wrapper.h>
-        /// using namespace aRibeiro;
         /// using namespace AppKit::OpenGL;
         ///
         /// struct VertexAttrib {

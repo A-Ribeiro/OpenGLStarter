@@ -3,7 +3,6 @@
 #include <appkit-gl-base/GLDynamicFBO.h>
 
 #include <appkit-gl-engine/GL/GLRenderState.h>
-// #include <aRibeiroCore/aRibeiroCore.h>
 
 namespace AppKit
 {

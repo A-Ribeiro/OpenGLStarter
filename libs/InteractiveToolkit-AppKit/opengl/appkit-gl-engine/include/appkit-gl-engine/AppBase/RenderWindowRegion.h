@@ -1,10 +1,5 @@
 #pragma once
 
-// #include <aRibeiroCore/aRibeiroCore.h>
-// #include <aRibeiroPlatform/aRibeiroPlatform.h>
-// #include <appkit-gl-base/opengl-wrapper.h>
-// #include <window-gl-wrapper/window-gl-wrapper.h>
-
 #include <AppKit/window/Window.h>
 
 #include <InteractiveToolkit/Platform/Time.h>

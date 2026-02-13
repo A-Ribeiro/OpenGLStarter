@@ -2,7 +2,6 @@
 
 #include <appkit-gl-base/platform/PlatformGL.h>
 
-//#include <aRibeiroCore/aRibeiroCore.h>
 
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/GLCubeMap.h>

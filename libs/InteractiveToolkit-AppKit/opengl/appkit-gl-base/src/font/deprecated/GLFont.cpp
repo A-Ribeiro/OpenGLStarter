@@ -11,13 +11,11 @@
 #include <appkit-gl-base/font/deprecated/GLFont.h>
 #include <appkit-gl-base/font/deprecated/GLStripText.h>
 #include <appkit-gl-base/platform/PlatformGL.h>
-// #include <aRibeiroCore/SetnullptrAndDelete.h>
 
 #include <stdlib.h>
 #include <string.h>
 #include <string>
 
-// using namespace aRibeiro;
 
 namespace AppKit
 {
@@ -233,8 +231,8 @@ namespace AppKit
                             max = position;
                         }
                         else {
-                            min = aRibeiro::minimum(position, min);
-                            max = MathCore::OP<float>::maximum(position, max);
+                            min = MathCore::OP<MathCore::vec2f>::minimum(position, min);
+                            max = MathCore::OP<MathCore::vec2f>::maximum(position, max);
                         }
                         */
                     }
