@@ -33,6 +33,7 @@ namespace HeightAndTime
         return (velocity * velocity) / (2.0f * MathCore::OP<float>::abs(gravity));
     }
 
+    // only works couppled with CalcHeightFromVelocity, as it assumes the velocity -> height relationship, and the gravity is constant
     static float CalcTimeToReachHeight(float height, float gravity)
     {
         // t = sqrt(2 * h / g)
