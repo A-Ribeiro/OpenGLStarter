@@ -56,6 +56,11 @@ namespace SimplePhysics
         return overlaps(min, max, other.min, other.max);
     }
 
+    bool Box2D::overlaps(const MathCore::vec2f &min2, const MathCore::vec2f &max2) const 
+    {
+        return overlaps(min, max, min2, max2);
+    }
+
     MathCore::vec2f Box2D::closestPoint(const MathCore::vec2f &p) const
     {
         return closestPointToBox(p, min, max);

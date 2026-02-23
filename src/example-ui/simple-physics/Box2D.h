@@ -20,7 +20,7 @@ namespace SimplePhysics
         /// \param a First corner.
         /// \param b Second corner.
         Box2D(const MathCore::vec2f &a, const MathCore::vec2f &b);
-        
+
         /// \brief Expands the box to include a line segment.
         ///
         /// \param a First endpoint of the segment.
@@ -50,6 +50,13 @@ namespace SimplePhysics
         /// \param other The other box.
         /// \return True if the boxes overlap.
         bool overlaps(const Box2D &other) const;
+
+        /// \brief Checks if this box overlaps with another box.
+        ///
+        /// \param min2 The other box minimum corner.
+        /// \param max2 The other box maximum corner.
+        /// \return True if the boxes overlap.
+        bool overlaps(const MathCore::vec2f &min2, const MathCore::vec2f &max2) const;
 
         /// \brief Returns the closest point in the box to point p.
         ///

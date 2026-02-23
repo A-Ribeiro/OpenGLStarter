@@ -13,6 +13,8 @@ namespace SimplePhysics
     public:
         std::vector<Structure2D> static_structures;
         std::vector<Structure2D> dynamic_structures;
+
+        
     };
 
 }

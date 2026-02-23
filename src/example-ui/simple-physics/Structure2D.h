@@ -81,6 +81,9 @@ namespace SimplePhysics
 
         // valid for: Box, Circle, and ClosedPolygon
         bool checkPointInside(const MathCore::vec2f &point) const;
+        bool checkBoxOverlap(const Box2D &other) const;
+        bool checkBoxOverlap(const MathCore::vec2f &min, const MathCore::vec2f &max) const;
+
     };
 
 }
