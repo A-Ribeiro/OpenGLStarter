@@ -261,4 +261,37 @@ namespace SimplePhysics
         return false;
     }
 
+    bool Structure2D::checkBoxOverlap(const Box2D &other) const 
+    {
+        return checkBoxOverlap(other.min, other.max);
+    }
+
+    bool Structure2D::checkBoxOverlap(const MathCore::vec2f &min, const MathCore::vec2f &max) const
+    {
+        if (!box.overlaps(min, max))
+            return false;
+
+        if (type == StructureType::Box)
+        {
+            return true;
+        }
+        else if (type == StructureType::Circle)
+        {
+            // check if the closest point in the box to the circle center is within the circle radius
+            MathCore::vec2f circle_center = box.getCenter();
+            MathCore::vec2f closest_point = Box2D::closestPointToBox(circle_center, min, max);
+            return MathCore::OP<MathCore::vec2f>::sqrDistance(closest_point, circle_center) <= (circle_radius * circle_radius);
+        }
+        else if (type == StructureType::ClosedPolygon || type == StructureType::Segment)
+        {
+            // check if any of the polygon edges intersect with the box
+            for (const Segment2D &segment : segments)
+            {
+                if (segment.intersectsBox(min, max))
+                    return true;
+            }
+        }
+        return false;
+    }
+
 }
