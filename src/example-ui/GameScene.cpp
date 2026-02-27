@@ -4,10 +4,13 @@
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 #include "components/ComponentGameArea.h"
 #include "components/ComponentPlayer.h"
+#include "simple-physics/PhysicsContainer.h"
 
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void GameScene::loadResources()
 {
+    physicsContainer = STL_Tools::make_unique<SimplePhysics::PhysicsContainer>();
+
 }
 // to load the scene graph
 void GameScene::loadGraph()
@@ -76,6 +79,7 @@ void GameScene::unloadAll()
 {
     root = nullptr;
     camera = nullptr;
+    physicsContainer.reset();
 }
 
 GameScene *GameScene::currentInstance = nullptr;

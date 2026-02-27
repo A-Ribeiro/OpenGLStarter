@@ -21,6 +21,13 @@ namespace SimplePhysics
         void computeBox();
 
     public:
+        struct QuadtreeIntegration
+        {
+            using type = Structure2D;
+            ITK_INLINE static bool CheckBoxOverlap(const type &item, const MathCore::vec2f &min, const MathCore::vec2f &max) { return item.checkBoxOverlap(min, max); }
+            ITK_INLINE static const MathCore::vec2f &GetBoxMin(const type &item) { return item.box.min; }
+            ITK_INLINE static const MathCore::vec2f &GetBoxMax(const type &item) { return item.box.max; }
+        };
         float friction;
         char tag[32];
 
@@ -44,7 +51,7 @@ namespace SimplePhysics
             const char *tag,
             float friction,
             const std::vector<Segment2D> &segments);
-        
+
         static Structure2D FromClosedPolygon(
             const char *tag,
             float friction,
@@ -68,7 +75,7 @@ namespace SimplePhysics
             const MathCore::vec2f &center,
             float radius,
             int segment_count);
-        
+
         static Structure2D FromCircleTol(
             const char *tag,
             float friction,
@@ -83,7 +90,6 @@ namespace SimplePhysics
         bool checkPointInside(const MathCore::vec2f &point) const;
         bool checkBoxOverlap(const Box2D &other) const;
         bool checkBoxOverlap(const MathCore::vec2f &min, const MathCore::vec2f &max) const;
-
     };
 
 }
