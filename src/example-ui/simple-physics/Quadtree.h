@@ -250,7 +250,8 @@ namespace SimplePhysics
             tmp_array.resize(last_query.size());
             AlgorithmCore::Sorting::RadixCountingSort<uint32_t>::sort(last_query.data(), (uint32_t)last_query.size(), tmp_array.data());
             // std::sort(last_query.begin(), last_query.end());
-            last_query.erase(std::unique(last_query.begin(), last_query.end()), last_query.end());
+            // std::unique expects the input to be sorted, and moves the duplicates to the end of the vector, returning an iterator to the new end of the vector
+            last_query.resize(std::unique(last_query.begin(), last_query.end()) - last_query.begin());
 
             return last_query;
         }
