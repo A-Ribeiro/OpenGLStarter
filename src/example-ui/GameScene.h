@@ -9,6 +9,11 @@
 
 class App;
 
+namespace SimplePhysics
+{
+    class PhysicsContainer;
+}
+
 class GameScene : public AppKit::GLEngine::SceneBase
 {
 protected:
@@ -42,6 +47,8 @@ public:
     // std::vector<PlayerInputState> players;
 
     MathCore::vec2f screen_custom_size;
+
+    std::unique_ptr<SimplePhysics::PhysicsContainer> physicsContainer;
 
 
     ~GameScene();

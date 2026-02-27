@@ -6,15 +6,25 @@
 #include "Box2D.h"
 #include "Structure2D.h"
 
+#include "Quadtree.h"
+
 namespace SimplePhysics
 {
     class PhysicsContainer
     {
     public:
         std::vector<Structure2D> static_structures;
-        std::vector<Structure2D> dynamic_structures;
+        std::unique_ptr<Quadtree<Structure2D::QuadtreeIntegration>> static_quadtree;
 
-        
+        std::vector<Structure2D> dynamic_structures;
+        std::unique_ptr<Quadtree<Structure2D::QuadtreeIntegration>> dynamic_quadtree;
+
+        void buildStaticQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16);
+        void buildDynamicQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16);
+
+        void clearStatic();
+        void clearDynamic();
+
     };
 
 }
