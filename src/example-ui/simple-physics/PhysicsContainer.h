@@ -19,8 +19,8 @@ namespace SimplePhysics
         std::vector<Structure2D> dynamic_structures;
         std::unique_ptr<Quadtree<Structure2D::QuadtreeIntegration>> dynamic_quadtree;
 
-        void buildStaticQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16);
-        void buildDynamicQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16);
+        void buildStaticQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16, const Box2D &initial_box = Box2D());
+        void buildDynamicQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16, const Box2D &initial_box = Box2D());
 
         void clearStatic();
         void clearDynamic();
