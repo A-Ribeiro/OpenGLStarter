@@ -196,7 +196,8 @@ namespace SimplePhysics
     {
 
         std::unique_ptr<QuadtreeNode> root;
-        const std::vector<typename QuadTreeIntegrationT::type> &items;
+        std::vector<typename QuadTreeIntegrationT::type> *items;
+        size_t computed_count;
         int32_t maxDepth, minPointThresholdToSubdivide;
 
         std::vector<uint32_t> tmp_array;
@@ -212,26 +213,58 @@ namespace SimplePhysics
         //     ITK_INLINE static const MathCore::vec2f &GetBoxMin(const type &item) { return item.box.min; }
         //     ITK_INLINE static const MathCore::vec2f &GetBoxMax(const type &item) { return item.box.max; }
         // };
-        Quadtree(const std::vector<typename QuadTreeIntegrationT::type> &items, int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16) : items(items)
+        Quadtree(std::vector<typename QuadTreeIntegrationT::type> *items,
+                 int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16,
+                 const Box2D &initial_box = Box2D()) : items(items)
         {
             maxDepth = maxDepth_;
             minPointThresholdToSubdivide = minPointThresholdToSubdivide_;
 
-            if (items.empty())
+            if (items->empty())
             {
                 root.reset();
                 return;
             }
-            MathCore::vec2f _min = QuadTreeIntegrationT::GetBoxMin(items[0]),
-                            _max = QuadTreeIntegrationT::GetBoxMax(items[0]);
-            for (const auto &p : items)
+            if (initial_box.isEmpty())
             {
-                _min = MathCore::OP<MathCore::vec2f>::minimum(_min, QuadTreeIntegrationT::GetBoxMin(p));
-                _max = MathCore::OP<MathCore::vec2f>::maximum(_max, QuadTreeIntegrationT::GetBoxMax(p));
+                // Compute the bounding box of all items
+                MathCore::vec2f _min = QuadTreeIntegrationT::GetBoxMin((*items)[0]),
+                                _max = QuadTreeIntegrationT::GetBoxMax((*items)[0]);
+                for (const auto &p : *items)
+                {
+                    _min = MathCore::OP<MathCore::vec2f>::minimum(_min, QuadTreeIntegrationT::GetBoxMin(p));
+                    _max = MathCore::OP<MathCore::vec2f>::maximum(_max, QuadTreeIntegrationT::GetBoxMax(p));
+                }
+                root = STL_Tools::make_unique<QuadtreeNode>(_min, _max, 0, minPointThresholdToSubdivide);
             }
-            root = STL_Tools::make_unique<QuadtreeNode>(_min, _max, 0, minPointThresholdToSubdivide);
-            for (uint32_t i = 0; i < (uint32_t)items.size(); ++i)
-                root->recursive_insert<QuadTreeIntegrationT>(items, i, maxDepth, minPointThresholdToSubdivide);
+            else
+                root = STL_Tools::make_unique<QuadtreeNode>(initial_box.min, initial_box.max, 0, minPointThresholdToSubdivide);
+            for (uint32_t i = 0; i < (uint32_t)items->size(); ++i)
+                root->recursive_insert<QuadTreeIntegrationT>(*items, i, maxDepth, minPointThresholdToSubdivide);
+            computed_count = items->size();
+        }
+
+        void insertNewAdded()
+        {
+            if (items->size() <= computed_count)
+                return; // No new items to insert
+            for (uint32_t i = (uint32_t)computed_count; i < (uint32_t)items->size(); ++i)
+                root->recursive_insert<QuadTreeIntegrationT>(*items, i, maxDepth, minPointThresholdToSubdivide);
+            computed_count = items->size();
+        }
+
+        bool checkNeedsRebuildFromNewAdded() const
+        {
+            if (!root)
+                return false; // No items, no need to rebuild
+            Box2D root_box = root->box;
+            for (uint32_t i = (uint32_t)computed_count; i < (uint32_t)items->size(); ++i)
+            {
+                const auto &item = (*items)[i];
+                if (!QuadTreeIntegrationT::CheckBoxOverlap(item, root_box.min, root_box.max))
+                    return true; // Found an item that is outside the root box, need to rebuild
+            }
+            return false; // All items are within the root box, no need to rebuild
         }
 
         ~Quadtree()
