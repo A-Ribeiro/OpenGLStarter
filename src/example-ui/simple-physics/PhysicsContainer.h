@@ -4,12 +4,22 @@
 
 #include "Segment2D.h"
 #include "Box2D.h"
+#include "Line2D.h"
 #include "Structure2D.h"
 
 #include "Quadtree.h"
 
 namespace SimplePhysics
 {
+    enum GameAreaSide
+    {
+        GameAreaSide_Top,
+        GameAreaSide_Bottom,
+        GameAreaSide_Left,
+        GameAreaSide_Right,
+        GameAreaSide_Count
+    };
+
     class PhysicsContainer
     {
     public:
@@ -19,11 +29,19 @@ namespace SimplePhysics
         std::vector<Structure2D> dynamic_structures;
         std::unique_ptr<Quadtree<Structure2D::QuadtreeIntegration>> dynamic_quadtree;
 
-        void buildStaticQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16, const Box2D &initial_box = Box2D());
-        void buildDynamicQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16, const Box2D &initial_box = Box2D());
+        Line2D game_area_lines[GameAreaSide_Count];
+        Box2D game_area;
+
+        void buildStaticQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16);
+        void buildDynamicQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16);
 
         void clearStatic();
         void clearDynamic();
+
+        void setGameArea(const Box2D &box);
+
+        Box2D computeStaticStructureBox() const;
+
 
     };
 

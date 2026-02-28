@@ -35,6 +35,8 @@ namespace SimplePhysics
         /// \param center Center of the circle.
         /// \param radius Radius of the circle.
         void wrapCircle(const MathCore::vec2f &center, float radius);
+
+        void wrapBox(const Box2D &box);
         /// \brief Sets the box to an empty state.
         void makeEmpty();
         /// \brief Checks if the box is empty.

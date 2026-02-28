@@ -6,10 +6,42 @@
 #include "components/ComponentPlayer.h"
 #include "simple-physics/PhysicsContainer.h"
 
+#include <InteractiveToolkit/ITKCommon/Random.h>
+#include <InteractiveToolkit/MathCore/MathCore.h>
+
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void GameScene::loadResources()
 {
+    using namespace ITKCommon;
+    using namespace MathCore;
+
     physicsContainer = STL_Tools::make_unique<SimplePhysics::PhysicsContainer>();
+
+    auto game_area_box = SimplePhysics::Box2D(MathCore::vec2f(0.0f, 0.0f), MathCore::vec2f(1024.0f, 768.0f));
+    physicsContainer->setGameArea(game_area_box);
+
+    MathRandomExt<Random> mathRnd(Random::Instance());
+
+    for (int i = 0; i < 10; i++) {
+        
+        vec2f pos_rnd = mathRnd.nextRange<vec2f>(game_area_box.min, game_area_box.max);
+
+        float size_half = mathRnd.nextRange<float>(20.0f, 100.0f);
+        vec2f segment_a = pos_rnd - vec2f(size_half);
+        vec2f segment_b = pos_rnd + vec2f(size_half);
+
+        auto structure = SimplePhysics::Structure2D::FromSegment(
+            "Test Segment",
+            0.5f,
+            SimplePhysics::Segment2D(segment_a, segment_b)
+        );
+
+        physicsContainer->static_structures.push_back(structure);
+    }
+
+    physicsContainer->buildStaticQuadtree(
+        8, //maxDepth_
+        16); //minPointThresholdToSubdivide_
 
 }
 // to load the scene graph
