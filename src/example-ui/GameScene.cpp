@@ -40,6 +40,15 @@ void GameScene::loadResources()
         physicsContainer->static_structures.push_back(structure);
     }
 
+    auto structure = SimplePhysics::Structure2D::FromBoxCenterSize(
+        "Test Box",
+        0.5f,
+        vec2f(0, 0),    // center
+        vec2f(100, 100) // size
+    );
+
+    physicsContainer->static_structures.push_back(structure);
+
     physicsContainer->buildStaticQuadtree(
         8,   // maxDepth_
         16); // minPointThresholdToSubdivide_
@@ -103,20 +112,20 @@ void GameScene::loadGraph()
 
         // draw filled quad on game area box
         {
-            auto stage_center = physicsContainer->game_area.getCenter();
-            auto stage_size = physicsContainer->game_area.getSize();
+            auto box_center = physicsContainer->game_area.getCenter();
+            auto box_size = physicsContainer->game_area.getSize();
 
-            auto debugDrawTransform = game_area_transform->addChild(Transform::CreateShared("DebugDrawAABB"));
-            debugDrawTransform->setLocalPosition(MathCore::vec3f(
-                stage_center.x,
-                stage_center.y,
+            auto box_to_draw_transform = game_area_transform->addChild(Transform::CreateShared("DebugDrawAABB"));
+            box_to_draw_transform->setLocalPosition(MathCore::vec3f(
+                box_center.x,
+                box_center.y,
                 100.0f));
-            auto rect = debugDrawTransform->addNewComponent<ComponentRectangle>();
+            auto rect = box_to_draw_transform->addNewComponent<ComponentRectangle>();
             rect->setQuad(
                 &app->resourceMap, // use app's resource map
                 MathCore::vec2f(
-                    stage_size.x,
-                    stage_size.y),             // size
+                    box_size.x,
+                    box_size.y),               // size
                 ui::colorFromHex("#c8e8c8FF"), // color
                 MathCore::vec4f(0, 0, 0, 0),   // radius
                 StrokeModeGrowOutside,         // stroke mode
@@ -126,7 +135,36 @@ void GameScene::loadGraph()
                 MathCore::vec4f(0, 0, 0, 0),   // drop shadow color
                 MeshUploadMode_Direct,         // mesh upload mode
                 4);                            // segment count
-            app->gameScene->printHierarchy();
+
+            for (const auto &structure : physicsContainer->static_structures)
+            {
+                if (structure.type == SimplePhysics::StructureType::Box)
+                {
+                    auto box_center = structure.box.getCenter();
+                    auto box_size = structure.box.getSize();
+
+                    box_to_draw_transform = game_area_transform->addChild(Transform::CreateShared("DebugDrawAABB"));
+                    box_to_draw_transform->setLocalPosition(MathCore::vec3f(
+                        box_center.x,
+                        box_center.y,
+                        50.0f));
+                    auto rect = box_to_draw_transform->addNewComponent<ComponentRectangle>();
+                    rect->setQuad(
+                        &app->resourceMap, // use app's resource map
+                        MathCore::vec2f(
+                            box_size.x,
+                            box_size.y),               // size
+                        ui::colorFromHex("#0000003f"), // color
+                        MathCore::vec4f(0, 0, 0, 0),   // radius
+                        StrokeModeGrowOutside,         // stroke mode
+                        0.0f,                          // stroke thickness
+                        MathCore::vec4f(0, 0, 0, 0),   // stroke color
+                        0.0f,                          // drop shadow thickness
+                        MathCore::vec4f(0, 0, 0, 0),   // drop shadow color
+                        MeshUploadMode_Direct,         // mesh upload mode
+                        4);                            // segment count
+                }
+            }
         }
     }
 }
