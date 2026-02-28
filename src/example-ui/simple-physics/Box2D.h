@@ -21,6 +21,9 @@ namespace SimplePhysics
         /// \param b Second corner.
         Box2D(const MathCore::vec2f &a, const MathCore::vec2f &b);
 
+        void fillVectorWithBoxPoints(std::vector<MathCore::vec2f> *points) const;
+        std::vector<MathCore::vec2f> getBoxPoints() const;
+
         /// \brief Expands the box to include a line segment.
         ///
         /// \param a First endpoint of the segment.

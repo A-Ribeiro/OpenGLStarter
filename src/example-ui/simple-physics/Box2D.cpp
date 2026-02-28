@@ -15,6 +15,22 @@ namespace SimplePhysics
         max = MathCore::OP<MathCore::vec2f>::maximum(a, b);
     }
 
+    void Box2D::fillVectorWithBoxPoints(std::vector<MathCore::vec2f> *points) const
+    {
+        points->reserve(points->size() + 4);
+        points->push_back(min);
+        points->push_back(MathCore::vec2f(max.x, min.y));
+        points->push_back(max);
+        points->push_back(MathCore::vec2f(min.x, max.y));
+    }
+
+    std::vector<MathCore::vec2f> Box2D::getBoxPoints() const
+    {
+        std::vector<MathCore::vec2f> points;
+        fillVectorWithBoxPoints(&points);
+        return points;
+    }
+
     void Box2D::wrapLine(const MathCore::vec2f &a, const MathCore::vec2f &b)
     {
         min = MathCore::OP<MathCore::vec2f>::minimum(a, b);
