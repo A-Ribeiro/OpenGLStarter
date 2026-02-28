@@ -7,6 +7,8 @@
 
 #include <appkit-gl-engine/util/SpriteAtlas.h>
 
+#include "stage-generator/StageGenerator.h"
+
 class App;
 
 namespace SimplePhysics
@@ -52,6 +54,7 @@ public:
 
     std::unique_ptr<SimplePhysics::PhysicsContainer> physicsContainer;
 
+    StageGen::StageResult stageResult;
 
     ~GameScene();
 

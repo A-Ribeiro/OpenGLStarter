@@ -10,41 +10,17 @@
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
 
+#include "stage-generator/StageGenerator.h"
+
 void GameScene::generateRandomStage()
 {
-    using namespace ITKCommon;
-    using namespace MathCore;
-    
-    auto game_area_box = SimplePhysics::Box2D(MathCore::vec2f(0.0f, 0.0f), MathCore::vec2f(1024.0f, 768.0f));
-    physicsContainer->setGameArea(game_area_box);
+    StageGen::StageParams params;
+    params.normal_jump_height = 300.0f;
+    params.double_jump_height = 200.0f;
+    params.player_radius = 50.0f;
+    params.stage_length_screens = 5;
 
-    MathRandomExt<Random> mathRnd(Random::Instance());
-
-    for (int i = 0; i < 10; i++)
-    {
-
-        vec2f pos_rnd = mathRnd.nextRange<vec2f>(game_area_box.min, game_area_box.max);
-
-        float size_half = mathRnd.nextRange<float>(20.0f, 100.0f);
-        vec2f segment_a = pos_rnd - vec2f(size_half, 0);
-        vec2f segment_b = pos_rnd + vec2f(size_half, 0);
-
-        auto structure = SimplePhysics::Structure2D::FromSegment(
-            "Test Segment",
-            0.5f,
-            SimplePhysics::Segment2D(segment_a, segment_b));
-
-        physicsContainer->static_structures.push_back(structure);
-    }
-
-    auto structure = SimplePhysics::Structure2D::FromBoxCenterSize(
-        "Test Box",
-        0.5f,
-        vec2f(0, 0),    // center
-        vec2f(100, 100) // size
-    );
-
-    physicsContainer->static_structures.push_back(structure);
+    stageResult = StageGen::StageGenerator::generate(*physicsContainer, params, random32);
 }
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void GameScene::loadResources()
@@ -201,11 +177,13 @@ void GameScene::bindResourcesToGraph()
     auto gameArea = root->findTransformByName("Game Area");
     auto componentGameArea = gameArea->addNewComponent<ComponentGameArea>();
     {
+        auto ga_center = physicsContainer->game_area.getCenter();
+        auto ga_size = physicsContainer->game_area.getSize();
         componentGameArea->debugDrawEnabled = true;
         componentGameArea->debugDrawColor = ui::colorFromHex("#00FF00FF");
         componentGameArea->StageArea = CollisionCore::AABB<MathCore::vec3f>(
             MathCore::vec3f(0.0f, 0.0f, 0.0f),
-            MathCore::vec3f(600.0f, 300.0f, 0.0f));
+            MathCore::vec3f(ga_size.x, ga_size.y, 0.0f));
         componentGameArea->LockCameraMove = false;
         componentGameArea->app = app;
     }
@@ -219,7 +197,7 @@ void GameScene::bindResourcesToGraph()
         componentPlayer->Radius = 50.0f;
         componentPlayer->app = app;
         componentPlayer->gameArea = componentGameArea;
-        player_0->setLocalPosition(MathCore::vec3f(componentPlayer->Radius.c_val(), componentPlayer->Radius.c_val(), 0.0f));
+        player_0->setLocalPosition(MathCore::vec3f(stageResult.start_point.x, stageResult.start_point.y, 0.0f));
     }
 }
 
