@@ -35,6 +35,12 @@ namespace SimplePhysics
         wrapPoint(point_max);
     }
 
+    void Box2D::wrapBox(const Box2D &box)
+    {
+        wrapPoint(box.min);
+        wrapPoint(box.max);
+    }
+
     void Box2D::makeEmpty()
     {
         min = MathCore::vec2f(MathCore::FloatTypeInfo<float>::max);
@@ -56,7 +62,7 @@ namespace SimplePhysics
         return overlaps(min, max, other.min, other.max);
     }
 
-    bool Box2D::overlaps(const MathCore::vec2f &min2, const MathCore::vec2f &max2) const 
+    bool Box2D::overlaps(const MathCore::vec2f &min2, const MathCore::vec2f &max2) const
     {
         return overlaps(min, max, min2, max2);
     }

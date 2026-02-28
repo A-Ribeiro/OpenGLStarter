@@ -155,6 +155,9 @@ namespace SimplePhysics
         /// \param output_array Array to store output points.
         /// \return Number of closest points found.
         static int closestPointInSegmentToBox(const MathCore::vec2f &a, const MathCore::vec2f &b, const MathCore::vec2f &min, const MathCore::vec2f &max, MathCore::vec2f *output_array);
+
+        static bool circleIntersectsSegment(const MathCore::vec2f &center, const float &radius, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *penetration);
+        static bool boxIntersectsSegment(const MathCore::vec2f &min, const MathCore::vec2f &max, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *penetration);
     };
 
 }

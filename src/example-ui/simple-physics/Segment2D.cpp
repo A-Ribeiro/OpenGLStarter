@@ -284,7 +284,6 @@ namespace SimplePhysics
         return collision_count;
     }
 
-
     int Segment2D::closestPointInSegmentToBox(const MathCore::vec2f &a, const MathCore::vec2f &b, const MathCore::vec2f &min, const MathCore::vec2f &max, MathCore::vec2f *output_array)
     {
         using namespace MathCore;
@@ -336,7 +335,7 @@ namespace SimplePhysics
         float dist2 = OP<vec2f>::sqrDistance(candidate2, box_point2);
         float dist3 = OP<vec2f>::sqrDistance(candidate3, box_point3);
         float dist4 = OP<vec2f>::sqrDistance(candidate4, box_point4);
-        
+
         // Also check segment endpoints projected onto box
         vec2f box_point_a = Box2D::closestPointToBox(a, min, max);
         vec2f box_point_b = Box2D::closestPointToBox(b, min, max);
@@ -375,6 +374,46 @@ namespace SimplePhysics
         output_array[0] = result;
 
         return 1;
+    }
+
+    bool Segment2D::circleIntersectsSegment(const MathCore::vec2f &center, const float &radius, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *penetration)
+    {
+        using namespace MathCore;
+
+        vec2f closestp = closestPointToSegment(center, a, b);
+
+        float distance_to_line = OP<vec2f>::distance(closestp, center);
+        float sphere_dst_to_line_abs = MathCore::OP<float>::abs(distance_to_line - radius);
+
+        if (sphere_dst_to_line_abs > 0.004f && distance_to_line < radius) // 0.00002f
+        {
+            // EPSILON - to avoid process the same triangle again...
+            const float EPSILON = 0.002f;
+            vec2f penetration_dir = OP<vec2f>::normalize(closestp - center);
+            *penetration = penetration_dir * (sphere_dst_to_line_abs + EPSILON);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool Segment2D::boxIntersectsSegment(const MathCore::vec2f &min, const MathCore::vec2f &max, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *penetration)
+    {
+        using namespace MathCore;
+
+        vec2f closestp;
+        closestPointInSegmentToBox(a, b, min, max, &closestp);
+
+        vec2f box_closestp = Box2D::closestPointToBox(closestp, min, max);
+
+        if (OP<vec2f>::sqrDistance(closestp, box_closestp) > 0.00002f)
+        {
+            vec2f penetration_dir = OP<vec2f>::normalize(closestp - box_closestp);
+            *penetration = penetration_dir * OP<vec2f>::distance(closestp, box_closestp);
+            return true;
+        }
+
+        return false;
     }
 
 }
