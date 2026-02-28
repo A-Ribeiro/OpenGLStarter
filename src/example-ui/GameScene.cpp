@@ -8,6 +8,7 @@
 
 #include <InteractiveToolkit/ITKCommon/Random.h>
 #include <InteractiveToolkit/MathCore/MathCore.h>
+#include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
 
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void GameScene::loadResources()
@@ -22,27 +23,26 @@ void GameScene::loadResources()
 
     MathRandomExt<Random> mathRnd(Random::Instance());
 
-    for (int i = 0; i < 10; i++) {
-        
+    for (int i = 0; i < 10; i++)
+    {
+
         vec2f pos_rnd = mathRnd.nextRange<vec2f>(game_area_box.min, game_area_box.max);
 
         float size_half = mathRnd.nextRange<float>(20.0f, 100.0f);
-        vec2f segment_a = pos_rnd - vec2f(size_half);
-        vec2f segment_b = pos_rnd + vec2f(size_half);
+        vec2f segment_a = pos_rnd - vec2f(size_half, 0);
+        vec2f segment_b = pos_rnd + vec2f(size_half, 0);
 
         auto structure = SimplePhysics::Structure2D::FromSegment(
             "Test Segment",
             0.5f,
-            SimplePhysics::Segment2D(segment_a, segment_b)
-        );
+            SimplePhysics::Segment2D(segment_a, segment_b));
 
         physicsContainer->static_structures.push_back(structure);
     }
 
     physicsContainer->buildStaticQuadtree(
-        8, //maxDepth_
-        16); //minPointThresholdToSubdivide_
-
+        8,   // maxDepth_
+        16); // minPointThresholdToSubdivide_
 }
 // to load the scene graph
 void GameScene::loadGraph()
@@ -54,9 +54,81 @@ void GameScene::loadGraph()
 
     auto main_camera = root->addChild(Transform::CreateShared("Main Camera"));
 
-    auto game_area = root->addChild(Transform::CreateShared("Game Area"));
+    auto game_area_transform = root->addChild(Transform::CreateShared("Game Area"));
 
-    auto player_0 = game_area->addChild(Transform::CreateShared("Player 0"));
+    auto player_0 = game_area_transform->addChild(Transform::CreateShared("Player 0"));
+
+    {
+        using namespace AppKit::GLEngine::Components;
+        // draw lines drawing of the game area box and static structures
+        {
+            // draw debug static structures
+            auto debugDrawTransform = game_area_transform->addChild(Transform::CreateShared("Static Structures Debug Draw"));
+            // debugDrawTransform->setLocalPosition(MathCore::vec3f(0,0,-1.0f));
+
+            std::shared_ptr<ComponentLineMounter> line_mounter = debugDrawTransform->addNewComponent<ComponentLineMounter>();
+            line_mounter->setCamera(&app->resourceMap, app->gameScene->getCamera(), true);
+
+            auto points = physicsContainer->game_area.getBoxPoints();
+
+            for (size_t i = 0; i < points.size(); i++)
+            {
+                auto a = points[i];
+                auto b = points[(i + 1) % points.size()];
+
+                line_mounter->addLine(
+                    MathCore::vec3f(a, 0),        // a
+                    MathCore::vec3f(b, 0),        // b
+                    3.0f,                         // thickness
+                    ui::colorFromHex("#00FF00FF") // color
+                );
+            }
+
+            for (const auto &structure : physicsContainer->static_structures)
+            {
+                if (structure.type == SimplePhysics::StructureType::Segment)
+                {
+                    for (const auto &segment : structure.segments)
+                    {
+                        line_mounter->addLine(
+                            MathCore::vec3f(segment.a, -1.0f), // a
+                            MathCore::vec3f(segment.b, -1.0f), // b
+                            3.0f,                              // thickness
+                            ui::colorFromHex("#FF0000FF")      // color
+                        );
+                    }
+                }
+            }
+        }
+
+        // draw filled quad on game area box
+        {
+            auto stage_center = physicsContainer->game_area.getCenter();
+            auto stage_size = physicsContainer->game_area.getSize();
+
+            auto debugDrawTransform = game_area_transform->addChild(Transform::CreateShared("DebugDrawAABB"));
+            debugDrawTransform->setLocalPosition(MathCore::vec3f(
+                stage_center.x,
+                stage_center.y,
+                100.0f));
+            auto rect = debugDrawTransform->addNewComponent<ComponentRectangle>();
+            rect->setQuad(
+                &app->resourceMap, // use app's resource map
+                MathCore::vec2f(
+                    stage_size.x,
+                    stage_size.y),             // size
+                ui::colorFromHex("#c8e8c8FF"), // color
+                MathCore::vec4f(0, 0, 0, 0),   // radius
+                StrokeModeGrowOutside,         // stroke mode
+                0.0f,                          // stroke thickness
+                MathCore::vec4f(0, 0, 0, 0),   // stroke color
+                0.0f,                          // drop shadow thickness
+                MathCore::vec4f(0, 0, 0, 0),   // drop shadow color
+                MeshUploadMode_Direct,         // mesh upload mode
+                4);                            // segment count
+            app->gameScene->printHierarchy();
+        }
+    }
 }
 // to bind the resources to the current graph
 void GameScene::bindResourcesToGraph()
