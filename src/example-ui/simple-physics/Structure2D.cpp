@@ -1,6 +1,9 @@
 #include "Structure2D.h"
 #include <InteractiveToolkit/AlgorithmCore/Polygon/Polygon2D.h>
-
+#if defined(_WIN32)
+#pragma warning( push )
+#pragma warning( disable : 4996)
+#endif
 namespace SimplePhysics
 {
     void Structure2D::computeBox()
@@ -39,7 +42,7 @@ namespace SimplePhysics
         float friction,
         const std::vector<Segment2D> &segments)
     {
-        Structure2D result(segments.size());
+        Structure2D result((int)segments.size());
 
         result.friction = friction;
         strncpy(result.tag, tag, sizeof(result.tag) - 1);
@@ -56,7 +59,7 @@ namespace SimplePhysics
         float friction,
         const std::vector<MathCore::vec2f> &vertices)
     {
-        Structure2D result(vertices.size());
+        Structure2D result((int)vertices.size());
 
         result.friction = friction;
         strncpy(result.tag, tag, sizeof(result.tag) - 1);
@@ -295,3 +298,6 @@ namespace SimplePhysics
     }
 
 }
+#if defined(_WIN32)
+#pragma warning( pop )
+#endif
