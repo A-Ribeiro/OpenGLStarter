@@ -17,6 +17,8 @@ namespace SimplePhysics
 class GameScene : public AppKit::GLEngine::SceneBase
 {
 protected:
+    void generateRandomStage();
+
     // to load skybox, textures, cubemaps, 3DModels and setup materials
     virtual void loadResources();
     // to load the scene graph

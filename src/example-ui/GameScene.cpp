@@ -10,14 +10,11 @@
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
 
-// to load skybox, textures, cubemaps, 3DModels and setup materials
-void GameScene::loadResources()
+void GameScene::generateRandomStage()
 {
     using namespace ITKCommon;
     using namespace MathCore;
-
-    physicsContainer = STL_Tools::make_unique<SimplePhysics::PhysicsContainer>();
-
+    
     auto game_area_box = SimplePhysics::Box2D(MathCore::vec2f(0.0f, 0.0f), MathCore::vec2f(1024.0f, 768.0f));
     physicsContainer->setGameArea(game_area_box);
 
@@ -48,6 +45,16 @@ void GameScene::loadResources()
     );
 
     physicsContainer->static_structures.push_back(structure);
+}
+// to load skybox, textures, cubemaps, 3DModels and setup materials
+void GameScene::loadResources()
+{
+    using namespace ITKCommon;
+    using namespace MathCore;
+
+    physicsContainer = STL_Tools::make_unique<SimplePhysics::PhysicsContainer>();
+
+    generateRandomStage();
 
     physicsContainer->buildStaticQuadtree(
         8,   // maxDepth_
