@@ -18,7 +18,7 @@ namespace AppKit
     {
         namespace Components
         {
-            class ComponentGameArea;
+            // class ComponentGameArea;
 
             class ComponentPlayer : public Component
             {
@@ -37,8 +37,9 @@ namespace AppKit
                 float debugDrawThickness;
                 MathCore::vec4f debugDrawColor;
                 EventCore::Property<float> Radius;
+                EventCore::Property<float> RadiusGrounded;
 
-                std::weak_ptr<ComponentGameArea> gameArea;
+                // std::weak_ptr<ComponentGameArea> gameArea;
 
                 MathCore::vec3f velocity;
                 MathCore::vec3f acceleration;

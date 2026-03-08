@@ -134,7 +134,7 @@ namespace SimplePhysics
             if (hasChildren())
             {
                 for (const auto &children : children)
-                    children->query(items, min, max, result);
+                    children->query<QuadTreeIntegrationT>(items, min, max, result);
             }
             else
             {
@@ -277,7 +277,7 @@ namespace SimplePhysics
             if (!root)
                 return last_query; // No points to query
 
-            root->query<QuadTreeIntegrationT>(items, min, max, last_query);
+            root->query<QuadTreeIntegrationT>(*items, min, max, last_query);
 
             // sort last_query by index and remove duplicates
             tmp_array.resize(last_query.size());

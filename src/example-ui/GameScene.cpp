@@ -2,7 +2,7 @@
 #include "App.h"
 
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
-#include "components/ComponentGameArea.h"
+#include "components/ComponentCameraToPlayer.h"
 #include "components/ComponentPlayer.h"
 #include "simple-physics/PhysicsContainer.h"
 
@@ -174,19 +174,19 @@ void GameScene::bindResourcesToGraph()
     componentCameraOrthographic->useSizeX = true;
     componentCameraOrthographic->useSizeY = true;
 
-    auto gameArea = root->findTransformByName("Game Area");
-    auto componentGameArea = gameArea->addNewComponent<ComponentGameArea>();
-    {
-        auto ga_center = physicsContainer->game_area.getCenter();
-        auto ga_size = physicsContainer->game_area.getSize();
-        componentGameArea->debugDrawEnabled = true;
-        componentGameArea->debugDrawColor = ui::colorFromHex("#00FF00FF");
-        componentGameArea->StageArea = CollisionCore::AABB<MathCore::vec3f>(
-            MathCore::vec3f(0.0f, 0.0f, 0.0f),
-            MathCore::vec3f(ga_size.x, ga_size.y, 0.0f));
-        componentGameArea->LockCameraMove = false;
-        componentGameArea->app = app;
-    }
+    // auto gameArea = root->findTransformByName("Game Area");
+    // auto componentGameArea = gameArea->addNewComponent<ComponentGameArea>();
+    // {
+    //     auto ga_center = physicsContainer->game_area.getCenter();
+    //     auto ga_size = physicsContainer->game_area.getSize();
+    //     componentGameArea->debugDrawEnabled = true;
+    //     componentGameArea->debugDrawColor = ui::colorFromHex("#00FF00FF");
+    //     componentGameArea->StageArea = CollisionCore::AABB<MathCore::vec3f>(
+    //         MathCore::vec3f(0.0f, 0.0f, 0.0f),
+    //         MathCore::vec3f(ga_size.x, ga_size.y, 0.0f));
+    //     componentGameArea->LockCameraMove = false;
+    //     componentGameArea->app = app;
+    // }
 
     auto player_0 = root->findTransformByName("Player 0");
     auto componentPlayer = player_0->addNewComponent<ComponentPlayer>();
@@ -195,9 +195,18 @@ void GameScene::bindResourcesToGraph()
         componentPlayer->debugDrawThickness = 5.0f;
         componentPlayer->debugDrawColor = ui::colorFromHex("#0000ffFF");
         componentPlayer->Radius = 50.0f;
+        componentPlayer->RadiusGrounded = 50.0f + 5.0f;
         componentPlayer->app = app;
-        componentPlayer->gameArea = componentGameArea;
+        // componentPlayer->gameArea = componentGameArea;
         player_0->setLocalPosition(MathCore::vec3f(stageResult.start_point.x, stageResult.start_point.y, 0.0f));
+    }
+
+    auto componentCameraToPlayer = player_0->addNewComponent<ComponentCameraToPlayer>();
+    {
+        componentCameraToPlayer->app = app;
+        componentCameraToPlayer->camera = componentCameraOrthographic;
+        componentCameraToPlayer->player = componentPlayer;
+        // componentCameraToPlayer->LockCameraMove = false;
     }
 }
 
