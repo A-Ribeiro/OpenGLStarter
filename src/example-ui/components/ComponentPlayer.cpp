@@ -5,8 +5,9 @@
 #include <InteractiveToolkit/CollisionCore/CollisionCore.h>
 // #include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 #include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
+#include "../simple-physics/PhysicsContainer.h"
 
-#include "ComponentGameArea.h"
+// #include "ComponentGameArea.h"
 
 namespace AppKit
 {
@@ -149,9 +150,9 @@ namespace AppKit
 
                 // check is grounded before update velocity for jump
                 // stage limits
-                auto gameAreaShared = gameArea.lock();
-                if (gameAreaShared == nullptr)
-                    return;
+                // auto gameAreaShared = gameArea.lock();
+                // if (gameAreaShared == nullptr)
+                //     return;
 
                 jumpState.update(&velocity.y,             // velocityY
                                  time->deltaTime,         // deltaTime
@@ -174,6 +175,7 @@ namespace AppKit
 
                 position += velocity * time->deltaTime;
 
+                /*
                 {
                     auto stageArea = gameAreaShared->StageArea.c_val();
 
@@ -199,10 +201,20 @@ namespace AppKit
                         velocity -= parallel_penetration;
                     }
                 }
+                */
 
                 // force 2d logic
                 position.z = 0.0f;
                 velocity.z = 0;
+
+                app->gameScene->physicsContainer->movePlayer(
+                    getTransform()->getLocalPosition(), Radius.c_val(), RadiusGrounded.c_val(),
+                    &position, &velocity,
+                    // onGrounded callback
+                    [this]() {
+                        if (jumpState.getState() == JumpState::Falling)
+                            jumpState.setGrounded();
+                    });
 
                 getTransform()->setLocalPosition(position);
 
@@ -235,7 +247,7 @@ namespace AppKit
                         color = ui::colorFromHex("#FFFFFFFF");
                         break;
                     }
-                    for( size_t i=0 ; i<mesh_line_drawer->color[0].size() - 8*3; i++ )
+                    for (size_t i = 0; i < mesh_line_drawer->color[0].size() - 8 * 3; i++)
                         mesh_line_drawer->color[0][i] = color;
                 }
             }
@@ -251,7 +263,7 @@ namespace AppKit
                 result->debugDrawColor = this->debugDrawColor;
                 result->app = this->app;
                 result->Radius.setValueNoCallback(this->Radius.c_val());
-                result->gameArea = this->gameArea;
+                // result->gameArea = this->gameArea;
 
                 return result;
             }

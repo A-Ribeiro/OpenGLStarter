@@ -48,6 +48,7 @@ namespace StageGen
         PhysicsContainer &container,
         const StageParams &params)
     {
+        return;
         float W = params.totalWidth();
         float H = params.totalHeight();
         float margin = 10.0f;
@@ -324,6 +325,7 @@ namespace StageGen
         const StageParams &params,
         MathRandomExt<Random32> &mathRnd)
     {
+        return;
         float W = params.totalWidth();
         int numScreens = params.stage_length_screens;
         int numBoxes = numScreens * 2; // ~2 obstacle boxes per screen

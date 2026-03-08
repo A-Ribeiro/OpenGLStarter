@@ -15,7 +15,10 @@ namespace AppKit
     {
         namespace Components
         {
-            class ComponentGameArea : public Component
+            class ComponentCameraOrthographic;
+            class ComponentPlayer;
+
+            class ComponentCameraToPlayer : public Component
             {
 
                 // std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
@@ -28,17 +31,13 @@ namespace AppKit
             public:
                 static const ComponentType Type;
 
-                bool debugDrawEnabled;
-                MathCore::vec4f debugDrawColor;
-                EventCore::Property<CollisionCore::AABB<MathCore::vec3f>> StageArea;
-
-                bool LockCameraMove;
+                std::weak_ptr<ComponentCameraOrthographic> camera;
+                std::weak_ptr<ComponentPlayer> player;
 
                 App *app;
-                // Platform::ObjectQueue<std::shared_ptr<AppKit::GLEngine::Transform>> *transformPool;
 
-                ComponentGameArea();
-                ~ComponentGameArea();
+                ComponentCameraToPlayer();
+                ~ComponentCameraToPlayer();
 
                 void attachToTransform(std::shared_ptr<Transform> t) override;
                 void detachFromTransform(std::shared_ptr<Transform> t) override;

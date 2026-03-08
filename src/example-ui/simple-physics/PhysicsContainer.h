@@ -29,7 +29,7 @@ namespace SimplePhysics
         std::vector<Structure2D> dynamic_structures;
         std::unique_ptr<Quadtree<Structure2D::QuadtreeIntegration>> dynamic_quadtree;
 
-        Line2D game_area_lines[GameAreaSide_Count];
+        Line2D game_area_inequality_eq[GameAreaSide_Count];
         Box2D game_area;
 
         void buildStaticQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16);
@@ -41,6 +41,16 @@ namespace SimplePhysics
         void setGameArea(const Box2D &box);
 
         Box2D computeStaticStructureBox() const;
+
+
+        void movePlayer(
+            const MathCore::vec3f &position, 
+            float radius, 
+            float radius_grounded, 
+            MathCore::vec3f *out_position, 
+            MathCore::vec3f *out_velocity,
+            const EventCore::Callback<void()> &onGrounded
+        );
 
 
     };

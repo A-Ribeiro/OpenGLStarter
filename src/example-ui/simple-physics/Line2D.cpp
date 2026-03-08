@@ -63,9 +63,10 @@ namespace SimplePhysics
             // EPSILON - to avoid process the same triangle again...
             const float EPSILON = 0.002f;
             *penetration = -line.normal * (sphere_dst_to_line_abs + EPSILON);
+            printf ("+"); fflush(stdout);
             return true;
         }
-
+printf ("."); fflush(stdout);
         return false;
     }
 
