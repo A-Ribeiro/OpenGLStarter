@@ -56,26 +56,9 @@ namespace SimplePhysics
         vec2f a = CVT<vec3f>::toVec2(position);
         vec2f b = CVT<vec3f>::toVec2(*out_position);
         vec2f vel = CVT<vec3f>::toVec2(*out_velocity);
-
-        // check with ground
-        vec2f penetration;
-        if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[GameAreaSide_Bottom], &penetration))
-        {
-            b -= penetration;
-            vel = b - a;
-            vec2f ground_check = b - vec2f(0, radius_grounded);
-            vec2f aux;
-            if (Line2D::segmentIntersectsLine(
-                    b, ground_check,
-                    game_area_inequality_eq[GameAreaSide_Bottom],
-                    &aux))
-            {
-                // emmit event grounded
-                onGrounded();
-            }
-        }
-
         Box2D b_box = Box2D(b - radius, b + radius);
+
+        vec2f penetration;
 
         const auto &static_idx = static_quadtree->query(b_box.min, b_box.max);
         for (uint32_t idx : static_idx)
@@ -100,6 +83,36 @@ namespace SimplePhysics
                         onGrounded();
                     }
                 }
+            }
+        }
+
+
+        // check with ground
+        if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[GameAreaSide_Bottom], &penetration))
+        {
+            b -= penetration;
+            vel = b - a;
+            vec2f ground_check = b - vec2f(0, radius_grounded);
+            vec2f aux;
+            if (Line2D::segmentIntersectsLine(
+                    b, ground_check,
+                    game_area_inequality_eq[GameAreaSide_Bottom],
+                    &aux))
+            {
+                // emmit event grounded
+                onGrounded();
+            }
+        }
+
+        // check other sides of game area
+        for (int i = 0; i < GameAreaSide_Count; i++)
+        {
+            if (i == GameAreaSide_Bottom || i == GameAreaSide_Top)
+                continue;
+            if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[i], &penetration))
+            {
+                b -= penetration;
+                vel = b - a;
             }
         }
 
