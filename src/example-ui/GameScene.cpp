@@ -192,10 +192,12 @@ void GameScene::bindResourcesToGraph()
     auto componentPlayer = player_0->addNewComponent<ComponentPlayer>();
     {
         componentPlayer->debugDrawEnabled = true;
-        componentPlayer->debugDrawThickness = 5.0f;
+        componentPlayer->debugDrawThickness = 2.0f;
         componentPlayer->debugDrawColor = ui::colorFromHex("#0000ffFF");
         componentPlayer->Radius = 50.0f;
-        componentPlayer->RadiusGrounded = 50.0f + 5.0f;
+        float factor = 5.0f;
+        componentPlayer->RadiusGrounded = 50.0f - factor;
+        componentPlayer->OffsetGrounded = 7.0f + factor;
         componentPlayer->app = app;
         // componentPlayer->gameArea = componentGameArea;
         player_0->setLocalPosition(MathCore::vec3f(stageResult.start_point.x, stageResult.start_point.y, 0.0f));

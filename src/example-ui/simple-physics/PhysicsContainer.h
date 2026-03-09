@@ -47,6 +47,7 @@ namespace SimplePhysics
             const MathCore::vec3f &position, 
             float radius, 
             float radius_grounded, 
+            float offset_grounded,
             MathCore::vec3f *out_position, 
             MathCore::vec3f *out_velocity,
             const EventCore::Callback<void()> &onGrounded
