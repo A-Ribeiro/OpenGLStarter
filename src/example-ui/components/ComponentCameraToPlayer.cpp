@@ -50,6 +50,15 @@ namespace AppKit
 
             void ComponentCameraToPlayer::OnUpdate(Platform::Time *time)
             {
+                auto player_ref = player.lock();
+                auto camera_ref = camera.lock();
+                if (player_ref == nullptr || camera_ref == nullptr)
+                    return;
+                auto player_transform = player_ref->getTransform();
+                auto camera_transform = camera_ref->getTransform();
+
+                camera_transform->setLocalPosition(player_transform->getLocalPosition());
+
             }
 
             // always clone
