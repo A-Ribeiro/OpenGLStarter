@@ -86,6 +86,16 @@ namespace AppKit
                             MathCore::quatf() // rotation
                         );
 
+
+                        line_mounter->addCircle(
+                            MathCore::vec3f(0, -self_ref->OffsetGrounded.c_val(),0), // pos
+                            self_ref->RadiusGrounded - 2.0f,    // radius
+                            2.0f, // thickness
+                            ui::colorFromHex("#0008ff"), // color
+                            32, // segment_count
+                            MathCore::quatf() // rotation
+                        );
+
                         float radius_to_draw = inner_radius * 20.0f;
                         line_mounter->addLine(
                             MathCore::vec3f(-radius_to_draw, self_ref->jumpState.getMinJumpHeight() - inner_radius,0), // a
@@ -208,10 +218,11 @@ namespace AppKit
                 velocity.z = 0;
 
                 app->gameScene->physicsContainer->movePlayer(
-                    getTransform()->getLocalPosition(), Radius.c_val(), RadiusGrounded.c_val(),
+                    getTransform()->getLocalPosition(), Radius.c_val(), RadiusGrounded.c_val(), OffsetGrounded.c_val(),
                     &position, &velocity,
                     // onGrounded callback
-                    [this]() {
+                    [this]()
+                    {
                         if (jumpState.getState() == JumpState::Falling)
                             jumpState.setGrounded();
                     });
@@ -247,7 +258,7 @@ namespace AppKit
                         color = ui::colorFromHex("#FFFFFFFF");
                         break;
                     }
-                    for (size_t i = 0; i < mesh_line_drawer->color[0].size() - 8 * 3; i++)
+                    for (size_t i = 0; i < mesh_line_drawer->color[0].size() - 8 * (3 + 32); i++)
                         mesh_line_drawer->color[0][i] = color;
                 }
             }

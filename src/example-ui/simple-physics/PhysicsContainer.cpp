@@ -46,7 +46,7 @@ namespace SimplePhysics
 
     void PhysicsContainer::movePlayer(
         const MathCore::vec3f &position,
-        float radius, float radius_grounded,
+        float radius, float radius_grounded, float offset_grounded,
         MathCore::vec3f *out_position,
         MathCore::vec3f *out_velocity,
         const EventCore::Callback<void()> &onGrounded)
@@ -57,6 +57,8 @@ namespace SimplePhysics
         vec2f b = CVT<vec3f>::toVec2(*out_position);
         vec2f vel = CVT<vec3f>::toVec2(*out_velocity);
         Box2D b_box = Box2D(b - radius, b + radius);
+
+        vec2f ground_center = b + vec2f(0, -offset_grounded);
 
         vec2f penetration;
 
@@ -73,11 +75,15 @@ namespace SimplePhysics
                 {
                     b -= penetration;
                     vel = b - a;
-
-                    vec2f ground_check = b - vec2f(0, radius_grounded);
-                    if (Segment2D::segmentsIntersect(
-                            b, ground_check,
-                            segment.a, segment.b))
+                    vec2f aux;
+                    // vec2f ground_check = b - vec2f(0, radius_grounded);
+                    // if (Segment2D::segmentsIntersect(
+                    //         b, ground_check,
+                    //         segment.a, segment.b))
+                    if (Segment2D::circleIntersectsSegment(
+                            ground_center, radius_grounded,
+                            segment.a, segment.b,
+                            &aux))
                     {
                         // emmit event grounded
                         onGrounded();
@@ -86,7 +92,6 @@ namespace SimplePhysics
             }
         }
 
-
         // check with ground
         if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[GameAreaSide_Bottom], &penetration))
         {
@@ -94,8 +99,12 @@ namespace SimplePhysics
             vel = b - a;
             vec2f ground_check = b - vec2f(0, radius_grounded);
             vec2f aux;
-            if (Line2D::segmentIntersectsLine(
-                    b, ground_check,
+            // if (Line2D::segmentIntersectsLine(
+            //         b, ground_check,
+            //         game_area_inequality_eq[GameAreaSide_Bottom],
+            //         &aux))
+            if (Line2D::circleOverlapsLine(
+                    ground_center, radius_grounded,
                     game_area_inequality_eq[GameAreaSide_Bottom],
                     &aux))
             {

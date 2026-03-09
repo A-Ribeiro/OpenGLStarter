@@ -38,6 +38,7 @@ namespace AppKit
                 MathCore::vec4f debugDrawColor;
                 EventCore::Property<float> Radius;
                 EventCore::Property<float> RadiusGrounded;
+                EventCore::Property<float> OffsetGrounded;
 
                 // std::weak_ptr<ComponentGameArea> gameArea;
 
