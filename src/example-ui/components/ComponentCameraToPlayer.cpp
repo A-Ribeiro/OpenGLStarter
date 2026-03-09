@@ -6,6 +6,9 @@
 #include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 #include "./ComponentPlayer.h"
 
+#include "../simple-physics/Box2D.h"
+#include "../simple-physics/PhysicsContainer.h"
+
 namespace AppKit
 {
     namespace GLEngine
@@ -30,7 +33,6 @@ namespace AppKit
             {
                 if (auto eventHandlerSet = eventHandlerSetRef.lock())
                     eventHandlerSet->OnUpdate.add(&ComponentCameraToPlayer::OnUpdate, this);
-                
             }
 
             void ComponentCameraToPlayer::attachToTransform(std::shared_ptr<Transform> t)
@@ -57,8 +59,23 @@ namespace AppKit
                 auto player_transform = player_ref->getTransform();
                 auto camera_transform = camera_ref->getTransform();
 
-                camera_transform->setLocalPosition(player_transform->getLocalPosition());
+                using namespace MathCore;
+                using namespace SimplePhysics;
 
+                vec2f windowSize_2 = vec2f(camera_ref->viewport.w, camera_ref->viewport.h) * 0.5f;
+
+                vec2f stage_camera_min_limit = app->gameScene->physicsContainer->game_area.min + windowSize_2;
+                vec2f stage_camera_max_limit = app->gameScene->physicsContainer->game_area.max - windowSize_2;
+
+                vec3f camera_look_to = player_transform->getLocalPosition();
+
+                camera_look_to = OP<vec3f>::clamp(camera_look_to, 
+                    vec3f(stage_camera_min_limit, camera_look_to.z), 
+                    vec3f(stage_camera_max_limit, camera_look_to.z));
+
+
+
+                camera_transform->setLocalPosition(camera_look_to);
             }
 
             // always clone
@@ -81,9 +98,9 @@ namespace AppKit
             }
 
             void ComponentCameraToPlayer::Deserialize(rapidjson::Value &_value,
-                                                std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                                                std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                                                ResourceSet &resourceSet)
+                                                      std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                                      std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                                      ResourceSet &resourceSet)
             {
             }
 
