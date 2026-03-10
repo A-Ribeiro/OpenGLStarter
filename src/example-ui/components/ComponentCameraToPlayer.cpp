@@ -67,6 +67,19 @@ namespace AppKit
                 vec2f stage_camera_min_limit = app->gameScene->physicsContainer->game_area.min + windowSize_2;
                 vec2f stage_camera_max_limit = app->gameScene->physicsContainer->game_area.max - windowSize_2;
 
+                vec2f game_area_center = app->gameScene->physicsContainer->game_area.getCenter();
+
+                for(int i=0;i<2;i++)
+                {
+                    if (stage_camera_max_limit[i] < stage_camera_min_limit[i])
+                    {
+                        // If the game area is smaller than the camera viewport, center the camera on the game area
+                        float center = game_area_center[i];
+                        stage_camera_min_limit[i] = center;
+                        stage_camera_max_limit[i] = center;
+                    }
+                }
+
                 vec3f camera_look_to = player_transform->getLocalPosition();
 
                 camera_look_to = OP<vec3f>::clamp(camera_look_to, 
