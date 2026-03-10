@@ -28,20 +28,20 @@ namespace SimplePhysics
         ///
         /// \param a First endpoint of the segment.
         /// \param b Second endpoint of the segment.
-        void wrapLine(const MathCore::vec2f &a, const MathCore::vec2f &b);
+        Box2D &wrapLine(const MathCore::vec2f &a, const MathCore::vec2f &b);
         /// \brief Expands the box to include a point.
         ///
         /// \param point The point to include.
-        void wrapPoint(const MathCore::vec2f &point);
+        Box2D &wrapPoint(const MathCore::vec2f &point);
         /// \brief Expands the box to include a circle.
         ///
         /// \param center Center of the circle.
         /// \param radius Radius of the circle.
-        void wrapCircle(const MathCore::vec2f &center, float radius);
+        Box2D &wrapCircle(const MathCore::vec2f &center, float radius);
 
-        void wrapBox(const Box2D &box);
+        Box2D &wrapBox(const Box2D &box);
         /// \brief Sets the box to an empty state.
-        void makeEmpty();
+        Box2D &makeEmpty();
         /// \brief Checks if the box is empty.
         /// \return True if the box is empty.
         bool isEmpty() const;

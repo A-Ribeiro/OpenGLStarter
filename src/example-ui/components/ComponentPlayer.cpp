@@ -155,8 +155,9 @@ namespace AppKit
                 // vec3 traveled_position_aux = HeightAndTime::IntegrateAcceleration(velocity, acceleration, time->deltaTime);
                 velocity += acceleration * time->deltaTime;
 
-                const float max_velocity = 5000.0f;
-                velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), velocity, max_velocity);
+                const float & max_velocity = app->gameScene->physicsContainer->max_velocity;
+                //velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), velocity, max_velocity);
+                velocity.y = MathCore::OP<float>::clamp(velocity.y, -max_velocity, max_velocity);
 
                 // check is grounded before update velocity for jump
                 // stage limits
@@ -218,8 +219,12 @@ namespace AppKit
                 velocity.z = 0;
 
                 app->gameScene->physicsContainer->movePlayer(
-                    getTransform()->getLocalPosition(), Radius.c_val(), RadiusGrounded.c_val(), OffsetGrounded.c_val(),
+                    getTransform()->getLocalPosition(), 
+                    Radius.c_val(), 
+                    RadiusGrounded.c_val(), 
+                    OffsetGrounded.c_val(),
                     &position, &velocity,
+                    time->deltaTime,
                     // onGrounded callback
                     [this]()
                     {

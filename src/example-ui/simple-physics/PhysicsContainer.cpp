@@ -49,6 +49,7 @@ namespace SimplePhysics
         float radius, float radius_grounded, float offset_grounded,
         MathCore::vec3f *out_position,
         MathCore::vec3f *out_velocity,
+        float delta_time,
         const EventCore::Callback<void()> &onGrounded)
     {
         using namespace MathCore;
@@ -56,53 +57,64 @@ namespace SimplePhysics
         vec2f a = CVT<vec3f>::toVec2(position);
         vec2f b = CVT<vec3f>::toVec2(*out_position);
         vec2f vel = CVT<vec3f>::toVec2(*out_velocity);
-        Box2D b_box = Box2D(b - radius, b + radius);
+        Box2D move_box = Box2D(b - radius, b + radius).wrapPoint(a - radius).wrapPoint(a + radius);
 
-        vec2f ground_center = b + vec2f(0, -offset_grounded);
+        vec2f ab = b - a;
+        float ab_mag = OP<vec2f>::length(ab);
+
+        if (ab_mag == 0.0f || delta_time == 0.0f)
+        {
+            *out_position = position;
+            return;
+        }
+
+        float delta_time_inv = 1.0f / delta_time;
 
         vec2f penetration;
 
-        const auto &static_idx = static_quadtree->query(b_box.min, b_box.max);
-        for (uint32_t idx : static_idx)
-        {
-            const auto &structure = static_structures[idx];
-            for (const auto &segment : structure.segments)
-            {
-                if (Segment2D::circleIntersectsSegment(
-                        b, radius,
-                        segment.a, segment.b,
-                        &penetration))
-                {
-                    b -= penetration;
-                    vel = b - a;
-                    vec2f aux;
-                    // vec2f ground_check = b - vec2f(0, radius_grounded);
-                    // if (Segment2D::segmentsIntersect(
-                    //         b, ground_check,
-                    //         segment.a, segment.b))
-                    if (Segment2D::circleIntersectsSegment(
-                            ground_center, radius_grounded,
-                            segment.a, segment.b,
-                            &aux))
-                    {
-                        // emmit event grounded
-                        onGrounded();
-                    }
-                }
-            }
-        }
+        // // const auto &static_ids = static_quadtree->query(move_box.min, move_box.max);
+        // // for (uint32_t idx : static_ids)
+        // // {
+        // //     const auto &structure = static_structures[idx];
+        // //     for (const auto &segment : structure.segments)
+        // //     {
+        // //         if (Segment2D::circleIntersectsSegment(
+        // //                 b, radius,
+        // //                 segment.a, segment.b,
+        // //                 &penetration))
+        // //         {
+        // //             b -= penetration;
+        // //             vel = b - a;
+        // //             vec2f aux;
+        // //             // vec2f ground_check = b - vec2f(0, radius_grounded);
+        // //             // if (Segment2D::segmentsIntersect(
+        // //             //         b, ground_check,
+        // //             //         segment.a, segment.b))
+        // //             vec2f ground_center = b + vec2f(0, -offset_grounded);
+        // //             if (Segment2D::circleIntersectsSegment(
+        // //                     ground_center, radius_grounded,
+        // //                     segment.a, segment.b,
+        // //                     &aux))
+        // //             {
+        // //                 // emmit event grounded
+        // //                 onGrounded();
+        // //             }
+        // //         }
+        // //     }
+        // // }
 
         // check with ground
         if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[GameAreaSide_Bottom], &penetration))
         {
-            b -= penetration;
-            vel = b - a;
+            b.y -= penetration.y;
+            vel = (b - a) * delta_time_inv;
             vec2f ground_check = b - vec2f(0, radius_grounded);
             vec2f aux;
             // if (Line2D::segmentIntersectsLine(
             //         b, ground_check,
             //         game_area_inequality_eq[GameAreaSide_Bottom],
             //         &aux))
+            vec2f ground_center = b + vec2f(0, -offset_grounded);
             if (Line2D::circleOverlapsLine(
                     ground_center, radius_grounded,
                     game_area_inequality_eq[GameAreaSide_Bottom],
@@ -118,15 +130,20 @@ namespace SimplePhysics
         {
             if (i == GameAreaSide_Bottom || i == GameAreaSide_Top)
                 continue;
+
             if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[i], &penetration))
             {
-                b -= penetration;
-                vel = b - a;
+                b.x -= penetration.x;
+                vel = (b - a) * delta_time_inv;
+                break;
             }
         }
 
         *out_position = vec3f(b, out_position->z);
-        *out_velocity = vec3f(vel, out_velocity->z);
+
+        // *out_velocity = vec3f(vel, out_velocity->z);
+        *out_velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), vec3f(vel, out_velocity->z), max_velocity);
+
     }
 
 }
