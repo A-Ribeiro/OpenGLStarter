@@ -95,7 +95,7 @@ namespace StageGen
             vec2f center(params.player_radius + platformWidth * 0.5f + 20.0f, platformY);
             container.static_structures.push_back(
                 Structure2D::FromBoxCenterSize("Start Platform", 0.8f,
-                                              center, vec2f(platformWidth, platformThickness)));
+                                               center, vec2f(platformWidth, platformThickness)));
             out_start = vec2f(center.x, center.y + platformThickness * 0.5f + params.player_radius);
         }
 
@@ -104,7 +104,7 @@ namespace StageGen
             vec2f center(W - params.player_radius - platformWidth * 0.5f - 20.0f, platformY);
             container.static_structures.push_back(
                 Structure2D::FromBoxCenterSize("End Platform", 0.8f,
-                                              center, vec2f(platformWidth, platformThickness)));
+                                               center, vec2f(platformWidth, platformThickness)));
             out_end = vec2f(center.x, center.y + platformThickness * 0.5f + params.player_radius);
         }
     }
@@ -131,8 +131,8 @@ namespace StageGen
         // With horizontal speed ~600 px/s and jump time ~0.5s, horizontal reach ~300px
         // We'll use a generous max gap proportional to jump height
         float maxHorizontalGap = normalJump * 2.5f;
-        float maxVerticalGap = normalJump * 0.85f;             // reachable with single jump
-        float maxVerticalGapDouble = totalMaxJump * 0.85f;     // reachable with double jump
+        float maxVerticalGap = normalJump * 0.85f;         // reachable with single jump
+        float maxVerticalGapDouble = totalMaxJump * 0.85f; // reachable with double jump
 
         // Platform dimensions
         float minPlatformWidth = 100.0f;
@@ -195,7 +195,7 @@ namespace StageGen
             if (!overlapsExisting(placed, center, platW, platformThickness, overlapMargin))
             {
                 // Decide if this is a box or a segment platform
-                bool useBox = (chance < 0.50f);
+                bool useBox = (chance < 0.20f);
 
                 if (useBox)
                 {
@@ -209,8 +209,10 @@ namespace StageGen
                 {
                     // Segment: a flat line at the top of where the box would be
                     float segY = center.y + platformThickness * 0.5f;
-                    vec2f segA(center.x - platW * 0.5f, segY);
-                    vec2f segB(center.x + platW * 0.5f, segY);
+                    mat2f rot = GEN<mat2f>::rotate(
+                        mathRnd.nextRange<float>(OP<float>::deg_2_rad(30.0f), OP<float>::deg_2_rad(45.0f)) * OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f)));
+                    vec2f segA = vec2f(center.x, segY) + rot * vec2f(-platW * 0.5f, 0);
+                    vec2f segB = vec2f(center.x, segY) + rot * vec2f(platW * 0.5f, 0);
                     container.static_structures.push_back(
                         Structure2D::FromSegment("Platform Segment", 0.6f,
                                                  Segment2D(segA, segB)));
@@ -265,55 +267,59 @@ namespace StageGen
             else
             {
                 float segY = center.y + platformThickness * 0.5f;
+                mat2f rot = GEN<mat2f>::rotate(
+                    mathRnd.nextRange<float>(OP<float>::deg_2_rad(30.0f), OP<float>::deg_2_rad(45.0f)) * OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f)));
                 container.static_structures.push_back(
                     Structure2D::FromSegment("Branch Segment", 0.5f,
                                              Segment2D(
-                                                 vec2f(center.x - platW * 0.5f, segY),
-                                                 vec2f(center.x + platW * 0.5f, segY))));
+                                                 vec2f(center.x, segY) + rot * vec2f(-platW * 0.5f, 0),
+                                                 vec2f(center.x, segY) + rot * vec2f(platW * 0.5f, 0))));
             }
 
             placed.push_back({center, platW, platformThickness, useBox});
         }
 
-        // --- Add some angled / sloped segments for variety ---
-        int slopedCount = numScreens * 2;
-        for (int i = 0; i < slopedCount; i++)
-        {
-            if (placed.empty())
-                break;
-            int anchorIdx = (int)mathRnd.nextRange<float>(0.0f, (float)(placed.size() - 1));
-            auto &anchor = placed[anchorIdx];
+        // // --- Add some angled / sloped segments for variety ---
+        // int slopedCount = numScreens * 2;
+        // for (int i = 0; i < slopedCount; i++)
+        // {
+        //     if (placed.empty())
+        //         break;
+        //     int anchorIdx = mathRnd.random->getRange<int32_t>(0, (int32_t)(placed.size() - 1));
+        //     auto &anchor = placed[anchorIdx];
 
-            float slopeLen = mathRnd.nextRange<float>(80.0f, 200.0f);
-            float angle = mathRnd.nextRange<float>(-0.4f, 0.4f); // mild slope in radians
+        //     float slopeLen = mathRnd.nextRange<float>(80.0f, 200.0f);
+        //     //float angle = mathRnd.nextRange<float>(-0.4f, 0.4f); // mild slope in radians
+        //     float angle = mathRnd.nextRange<float>(OP<float>::deg_2_rad(45.0f), OP<float>::deg_2_rad(60.0f)) *
+        //                   OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f));
 
-            float dx = mathRnd.nextRange<float>(-maxHorizontalGap * 0.7f, maxHorizontalGap * 0.7f);
-            float dy = mathRnd.nextRange<float>(-maxVerticalGap * 0.5f, maxVerticalGap * 0.5f);
+        //     float dx = mathRnd.nextRange<float>(-maxHorizontalGap * 0.7f, maxHorizontalGap * 0.7f);
+        //     float dy = mathRnd.nextRange<float>(-maxVerticalGap * 0.5f, maxVerticalGap * 0.5f);
 
-            vec2f slopeCenter(
-                OP<float>::clamp(anchor.position.x + dx, slopeLen + 10.0f, W - slopeLen - 10.0f),
-                OP<float>::clamp(anchor.position.y + dy, minY, maxY));
+        //     vec2f slopeCenter(
+        //         OP<float>::clamp(anchor.position.x + dx, slopeLen + 10.0f, W - slopeLen - 10.0f),
+        //         OP<float>::clamp(anchor.position.y + dy, minY, maxY));
 
-            vec2f dir(OP<float>::cos(angle), OP<float>::sin(angle));
-            vec2f segA = slopeCenter - dir * (slopeLen * 0.5f);
-            vec2f segB = slopeCenter + dir * (slopeLen * 0.5f);
+        //     vec2f dir(OP<float>::cos(angle), OP<float>::sin(angle));
+        //     vec2f segA = slopeCenter - dir * (slopeLen * 0.5f);
+        //     vec2f segB = slopeCenter + dir * (slopeLen * 0.5f);
 
-            // Clamp endpoints to game area
-            segA.y = OP<float>::clamp(segA.y, 10.0f, H - 10.0f);
-            segB.y = OP<float>::clamp(segB.y, 10.0f, H - 10.0f);
+        //     // Clamp endpoints to game area
+        //     segA.y = OP<float>::clamp(segA.y, 10.0f, H - 10.0f);
+        //     segB.y = OP<float>::clamp(segB.y, 10.0f, H - 10.0f);
 
-            // Simple overlap check using bounding box
-            float bw = OP<float>::abs(segB.x - segA.x);
-            float bh = OP<float>::abs(segB.y - segA.y) + 10.0f;
-            vec2f bCenter = (segA + segB) * 0.5f;
+        //     // Simple overlap check using bounding box
+        //     float bw = OP<float>::abs(segB.x - segA.x);
+        //     float bh = OP<float>::abs(segB.y - segA.y) + 10.0f;
+        //     vec2f bCenter = (segA + segB) * 0.5f;
 
-            if (!overlapsExisting(placed, bCenter, bw, bh, overlapMargin * 0.5f))
-            {
-                container.static_structures.push_back(
-                    Structure2D::FromSegment("Slope", 0.4f, Segment2D(segA, segB)));
-                placed.push_back({bCenter, bw, bh, false});
-            }
-        }
+        //     if (!overlapsExisting(placed, bCenter, bw, bh, overlapMargin * 0.5f))
+        //     {
+        //         container.static_structures.push_back(
+        //             Structure2D::FromSegment("Slope", 0.4f, Segment2D(segA, segB)));
+        //         placed.push_back({bCenter, bw, bh, false});
+        //     }
+        // }
     }
 
     // ----------------------------------------------------------------
