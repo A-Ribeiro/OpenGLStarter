@@ -31,36 +31,41 @@ namespace SimplePhysics
         return points;
     }
 
-    void Box2D::wrapLine(const MathCore::vec2f &a, const MathCore::vec2f &b)
+    Box2D& Box2D::wrapLine(const MathCore::vec2f &a, const MathCore::vec2f &b)
     {
         min = MathCore::OP<MathCore::vec2f>::minimum(a, b);
         max = MathCore::OP<MathCore::vec2f>::maximum(a, b);
+        return *this;
     }
 
-    void Box2D::wrapPoint(const MathCore::vec2f &point)
+    Box2D& Box2D::wrapPoint(const MathCore::vec2f &point)
     {
         min = MathCore::OP<MathCore::vec2f>::minimum(min, point);
         max = MathCore::OP<MathCore::vec2f>::maximum(max, point);
+        return *this;
     }
 
-    void Box2D::wrapCircle(const MathCore::vec2f &center, float radius)
+    Box2D& Box2D::wrapCircle(const MathCore::vec2f &center, float radius)
     {
         MathCore::vec2f point_min = center - MathCore::vec2f(radius, radius);
         MathCore::vec2f point_max = center + MathCore::vec2f(radius, radius);
         wrapPoint(point_min);
         wrapPoint(point_max);
+        return *this;
     }
 
-    void Box2D::wrapBox(const Box2D &box)
+    Box2D& Box2D::wrapBox(const Box2D &box)
     {
         wrapPoint(box.min);
         wrapPoint(box.max);
+        return *this;
     }
 
-    void Box2D::makeEmpty()
+    Box2D& Box2D::makeEmpty()
     {
         min = MathCore::vec2f(MathCore::FloatTypeInfo<float>::max);
         max = MathCore::vec2f(-MathCore::FloatTypeInfo<float>::max);
+        return *this;
     }
 
     bool Box2D::isEmpty() const

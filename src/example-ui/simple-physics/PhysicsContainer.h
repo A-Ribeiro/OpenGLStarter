@@ -50,9 +50,11 @@ namespace SimplePhysics
             float offset_grounded,
             MathCore::vec3f *out_position, 
             MathCore::vec3f *out_velocity,
+            float delta_time,
             const EventCore::Callback<void()> &onGrounded
         );
 
+        const float max_velocity = 5000.0f;
 
     };
 
