@@ -84,7 +84,7 @@ namespace SimplePhysics
 
                 for (const auto &children : children)
                 {
-                    if (children->intersects<QuadTreeIntegrationT>(item))
+                    if (children->contains<QuadTreeIntegrationT>(item))
                         children->indices->push_back(idx);
                 }
 
@@ -97,10 +97,60 @@ namespace SimplePhysics
             indices.reset();
         }
 
-        ITK_INLINE bool contains(const MathCore::vec2f &p) const { return box.isPointInside(p); }
-        ITK_INLINE bool intersects(const MathCore::vec2f &min, const MathCore::vec2f &max) const { return box.overlaps(min, max); }
-        ITK_INLINE bool intersects(const QuadtreeNode &other) const { return box.overlaps(other.box); }
-        ITK_INLINE bool intersects(const Box2D &other) const { return box.overlaps(other); }
+        ITK_INLINE static bool box_isPointInside(const MathCore::vec2f &point, const MathCore::vec2f &min, const MathCore::vec2f &max)
+        {
+            // [min, max) — point on min edge IS inside, point on max edge is NOT
+            return (point.x >= min.x && point.x < max.x &&
+                    point.y >= min.y && point.y < max.y);
+        }
+
+        ITK_INLINE static bool box_overlaps(const MathCore::vec2f &min1, const MathCore::vec2f &max1, const MathCore::vec2f &min2, const MathCore::vec2f &max2)
+        {
+            using namespace MathCore;
+
+            for (int i = 0; i < 2; i++)
+            {
+                bool value_is_same1 = min1[i] == max1[i];
+                bool value_is_same2 = min2[i] == max2[i];
+
+                if (value_is_same1 && value_is_same2)
+                {
+                    // both are points on this axis: overlap only if equal
+                    if (min1[i] != min2[i])
+                        return false;
+                }
+                else if (value_is_same1)
+                {
+                    // box1 is a point on this axis: must lie inside [min2, max2)
+                    if (min1[i] < min2[i] || min1[i] >= max2[i])
+                        return false;
+                }
+                else if (value_is_same2)
+                {
+                    // box2 is a point on this axis: must lie inside [min1, max1)
+                    if (min2[i] < min1[i] || min2[i] >= max1[i])
+                        return false;
+                }
+                else
+                {
+                    // regular [min, max) half-open interval overlap check
+                    if (max1[i] <= min2[i] || min1[i] >= max2[i])
+                        return false;
+                }
+            }
+
+            // // [min, max) half-open: touching edges do NOT overlap
+            // if (max1.x <= min2.x || min1.x >= max2.x)
+            //     return false;
+            // if (max1.y <= min2.y || min1.y >= max2.y)
+            //     return false;
+            return true;
+        }
+
+        ITK_INLINE bool contains(const MathCore::vec2f &p) const { return box_isPointInside(p, box.min, box.max); }
+        ITK_INLINE bool contains(const MathCore::vec2f &min, const MathCore::vec2f &max) const { return box_overlaps(box.min, box.max, min, max); }
+        ITK_INLINE bool contains(const QuadtreeNode &other) const { return box_overlaps(box.min, box.max, other.box.min, other.box.max); }
+        ITK_INLINE bool contains(const Box2D &other) const { return box_overlaps(box.min, box.max, other.min, other.max); }
 
         // Example of QuadtreeIntegration:
         // struct QuadtreeIntegration
@@ -111,7 +161,7 @@ namespace SimplePhysics
         //     ITK_INLINE static const MathCore::vec2f &GetBoxMax(const type &item) { return item.box.max; }
         // };
         template <typename QuadTreeIntegrationT>
-        ITK_INLINE bool intersects(const typename QuadTreeIntegrationT::type &item) const { return QuadTreeIntegrationT::CheckBoxOverlap(item, box.min, box.max); }
+        ITK_INLINE bool contains(const typename QuadTreeIntegrationT::type &item) const { return QuadTreeIntegrationT::CheckBoxOverlap(item, box.min, box.max); }
 
         ITK_INLINE bool isLeaf() const { return children[0] == nullptr; }
         ITK_INLINE bool hasChildren() const { return children[0] != nullptr; }
@@ -129,7 +179,7 @@ namespace SimplePhysics
                    const MathCore::vec2f &min, const MathCore::vec2f &max,
                    std::vector<uint32_t> &result) const
         {
-            if (!intersects(min, max))
+            if (!contains(min, max))
                 return; // No intersection with the query box
             if (hasChildren())
             {
@@ -141,7 +191,10 @@ namespace SimplePhysics
                 for (uint32_t idx : *indices)
                 {
                     const typename QuadTreeIntegrationT::type &item = items[idx];
-                    if (QuadTreeIntegrationT::CheckBoxOverlap(item, min, max))
+                    // if (QuadTreeIntegrationT::CheckBoxOverlap(item, min, max))
+                    const MathCore::vec2f &item_min = QuadTreeIntegrationT::GetBoxMin(item);
+                    const MathCore::vec2f &item_max = QuadTreeIntegrationT::GetBoxMax(item);
+                    if (box_overlaps(item_min, item_max, min, max))
                         result.push_back(idx);
                 }
             }
@@ -160,7 +213,7 @@ namespace SimplePhysics
         {
             const typename QuadTreeIntegrationT::type &item = items[idx];
 
-            bool box_overlapps = intersects<QuadTreeIntegrationT>(item);
+            bool box_overlapps = contains<QuadTreeIntegrationT>(item);
             if (!box_overlapps)
                 return;
 
@@ -242,6 +295,11 @@ namespace SimplePhysics
             for (uint32_t i = 0; i < (uint32_t)items->size(); ++i)
                 root->recursive_insert<QuadTreeIntegrationT>(*items, i, maxDepth, minPointThresholdToSubdivide);
             computed_count = items->size();
+        }
+
+        const QuadtreeNode *getRoot() const
+        {
+            return root.get();
         }
 
         void insertNewAdded()
