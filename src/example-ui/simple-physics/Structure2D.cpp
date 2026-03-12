@@ -1,4 +1,5 @@
 #include "Structure2D.h"
+#include "Quadtree.h"
 #include <InteractiveToolkit/AlgorithmCore/Polygon/Polygon2D.h>
 #if defined(_WIN32)
 #pragma warning( push )
@@ -271,7 +272,7 @@ namespace SimplePhysics
 
     bool Structure2D::checkBoxOverlap(const MathCore::vec2f &min, const MathCore::vec2f &max) const
     {
-        if (!box.overlaps(min, max))
+        if (!QuadtreeNode::box_overlaps(box.min, box.max, min, max))
             return false;
 
         if (type == StructureType::Box)
@@ -290,6 +291,9 @@ namespace SimplePhysics
             // check if any of the polygon edges intersect with the box
             for (const Segment2D &segment : segments)
             {
+                auto segment_box = Box2D(segment.a, segment.b);
+                if (!QuadtreeNode::box_overlaps(segment_box.min, segment_box.max, min, max))
+                    continue; // skip segments that are completely outside the box
                 if (segment.intersectsBox(min, max))
                     return true;
             }
