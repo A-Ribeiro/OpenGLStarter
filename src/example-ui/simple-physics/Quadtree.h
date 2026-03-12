@@ -175,16 +175,16 @@ namespace SimplePhysics
         //     ITK_INLINE static const MathCore::vec2f &GetBoxMax(const type &item) { return item.box.max; }
         // };
         template <typename QuadTreeIntegrationT>
-        void query(const std::vector<typename QuadTreeIntegrationT::type> &items,
-                   const MathCore::vec2f &min, const MathCore::vec2f &max,
-                   std::vector<uint32_t> &result) const
+        void query_box(const std::vector<typename QuadTreeIntegrationT::type> &items,
+                       const MathCore::vec2f &min, const MathCore::vec2f &max,
+                       std::vector<uint32_t> &result) const
         {
             if (!contains(min, max))
                 return; // No intersection with the query box
             if (hasChildren())
             {
                 for (const auto &children : children)
-                    children->query<QuadTreeIntegrationT>(items, min, max, result);
+                    children->query_box<QuadTreeIntegrationT>(items, min, max, result);
             }
             else
             {
@@ -196,6 +196,46 @@ namespace SimplePhysics
                     const MathCore::vec2f &item_max = QuadTreeIntegrationT::GetBoxMax(item);
                     if (box_overlaps(item_min, item_max, min, max))
                         result.push_back(idx);
+                }
+            }
+        }
+
+        template <typename QuadTreeIntegrationT>
+        void query_segment_radius(const std::vector<typename QuadTreeIntegrationT::type> &items,
+                                  const Box2D &box,
+                                  const MathCore::vec2f &a, const MathCore::vec2f &b, float radius,
+                                  float radius_squared,
+                                  std::vector<uint32_t> &result) const
+        {
+            if (!contains(box.min, box.max))
+                return; // No intersection with the query box
+            if (hasChildren())
+            {
+                for (const auto &children : children)
+                    children->query_segment_radius<QuadTreeIntegrationT>(items, box, a, b, radius, radius_squared, result);
+            }
+            else
+            {
+                MathCore::vec2f closest_point_array[2];
+                for (uint32_t idx : *indices)
+                {
+                    const typename QuadTreeIntegrationT::type &item = items[idx];
+                    // if (QuadTreeIntegrationT::CheckBoxOverlap(item, min, max))
+                    const MathCore::vec2f &item_min = QuadTreeIntegrationT::GetBoxMin(item);
+                    const MathCore::vec2f &item_max = QuadTreeIntegrationT::GetBoxMax(item);
+                    if (box_overlaps(item_min, item_max, box.min, box.max))
+                    {
+                        // check segment with box
+                        auto box_pt_rc = Box2D::closestPointInBoxToSegment(item_min, item_max, a, b, closest_point_array);
+                        if (box_pt_rc == SegmentPointReturnType_One_Outside)
+                        {
+                            MathCore::vec2f closest_point = Segment2D::closestPointToSegment(closest_point_array[0], a, b);
+                            if (MathCore::OP<MathCore::vec2f>::sqrLength(closest_point - a) <= radius_squared)
+                                result.push_back(idx);
+                        }
+                        else if (box_pt_rc & SegmentPointReturnType_Zero_Dst_Bit)
+                            result.push_back(idx);
+                    }
                 }
             }
         }
@@ -288,10 +328,18 @@ namespace SimplePhysics
                     _min = MathCore::OP<MathCore::vec2f>::minimum(_min, QuadTreeIntegrationT::GetBoxMin(p));
                     _max = MathCore::OP<MathCore::vec2f>::maximum(_max, QuadTreeIntegrationT::GetBoxMax(p));
                 }
+                // to avoid zero-size boxes, which can cause issues in the quadtree logic
+                _min -= MathCore::EPSILON<float>::low_precision;
+                _max += MathCore::EPSILON<float>::low_precision;
                 root = STL_Tools::make_unique<QuadtreeNode>(_min, _max, 0, minPointThresholdToSubdivide);
             }
             else
-                root = STL_Tools::make_unique<QuadtreeNode>(initial_box.min, initial_box.max, 0, minPointThresholdToSubdivide);
+            {
+                // to avoid zero-size boxes, which can cause issues in the quadtree logic
+                MathCore::vec2f _min = initial_box.min - MathCore::EPSILON<float>::low_precision;
+                MathCore::vec2f _max = initial_box.max + MathCore::EPSILON<float>::low_precision;
+                root = STL_Tools::make_unique<QuadtreeNode>(_min, _max, 0, minPointThresholdToSubdivide);
+            }
             for (uint32_t i = 0; i < (uint32_t)items->size(); ++i)
                 root->recursive_insert<QuadTreeIntegrationT>(*items, i, maxDepth, minPointThresholdToSubdivide);
             computed_count = items->size();
@@ -319,7 +367,10 @@ namespace SimplePhysics
             for (uint32_t i = (uint32_t)computed_count; i < (uint32_t)items->size(); ++i)
             {
                 const auto &item = (*items)[i];
-                if (!QuadTreeIntegrationT::CheckBoxOverlap(item, root_box.min, root_box.max))
+                const auto &item_min = QuadTreeIntegrationT::GetBoxMin(item);
+                const auto &item_max = QuadTreeIntegrationT::GetBoxMax(item);
+                // if (!QuadTreeIntegrationT::CheckBoxOverlap(item, root_box.min, root_box.max))
+                if (!QuadtreeNode::box_overlaps(item_min, item_max, root_box.min, root_box.max))
                     return true; // Found an item that is outside the root box, need to rebuild
             }
             return false; // All items are within the root box, no need to rebuild
@@ -329,13 +380,32 @@ namespace SimplePhysics
         {
         }
 
-        std::vector<uint32_t> &query(const MathCore::vec2f &min, const MathCore::vec2f &max)
+        std::vector<uint32_t> &query_box(const MathCore::vec2f &min, const MathCore::vec2f &max)
         {
             last_query.clear();
             if (!root)
                 return last_query; // No points to query
 
-            root->query<QuadTreeIntegrationT>(*items, min, max, last_query);
+            root->query_box<QuadTreeIntegrationT>(*items, min, max, last_query);
+
+            // sort last_query by index and remove duplicates
+            tmp_array.resize(last_query.size());
+            AlgorithmCore::Sorting::RadixCountingSort<uint32_t>::sort(last_query.data(), (uint32_t)last_query.size(), tmp_array.data());
+            // std::sort(last_query.begin(), last_query.end());
+            // std::unique expects the input to be sorted, and moves the duplicates to the end of the vector, returning an iterator to the new end of the vector
+            last_query.resize(std::unique(last_query.begin(), last_query.end()) - last_query.begin());
+
+            return last_query;
+        }
+
+        std::vector<uint32_t> &query_segment_radius(const MathCore::vec2f &a, const MathCore::vec2f &b, float radius)
+        {
+            last_query.clear();
+            if (!root)
+                return last_query; // No points to query
+
+            Box2D query_box = Box2D(a, b).expand(MathCore::vec2f(radius));
+            root->query_segment_radius<QuadTreeIntegrationT>(*items, query_box, a, b, radius, radius * radius, last_query);
 
             // sort last_query by index and remove duplicates
             tmp_array.resize(last_query.size());

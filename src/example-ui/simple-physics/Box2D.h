@@ -6,6 +6,23 @@ namespace SimplePhysics
 {
     class Segment2D;
 
+    enum SegmentPointReturnType
+    {
+        SegmentPointReturnType_Two_Intersects = 1,
+        SegmentPointReturnType_One_Intersect_One_Inside_A = 1 << 1,
+        SegmentPointReturnType_One_Intersect_One_Inside_B = 1 << 2,
+        SegmentPointReturnType_One_Intersect_One_Unknown = 1 << 3,
+        SegmentPointReturnType_Two_Inside = 1 << 4,
+        SegmentPointReturnType_One_Outside = 1 << 5,
+    };
+
+    const uint32_t SegmentPointReturnType_Zero_Dst_Bit =
+        SegmentPointReturnType_Two_Intersects |
+        SegmentPointReturnType_One_Intersect_One_Inside_A |
+        SegmentPointReturnType_One_Intersect_One_Inside_B |
+        SegmentPointReturnType_One_Intersect_One_Unknown |
+        SegmentPointReturnType_Two_Inside;
+
     class Box2D
     {
     public:
@@ -40,6 +57,9 @@ namespace SimplePhysics
         Box2D &wrapCircle(const MathCore::vec2f &center, float radius);
 
         Box2D &wrapBox(const Box2D &box);
+
+        Box2D &expand(const MathCore::vec2f &radius);
+
         /// \brief Sets the box to an empty state.
         Box2D &makeEmpty();
         /// \brief Checks if the box is empty.
@@ -118,7 +138,7 @@ namespace SimplePhysics
         /// \param b Second endpoint of the segment.
         /// \param output_array Array to store output points.
         /// \return Number of closest points found.
-        static int closestPointInBoxToSegment(const MathCore::vec2f &min, const MathCore::vec2f &max, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *output_array);
+        static SegmentPointReturnType closestPointInBoxToSegment(const MathCore::vec2f &min, const MathCore::vec2f &max, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *output_array);
         /// \brief Checks if this box overlaps with another box.
         ///
         /// \param min1 Minimum corner of the first box.
