@@ -452,44 +452,62 @@ namespace SimplePhysics
             float dh = OP<vec2f>::dot(move_dir, seg_normal);
 
             if (OP<float>::abs(dh) > 1e-12f)
+            // {
+            //     // Solve h0 + t * dh = +radius and h0 + t * dh = -radius
+            //     float dh_inv = 1.0f / dh;
+            //     float t_candidates[2] = {
+            //         (radius - h0) * dh_inv,
+            //         (-radius - h0) * dh_inv};
+
+            //     for (int i = 0; i < 2; i++)
+            //     {
+            //         float t = t_candidates[i];
+            //         if (t >= 0.0f && t < result)
+            //         {
+            //             // Check if the contact point projects within the segment bounds
+            //             vec2f p_at_t = center_from + t * move_dir;
+            //             float s = OP<vec2f>::dot(p_at_t - segment_a, seg_dir_normalized);
+            //             if (s >= 0.0f && s <= seg_len)
+            //                 result = t;
+            //         }
+            //     }
+            // }
             {
                 // Solve h0 + t * dh = +radius and h0 + t * dh = -radius
                 float dh_inv = 1.0f / dh;
-                float t_candidates[2] = {
-                    (radius - h0) * dh_inv,
-                    (-radius - h0) * dh_inv};
-
-                for (int i = 0; i < 2; i++)
+                float t = (dh > 0) ? (-radius - h0) * dh_inv : (radius - h0) * dh_inv;
+                if (t >= 0.0f && t < result)
                 {
-                    float t = t_candidates[i];
-                    if (t >= 0.0f && t < result)
-                    {
-                        // Check if the contact point projects within the segment bounds
-                        vec2f p_at_t = center_from + t * move_dir;
-                        float s = OP<vec2f>::dot(p_at_t - segment_a, seg_dir_normalized);
-                        if (s >= 0.0f && s <= seg_len)
-                            result = t;
-                    }
+                    // Check if the contact point projects within the segment bounds
+                    vec2f p_at_t = center_from + t * move_dir;
+                    float s = OP<vec2f>::dot(p_at_t - segment_a, seg_dir_normalized);
+                    if (s >= 0.0f && s <= seg_len)
+                        result = t;
                 }
             }
         }
 
         // --- Case 2: Circle vs segment endpoints ---
         // Solve |center_from + t * move_dir - endpoint|² = radius²
+        //       |t * move_dir + (center_from - endpoint)|² - radius² = 0
+        // eq = t²|move_dir|² +
+        //      t * 2 * dot(center_from - endpoint, move_dir) +
+        //      |center_from - endpoint|² - radius²
         // => A*t² + B*t + C = 0
         const vec2f *endpoints[2] = {&segment_a, &segment_b};
         for (int i = 0; i < 2; i++)
         {
+            // Bhaskara
             vec2f diff = center_from - *endpoints[i];
             float A = move_len_sq;
             float B = 2.0f * OP<vec2f>::dot(diff, move_dir);
             float C = OP<vec2f>::dot(diff, diff) - radius * radius;
 
-            float discriminant = B * B - 4.0f * A * C;
-            if (discriminant >= 0.0f)
+            float delta = B * B - 4.0f * A * C;
+            if (delta >= 0.0f)
             {
-                float sqrt_disc = OP<float>::sqrt(discriminant);
-                float t = (-B - sqrt_disc) / (2.0f * A);
+                float sqrt_delta = OP<float>::sqrt(delta);
+                float t = (-B - sqrt_delta) / (2.0f * A);
                 if (t >= 0.0f && t < result)
                     result = t;
             }
