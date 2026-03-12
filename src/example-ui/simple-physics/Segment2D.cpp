@@ -487,7 +487,11 @@ namespace SimplePhysics
             }
         }
 
-        // --- Case 2: Circle vs segment endpoints ---
+        // We already have a valid collision with the edge, so we can return early
+        if (result < 1.0f)
+            return result;
+
+        // --- Case 2: Circle vs segment endpoints ---        
         // Solve |center_from + t * move_dir - endpoint|² = radius²
         //       |t * move_dir + (center_from - endpoint)|² - radius² = 0
         // eq = t²|move_dir|² +
