@@ -31,21 +31,21 @@ namespace SimplePhysics
         return points;
     }
 
-    Box2D& Box2D::wrapLine(const MathCore::vec2f &a, const MathCore::vec2f &b)
+    Box2D &Box2D::wrapLine(const MathCore::vec2f &a, const MathCore::vec2f &b)
     {
         min = MathCore::OP<MathCore::vec2f>::minimum(a, b);
         max = MathCore::OP<MathCore::vec2f>::maximum(a, b);
         return *this;
     }
 
-    Box2D& Box2D::wrapPoint(const MathCore::vec2f &point)
+    Box2D &Box2D::wrapPoint(const MathCore::vec2f &point)
     {
         min = MathCore::OP<MathCore::vec2f>::minimum(min, point);
         max = MathCore::OP<MathCore::vec2f>::maximum(max, point);
         return *this;
     }
 
-    Box2D& Box2D::wrapCircle(const MathCore::vec2f &center, float radius)
+    Box2D &Box2D::wrapCircle(const MathCore::vec2f &center, float radius)
     {
         MathCore::vec2f point_min = center - MathCore::vec2f(radius, radius);
         MathCore::vec2f point_max = center + MathCore::vec2f(radius, radius);
@@ -54,14 +54,21 @@ namespace SimplePhysics
         return *this;
     }
 
-    Box2D& Box2D::wrapBox(const Box2D &box)
+    Box2D &Box2D::wrapBox(const Box2D &box)
     {
         wrapPoint(box.min);
         wrapPoint(box.max);
         return *this;
     }
 
-    Box2D& Box2D::makeEmpty()
+    Box2D &Box2D::expand(const MathCore::vec2f &radius)
+    {
+        min -= radius;
+        max += radius;
+        return *this;
+    }
+
+    Box2D &Box2D::makeEmpty()
     {
         min = MathCore::vec2f(MathCore::FloatTypeInfo<float>::max);
         max = MathCore::vec2f(-MathCore::FloatTypeInfo<float>::max);
@@ -135,43 +142,36 @@ namespace SimplePhysics
                 point.y < max.y && point.y > min.y);
     }
 
-    int Box2D::closestPointInBoxToSegment(const MathCore::vec2f &min, const MathCore::vec2f &max, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *output_array)
+    SegmentPointReturnType Box2D::closestPointInBoxToSegment(const MathCore::vec2f &min, const MathCore::vec2f &max, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *output_array)
     {
         using namespace MathCore;
         int rc = Segment2D::segmentIntersectBox(a, b, min, max, output_array);
 
         if (rc == 2)
-            return rc;
+            return SegmentPointReturnType_Two_Intersects;
         else if (rc == 1)
         {
             if (isPointInside(a, min, max))
             {
                 output_array[1] = a;
-                return 2;
+                return SegmentPointReturnType_One_Intersect_One_Inside_A;
             }
             else if (isPointInside(b, min, max))
             {
                 output_array[1] = b;
-                return 2;
+                return SegmentPointReturnType_One_Intersect_One_Inside_B;
             }
-            return 1;
+            return SegmentPointReturnType_One_Intersect_One_Unknown;
         }
         else if (rc == 0)
         {
             // No intersection, check if endpoints are inside the box
-            int count = 0;
-            if (isPointInside(a, min, max))
+            if (isPointInside(a, min, max) || isPointInside(b, min, max))
             {
-                output_array[count] = a;
-                count++;
+                output_array[0] = a;
+                output_array[1] = b;
+                return SegmentPointReturnType_Two_Inside;
             }
-            if (isPointInside(b, min, max))
-            {
-                output_array[count] = b;
-                count++;
-            }
-            if (count > 0)
-                return count;
         }
 
         // No intersection and no endpoints inside: find closest point on box boundary to segment
@@ -219,7 +219,7 @@ namespace SimplePhysics
 
         output_array[0] = result;
 
-        return 1;
+        return SegmentPointReturnType_One_Outside;
     }
 
     bool Box2D::overlaps(const MathCore::vec2f &min1, const MathCore::vec2f &max1, const MathCore::vec2f &min2, const MathCore::vec2f &max2)

@@ -93,6 +93,37 @@ void GameScene::loadGraph()
             }
         }
 
+        {
+            auto auxDraw = game_area_transform->addChild(Transform::CreateShared("auxDraw"));
+            std::shared_ptr<ComponentLineMounter> line_mounter = auxDraw->addNewComponent<ComponentLineMounter>();
+            line_mounter->setCamera(&app->resourceMap, app->gameScene->getCamera(), true);
+
+            //draw the quadtree nodes for debug
+            std::function<void(const SimplePhysics::QuadtreeNode *, int)> drawQuadtreeNode = [&](const SimplePhysics::QuadtreeNode *node, int depth)
+            {
+                if (!node)
+                    return; 
+                const float draw_depth = -100.0f;
+                auto points = node->box.getBoxPoints();
+                for (size_t i = 0; i < points.size(); i++)
+                {
+                    auto a = points[i];
+                    auto b = points[(i + 1) % points.size()];
+
+                    line_mounter->addLine(
+                        MathCore::vec3f(a, draw_depth),        // a
+                        MathCore::vec3f(b, draw_depth),        // b
+                        3.0f,                                       // thickness
+                        ui::colorFromHex("#0000FFFF")              // color
+                    );
+                }
+                for (const auto &child : node->children)
+                    drawQuadtreeNode(child.get(), depth + 1);
+            };
+
+            drawQuadtreeNode(physicsContainer->static_quadtree->getRoot(), 0);
+        }
+
         // draw filled quad on game area box
         {
             auto box_center = physicsContainer->game_area.getCenter();
@@ -210,11 +241,14 @@ void GameScene::bindResourcesToGraph()
         componentCameraToPlayer->player = componentPlayer;
         // componentCameraToPlayer->LockCameraMove = false;
     }
+
+    this->OnUpdate.add(&GameScene::update, this);
 }
 
 // clear all loaded scene
 void GameScene::unloadAll()
 {
+    this->OnUpdate.remove(&GameScene::update, this);
     root = nullptr;
     camera = nullptr;
     physicsContainer.reset();
@@ -272,6 +306,63 @@ void GameScene::onCameraViewportUpdate(const MathCore::vec2i &viewport_size)
 
 void GameScene::update(Platform::Time *elapsed)
 {
+
+    // auto line_mounter = root->findTransformByName("auxDraw")->findComponent<ComponentLineMounter>();
+    // if (line_mounter)
+    // {
+    //     using namespace MathCore;
+
+    //     line_mounter->clear();
+
+    //     auto player_0 = root->findTransformByName("Player 0");
+
+    //     auto length = 100.0f;
+
+    //     static float rot = 0;
+    //     rot = OP<float>::fmod(rot + elapsed->deltaTime * 0.5f, 2.0f * CONSTANT<float>::PI);
+
+    //     auto pos = CVT<vec3f>::toVec2(player_0->getLocalPosition());
+    //     //auto pos_b = pos + vec2f(OP<float>::cos(rot), OP<float>::sin(rot)) * length;
+
+    //     auto segment = vec2f(OP<float>::cos(rot), OP<float>::sin(rot)) * length;
+
+    //     auto pos_c = pos + vec2f( 300.0f, 0.0f);
+
+    //     auto pos_b = pos_c;
+        
+    //     auto line_a = pos_c - segment * 0.5f;
+    //     auto line_b = pos_c + segment * 0.5f;
+
+    //     float radius = 30.0f;
+
+    //     line_mounter->addLine(
+    //         vec3f(pos, -1.0f),            // a
+    //         vec3f(pos_b, -1.0f),          // b
+    //         3.0f,                         // thickness
+    //         ui::colorFromHex("#0000ffFF") // color
+    //     );
+
+    //     line_mounter->addLine(
+    //         vec3f(line_a, -1.0f),         // a
+    //         vec3f(line_b, -1.0f),         // b
+    //         3.0f,                         // thickness
+    //         ui::colorFromHex("#ff00ffFF") // color
+    //     );
+
+    //     float t = SimplePhysics::Segment2D::circleCastIntersectsSegment
+    //     (
+    //         pos, pos_b,
+    //         radius,
+    //         line_a, line_b
+    //     );
+
+    //     line_mounter->addCircle(
+    //         vec3f( OP<vec2f>::lerp(pos, pos_b, t) , -1.0f),            // a
+    //         radius,                       // b
+    //         3.0f,                         // thickness
+    //         ui::colorFromHex("#0000ffFF") // color
+    //     );
+    // }
 }
 
 void GameScene::printHierarchy()
