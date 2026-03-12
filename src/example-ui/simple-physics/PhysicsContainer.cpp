@@ -87,7 +87,7 @@ namespace SimplePhysics
                         &penetration))
                 {
                     b -= penetration;
-                    vel = b - a;
+                    vel = (b - a) * delta_time_inv;
                     vec2f aux;
                     // vec2f ground_check = b - vec2f(0, radius_grounded);
                     // if (Segment2D::segmentsIntersect(
