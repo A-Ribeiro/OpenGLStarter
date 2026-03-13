@@ -87,7 +87,13 @@ namespace SimplePhysics
                         &penetration))
                 {
                     b -= penetration;
-                    vel = (b - a) * delta_time_inv;
+                    //vel = (b - a) * delta_time_inv;
+                    // remove vel component in the direction of the segment normal
+                    vec2f segment_dir = OP<vec2f>::normalize(segment.b - segment.a);
+                    vec2f segment_normal = OP<vec2f>::cross_z_up(segment_dir);
+                    float vel_normal_component = OP<vec2f>::dot(vel, segment_normal);
+                    vel -= segment_normal * vel_normal_component;
+
                     vec2f aux;
                     // vec2f ground_check = b - vec2f(0, radius_grounded);
                     // if (Segment2D::segmentsIntersect(
@@ -110,7 +116,8 @@ namespace SimplePhysics
         if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[GameAreaSide_Bottom], &penetration))
         {
             b.y -= penetration.y;
-            vel = (b - a) * delta_time_inv;
+            //vel = (b - a) * delta_time_inv;
+            vel.y = 0;
             vec2f ground_check = b - vec2f(0, radius_grounded);
             vec2f aux;
             // if (Line2D::segmentIntersectsLine(
@@ -137,7 +144,8 @@ namespace SimplePhysics
             if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[i], &penetration))
             {
                 b.x -= penetration.x;
-                vel = (b - a) * delta_time_inv;
+                //vel = (b - a) * delta_time_inv;
+                vel.x = 0;
                 break;
             }
         }
