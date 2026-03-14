@@ -5,6 +5,7 @@
 namespace SimplePhysics
 {
     class Box2D;
+    class Line2D;
 
     class Segment2D
     {

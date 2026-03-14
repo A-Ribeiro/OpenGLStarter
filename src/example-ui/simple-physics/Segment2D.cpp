@@ -1,6 +1,7 @@
 #include "Segment2D.h"
 #include "Box2D.h"
-
+#include "Line2D.h"
+    
 namespace SimplePhysics
 {
 
@@ -550,7 +551,8 @@ namespace SimplePhysics
             vec2f center_to_touch_pt = closest_start - center_from;
 
             bool in_front = OP<vec2f>::dot(center_to_touch_pt, move_vector) > 0;
-            if (in_front) {
+            if (in_front)
+            {
                 vec2f tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
                 tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
                 *out_move_direction = tan_dir;
@@ -572,8 +574,7 @@ namespace SimplePhysics
 
             // tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
             // *out_move_direction = tan_dir;
-
-            
+            return 1.0f;
         }
 
         float move_len_sq = OP<vec2f>::dot(move_vector, move_vector);
@@ -663,5 +664,5 @@ namespace SimplePhysics
 
         return result;
     }
-
+    
 }
