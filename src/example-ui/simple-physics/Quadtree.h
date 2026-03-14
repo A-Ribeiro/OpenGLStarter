@@ -329,15 +329,15 @@ namespace SimplePhysics
                     _max = MathCore::OP<MathCore::vec2f>::maximum(_max, QuadTreeIntegrationT::GetBoxMax(p));
                 }
                 // to avoid zero-size boxes, which can cause issues in the quadtree logic
-                _min -= MathCore::EPSILON<float>::low_precision;
-                _max += MathCore::EPSILON<float>::low_precision;
+                //_min -= MathCore::EPSILON<float>::low_precision;
+                _max += 1.0f;
                 root = STL_Tools::make_unique<QuadtreeNode>(_min, _max, 0, minPointThresholdToSubdivide);
             }
             else
             {
                 // to avoid zero-size boxes, which can cause issues in the quadtree logic
-                MathCore::vec2f _min = initial_box.min - MathCore::EPSILON<float>::low_precision;
-                MathCore::vec2f _max = initial_box.max + MathCore::EPSILON<float>::low_precision;
+                MathCore::vec2f _min = initial_box.min;
+                MathCore::vec2f _max = initial_box.max + 1.0f;
                 root = STL_Tools::make_unique<QuadtreeNode>(_min, _max, 0, minPointThresholdToSubdivide);
             }
             for (uint32_t i = 0; i < (uint32_t)items->size(); ++i)

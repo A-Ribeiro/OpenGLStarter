@@ -30,6 +30,12 @@ namespace SimplePhysics
 
         // check if segment has any point with distance <= 0 to line, if so, they overlap
         static bool segmentOverlapsLine(const MathCore::vec2f &a, const MathCore::vec2f &b, const Line2D &line);
-   };
+
+        static float circleCastIntersectsLine(
+            const MathCore::vec2f &center_from, const MathCore::vec2f &center_to,
+            const float &radius,
+            const Line2D &line,
+            MathCore::vec2f *out_move_direction);
+    };
 
 }

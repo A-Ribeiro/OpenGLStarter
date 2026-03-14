@@ -116,4 +116,57 @@ namespace SimplePhysics
 
         return da <= 0 || db <= 0;
     }
+
+    float Line2D::circleCastIntersectsLine(
+        const MathCore::vec2f &center_from, const MathCore::vec2f &center_to,
+        const float &radius,
+        const Line2D &line,
+        MathCore::vec2f *out_move_direction)
+    {
+        using namespace MathCore;
+
+        vec2f move_vector = center_to - center_from;
+
+        // Signed distance from center_from to line
+        float h0 = Line2D::pointDistanceToLine(center_from, line);
+
+        // Check if already overlapping at start
+        if (OP<float>::abs(h0) <= radius)
+        {
+            vec2f closest_on_line = Line2D::closestPointToLine(center_from, line);
+            vec2f center_to_line = closest_on_line - center_from;
+
+            bool in_front = OP<vec2f>::dot(center_to_line, move_vector) > 0;
+            if (in_front)
+            {
+                vec2f tan_dir = OP<vec2f>::cross_z_up(line.normal);
+                tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
+                *out_move_direction = tan_dir;
+                return 0.0f;
+            }
+            return 1.0f;
+        }
+
+        float move_len_sq = OP<vec2f>::dot(move_vector, move_vector);
+        if (move_len_sq < 1e-12f)
+            return 1.0f;
+
+        // h(t) = h0 + t * dh, solve for h(t) = ±radius
+        float dh = OP<vec2f>::dot(move_vector, line.normal);
+
+        if (OP<float>::abs(dh) > 1e-12f)
+        {
+            float dh_inv = 1.0f / dh;
+            float t = (dh > 0) ? (-radius - h0) * dh_inv : (radius - h0) * dh_inv;
+            if (t >= 0.0f && t < 1.0f)
+            {
+                vec2f tan_dir = OP<vec2f>::cross_z_up(line.normal);
+                tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
+                *out_move_direction = tan_dir;
+                return t;
+            }
+        }
+
+        return 1.0f;
+    }
 }

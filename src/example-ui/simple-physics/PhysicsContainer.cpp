@@ -1,11 +1,10 @@
 #include "PhysicsContainer.h"
 
-namespace Debug 
+namespace Debug
 {
     extern std::vector<MathCore::vec2f> dir;
     extern std::vector<MathCore::vec2f> lines;
 }
-
 
 namespace SimplePhysics
 {
@@ -133,6 +132,19 @@ namespace SimplePhysics
                 }
             }
 
+            // // circle cast against game area
+            // for (int i = 0; i < GameAreaSide_Count; i++)
+            // {
+            //     vec2f out_dir;
+            //     float t = Line2D::circleCastIntersectsLine(a, b, radius, game_area_inequality_eq[i], &out_dir);
+            //     if (t < move_t)
+            //     {
+            //         move_t = t;
+            //         segment_collision = nullptr;
+            //         move_dir_to_apply_next = out_dir;
+            //     }
+            // }
+
             if (move_t == 1.0f)
                 break;
 
@@ -200,9 +212,18 @@ namespace SimplePhysics
                     }
                 }
 
+                // for (int i = 0; i < GameAreaSide_Count; i++)
+                // {
+                //     if (i == GameAreaSide_Top)
+                //         continue;
+                //     if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[i], &penetration))
+                //         move_out_collision -= penetration;
+                // }
+
                 if (OP<vec2f>::sqrLength(move_out_collision) > 1e-12f)
                 {
                     b += move_out_collision;
+                    vec2f ground_center = b + vec2f(0, -offset_grounded);
                     // remove vel component in the direction of the push-out
                     vec2f segment_normal = OP<vec2f>::normalize(move_out_collision);
                     float vel_normal_component = OP<vec2f>::dot(vel, segment_normal);
@@ -216,7 +237,6 @@ namespace SimplePhysics
                             const auto &structure = static_structures[idx];
                             for (const auto &segment : structure.segments)
                             {
-                                vec2f ground_center = b + vec2f(0, -offset_grounded);
                                 if (Segment2D::circleIntersectsSegment(
                                         ground_center, radius_grounded,
                                         segment.a, segment.b))
@@ -233,6 +253,19 @@ namespace SimplePhysics
                                 break;
                         }
                     }
+                    // if (!on_ground_called)
+                    // {
+                    //     vec2f aux;
+                    //     if (Line2D::circleOverlapsLine(
+                    //             ground_center, radius_grounded,
+                    //             game_area_inequality_eq[GameAreaSide_Bottom],
+                    //             &aux))
+                    //     {
+                    //         // emmit event grounded
+                    //         onGrounded();
+                    //         on_ground_called = true;
+                    //     }
+                    // }
                     break;
                 }
                 // No real penetration (just touching) — fall through to use tangent redirect
@@ -248,43 +281,43 @@ namespace SimplePhysics
             }
         }
 
-        // check with ground
-        if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[GameAreaSide_Bottom], &penetration))
-        {
-            b.y -= penetration.y;
-            // vel = (b - a) * delta_time_inv;
-            vel.y = 0;
-            vec2f ground_check = b - vec2f(0, radius_grounded);
-            vec2f aux;
-            // if (Line2D::segmentIntersectsLine(
-            //         b, ground_check,
-            //         game_area_inequality_eq[GameAreaSide_Bottom],
-            //         &aux))
-            vec2f ground_center = b + vec2f(0, -offset_grounded);
-            if (Line2D::circleOverlapsLine(
-                    ground_center, radius_grounded,
-                    game_area_inequality_eq[GameAreaSide_Bottom],
-                    &aux))
-            {
-                // emmit event grounded
-                onGrounded();
-            }
-        }
+        // // check with ground
+        // if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[GameAreaSide_Bottom], &penetration))
+        // {
+        //     b.y -= penetration.y;
+        //     // vel = (b - a) * delta_time_inv;
+        //     vel.y = 0;
+        //     vec2f ground_check = b - vec2f(0, radius_grounded);
+        //     vec2f aux;
+        //     // if (Line2D::segmentIntersectsLine(
+        //     //         b, ground_check,
+        //     //         game_area_inequality_eq[GameAreaSide_Bottom],
+        //     //         &aux))
+        //     vec2f ground_center = b + vec2f(0, -offset_grounded);
+        //     if (Line2D::circleOverlapsLine(
+        //             ground_center, radius_grounded,
+        //             game_area_inequality_eq[GameAreaSide_Bottom],
+        //             &aux))
+        //     {
+        //         // emmit event grounded
+        //         onGrounded();
+        //     }
+        // }
 
-        // check other sides of game area
-        for (int i = 0; i < GameAreaSide_Count; i++)
-        {
-            if (i == GameAreaSide_Bottom || i == GameAreaSide_Top)
-                continue;
+        // // check other sides of game area
+        // for (int i = 0; i < GameAreaSide_Count; i++)
+        // {
+        //     if (i == GameAreaSide_Bottom || i == GameAreaSide_Top)
+        //         continue;
 
-            if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[i], &penetration))
-            {
-                b.x -= penetration.x;
-                // vel = (b - a) * delta_time_inv;
-                vel.x = 0;
-                break;
-            }
-        }
+        //     if (Line2D::circleOverlapsLine(b, radius, game_area_inequality_eq[i], &penetration))
+        //     {
+        //         b.x -= penetration.x;
+        //         // vel = (b - a) * delta_time_inv;
+        //         vel.x = 0;
+        //         break;
+        //     }
+        // }
 
         *out_position = vec3f(b, out_position->z);
 

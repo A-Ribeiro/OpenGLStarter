@@ -369,6 +369,24 @@ namespace StageGen
         auto game_area_box = Box2D(vec2f(0.0f, 0.0f), vec2f(W, H));
         container.setGameArea(game_area_box);
 
+        // add game area boundary segments for collision (optional, since we have floor/walls, but good for safety)
+        {
+            float normalJump = params.normal_jump_height;
+            float doubleJump = params.double_jump_height;
+            float playerR = params.player_radius;
+            float totalMaxJump = normalJump + doubleJump;
+
+            container.static_structures.push_back(
+                Structure2D::FromSegment("Floor", 0.8f,
+                                         Segment2D(vec2f(0, 0), vec2f(W, 0))));
+            container.static_structures.push_back(
+                Structure2D::FromSegment("Wall", 1.0f,
+                                         Segment2D(vec2f(0, 0), vec2f(0, H + totalMaxJump * 10.0f))));
+            container.static_structures.push_back(
+                Structure2D::FromSegment("Wall", 1.0f,
+                                         Segment2D(vec2f(W, 0), vec2f(W, H + totalMaxJump * 10.0f))));
+        }
+
         // 2. Floor, ceiling, walls
         addFloorAndWalls(container, params);
 
