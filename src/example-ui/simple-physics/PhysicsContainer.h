@@ -43,6 +43,13 @@ namespace SimplePhysics
         Box2D computeStaticStructureBox() const;
 
 
+        void groundCheck(
+            const std::vector<uint32_t> &static_ids,
+            bool *ref_on_ground_called,
+            const MathCore::vec2f &position, 
+            float radius_grounded, 
+            const EventCore::Callback<void()> &onGrounded
+        );
         void movePlayer(
             const MathCore::vec3f &position, 
             float radius, 
