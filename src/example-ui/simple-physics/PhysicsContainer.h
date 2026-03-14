@@ -50,6 +50,21 @@ namespace SimplePhysics
             float radius_grounded, 
             const EventCore::Callback<void()> &onGrounded
         );
+        
+        void pushOutOfSegments1(
+            MathCore::vec2f *ref_b, 
+            float radius
+        );
+
+        bool pushOutOfSegments(
+            MathCore::vec2f point, 
+            float radius,
+            MathCore::vec2f *output,
+            MathCore::vec2f *offset,
+            MathCore::vec2f *push_normal
+        );
+
+
         void movePlayer(
             const MathCore::vec3f &position, 
             float radius, 

@@ -25,7 +25,32 @@ void GameScene::generateRandomStage()
     params.player_radius = 50.0f;
     params.stage_length_screens = 5;
 
-    stageResult = StageGen::StageGenerator::generate(*physicsContainer, params, random32);
+    // stageResult = StageGen::StageGenerator::generate(*physicsContainer, params, random32);
+    using namespace MathCore;
+    using namespace SimplePhysics;
+
+    stageResult.start_point = vec2f(0.0f, 0.0f);
+
+    vec2f screen_size = vec2f(1920.0f, 1080.0f);
+    vec2f screen_size_2 = screen_size * 0.5f;
+
+    physicsContainer->setGameArea(
+        Box2D(vec2f(-screen_size_2.x, -screen_size_2.y),
+              vec2f(screen_size_2.x, screen_size_2.y)));
+
+    physicsContainer->static_structures.push_back(Structure2D::FromSegment(
+        "wall", 0.5f,
+        Segment2D(
+            vec2f(-screen_size_2.x, screen_size_2.y), 
+            vec2f(-params.player_radius * 0.5f, -screen_size_2.y * 0.5f)
+        )));
+    physicsContainer->static_structures.push_back(Structure2D::FromSegment(
+        "wall", 0.5f,
+        Segment2D(
+            vec2f(params.player_radius * 2.0f, screen_size_2.y), 
+            vec2f(params.player_radius * 0.5f, -screen_size_2.y * 0.5f)
+        )));
+
 }
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void GameScene::loadResources()
@@ -395,10 +420,10 @@ void GameScene::update(Platform::Time *elapsed)
         for (int i = 0; i < (int)Debug::lines.size(); i += 2)
         {
             line_mounter->addLine(
-                vec3f(Debug::lines[i], -1.0f),       // a
-                vec3f(Debug::lines[i + 1], -1.0f),   // b
-                4.0f,                         // thickness
-                ui::colorFromHex("#ffff00FF") // color
+                vec3f(Debug::lines[i], -1.0f),     // a
+                vec3f(Debug::lines[i + 1], -1.0f), // b
+                4.0f,                              // thickness
+                ui::colorFromHex("#ffff00FF")      // color
             );
         }
     }
