@@ -144,7 +144,7 @@ namespace SimplePhysics
                 *out_move_direction = tan_dir;
                 return 0.0f;
             }
-            return 1.0f;
+            // return 1.0f;
         }
 
         float move_len_sq = OP<vec2f>::dot(move_vector, move_vector);
