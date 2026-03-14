@@ -397,6 +397,18 @@ namespace SimplePhysics
         return false;
     }
 
+    bool Segment2D::circleIntersectsSegment(const MathCore::vec2f &center, const float &radius, const MathCore::vec2f &a, const MathCore::vec2f &b)
+    {
+        using namespace MathCore;
+
+        vec2f closestp = closestPointToSegment(center, a, b);
+
+        float distance_to_line = OP<vec2f>::distance(closestp, center);
+        float sphere_dst_to_line_abs = MathCore::OP<float>::abs(distance_to_line - radius);
+
+        return (sphere_dst_to_line_abs > 0.004f && distance_to_line < radius); // 0.00002f
+    }
+
     bool Segment2D::boxIntersectsSegment(const MathCore::vec2f &min, const MathCore::vec2f &max, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *penetration)
     {
         using namespace MathCore;
@@ -428,8 +440,8 @@ namespace SimplePhysics
         if (OP<vec2f>::sqrDistance(center_from, closest_start) <= radius * radius)
             return 0.0f;
 
-        vec2f move_dir = center_to - center_from;
-        float move_len_sq = OP<vec2f>::dot(move_dir, move_dir);
+        vec2f move_vector = center_to - center_from;
+        float move_len_sq = OP<vec2f>::dot(move_vector, move_vector);
 
         // If not moving, no collision
         if (move_len_sq < 1e-12f)
@@ -439,17 +451,17 @@ namespace SimplePhysics
 
         // --- Case 1: Circle vs the edge (infinite line containing the segment) ---
         vec2f seg_dir = segment_b - segment_a;
-        float seg_len = OP<vec2f>::length(seg_dir);
+        float seg_len_sq = OP<vec2f>::sqrLength(seg_dir);
 
-        if (seg_len > 1e-8f)
+        if (seg_len_sq > 1e-16f)
         {
-            vec2f seg_dir_normalized = seg_dir * (1.0f / seg_len);
+            vec2f seg_dir_normalized = seg_dir * OP<float>::rsqrt(seg_len_sq);
             // Outward normal of the segment
             vec2f seg_normal = OP<vec2f>::cross_z_up(seg_dir_normalized);
 
             // Signed distance from P(t) to infinite line: h(t) = h0 + t * dh
             float h0 = OP<vec2f>::dot(center_from - segment_a, seg_normal);
-            float dh = OP<vec2f>::dot(move_dir, seg_normal);
+            float dh = OP<vec2f>::dot(move_vector, seg_normal);
 
             if (OP<float>::abs(dh) > 1e-12f)
             // {
@@ -467,7 +479,7 @@ namespace SimplePhysics
             //             // Check if the contact point projects within the segment bounds
             //             vec2f p_at_t = center_from + t * move_dir;
             //             float s = OP<vec2f>::dot(p_at_t - segment_a, seg_dir_normalized);
-            //             if (s >= 0.0f && s <= seg_len)
+            //             if (s >= 0.0f && s*s <= seg_len_sq)
             //                 result = t;
             //         }
             //     }
@@ -479,9 +491,9 @@ namespace SimplePhysics
                 if (t >= 0.0f && t < result)
                 {
                     // Check if the contact point projects within the segment bounds
-                    vec2f p_at_t = center_from + t * move_dir;
+                    vec2f p_at_t = center_from + t * move_vector;
                     float s = OP<vec2f>::dot(p_at_t - segment_a, seg_dir_normalized);
-                    if (s >= 0.0f && s <= seg_len)
+                    if (s >= 0.0f && s * s <= seg_len_sq)
                         result = t;
                 }
             }
@@ -491,20 +503,21 @@ namespace SimplePhysics
         if (result < 1.0f)
             return result;
 
-        // --- Case 2: Circle vs segment endpoints ---        
-        // Solve |center_from + t * move_dir - endpoint|² = radius²
-        //       |t * move_dir + (center_from - endpoint)|² - radius² = 0
-        // eq = t²|move_dir|² +
-        //      t * 2 * dot(center_from - endpoint, move_dir) +
+        // --- Case 2: Circle vs segment endpoints ---
+        // Solve |center_from + t * move_vector - endpoint|² = radius²
+        //       |t * move_vector + (center_from - endpoint)|² - radius² = 0
+        // eq = t²|move_vector|² +
+        //      t * 2 * dot(center_from - endpoint, move_vector) +
         //      |center_from - endpoint|² - radius²
         // => A*t² + B*t + C = 0
+
         const vec2f *endpoints[2] = {&segment_a, &segment_b};
         for (int i = 0; i < 2; i++)
         {
             // Bhaskara
             vec2f diff = center_from - *endpoints[i];
             float A = move_len_sq;
-            float B = 2.0f * OP<vec2f>::dot(diff, move_dir);
+            float B = 2.0f * OP<vec2f>::dot(diff, move_vector);
             float C = OP<vec2f>::dot(diff, diff) - radius * radius;
 
             float delta = B * B - 4.0f * A * C;
@@ -516,6 +529,137 @@ namespace SimplePhysics
                     result = t;
             }
         }
+
+        return result;
+    }
+
+    float Segment2D::circleCastIntersectsSegment(
+        const MathCore::vec2f &center_from, const MathCore::vec2f &center_to,
+        const float &radius,
+        const MathCore::vec2f &segment_a, const MathCore::vec2f &segment_b,
+        MathCore::vec2f *out_move_direction)
+    {
+        using namespace MathCore;
+
+        vec2f move_vector = center_to - center_from;
+
+        // Check if already overlapping at start
+        vec2f closest_start = closestPointToSegment(center_from, segment_a, segment_b);
+        if (OP<vec2f>::sqrDistance(center_from, closest_start) <= radius * radius)
+        {
+            vec2f center_to_touch_pt = closest_start - center_from;
+
+            bool in_front = OP<vec2f>::dot(center_to_touch_pt, move_vector) > 0;
+            if (in_front) {
+                vec2f tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
+                tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
+                *out_move_direction = tan_dir;
+                return 0.0f;
+            }
+
+            // // t = 0
+            // vec2f p_at_t = center_from;
+
+            // vec2f normal = p_at_t - closest_start;
+            // float normal_len_sq = OP<vec2f>::dot(normal, normal);
+            // vec2f tan_dir;
+
+            // if (normal_len_sq > 1e-12f) {
+            //     normal *= OP<float>::rsqrt(normal_len_sq);
+            //     tan_dir = OP<vec2f>::cross_z_up(normal);
+            // } else
+            //     tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
+
+            // tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
+            // *out_move_direction = tan_dir;
+
+            
+        }
+
+        float move_len_sq = OP<vec2f>::dot(move_vector, move_vector);
+
+        // If not moving, no collision
+        if (move_len_sq < 1e-12f)
+            return 1.0f;
+
+        float result = 1.0f;
+
+        // --- Case 1: Circle vs the edge (infinite line containing the segment) ---
+        vec2f seg_dir = segment_b - segment_a;
+        float seg_len_sq = OP<vec2f>::sqrLength(seg_dir);
+
+        if (seg_len_sq > 1e-16f)
+        {
+            vec2f seg_dir_normalized = seg_dir * OP<float>::rsqrt(seg_len_sq);
+            // Outward normal of the segment
+            vec2f seg_normal = OP<vec2f>::cross_z_up(seg_dir_normalized);
+
+            // Signed distance from P(t) to infinite line: h(t) = h0 + t * dh
+            float h0 = OP<vec2f>::dot(center_from - segment_a, seg_normal);
+            float dh = OP<vec2f>::dot(move_vector, seg_normal);
+
+            if (OP<float>::abs(dh) > 1e-12f)
+            {
+                // Solve h0 + t * dh = +radius and h0 + t * dh = -radius
+                float dh_inv = 1.0f / dh;
+                float t = (dh > 0) ? (-radius - h0) * dh_inv : (radius - h0) * dh_inv;
+                if (t >= 0.0f && t < result)
+                {
+                    // Check if the contact point projects within the segment bounds
+                    vec2f p_at_t = center_from + t * move_vector;
+                    float s = OP<vec2f>::dot(p_at_t - segment_a, seg_dir_normalized);
+                    if (s >= 0.0f && s * s <= seg_len_sq)
+                    {
+                        result = t;
+
+                        seg_dir_normalized = (OP<vec2f>::dot(move_vector, seg_dir_normalized) < 0.0f) ? -seg_dir_normalized : seg_dir_normalized;
+
+                        *out_move_direction = seg_dir_normalized;
+                    }
+                }
+            }
+        }
+
+        // We already have a valid collision with the edge, so we can return early
+        if (result < 1.0f)
+            return result;
+
+        // --- Case 2: Circle vs segment endpoints ---
+        // Solve |center_from + t * move_vector - endpoint|² = radius²
+        //       |t * move_vector + (center_from - endpoint)|² - radius² = 0
+        // eq = t²|move_vector|² +
+        //      t * 2 * dot(center_from - endpoint, move_vector) +
+        //      |center_from - endpoint|² - radius²
+        // => A*t² + B*t + C = 0
+        const vec2f *endpoints[2] = {&segment_a, &segment_b};
+        for (int i = 0; i < 2; i++)
+        {
+            // Bhaskara
+            vec2f diff = center_from - *endpoints[i];
+            float A = move_len_sq;
+            float B = 2.0f * OP<vec2f>::dot(diff, move_vector);
+            float C = OP<vec2f>::dot(diff, diff) - radius * radius;
+
+            float delta = B * B - 4.0f * A * C;
+            if (delta >= 0.0f)
+            {
+                float sqrt_delta = OP<float>::sqrt(delta);
+                float t = (-B - sqrt_delta) / (2.0f * A);
+                if (t >= 0.0f && t < result)
+                {
+                    result = t;
+                    vec2f p_at_t = center_from + t * move_vector;
+                    vec2f normal = OP<vec2f>::normalize(p_at_t - *endpoints[i]);
+                    vec2f tan_dir = OP<vec2f>::cross_z_up(normal);
+                    tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
+                    *out_move_direction = tan_dir;
+                }
+            }
+        }
+
+        // // No collision
+        // if (result == 1.0f)
+        //     *out_move_direction = move_vector * OP<float>::rsqrt(move_len_sq);
 
         return result;
     }

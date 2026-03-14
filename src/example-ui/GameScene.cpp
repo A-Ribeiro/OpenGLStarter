@@ -12,6 +12,11 @@
 
 #include "stage-generator/StageGenerator.h"
 
+namespace Debug
+{
+    std::vector<MathCore::vec2f> dir;
+    std::vector<MathCore::vec2f> lines;
+}
 void GameScene::generateRandomStage()
 {
     StageGen::StageParams params;
@@ -98,11 +103,11 @@ void GameScene::loadGraph()
             std::shared_ptr<ComponentLineMounter> line_mounter = auxDraw->addNewComponent<ComponentLineMounter>();
             line_mounter->setCamera(&app->resourceMap, app->gameScene->getCamera(), true);
 
-            //draw the quadtree nodes for debug
+            // draw the quadtree nodes for debug
             std::function<void(const SimplePhysics::QuadtreeNode *, int)> drawQuadtreeNode = [&](const SimplePhysics::QuadtreeNode *node, int depth)
             {
                 if (!node)
-                    return; 
+                    return;
                 const float draw_depth = -100.0f;
                 auto points = node->box.getBoxPoints();
                 for (size_t i = 0; i < points.size(); i++)
@@ -111,10 +116,10 @@ void GameScene::loadGraph()
                     auto b = points[(i + 1) % points.size()];
 
                     line_mounter->addLine(
-                        MathCore::vec3f(a, draw_depth),        // a
-                        MathCore::vec3f(b, draw_depth),        // b
-                        3.0f,                                       // thickness
-                        ui::colorFromHex("#0000FFFF")              // color
+                        MathCore::vec3f(a, draw_depth), // a
+                        MathCore::vec3f(b, draw_depth), // b
+                        3.0f,                           // thickness
+                        ui::colorFromHex("#0000FFFF")   // color
                     );
                 }
                 for (const auto &child : node->children)
@@ -307,62 +312,96 @@ void GameScene::onCameraViewportUpdate(const MathCore::vec2i &viewport_size)
 void GameScene::update(Platform::Time *elapsed)
 {
 
-    // auto line_mounter = root->findTransformByName("auxDraw")->findComponent<ComponentLineMounter>();
-    // if (line_mounter)
-    // {
-    //     using namespace MathCore;
+    auto line_mounter = root->findTransformByName("auxDraw")->findComponent<ComponentLineMounter>();
+    if (line_mounter)
+    {
+        using namespace MathCore;
 
-    //     line_mounter->clear();
+        line_mounter->clear();
 
-    //     auto player_0 = root->findTransformByName("Player 0");
+        auto player_0 = root->findTransformByName("Player 0");
 
-    //     auto length = 100.0f;
+        auto length = 100.0f;
 
-    //     static float rot = 0;
-    //     rot = OP<float>::fmod(rot + elapsed->deltaTime * 0.5f, 2.0f * CONSTANT<float>::PI);
+        static float rot = 0;
+        rot = OP<float>::fmod(rot + elapsed->deltaTime * 0.5f, 2.0f * CONSTANT<float>::PI);
 
-    //     auto pos = CVT<vec3f>::toVec2(player_0->getLocalPosition());
-    //     //auto pos_b = pos + vec2f(OP<float>::cos(rot), OP<float>::sin(rot)) * length;
+        auto pos = CVT<vec3f>::toVec2(player_0->getLocalPosition());
+        // auto pos_b = pos + vec2f(OP<float>::cos(rot), OP<float>::sin(rot)) * length;
 
-    //     auto segment = vec2f(OP<float>::cos(rot), OP<float>::sin(rot)) * length;
+        auto segment = vec2f(OP<float>::cos(rot), OP<float>::sin(rot)) * length;
 
-    //     auto pos_c = pos + vec2f( 300.0f, 0.0f);
+        auto pos_c = pos + vec2f(300.0f, 0.0f);
 
-    //     auto pos_b = pos_c;
-        
-    //     auto line_a = pos_c - segment * 0.5f;
-    //     auto line_b = pos_c + segment * 0.5f;
+        auto pos_b = pos_c;
 
-    //     float radius = 30.0f;
+        auto line_a = pos_c - segment * 0.5f;
+        auto line_b = pos_c + segment * 0.5f;
 
-    //     line_mounter->addLine(
-    //         vec3f(pos, -1.0f),            // a
-    //         vec3f(pos_b, -1.0f),          // b
-    //         3.0f,                         // thickness
-    //         ui::colorFromHex("#0000ffFF") // color
-    //     );
+        float radius = 30.0f;
 
-    //     line_mounter->addLine(
-    //         vec3f(line_a, -1.0f),         // a
-    //         vec3f(line_b, -1.0f),         // b
-    //         3.0f,                         // thickness
-    //         ui::colorFromHex("#ff00ffFF") // color
-    //     );
+        line_mounter->addLine(
+            vec3f(pos, -1.0f),            // a
+            vec3f(pos_b, -1.0f),          // b
+            3.0f,                         // thickness
+            ui::colorFromHex("#0000ffFF") // color
+        );
 
-    //     float t = SimplePhysics::Segment2D::circleCastIntersectsSegment
-    //     (
-    //         pos, pos_b,
-    //         radius,
-    //         line_a, line_b
-    //     );
+        line_mounter->addLine(
+            vec3f(line_a, -1.0f),         // a
+            vec3f(line_b, -1.0f),         // b
+            3.0f,                         // thickness
+            ui::colorFromHex("#ff00ffFF") // color
+        );
 
-    //     line_mounter->addCircle(
-    //         vec3f( OP<vec2f>::lerp(pos, pos_b, t) , -1.0f),            // a
-    //         radius,                       // b
-    //         3.0f,                         // thickness
-    //         ui::colorFromHex("#0000ffFF") // color
-    //     );
-    // }
+        vec2f out_dir;
+        float t = SimplePhysics::Segment2D::circleCastIntersectsSegment(
+            pos, pos_b,
+            radius,
+            line_a, line_b,
+            &out_dir);
+
+        vec2f circle_pos = OP<vec2f>::lerp(pos, pos_b, t);
+
+        line_mounter->addCircle(
+            vec3f(circle_pos, -1.0f),     // a
+            radius,                       // b
+            3.0f,                         // thickness
+            ui::colorFromHex("#0000ffFF") // color
+        );
+
+        if (t < 1.0f)
+        {
+            vec2f pt_in_line = SimplePhysics::Segment2D::closestPointToSegment(circle_pos, line_a, line_b);
+
+            line_mounter->addLine(
+                vec3f(pt_in_line, -1.0f),                    // a
+                vec3f(pt_in_line + out_dir * length, -1.0f), // b
+                5.0f,                                        // thickness
+                ui::colorFromHex("#00ff00FF")                // color
+            );
+        }
+
+        for (const auto &v : Debug::dir)
+        {
+            line_mounter->addLine(
+                vec3f(pos, -1.0f),            // a
+                vec3f(pos + v, -1.0f),        // b
+                5.0f,                         // thickness
+                ui::colorFromHex("#00ff00FF") // color
+            );
+        }
+
+        for (int i = 0; i < (int)Debug::lines.size(); i += 2)
+        {
+            line_mounter->addLine(
+                vec3f(Debug::lines[i], -1.0f),       // a
+                vec3f(Debug::lines[i + 1], -1.0f),   // b
+                4.0f,                         // thickness
+                ui::colorFromHex("#ffff00FF") // color
+            );
+        }
+    }
 }
 
 void GameScene::printHierarchy()

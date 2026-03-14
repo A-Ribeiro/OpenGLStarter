@@ -157,6 +157,8 @@ namespace SimplePhysics
         static int closestPointInSegmentToBox(const MathCore::vec2f &a, const MathCore::vec2f &b, const MathCore::vec2f &min, const MathCore::vec2f &max, MathCore::vec2f *output_array);
 
         static bool circleIntersectsSegment(const MathCore::vec2f &center, const float &radius, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *penetration);
+        static bool circleIntersectsSegment(const MathCore::vec2f &center, const float &radius, const MathCore::vec2f &a, const MathCore::vec2f &b);
+
         static bool boxIntersectsSegment(const MathCore::vec2f &min, const MathCore::vec2f &max, const MathCore::vec2f &a, const MathCore::vec2f &b, MathCore::vec2f *penetration);
 
 
@@ -165,6 +167,11 @@ namespace SimplePhysics
             const MathCore::vec2f &center_from, const MathCore::vec2f &center_to, 
             const float &radius, 
             const MathCore::vec2f &segment_a, const MathCore::vec2f &segment_b);
+        static float circleCastIntersectsSegment(
+            const MathCore::vec2f &center_from, const MathCore::vec2f &center_to, 
+            const float &radius, 
+            const MathCore::vec2f &segment_a, const MathCore::vec2f &segment_b,
+            MathCore::vec2f *out_move_direction);
 
 
     };
