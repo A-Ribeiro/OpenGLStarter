@@ -84,11 +84,11 @@ namespace SimplePhysics
     }
 
     void PhysicsContainer::pushOutOfSegments1(
-        //const std::vector<uint32_t> &static_ids,
-        MathCore::vec2f *ref_b, 
-        //MathCore::vec2f *ref_vel, 
+        // const std::vector<uint32_t> &static_ids,
+        MathCore::vec2f *ref_b,
+        // MathCore::vec2f *ref_vel,
         float radius
-        // float radius_grounded, 
+        // float radius_grounded,
         // float offset_grounded
         // bool *ref_on_ground_called,
         // const EventCore::Callback<void()> &onGrounded
@@ -123,7 +123,7 @@ namespace SimplePhysics
         if (OP<vec2f>::sqrLength(move_out_collision) > 1e-12f)
         {
             *ref_b += move_out_collision;
-            
+
             // vec2f ground_center = *ref_b + vec2f(0, -offset_grounded);
             // // remove vel component in the direction of the push-out
             // vec2f segment_normal = OP<vec2f>::normalize(move_out_collision);
@@ -143,12 +143,11 @@ namespace SimplePhysics
     }
 
     bool PhysicsContainer::pushOutOfSegments(
-            MathCore::vec2f point, 
-            float radius,
-            MathCore::vec2f *output,
-            MathCore::vec2f *offset,
-            MathCore::vec2f *push_normal
-        )
+        MathCore::vec2f point,
+        float radius,
+        MathCore::vec2f *output,
+        MathCore::vec2f *offset,
+        MathCore::vec2f *push_normal)
     {
         using namespace MathCore;
         Box2D b_box = Box2D().wrapCircle(point, radius);
@@ -180,7 +179,7 @@ namespace SimplePhysics
         {
             *output = point + move_out_collision;
             *offset = move_out_collision;
-            *push_normal = OP<vec2f>::normalize(move_out_collision);            
+            *push_normal = OP<vec2f>::normalize(move_out_collision);
             return true;
         }
 
@@ -205,7 +204,8 @@ namespace SimplePhysics
 
         {
             vec2f push_offset, push_normal;
-            if (pushOutOfSegments(a, radius, &a, &push_offset, &push_normal)) {
+            if (pushOutOfSegments(a, radius, &a, &push_offset, &push_normal))
+            {
                 // need recompute velocity and b offset
                 b += push_offset;
                 // cancel velocity into the push-out surface
@@ -218,8 +218,6 @@ namespace SimplePhysics
                 *out_velocity = vec3f(vel, out_velocity->z);
             }
         }
-
-
 
         float length_vel = OP<vec2f>::length(vel);
 
@@ -322,8 +320,6 @@ namespace SimplePhysics
                 radius_grounded,
                 onGrounded);
 
-            
-
             // Redirect remaining movement along the collision tangent
             if (max_iterations-- <= 0)
                 break;
@@ -361,6 +357,17 @@ namespace SimplePhysics
         //             onGrounded);
         //     }
         // }
+
+        {
+            vec2f push_offset, push_normal;
+            if (pushOutOfSegments(b, radius, &b, &push_offset, &push_normal))
+            {
+                // cancel velocity component going into the surface
+                float vel_into_surface = OP<vec2f>::dot(vel, push_normal);
+                if (vel_into_surface < 0.0f)
+                    vel -= push_normal * vel_into_surface;
+            }
+        }
 
         *out_position = vec3f(b, out_position->z);
         // *out_velocity = vec3f(vel, out_velocity->z);
