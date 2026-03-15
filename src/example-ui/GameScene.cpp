@@ -41,16 +41,21 @@ void GameScene::generateRandomStage()
     physicsContainer->static_structures.push_back(Structure2D::FromSegment(
         "wall", 0.5f,
         Segment2D(
-            vec2f(-screen_size_2.x, screen_size_2.y), 
-            vec2f(-params.player_radius * 0.5f, -screen_size_2.y * 0.5f)
-        )));
+            vec2f(-screen_size_2.x, screen_size_2.y),
+            vec2f(-params.player_radius * 0.5f, -screen_size_2.y * 0.5f))));
+
     physicsContainer->static_structures.push_back(Structure2D::FromSegment(
         "wall", 0.5f,
         Segment2D(
-            vec2f(params.player_radius * 2.0f, screen_size_2.y), 
-            vec2f(params.player_radius * 0.5f, -screen_size_2.y * 0.5f)
-        )));
+            vec2f(-params.player_radius * 0.5f, -screen_size_2.y * 0.5f),
+            vec2f(-params.player_radius * 0.5f + screen_size.x, -screen_size_2.y * 0.5f))));
 
+    // physicsContainer->static_structures.push_back(Structure2D::FromSegment(
+    //     "wall", 0.5f,
+    //     Segment2D(
+    //         vec2f(params.player_radius * 2.0f, screen_size_2.y),
+    //         vec2f(params.player_radius * 0.5f, -screen_size_2.y * 0.5f)
+    //     )));
 }
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void GameScene::loadResources()
@@ -129,7 +134,7 @@ void GameScene::loadGraph()
             std::shared_ptr<ComponentLineMounter> line_mounter = auxDraw->addNewComponent<ComponentLineMounter>();
             line_mounter->setCamera(&app->resourceMap, app->gameScene->getCamera(), true);
 
-            Debug::lineMounter =  line_mounter.get();
+            Debug::lineMounter = line_mounter.get();
 
             // // draw the quadtree nodes for debug
             // std::function<void(const SimplePhysics::QuadtreeNode *, int)> drawQuadtreeNode = [&](const SimplePhysics::QuadtreeNode *node, int depth)
