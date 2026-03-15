@@ -230,10 +230,10 @@ namespace SimplePhysics
                         if (box_pt_rc == SegmentPointReturnType_One_Outside)
                         {
                             MathCore::vec2f closest_point = Segment2D::closestPointToSegment(closest_point_array[0], a, b);
-                            if (MathCore::OP<MathCore::vec2f>::sqrLength(closest_point - a) <= radius_squared)
+                            if (MathCore::OP<MathCore::vec2f>::sqrDistance(closest_point, closest_point_array[0]) <= radius_squared)
                                 result.push_back(idx);
                         }
-                        else if (box_pt_rc & SegmentPointReturnType_Zero_Dst_Bit)
+                        else if (box_pt_rc & SegmentPointReturnType_AnyIntersectOrInside_Bit)
                             result.push_back(idx);
                     }
                 }
