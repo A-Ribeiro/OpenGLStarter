@@ -18,12 +18,12 @@ namespace AppKit
         {
             const ComponentType ComponentPlayer::Type = "ComponentPlayer";
 
-            CollisionCore::Sphere<MathCore::vec3f> ComponentPlayer::getSphere()
-            {
-                auto transform = getTransform();
-                auto position = transform->getLocalPosition();
-                return CollisionCore::Sphere<MathCore::vec3f>(position, Radius.c_val());
-            }
+            // CollisionCore::Sphere<MathCore::vec3f> ComponentPlayer::getSphere()
+            // {
+            //     auto transform = getTransform();
+            //     auto position = transform->getLocalPosition();
+            //     return CollisionCore::Sphere<MathCore::vec3f>(position, Radius.c_val());
+            // }
 
             ComponentPlayer::ComponentPlayer() : Component(ComponentPlayer::Type), inputState(RawInputFromDevice::Keyboard)
             {
@@ -36,13 +36,13 @@ namespace AppKit
 
                 Radius.OnChange.add(&ComponentPlayer::OnRadiusParameter, this);
 
-                jumpState.configureJump(
-                    1000.0f, // risingVelocity
-                    150.0f,  // minJumpHeight
-                    300.0f,  // maxJumpHeight
-                    200.0f,  // secondJumpHeight
-                    -5000.0f // gravity
-                );
+                // jumpState.configureJump(
+                //     1000.0f, // risingVelocity
+                //     150.0f,  // minJumpHeight
+                //     300.0f,  // maxJumpHeight
+                //     200.0f,  // secondJumpHeight
+                //     -5000.0f // gravity
+                // );
             }
 
             ComponentPlayer::~ComponentPlayer()
@@ -53,6 +53,21 @@ namespace AppKit
 
             void ComponentPlayer::start()
             {
+                physicsController = SimplePhysics::JumpingController::CreateShared();
+                *physicsController = SimplePhysics::JumpingController::fromStaticConfig(
+                    Radius.c_val(),
+                    RadiusGrounded.c_val(),
+                    OffsetGrounded.c_val(),
+                    1000.0f,                         // risingVelocity
+                    150.0f,                          // minJumpHeight
+                    300.0f,                          // maxJumpHeight
+                    200.0f,                          // secondJumpHeight
+                    MathCore::vec2f(0.0f, -5000.0f), // gravity
+                    true                             // allow_double_jump
+                );
+                // app->gameScene->physicsContainer->jumpingControllerList.push_back(physicsController);
+                physicsController->teleport(MathCore::CVT<MathCore::vec3f>::toVec2(getTransform()->getLocalPosition()));
+
                 if (auto eventHandlerSet = eventHandlerSetRef.lock())
                     eventHandlerSet->OnUpdate.add(&ComponentPlayer::OnUpdate, this);
 
@@ -98,22 +113,22 @@ namespace AppKit
 
                         float radius_to_draw = inner_radius * 20.0f;
                         line_mounter->addLine(
-                            MathCore::vec3f(-radius_to_draw, self_ref->jumpState.getMinJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(radius_to_draw, self_ref->jumpState.getMinJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->physicsController->jumpState.getMinJumpHeight() - inner_radius,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->physicsController->jumpState.getMinJumpHeight() - inner_radius, 0), // b
                             self_ref->debugDrawThickness, // thickness
                             ui::colorFromHex("#FF0000FF") // color
                         );
 
                         line_mounter->addLine(
-                            MathCore::vec3f(-radius_to_draw, self_ref->jumpState.getMaxJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(radius_to_draw, self_ref->jumpState.getMaxJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->physicsController->jumpState.getMaxJumpHeight() - inner_radius,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->physicsController->jumpState.getMaxJumpHeight() - inner_radius, 0), // b
                             self_ref->debugDrawThickness, // thickness
                             ui::colorFromHex("#FF0000FF") // color
                         );
 
                         line_mounter->addLine(
-                            MathCore::vec3f(-radius_to_draw, self_ref->jumpState.getSecondJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(radius_to_draw, self_ref->jumpState.getSecondJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->physicsController->jumpState.getSecondJumpHeight() - inner_radius,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->physicsController->jumpState.getSecondJumpHeight() - inner_radius, 0), // b
                             self_ref->debugDrawThickness * 0.5f, // thickness
                             ui::colorFromHex("#f700ffff") // color
                         );
@@ -141,110 +156,84 @@ namespace AppKit
             {
                 inputState.fillState();
 
-                MathCore::vec3f position = getTransform()->getLocalPosition();
+                // MathCore::vec3f position = getTransform()->getLocalPosition();
 
-                const MathCore::vec3f gravity_px_per_sec = MathCore::vec3f(0, -5000.0f, 0.0f);
+                // const MathCore::vec3f gravity_px_per_sec = MathCore::vec3f(0, -5000.0f, 0.0f);
 
-                acceleration = MathCore::vec3f(0.0f, 0.0f, 0.0f); // reset acceleration
-                acceleration += gravity_px_per_sec;
+                // acceleration = MathCore::vec3f(0.0f, 0.0f, 0.0f); // reset acceleration
+                // acceleration += gravity_px_per_sec;
 
-                // avoid affect the velocity, and give the jumpstate the control of the y velocity
-                // if (jumpState.isJumping())
-                //     acceleration.y = 0;
+                // // avoid affect the velocity, and give the jumpstate the control of the y velocity
+                // // if (jumpState.isJumping())
+                // //     acceleration.y = 0;
 
-                // vec3 traveled_position_aux = HeightAndTime::IntegrateAcceleration(velocity, acceleration, time->deltaTime);
-                velocity += acceleration * time->deltaTime;
+                // // vec3 traveled_position_aux = HeightAndTime::IntegrateAcceleration(velocity, acceleration, time->deltaTime);
+                // velocity += acceleration * time->deltaTime;
 
-                const float & max_velocity = app->gameScene->physicsContainer->max_velocity;
-                //velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), velocity, max_velocity);
-                velocity.y = MathCore::OP<float>::clamp(velocity.y, -max_velocity, max_velocity);
+                // const float & max_velocity = app->gameScene->physicsContainer->max_velocity;
+                // //velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), velocity, max_velocity);
+                // velocity.y = MathCore::OP<float>::clamp(velocity.y, -max_velocity, max_velocity);
 
-                // check is grounded before update velocity for jump
-                // stage limits
-                // auto gameAreaShared = gameArea.lock();
-                // if (gameAreaShared == nullptr)
-                //     return;
+                // jumpState.update(&velocity.y,             // velocityY
+                //                  time->deltaTime,         // deltaTime
+                //                  gravity_px_per_sec.y,    // gravity
+                //                  inputState.jump.pressed, // jump_pressed
+                //                  true);                   // allow_double_jump
 
-                jumpState.update(&velocity.y,             // velocityY
-                                 time->deltaTime,         // deltaTime
-                                 gravity_px_per_sec.y,    // gravity
-                                 inputState.jump.pressed, // jump_pressed
-                                 true);                   // allow_double_jump
+                // float x = inputState.x_axis;
 
-                float x = inputState.x_axis;
+                // bool stop_player = true;
 
-                bool stop_player = true;
+                // if (abs(x) > 0.02f)
+                // {
+                //     velocity.x = 600.0f * x;
+                //     stop_player = false;
+                // }
 
-                if (abs(x) > 0.02f)
-                {
-                    velocity.x = 600.0f * x;
-                    stop_player = false;
-                }
+                // if (stop_player)
+                // {
+                //     using namespace MathCore;
+                //     vec3f cancel_normal = vec3f(1, 0, 0);
+                //     float vel_into_surface = OP<vec3f>::dot(velocity, cancel_normal);
+                //     velocity -= cancel_normal * vel_into_surface;
+                // }
 
-                if (stop_player)
-                {
-                    using namespace MathCore;
-                    vec3f cancel_normal = vec3f(1, 0, 0);
-                    float vel_into_surface = OP<vec3f>::dot(velocity, cancel_normal);
-                    velocity -= cancel_normal * vel_into_surface;
-                }
+                // position += velocity * time->deltaTime;
 
-                position += velocity * time->deltaTime;
+                // // force 2d logic
+                // position.z = 0.0f;
+                // velocity.z = 0;
 
-                /*
-                {
-                    auto stageArea = gameAreaShared->StageArea.c_val();
+                // app->gameScene->physicsContainer->movePlayer(
+                //     getTransform()->getLocalPosition(),
+                //     Radius.c_val(),
+                //     RadiusGrounded.c_val(),
+                //     OffsetGrounded.c_val(),
+                //     &position, &velocity,
+                //     time->deltaTime,
+                //     // onGrounded callback
+                //     [this]()
+                //     {
+                //         if (jumpState.getState() == JumpState::Falling)
+                //             jumpState.setGrounded();
+                //     });
 
-                    auto sphere = CollisionCore::Sphere<MathCore::vec3f>(position, Radius.c_val());
-                    auto lower_limit_plane = CollisionCore::Plane<MathCore::vec3f>(
-                        stageArea.min_box,       // point
-                        MathCore::vec3f(0, 1, 0) // normal
-                    );
+                // getTransform()->setLocalPosition(position);
 
-                    MathCore::vec3f penetration;
-                    if (CollisionCore::Plane<MathCore::vec3f>::sphereIntersectsPlane(sphere, lower_limit_plane, &penetration))
-                    {
-                        jumpState.setGrounded();
+                physicsController->update(app->gameScene->physicsContainer.get(),
+                                          time,
+                                          inputState.x_axis,
+                                          inputState.jump.pressed,
+                                          app->gameScene->physicsContainer->max_velocity);
 
-                        position -= penetration;
-
-                        auto penetration_dir = MathCore::OP<MathCore::vec3f>::normalize(penetration);
-                        auto parallel_penetration = MathCore::OP<MathCore::vec3f>::parallelComponent(
-                            velocity,
-                            penetration_dir);
-
-                        // remove velocity component in the plane direction from velocity vector
-                        velocity -= parallel_penetration;
-                    }
-                }
-                */
-
-                // force 2d logic
-                position.z = 0.0f;
-                velocity.z = 0;
-
-                app->gameScene->physicsContainer->movePlayer(
-                    getTransform()->getLocalPosition(), 
-                    Radius.c_val(), 
-                    RadiusGrounded.c_val(), 
-                    OffsetGrounded.c_val(),
-                    &position, &velocity,
-                    time->deltaTime,
-                    // onGrounded callback
-                    [this]()
-                    {
-                        if (jumpState.getState() == JumpState::Falling)
-                            jumpState.setGrounded();
-                    });
-
-                getTransform()->setLocalPosition(position);
+                getTransform()->setLocalPosition(MathCore::vec3f(physicsController->position, 0.0f));
 
                 auto debugDrawTransform = getTransform()->findTransformByName("DebugDrawCircle");
                 if (debugDrawTransform)
                 {
                     auto mesh_line_drawer = debugDrawTransform->findComponent<ComponentMesh>();
                     MathCore::vec4f color;
-                    auto state = jumpState.getState();
+                    auto state = physicsController->jumpState.getState();
                     switch (state)
                     {
                     case JumpState::Grounded:
