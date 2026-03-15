@@ -16,7 +16,7 @@ namespace SimplePhysics
         SegmentPointReturnType_One_Outside = 1 << 5,
     };
 
-    const uint32_t SegmentPointReturnType_Zero_Dst_Bit =
+    const uint32_t SegmentPointReturnType_AnyIntersectOrInside_Bit =
         SegmentPointReturnType_Two_Intersects |
         SegmentPointReturnType_One_Intersect_One_Inside_A |
         SegmentPointReturnType_One_Intersect_One_Inside_B |

@@ -1,9 +1,13 @@
 #include "PhysicsContainer.h"
+#include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
+#include "../ui/common.h"
+
+using namespace MathCore;
+using namespace AppKit::GLEngine::Components;
 
 namespace Debug
 {
-    extern std::vector<MathCore::vec2f> dir;
-    extern std::vector<MathCore::vec2f> lines;
+    extern ComponentLineMounter *lineMounter;
 }
 
 namespace SimplePhysics
@@ -194,8 +198,6 @@ namespace SimplePhysics
         float delta_time,
         const EventCore::Callback<void()> &onGrounded)
     {
-        Debug::dir.clear();
-        Debug::lines.clear();
         using namespace MathCore;
 
         vec2f a = CVT<vec3f>::toVec2(position);
@@ -221,8 +223,6 @@ namespace SimplePhysics
 
         float length_vel = OP<vec2f>::length(vel);
 
-        Debug::dir.push_back(vel);
-
         vec2f ab = b - a;
         float ab_mag = OP<vec2f>::length(ab);
 
@@ -232,12 +232,22 @@ namespace SimplePhysics
             return;
         }
 
+        for (int i = 0; i <= 10; i++)
+        {
+            float lrp = (float)i / 10.0f;
+            Debug::lineMounter->addCircle(
+                vec3f(OP<vec2f>::lerp(a, b, lrp), 0.0f),
+                radius,
+                5.0f,
+                ui::colorFromHex("#ff00004c"));
+        }
+
         float delta_time_inv = 1.0f / delta_time;
 
         vec2f penetration;
         float radius_sq = radius * radius;
 
-        float query_radius = offset_grounded + radius_grounded + 1.0f;
+        float query_radius = OP<float>::abs(offset_grounded) + radius_grounded + 1.0f;
 
         // const Segment2D *segment_collision_to_ignore[16] = {};
         // int segment_collision_to_ignore_count = 0;
@@ -260,6 +270,7 @@ namespace SimplePhysics
             vec2f move_dir_to_apply_next = vec2f(0.0f);
 
             const auto &static_ids = static_quadtree->query_segment_radius(a, b, query_radius);
+            // const auto &static_ids = static_quadtree->query_box(move_box.min, move_box.max);
             for (uint32_t idx : static_ids)
             {
                 const auto &structure = static_structures[idx];
@@ -330,44 +341,36 @@ namespace SimplePhysics
                 b = a + move_dir_to_apply_next * curr_move_length;
                 vel = move_dir_to_apply_next * length_vel;
                 previous_move_dir = move_dir_to_apply_next;
+
+                for (int i = 0; i <= 10; i++)
+                {
+                    float lrp = (float)i / 10.0f;
+                    Debug::lineMounter->addCircle(
+                        vec3f(OP<vec2f>::lerp(a, b, lrp), 0.0f),
+                        radius,
+                        5.0f,
+                        ui::colorFromHex("#00ffff4c"));
+                }
             }
         }
 
-        // // Safety: push b out of any remaining penetrating segments
+        // // // Safety: push b out of any remaining penetrating segments
         // {
-        //     vec2f b_before_push = b;
-        //     pushOutOfSegments(&b, radius);
-        //     vec2f push_delta = b - b_before_push;
-        //     if (OP<vec2f>::sqrLength(push_delta) > 1e-12f)
+        //     vec2f push_offset, push_normal;
+        //     if (pushOutOfSegments(b, radius, &b, &push_offset, &push_normal))
         //     {
         //         // cancel velocity component going into the surface
-        //         vec2f push_normal = OP<vec2f>::normalize(push_delta);
         //         float vel_into_surface = OP<vec2f>::dot(vel, push_normal);
         //         if (vel_into_surface < 0.0f)
         //             vel -= push_normal * vel_into_surface;
-
-        //         // ground check after push-out
-        //         Box2D push_box = Box2D().wrapCircle(b, radius + query_radius);
-        //         const auto &static_ids_push = static_quadtree->query_box(push_box.min, push_box.max);
-        //         groundCheck(
-        //             static_ids_push,
-        //             &on_ground_called,
-        //             b + vec2f(0, -offset_grounded),
-        //             radius_grounded,
-        //             onGrounded);
         //     }
         // }
 
-        {
-            vec2f push_offset, push_normal;
-            if (pushOutOfSegments(b, radius, &b, &push_offset, &push_normal))
-            {
-                // cancel velocity component going into the surface
-                float vel_into_surface = OP<vec2f>::dot(vel, push_normal);
-                if (vel_into_surface < 0.0f)
-                    vel -= push_normal * vel_into_surface;
-            }
-        }
+        Debug::lineMounter->addCircle(
+            vec3f(b, -2.0f),
+            radius,
+            5.0f,
+            ui::colorFromHex("#ffff004c"));
 
         *out_position = vec3f(b, out_position->z);
         // *out_velocity = vec3f(vel, out_velocity->z);

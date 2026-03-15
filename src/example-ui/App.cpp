@@ -89,17 +89,18 @@ void App::draw()
     fps_timer.update();
     time.update();
     // 1000 hz protection code
-    if (time.unscaledDeltaTime <= 1.0f / 1000.0f)
+    // time.timeScale = 0.1f;
+    if (time.deltaTime <= 1.0f / 10.0f)
         time.rollback_and_set_zero();
-    // 2 hz protection code - for fallback from window move
-    if (time.unscaledDeltaTime > 1.0f / 2.0f && below_min_hz_count < 2)
-    {
-        below_min_hz_count++;
-        time.reset();
-        fps_timer.reset();
-    }
-    else
-        below_min_hz_count = 0;
+    // // 2 hz protection code - for fallback from window move
+    // if (time.unscaledDeltaTime > 1.0f / 2.0f && below_min_hz_count < 2)
+    // {
+    //     below_min_hz_count++;
+    //     time.reset();
+    //     fps_timer.reset();
+    // }
+    // else
+    //     below_min_hz_count = 0;
 
     if (gain_focus)
     {
