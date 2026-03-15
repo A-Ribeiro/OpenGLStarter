@@ -1,6 +1,7 @@
 #pragma once
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
+#include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
 
 #include "Segment2D.h"
 #include "Box2D.h"
@@ -47,6 +48,8 @@ namespace SimplePhysics
         Segment2D last_collision_segment;
         bool has_last_collision_segment;
 
+        EventCore::PressReleaseDetector move_x_detector;
+
         JumpingController();
 
         static JumpingController fromStaticConfig(
@@ -92,7 +95,7 @@ namespace SimplePhysics
             bool *ref_on_ground_called,
             const MathCore::vec2f &position,
             float radius_grounded,
-            const EventCore::Callback<void(const Segment2D* on_segment)> &onGrounded);
+            const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded);
 
         void pushOutOfSegments1(
             MathCore::vec2f *ref_b,
@@ -114,7 +117,8 @@ namespace SimplePhysics
             MathCore::vec2f *out_position,
             MathCore::vec2f *out_velocity,
             float delta_time,
-            const EventCore::Callback<void(const Segment2D* on_segment)> &onGrounded);
+            const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
+            const EventCore::Callback<void(const MathCore::vec2f &pos, const Segment2D *on_segment)> &onMoveTouch);
 
         const float max_velocity = 5000.0f;
 

@@ -198,6 +198,13 @@ public:
         state = Grounded;
     }
 
+    void setFalling()
+    {
+        if (state != Grounded)
+            return;
+        state = Falling;
+    }
+
     void update(float *velocityY, float deltaTime, float gravity, bool jump_pressedp, bool allow_double_jump, bool double_jump_at_any_time = true)
     {
         jump_trigger_detector.setState(jump_pressedp);

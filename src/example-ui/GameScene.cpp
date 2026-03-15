@@ -48,7 +48,7 @@ void GameScene::generateRandomStage()
         "wall", 0.5f,
         Segment2D(
             vec2f(-params.player_radius * 0.5f, -screen_size_2.y * 0.5f),
-            vec2f(-params.player_radius * 0.5f + screen_size.x, -screen_size_2.y * 0.5f))));
+            vec2f(-params.player_radius * 0.5f + 100.0f, -screen_size_2.y * 0.5f))));
 
     // physicsContainer->static_structures.push_back(Structure2D::FromSegment(
     //     "wall", 0.5f,
