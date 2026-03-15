@@ -5,6 +5,8 @@
 using namespace MathCore;
 using namespace AppKit::GLEngine::Components;
 
+#define DEBUG_DRAW 0
+
 namespace Debug
 {
     extern ComponentLineMounter *lineMounter;
@@ -59,7 +61,7 @@ namespace SimplePhysics
         bool *ref_on_ground_called,
         const MathCore::vec2f &position,
         float radius_grounded,
-        const EventCore::Callback<void()> &onGrounded)
+        const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded)
     {
         using namespace MathCore;
 
@@ -77,7 +79,7 @@ namespace SimplePhysics
                         // emmit event grounded
                         if (!*ref_on_ground_called)
                         {
-                            onGrounded();
+                            onGrounded(&segment);
                             *ref_on_ground_called = true;
                         }
                         return;
@@ -191,18 +193,18 @@ namespace SimplePhysics
     }
 
     void PhysicsContainer::movePlayer(
-        const MathCore::vec3f &position,
+        const MathCore::vec2f &position,
         float radius, float radius_grounded, float offset_grounded,
-        MathCore::vec3f *out_position,
-        MathCore::vec3f *out_velocity,
+        MathCore::vec2f *out_position,
+        MathCore::vec2f *out_velocity,
         float delta_time,
-        const EventCore::Callback<void()> &onGrounded)
+        const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded)
     {
         using namespace MathCore;
 
-        vec2f a = CVT<vec3f>::toVec2(position);
-        vec2f b = CVT<vec3f>::toVec2(*out_position);
-        vec2f vel = CVT<vec3f>::toVec2(*out_velocity);
+        vec2f a = position;
+        vec2f b = *out_position;
+        vec2f vel = *out_velocity;
 
         {
             vec2f push_offset, push_normal;
@@ -216,8 +218,8 @@ namespace SimplePhysics
                     vel -= push_normal * vel_into_surface;
 
                 // force output of the correct position and velocity after push-out
-                *out_position = vec3f(b, out_position->z);
-                *out_velocity = vec3f(vel, out_velocity->z);
+                *out_position = b;
+                *out_velocity = vel;
             }
         }
 
@@ -230,9 +232,11 @@ namespace SimplePhysics
 
         if (ab_mag == 0.0f || delta_time == 0.0f || length_vel == 0.0f)
         {
-            *out_position = vec3f(a, position.z);
+            *out_position = a;
             return;
         }
+
+#if DEBUG_DRAW != 0
 
         // for (int i = 0; i <= 10; i++)
         // {
@@ -254,6 +258,8 @@ namespace SimplePhysics
             vec3f(b, -1.0f),
             5.0f,
             ui::colorFromHex("#ff00004c"));
+
+#endif
 
         float delta_time_inv = 1.0f / delta_time;
 
@@ -342,8 +348,8 @@ namespace SimplePhysics
                 remaining_move_cos = OP<float>::clamp(remaining_move_cos, -1.0f, 1.0f);
                 if (remaining_move_cos < 1e-3f) // if the remaining move is almost perpendicular to the collision surface, just stop
                 {
-                    if (remaining_move_cos < 0.0f)
-                        printf("################### Error scabroso no slide negativo...\n");
+                    // if (remaining_move_cos < 0.0f)
+                    //     printf("################### Error scabroso no slide negativo...\n");
                     break;
                 }
 
@@ -353,6 +359,8 @@ namespace SimplePhysics
                 b = a + new_remaining_dir_norm * remaining_move_mag;
                 // vel = new_remaining_dir_norm * length_vel;
                 remaining_dir_norm = new_remaining_dir_norm;
+
+#if DEBUG_DRAW != 0
 
                 // for (int i = 0; i <= 10; i++)
                 // {
@@ -384,6 +392,8 @@ namespace SimplePhysics
                 //     vec3f(b, -1.0f),
                 //     1.0f,
                 //     ui::colorFromHex("#00ffff4c"));
+
+#endif
             }
         }
 
@@ -399,6 +409,8 @@ namespace SimplePhysics
         //     }
         // }
 
+#if DEBUG_DRAW != 0
+
         // Debug::lineMounter->addCircle(
         //     vec3f(b, -2.0f),
         //     radius,
@@ -410,12 +422,130 @@ namespace SimplePhysics
             vec3f(b, -1.0f),
             5.0f,
             ui::colorFromHex("#ffff004c"));
+#endif
 
         vel = (b - a_copy) * delta_time_inv;
 
-        *out_position = vec3f(b, out_position->z);
+        *out_position = b;
         // *out_velocity = vec3f(vel, out_velocity->z);
-        *out_velocity = MathCore::OP<MathCore::vec3f>::quadraticClamp(MathCore::vec3f(0, 0, 0), vec3f(vel, out_velocity->z), max_velocity);
+        *out_velocity = OP<vec2f>::quadraticClamp(vec2f(0, 0), vel, max_velocity);
+    }
+
+    JumpingController::JumpingController()
+    {
+        has_last_collision_segment = false;
+    }
+
+    JumpingController JumpingController::fromStaticConfig(
+        float radius, float radius_grounded, float offset_grounded,
+        float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
+        const MathCore::vec2f &gravity,
+        bool allow_double_jump)
+    {
+        using namespace MathCore;
+        JumpingController controller;
+
+        controller.radius = radius;
+        controller.radius_grounded = radius_grounded;
+        controller.offset_grounded = offset_grounded;
+        controller.allow_double_jump = allow_double_jump;
+
+        controller.gravity = gravity;
+        controller.gravity_mag = OP<vec2f>::length(gravity);
+        controller.gravity_dir = gravity * (1.0f / controller.gravity_mag);
+
+        controller.jumpState.configureJump(
+            jump_risingVelocity, jump_minJumpHeight, jump_maxJumpHeight, jump_secondJumpHeight, -controller.gravity_mag);
+
+        return controller;
+    }
+
+    void JumpingController::update(PhysicsContainer *physicsContainer, Platform::Time *time, float input_x_axis, bool jump_pressed, float max_velocity)
+    {
+        using namespace MathCore;
+
+        // reset acceleration
+        acceleration = vec2f(0.0f, 0.0f);
+        acceleration += gravity;
+
+        velocity += acceleration * time->deltaTime;
+        velocity = OP<vec2f>::quadraticClamp(vec2f(0.0f, 0.0f), velocity, max_velocity);
+
+        vec2f gravity_up = -gravity_dir;
+        float velocity_gravity_y = OP<vec2f>::dot(velocity, gravity_up);
+
+        jumpState.update(&velocity_gravity_y, // velocityY
+                         time->deltaTime,     // deltaTime
+                         -gravity_mag,        // gravity
+                         jump_pressed,        // jump_pressed
+                         allow_double_jump);  // allow_double_jump
+
+        // apply back the jump velocity to the velocity vector
+        // removing velocity in gravity direction and adding the jump velocity in the gravity direction
+        velocity += gravity_up * (velocity_gravity_y - OP<vec2f>::dot(velocity, gravity_up));
+
+        // x-axis movement logic
+
+        const vec2f x_axis = vec2f(1, 0);
+        bool stop_player = true;
+        if (OP<float>::abs(input_x_axis) > 0.02f)
+        {
+            velocity += x_axis * (600.0f * input_x_axis - OP<vec2f>::dot(velocity, x_axis));
+            stop_player = false;
+        }
+        else
+        {
+            vec2f cancel_normal = vec2f(1, 0);
+            float vel_into_surface = OP<vec2f>::dot(velocity, cancel_normal);
+            velocity -= cancel_normal * vel_into_surface;
+        }
+
+        if (jumpState.getState() == JumpState::Grounded)
+        {
+            vec2f segment = last_collision_segment.b - last_collision_segment.a;
+            float segment_mag_2 = OP<vec2f>::sqrLength(segment);
+            if (segment_mag_2 > 1e-8f)
+            {
+                vec2f segment_dir = segment * OP<float>::rsqrt(segment_mag_2);
+                vec2f segment_normal = OP<vec2f>::cross_z_up(segment_dir);
+
+                // remove normal component of the velocity
+                float vel_into_surface = OP<vec2f>::dot(velocity, segment_normal);
+                velocity -= segment_normal * vel_into_surface;
+            }
+        }
+        else
+            last_collision_segment = Segment2D();
+
+        vec2f position_before = position;
+
+        position += velocity * time->deltaTime;
+
+        // set 0
+        // last_collision_segment = Segment2D();
+
+        physicsContainer->movePlayer(
+            position_before,
+            radius,
+            radius_grounded,
+            offset_grounded,
+            &position, &velocity,
+            time->deltaTime,
+            // onGrounded callback
+            [this](const Segment2D *on_segment)
+            {
+                last_collision_segment = *on_segment;
+                if (jumpState.getState() == JumpState::Falling)
+                    jumpState.setGrounded();
+            });
+    }
+
+    // set the position and make reset velocity and acceleration, useful for teleporting the player
+    void JumpingController::teleport(const MathCore::vec2f &position)
+    {
+        this->position = position;
+        velocity = vec2f(0);
+        acceleration = vec2f(0);
     }
 
 }

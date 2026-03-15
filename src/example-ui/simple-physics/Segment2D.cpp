@@ -7,6 +7,8 @@ namespace SimplePhysics
 
     Segment2D::Segment2D()
     {
+        a = MathCore::vec2f(0);
+        b = MathCore::vec2f(0);
     }
 
     Segment2D::Segment2D(const MathCore::vec2f &a, const MathCore::vec2f &b)
