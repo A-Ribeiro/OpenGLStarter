@@ -221,6 +221,8 @@ namespace SimplePhysics
             }
         }
 
+        vec2f a_copy = a;
+
         float length_vel = OP<vec2f>::length(vel);
 
         vec2f ab = b - a;
@@ -371,6 +373,8 @@ namespace SimplePhysics
             radius,
             5.0f,
             ui::colorFromHex("#ffff004c"));
+
+        vel = (b - a_copy) * delta_time_inv;
 
         *out_position = vec3f(b, out_position->z);
         // *out_velocity = vec3f(vel, out_velocity->z);
