@@ -182,7 +182,12 @@ namespace AppKit
                 }
 
                 if (stop_player)
-                    velocity.x = 0;
+                {
+                    using namespace MathCore;
+                    vec3f cancel_normal = vec3f(1, 0, 0);
+                    float vel_into_surface = OP<vec3f>::dot(velocity, cancel_normal);
+                    velocity -= cancel_normal * vel_into_surface;
+                }
 
                 position += velocity * time->deltaTime;
 

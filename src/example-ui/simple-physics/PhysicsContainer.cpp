@@ -234,15 +234,26 @@ namespace SimplePhysics
             return;
         }
 
-        for (int i = 0; i <= 10; i++)
-        {
-            float lrp = (float)i / 10.0f;
-            Debug::lineMounter->addCircle(
-                vec3f(OP<vec2f>::lerp(a, b, lrp), 0.0f),
-                radius,
-                5.0f,
-                ui::colorFromHex("#ff00004c"));
-        }
+        // for (int i = 0; i <= 10; i++)
+        // {
+        //     float lrp = (float)i / 10.0f;
+        //     Debug::lineMounter->addCircle(
+        //         vec3f(OP<vec2f>::lerp(a, b, lrp), 0.0f),
+        //         radius,
+        //         5.0f,
+        //         ui::colorFromHex("#ff00004c"));
+        // }
+
+        Debug::lineMounter->addCircle(
+            vec3f(a, 0.0f),
+            radius,
+            2.0f,
+            ui::colorFromHex("#ff00004c"));
+        Debug::lineMounter->addLine(
+            vec3f(a, -1.0f),
+            vec3f(b, -1.0f),
+            5.0f,
+            ui::colorFromHex("#ff00004c"));
 
         float delta_time_inv = 1.0f / delta_time;
 
@@ -252,22 +263,21 @@ namespace SimplePhysics
         float query_radius = OP<float>::abs(offset_grounded) + radius_grounded + 1.0f;
 
         const Segment2D *segment_collision_to_ignore = nullptr;
-        float moved_len = 0;
 
-        vec2f previous_move_dir = OP<vec2f>::normalize(ab);
-        float curr_move_length = ab_mag;
+        vec2f remaining_dir_norm = ab * (1.0f / ab_mag);
+        float remaining_move_mag = ab_mag;
 
         bool on_ground_called = false;
 
         int max_iterations_without_move = 3;
-        while (moved_len < ab_mag - EPSILON<float>::low_precision)
+        while (remaining_move_mag > EPSILON<float>::low_precision)
         {
             Box2D move_box = Box2D(a, b).expand(radius);
 
             const Segment2D *segment_collision = nullptr;
             float move_t = 1.0f;
 
-            vec2f move_dir_to_apply_next = vec2f(0.0f);
+            vec2f new_remaining_dir_norm = vec2f(0.0f);
 
             const auto &static_ids = static_quadtree->query_segment_radius(a, b, query_radius);
             // const auto &static_ids = static_quadtree->query_box(move_box.min, move_box.max);
@@ -296,7 +306,7 @@ namespace SimplePhysics
                     {
                         move_t = t;
                         segment_collision = &segment;
-                        move_dir_to_apply_next = out_dir;
+                        new_remaining_dir_norm = out_dir;
                     }
                 }
             }
@@ -306,9 +316,9 @@ namespace SimplePhysics
 
             // move b to the collision point
             segment_collision_to_ignore = segment_collision;
-            float local_moved_length = curr_move_length * move_t;
-            moved_len += local_moved_length;
-            b = a + previous_move_dir * local_moved_length;
+            float remaining_actual_moved = remaining_move_mag * move_t;
+            b = a + remaining_dir_norm * remaining_actual_moved;
+            remaining_move_mag -= remaining_actual_moved;
 
             // ground check
             groundCheck(
@@ -323,25 +333,57 @@ namespace SimplePhysics
             {
                 if (max_iterations_without_move-- <= 0)
                     break;
-            } else
+            }
+            else
                 max_iterations_without_move = 3;
-            if (moved_len < ab_mag - EPSILON<float>::low_precision) // test to avoid b to have move after the logic
+            if (remaining_move_mag > EPSILON<float>::low_precision) // test to avoid b to have move after the logic
             {
-                curr_move_length = ab_mag - moved_len;
-                a = b;
-                b = a + move_dir_to_apply_next * curr_move_length;
-                vel = move_dir_to_apply_next * length_vel;
-                previous_move_dir = move_dir_to_apply_next;
-
-                for (int i = 0; i <= 10; i++)
+                float remaining_move_cos = OP<vec2f>::dot(remaining_dir_norm, new_remaining_dir_norm);
+                remaining_move_cos = OP<float>::clamp(remaining_move_cos, -1.0f, 1.0f);
+                if (remaining_move_cos < 1e-3f) // if the remaining move is almost perpendicular to the collision surface, just stop
                 {
-                    float lrp = (float)i / 10.0f;
-                    Debug::lineMounter->addCircle(
-                        vec3f(OP<vec2f>::lerp(a, b, lrp), 0.0f),
-                        radius,
-                        5.0f,
-                        ui::colorFromHex("#00ffff4c"));
+                    if (remaining_move_cos < 0.0f)
+                        printf("################### Error scabroso no slide negativo...\n");
+                    break;
                 }
+
+                remaining_move_mag *= remaining_move_cos;
+
+                a = b;
+                b = a + new_remaining_dir_norm * remaining_move_mag;
+                // vel = new_remaining_dir_norm * length_vel;
+                remaining_dir_norm = new_remaining_dir_norm;
+
+                // for (int i = 0; i <= 10; i++)
+                // {
+                //     float lrp = (float)i / 10.0f;
+                //     Debug::lineMounter->addCircle(
+                //         vec3f(OP<vec2f>::lerp(a, b, lrp), 0.0f),
+                //         radius,
+                //         5.0f,
+                //         ui::colorFromHex("#00ffff4c"));
+                // }
+                Debug::lineMounter->addLine(
+                    vec3f(a, -1.0f),
+                    vec3f(b, -1.0f),
+                    5.0f,
+                    ui::colorFromHex("#00ffff4c"));
+
+                auto pt = Segment2D::closestPointToSegment(
+                    a,
+                    segment_collision->a, segment_collision->b);
+
+                Debug::lineMounter->addLine(
+                    vec3f(pt, -1.0f),
+                    vec3f(pt + new_remaining_dir_norm * remaining_move_mag, -1.0f),
+                    2.0f,
+                    ui::colorFromHex("#ffff004c"));
+
+                // Debug::lineMounter->addLine(
+                //     vec3f(a, -1.0f),
+                //     vec3f(b, -1.0f),
+                //     1.0f,
+                //     ui::colorFromHex("#00ffff4c"));
             }
         }
 
@@ -357,9 +399,15 @@ namespace SimplePhysics
         //     }
         // }
 
-        Debug::lineMounter->addCircle(
-            vec3f(b, -2.0f),
-            radius,
+        // Debug::lineMounter->addCircle(
+        //     vec3f(b, -2.0f),
+        //     radius,
+        //     5.0f,
+        //     ui::colorFromHex("#ffff004c"));
+
+        Debug::lineMounter->addLine(
+            vec3f(a_copy, -1.0f),
+            vec3f(b, -1.0f),
             5.0f,
             ui::colorFromHex("#ffff004c"));
 
