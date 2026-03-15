@@ -198,7 +198,8 @@ namespace SimplePhysics
         MathCore::vec2f *out_position,
         MathCore::vec2f *out_velocity,
         float delta_time,
-        const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded)
+        const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
+        const EventCore::Callback<void(const MathCore::vec2f &pos, const Segment2D *on_segment)> &onMoveTouch)
     {
         using namespace MathCore;
 
@@ -325,6 +326,8 @@ namespace SimplePhysics
             float remaining_actual_moved = remaining_move_mag * move_t;
             b = a + remaining_dir_norm * remaining_actual_moved;
             remaining_move_mag -= remaining_actual_moved;
+
+            onMoveTouch(b, segment_collision);
 
             // ground check
             groundCheck(
@@ -487,34 +490,45 @@ namespace SimplePhysics
         // x-axis movement logic
 
         const vec2f x_axis = vec2f(1, 0);
-        bool stop_player = true;
-        if (OP<float>::abs(input_x_axis) > 0.02f)
+
+        move_x_detector.setState(OP<float>::abs(input_x_axis) > 0.02f);
+
+        if (move_x_detector.pressed)
         {
+            // get the current velocity on the x-axis
+            // checks if the applied is greater, and apply only in this case
+            // if is reverse direction, needs to clean the y collision when applying new velocity.
+
             velocity += x_axis * (600.0f * input_x_axis - OP<vec2f>::dot(velocity, x_axis));
-            stop_player = false;
-        }
-        else
-        {
-            vec2f cancel_normal = vec2f(1, 0);
-            float vel_into_surface = OP<vec2f>::dot(velocity, cancel_normal);
-            velocity -= cancel_normal * vel_into_surface;
         }
 
-        if (jumpState.getState() == JumpState::Grounded)
+        if (move_x_detector.up)
         {
-            vec2f segment = last_collision_segment.b - last_collision_segment.a;
-            float segment_mag_2 = OP<vec2f>::sqrLength(segment);
-            if (segment_mag_2 > 1e-8f)
             {
-                vec2f segment_dir = segment * OP<float>::rsqrt(segment_mag_2);
-                vec2f segment_normal = OP<vec2f>::cross_z_up(segment_dir);
-
-                // remove normal component of the velocity
-                float vel_into_surface = OP<vec2f>::dot(velocity, segment_normal);
-                velocity -= segment_normal * vel_into_surface;
+                vec2f cancel_normal = vec2f(1, 0);
+                float vel_into_surface = OP<vec2f>::dot(velocity, cancel_normal);
+                velocity -= cancel_normal * vel_into_surface;
             }
+
+            if (jumpState.getState() == JumpState::Grounded)
+            {
+                vec2f segment = last_collision_segment.b - last_collision_segment.a;
+                float segment_mag_2 = OP<vec2f>::sqrLength(segment);
+                if (segment_mag_2 > 1e-8f)
+                {
+                    vec2f segment_dir = segment * OP<float>::rsqrt(segment_mag_2);
+                    vec2f segment_normal = OP<vec2f>::cross_z_up(segment_dir);
+
+                    // remove normal component of the velocity
+                    float vel_into_surface = OP<vec2f>::dot(velocity, segment_normal);
+                    velocity -= segment_normal * vel_into_surface;
+                }
+            }
+            else
+                last_collision_segment = Segment2D();
         }
-        else
+
+        if (!move_x_detector.pressed && jumpState.getState() != JumpState::Grounded)
             last_collision_segment = Segment2D();
 
         vec2f position_before = position;
@@ -524,6 +538,8 @@ namespace SimplePhysics
         // set 0
         // last_collision_segment = Segment2D();
 
+        bool ground_touch = false;
+
         physicsContainer->movePlayer(
             position_before,
             radius,
@@ -532,12 +548,32 @@ namespace SimplePhysics
             &position, &velocity,
             time->deltaTime,
             // onGrounded callback
-            [this](const Segment2D *on_segment)
+            [this, &ground_touch](const Segment2D *on_segment)
             {
-                last_collision_segment = *on_segment;
-                if (jumpState.getState() == JumpState::Falling)
-                    jumpState.setGrounded();
+                ground_touch = true;
+            },
+            // onMoveTouch callback
+            [this](const MathCore::vec2f &pos, const Segment2D *on_segment)
+            {
+                MathCore::vec2f p_ground_check = pos + MathCore::vec2f(0, -offset_grounded);
+                float radius_grounded = this->radius_grounded;
+                if (Segment2D::circleIntersectsSegment(
+                        p_ground_check, radius_grounded,
+                        on_segment->a, on_segment->b))
+                    last_collision_segment = *on_segment;
             });
+
+        // last_collision_segment = *on_segment;
+        if (ground_touch)
+        {
+            if (jumpState.getState() == JumpState::Falling)
+                jumpState.setGrounded();
+        }
+        else
+        {
+            if (jumpState.getState() == JumpState::Grounded)
+                jumpState.setFalling();
+        }
     }
 
     // set the position and make reset velocity and acceleration, useful for teleporting the player
