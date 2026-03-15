@@ -251,8 +251,6 @@ namespace SimplePhysics
 
         float query_radius = OP<float>::abs(offset_grounded) + radius_grounded + 1.0f;
 
-        // const Segment2D *segment_collision_to_ignore[16] = {};
-        // int segment_collision_to_ignore_count = 0;
         const Segment2D *segment_collision_to_ignore = nullptr;
         float moved_len = 0;
 
@@ -261,7 +259,7 @@ namespace SimplePhysics
 
         bool on_ground_called = false;
 
-        int max_iterations = 8;
+        int max_iterations_without_move = 3;
         while (moved_len < ab_mag - EPSILON<float>::low_precision)
         {
             Box2D move_box = Box2D(a, b).expand(radius);
@@ -278,17 +276,6 @@ namespace SimplePhysics
                 const auto &structure = static_structures[idx];
                 for (const auto &segment : structure.segments)
                 {
-                    // bool should_ignore = false;
-                    // for (int ig = 0; ig < segment_collision_to_ignore_count; ig++)
-                    // {
-                    //     if (&segment == segment_collision_to_ignore[ig])
-                    //     {
-                    //         should_ignore = true;
-                    //         break;
-                    //     }
-                    // }
-                    // if (should_ignore)
-                    //     continue;
                     if (segment_collision_to_ignore == &segment)
                         continue;
 
@@ -318,8 +305,6 @@ namespace SimplePhysics
                 break;
 
             // move b to the collision point
-            // if (segment_collision_to_ignore_count < 16)
-            //     segment_collision_to_ignore[segment_collision_to_ignore_count++] = segment_collision;
             segment_collision_to_ignore = segment_collision;
             float local_moved_length = curr_move_length * move_t;
             moved_len += local_moved_length;
@@ -334,8 +319,12 @@ namespace SimplePhysics
                 onGrounded);
 
             // Redirect remaining movement along the collision tangent
-            if (max_iterations-- <= 0)
-                break;
+            if (move_t == 0.0f)
+            {
+                if (max_iterations_without_move-- <= 0)
+                    break;
+            } else
+                max_iterations_without_move = 3;
             if (moved_len < ab_mag - EPSILON<float>::low_precision) // test to avoid b to have move after the logic
             {
                 curr_move_length = ab_mag - moved_len;
