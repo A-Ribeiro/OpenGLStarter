@@ -5,7 +5,7 @@
 using namespace MathCore;
 using namespace AppKit::GLEngine::Components;
 
-#define DEBUG_DRAW 0
+#define DEBUG_DRAW 1
 
 namespace Debug
 {
@@ -89,64 +89,64 @@ namespace SimplePhysics
         }
     }
 
-    void PhysicsContainer::pushOutOfSegments1(
-        // const std::vector<uint32_t> &static_ids,
-        MathCore::vec2f *ref_b,
-        // MathCore::vec2f *ref_vel,
-        float radius
-        // float radius_grounded,
-        // float offset_grounded
-        // bool *ref_on_ground_called,
-        // const EventCore::Callback<void()> &onGrounded
-    )
-    {
-        using namespace MathCore;
-        Box2D b_box = Box2D().wrapCircle(*ref_b, radius);
+    // void PhysicsContainer::pushOutOfSegments1(
+    //     // const std::vector<uint32_t> &static_ids,
+    //     MathCore::vec2f *ref_b,
+    //     // MathCore::vec2f *ref_vel,
+    //     float radius
+    //     // float radius_grounded,
+    //     // float offset_grounded
+    //     // bool *ref_on_ground_called,
+    //     // const EventCore::Callback<void()> &onGrounded
+    // )
+    // {
+    //     using namespace MathCore;
+    //     Box2D b_box = Box2D().wrapCircle(*ref_b, radius);
 
-        const auto &static_ids = static_quadtree->query_box(b_box.min, b_box.max);
+    //     const auto &static_ids = static_quadtree->query_box(b_box.min, b_box.max);
 
-        // push out of all overlapping segments
-        vec2f move_out_collision = vec2f(0);
-        for (uint32_t idx : static_ids)
-        {
-            const auto &structure = static_structures[idx];
-            for (const auto &segment : structure.segments)
-            {
-                Box2D segment_box = Box2D(segment.a, segment.b);
-                if (!Box2D::overlaps(b_box.min, b_box.max, segment_box.min, segment_box.max))
-                    continue;
-                vec2f penetration;
-                if (Segment2D::circleIntersectsSegment(
-                        *ref_b, radius,
-                        segment.a, segment.b,
-                        &penetration))
-                {
-                    move_out_collision -= penetration;
-                }
-            }
-        }
+    //     // push out of all overlapping segments
+    //     vec2f move_out_collision = vec2f(0);
+    //     for (uint32_t idx : static_ids)
+    //     {
+    //         const auto &structure = static_structures[idx];
+    //         for (const auto &segment : structure.segments)
+    //         {
+    //             Box2D segment_box = Box2D(segment.a, segment.b);
+    //             if (!Box2D::overlaps(b_box.min, b_box.max, segment_box.min, segment_box.max))
+    //                 continue;
+    //             vec2f penetration;
+    //             if (Segment2D::circleIntersectsSegment(
+    //                     *ref_b, radius,
+    //                     segment.a, segment.b,
+    //                     &penetration))
+    //             {
+    //                 move_out_collision -= penetration;
+    //             }
+    //         }
+    //     }
 
-        if (OP<vec2f>::sqrLength(move_out_collision) > 1e-12f)
-        {
-            *ref_b += move_out_collision;
+    //     if (OP<vec2f>::sqrLength(move_out_collision) > 1e-12f)
+    //     {
+    //         *ref_b += move_out_collision;
 
-            // vec2f ground_center = *ref_b + vec2f(0, -offset_grounded);
-            // // remove vel component in the direction of the push-out
-            // vec2f segment_normal = OP<vec2f>::normalize(move_out_collision);
-            // float vel_normal_component = OP<vec2f>::dot(*ref_vel, segment_normal);
-            // *ref_vel -= segment_normal * vel_normal_component;
+    //         // vec2f ground_center = *ref_b + vec2f(0, -offset_grounded);
+    //         // // remove vel component in the direction of the push-out
+    //         // vec2f segment_normal = OP<vec2f>::normalize(move_out_collision);
+    //         // float vel_normal_component = OP<vec2f>::dot(*ref_vel, segment_normal);
+    //         // *ref_vel -= segment_normal * vel_normal_component;
 
-            // // ground check after push-out
-            // groundCheck(
-            //     static_ids,
-            //     ref_on_ground_called,
-            //     *ref_b + vec2f(0, -offset_grounded),
-            //     radius_grounded,
-            //     onGrounded);
+    //         // // ground check after push-out
+    //         // groundCheck(
+    //         //     static_ids,
+    //         //     ref_on_ground_called,
+    //         //     *ref_b + vec2f(0, -offset_grounded),
+    //         //     radius_grounded,
+    //         //     onGrounded);
 
-            // break;
-        }
-    }
+    //         // break;
+    //     }
+    // }
 
     bool PhysicsContainer::pushOutOfSegments(
         MathCore::vec2f point,
@@ -233,6 +233,22 @@ namespace SimplePhysics
 
         if (ab_mag == 0.0f || delta_time == 0.0f || length_vel == 0.0f)
         {
+            // do ground check
+            vec2f ground_pos = a + vec2f(0, -offset_grounded);
+            Box2D ground_box = Box2D().wrapCircle(ground_pos, radius);
+            const auto &static_ids = static_quadtree->query_box(ground_box.min, ground_box.max);
+            for (uint32_t idx : static_ids)
+            {
+                const auto &structure = static_structures[idx];
+                for (const auto &segment : structure.segments)
+                {
+                    if (Segment2D::circleIntersectsSegment(
+                            ground_pos, radius_grounded,
+                            segment.a, segment.b))
+                        onMoveTouch(a, &segment);
+                }
+            }
+
             *out_position = a;
             return;
         }
@@ -249,16 +265,16 @@ namespace SimplePhysics
         //         ui::colorFromHex("#ff00004c"));
         // }
 
-        Debug::lineMounter->addCircle(
-            vec3f(a, 0.0f),
-            radius,
-            2.0f,
-            ui::colorFromHex("#ff00004c"));
-        Debug::lineMounter->addLine(
-            vec3f(a, -1.0f),
-            vec3f(b, -1.0f),
-            5.0f,
-            ui::colorFromHex("#ff00004c"));
+        // Debug::lineMounter->addCircle(
+        //     vec3f(a, 0.0f),
+        //     radius,
+        //     2.0f,
+        //     ui::colorFromHex("#ff00004c"));
+        // Debug::lineMounter->addLine(
+        //     vec3f(a, -1.0f),
+        //     vec3f(b, -1.0f),
+        //     5.0f,
+        //     ui::colorFromHex("#ff00004c"));
 
 #endif
 
@@ -314,6 +330,23 @@ namespace SimplePhysics
                         move_t = t;
                         segment_collision = &segment;
                         new_remaining_dir_norm = out_dir;
+
+                        // vec2f new_p = OP<vec2f>::lerp(a, b, t);
+                        // vec2f pt_in_segment = Segment2D::closestPointToSegment(new_p, segment.a, segment.b);
+                        // vec2f normal = OP<vec2f>::normalize(new_p - pt_in_segment);
+                        // new_remaining_dir_norm = OP<vec2f>::cross_z_up(normal);
+                        // if (OP<vec2f>::dot(new_remaining_dir_norm, out_dir) < 0.0f)
+                        //     new_remaining_dir_norm = -new_remaining_dir_norm;
+
+#if DEBUG_DRAW != 0
+
+                        Debug::lineMounter->addLine(
+                            vec3f(a, -1.0f),
+                            vec3f(b, -1.0f),
+                            5.0f,
+                            ui::colorFromHex("#ff00d04c"));
+
+#endif
                     }
                 }
             }
@@ -374,11 +407,11 @@ namespace SimplePhysics
                 //         5.0f,
                 //         ui::colorFromHex("#00ffff4c"));
                 // }
-                Debug::lineMounter->addLine(
-                    vec3f(a, -1.0f),
-                    vec3f(b, -1.0f),
-                    5.0f,
-                    ui::colorFromHex("#00ffff4c"));
+                // Debug::lineMounter->addLine(
+                //     vec3f(a, -1.0f),
+                //     vec3f(b, -1.0f),
+                //     5.0f,
+                //     ui::colorFromHex("#00ffff4c"));
 
                 auto pt = Segment2D::closestPointToSegment(
                     a,
@@ -387,7 +420,7 @@ namespace SimplePhysics
                 Debug::lineMounter->addLine(
                     vec3f(pt, -1.0f),
                     vec3f(pt + new_remaining_dir_norm * remaining_move_mag, -1.0f),
-                    2.0f,
+                    5.0f,
                     ui::colorFromHex("#ffff004c"));
 
                 // Debug::lineMounter->addLine(
@@ -465,6 +498,9 @@ namespace SimplePhysics
 
     void JumpingController::update(PhysicsContainer *physicsContainer, Platform::Time *time, float input_x_axis, bool jump_pressed, float max_velocity)
     {
+        if (time->deltaTime == 0.0f)
+            return;
+
         using namespace MathCore;
 
         // reset acceleration
@@ -552,7 +588,24 @@ namespace SimplePhysics
 
         vec2f position_before = position;
 
+        static bool passed = false;
+
+        // position_before
+        if (!passed) {
+            position_before = vec2f(270.000000,80.000000);
+            position = position_before; // 330.975555 28.360878
+            passed = true;
+        }
+        velocity = vec2f(600.000000,-508.129517);
+
+
         position += velocity * time->deltaTime;
+
+        // printf("position_before: %f %f, position: %f %f, velocity: %f %f\n", 
+        //     position_before.x, position_before.y,
+        //     position.x, position.y, 
+        //     velocity.x, velocity.y);
+
 
         bool ground_touch = false;
 
@@ -572,15 +625,16 @@ namespace SimplePhysics
             [this, &ground_touch](const MathCore::vec2f &pos, const Segment2D *on_segment)
             {
                 MathCore::vec2f p_ground_check = pos + MathCore::vec2f(0, -offset_grounded);
-                float radius_grounded = this->radius_grounded;
                 if (Segment2D::circleIntersectsSegment(
-                        p_ground_check, radius_grounded,
+                        p_ground_check, this->radius_grounded,
                         on_segment->a, on_segment->b))
                 {
                     ground_touch = true;
                     last_collision_segment = *on_segment;
                 }
             });
+        
+        passed = passed || (position != position_before);
 
         // last_collision_segment = *on_segment;
         if (ground_touch)

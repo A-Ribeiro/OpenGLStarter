@@ -612,9 +612,9 @@ namespace SimplePhysics
             {
                 float sqrt_delta = OP<float>::sqrt(delta);
                 float t = (-B - sqrt_delta) / (2.0f * A);
-                if (t >= -1e-3f && t < result)
+                if (t >= 0 && t < result) // -1e-3f
                 {
-                    if (t < 0.0f) t = 0.0f;
+                    // if (t < 0.0f) t = 0.0f;
                     result = t;
                     vec2f p_at_t = center_from + t * move_vector;
                     vec2f normal = OP<vec2f>::normalize(p_at_t - *endpoints[i]);
