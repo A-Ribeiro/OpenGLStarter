@@ -427,7 +427,7 @@ namespace SimplePhysics
             ui::colorFromHex("#ffff004c"));
 #endif
 
-        vel = (b - a_copy) * delta_time_inv;
+        vel = remaining_dir_norm * OP<vec2f>::length(b - a_copy) * delta_time_inv;
 
         *out_position = b;
         // *out_velocity = vec3f(vel, out_velocity->z);
@@ -489,54 +489,70 @@ namespace SimplePhysics
 
         // x-axis movement logic
 
-        const vec2f x_axis = vec2f(1, 0);
+        vec2f x_axis = OP<vec2f>::cross_z_down(gravity_up);
+        vec2f ground_axis = x_axis;
+        if (jumpState.getState() == JumpState::Grounded)
+        {
+            vec2f segment_point = last_collision_segment.closestPoint(position);
+            vec2f normal = position - segment_point;
+            float normal_mag_2 = OP<vec2f>::sqrLength(normal);
+            if (normal_mag_2 > 1e-8f)
+            {
+                normal *= OP<float>::rsqrt(normal_mag_2);
+                ground_axis = OP<vec2f>::cross_z_up(normal);
+                // ground axis pointing to the same direction x_axis points to
+                if (OP<vec2f>::dot(ground_axis, x_axis) < 0.0f)
+                    ground_axis = -ground_axis;
+
+                // if (OP<vec2f>::dot(ground_axis, x_axis) < OP<float>::cos( OP<float>::deg_2_rad(45.0f) ) )
+                //     ground_axis = x_axis;
+            }
+        }
 
         move_x_detector.setState(OP<float>::abs(input_x_axis) > 0.02f);
 
         if (move_x_detector.pressed)
         {
-            // get the current velocity on the x-axis
-            // checks if the applied is greater, and apply only in this case
-            // if is reverse direction, needs to clean the y collision when applying new velocity.
 
-            velocity += x_axis * (600.0f * input_x_axis - OP<vec2f>::dot(velocity, x_axis));
-        }
+            float move_direction = OP<float>::sign(input_x_axis);
 
-        if (move_x_detector.up)
-        {
+            Debug::lineMounter->addLine(
+                vec3f(position, -1.0f),
+                vec3f(position + move_direction * ground_axis * 100, -1.0f),
+                5.0f,
+                ui::colorFromHex("#ff00004c"));
+
+            float speed_factor = 1.0f;
+            float up_down_detector = OP<vec2f>::dot(move_direction * ground_axis, gravity_up);
+            float slope_factor = OP<vec2f>::dot(ground_axis, x_axis);
+            if (OP<float>::abs(slope_factor) > EPSILON<float>::low_precision)
             {
-                vec2f cancel_normal = vec2f(1, 0);
-                float vel_into_surface = OP<vec2f>::dot(velocity, cancel_normal);
-                velocity -= cancel_normal * vel_into_surface;
-            }
-
-            if (jumpState.getState() == JumpState::Grounded)
-            {
-                vec2f segment = last_collision_segment.b - last_collision_segment.a;
-                float segment_mag_2 = OP<vec2f>::sqrLength(segment);
-                if (segment_mag_2 > 1e-8f)
+                if (up_down_detector > EPSILON<float>::low_precision)
                 {
-                    vec2f segment_dir = segment * OP<float>::rsqrt(segment_mag_2);
-                    vec2f segment_normal = OP<vec2f>::cross_z_up(segment_dir);
-
-                    // remove normal component of the velocity
-                    float vel_into_surface = OP<vec2f>::dot(velocity, segment_normal);
-                    velocity -= segment_normal * vel_into_surface;
+                    speed_factor = OP<vec2f>::dot(ground_axis, x_axis);
+                    // printf("up hill speed: %f\n", speed_factor);
+                }
+                else if (up_down_detector < -EPSILON<float>::low_precision)
+                {
+                    speed_factor = 1.0f / OP<vec2f>::dot(ground_axis, x_axis);
+                    // printf("down hill speed: %f\n", speed_factor);
                 }
             }
-            else
-                last_collision_segment = Segment2D();
-        }
 
-        if (!move_x_detector.pressed && jumpState.getState() != JumpState::Grounded)
-            last_collision_segment = Segment2D();
+            float desired_velocity = 600.0f * input_x_axis * speed_factor;
+
+            float curr_velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
+            velocity += ground_axis * (desired_velocity - curr_velocity_on_ground);
+        }
+        else
+        {
+            float velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
+            velocity -= ground_axis * velocity_on_ground;
+        }
 
         vec2f position_before = position;
 
         position += velocity * time->deltaTime;
-
-        // set 0
-        // last_collision_segment = Segment2D();
 
         bool ground_touch = false;
 
@@ -550,17 +566,20 @@ namespace SimplePhysics
             // onGrounded callback
             [this, &ground_touch](const Segment2D *on_segment)
             {
-                ground_touch = true;
+                // ground_touch = true;
             },
             // onMoveTouch callback
-            [this](const MathCore::vec2f &pos, const Segment2D *on_segment)
+            [this, &ground_touch](const MathCore::vec2f &pos, const Segment2D *on_segment)
             {
                 MathCore::vec2f p_ground_check = pos + MathCore::vec2f(0, -offset_grounded);
                 float radius_grounded = this->radius_grounded;
                 if (Segment2D::circleIntersectsSegment(
                         p_ground_check, radius_grounded,
                         on_segment->a, on_segment->b))
+                {
+                    ground_touch = true;
                     last_collision_segment = *on_segment;
+                }
             });
 
         // last_collision_segment = *on_segment;
@@ -571,6 +590,7 @@ namespace SimplePhysics
         }
         else
         {
+            last_collision_segment = Segment2D();
             if (jumpState.getState() == JumpState::Grounded)
                 jumpState.setFalling();
         }
