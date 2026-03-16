@@ -203,6 +203,7 @@ public:
         if (state != Grounded)
             return;
         state = Falling;
+        can_double_jump = false;
     }
 
     void update(float *velocityY, float deltaTime, float gravity, bool jump_pressedp, bool allow_double_jump, bool double_jump_at_any_time = true)
