@@ -5,7 +5,7 @@
 using namespace MathCore;
 using namespace AppKit::GLEngine::Components;
 
-#define DEBUG_DRAW 1
+#define DEBUG_DRAW 0
 
 namespace Debug
 {
@@ -331,18 +331,26 @@ namespace SimplePhysics
                         segment_collision = &segment;
                         new_remaining_dir_norm = out_dir;
 
-                        // vec2f new_p = OP<vec2f>::lerp(a, b, t);
-                        // vec2f pt_in_segment = Segment2D::closestPointToSegment(new_p, segment.a, segment.b);
+                        
+#if DEBUG_DRAW != 0
+
+
+                        vec2f new_p = OP<vec2f>::lerp(a, b, t);
+                        vec2f pt_in_segment = Segment2D::closestPointToSegment(new_p, segment.a, segment.b);
                         // vec2f normal = OP<vec2f>::normalize(new_p - pt_in_segment);
                         // new_remaining_dir_norm = OP<vec2f>::cross_z_up(normal);
                         // if (OP<vec2f>::dot(new_remaining_dir_norm, out_dir) < 0.0f)
                         //     new_remaining_dir_norm = -new_remaining_dir_norm;
 
-#if DEBUG_DRAW != 0
+                        Debug::lineMounter->addLine(
+                            vec3f(pt_in_segment, -1.0f),
+                            vec3f(pt_in_segment + new_remaining_dir_norm * 100.0f, -1.0f),
+                            3.0f,
+                            ui::colorFromHex("#00ff007f"));
 
                         Debug::lineMounter->addLine(
-                            vec3f(a, -1.0f),
-                            vec3f(b, -1.0f),
+                            vec3f(segment.a, -1.0f),
+                            vec3f(segment.b, -1.0f),
                             5.0f,
                             ui::colorFromHex("#ff00d04c"));
 
@@ -552,11 +560,11 @@ namespace SimplePhysics
 
             float move_direction = OP<float>::sign(input_x_axis);
 
-            Debug::lineMounter->addLine(
-                vec3f(position, -1.0f),
-                vec3f(position + move_direction * ground_axis * 100, -1.0f),
-                5.0f,
-                ui::colorFromHex("#ff00004c"));
+            // Debug::lineMounter->addLine(
+            //     vec3f(position, -1.0f),
+            //     vec3f(position + move_direction * ground_axis * 100, -1.0f),
+            //     5.0f,
+            //     ui::colorFromHex("#ff00004c"));
 
             float speed_factor = 1.0f;
             float up_down_detector = OP<vec2f>::dot(move_direction * ground_axis, gravity_up);
@@ -588,15 +596,14 @@ namespace SimplePhysics
 
         vec2f position_before = position;
 
-        static bool passed = false;
-
+        // static bool passed = false;
         // position_before
-        if (!passed) {
-            position_before = vec2f(270.000000,80.000000);
-            position = position_before; // 330.975555 28.360878
-            passed = true;
-        }
-        velocity = vec2f(600.000000,-508.129517);
+        // if (!passed) {
+        //     position_before = vec2f(270.000000,80.000000);
+        //     position = position_before; // 330.975555 28.360878
+        //     passed = true;
+        // }
+        // velocity = vec2f(600.000000,-508.129517);
 
 
         position += velocity * time->deltaTime;
@@ -634,7 +641,7 @@ namespace SimplePhysics
                 }
             });
         
-        passed = passed || (position != position_before);
+        // passed = passed || (position != position_before);
 
         // last_collision_segment = *on_segment;
         if (ground_touch)

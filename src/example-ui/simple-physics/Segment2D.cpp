@@ -1,7 +1,7 @@
 #include "Segment2D.h"
 #include "Box2D.h"
 #include "Line2D.h"
-    
+
 namespace SimplePhysics
 {
 
@@ -441,7 +441,7 @@ namespace SimplePhysics
 
         // Check if already overlapping at start
         vec2f closest_start = closestPointToSegment(center_from, segment_a, segment_b);
-        if (OP<vec2f>::sqrDistance(center_from, closest_start) <= radius * radius + EPSILON<float>::high_precision )
+        if (OP<vec2f>::sqrDistance(center_from, closest_start) <= radius * radius + EPSILON<float>::high_precision)
         {
             vec2f center_to_touch_pt = closest_start - center_from;
             bool in_front = OP<vec2f>::dot(center_to_touch_pt, move_vector) > 0;
@@ -476,7 +476,8 @@ namespace SimplePhysics
                 float t = (dh > 0) ? (-radius - h0) * dh_inv : (radius - h0) * dh_inv;
                 if (t >= -1e-3f && t < 1.0f)
                 {
-                    if (t < 0.0f) t = 0.0f;
+                    if (t < 0.0f)
+                        t = 0.0f;
                     // Check if the contact point projects within the segment bounds
                     vec2f p_at_t = center_from + t * move_vector;
                     float s = OP<vec2f>::dot(p_at_t - segment_a, seg_dir_normalized);
@@ -510,7 +511,8 @@ namespace SimplePhysics
                 float t = (-B - sqrt_delta) / (2.0f * A);
                 if (t >= -1e-3f && t < result)
                 {
-                    if (t < 0.0f) t = 0.0f;
+                    if (t < 0.0f)
+                        t = 0.0f;
                     result = t;
                 }
             }
@@ -531,14 +533,23 @@ namespace SimplePhysics
 
         // Check if already overlapping at start
         vec2f closest_start = closestPointToSegment(center_from, segment_a, segment_b);
-        if (OP<vec2f>::sqrDistance(center_from, closest_start) <= radius * radius + EPSILON<float>::high_precision )
+        if (OP<vec2f>::sqrDistance(center_from, closest_start) <= radius * radius + EPSILON<float>::high_precision)
         {
             vec2f center_to_touch_pt = closest_start - center_from;
-
-            bool in_front = OP<vec2f>::dot(center_to_touch_pt, move_vector) > 0;
+            const float cos_threshold = OP<float>::cos(OP<float>::deg_2_rad(89.0f));
+            bool in_front = OP<vec2f>::dot(center_to_touch_pt, move_vector) > cos_threshold;
             if (in_front)
             {
-                vec2f tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
+                // vec2f tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
+                vec2f tan_dir;
+
+                vec2f out_normal = -center_to_touch_pt;
+                float out_normal_len_sq = OP<vec2f>::sqrLength(out_normal);
+                if (out_normal_len_sq > 1e-8f)
+                    tan_dir = OP<vec2f>::cross_z_up(out_normal * OP<float>::rsqrt(out_normal_len_sq));
+                else
+                    tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
+
                 tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
                 *out_move_direction = tan_dir;
                 return 0.0f;
@@ -572,7 +583,8 @@ namespace SimplePhysics
                 float t = (dh > 0) ? (-radius - h0) * dh_inv : (radius - h0) * dh_inv;
                 if (t >= -1e-3f && t < 1.0f)
                 {
-                    if (t < 0.0f) t = 0.0f;
+                    if (t < 0.0f)
+                        t = 0.0f;
                     // Check if the contact point projects within the segment bounds
                     vec2f p_at_t = center_from + t * move_vector;
                     float s = OP<vec2f>::dot(p_at_t - segment_a, seg_dir_normalized);
@@ -588,7 +600,6 @@ namespace SimplePhysics
                 }
             }
         }
-
 
         // --- Case 2: Circle vs segment endpoints ---
         // Solve |center_from + t * move_vector - endpoint|² = radius²
@@ -630,5 +641,5 @@ namespace SimplePhysics
 
         return result;
     }
-    
+
 }
