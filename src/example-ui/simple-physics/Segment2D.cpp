@@ -444,7 +444,8 @@ namespace SimplePhysics
         if (OP<vec2f>::sqrDistance(center_from, closest_start) <= radius * radius + EPSILON<float>::high_precision)
         {
             vec2f center_to_touch_pt = closest_start - center_from;
-            bool in_front = OP<vec2f>::dot(center_to_touch_pt, move_vector) > 0;
+            const float cos_threshold = OP<float>::cos(OP<float>::deg_2_rad(89.0f));
+            bool in_front = OP<vec2f>::dot(center_to_touch_pt, move_vector) > cos_threshold;
             if (in_front)
                 return 0.0f;
         }
@@ -482,7 +483,11 @@ namespace SimplePhysics
                     vec2f p_at_t = center_from + t * move_vector;
                     float s = OP<vec2f>::dot(p_at_t - segment_a, seg_dir_normalized);
                     if (s >= 0.0f && s * s <= seg_len_sq)
+                    {
+                        // seg_dir_normalized = (OP<vec2f>::dot(move_vector, seg_dir_normalized) < 0.0f) ? -seg_dir_normalized : seg_dir_normalized;
+                        // We already have a valid collision with the edge, so we can return early
                         return t;
+                    }
                 }
             }
         }
@@ -509,14 +514,21 @@ namespace SimplePhysics
             {
                 float sqrt_delta = OP<float>::sqrt(delta);
                 float t = (-B - sqrt_delta) / (2.0f * A);
-                if (t >= -1e-3f && t < result)
+                if (t >= 0 && t < result) // -1e-3f
                 {
-                    if (t < 0.0f)
-                        t = 0.0f;
+                    // if (t < 0.0f) t = 0.0f;
                     result = t;
+                    // vec2f p_at_t = center_from + t * move_vector;
+                    // vec2f normal = OP<vec2f>::normalize(p_at_t - *endpoints[i]);
+                    // vec2f tan_dir = OP<vec2f>::cross_z_up(normal);
+                    // tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
+                    // *out_move_direction = tan_dir;
                 }
             }
         }
+
+        // if (result == 1.0f)
+        //     *out_move_direction = OP<vec2f>::normalize(move_vector);
 
         return result;
     }
