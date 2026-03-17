@@ -209,10 +209,10 @@ namespace StageGen
                 {
                     // Segment: a flat line at the top of where the box would be
                     float segY = center.y + platformThickness * 0.5f;
-                    mat2f rot = GEN<mat2f>::rotate(
-                        mathRnd.nextRange<float>(OP<float>::deg_2_rad(30.0f), OP<float>::deg_2_rad(45.0f)) * OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f)));
-                    vec2f segA = vec2f(center.x, segY) + rot * vec2f(-platW * 0.5f, 0);
-                    vec2f segB = vec2f(center.x, segY) + rot * vec2f(platW * 0.5f, 0);
+                    // mat2f rot = GEN<mat2f>::rotate(
+                    //     mathRnd.nextRange<float>(OP<float>::deg_2_rad(30.0f), OP<float>::deg_2_rad(45.0f)) * OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f)));
+                    vec2f segA = vec2f(center.x, segY) + vec2f(-platW * 0.5f, 0);
+                    vec2f segB = vec2f(center.x, segY) + vec2f(platW * 0.5f, 0);
                     container.static_structures.push_back(
                         Structure2D::FromSegment("Platform Segment", 0.6f,
                                                  Segment2D(segA, segB)));
@@ -267,16 +267,52 @@ namespace StageGen
             else
             {
                 float segY = center.y + platformThickness * 0.5f;
-                mat2f rot = GEN<mat2f>::rotate(
-                    mathRnd.nextRange<float>(OP<float>::deg_2_rad(30.0f), OP<float>::deg_2_rad(45.0f)) * OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f)));
+                // mat2f rot = GEN<mat2f>::rotate(
+                //     mathRnd.nextRange<float>(OP<float>::deg_2_rad(30.0f), OP<float>::deg_2_rad(45.0f)) * OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f)));
                 container.static_structures.push_back(
                     Structure2D::FromSegment("Branch Segment", 0.5f,
                                              Segment2D(
-                                                 vec2f(center.x, segY) + rot * vec2f(-platW * 0.5f, 0),
-                                                 vec2f(center.x, segY) + rot * vec2f(platW * 0.5f, 0))));
+                                                 vec2f(center.x, segY) + vec2f(-platW * 0.5f, 0),
+                                                 vec2f(center.x, segY) + vec2f(platW * 0.5f, 0))));
             }
 
             placed.push_back({center, platW, platformThickness, useBox});
+        }
+
+        // --- Add one-way pass-through platforms ---
+        // These are horizontal segments the player can jump through from below but land on from above.
+        int oneWayPlatforms = numScreens * 2; // ~2 per screen
+        for (int i = 0; i < oneWayPlatforms; i++)
+        {
+            float platW = mathRnd.nextRange<float>(minPlatformWidth, maxPlatformWidth);
+
+            if (placed.empty())
+                break;
+            int anchorIdx = (int)mathRnd.nextRange<float>(0.0f, (float)(placed.size() - 1));
+            auto &anchor = placed[anchorIdx];
+
+            float dx = mathRnd.nextRange<float>(-maxHorizontalGap * 0.8f, maxHorizontalGap * 0.8f);
+            // Place above the anchor so the player can jump up through them
+            float dy = mathRnd.nextRange<float>(normalJump * 0.3f, normalJump * 0.9f);
+
+            vec2f center(
+                OP<float>::clamp(anchor.position.x + dx, platW * 0.5f + 10.0f, W - platW * 0.5f - 10.0f),
+                OP<float>::clamp(anchor.position.y + dy, minY, maxY));
+
+            if (overlapsExisting(placed, center, platW, platformThickness, overlapMargin))
+                continue;
+
+            // One-way platforms are always flat horizontal segments
+            float segY = center.y + platformThickness * 0.5f;
+            auto structure = Structure2D::FromSegment(
+                "One-Way Platform", 0.6f,
+                Segment2D(vec2f(center.x - platW * 0.5f, segY),
+                          vec2f(center.x + platW * 0.5f, segY)));
+            // pass through when moving upward
+            structure.pass_through_direction = vec2f(0, 1);
+            container.static_structures.push_back(structure);
+
+            placed.push_back({center, platW, platformThickness, false});
         }
 
         // // --- Add some angled / sloped segments for variety ---

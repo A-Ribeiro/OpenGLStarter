@@ -106,7 +106,8 @@ namespace SimplePhysics
             float radius,
             MathCore::vec2f *output,
             MathCore::vec2f *offset,
-            MathCore::vec2f *push_normal);
+            MathCore::vec2f *push_normal,
+            const MathCore::vec2f &velocity_hint = MathCore::vec2f(0));
 
         // returns last collision segment if collision occurs, otherwise returns nullptr
         void movePlayer(

@@ -70,6 +70,14 @@ namespace SimplePhysics
             for (uint32_t idx : static_ids)
             {
                 const auto &structure = static_structures[idx];
+                // skip pass-through structures when player is on the pass-through side
+                if (OP<vec2f>::sqrLength(structure.pass_through_direction) > 1e-12f)
+                {
+                    vec2f seg_mid = (structure.box.min + structure.box.max) * 0.5f;
+                    vec2f to_player = position - seg_mid;
+                    if (OP<vec2f>::dot(to_player, structure.pass_through_direction) < 0.0f)
+                        continue;
+                }
                 for (const auto &segment : structure.segments)
                 {
                     if (Segment2D::circleIntersectsSegment(
@@ -153,7 +161,8 @@ namespace SimplePhysics
         float radius,
         MathCore::vec2f *output,
         MathCore::vec2f *offset,
-        MathCore::vec2f *push_normal)
+        MathCore::vec2f *push_normal,
+        const MathCore::vec2f &velocity_hint)
     {
         using namespace MathCore;
         Box2D b_box = Box2D().wrapCircle(point, radius);
@@ -165,6 +174,9 @@ namespace SimplePhysics
         for (uint32_t idx : static_ids)
         {
             const auto &structure = static_structures[idx];
+            // skip pass-through structures when velocity aligns with pass-through direction
+            if (structure.shouldPassThrough(velocity_hint))
+                continue;
             for (const auto &segment : structure.segments)
             {
                 Box2D segment_box = Box2D(segment.a, segment.b);
@@ -209,7 +221,7 @@ namespace SimplePhysics
 
         {
             vec2f push_offset, push_normal;
-            if (pushOutOfSegments(a, radius, &a, &push_offset, &push_normal))
+            if (pushOutOfSegments(a, radius, &a, &push_offset, &push_normal, vel))
             {
                 // need recompute velocity and b offset
                 b += push_offset;
@@ -240,6 +252,14 @@ namespace SimplePhysics
             for (uint32_t idx : static_ids)
             {
                 const auto &structure = static_structures[idx];
+                // skip pass-through structures when player is on the pass-through side
+                if (OP<vec2f>::sqrLength(structure.pass_through_direction) > 1e-12f)
+                {
+                    vec2f seg_mid = (structure.box.min + structure.box.max) * 0.5f;
+                    vec2f to_player = a - seg_mid;
+                    if (OP<vec2f>::dot(to_player, structure.pass_through_direction) < 0.0f)
+                        continue;
+                }
                 for (const auto &segment : structure.segments)
                 {
                     if (Segment2D::circleIntersectsSegment(
@@ -307,6 +327,9 @@ namespace SimplePhysics
             for (uint32_t idx : static_ids)
             {
                 const auto &structure = static_structures[idx];
+                // skip pass-through structures when movement aligns with pass-through direction
+                if (structure.shouldPassThrough(remaining_dir_norm))
+                    continue;
                 for (const auto &segment : structure.segments)
                 {
                     if (segment_collision_to_ignore == &segment)

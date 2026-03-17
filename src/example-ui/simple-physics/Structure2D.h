@@ -40,6 +40,14 @@ namespace SimplePhysics
         // only valid for circle type
         float circle_radius;
 
+        // direction in which movement can pass through this structure.
+        // zero vector = fully solid (default).
+        // e.g. vec2f(0,1) = player can pass through when moving upward (one-way platform from below)
+        MathCore::vec2f pass_through_direction;
+
+        // returns true if the given movement direction should pass through this structure
+        bool shouldPassThrough(const MathCore::vec2f &move_direction) const;
+
         Structure2D(int segment_count = 0);
 
         static Structure2D FromSegment(
