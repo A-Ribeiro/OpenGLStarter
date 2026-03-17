@@ -118,10 +118,12 @@ void GameScene::loadGraph()
                     for (const auto &segment : structure.segments)
                     {
                         line_mounter->addLine(
-                            MathCore::vec3f(segment.a, -1.0f), // a
-                            MathCore::vec3f(segment.b, -1.0f), // b
-                            3.0f,                              // thickness
-                            ui::colorFromHex("#FF0000FF")      // color
+                            MathCore::vec3f(segment.a, -1.0f),                                                   // a
+                            MathCore::vec3f(segment.b, -1.0f),                                                   // b
+                            3.0f,                                                                                // thickness
+                            (structure.pass_through_direction.x != 0 || structure.pass_through_direction.y != 0) //
+                                ? ui::colorFromHex("#0000FFFF")                                                  // color for pass-through segments
+                                : ui::colorFromHex("#FF0000FF")                                                  // color
                         );
                     }
                 }
@@ -206,7 +208,9 @@ void GameScene::loadGraph()
                         MathCore::vec2f(
                             box_size.x,
                             box_size.y),               // size
-                        ui::colorFromHex("#0000003f"), // color
+                        (structure.pass_through_direction.x != 0 || structure.pass_through_direction.y != 0) //
+                            ? ui::colorFromHex("#0000ffff") // color for pass-through structures
+                            : ui::colorFromHex("#FF0000FF"), // color
                         MathCore::vec4f(0, 0, 0, 0),   // radius
                         StrokeModeGrowOutside,         // stroke mode
                         0.0f,                          // stroke thickness

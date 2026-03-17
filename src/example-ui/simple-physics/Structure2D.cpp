@@ -19,6 +19,15 @@ namespace SimplePhysics
     {
         friction = 0.0f;
         type = StructureType::None;
+        pass_through_direction = MathCore::vec2f(0);
+    }
+
+    bool Structure2D::shouldPassThrough(const MathCore::vec2f &move_direction) const
+    {
+        using namespace MathCore;
+        if (OP<vec2f>::sqrLength(pass_through_direction) < 1e-12f)
+            return false;
+        return OP<vec2f>::dot(move_direction, pass_through_direction) > 0.0f;
     }
 
     Structure2D Structure2D::FromSegment(
