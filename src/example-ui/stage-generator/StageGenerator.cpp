@@ -304,12 +304,12 @@ namespace StageGen
 
             // One-way platforms are always flat horizontal segments
             float segY = center.y + platformThickness * 0.5f;
-            auto structure = Structure2D::FromSegment(
+            auto structure = Structure2D::FromSegmentPassThrough(
                 "One-Way Platform", 0.6f,
                 Segment2D(vec2f(center.x - platW * 0.5f, segY),
-                          vec2f(center.x + platW * 0.5f, segY)));
+                          vec2f(center.x + platW * 0.5f, segY)),
+                vec2f(0, 1));
             // pass through when moving upward
-            structure.pass_through_direction = vec2f(0, 1);
             container.static_structures.push_back(structure);
 
             placed.push_back({center, platW, platformThickness, false});

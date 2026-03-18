@@ -87,6 +87,7 @@ void GameScene::loadGraph()
 
     {
         using namespace AppKit::GLEngine::Components;
+        using namespace MathCore;
         // draw lines drawing of the game area box and static structures
         {
             // draw debug static structures
@@ -118,12 +119,33 @@ void GameScene::loadGraph()
                     for (const auto &segment : structure.segments)
                     {
                         line_mounter->addLine(
-                            MathCore::vec3f(segment.a, -1.0f),                                                   // a
-                            MathCore::vec3f(segment.b, -1.0f),                                                   // b
-                            3.0f,                                                                                // thickness
-                            (structure.pass_through_direction.x != 0 || structure.pass_through_direction.y != 0) //
-                                ? ui::colorFromHex("#0000FFFF")                                                  // color for pass-through segments
-                                : ui::colorFromHex("#FF0000FF")                                                  // color
+                            MathCore::vec3f(segment.a, -1.0f),  // a
+                            MathCore::vec3f(segment.b, -1.0f),  // b
+                            3.0f,                               // thickness
+                            (structure.pass_through_set)        //
+                                ? ui::colorFromHex("#0000FFFF") // color for pass-through segments
+                                : ui::colorFromHex("#FF0000FF") // color
+                        );
+                    }
+                    if (structure.pass_through_set)
+                    {
+                        using namespace SimplePhysics;
+                        vec2f center = (structure.segments[0].a + structure.segments[0].b) * 0.5f;
+                        // also draw the pass-through activation line
+                        float dst =  Line2D::pointDistanceToLine(center, structure.pass_through_activate_line);
+                        line_mounter->addCircle(
+                            MathCore::vec3f(center + structure.pass_through_activate_line.normal * (50.0f - dst), -1.0f),
+                            50.0f,                        // radius
+                            3.0f,                         // thickness
+                            ui::colorFromHex("#ffff00FF") // color for pass-through segments
+                        );
+
+                        dst = Line2D::pointDistanceToLine(center, structure.pass_through_deactivate_line);
+                        line_mounter->addCircle(
+                            MathCore::vec3f(center + structure.pass_through_deactivate_line.normal * (0.0f - dst), -1.0f),
+                            50.0f,                        // radius
+                            3.0f,                         // thickness
+                            ui::colorFromHex("#ffff00FF") // color for pass-through segments
                         );
                     }
                 }
@@ -207,18 +229,18 @@ void GameScene::loadGraph()
                         &app->resourceMap, // use app's resource map
                         MathCore::vec2f(
                             box_size.x,
-                            box_size.y),               // size
-                        (structure.pass_through_direction.x != 0 || structure.pass_through_direction.y != 0) //
-                            ? ui::colorFromHex("#0000ffff") // color for pass-through structures
+                            box_size.y),                     // size
+                        (structure.pass_through_set)         //
+                            ? ui::colorFromHex("#0000ffff")  // color for pass-through structures
                             : ui::colorFromHex("#FF0000FF"), // color
-                        MathCore::vec4f(0, 0, 0, 0),   // radius
-                        StrokeModeGrowOutside,         // stroke mode
-                        0.0f,                          // stroke thickness
-                        MathCore::vec4f(0, 0, 0, 0),   // stroke color
-                        0.0f,                          // drop shadow thickness
-                        MathCore::vec4f(0, 0, 0, 0),   // drop shadow color
-                        MeshUploadMode_Direct,         // mesh upload mode
-                        4);                            // segment count
+                        MathCore::vec4f(0, 0, 0, 0),         // radius
+                        StrokeModeGrowOutside,               // stroke mode
+                        0.0f,                                // stroke thickness
+                        MathCore::vec4f(0, 0, 0, 0),         // stroke color
+                        0.0f,                                // drop shadow thickness
+                        MathCore::vec4f(0, 0, 0, 0),         // drop shadow color
+                        MeshUploadMode_Direct,               // mesh upload mode
+                        4);                                  // segment count
                 }
             }
         }
