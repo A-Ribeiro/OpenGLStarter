@@ -71,13 +71,8 @@ namespace SimplePhysics
             {
                 const auto &structure = static_structures[idx];
                 // skip pass-through structures when player is on the pass-through side
-                if (OP<vec2f>::sqrLength(structure.pass_through_direction) > 1e-12f)
-                {
-                    vec2f seg_mid = (structure.box.min + structure.box.max) * 0.5f;
-                    vec2f to_player = position - seg_mid;
-                    if (OP<vec2f>::dot(to_player, structure.pass_through_direction) < 0.0f)
-                        continue;
-                }
+                if (structure.pass_through_set && !structure.pass_through_is_active)
+                    continue;
                 for (const auto &segment : structure.segments)
                 {
                     if (Segment2D::circleIntersectsSegment(
@@ -175,7 +170,7 @@ namespace SimplePhysics
         {
             const auto &structure = static_structures[idx];
             // skip pass-through structures when velocity aligns with pass-through direction
-            if (structure.shouldPassThrough(velocity_hint))
+            if (structure.pass_through_set && !structure.pass_through_is_active)
                 continue;
             for (const auto &segment : structure.segments)
             {
@@ -253,13 +248,8 @@ namespace SimplePhysics
             {
                 const auto &structure = static_structures[idx];
                 // skip pass-through structures when player is on the pass-through side
-                if (OP<vec2f>::sqrLength(structure.pass_through_direction) > 1e-12f)
-                {
-                    vec2f seg_mid = (structure.box.min + structure.box.max) * 0.5f;
-                    vec2f to_player = a - seg_mid;
-                    if (OP<vec2f>::dot(to_player, structure.pass_through_direction) < 0.0f)
-                        continue;
-                }
+                if (structure.pass_through_set && !structure.pass_through_is_active)
+                    continue;
                 for (const auto &segment : structure.segments)
                 {
                     if (Segment2D::circleIntersectsSegment(
@@ -326,10 +316,29 @@ namespace SimplePhysics
             // const auto &static_ids = static_quadtree->query_box(move_box.min, move_box.max);
             for (uint32_t idx : static_ids)
             {
-                const auto &structure = static_structures[idx];
-                // skip pass-through structures when movement aligns with pass-through direction
-                if (structure.shouldPassThrough(remaining_dir_norm))
-                    continue;
+                auto &structure = static_structures[idx];
+                // pass-through logic
+                if (structure.pass_through_set)
+                {
+                    // the current position is a
+                    bool below_deactivation_line = structure.pass_through_is_below_or_touching_deactivation_line(a, radius);
+                    if (below_deactivation_line)
+                        structure.pass_through_is_active = false;
+                    else
+                    {
+                        bool above_activation_line = structure.pass_through_is_above_activation_line(a, radius);
+                        if (above_activation_line)
+                            structure.pass_through_is_active = true;
+                        // if (above_activation_line)
+                        // {
+                        //     bool inside_or_touching_left_right = structure.pass_through_is_inside_or_touching_left_right_bound(a, radius);
+                        //     structure.pass_through_is_active = inside_or_touching_left_right;
+                        // }
+                    }
+
+                    if (!structure.pass_through_is_active)
+                        continue;
+                }
                 for (const auto &segment : structure.segments)
                 {
                     if (segment_collision_to_ignore == &segment)
@@ -354,9 +363,7 @@ namespace SimplePhysics
                         segment_collision = &segment;
                         new_remaining_dir_norm = out_dir;
 
-                        
 #if DEBUG_DRAW != 0
-
 
                         vec2f new_p = OP<vec2f>::lerp(a, b, t);
                         vec2f pt_in_segment = Segment2D::closestPointToSegment(new_p, segment.a, segment.b);
@@ -628,14 +635,12 @@ namespace SimplePhysics
         // }
         // velocity = vec2f(600.000000,-508.129517);
 
-
         position += velocity * time->deltaTime;
 
-        // printf("position_before: %f %f, position: %f %f, velocity: %f %f\n", 
+        // printf("position_before: %f %f, position: %f %f, velocity: %f %f\n",
         //     position_before.x, position_before.y,
-        //     position.x, position.y, 
+        //     position.x, position.y,
         //     velocity.x, velocity.y);
-
 
         bool ground_touch = false;
 
@@ -663,7 +668,7 @@ namespace SimplePhysics
                     last_collision_segment = *on_segment;
                 }
             });
-        
+
         // passed = passed || (position != position_before);
 
         // last_collision_segment = *on_segment;

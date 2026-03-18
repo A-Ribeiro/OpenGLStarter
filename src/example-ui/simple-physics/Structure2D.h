@@ -2,6 +2,7 @@
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
 
+#include "Line2D.h"
 #include "Segment2D.h"
 #include "Box2D.h"
 
@@ -19,6 +20,8 @@ namespace SimplePhysics
     class Structure2D
     {
         void computeBox();
+
+        void computePassThroughLines(const MathCore::vec2f &pass_through_normal_hint);
 
     public:
         struct QuadtreeIntegration
@@ -40,15 +43,30 @@ namespace SimplePhysics
         // only valid for circle type
         float circle_radius;
 
-        // direction in which movement can pass through this structure.
-        // zero vector = fully solid (default).
-        // e.g. vec2f(0,1) = player can pass through when moving upward (one-way platform from below)
-        MathCore::vec2f pass_through_direction;
+        bool pass_through_set;
 
-        // returns true if the given movement direction should pass through this structure
-        bool shouldPassThrough(const MathCore::vec2f &move_direction) const;
+        bool pass_through_is_active;
+
+        Line2D pass_through_activate_line;
+        Line2D pass_through_deactivate_line;
+
+        // Line2D pass_through_left_bound_line;
+        // Line2D pass_through_right_bound_line;
+
+        // bool pass_through_is_inside_or_touching_left_right_bound(const MathCore::vec2f &point, float radius) const;
+        bool pass_through_is_above_activation_line(const MathCore::vec2f &point, float radius) const;
+        bool pass_through_is_below_or_touching_deactivation_line(const MathCore::vec2f &point, float radius) const;
 
         Structure2D(int segment_count = 0);
+
+        static Structure2D FromSegmentPassThrough(
+            const char *tag,
+            float friction,
+            const Segment2D &segment,
+            // will calculate the passthrough normal in the same direction,
+            // but with 90 degree against the segment
+            const MathCore::vec2f &pass_through_normal_hint
+        );
 
         static Structure2D FromSegment(
             const char *tag,

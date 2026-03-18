@@ -2,8 +2,8 @@
 #include "Quadtree.h"
 #include <InteractiveToolkit/AlgorithmCore/Polygon/Polygon2D.h>
 #if defined(_WIN32)
-#pragma warning( push )
-#pragma warning( disable : 4996)
+#pragma warning(push)
+#pragma warning(disable : 4996)
 #endif
 namespace SimplePhysics
 {
@@ -15,19 +15,99 @@ namespace SimplePhysics
             box.wrapLine(segment.a, segment.b);
     }
 
+    void Structure2D::computePassThroughLines(const MathCore::vec2f &pass_through_normal_hint)
+    {
+        using namespace MathCore;
+        pass_through_set = true;
+
+        vec2f segment_ab = segments[0].b - segments[0].a;
+        vec2f normal = OP<vec2f>::cross_z_up(segment_ab);
+        normal = OP<vec2f>::normalize(normal);
+        normal = (OP<vec2f>::dot(normal, pass_through_normal_hint) >= 0) ? normal : -normal;
+
+        const float deactivate_threshold_px = 2.0f;
+
+        box.expand(vec2f(deactivate_threshold_px));
+
+        vec2f point_in_line = segments[0].a;
+
+        pass_through_activate_line = Line2D::FromPointNormal(point_in_line, normal);
+        //pass_through_deactivate_line = Line2D::FromPointNormal(point_in_line - deactivate_threshold_px * normal, -normal);
+        pass_through_deactivate_line = Line2D::FromPointNormal(point_in_line, -normal);
+
+        // vec2f x_axis_positive = OP<vec2f>::cross_z_down(normal);
+        // vec2f x_axis_negative = -x_axis_positive;
+
+        // if (OP<vec2f>::dot(x_axis_positive, segment_ab) < 0)
+        //     std::swap(segments[0].a, segments[0].b);
+        // // segment ab is in the same direction of x_axis_positive
+        // // a is the left point and b is the right point
+
+        // pass_through_left_bound_line = Line2D::FromPointNormal(segments[0].a, x_axis_positive);
+        // pass_through_right_bound_line = Line2D::FromPointNormal(segments[0].b, x_axis_negative);
+    }
+
+    // bool Structure2D::pass_through_is_inside_or_touching_left_right_bound(const MathCore::vec2f &point, float radius) const
+    // {
+    //     float dst = Line2D::pointDistanceToLine(point, pass_through_left_bound_line);
+    //     if (dst < -radius)
+    //         return false;
+    //     dst = Line2D::pointDistanceToLine(point, pass_through_right_bound_line);
+    //     if (dst < -radius)
+    //         return false;
+    //     return true;
+    // }
+
+    bool Structure2D::pass_through_is_above_activation_line(const MathCore::vec2f &point, float radius) const
+    {
+        float dst = Line2D::pointDistanceToLine(point, pass_through_activate_line);
+        // printf("is_above: %d\n", (int)(dst > radius));
+        return dst > radius;
+    }
+
+    bool Structure2D::pass_through_is_below_or_touching_deactivation_line(const MathCore::vec2f &point, float radius) const
+    {
+        float dst = Line2D::pointDistanceToLine(point, pass_through_deactivate_line);
+        // printf("is_below: %d\n", (int)(dst > 0));
+        return dst > 0;
+    }
+
     Structure2D::Structure2D(int segment_count) : tag{'\0'}, segments(segment_count)
     {
         friction = 0.0f;
         type = StructureType::None;
-        pass_through_direction = MathCore::vec2f(0);
+        pass_through_set = false;
+        pass_through_is_active = true;
     }
 
-    bool Structure2D::shouldPassThrough(const MathCore::vec2f &move_direction) const
+    // bool Structure2D::shouldPassThrough(const MathCore::vec2f &move_direction) const
+    // {
+    //     using namespace MathCore;
+    //     if (OP<vec2f>::sqrLength(pass_through_direction) < 1e-12f)
+    //         return false;
+    //     return OP<vec2f>::dot(move_direction, pass_through_direction) > 0.0f;
+    // }
+
+    Structure2D Structure2D::FromSegmentPassThrough(
+        const char *tag,
+        float friction,
+        const Segment2D &segment,
+        // will calculate the passthrough normal in the same direction,
+        // but with 90 degree against the segment
+        const MathCore::vec2f &pass_through_normal_hint)
     {
-        using namespace MathCore;
-        if (OP<vec2f>::sqrLength(pass_through_direction) < 1e-12f)
-            return false;
-        return OP<vec2f>::dot(move_direction, pass_through_direction) > 0.0f;
+        Structure2D result(1);
+
+        result.friction = friction;
+        strncpy(result.tag, tag, sizeof(result.tag) - 1);
+        result.type = StructureType::Segment;
+        result.segments[0] = segment;
+
+        result.computeBox();
+
+        result.computePassThroughLines(pass_through_normal_hint);
+
+        return result;
     }
 
     Structure2D Structure2D::FromSegment(
@@ -229,7 +309,7 @@ namespace SimplePhysics
         {
             if (!box.isPointInside(point))
                 return false;
-            
+
             bool inside = false;
             size_t count = segments.size();
             if (count < 3)
@@ -274,7 +354,7 @@ namespace SimplePhysics
         return false;
     }
 
-    bool Structure2D::checkBoxOverlap(const Box2D &other) const 
+    bool Structure2D::checkBoxOverlap(const Box2D &other) const
     {
         return checkBoxOverlap(other.min, other.max);
     }
@@ -284,7 +364,7 @@ namespace SimplePhysics
         if (!QuadtreeNode::box_overlaps(box.min, box.max, min, max))
             return false;
 
-        if (type == StructureType::Box)
+        if (type == StructureType::Box || pass_through_set)
         {
             return true;
         }
@@ -312,5 +392,5 @@ namespace SimplePhysics
 
 }
 #if defined(_WIN32)
-#pragma warning( pop )
+#pragma warning(pop)
 #endif
