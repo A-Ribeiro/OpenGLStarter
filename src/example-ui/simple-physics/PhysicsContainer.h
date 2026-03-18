@@ -2,6 +2,7 @@
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <InteractiveToolkit/EventCore/PressReleaseDetector.h>
+#include <InteractiveToolkit/Platform/Core/SmartVector.h>
 
 #include "Segment2D.h"
 #include "Box2D.h"
@@ -24,6 +25,12 @@ namespace SimplePhysics
     };
 
     class PhysicsContainer;
+
+    struct PassThroughState
+    {
+        uint32_t id;
+        bool is_active;
+    };
 
     class JumpingController
     {
@@ -49,6 +56,8 @@ namespace SimplePhysics
         bool has_last_collision_segment;
 
         EventCore::PressReleaseDetector move_x_detector;
+
+        Platform::SmartVector<PassThroughState> pass_through_active_circular_list;
 
         JumpingController();
 
@@ -95,11 +104,12 @@ namespace SimplePhysics
             bool *ref_on_ground_called,
             const MathCore::vec2f &position,
             float radius_grounded,
-            const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded);
+            const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
+            Platform::SmartVector<PassThroughState> &pass_through_active_circular_list);
 
-        void pushOutOfSegments1(
-            MathCore::vec2f *ref_b,
-            float radius);
+        // void pushOutOfSegments1(
+        //     MathCore::vec2f *ref_b,
+        //     float radius);
 
         bool pushOutOfSegments(
             MathCore::vec2f point,
@@ -107,7 +117,8 @@ namespace SimplePhysics
             MathCore::vec2f *output,
             MathCore::vec2f *offset,
             MathCore::vec2f *push_normal,
-            const MathCore::vec2f &velocity_hint = MathCore::vec2f(0));
+            const MathCore::vec2f &velocity_hint,
+            Platform::SmartVector<PassThroughState> &pass_through_active_circular_list);
 
         // returns last collision segment if collision occurs, otherwise returns nullptr
         void movePlayer(
@@ -119,7 +130,8 @@ namespace SimplePhysics
             MathCore::vec2f *out_velocity,
             float delta_time,
             const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
-            const EventCore::Callback<void(const MathCore::vec2f &pos, const Segment2D *on_segment)> &onMoveTouch);
+            const EventCore::Callback<void(const MathCore::vec2f &pos, const Segment2D *on_segment)> &onMoveTouch,
+            Platform::SmartVector<PassThroughState> &pass_through_active_circular_list);
 
         const float max_velocity = 5000.0f;
 

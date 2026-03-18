@@ -77,7 +77,7 @@ namespace SimplePhysics
         friction = 0.0f;
         type = StructureType::None;
         pass_through_set = false;
-        pass_through_is_active = true;
+        // pass_through_is_active = true;
     }
 
     // bool Structure2D::shouldPassThrough(const MathCore::vec2f &move_direction) const

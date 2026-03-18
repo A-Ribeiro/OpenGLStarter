@@ -45,7 +45,7 @@ namespace SimplePhysics
 
         bool pass_through_set;
 
-        bool pass_through_is_active;
+        // bool pass_through_is_active;
 
         Line2D pass_through_activate_line;
         Line2D pass_through_deactivate_line;
