@@ -281,7 +281,7 @@ namespace StageGen
 
         // --- Add one-way pass-through platforms ---
         // These are horizontal segments the player can jump through from below but land on from above.
-        int oneWayPlatforms = numScreens * 2; // ~2 per screen
+        int oneWayPlatforms = numScreens * 3; // ~3 per screen
         for (int i = 0; i < oneWayPlatforms; i++)
         {
             float platW = mathRnd.nextRange<float>(minPlatformWidth, maxPlatformWidth);

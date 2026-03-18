@@ -7,6 +7,8 @@ using namespace AppKit::GLEngine::Components;
 
 #define DEBUG_DRAW 0
 
+const size_t MAX_ACTIVE_PASS_THROUGH = 4;
+
 namespace Debug
 {
     extern ComponentLineMounter *lineMounter;
@@ -61,7 +63,8 @@ namespace SimplePhysics
         bool *ref_on_ground_called,
         const MathCore::vec2f &position,
         float radius_grounded,
-        const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded)
+        const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
+        Platform::SmartVector<PassThroughState> &pass_through_active_circular_list)
     {
         using namespace MathCore;
 
@@ -71,8 +74,15 @@ namespace SimplePhysics
             {
                 const auto &structure = static_structures[idx];
                 // skip pass-through structures when player is on the pass-through side
-                if (structure.pass_through_set && !structure.pass_through_is_active)
-                    continue;
+                if (structure.pass_through_set)
+                {
+                    auto it = std::find_if(pass_through_active_circular_list.begin(), pass_through_active_circular_list.end(),
+                                           [idx](const PassThroughState &state)
+                                           { return state.id == idx; });
+                    bool is_active = (it != pass_through_active_circular_list.end()) ? it->is_active : false;
+                    if (!is_active)
+                        continue;
+                }
                 for (const auto &segment : structure.segments)
                 {
                     if (Segment2D::circleIntersectsSegment(
@@ -157,7 +167,8 @@ namespace SimplePhysics
         MathCore::vec2f *output,
         MathCore::vec2f *offset,
         MathCore::vec2f *push_normal,
-        const MathCore::vec2f &velocity_hint)
+        const MathCore::vec2f &velocity_hint,
+        Platform::SmartVector<PassThroughState> &pass_through_active_circular_list)
     {
         using namespace MathCore;
         Box2D b_box = Box2D().wrapCircle(point, radius);
@@ -170,8 +181,15 @@ namespace SimplePhysics
         {
             const auto &structure = static_structures[idx];
             // skip pass-through structures when velocity aligns with pass-through direction
-            if (structure.pass_through_set && !structure.pass_through_is_active)
-                continue;
+            if (structure.pass_through_set)
+            {
+                auto it = std::find_if(pass_through_active_circular_list.begin(), pass_through_active_circular_list.end(),
+                                       [idx](const PassThroughState &state)
+                                       { return state.id == idx; });
+                bool is_active = (it != pass_through_active_circular_list.end()) ? it->is_active : false;
+                if (!is_active)
+                    continue;
+            }
             for (const auto &segment : structure.segments)
             {
                 Box2D segment_box = Box2D(segment.a, segment.b);
@@ -206,7 +224,8 @@ namespace SimplePhysics
         MathCore::vec2f *out_velocity,
         float delta_time,
         const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
-        const EventCore::Callback<void(const MathCore::vec2f &pos, const Segment2D *on_segment)> &onMoveTouch)
+        const EventCore::Callback<void(const MathCore::vec2f &pos, const Segment2D *on_segment)> &onMoveTouch,
+        Platform::SmartVector<PassThroughState> &pass_through_active_circular_list)
     {
         using namespace MathCore;
 
@@ -216,7 +235,7 @@ namespace SimplePhysics
 
         {
             vec2f push_offset, push_normal;
-            if (pushOutOfSegments(a, radius + 1e-2f, &a, &push_offset, &push_normal, vel))
+            if (pushOutOfSegments(a, radius + 1e-2f, &a, &push_offset, &push_normal, vel, pass_through_active_circular_list))
             {
                 // need recompute velocity and b offset
                 b += push_offset;
@@ -255,7 +274,8 @@ namespace SimplePhysics
                 &on_ground_called,
                 a + vec2f(0, -offset_grounded),
                 radius_grounded,
-                onGrounded);
+                onGrounded,
+                pass_through_active_circular_list);
 
             // for (uint32_t idx : static_ids)
             // {
@@ -275,7 +295,6 @@ namespace SimplePhysics
             //     }
             // }
 
-            
             return;
         }
 
@@ -309,7 +328,11 @@ namespace SimplePhysics
         vec2f penetration;
         float radius_sq = radius * radius;
 
-        float query_radius = OP<float>::abs(offset_grounded) + radius_grounded + 1.0f;
+        float query_radius =
+            OP<float>::maximum(
+                radius,
+                OP<float>::abs(offset_grounded) + radius_grounded) +
+            1.0f;
 
         const Segment2D *segment_collision_to_ignore = nullptr;
 
@@ -334,15 +357,42 @@ namespace SimplePhysics
                 // pass-through logic
                 if (structure.pass_through_set)
                 {
+                    auto it = std::find_if(pass_through_active_circular_list.begin(), pass_through_active_circular_list.end(),
+                                           [idx](const PassThroughState &state)
+                                           { return state.id == idx; });
+                    if (it == pass_through_active_circular_list.end())
+                    {
+                        if (pass_through_active_circular_list.size() >= MAX_ACTIVE_PASS_THROUGH)
+                            pass_through_active_circular_list.pop_front();
+                        // if not found, add to the active list with inactive state
+                        pass_through_active_circular_list.push_back({idx, true});
+                        it = --pass_through_active_circular_list.end();
+                    }
+                    else
+                    {
+                        // make this it the last
+                        PassThroughState state = *it;
+                        pass_through_active_circular_list.erase(it);
+                        pass_through_active_circular_list.push_back(state);
+                        it = --pass_through_active_circular_list.end();
+                    }
+
+                    // printf("active pass-through :");
+                    // for( auto &state : pass_through_active_circular_list)
+                    //     printf("{id: %u, is_active: %d} ", state.id, state.is_active);
+                    // printf("\n");
+
+                    bool &is_active = it->is_active;
+
                     // the current position is a
                     bool below_deactivation_line = structure.pass_through_is_below_or_touching_deactivation_line(a, radius);
                     if (below_deactivation_line)
-                        structure.pass_through_is_active = false;
+                        is_active = false;
                     else
                     {
                         bool above_activation_line = structure.pass_through_is_above_activation_line(a, radius);
                         if (above_activation_line)
-                            structure.pass_through_is_active = true;
+                            is_active = true;
                         // if (above_activation_line)
                         // {
                         //     bool inside_or_touching_left_right = structure.pass_through_is_inside_or_touching_left_right_bound(a, radius);
@@ -350,7 +400,7 @@ namespace SimplePhysics
                         // }
                     }
 
-                    if (!structure.pass_through_is_active)
+                    if (!is_active)
                         continue;
                 }
                 for (const auto &segment : structure.segments)
@@ -420,7 +470,8 @@ namespace SimplePhysics
                 &on_ground_called,
                 b + vec2f(0, -offset_grounded),
                 radius_grounded,
-                onGrounded);
+                onGrounded,
+                pass_through_active_circular_list);
 
             // Redirect remaining movement along the collision tangent
             if (move_t == 0.0f)
@@ -519,8 +570,9 @@ namespace SimplePhysics
         *out_velocity = OP<vec2f>::quadraticClamp(vec2f(0, 0), vel, max_velocity);
     }
 
-    JumpingController::JumpingController()
+    JumpingController::JumpingController() : pass_through_active_circular_list(MAX_ACTIVE_PASS_THROUGH)
     {
+        pass_through_active_circular_list.clear();
         has_last_collision_segment = false;
     }
 
@@ -641,7 +693,7 @@ namespace SimplePhysics
         vec2f position_before = position;
         // static bool passed = false;
         // if (!passed)
-        // {             
+        // {
         //     position_before = vec2f(1083.843994, 49.999996);
         //     position = position_before; // 1087.049561 150.038300
         //     velocity = vec2f(600.000000, 1000.000000);
@@ -686,7 +738,8 @@ namespace SimplePhysics
                 //     ground_touch = true;
                 //     last_collision_segment = *on_segment;
                 // }
-            });
+            },
+            pass_through_active_circular_list);
 
         // passed = passed || (position != position_before);
         // printf("passed: %d\n", passed);
