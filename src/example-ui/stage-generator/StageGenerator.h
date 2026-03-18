@@ -68,6 +68,13 @@ namespace StageGen
             const MathCore::vec2f &start,
             const MathCore::vec2f &end);
 
+        static void addTestPlatformSequence(
+            SimplePhysics::PhysicsContainer &container,
+            const StageParams &params,
+            MathCore::MathRandomExt<ITKCommon::Random32> &mathRnd,
+            const MathCore::vec2f &start,
+            const MathCore::vec2f &end);
+
         static void addDecorativeBoxes(
             SimplePhysics::PhysicsContainer &container,
             const StageParams &params,

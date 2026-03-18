@@ -358,6 +358,88 @@ namespace StageGen
         // }
     }
 
+    void StageGenerator::addTestPlatformSequence(
+        PhysicsContainer &container,
+        const StageParams &params,
+        MathRandomExt<Random32> &mathRnd,
+        const vec2f &start,
+        const vec2f &end)
+    {
+        float W = params.totalWidth();
+        float H = params.totalHeight();
+        float normalJump = params.normal_jump_height;
+        float doubleJump = params.double_jump_height;
+        float playerR = params.player_radius;
+        float totalMaxJump = normalJump + doubleJump;
+
+        // The reachable horizontal distance during a jump arc (approximate)
+        // With horizontal speed ~600 px/s and jump time ~0.5s, horizontal reach ~300px
+        // We'll use a generous max gap proportional to jump height
+        float maxHorizontalGap = normalJump * 2.5f;
+        float maxVerticalGap = normalJump * 0.85f;         // reachable with single jump
+        float maxVerticalGapDouble = totalMaxJump * 0.85f; // reachable with double jump
+
+        // Platform dimensions
+        float minPlatformWidth = 100.0f;
+        float maxPlatformWidth = 350.0f;
+        float platformThickness = 20.0f;
+
+        // Vertical band limits (keep platforms away from floor and ceiling)
+        float minY = 60.0f;
+        float maxY = H - 80.0f;
+
+        // Tracked placements to avoid overlaps
+        std::vector<PlatformPlacement> placed;
+        float overlapMargin = playerR * 2.0f;
+
+        // --- Generate a main traversal path ---
+        // Walk from start.x to near end.x, placing platforms that the player can reach
+        float cursorX = start.x + 150.0f;
+        float cursorY = start.y;
+        int platformIndex = 0;
+
+        float dy_increment = -50.0f;
+
+        while (cursorX < end.x - 200.0f)
+        {
+            // Decide platform width
+            float platW = mathRnd.nextRange<float>(minPlatformWidth, maxPlatformWidth);
+
+            // Horizontal jump: place next platform within reachable horizontal distance
+            float dx = mathRnd.nextRange<float>(platW * 0.5f + playerR * 2.0f, maxHorizontalGap);
+
+            // Vertical variation: prefer staying in the lower-mid range, occasionally go higher
+            float dy = 0.0f;
+            // float chance = mathRnd.nextRange<float>(0.0f, 1.0f);
+            dy = dy_increment;
+            dy_increment += 5.0f; // steadily increase vertical gap to test jumps
+
+            float newX = cursorX + dx;
+            float newY = OP<float>::clamp(cursorY + dy, minY, maxY);
+
+            vec2f center(newX, newY);
+
+            // Check for overlap with already placed platforms
+            if (!overlapsExisting(placed, center, platW, platformThickness, overlapMargin))
+            {
+                container.static_structures.push_back(
+                    Structure2D::FromBoxCenterSize(
+                        "Platform Box", 0.6f,
+                        center,
+                        vec2f(platW, platformThickness)));
+                placed.push_back({center, platW, platformThickness, true});
+                cursorX = newX;
+                cursorY = newY;
+                platformIndex++;
+            }
+            else
+            {
+                // Skip ahead a bit to avoid getting stuck
+                cursorX += platW * 0.5f;
+            }
+        }
+    }
+
     // ----------------------------------------------------------------
     // Decorative box obstacles
     // ----------------------------------------------------------------
@@ -396,6 +478,7 @@ namespace StageGen
         const StageParams &params,
         Random32 &rng)
     {
+        // rng.setSeed(1);
         MathRandomExt<Random32> mathRnd(&rng);
 
         float W = params.totalWidth();
@@ -423,12 +506,14 @@ namespace StageGen
                                          Segment2D(vec2f(W, 0), vec2f(W, H + totalMaxJump * 10.0f))));
         }
 
-        // 2. Floor, ceiling, walls
-        addFloorAndWalls(container, params);
+        // // 2. Floor, ceiling, walls
+        // addFloorAndWalls(container, params);
 
         // 3. Start and end platforms
         vec2f startPt, endPt;
         addStartAndEndPlatforms(container, params, startPt, endPt);
+
+        // addTestPlatformSequence(container, params, mathRnd, startPt, endPt);
 
         // 4. Main platform sequence + branches + slopes
         addPlatformSequence(container, params, mathRnd, startPt, endPt);

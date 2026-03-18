@@ -437,24 +437,35 @@ namespace SimplePhysics
     {
         using namespace MathCore;
 
-        vec2f move_vector = center_to - center_from;
+        // Skin width to prevent exact-touching deadlocks in iterative collision response
+        const float skin_width = 1e-2f;
+        float effective_radius = radius - skin_width;
+        float effective_radius_sq = effective_radius * effective_radius;
 
-        // Check if already overlapping at start
-        vec2f closest_start = closestPointToSegment(center_from, segment_a, segment_b);
-        if (OP<vec2f>::sqrDistance(center_from, closest_start) <= radius * radius + EPSILON<float>::high_precision)
-        {
-            vec2f center_to_touch_pt = closest_start - center_from;
-            const float cos_threshold = OP<float>::cos(OP<float>::deg_2_rad(89.0f));
-            bool in_front = OP<vec2f>::dot(center_to_touch_pt, move_vector) > cos_threshold;
-            if (in_front)
-                return 0.0f;
-        }
+        vec2f move_vector = center_to - center_from;
 
         float move_len_sq = OP<vec2f>::dot(move_vector, move_vector);
 
         // If not moving, no collision
         if (move_len_sq < 1e-12f)
             return 1.0f;
+
+        // Check if already overlapping at start
+        vec2f closest_start = closestPointToSegment(center_from, segment_a, segment_b);
+        if (OP<vec2f>::sqrDistance(center_from, closest_start) < effective_radius_sq)
+        {
+            vec2f center_to_touch_pt = closest_start - center_from;
+            float center_to_touch_len_sq = OP<vec2f>::sqrLength(center_to_touch_pt);
+            if (center_to_touch_len_sq > 1e-8f)
+            {
+                const float cos_threshold = OP<float>::cos(OP<float>::deg_2_rad(89.0f));
+                vec2f center_to_touch_pt_normalized = center_to_touch_pt * OP<float>::rsqrt(center_to_touch_len_sq);
+                vec2f move_vector_normalized = move_vector * OP<float>::rsqrt(move_len_sq);
+                bool in_front = OP<vec2f>::dot(center_to_touch_pt_normalized, move_vector_normalized) > cos_threshold;
+                if (in_front)
+                    return 0.0f;
+            }
+        }
 
         // --- Case 1: Circle vs the edge (infinite line containing the segment) ---
         vec2f seg_dir = segment_b - segment_a;
@@ -472,9 +483,9 @@ namespace SimplePhysics
 
             if (OP<float>::abs(dh) > 1e-12f)
             {
-                // Solve h0 + t * dh = +radius and h0 + t * dh = -radius
+                // Solve h0 + t * dh = +effective_radius and h0 + t * dh = -effective_radius
                 float dh_inv = 1.0f / dh;
-                float t = (dh > 0) ? (-radius - h0) * dh_inv : (radius - h0) * dh_inv;
+                float t = (dh > 0) ? (-effective_radius - h0) * dh_inv : (effective_radius - h0) * dh_inv;
                 if (t >= -1e-3f && t < 1.0f)
                 {
                     if (t < 0.0f)
@@ -493,11 +504,11 @@ namespace SimplePhysics
         }
 
         // --- Case 2: Circle vs segment endpoints ---
-        // Solve |center_from + t * move_vector - endpoint|² = radius²
-        //       |t * move_vector + (center_from - endpoint)|² - radius² = 0
+        // Solve |center_from + t * move_vector - endpoint|² = effective_radius²
+        //       |t * move_vector + (center_from - endpoint)|² - effective_radius² = 0
         // eq = t²|move_vector|² +
         //      t * 2 * dot(center_from - endpoint, move_vector) +
-        //      |center_from - endpoint|² - radius²
+        //      |center_from - endpoint|² - effective_radius²
         // => A*t² + B*t + C = 0
         float result = 1.0f;
         const vec2f *endpoints[2] = {&segment_a, &segment_b};
@@ -507,7 +518,7 @@ namespace SimplePhysics
             vec2f diff = center_from - *endpoints[i];
             float A = move_len_sq;
             float B = 2.0f * OP<vec2f>::dot(diff, move_vector);
-            float C = OP<vec2f>::dot(diff, diff) - radius * radius;
+            float C = OP<vec2f>::dot(diff, diff) - effective_radius_sq;
 
             float delta = B * B - 4.0f * A * C;
             if (delta >= 0.0f)
@@ -541,38 +552,55 @@ namespace SimplePhysics
     {
         using namespace MathCore;
 
+        // Skin width to prevent exact-touching deadlocks in iterative collision response
+        const float skin_width = 1e-2f;
+        float effective_radius = radius - skin_width;
+        float effective_radius_sq = effective_radius * effective_radius;
+
         vec2f move_vector = center_to - center_from;
-
-        // Check if already overlapping at start
-        vec2f closest_start = closestPointToSegment(center_from, segment_a, segment_b);
-        if (OP<vec2f>::sqrDistance(center_from, closest_start) <= radius * radius + EPSILON<float>::high_precision)
-        {
-            vec2f center_to_touch_pt = closest_start - center_from;
-            const float cos_threshold = OP<float>::cos(OP<float>::deg_2_rad(89.0f));
-            bool in_front = OP<vec2f>::dot(center_to_touch_pt, move_vector) > cos_threshold;
-            if (in_front)
-            {
-                // vec2f tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
-                vec2f tan_dir;
-
-                vec2f out_normal = -center_to_touch_pt;
-                float out_normal_len_sq = OP<vec2f>::sqrLength(out_normal);
-                if (out_normal_len_sq > 1e-8f)
-                    tan_dir = OP<vec2f>::cross_z_up(out_normal * OP<float>::rsqrt(out_normal_len_sq));
-                else
-                    tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
-
-                tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
-                *out_move_direction = tan_dir;
-                return 0.0f;
-            }
-        }
 
         float move_len_sq = OP<vec2f>::dot(move_vector, move_vector);
 
         // If not moving, no collision
         if (move_len_sq < 1e-12f)
             return 1.0f;
+
+        // Check if already overlapping at start
+        vec2f closest_start = closestPointToSegment(center_from, segment_a, segment_b);
+        if (OP<vec2f>::sqrDistance(center_from, closest_start) < effective_radius_sq)
+        {
+            vec2f center_to_touch_pt = closest_start - center_from;
+            float center_to_touch_len_sq = OP<vec2f>::sqrLength(center_to_touch_pt);
+            if (center_to_touch_len_sq > 1e-8f)
+            {
+
+                const float cos_threshold = OP<float>::cos(OP<float>::deg_2_rad(89.0f));
+
+                vec2f center_to_touch_pt_normalized = center_to_touch_pt * OP<float>::rsqrt(center_to_touch_len_sq);
+                vec2f move_vector_normalized = move_vector * OP<float>::rsqrt(move_len_sq);
+
+                float cos_angle_to_check = OP<vec2f>::dot(center_to_touch_pt_normalized, move_vector_normalized);
+                bool in_front = cos_angle_to_check > cos_threshold;
+                if (in_front)
+                {
+                    // vec2f tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
+                    vec2f tan_dir;
+
+                    // vec2f out_normal = -center_to_touch_pt;
+                    // float out_normal_len_sq = OP<vec2f>::sqrLength(out_normal);
+                    // if (out_normal_len_sq > 1e-8f)
+                    //     tan_dir = OP<vec2f>::cross_z_up(out_normal * OP<float>::rsqrt(out_normal_len_sq));
+                    // else
+                    //     tan_dir = OP<vec2f>::normalize(segment_b - segment_a);
+
+                    tan_dir = OP<vec2f>::cross_z_up(center_to_touch_pt_normalized);
+
+                    tan_dir = (OP<vec2f>::dot(move_vector, tan_dir) < 0.0f) ? -tan_dir : tan_dir;
+                    *out_move_direction = tan_dir;
+                    return 0.0f;
+                }
+            }
+        }
 
         // --- Case 1: Circle vs the edge (infinite line containing the segment) ---
         vec2f seg_dir = segment_b - segment_a;
@@ -590,9 +618,9 @@ namespace SimplePhysics
 
             if (OP<float>::abs(dh) > 1e-12f)
             {
-                // Solve h0 + t * dh = +radius and h0 + t * dh = -radius
+                // Solve h0 + t * dh = +effective_radius and h0 + t * dh = -effective_radius
                 float dh_inv = 1.0f / dh;
-                float t = (dh > 0) ? (-radius - h0) * dh_inv : (radius - h0) * dh_inv;
+                float t = (dh > 0) ? (-effective_radius - h0) * dh_inv : (effective_radius - h0) * dh_inv;
                 if (t >= -1e-3f && t < 1.0f)
                 {
                     if (t < 0.0f)
@@ -614,11 +642,11 @@ namespace SimplePhysics
         }
 
         // --- Case 2: Circle vs segment endpoints ---
-        // Solve |center_from + t * move_vector - endpoint|² = radius²
-        //       |t * move_vector + (center_from - endpoint)|² - radius² = 0
+        // Solve |center_from + t * move_vector - endpoint|² = effective_radius²
+        //       |t * move_vector + (center_from - endpoint)|² - effective_radius² = 0
         // eq = t²|move_vector|² +
         //      t * 2 * dot(center_from - endpoint, move_vector) +
-        //      |center_from - endpoint|² - radius²
+        //      |center_from - endpoint|² - effective_radius²
         // => A*t² + B*t + C = 0
         float result = 1.0f;
         const vec2f *endpoints[2] = {&segment_a, &segment_b};
@@ -628,7 +656,7 @@ namespace SimplePhysics
             vec2f diff = center_from - *endpoints[i];
             float A = move_len_sq;
             float B = 2.0f * OP<vec2f>::dot(diff, move_vector);
-            float C = OP<vec2f>::dot(diff, diff) - radius * radius;
+            float C = OP<vec2f>::dot(diff, diff) - effective_radius_sq;
 
             float delta = B * B - 4.0f * A * C;
             if (delta >= 0.0f)

@@ -216,7 +216,7 @@ namespace SimplePhysics
 
         {
             vec2f push_offset, push_normal;
-            if (pushOutOfSegments(a, radius, &a, &push_offset, &push_normal, vel))
+            if (pushOutOfSegments(a, radius + 1e-2f, &a, &push_offset, &push_normal, vel))
             {
                 // need recompute velocity and b offset
                 b += push_offset;
@@ -238,28 +238,44 @@ namespace SimplePhysics
         vec2f ab = b - a;
         float ab_mag = OP<vec2f>::length(ab);
 
+        bool on_ground_called = false;
+
         if (ab_mag == 0.0f || delta_time == 0.0f || length_vel == 0.0f)
         {
+            *out_position = a;
+
             // do ground check
             vec2f ground_pos = a + vec2f(0, -offset_grounded);
-            Box2D ground_box = Box2D().wrapCircle(ground_pos, radius);
+            Box2D ground_box = Box2D().wrapCircle(ground_pos, radius_grounded);
             const auto &static_ids = static_quadtree->query_box(ground_box.min, ground_box.max);
-            for (uint32_t idx : static_ids)
-            {
-                const auto &structure = static_structures[idx];
-                // skip pass-through structures when player is on the pass-through side
-                if (structure.pass_through_set && !structure.pass_through_is_active)
-                    continue;
-                for (const auto &segment : structure.segments)
-                {
-                    if (Segment2D::circleIntersectsSegment(
-                            ground_pos, radius_grounded,
-                            segment.a, segment.b))
-                        onMoveTouch(a, &segment);
-                }
-            }
 
-            *out_position = a;
+            // ground check
+            groundCheck(
+                static_ids,
+                &on_ground_called,
+                a + vec2f(0, -offset_grounded),
+                radius_grounded,
+                onGrounded);
+
+            // for (uint32_t idx : static_ids)
+            // {
+            //     const auto &structure = static_structures[idx];
+            //     // skip pass-through structures when player is on the pass-through side
+            //     if (structure.pass_through_set && !structure.pass_through_is_active)
+            //         continue;
+            //     for (const auto &segment : structure.segments)
+            //     {
+            //         if (Segment2D::circleIntersectsSegment(
+            //                 ground_pos, radius_grounded,
+            //                 segment.a, segment.b))
+            //         {
+            //             onGrounded(&segment);
+            //             // onMoveTouch(a, &segment);
+            //         }
+            //     }
+            // }
+
+            
             return;
         }
 
@@ -299,8 +315,6 @@ namespace SimplePhysics
 
         vec2f remaining_dir_norm = ab * (1.0f / ab_mag);
         float remaining_move_mag = ab_mag;
-
-        bool on_ground_called = false;
 
         int max_iterations_without_move = 3;
         while (remaining_move_mag > EPSILON<float>::low_precision)
@@ -625,19 +639,22 @@ namespace SimplePhysics
         }
 
         vec2f position_before = position;
-
         // static bool passed = false;
-        // position_before
-        // if (!passed) {
-        //     position_before = vec2f(270.000000,80.000000);
-        //     position = position_before; // 330.975555 28.360878
-        //     passed = true;
+        // if (!passed)
+        // {             
+        //     position_before = vec2f(1083.843994, 49.999996);
+        //     position = position_before; // 1087.049561 150.038300
+        //     velocity = vec2f(600.000000, 1000.000000);
+
+        //     // p + v = 1087.049561 150.038300;
+        //     vec2f v_diff = vec2f(1144.804810, 151.601395) - position_before;
+        //     time->deltaTime = OP<vec2f>::length(v_diff) / OP<vec2f>::length(velocity);
+        //     // passed = true;
         // }
-        // velocity = vec2f(600.000000,-508.129517);
 
         position += velocity * time->deltaTime;
 
-        // printf("position_before: %f %f, position: %f %f, velocity: %f %f\n",
+        // printf("position_before: (%f, %f), position: (%f, %f), velocity: (%f, %f)\n",
         //     position_before.x, position_before.y,
         //     position.x, position.y,
         //     velocity.x, velocity.y);
@@ -655,21 +672,24 @@ namespace SimplePhysics
             [this, &ground_touch](const Segment2D *on_segment)
             {
                 // ground_touch = true;
+                ground_touch = true;
+                last_collision_segment = *on_segment;
             },
             // onMoveTouch callback
             [this, &ground_touch](const MathCore::vec2f &pos, const Segment2D *on_segment)
             {
-                MathCore::vec2f p_ground_check = pos + MathCore::vec2f(0, -offset_grounded);
-                if (Segment2D::circleIntersectsSegment(
-                        p_ground_check, this->radius_grounded,
-                        on_segment->a, on_segment->b))
-                {
-                    ground_touch = true;
-                    last_collision_segment = *on_segment;
-                }
+                // MathCore::vec2f p_ground_check = pos + MathCore::vec2f(0, -offset_grounded);
+                // if (Segment2D::circleIntersectsSegment(
+                //         p_ground_check, this->radius_grounded,
+                //         on_segment->a, on_segment->b))
+                // {
+                //     ground_touch = true;
+                //     last_collision_segment = *on_segment;
+                // }
             });
 
         // passed = passed || (position != position_before);
+        // printf("passed: %d\n", passed);
 
         // last_collision_segment = *on_segment;
         if (ground_touch)
