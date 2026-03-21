@@ -53,11 +53,21 @@ namespace SimplePhysics
         // Line2D pass_through_left_bound_line;
         // Line2D pass_through_right_bound_line;
 
+        bool always_check;
+
+        uint32_t id;
+
         // bool pass_through_is_inside_or_touching_left_right_bound(const MathCore::vec2f &point, float radius) const;
         bool pass_through_is_above_activation_line(const MathCore::vec2f &point, float radius) const;
         bool pass_through_is_below_or_touching_deactivation_line(const MathCore::vec2f &point, float radius) const;
 
         Structure2D(int segment_count = 0);
+
+        Structure2D &setAlwaysCheck(bool value)
+        {
+            always_check = value;
+            return *this;
+        }
 
         static Structure2D FromSegmentPassThrough(
             const char *tag,
@@ -65,8 +75,7 @@ namespace SimplePhysics
             const Segment2D &segment,
             // will calculate the passthrough normal in the same direction,
             // but with 90 degree against the segment
-            const MathCore::vec2f &pass_through_normal_hint
-        );
+            const MathCore::vec2f &pass_through_normal_hint);
 
         static Structure2D FromSegment(
             const char *tag,

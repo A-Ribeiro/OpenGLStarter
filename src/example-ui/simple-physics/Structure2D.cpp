@@ -77,6 +77,7 @@ namespace SimplePhysics
         friction = 0.0f;
         type = StructureType::None;
         pass_through_set = false;
+        always_check = false;
         // pass_through_is_active = true;
     }
 
