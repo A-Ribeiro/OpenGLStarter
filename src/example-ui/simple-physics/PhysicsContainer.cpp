@@ -7,8 +7,6 @@ using namespace AppKit::GLEngine::Components;
 
 #define DEBUG_DRAW 0
 
-const size_t MAX_ACTIVE_PASS_THROUGH = 4;
-
 namespace Debug
 {
     extern ComponentLineMounter *lineMounter;
@@ -19,10 +17,22 @@ namespace SimplePhysics
 
     void PhysicsContainer::buildStaticQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_)
     {
+        for (uint32_t i = 0; i < static_structures.size(); ++i)
+        {
+            static_structures[i].id = i;
+            if (static_structures[i].always_check)
+                always_check_structures.push_back(&static_structures[i]);
+        }
         static_quadtree = STL_Tools::make_unique<Quadtree<Structure2D::QuadtreeIntegration>>(&static_structures, maxDepth_, minPointThresholdToSubdivide_, game_area);
     }
     void PhysicsContainer::buildDynamicQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_)
     {
+        for (uint32_t i = 0; i < dynamic_structures.size(); ++i)
+        {
+            dynamic_structures[i].id = i + 0x80000000; // to distinguish from static structures
+            if (dynamic_structures[i].always_check)
+                always_check_structures.push_back(&dynamic_structures[i]);
+        }
         dynamic_quadtree = STL_Tools::make_unique<Quadtree<Structure2D::QuadtreeIntegration>>(&dynamic_structures, maxDepth_, minPointThresholdToSubdivide_, game_area);
     }
 
@@ -59,31 +69,25 @@ namespace SimplePhysics
     }
 
     void PhysicsContainer::groundCheck(
-        const std::vector<uint32_t> &static_ids,
         bool *ref_on_ground_called,
         const MathCore::vec2f &position,
         float radius_grounded,
         const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
-        Platform::SmartVector<PassThroughState> &pass_through_active_circular_list)
+        PhysicsState &physics_state)
     {
         using namespace MathCore;
 
         if (!*ref_on_ground_called)
         {
-            for (uint32_t idx : static_ids)
+            for (const Structure2D *structure : physics_state.structure_ptrs)
             {
-                const auto &structure = static_structures[idx];
                 // skip pass-through structures when player is on the pass-through side
-                if (structure.pass_through_set)
+                if (structure->pass_through_set)
                 {
-                    auto it = std::find_if(pass_through_active_circular_list.begin(), pass_through_active_circular_list.end(),
-                                           [idx](const PassThroughState &state)
-                                           { return state.id == idx; });
-                    bool is_active = (it != pass_through_active_circular_list.end()) ? it->is_active : false;
-                    if (!is_active)
+                    if (!physics_state.pass_through_is_active(structure->id))
                         continue;
                 }
-                for (const auto &segment : structure.segments)
+                for (const auto &segment : structure->segments)
                 {
                     if (Segment2D::circleIntersectsSegment(
                             position, radius_grounded,
@@ -168,29 +172,30 @@ namespace SimplePhysics
         MathCore::vec2f *offset,
         MathCore::vec2f *push_normal,
         const MathCore::vec2f &velocity_hint,
-        Platform::SmartVector<PassThroughState> &pass_through_active_circular_list)
+        PhysicsState &physics_state)
     {
         using namespace MathCore;
         Box2D b_box = Box2D().wrapCircle(point, radius);
 
-        const auto &static_ids = static_quadtree->query_box(b_box.min, b_box.max);
+        physics_state.query_box(static_quadtree.get(), static_structures, b_box.min, b_box.max);
+        if (physics_state.structure_ptrs.empty())
+        {
+            // for (const auto *structure : always_check_structures)
+            //     physics_state.quadtree_ids.push_back(structure->id);
+            physics_state.structure_ptrs.assign(always_check_structures.begin(), always_check_structures.end());
+        }
 
         // push out of all overlapping segments
         vec2f move_out_collision = vec2f(0);
-        for (uint32_t idx : static_ids)
+        for (const Structure2D *structure : physics_state.structure_ptrs)
         {
-            const auto &structure = static_structures[idx];
             // skip pass-through structures when velocity aligns with pass-through direction
-            if (structure.pass_through_set)
+            if (structure->pass_through_set)
             {
-                auto it = std::find_if(pass_through_active_circular_list.begin(), pass_through_active_circular_list.end(),
-                                       [idx](const PassThroughState &state)
-                                       { return state.id == idx; });
-                bool is_active = (it != pass_through_active_circular_list.end()) ? it->is_active : false;
-                if (!is_active)
+                if (!physics_state.pass_through_is_active(structure->id))
                     continue;
             }
-            for (const auto &segment : structure.segments)
+            for (const auto &segment : structure->segments)
             {
                 Box2D segment_box = Box2D(segment.a, segment.b);
                 if (!Box2D::overlaps(b_box.min, b_box.max, segment_box.min, segment_box.max))
@@ -225,7 +230,7 @@ namespace SimplePhysics
         float delta_time,
         const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
         const EventCore::Callback<void(const MathCore::vec2f &pos, const Segment2D *on_segment)> &onMoveTouch,
-        Platform::SmartVector<PassThroughState> &pass_through_active_circular_list)
+        PhysicsState &physics_state)
     {
         using namespace MathCore;
 
@@ -235,7 +240,7 @@ namespace SimplePhysics
 
         {
             vec2f push_offset, push_normal;
-            if (pushOutOfSegments(a, radius + 1e-2f, &a, &push_offset, &push_normal, vel, pass_through_active_circular_list))
+            if (pushOutOfSegments(a, radius + 1e-2f, &a, &push_offset, &push_normal, vel, physics_state))
             {
                 // need recompute velocity and b offset
                 b += push_offset;
@@ -266,16 +271,22 @@ namespace SimplePhysics
             // do ground check
             vec2f ground_pos = a + vec2f(0, -offset_grounded);
             Box2D ground_box = Box2D().wrapCircle(ground_pos, radius_grounded);
-            const auto &static_ids = static_quadtree->query_box(ground_box.min, ground_box.max);
+            // const auto &static_ids = static_quadtree->query_box(ground_box.min, ground_box.max);
+            physics_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max);
+            if (physics_state.structure_ptrs.empty())
+            {
+                // for (const auto *structure : always_check_structures)
+                //     physics_state.quadtree_ids.push_back(structure->id);
+                physics_state.structure_ptrs.assign(always_check_structures.begin(), always_check_structures.end());
+            }
 
             // ground check
             groundCheck(
-                static_ids,
                 &on_ground_called,
                 a + vec2f(0, -offset_grounded),
                 radius_grounded,
                 onGrounded,
-                pass_through_active_circular_list);
+                physics_state);
 
             // for (uint32_t idx : static_ids)
             // {
@@ -349,48 +360,30 @@ namespace SimplePhysics
 
             vec2f new_remaining_dir_norm = vec2f(0.0f);
 
-            const auto &static_ids = static_quadtree->query_segment_radius(a, b, query_radius);
-            // const auto &static_ids = static_quadtree->query_box(move_box.min, move_box.max);
-            for (uint32_t idx : static_ids)
+            // const std::vector<uint32_t> &static_ids = static_quadtree->query_segment_radius(a, b, query_radius);
+            physics_state.query_segment_radius(static_quadtree.get(), static_structures, a, b, query_radius);
+            if (physics_state.structure_ptrs.empty())
             {
-                auto &structure = static_structures[idx];
+                // for (const auto *structure : always_check_structures)
+                //     physics_state.quadtree_ids.push_back(structure->id);
+                physics_state.structure_ptrs.assign(always_check_structures.begin(), always_check_structures.end());
+            }
+
+            // const auto &static_ids = static_quadtree->query_box(move_box.min, move_box.max);
+            for (const Structure2D *structure : physics_state.structure_ptrs)
+            {
                 // pass-through logic
-                if (structure.pass_through_set)
+                if (structure->pass_through_set)
                 {
-                    auto it = std::find_if(pass_through_active_circular_list.begin(), pass_through_active_circular_list.end(),
-                                           [idx](const PassThroughState &state)
-                                           { return state.id == idx; });
-                    if (it == pass_through_active_circular_list.end())
-                    {
-                        if (pass_through_active_circular_list.size() >= MAX_ACTIVE_PASS_THROUGH)
-                            pass_through_active_circular_list.pop_front();
-                        // if not found, add to the active list with inactive state
-                        pass_through_active_circular_list.push_back({idx, true});
-                        it = --pass_through_active_circular_list.end();
-                    }
-                    else
-                    {
-                        // make this it the last
-                        PassThroughState state = *it;
-                        pass_through_active_circular_list.erase(it);
-                        pass_through_active_circular_list.push_back(state);
-                        it = --pass_through_active_circular_list.end();
-                    }
-
-                    // printf("active pass-through :");
-                    // for( auto &state : pass_through_active_circular_list)
-                    //     printf("{id: %u, is_active: %d} ", state.id, state.is_active);
-                    // printf("\n");
-
-                    bool &is_active = it->is_active;
+                    bool &is_active = physics_state.pass_through_get_active_ref(structure->id);
 
                     // the current position is a
-                    bool below_deactivation_line = structure.pass_through_is_below_or_touching_deactivation_line(a, radius);
+                    bool below_deactivation_line = structure->pass_through_is_below_or_touching_deactivation_line(a, radius);
                     if (below_deactivation_line)
                         is_active = false;
                     else
                     {
-                        bool above_activation_line = structure.pass_through_is_above_activation_line(a, radius);
+                        bool above_activation_line = structure->pass_through_is_above_activation_line(a, radius);
                         if (above_activation_line)
                             is_active = true;
                         // if (above_activation_line)
@@ -403,7 +396,7 @@ namespace SimplePhysics
                     if (!is_active)
                         continue;
                 }
-                for (const auto &segment : structure.segments)
+                for (const auto &segment : structure->segments)
                 {
                     if (segment_collision_to_ignore == &segment)
                         continue;
@@ -466,12 +459,11 @@ namespace SimplePhysics
 
             // ground check
             groundCheck(
-                static_ids,
                 &on_ground_called,
                 b + vec2f(0, -offset_grounded),
                 radius_grounded,
                 onGrounded,
-                pass_through_active_circular_list);
+                physics_state);
 
             // Redirect remaining movement along the collision tangent
             if (move_t == 0.0f)
@@ -570,9 +562,8 @@ namespace SimplePhysics
         *out_velocity = OP<vec2f>::quadraticClamp(vec2f(0, 0), vel, max_velocity);
     }
 
-    JumpingController::JumpingController() : pass_through_active_circular_list(MAX_ACTIVE_PASS_THROUGH)
+    JumpingController::JumpingController()
     {
-        pass_through_active_circular_list.clear();
         has_last_collision_segment = false;
     }
 
@@ -739,7 +730,7 @@ namespace SimplePhysics
                 //     last_collision_segment = *on_segment;
                 // }
             },
-            pass_through_active_circular_list);
+            physics_state);
 
         // passed = passed || (position != position_before);
         // printf("passed: %d\n", passed);

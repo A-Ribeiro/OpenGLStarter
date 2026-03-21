@@ -293,10 +293,10 @@ namespace SimplePhysics
         size_t computed_count;
         int32_t maxDepth, minPointThresholdToSubdivide;
 
-        std::vector<uint32_t> tmp_array;
+        //std::vector<uint32_t> tmp_array;
 
     public:
-        std::vector<uint32_t> last_query;
+        // std::vector<uint32_t> last_query;
 
         // Example of QuadtreeIntegration:
         // struct QuadtreeIntegration
@@ -380,41 +380,42 @@ namespace SimplePhysics
         {
         }
 
-        std::vector<uint32_t> &query_box(const MathCore::vec2f &min, const MathCore::vec2f &max)
+        void query_box(const MathCore::vec2f &min, const MathCore::vec2f &max,
+        std::vector<uint32_t> *query_result,
+        std::vector<uint32_t> *tmp_array)
         {
-            last_query.clear();
+            query_result->clear();
             if (!root)
-                return last_query; // No points to query
+                return; // No points to query
 
-            root->query_box<QuadTreeIntegrationT>(*items, min, max, last_query);
+            root->query_box<QuadTreeIntegrationT>(*items, min, max, *query_result);
 
-            // sort last_query by index and remove duplicates
-            tmp_array.resize(last_query.size());
-            AlgorithmCore::Sorting::RadixCountingSort<uint32_t>::sort(last_query.data(), (uint32_t)last_query.size(), tmp_array.data());
-            // std::sort(last_query.begin(), last_query.end());
+            // sort query_result by index and remove duplicates
+            tmp_array->resize(query_result->size());
+            AlgorithmCore::Sorting::RadixCountingSort<uint32_t>::sort(query_result->data(), (uint32_t)query_result->size(), tmp_array->data());
+            // std::sort(query_result->begin(), query_result->end());
             // std::unique expects the input to be sorted, and moves the duplicates to the end of the vector, returning an iterator to the new end of the vector
-            last_query.resize(std::unique(last_query.begin(), last_query.end()) - last_query.begin());
-
-            return last_query;
+            query_result->resize(std::unique(query_result->begin(), query_result->end()) - query_result->begin());
         }
 
-        std::vector<uint32_t> &query_segment_radius(const MathCore::vec2f &a, const MathCore::vec2f &b, float radius)
+        void query_segment_radius(
+            const MathCore::vec2f &a, const MathCore::vec2f &b, float radius,
+            std::vector<uint32_t> *query_result, 
+            std::vector<uint32_t> *tmp_array)
         {
-            last_query.clear();
+            query_result->clear();
             if (!root)
-                return last_query; // No points to query
+                return; // No points to query
 
             Box2D query_box = Box2D(a, b).expand(MathCore::vec2f(radius));
-            root->query_segment_radius<QuadTreeIntegrationT>(*items, query_box, a, b, radius, radius * radius, last_query);
+            root->query_segment_radius<QuadTreeIntegrationT>(*items, query_box, a, b, radius, radius * radius, *query_result);
 
             // sort last_query by index and remove duplicates
-            tmp_array.resize(last_query.size());
-            AlgorithmCore::Sorting::RadixCountingSort<uint32_t>::sort(last_query.data(), (uint32_t)last_query.size(), tmp_array.data());
-            // std::sort(last_query.begin(), last_query.end());
+            tmp_array->resize(query_result->size());
+            AlgorithmCore::Sorting::RadixCountingSort<uint32_t>::sort(query_result->data(), (uint32_t)query_result->size(), tmp_array->data());
+            // std::sort(query_result->begin(), query_result->end());
             // std::unique expects the input to be sorted, and moves the duplicates to the end of the vector, returning an iterator to the new end of the vector
-            last_query.resize(std::unique(last_query.begin(), last_query.end()) - last_query.begin());
-
-            return last_query;
+            query_result->resize(std::unique(query_result->begin(), query_result->end()) - query_result->begin());
         }
     };
 

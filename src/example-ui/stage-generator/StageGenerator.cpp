@@ -500,10 +500,10 @@ namespace StageGen
                                          Segment2D(vec2f(0, 0), vec2f(W, 0))));
             container.static_structures.push_back(
                 Structure2D::FromSegment("Wall", 1.0f,
-                                         Segment2D(vec2f(0, 0), vec2f(0, H + totalMaxJump * 10.0f))));
+                                         Segment2D(vec2f(0, 0), vec2f(0, H + totalMaxJump * 10.0f))).setAlwaysCheck(true));
             container.static_structures.push_back(
                 Structure2D::FromSegment("Wall", 1.0f,
-                                         Segment2D(vec2f(W, 0), vec2f(W, H + totalMaxJump * 10.0f))));
+                                         Segment2D(vec2f(W, 0), vec2f(W, H + totalMaxJump * 10.0f))).setAlwaysCheck(true));
         }
 
         // // 2. Floor, ceiling, walls
