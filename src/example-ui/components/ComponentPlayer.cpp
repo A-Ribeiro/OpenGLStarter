@@ -220,7 +220,9 @@ namespace AppKit
 
                 // getTransform()->setLocalPosition(position);
 
+                SimplePhysics::ThreadState thread_state;
                 physicsController->update(app->gameScene->physicsContainer.get(),
+                                          thread_state,
                                           time,
                                           inputState.x_axis,
                                           inputState.jump.pressed,

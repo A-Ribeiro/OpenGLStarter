@@ -34,19 +34,12 @@ namespace SimplePhysics
 
     const size_t MAX_ACTIVE_PASS_THROUGH = 4;
 
-    struct PhysicsState
+    struct ObjectState
     {
         // aux for pass through platforms
         Platform::SmartVector<PassThroughState> pass_through_active_circular_list;
 
-        // aux for quadtree queries
-        std::vector<uint32_t> quadtree_ids;
-        std::vector<uint32_t> tmp_array;
-
-        // aux for structure query
-        std::vector<const Structure2D *> structure_ptrs;
-
-        PhysicsState() : pass_through_active_circular_list(MAX_ACTIVE_PASS_THROUGH)
+        ObjectState() : pass_through_active_circular_list(MAX_ACTIVE_PASS_THROUGH)
         {
             pass_through_active_circular_list.clear();
         }
@@ -87,6 +80,21 @@ namespace SimplePhysics
             // printf("\n");
 
             return it->is_active;
+        }
+    };
+
+
+    struct ThreadState
+    {
+        // aux for quadtree queries
+        std::vector<uint32_t> quadtree_ids;
+        std::vector<uint32_t> tmp_array;
+
+        // aux for structure query
+        std::vector<const Structure2D *> structure_ptrs;
+
+        ThreadState()
+        {
         }
 
         inline void query_box(
@@ -141,7 +149,7 @@ namespace SimplePhysics
 
         EventCore::PressReleaseDetector move_x_detector;
 
-        PhysicsState physics_state;
+        ObjectState object_state;
 
         JumpingController();
 
@@ -151,7 +159,7 @@ namespace SimplePhysics
             const MathCore::vec2f &gravity,
             bool allow_double_jump);
 
-        void update(PhysicsContainer *physicsContainer, Platform::Time *time, float input_x_axis, bool jump_pressed, float max_velocity);
+        void update(PhysicsContainer *physicsContainer, ThreadState &thread_state, Platform::Time *time, float input_x_axis, bool jump_pressed, float max_velocity);
 
         // set the position and make reset velocity and acceleration, useful for teleporting the player
         void teleport(const MathCore::vec2f &position);
@@ -189,7 +197,8 @@ namespace SimplePhysics
             const MathCore::vec2f &position,
             float radius_grounded,
             const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
-            PhysicsState &physics_state);
+            ThreadState &thread_state,
+            ObjectState &object_state);
 
         // void pushOutOfSegments1(
         //     MathCore::vec2f *ref_b,
@@ -202,7 +211,8 @@ namespace SimplePhysics
             MathCore::vec2f *offset,
             MathCore::vec2f *push_normal,
             const MathCore::vec2f &velocity_hint,
-            PhysicsState &physics_state);
+            ThreadState &thread_state,
+            ObjectState &object_state);
 
         // returns last collision segment if collision occurs, otherwise returns nullptr
         void movePlayer(
@@ -215,7 +225,8 @@ namespace SimplePhysics
             float delta_time,
             const EventCore::Callback<void(const Segment2D *on_segment)> &onGrounded,
             const EventCore::Callback<void(const MathCore::vec2f &pos, const Segment2D *on_segment)> &onMoveTouch,
-            PhysicsState &physics_state);
+            ThreadState &thread_state,
+            ObjectState &object_state);
 
         const float max_velocity = 5000.0f;
 
