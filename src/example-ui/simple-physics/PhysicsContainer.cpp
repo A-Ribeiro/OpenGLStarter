@@ -142,9 +142,8 @@ namespace SimplePhysics
         Box2D box;
         box.makeEmpty();
         for (const auto &structure : static_structures)
-        {
             box.wrapBox(structure->box);
-        }
+        box.wrapBox(game_area);
         return box;
     }
 
@@ -259,7 +258,9 @@ namespace SimplePhysics
         using namespace MathCore;
         Box2D b_box = Box2D().wrapCircle(point, radius);
 
-        thread_state.query_box(static_quadtree.get(), static_structures, b_box.min, b_box.max);
+        thread_state.query_box(static_quadtree.get(), static_structures, b_box.min, b_box.max, true);
+        if (dynamic_quadtree)
+            thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, b_box.min, b_box.max, false);
         if (thread_state.structure_ptrs.empty())
         {
             // for (const auto *structure : always_check_structures)
@@ -356,7 +357,10 @@ namespace SimplePhysics
             vec2f ground_pos = a + vec2f(0, -offset_grounded);
             Box2D ground_box = Box2D().wrapCircle(ground_pos, radius_grounded);
             // const auto &static_ids = static_quadtree->query_box(ground_box.min, ground_box.max);
-            thread_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max);
+            thread_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max, true);
+            if (dynamic_quadtree)
+                thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, ground_box.min, ground_box.max, false);
+            
             if (thread_state.structure_ptrs.empty())
             {
                 // for (const auto *structure : always_check_structures)
@@ -448,7 +452,9 @@ namespace SimplePhysics
             vec2f new_remaining_dir_norm = vec2f(0.0f);
 
             // const std::vector<uint32_t> &static_ids = static_quadtree->query_segment_radius(a, b, query_radius);
-            thread_state.query_segment_radius(static_quadtree.get(), static_structures, a, b, query_radius);
+            thread_state.query_segment_radius(static_quadtree.get(), static_structures, a, b, query_radius, true);
+            if (dynamic_quadtree)
+                thread_state.query_segment_radius(dynamic_quadtree.get(), dynamic_structures, a, b, query_radius, false);
             if (thread_state.structure_ptrs.empty())
             {
                 // for (const auto *structure : always_check_structures)

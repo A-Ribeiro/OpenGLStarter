@@ -108,26 +108,30 @@ namespace SimplePhysics
 
         inline void query_box(
             Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
-            const std::vector<std::unique_ptr<Structure2D>> &static_structures,
-            const MathCore::vec2f &min, const MathCore::vec2f &max)
+            const std::vector<std::unique_ptr<Structure2D>> &structures,
+            const MathCore::vec2f &min, const MathCore::vec2f &max,
+            bool clear_structure_ptrs)
         {
             quadtree_ids.clear();
             quadtree->query_box(min, max, &quadtree_ids, &tmp_array);
-            structure_ptrs.clear();
+            if (clear_structure_ptrs)
+                structure_ptrs.clear();
             for (uint32_t idx : quadtree_ids)
-                structure_ptrs.push_back(static_structures[idx].get());
+                structure_ptrs.push_back(structures[idx].get());
         }
 
         inline void query_segment_radius(
             Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
-            const std::vector<std::unique_ptr<Structure2D>> &static_structures,
-            const MathCore::vec2f &a, const MathCore::vec2f &b, float radius)
+            const std::vector<std::unique_ptr<Structure2D>> &structures,
+            const MathCore::vec2f &a, const MathCore::vec2f &b, float radius,
+            bool clear_structure_ptrs)
         {
             quadtree_ids.clear();
             quadtree->query_segment_radius(a, b, radius, &quadtree_ids, &tmp_array);
-            structure_ptrs.clear();
+            if (clear_structure_ptrs)
+                structure_ptrs.clear();
             for (uint32_t idx : quadtree_ids)
-                structure_ptrs.push_back(static_structures[idx].get());
+                structure_ptrs.push_back(structures[idx].get());
         }
     };
 
