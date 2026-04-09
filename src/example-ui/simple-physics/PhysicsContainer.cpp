@@ -15,11 +15,13 @@ namespace Debug
 namespace SimplePhysics
 {
 
-    uint32_t PhysicsContainer::addStaticStructure(const Structure2D &structure)
+    Structure2D *PhysicsContainer::addStaticStructure(const Structure2D &structure)
     {
         uint32_t new_id = uuid.next();
         std::unique_ptr<Structure2D> structure_copy = STL_Tools::make_unique<Structure2D>(structure);
         structure_copy->id = new_id;
+
+        Structure2D * result = structure_copy.get();
 
         static_structures.insert(
             std::upper_bound(static_structures.begin(), static_structures.end(), structure_copy,
@@ -27,7 +29,7 @@ namespace SimplePhysics
                              { return a->id < b->id; }),
             std::move(structure_copy));
 
-        return new_id;
+        return result;
     }
     void PhysicsContainer::removeStaticStructure(uint32_t idx)
     {
@@ -54,11 +56,13 @@ namespace SimplePhysics
         return (*it).get();
     }
 
-    uint32_t PhysicsContainer::addDynamicStructure(const Structure2D &structure)
+    Structure2D *PhysicsContainer::addDynamicStructure(const Structure2D &structure)
     {
         uint32_t new_id = uuid.next();
         std::unique_ptr<Structure2D> structure_copy = STL_Tools::make_unique<Structure2D>(structure);
         structure_copy->id = new_id;
+
+        Structure2D * result = structure_copy.get();
 
         dynamic_structures.insert(
             std::upper_bound(dynamic_structures.begin(), dynamic_structures.end(), structure_copy,
@@ -66,7 +70,7 @@ namespace SimplePhysics
                              { return a->id < b->id; }),
             std::move(structure_copy));
 
-        return new_id;
+        return result;
     }
     void PhysicsContainer::removeDynamicStructure(uint32_t idx)
     {
