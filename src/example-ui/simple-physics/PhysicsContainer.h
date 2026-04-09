@@ -195,11 +195,11 @@ namespace SimplePhysics
     std::vector<std::unique_ptr<Structure2D>> &getStaticStructures() { return static_structures; }
     std::vector<std::unique_ptr<Structure2D>> &getDynamicStructures() { return dynamic_structures; }
 
-        uint32_t addStaticStructure(const Structure2D &structure);
+        Structure2D *addStaticStructure(const Structure2D &structure);
         void removeStaticStructure(uint32_t idx);
         Structure2D *getStaticStructure(uint32_t idx);
 
-        uint32_t addDynamicStructure(const Structure2D &structure);
+        Structure2D *addDynamicStructure(const Structure2D &structure);
         void removeDynamicStructure(uint32_t idx);
         Structure2D *getDynamicStructure(uint32_t idx);        
 
