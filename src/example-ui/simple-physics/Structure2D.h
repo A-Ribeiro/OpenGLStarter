@@ -26,10 +26,10 @@ namespace SimplePhysics
     public:
         struct QuadtreeIntegration
         {
-            using type = Structure2D;
-            ITK_INLINE static bool CheckBoxOverlap(const type &item, const MathCore::vec2f &min, const MathCore::vec2f &max) { return item.checkBoxOverlap(min, max); }
-            ITK_INLINE static const MathCore::vec2f &GetBoxMin(const type &item) { return item.box.min; }
-            ITK_INLINE static const MathCore::vec2f &GetBoxMax(const type &item) { return item.box.max; }
+            using type = std::unique_ptr<Structure2D>;
+            ITK_INLINE static bool CheckBoxOverlap(const type &item, const MathCore::vec2f &min, const MathCore::vec2f &max) { return item->checkBoxOverlap(min, max); }
+            ITK_INLINE static const MathCore::vec2f &GetBoxMin(const type &item) { return item->box.min; }
+            ITK_INLINE static const MathCore::vec2f &GetBoxMax(const type &item) { return item->box.max; }
         };
         float friction;
         char tag[32];
