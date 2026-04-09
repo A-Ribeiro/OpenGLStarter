@@ -15,23 +15,103 @@ namespace Debug
 namespace SimplePhysics
 {
 
+    uint32_t PhysicsContainer::addStaticStructure(const Structure2D &structure)
+    {
+        uint32_t new_id = uuid.next();
+        std::unique_ptr<Structure2D> structure_copy = STL_Tools::make_unique<Structure2D>(structure);
+        structure_copy->id = new_id;
+
+        static_structures.insert(
+            std::upper_bound(static_structures.begin(), static_structures.end(), structure_copy,
+                             [](const std::unique_ptr<Structure2D> &a, const std::unique_ptr<Structure2D> &b)
+                             { return a->id < b->id; }),
+            std::move(structure_copy));
+
+        return new_id;
+    }
+    void PhysicsContainer::removeStaticStructure(uint32_t idx)
+    {
+        auto it = std::lower_bound(static_structures.begin(), static_structures.end(), idx,
+                                   [](const std::unique_ptr<Structure2D> &structure, uint32_t id)
+                                   { return structure->id < id; });
+        if (it == static_structures.end() || (*it)->id != idx)
+            return;
+
+        static_structures.erase(it);
+
+        for (auto &item : jumpingControllerList)
+            item->object_state.pass_through_remove_id(idx);
+
+        uuid.release(idx);
+    }
+    Structure2D *PhysicsContainer::getStaticStructure(uint32_t idx)
+    {
+        auto it = std::lower_bound(static_structures.begin(), static_structures.end(), idx,
+                                   [](const std::unique_ptr<Structure2D> &structure, uint32_t id)
+                                   { return structure->id < id; });
+        if (it == static_structures.end() || (*it)->id != idx)
+            return nullptr;
+        return (*it).get();
+    }
+
+    uint32_t PhysicsContainer::addDynamicStructure(const Structure2D &structure)
+    {
+        uint32_t new_id = uuid.next();
+        std::unique_ptr<Structure2D> structure_copy = STL_Tools::make_unique<Structure2D>(structure);
+        structure_copy->id = new_id;
+
+        dynamic_structures.insert(
+            std::upper_bound(dynamic_structures.begin(), dynamic_structures.end(), structure_copy,
+                             [](const std::unique_ptr<Structure2D> &a, const std::unique_ptr<Structure2D> &b)
+                             { return a->id < b->id; }),
+            std::move(structure_copy));
+
+        return new_id;
+    }
+    void PhysicsContainer::removeDynamicStructure(uint32_t idx)
+    {
+        auto it = std::lower_bound(dynamic_structures.begin(), dynamic_structures.end(), idx,
+                                   [](const std::unique_ptr<Structure2D> &structure, uint32_t id)
+                                   { return structure->id < id; });
+        if (it == dynamic_structures.end() || (*it)->id != idx)
+            return;
+
+        dynamic_structures.erase(it);
+
+        for (auto &item : jumpingControllerList)
+            item->object_state.pass_through_remove_id(idx);
+
+        uuid.release(idx);
+    }
+    Structure2D *PhysicsContainer::getDynamicStructure(uint32_t idx)
+    {
+        auto it = std::lower_bound(dynamic_structures.begin(), dynamic_structures.end(), idx,
+                                   [](const std::unique_ptr<Structure2D> &structure, uint32_t id)
+                                   { return structure->id < id; });
+        if (it == dynamic_structures.end() || (*it)->id != idx)
+            return nullptr;
+        return (*it).get();
+    }
+
     void PhysicsContainer::buildStaticQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_)
     {
+        static_always_check.clear();
+
         for (uint32_t i = 0; i < static_structures.size(); ++i)
         {
-            static_structures[i].id = i;
-            if (static_structures[i].always_check)
-                always_check_structures.push_back(&static_structures[i]);
+            if (static_structures[i]->always_check)
+                static_always_check.push_back(static_structures[i].get());
         }
         static_quadtree = STL_Tools::make_unique<Quadtree<Structure2D::QuadtreeIntegration>>(&static_structures, maxDepth_, minPointThresholdToSubdivide_, game_area);
     }
     void PhysicsContainer::buildDynamicQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_)
     {
+        dynamic_always_check.clear();
+
         for (uint32_t i = 0; i < dynamic_structures.size(); ++i)
         {
-            dynamic_structures[i].id = i + 0x80000000; // to distinguish from static structures
-            if (dynamic_structures[i].always_check)
-                always_check_structures.push_back(&dynamic_structures[i]);
+            if (dynamic_structures[i]->always_check)
+                dynamic_always_check.push_back(dynamic_structures[i].get());
         }
         dynamic_quadtree = STL_Tools::make_unique<Quadtree<Structure2D::QuadtreeIntegration>>(&dynamic_structures, maxDepth_, minPointThresholdToSubdivide_, game_area);
     }
@@ -63,7 +143,7 @@ namespace SimplePhysics
         box.makeEmpty();
         for (const auto &structure : static_structures)
         {
-            box.wrapBox(structure.box);
+            box.wrapBox(structure->box);
         }
         return box;
     }
@@ -184,7 +264,8 @@ namespace SimplePhysics
         {
             // for (const auto *structure : always_check_structures)
             //     thread_state.quadtree_ids.push_back(structure->id);
-            thread_state.structure_ptrs.assign(always_check_structures.begin(), always_check_structures.end());
+            thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
+            thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
         }
 
         // push out of all overlapping segments
@@ -280,7 +361,9 @@ namespace SimplePhysics
             {
                 // for (const auto *structure : always_check_structures)
                 //     thread_state.quadtree_ids.push_back(structure->id);
-                thread_state.structure_ptrs.assign(always_check_structures.begin(), always_check_structures.end());
+                
+                thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
+                thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
             }
 
             // ground check
@@ -370,7 +453,8 @@ namespace SimplePhysics
             {
                 // for (const auto *structure : always_check_structures)
                 //     thread_state.quadtree_ids.push_back(structure->id);
-                thread_state.structure_ptrs.assign(always_check_structures.begin(), always_check_structures.end());
+                thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
+                thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
             }
 
             // const auto &static_ids = static_quadtree->query_box(move_box.min, move_box.max);
@@ -597,11 +681,11 @@ namespace SimplePhysics
     }
 
     void JumpingController::update(
-        PhysicsContainer *physicsContainer, 
+        PhysicsContainer *physicsContainer,
         ThreadState &thread_state,
-        Platform::Time *time, 
-        float input_x_axis, 
-        bool jump_pressed, 
+        Platform::Time *time,
+        float input_x_axis,
+        bool jump_pressed,
         float max_velocity)
     {
         if (time->deltaTime == 0.0f)

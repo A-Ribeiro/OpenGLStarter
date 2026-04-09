@@ -54,22 +54,22 @@ namespace StageGen
         float margin = 10.0f;
 
         // Floor segment spanning the full width at y = 0
-        container.static_structures.push_back(
+        container.addStaticStructure(
             Structure2D::FromSegment("Floor", 0.8f,
                                      Segment2D(vec2f(-margin, 0), vec2f(W + margin, 0))));
 
         // Ceiling
-        container.static_structures.push_back(
+        container.addStaticStructure(
             Structure2D::FromSegment("Ceiling", 0.2f,
                                      Segment2D(vec2f(-margin, H), vec2f(W + margin, H))));
 
         // Left wall
-        container.static_structures.push_back(
+        container.addStaticStructure(
             Structure2D::FromSegment("Left Wall", 0.2f,
                                      Segment2D(vec2f(0, -margin), vec2f(0, H + margin))));
 
         // Right wall
-        container.static_structures.push_back(
+        container.addStaticStructure(
             Structure2D::FromSegment("Right Wall", 0.2f,
                                      Segment2D(vec2f(W, -margin), vec2f(W, H + margin))));
     }
@@ -93,7 +93,7 @@ namespace StageGen
         // Start platform: near the left edge, slightly elevated
         {
             vec2f center(params.player_radius + platformWidth * 0.5f + 20.0f, platformY);
-            container.static_structures.push_back(
+            container.addStaticStructure(
                 Structure2D::FromBoxCenterSize("Start Platform", 0.8f,
                                                center, vec2f(platformWidth, platformThickness)));
             out_start = vec2f(center.x, center.y + platformThickness * 0.5f + params.player_radius);
@@ -102,7 +102,7 @@ namespace StageGen
         // End platform: near the right edge, slightly elevated
         {
             vec2f center(W - params.player_radius - platformWidth * 0.5f - 20.0f, platformY);
-            container.static_structures.push_back(
+            container.addStaticStructure(
                 Structure2D::FromBoxCenterSize("End Platform", 0.8f,
                                                center, vec2f(platformWidth, platformThickness)));
             out_end = vec2f(center.x, center.y + platformThickness * 0.5f + params.player_radius);
@@ -199,7 +199,7 @@ namespace StageGen
 
                 if (useBox)
                 {
-                    container.static_structures.push_back(
+                    container.addStaticStructure(
                         Structure2D::FromBoxCenterSize(
                             "Platform Box", 0.6f,
                             center,
@@ -213,7 +213,7 @@ namespace StageGen
                     //     mathRnd.nextRange<float>(OP<float>::deg_2_rad(30.0f), OP<float>::deg_2_rad(45.0f)) * OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f)));
                     vec2f segA = vec2f(center.x, segY) + vec2f(-platW * 0.5f, 0);
                     vec2f segB = vec2f(center.x, segY) + vec2f(platW * 0.5f, 0);
-                    container.static_structures.push_back(
+                    container.addStaticStructure(
                         Structure2D::FromSegment("Platform Segment", 0.6f,
                                                  Segment2D(segA, segB)));
                 }
@@ -258,7 +258,7 @@ namespace StageGen
 
             if (useBox)
             {
-                container.static_structures.push_back(
+                container.addStaticStructure(
                     Structure2D::FromBoxCenterSize(
                         "Branch Box", 0.5f,
                         center,
@@ -269,7 +269,7 @@ namespace StageGen
                 float segY = center.y + platformThickness * 0.5f;
                 // mat2f rot = GEN<mat2f>::rotate(
                 //     mathRnd.nextRange<float>(OP<float>::deg_2_rad(30.0f), OP<float>::deg_2_rad(45.0f)) * OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f)));
-                container.static_structures.push_back(
+                container.addStaticStructure(
                     Structure2D::FromSegment("Branch Segment", 0.5f,
                                              Segment2D(
                                                  vec2f(center.x, segY) + vec2f(-platW * 0.5f, 0),
@@ -310,7 +310,7 @@ namespace StageGen
                           vec2f(center.x + platW * 0.5f, segY)),
                 vec2f(0, 1));
             // pass through when moving upward
-            container.static_structures.push_back(structure);
+            container.addStaticStructure(structure);
 
             placed.push_back({center, platW, platformThickness, false});
         }
@@ -351,7 +351,7 @@ namespace StageGen
 
         //     if (!overlapsExisting(placed, bCenter, bw, bh, overlapMargin * 0.5f))
         //     {
-        //         container.static_structures.push_back(
+        //         container.addStaticStructure(
         //             Structure2D::FromSegment("Slope", 0.4f, Segment2D(segA, segB)));
         //         placed.push_back({bCenter, bw, bh, false});
         //     }
@@ -422,7 +422,7 @@ namespace StageGen
             // Check for overlap with already placed platforms
             if (!overlapsExisting(placed, center, platW, platformThickness, overlapMargin))
             {
-                container.static_structures.push_back(
+                container.addStaticStructure(
                     Structure2D::FromBoxCenterSize(
                         "Platform Box", 0.6f,
                         center,
@@ -461,7 +461,7 @@ namespace StageGen
             // Place on the floor
             float y = boxSize * 0.5f;
 
-            container.static_structures.push_back(
+            container.addStaticStructure(
                 Structure2D::FromBoxCenterSize(
                     "Obstacle Box", 0.5f,
                     vec2f(x, y),
@@ -495,13 +495,13 @@ namespace StageGen
             float playerR = params.player_radius;
             float totalMaxJump = normalJump + doubleJump;
 
-            container.static_structures.push_back(
+            container.addStaticStructure(
                 Structure2D::FromSegment("Floor", 0.8f,
                                          Segment2D(vec2f(0, 0), vec2f(W, 0))));
-            container.static_structures.push_back(
+            container.addStaticStructure(
                 Structure2D::FromSegment("Wall", 1.0f,
                                          Segment2D(vec2f(0, 0), vec2f(0, H + totalMaxJump * 10.0f))).setAlwaysCheck(true));
-            container.static_structures.push_back(
+            container.addStaticStructure(
                 Structure2D::FromSegment("Wall", 1.0f,
                                          Segment2D(vec2f(W, 0), vec2f(W, H + totalMaxJump * 10.0f))).setAlwaysCheck(true));
         }

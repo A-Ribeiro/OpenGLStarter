@@ -12,6 +12,7 @@
 #include "Quadtree.h"
 
 #include "../components/util/JumpState.h"
+#include "Uuid.h"
 
 namespace SimplePhysics
 {
@@ -42,6 +43,15 @@ namespace SimplePhysics
         ObjectState() : pass_through_active_circular_list(MAX_ACTIVE_PASS_THROUGH)
         {
             pass_through_active_circular_list.clear();
+        }
+
+        inline void pass_through_remove_id(uint32_t idx)
+        {
+            auto it = std::find_if(pass_through_active_circular_list.begin(), pass_through_active_circular_list.end(),
+                                   [idx](const PassThroughState &state)
+                                   { return state.id == idx; });
+            if (it != pass_through_active_circular_list.end())
+                pass_through_active_circular_list.erase(it);
         }
 
         inline bool pass_through_is_active(uint32_t idx) const
@@ -83,7 +93,6 @@ namespace SimplePhysics
         }
     };
 
-
     struct ThreadState
     {
         // aux for quadtree queries
@@ -98,30 +107,28 @@ namespace SimplePhysics
         }
 
         inline void query_box(
-            Quadtree<Structure2D::QuadtreeIntegration> *quadtree, 
-            const std::vector<Structure2D> &static_structures,
+            Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
+            const std::vector<std::unique_ptr<Structure2D>> &static_structures,
             const MathCore::vec2f &min, const MathCore::vec2f &max)
         {
             quadtree_ids.clear();
             quadtree->query_box(min, max, &quadtree_ids, &tmp_array);
             structure_ptrs.clear();
             for (uint32_t idx : quadtree_ids)
-                structure_ptrs.push_back(&static_structures[idx]);
+                structure_ptrs.push_back(static_structures[idx].get());
         }
 
         inline void query_segment_radius(
-            Quadtree<Structure2D::QuadtreeIntegration> *quadtree, 
-            const std::vector<Structure2D> &static_structures,
+            Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
+            const std::vector<std::unique_ptr<Structure2D>> &static_structures,
             const MathCore::vec2f &a, const MathCore::vec2f &b, float radius)
         {
             quadtree_ids.clear();
             quadtree->query_segment_radius(a, b, radius, &quadtree_ids, &tmp_array);
             structure_ptrs.clear();
             for (uint32_t idx : quadtree_ids)
-                structure_ptrs.push_back(&static_structures[idx]);
+                structure_ptrs.push_back(static_structures[idx].get());
         }
-
-
     };
 
     class JumpingController
@@ -169,13 +176,29 @@ namespace SimplePhysics
 
     class PhysicsContainer
     {
-    public:
-        std::vector<Structure2D> static_structures;
-        std::unique_ptr<Quadtree<Structure2D::QuadtreeIntegration>> static_quadtree;
-        std::vector<const Structure2D *> always_check_structures;
+        UuidUint32 uuid;
 
-        std::vector<Structure2D> dynamic_structures;
+        std::vector<std::unique_ptr<Structure2D>> static_structures;
+        std::unique_ptr<Quadtree<Structure2D::QuadtreeIntegration>> static_quadtree;
+        std::vector<const Structure2D *> static_always_check;
+
+        std::vector<std::unique_ptr<Structure2D>> dynamic_structures;
         std::unique_ptr<Quadtree<Structure2D::QuadtreeIntegration>> dynamic_quadtree;
+        std::vector<const Structure2D *> dynamic_always_check;
+
+    public:
+
+    std::vector<std::unique_ptr<Structure2D>> &getStaticStructures() { return static_structures; }
+    std::vector<std::unique_ptr<Structure2D>> &getDynamicStructures() { return dynamic_structures; }
+
+        uint32_t addStaticStructure(const Structure2D &structure);
+        void removeStaticStructure(uint32_t idx);
+        Structure2D *getStaticStructure(uint32_t idx);
+
+        uint32_t addDynamicStructure(const Structure2D &structure);
+        void removeDynamicStructure(uint32_t idx);
+        Structure2D *getDynamicStructure(uint32_t idx);        
+
 
         Platform::SmartVector<std::shared_ptr<JumpingController>> jumpingControllerList;
 
