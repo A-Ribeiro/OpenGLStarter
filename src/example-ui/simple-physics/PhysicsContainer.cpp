@@ -21,7 +21,7 @@ namespace SimplePhysics
         std::unique_ptr<Structure2D> structure_copy = STL_Tools::make_unique<Structure2D>(structure);
         structure_copy->id = new_id;
 
-        Structure2D * result = structure_copy.get();
+        Structure2D *result = structure_copy.get();
 
         static_structures.insert(
             std::upper_bound(static_structures.begin(), static_structures.end(), structure_copy,
@@ -62,7 +62,7 @@ namespace SimplePhysics
         std::unique_ptr<Structure2D> structure_copy = STL_Tools::make_unique<Structure2D>(structure);
         structure_copy->id = new_id;
 
-        Structure2D * result = structure_copy.get();
+        Structure2D *result = structure_copy.get();
 
         dynamic_structures.insert(
             std::upper_bound(dynamic_structures.begin(), dynamic_structures.end(), structure_copy,
@@ -364,12 +364,12 @@ namespace SimplePhysics
             thread_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max, true);
             if (dynamic_quadtree)
                 thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, ground_box.min, ground_box.max, false);
-            
+
             if (thread_state.structure_ptrs.empty())
             {
                 // for (const auto *structure : always_check_structures)
                 //     thread_state.quadtree_ids.push_back(structure->id);
-                
+
                 thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
                 thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
             }
@@ -545,7 +545,17 @@ namespace SimplePhysics
             }
 
             if (move_t == 1.0f)
+            {
+                // ground check when the move is completed
+                groundCheck(
+                    &on_ground_called,
+                    b + vec2f(0, -offset_grounded),
+                    radius_grounded,
+                    onGrounded,
+                    thread_state,
+                    object_state);
                 break;
+            }
 
             // move b to the collision point
             segment_collision_to_ignore = segment_collision;
