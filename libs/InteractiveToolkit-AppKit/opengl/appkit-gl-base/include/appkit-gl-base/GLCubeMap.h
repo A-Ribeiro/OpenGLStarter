@@ -2,7 +2,6 @@
 
 #include <appkit-gl-base/platform/PlatformGL.h>
 #include <string>
-// #include <aRibeiroCore/aRibeiroCore.h>
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/GLVertexBufferObject.h>
 #include <appkit-gl-base/shaders/GLShaderTextureColor.h>
@@ -19,9 +18,7 @@ namespace AppKit
         /// Example:
         ///
         /// \code
-        /// #include <aRibeiroCore/aRibeiroCore.h>
         /// #include <appkit-gl-base/opengl-wrapper.h>
-        /// using namespace aRibeiro;
         /// using namespace AppKit::OpenGL;
         ///
         /// GLCubeMap *texture = new GLCubeMap();

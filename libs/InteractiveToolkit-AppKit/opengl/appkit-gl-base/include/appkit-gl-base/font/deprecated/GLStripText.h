@@ -5,13 +5,10 @@
 #include <vector>
 // #include <glew/glew.h>
 
-// #include <aRibeiroCore/all_math.h>
 
-// #include <aRibeiroCore/all_math.h>
 #include <appkit-gl-base/font/deprecated/Font.h>
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/shaders/GLShaderFont.h>
-// #include <aRibeiroCore/SSE2.h>
 
 namespace AppKit
 {

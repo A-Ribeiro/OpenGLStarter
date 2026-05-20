@@ -21,9 +21,7 @@ namespace AppKit
         /// Example:
         ///
         /// \code
-        /// #include <aRibeiroCore/aRibeiroCore.h>
         /// #include <appkit-gl-engine/mini-gl-engine.h>
-        /// using namespace aRibeiro;
         /// using namespace AppKit::OpenGL;
         /// using namespace AppKit::GLEngine;
         ///

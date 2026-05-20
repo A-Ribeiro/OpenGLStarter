@@ -6,10 +6,7 @@
 // #include <glew/glew.h>
 #include <map>
 #include <vector>
-// #include <convertutf/ConvertUTF.h>
 
-// #include <aRibeiroCore/all_math.h>
-// #include <aribeiro/GLStripText.h>
 #include <appkit-gl-base/font/deprecated/Font.h>
 #include <appkit-gl-base/GLTexture.h>
 #include <appkit-gl-base/shaders/GLShaderFont.h>

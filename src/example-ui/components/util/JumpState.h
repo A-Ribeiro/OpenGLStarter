@@ -33,16 +33,17 @@ namespace HeightAndTime
         return (velocity * velocity) / (2.0f * MathCore::OP<float>::abs(gravity));
     }
 
-    static float CalcTimeToReachHeight(float height, float gravity)
-    {
-        // t = sqrt(2 * h / g)
-        return MathCore::OP<float>::sqrt((2.0f * height) / MathCore::OP<float>::abs(gravity));
-    }
+    // // only works couppled with CalcHeightFromVelocity, as it assumes the velocity -> height relationship, and the gravity is constant
+    // static float CalcTimeToReachHeight(float height, float gravity)
+    // {
+    //     // t = sqrt(2 * h / g)
+    //     return MathCore::OP<float>::sqrt((2.0f * height) / MathCore::OP<float>::abs(gravity));
+    // }
 
-    static float CalcTimeToReachVelocity(float velocity, float gravity)
+    static float CalcTimeToReachZeroVelocity(float v0, float gravity)
     {
-        // t = v / g
-        return MathCore::OP<float>::abs(velocity / gravity);
+        // v(t) = v0 + g*t = 0  =>  t = -v0/g = |v0/g|
+        return MathCore::OP<float>::abs(v0 / gravity);
     }
 
     static float CalcHeightAtTime(float initialVelocity, float gravity, float time)
@@ -146,6 +147,11 @@ public:
 
         secondJumpHeight_keep_impulse_until_height = 0.0f;
 
+        velocity_replacer = 0.0f;
+        estimated_jump_height = 0.0f;
+        time_aux = 0.0f;
+        dynamic_max_height = 0.0f;
+        jump_pressed = false;
         can_double_jump = true;
         double_jump_used = false;
     }
@@ -181,7 +187,8 @@ public:
         maxJumpHeight_keep_impulse_until_height = maxJumpHeight - minJumpHeight_height_without_impulse;
         secondJumpHeight_keep_impulse_until_height = secondJumpHeight - minJumpHeight_height_without_impulse;
 
-        minJumpHeight_time_to_reach_max_height_without_impulse = HeightAndTime::CalcTimeToReachHeight(minJumpHeight_height_without_impulse, gravity);
+        // minJumpHeight_time_to_reach_max_height_without_impulse = HeightAndTime::CalcTimeToReachHeight(minJumpHeight_height_without_impulse, gravity);
+        minJumpHeight_time_to_reach_max_height_without_impulse = HeightAndTime::CalcTimeToReachZeroVelocity(rising_velocity_without_impulse, gravity);
     }
 
     void setGrounded()
@@ -189,6 +196,14 @@ public:
         if (state == Grounded)
             return;
         state = Grounded;
+    }
+
+    void setFalling()
+    {
+        if (state != Grounded)
+            return;
+        state = Falling;
+        can_double_jump = false;
     }
 
     void update(float *velocityY, float deltaTime, float gravity, bool jump_pressedp, bool allow_double_jump, bool double_jump_at_any_time = true)
@@ -202,12 +217,14 @@ public:
                 state = StartJump;
                 can_double_jump = true;
                 double_jump_used = false;
+                time_aux = 0.0f;
             }
             else if (allow_double_jump && can_double_jump && (state == Falling || double_jump_at_any_time))
             {
                 can_double_jump = false;
                 double_jump_used = true;
                 state = StartJump;
+                time_aux = 0.0f;
             }
         }
 
@@ -228,7 +245,7 @@ public:
         {
             state = RisingNoUpImpulsion;
             velocity_replacer = rising_velocity_without_impulse;
-            time_aux = 0.0f;
+            // time_aux = 0.0f;
 
             float base_line_jump_height = dynamic_max_height - minJumpHeight_height_without_impulse;
             float height_from_baseline = estimated_jump_height - base_line_jump_height;
@@ -239,13 +256,20 @@ public:
                 // force remaining height to be non-negative
                 if (remaining_height < 0.0f)
                     remaining_height = 0.0f;
-                // Time to travel remaining distance (from current position to max, ending at rest)
-                float time_remaining = HeightAndTime::CalcTimeToReachHeight(remaining_height, gravity);
-                // Time elapsed = total time - remaining time
+
+                velocity_replacer = HeightAndTime::CalcVelocityToReachHeight(remaining_height, gravity);
+                float time_remaining = HeightAndTime::CalcTimeToReachZeroVelocity(velocity_replacer, gravity);
                 time_aux = minJumpHeight_time_to_reach_max_height_without_impulse - time_remaining;
 
-                velocity_replacer += gravity * time_aux;
+                // // Time to travel remaining distance (from current position to max, ending at rest)
+                // float time_remaining = HeightAndTime::CalcTimeToReachHeight(remaining_height, gravity);
+                // // Time elapsed = total time - remaining time
+                // time_aux = minJumpHeight_time_to_reach_max_height_without_impulse - time_remaining;
+
+                // velocity_replacer += gravity * time_aux;
             }
+            else
+                time_aux = 0.0f;
         }
 
         if (state == Rising)

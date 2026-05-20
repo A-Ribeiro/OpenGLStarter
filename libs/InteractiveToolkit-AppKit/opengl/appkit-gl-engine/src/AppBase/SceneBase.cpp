@@ -1,7 +1,6 @@
 #include <appkit-gl-engine/AppBase/SceneBase.h>
 
 // #include <appkit-gl-engine/mini-gl-engine.h>
-// #include <aRibeiroCore/aRibeiroCore.h>
 
 #include <appkit-gl-engine/Engine.h>
 

@@ -5,7 +5,6 @@
 #include <appkit-gl-base/GLTexture.h>
 // #include <glew/glew.h>
 #include <vector>
-// #include <aRibeiroCore/SSE2.h>
 
 namespace AppKit
 {
@@ -28,9 +27,7 @@ namespace AppKit
         /// Example:
         ///
         /// \code
-        /// #include <aRibeiroCore/aRibeiroCore.h>
         /// #include <appkit-gl-base/opengl-wrapper.h>
-        /// using namespace aRibeiro;
         /// using namespace AppKit::OpenGL;
         ///
         /// ...

@@ -1,5 +1,4 @@
 #include <appkit-gl-base/platform/PlatformGL.h>
-// #include <aRibeiroCore/common.h>
 
 // #include <glad/gl.h>
 #include <stdio.h>

@@ -2,8 +2,6 @@
 
 #include <appkit-gl-base/platform/PlatformGL.h>
 // #include <glew/glew.h> // extensions here
-//#include <aRibeiroCore/common.h> // std types
-//#include <aRibeiroCore/SetnullptrAndDelete.h>
 
 #include <appkit-gl-base/VirtualTexture.h>
 
@@ -50,9 +48,7 @@ namespace AppKit
         /// Example:
         ///
         /// \code
-        /// #include <aRibeiroCore/aRibeiroCore.h>
         /// #include <appkit-gl-base/opengl-wrapper.h>
-        /// using namespace aRibeiro;
         /// using namespace AppKit::OpenGL;
         ///
         /// GLTexture *texture = GLTexture::loadFromFile("texture.png");

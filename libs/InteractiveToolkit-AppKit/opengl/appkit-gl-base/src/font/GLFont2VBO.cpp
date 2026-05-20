@@ -1,6 +1,5 @@
 #include <appkit-gl-base/font/GLFont2VBO.h>
 
-// using namespace aRibeiro;
 
 namespace AppKit
 {

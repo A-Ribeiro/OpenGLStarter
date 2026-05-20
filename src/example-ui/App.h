@@ -7,7 +7,6 @@
 #include "MainScene.h"
 #include "GameScene.h"
 
-//using namespace aRibeiro;
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
 using namespace AppKit::OpenGL;

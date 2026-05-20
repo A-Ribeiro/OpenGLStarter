@@ -1,6 +1,5 @@
 #include <appkit-gl-engine/GL/GLRenderState.h>
 
-// using namespace aRibeiro;
 // using namespace AppKit::OpenGL;
 
 namespace AppKit

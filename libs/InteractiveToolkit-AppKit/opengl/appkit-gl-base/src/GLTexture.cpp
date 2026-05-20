@@ -6,13 +6,9 @@
 #include <InteractiveToolkit-Extension/image/JPG.h> // JPGHelper
 #include <InteractiveToolkit-Extension/image/PNG.h> // PNGHelper
 
-// #include <aRibeiroCore/SetnullptrAndDelete.h>
-// #include <aRibeiroCore/geometricOperations.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 
-// using namespace aRibeiro;
 
 namespace AppKit
 {

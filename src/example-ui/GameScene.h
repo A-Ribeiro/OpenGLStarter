@@ -7,11 +7,20 @@
 
 #include <appkit-gl-engine/util/SpriteAtlas.h>
 
+#include "stage-generator/StageGenerator.h"
+
 class App;
+
+namespace SimplePhysics
+{
+    class PhysicsContainer;
+}
 
 class GameScene : public AppKit::GLEngine::SceneBase
 {
 protected:
+    void generateRandomStage();
+
     // to load skybox, textures, cubemaps, 3DModels and setup materials
     virtual void loadResources();
     // to load the scene graph
@@ -43,6 +52,9 @@ public:
 
     MathCore::vec2f screen_custom_size;
 
+    std::unique_ptr<SimplePhysics::PhysicsContainer> physicsContainer;
+
+    StageGen::StageResult stageResult;
 
     ~GameScene();
 
