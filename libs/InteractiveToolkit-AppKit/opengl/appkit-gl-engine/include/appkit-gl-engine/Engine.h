@@ -8,7 +8,6 @@
 #pragma warning(disable : 4305)
 #endif
 
-// #include <aRibeiroCore/aRibeiroCore.h>
 // #include <appkit-gl-base/opengl-wrapper.h>
 // #include <appkit-gl-engine/Component.h>
 // #include <appkit-gl-engine/AppBase.h>

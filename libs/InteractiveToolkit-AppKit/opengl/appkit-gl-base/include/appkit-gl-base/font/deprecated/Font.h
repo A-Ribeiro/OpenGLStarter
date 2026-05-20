@@ -2,8 +2,6 @@
 
 #include <appkit-gl-base/platform/PlatformGL.h>
 #include <map>
-// #include <convertutf/ConvertUTF.h>
-// #include <aribeiro/GLFont.h>
 
 namespace AppKit
 {

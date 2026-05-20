@@ -2,7 +2,6 @@
 
 #include <appkit-gl-engine/Components/deprecated/ComponentColorLine.h>
 
-// using namespace aRibeiro;
 // using namespace AppKit::GLEngine;
 // using namespace AppKit::GLEngine::Components;
 

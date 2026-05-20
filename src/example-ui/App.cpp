@@ -89,6 +89,7 @@ void App::draw()
     fps_timer.update();
     time.update();
     // 1000 hz protection code
+    // time.timeScale = 0.1f;
     if (time.unscaledDeltaTime <= 1.0f / 1000.0f)
         time.rollback_and_set_zero();
     // 2 hz protection code - for fallback from window move

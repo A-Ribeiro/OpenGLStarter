@@ -76,7 +76,17 @@ namespace AppKit
 
         void Button::update(const MathCore::vec3f &mousePosition)
         {
-            if (CollisionCore::AABB<MathCore::vec3f>::pointInsideAABB(mousePosition, aabb))
+            auto renderWindow = this->renderWindowRegion.lock();
+            if (renderWindow == nullptr)
+                return;
+
+            float scale_factor = 1.0f;
+            
+            if (camera != nullptr)
+                if (camera->useSizeY)
+                    scale_factor = camera->sizeY / (float)renderWindow->CameraViewport.c_ptr()->h;
+
+            if (CollisionCore::AABB<MathCore::vec3f>::pointInsideAABB(mousePosition * scale_factor, aabb))
             {
                 // materialBackground->unlit.color = MathCore::vec4f(1, 1, 0, 0.5);
                 materialBackground->property_bag.getProperty("uColor").set(MathCore::vec4f(1, 1, 0, 0.5));

@@ -95,6 +95,15 @@ add_subdirectory(libs/InteractiveToolkit "${CMAKE_BINARY_DIR}/lib/InteractiveToo
 
 find_package(InteractiveToolkit REQUIRED)
 
+set(ITKEXT_BCRYPT OFF CACHE BOOL "Set this if you want building bcrypt support" )
+set(ITKEXT_FONT ON CACHE BOOL "Set this if you want building font+atlas support" )
+set(ITKEXT_IMAGE ON CACHE BOOL "Set this if you want building image(JPEG+PNG) support" )
+set(ITKEXT_IMAGE_ATLAS ON CACHE BOOL "Set this if you want building image/texture atlas support" )
+set(ITKEXT_MODEL ON CACHE BOOL "Set this if you want building model(BASOF) support" )
+set(ITKEXT_NETWORK OFF CACHE BOOL "Set this if you want building network support" )
+set(ITKEXT_NETWORK_TLS OFF CACHE BOOL "Set this if you want building network/tls (mbedtls) support" )
+
+
 # include window source before extension -- load mbedtls
 if (NOT TARGET appkit-window)
     add_subdirectory(libs/InteractiveToolkit-AppKit/common/appkit-window "${CMAKE_BINARY_DIR}/lib/appkit-window")

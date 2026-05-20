@@ -1,9 +1,5 @@
 #include <appkit-gl-base/GLPostProcess.h>
-// #include <aRibeiroCore/common.h>
-// #include <aRibeiroCore/SetnullptrAndDelete.h>
 #include <appkit-gl-base/platform/PlatformGL.h>
-
-//using namespace aRibeiro;
 
 namespace AppKit
 {

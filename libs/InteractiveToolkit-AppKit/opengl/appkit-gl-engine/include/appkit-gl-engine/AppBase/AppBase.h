@@ -6,15 +6,6 @@
 #include <appkit-gl-engine/AppBase/RenderWindowRegion.h>
 #include <appkit-gl-engine/AppBase/EventHandlerSet.h>
 
-// #ifndef AppBase__H_
-// #define AppBase__H_
-
-// #include <aRibeiroCore/aRibeiroCore.h>
-// #include <aRibeiroPlatform/aRibeiroPlatform.h>
-// #include <appkit-gl-base/opengl-wrapper.h>
-// #include <window-gl-wrapper/window-gl-wrapper.h>
-// #include <appkit-gl-engine/RenderWindowRegion.h>
-
 namespace AppKit
 {
     namespace GLEngine
