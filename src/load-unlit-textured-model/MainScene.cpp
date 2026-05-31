@@ -1,0 +1,263 @@
+﻿#include "MainScene.h"
+#include "App.h"
+
+#include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
+#include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
+// #include <InteractiveToolkit/EaseCore/EaseCore.h>
+#include "components/ComponentGrow.h"
+
+using namespace AppKit::GLEngine;
+using namespace AppKit::GLEngine::Components;
+using namespace AppKit::OpenGL;
+using namespace AppKit::Window::Devices;
+using namespace MathCore;
+
+#include <InteractiveToolkit-Extension/model/ModelContainer.h>
+
+namespace SmartImporter
+{
+    class ModelSmasher
+    {
+        std::unique_ptr<ITKExtension::Model::ModelContainer> container;
+        std::unordered_map<const ITKExtension::Model::Geometry *, bool> geometryProcessed;
+
+        void traverse(const ITKExtension::Model::Node &node, int lvl = 0)
+        {
+            auto localPosition = node.getLocalPosition();
+            auto localScale = node.getLocalScale();
+            auto localRotation = node.getLocalRotation();
+
+            printf("%*s(%s)\n", lvl * 2, "+", node.name.c_str());
+            // printf("%*sLocalPosition %f, %f, %f\n",
+            //        lvl * 2, "",
+            //        localPosition.x,
+            //        localPosition.y,
+            //        localPosition.z);
+
+            // printf("%*sLocalScale %f, %f, %f\n",
+            //        lvl * 2, "",
+            //        localScale.x,
+            //        localScale.y,
+            //        localScale.z);
+
+            // printf("%*sLocalRotation %f, %f, %f, %f\n",
+            //        lvl * 2, "",
+            //        localRotation.x,
+            //        localRotation.y,
+            //        localRotation.z,
+            //        localRotation.w);
+
+            for (uint32_t gidx : node.geometries)
+            {
+                const ITKExtension::Model::Geometry *geom = &container->geometries[gidx];
+                const ITKExtension::Model::Material *mat = &container->materials[geom->materialIndex];
+
+                if (geometryProcessed.find(geom) != geometryProcessed.end())
+                {
+                    printf("%*sGeometry %s is a repeated geometry\n", lvl * 2, "", geom->name.c_str());
+                    continue;
+                }
+
+                if (geom->indiceCountPerFace == 2)
+                {
+                    printf("%*sGeometry %s is a line mesh\n", lvl * 2, "", geom->name.c_str());
+                }
+                else if (geom->indiceCountPerFace == 3)
+                {
+                    printf("%*sGeometry %s is a triangle mesh\n", lvl * 2, "", geom->name.c_str());
+
+                    bool can_use_texture_atlas = true;
+                    for (int i = 0; i < 8 && can_use_texture_atlas; i++)
+                    {
+                        for (const auto &uv : geom->uv[i])
+                            if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1)
+                            {
+                                can_use_texture_atlas = false;
+                                break;
+                            }
+                    }
+                    printf("%*sCan use texture atlas: %s\n", lvl * 2, "", can_use_texture_atlas ? "YES" : "NO");
+
+                    for (const auto &kv : mat->stringValue)
+                        printf("%*sMaterial String %s: %s\n", lvl * 2, "", kv.first.c_str(), kv.second.c_str());
+                    for (const auto &kv : mat->floatValue)
+                        printf("%*sMaterial Float %s: %f\n", lvl * 2, "", kv.first.c_str(), kv.second);
+                    for (const auto &kv : mat->vec2Value)
+                        printf("%*sMaterial Vec2 %s: %f, %f\n", lvl * 2, "", kv.first.c_str(), kv.second.x, kv.second.y);
+                    for (const auto &kv : mat->vec3Value)
+                        printf("%*sMaterial Vec3 %s: %f, %f, %f\n", lvl * 2, "", kv.first.c_str(), kv.second.x, kv.second.y, kv.second.z);
+                    for (const auto &kv : mat->vec4Value)
+                        printf("%*sMaterial Vec4 %s: %f, %f, %f, %f\n", lvl * 2, "", kv.first.c_str(), kv.second.x, kv.second.y, kv.second.z, kv.second.w);
+                    for (const auto &kv : mat->intValue)
+                        printf("%*sMaterial Int %s: %d\n", lvl * 2, "", kv.first.c_str(), kv.second);
+
+                    for (const auto &tex : mat->textures)
+                        printf("%*sMaterial Texture %s: %s.%s\n", lvl * 2, "",
+                               TextureTypeToStr(tex.type),
+                               tex.filename.c_str(), tex.fileext.c_str());
+
+                    bool is_opaque = true;
+                    if (mat->stringValue.find("gltf.alphaMode") != mat->stringValue.end())
+                        is_opaque = mat->stringValue.at("gltf.alphaMode") == "OPAQUE";
+                    else if (mat->floatValue.find("opacity") != mat->floatValue.end())
+                        is_opaque = mat->floatValue.at("opacity") >= 1.0f;
+                    printf("%*sMaterial %s is opaque: %s\n", lvl * 2, "", mat->name.c_str(), is_opaque ? "YES" : "NO");
+
+                    bool is_unlit = true;
+                    if (mat->intValue.find("gltf.unlit") != mat->intValue.end())
+                        is_unlit = mat->intValue.at("gltf.unlit") != 0;
+                    else if (mat->stringValue.find("shadingm") != mat->stringValue.end())
+                        is_unlit = mat->stringValue.at("shadingm") == "NO_SHADING";
+                    printf("%*sMaterial %s is unlit: %s\n", lvl * 2, "", mat->name.c_str(), is_unlit ? "YES" : "NO");
+
+                    bool is_two_sided = false;
+                    if (mat->intValue.find("twosided") != mat->intValue.end())
+                        is_two_sided = mat->intValue.at("twosided") != 0;
+                    printf("%*sMaterial %s is two-sided: %s\n", lvl * 2, "", mat->name.c_str(), is_two_sided ? "YES" : "NO");
+                }
+                else
+                {
+                    printf("%*sGeometry %s is a unknown mesh with %d indices per face\n", lvl * 2, "", geom->name.c_str(), geom->indiceCountPerFace);
+                    continue;
+                }
+
+                geometryProcessed[geom] = true;
+            }
+
+            for (uint32_t child_index : node.children)
+                traverse(container->nodes[child_index], lvl + 1);
+        }
+
+    public:
+        void load(const char *filename)
+        {
+            const uint32_t root_index = 0;
+
+            container = STL_Tools::make_unique<ITKExtension::Model::ModelContainer>();
+            container->read(filename);
+
+            traverse(container->nodes[root_index]);
+        }
+    };
+
+}
+
+namespace Scenes
+{
+
+    // to load skybox, textures, cubemaps, 3DModels and setup materials
+    void MainScene::loadResources()
+    {
+        // auto engine = AppKit::GLEngine::Engine::Instance();
+
+        // SpriteAtlasGenerator gen;
+
+        // gen.addEntry("resources/smoke.png");
+        // gen.addEntry("resources/opengl_logo_white.png");
+
+        // auto engine = AppKit::GLEngine::Engine::Instance();
+        // spriteAtlas = gen.generateAtlas(*resourceMap, engine->sRGBCapable, true, 10)[0];
+
+        // /mnt/d/shared/papercat/stages_gltf/stage3_04.bams
+
+        // Texture_Guard[0] = resourceHelper->createTextureFromFile("resources/castle_guard/Guard_02__diffuse.jpg", true && engine->sRGBCapable);
+        // Texture_Guard[1] = resourceHelper->createTextureFromFile("resources/castle_guard/Guard_02__normal.jpg", false);
+        // Texture_Guard[2] = resourceHelper->createTextureFromFile("resources/castle_guard/Guard_02__specular.jpg", false);
+
+        // Model_Palace = resourceHelper->createTransformFromModel("resources/palace/colonnato.min.bams", resourceMap, resourceMap->defaultPBRMaterial);
+
+        // return Basof2ToResource::loadAndConvert(path.c_str(), resourceMap, defaultPBRMaterial, nullptr, model_dynamic_upload, model_static_upload);
+
+        SmartImporter::ModelSmasher smasher;
+        smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams");
+    }
+    // to load the scene graph
+    void MainScene::loadGraph()
+    {
+        root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
+
+        auto main_camera = root->addChild(Transform::CreateShared("Main Camera"));
+
+        root->addChild(Transform::CreateShared("scene"));
+    }
+
+    // to bind the resources to the current graph
+    void MainScene::bindResourcesToGraph()
+    {
+        auto engine = AppKit::GLEngine::Engine::Instance();
+
+        GLRenderState *renderState = GLRenderState::Instance();
+
+        std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+        {
+            auto mainCamera = root->findTransformByName("Main Camera");
+
+            mainCamera->setLocalPosition(vec3f(0, 0, -10));
+
+            camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
+            componentCameraOrthographic->sizeY = 5;
+        }
+
+        sceneNode = root->findTransformByName("scene");
+
+        auto rect = renderWindow->CameraViewport.c_ptr();
+        resize(vec2i(rect->w, rect->h));
+
+        // Add AABB for all meshs...
+        {
+            resourceHelper->addAABBMesh(root);
+        }
+
+        this->OnUpdate.add(&MainScene::update, this);
+    }
+
+    // clear all loaded scene
+    void MainScene::unloadAll()
+    {
+        this->OnUpdate.remove(&MainScene::update, this);
+
+        root = nullptr;
+        camera = nullptr;
+
+        sceneNode = nullptr;
+    }
+
+    void MainScene::update(Platform::Time *elapsed)
+    {
+    }
+
+    void MainScene::draw()
+    {
+        auto engine = AppKit::GLEngine::Engine::Instance();
+        if (engine->sRGBCapable)
+            glDisable(GL_FRAMEBUFFER_SRGB);
+        GLRenderState *state = GLRenderState::Instance();
+        state->DepthTest = DepthTestDisabled;
+        renderPipeline->runSinglePassPipeline(resourceMap, root, camera, true, OrthographicFilter_UsingAABB, &app->threadPool);
+        if (engine->sRGBCapable)
+            glEnable(GL_FRAMEBUFFER_SRGB);
+    }
+
+    void MainScene::resize(const vec2i &size)
+    {
+    }
+
+    MainScene::MainScene(
+        App *app,
+        Platform::Time *_time,
+        AppKit::GLEngine::RenderPipeline *_renderPipeline,
+        AppKit::GLEngine::ResourceHelper *_resourceHelper,
+        AppKit::GLEngine::ResourceMap *_resourceMap,
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
+                                                                              random32(ITKCommon::RandomDefinition<uint32_t>::randomSeed()),
+                                                                              mathRandom(&random32)
+    {
+        this->app = app;
+    }
+
+    MainScene::~MainScene()
+    {
+        unload();
+    }
+
+}
