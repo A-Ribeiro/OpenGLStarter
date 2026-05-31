@@ -155,7 +155,7 @@ add_subdirectory(src/imgui_editor)
 
 add_subdirectory(src/imgui_service_ui)
 
-add_subdirectory(src/ipc_fullscreen_viewer)
+# add_subdirectory(src/ipc_fullscreen_viewer)
 
 # option(ARIBEIRO_BUILD_IMGUI_PROJECTS OFF)
 # if (ARIBEIRO_BUILD_IMGUI_PROJECTS)
@@ -176,3 +176,5 @@ add_subdirectory(src/tech-demo-line-rendering)
 add_subdirectory(src/tech-demo-sprite-atlas)
 
 add_subdirectory(src/example-ui)
+
+add_subdirectory(src/load-unlit-textured-model)

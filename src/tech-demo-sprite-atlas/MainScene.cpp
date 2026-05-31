@@ -23,7 +23,7 @@ void MainScene::loadResources()
     gen.addEntry("resources/opengl_logo_white.png");
 
     auto engine = AppKit::GLEngine::Engine::Instance();
-    spriteAtlas = gen.generateAtlas(*resourceMap, engine->sRGBCapable, true, 10);
+    spriteAtlas = gen.generateAtlas(*resourceMap, engine->sRGBCapable, true, 10)[0];
 }
 // to load the scene graph
 void MainScene::loadGraph()

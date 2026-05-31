@@ -1,0 +1,115 @@
+#include <InteractiveToolkit/MathCore/MathCore.h>
+#include <InteractiveToolkit/EaseCore/EaseCore.h>
+
+#include <appkit-gl-engine/Component.h>
+#include <appkit-gl-engine/Transform.h>
+#include <appkit-gl-engine/Engine.h>
+
+#include <appkit-gl-engine/Components/Core/ComponentMesh.h>
+
+#include "ComponentGrow.h"
+#include "../App.h"
+
+namespace AppKit
+{
+    namespace GLEngine
+    {
+        namespace Components
+        {
+
+            const ComponentType ComponentGrow::Type = "ComponentGrow";
+
+            ComponentGrow::ComponentGrow() : Component(ComponentGrow::Type)
+            {
+                transformPool = nullptr;
+            }
+
+            ComponentGrow::~ComponentGrow()
+            {
+                if (auto eventHandlerSet = eventHandlerSetRef.lock())
+                    eventHandlerSet->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
+            }
+
+            void ComponentGrow::OnUpdate(Platform::Time *time)
+            {
+                lrp = MathCore::OP<float>::move(lrp, 1.0f, time->deltaTime * 0.6f);
+                float expo = EaseCore::Easef32::inExpo(1.0f, 0.0f, lrp);
+
+                auto transform = getTransform();
+
+                if (lrp >= 1.0f - MathCore::EPSILON<float>::low_precision)
+                {
+                    transform->removeSelf();
+                    if (transformPool != nullptr){
+
+                        transform->setLocalScale(MathCore::vec3f(0));
+                        lrp = 0.0f;
+
+                        // allow call start event again
+                        this->start_registered = false;
+                        if (auto eventHandlerSet = eventHandlerSetRef.lock())
+                            eventHandlerSet->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
+        
+                        transformPool->enqueue(transform);
+                    }
+                    return;
+                }
+                transform->setLocalScale(MathCore::vec3f(lrp));
+                auto localPos = transform->getLocalPosition();
+                transform->setLocalPosition(MathCore::vec3f(localPos.x, localPos.y, -lrp));
+
+                auto mesh = transform->findComponent<ComponentMesh>();
+                for (auto &color : mesh->color[0])
+                {
+                    color.a = expo;
+                }
+
+                //mesh->syncVBO(ITKExtension::Model::CONTAINS_COLOR0, 0, false);
+            }
+
+            void ComponentGrow::attachToTransform(std::shared_ptr<Transform> t)
+            {
+            }
+
+            void ComponentGrow::detachFromTransform(std::shared_ptr<Transform> t)
+            {
+                if (auto eventHandlerSet = t->eventHandlerSet.lock())
+                    eventHandlerSet->OnUpdate.remove(&ComponentGrow::OnUpdate, this);
+            }
+
+            void ComponentGrow::start()
+            {
+                auto transform = getTransform();
+                transform->setLocalScale(MathCore::vec3f(0));
+                lrp = 0.0f;
+
+                eventHandlerSetRef = transform->eventHandlerSet;
+                if (auto eventHandlerSet = eventHandlerSetRef.lock())
+                    eventHandlerSet->OnUpdate.add(&ComponentGrow::OnUpdate, this);
+            }
+
+            // always clone
+            std::shared_ptr<Component> ComponentGrow::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
+            {
+                auto result = Component::CreateShared<ComponentGrow>();
+                result->app = app;
+                result->transformPool = transformPool;
+                return result;
+            }
+            void ComponentGrow::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
+            {
+            }
+
+            void ComponentGrow::Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
+            {
+            }
+            void ComponentGrow::Deserialize(rapidjson::Value &_value,
+                                            std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                                            std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                                            ResourceSet &resourceSet)
+            {
+            }
+
+        }
+    }
+}

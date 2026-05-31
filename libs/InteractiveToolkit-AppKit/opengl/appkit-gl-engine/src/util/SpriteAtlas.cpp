@@ -30,11 +30,11 @@ namespace AppKit
                 return it->second;
             static SpriteAtlas::Entry dummy{
                 MathCore::vec2f(1, 1), // atlasEntry.spriteSize = ;
-                MathCore::vec2f(0,0), // atlasEntry.uvMin = ;
-                MathCore::vec2f(0,0), // atlasEntry.uvMax = ;
+                MathCore::vec2f(0, 0), // atlasEntry.uvMin = ;
+                MathCore::vec2f(0, 0), // atlasEntry.uvMax = ;
             };
             return dummy;
-            //throw std::runtime_error("Sprite not found in atlas: " + name);
+            // throw std::runtime_error("Sprite not found in atlas: " + name);
         }
         const void SpriteAtlas::addSprite(const std::string &name, const Entry &entry)
         {
@@ -59,12 +59,14 @@ namespace AppKit
                 throw std::runtime_error("Entry not found: " + name);
         }
 
-        std::shared_ptr<SpriteAtlas> SpriteAtlasGenerator::generateAtlas(const ResourceMap &resourceMap, bool sRGB, bool use_fast_positioning, int spaceBetweenSpites_px)
+        std::vector<std::shared_ptr<SpriteAtlas>> SpriteAtlasGenerator::generateAtlas(const ResourceMap &resourceMap, bool sRGB, bool use_fast_positioning, int spaceBetweenSpites_px, int max_atlas_size)
         {
-            std::shared_ptr<SpriteAtlas> result = std::make_shared<SpriteAtlas>();
-            result->texture = std::make_shared<AppKit::OpenGL::GLTexture>();
+            std::vector<std::shared_ptr<SpriteAtlas>> result_array;
 
-            ITKExtension::Atlas::Atlas atlas(spaceBetweenSpites_px, spaceBetweenSpites_px);
+            std::shared_ptr<SpriteAtlas> result_single = std::make_shared<SpriteAtlas>();
+            result_single->texture = std::make_shared<AppKit::OpenGL::GLTexture>();
+
+            std::unique_ptr<ITKExtension::Atlas::Atlas> atlas = STL_Tools::make_unique<ITKExtension::Atlas::Atlas>(spaceBetweenSpites_px, spaceBetweenSpites_px);
 
             struct Combined_entry
             {
@@ -114,42 +116,75 @@ namespace AppKit
                 if (channels != 4 || depth != 8)
                     throw std::runtime_error("Invalid image format for sprite '" + name + "': expected RGBA 8-bit");
 
-                auto *atlasElementFace = atlas.addElement(name, w, h);
-                atlasElementFace->copyFromRGBABuffer((uint8_t *)buffer, w * 4);
+                auto atlasElementFace = atlas->addElement(name, w, h);
 
-                combinedEntries.push_back({name, genEntry, atlasElementFace});
+                atlas->organizePositions(use_fast_positioning);
+                if (atlas->textureResolution.w > max_atlas_size || atlas->textureResolution.h > max_atlas_size)
+                {
+                    // flush atlas and start a new one
+                    atlas->removeLastInsertedElement();
+                    atlas->organizePositions(use_fast_positioning);
+
+                    {
+                        auto rgba = atlas->createRGBA();
+                        result_single->texture->uploadBufferRGBA_8888(
+                            (const void *)rgba.get(),
+                            atlas->textureResolution.w,
+                            atlas->textureResolution.h,
+                            sRGB);
+                        // atlas.releaseRGBA(&rgba);
+                    }
+                    MathCore::vec2f atlasSize_inv = 1.0f / MathCore::vec2f(atlas->textureResolution.w, atlas->textureResolution.h);
+                    for (const auto &item : combinedEntries)
+                    {
+                        SpriteAtlas::Entry atlasEntry;
+                        atlasEntry.spriteSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.w);
+                        atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x,
+                                                           item.atlasElementFace->rect.y);
+                        atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteSize;
+                        atlasEntry.uvMin *= atlasSize_inv;
+                        atlasEntry.uvMax *= atlasSize_inv;
+                        result_single->addSprite(item.name, atlasEntry);
+                    }
+                    result_array.push_back(result_single);
+
+                    atlas = STL_Tools::make_unique<ITKExtension::Atlas::Atlas>(spaceBetweenSpites_px, spaceBetweenSpites_px);
+
+                    result_single = std::make_shared<SpriteAtlas>();
+                    result_single->texture = std::make_shared<AppKit::OpenGL::GLTexture>();
+                    atlasElementFace = atlas->addElement(name, w, h);
+                }
+
+                atlasElementFace->copyFromRGBABuffer((uint8_t *)buffer, w * 4);
+                combinedEntries.push_back({name, genEntry, atlasElementFace.get()});
             }
 
-            atlas.organizePositions(use_fast_positioning);
+            atlas->organizePositions(use_fast_positioning);
 
-            auto rgba = atlas.createRGBA();
-            result->texture->uploadBufferRGBA_8888(
-                (const void *)rgba,
-                atlas.textureResolution.w,
-                atlas.textureResolution.h,
-                sRGB);
-            atlas.releaseRGBA(&rgba);
-
-            MathCore::vec2f atlasSize_inv = 1.0f / MathCore::vec2f(atlas.textureResolution.w, atlas.textureResolution.h);
-
+            {
+                auto rgba = atlas->createRGBA();
+                result_single->texture->uploadBufferRGBA_8888(
+                    (const void *)rgba.get(),
+                    atlas->textureResolution.w,
+                    atlas->textureResolution.h,
+                    sRGB);
+                // atlas.releaseRGBA(&rgba);
+            }
+            MathCore::vec2f atlasSize_inv = 1.0f / MathCore::vec2f(atlas->textureResolution.w, atlas->textureResolution.h);
             for (const auto &item : combinedEntries)
             {
-
                 SpriteAtlas::Entry atlasEntry;
                 atlasEntry.spriteSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.w);
-                // atlasEntry.spritePivot = item.genEntry.pivot;
-
                 atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x,
                                                    item.atlasElementFace->rect.y);
                 atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteSize;
-
                 atlasEntry.uvMin *= atlasSize_inv;
                 atlasEntry.uvMax *= atlasSize_inv;
-
-                result->addSprite(item.name, atlasEntry);
+                result_single->addSprite(item.name, atlasEntry);
             }
+            result_array.push_back(result_single);
 
-            return result;
+            return result_array;
         }
 
     }
