@@ -6,6 +6,9 @@
 // #include <InteractiveToolkit/EaseCore/EaseCore.h>
 #include "components/ComponentGrow.h"
 
+#include <cstdlib>
+#include <string>
+
 using namespace AppKit::GLEngine;
 using namespace AppKit::GLEngine::Components;
 using namespace AppKit::OpenGL;
@@ -169,7 +172,14 @@ namespace Scenes
         // return Basof2ToResource::loadAndConvert(path.c_str(), resourceMap, defaultPBRMaterial, nullptr, model_dynamic_upload, model_static_upload);
 
         SmartImporter::ModelSmasher smasher;
+#if defined(__linux__)
+        const char *home = std::getenv("HOME");
+        std::string inputPath = std::string(home ? home : "") + "/Documents/papercat/stages_gltf/stage3_04.bams";
+        auto path = std::unique_ptr<char, decltype(&std::free)>(realpath(inputPath.c_str(), nullptr), &std::free);
+        smasher.load(path ? path.get() : inputPath.c_str());
+#else
         smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams");
+#endif
     }
     // to load the scene graph
     void MainScene::loadGraph()
