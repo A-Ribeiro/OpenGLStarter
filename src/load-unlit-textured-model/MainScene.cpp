@@ -23,6 +23,53 @@ namespace SmartImporter
     {
         std::unique_ptr<ITKExtension::Model::ModelContainer> container;
         std::unordered_map<const ITKExtension::Model::Geometry *, bool> geometryProcessed;
+        ResourceMap *resourceMap;
+
+        std::shared_ptr<Components::ComponentMaterial> createUnlitMaterial(const ITKExtension::Model::Material *mat)
+        {
+            using namespace AppKit::GLEngine::Components;
+            auto material = Component::CreateShared<Components::ComponentMaterial>();
+            material->setShader(resourceMap->shaderUnlitTextureAlpha);
+
+            // ShaderUnlitTextureAlpha Property Bag:
+
+            // bag.addProperty("uColor", uColor);
+            // bag.addProperty("uTexture", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+            // bag.addProperty("BlendMode", (int)AppKit::GLEngine::BlendModeAlpha);
+
+            // example:
+            // auto albedoColor = MathCore::CVT<MathCore::vec4f>::toVec3(it->second);
+            // albedoColor = ResourceHelper::vec3ColorGammaToLinear(albedoColor);
+            // material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(albedoColor);
+
+            return material;
+        }
+
+        std::shared_ptr<Components::ComponentMaterial> createPBRMaterial(const ITKExtension::Model::Material *mat)
+        {
+            using namespace AppKit::GLEngine::Components;
+            auto material = Component::CreateShared<Components::ComponentMaterial>();
+            material->setShader(resourceMap->pbrShaderSelector);
+
+            // PBRShaderSelector Property Bag:
+
+            // bag.addProperty("albedoColor", MathCore::vec3f(1.0f));
+            // bag.addProperty("emissionColor", MathCore::vec3f(0.0f));
+            // bag.addProperty("roughness", 1.0f);
+            // bag.addProperty("metallic", 0.0f);
+
+            // bag.addProperty("texAlbedo", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+            // bag.addProperty("texNormal", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+            // bag.addProperty("texSpecular", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+            // bag.addProperty("texEmission", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+
+            // example:
+            // auto albedoColor = MathCore::CVT<MathCore::vec4f>::toVec3(it->second);
+            // albedoColor = ResourceHelper::vec3ColorGammaToLinear(albedoColor);
+            // material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(albedoColor);
+
+            return material;
+        }
 
         void traverse(const ITKExtension::Model::Node &node, int lvl = 0)
         {
@@ -113,9 +160,11 @@ namespace SmartImporter
         }
 
     public:
-        void load(const char *filename)
+        void load(const char *filename, ResourceMap *resourceMap)
         {
             const uint32_t root_index = 0;
+
+            this->resourceMap = resourceMap;
 
             container = STL_Tools::make_unique<ITKExtension::Model::ModelContainer>();
             container->read(filename);
