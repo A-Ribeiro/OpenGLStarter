@@ -69,18 +69,6 @@ namespace SmartImporter
                 {
                     printf("%*sGeometry %s is a triangle mesh\n", lvl * 2, "", geom->name.c_str());
 
-                    bool can_use_texture_atlas = true;
-                    for (int i = 0; i < 8 && can_use_texture_atlas; i++)
-                    {
-                        for (const auto &uv : geom->uv[i])
-                            if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1)
-                            {
-                                can_use_texture_atlas = false;
-                                break;
-                            }
-                    }
-                    printf("%*sCan use texture atlas: %s\n", lvl * 2, "", can_use_texture_atlas ? "YES" : "NO");
-
                     for (const auto &kv : mat->stringValue)
                         printf("%*sMaterial String %s: %s\n", lvl * 2, "", kv.first.c_str(), kv.second.c_str());
                     for (const auto &kv : mat->floatValue)
@@ -95,27 +83,20 @@ namespace SmartImporter
                         printf("%*sMaterial Int %s: %d\n", lvl * 2, "", kv.first.c_str(), kv.second);
 
                     for (const auto &tex : mat->textures)
-                        printf("%*sMaterial Texture %s: %s.%s\n", lvl * 2, "",
+                    {
+                        bool compatible_with_texture_atlas = geom->is_uv_compatible_with_texture_atlas(tex.uvIndex);
+                        printf("%*sMaterial Texture %s: %s.%s (Compatible with texture atlas: %s)\n", lvl * 2, "",
                                TextureTypeToStr(tex.type),
-                               tex.filename.c_str(), tex.fileext.c_str());
+                               tex.filename.c_str(), tex.fileext.c_str(),
+                               compatible_with_texture_atlas ? "YES" : "NO");
+                    }
 
-                    bool is_opaque = true;
-                    if (mat->stringValue.find("gltf.alphaMode") != mat->stringValue.end())
-                        is_opaque = mat->stringValue.at("gltf.alphaMode") == "OPAQUE";
-                    else if (mat->floatValue.find("opacity") != mat->floatValue.end())
-                        is_opaque = mat->floatValue.at("opacity") >= 1.0f;
+                    bool is_opaque = mat->is_opaque();
+                    bool is_unlit = mat->is_unlit();
+                    bool is_two_sided = mat->is_two_sided();
+
                     printf("%*sMaterial %s is opaque: %s\n", lvl * 2, "", mat->name.c_str(), is_opaque ? "YES" : "NO");
-
-                    bool is_unlit = true;
-                    if (mat->intValue.find("gltf.unlit") != mat->intValue.end())
-                        is_unlit = mat->intValue.at("gltf.unlit") != 0;
-                    else if (mat->stringValue.find("shadingm") != mat->stringValue.end())
-                        is_unlit = mat->stringValue.at("shadingm") == "NO_SHADING";
                     printf("%*sMaterial %s is unlit: %s\n", lvl * 2, "", mat->name.c_str(), is_unlit ? "YES" : "NO");
-
-                    bool is_two_sided = false;
-                    if (mat->intValue.find("twosided") != mat->intValue.end())
-                        is_two_sided = mat->intValue.at("twosided") != 0;
                     printf("%*sMaterial %s is two-sided: %s\n", lvl * 2, "", mat->name.c_str(), is_two_sided ? "YES" : "NO");
                 }
                 else
