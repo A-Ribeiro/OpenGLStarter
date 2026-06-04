@@ -70,9 +70,10 @@ namespace SmartImporter
             for (const auto &tex : mat->textures)
             {
                 // bool compatible_with_texture_atlas = geom->is_uv_compatible_with_texture_atlas(tex.uvIndex);
-                printf("%*sMaterial Texture %s: %s.%s\n", lvl * 2, "",
+                printf("%*sMaterial Texture %s: %s.%s (Wrap Mode: %s %s %s)\n", lvl * 2, "",
                        TextureTypeToStr(tex.type),
-                       tex.filename.c_str(), tex.fileext.c_str());
+                       tex.filename.c_str(), tex.fileext.c_str(),
+                       TextureMapModeToStr(tex.mapMode_s), TextureMapModeToStr(tex.mapMode_t), TextureMapModeToStr(tex.mapMode_r));
             }
 
             bool is_opaque = mat->is_opaque();
@@ -163,7 +164,6 @@ namespace SmartImporter
             return material;
         }
 
-
         std::shared_ptr<Components::ComponentMaterial> createLineMaterial(const ITKExtension::Model::Material *mat)
         {
             using namespace AppKit::GLEngine::Components;
@@ -215,11 +215,14 @@ namespace SmartImporter
                     for (const auto &tex : mat->textures)
                     {
                         bool compatible_with_texture_atlas = geom->is_uv_compatible_with_texture_atlas(tex.uvIndex);
-                        printf("%*sMaterial Texture %s: %s.%s (Compatible with texture atlas: %s)\n", lvl * 2, "",
+                        printf("%*sMaterial Texture %s: %s.%s (Wrap Mode: %s %s %s) (Compatible with texture atlas: %s)\n", lvl * 2, "",
                                TextureTypeToStr(tex.type),
                                tex.filename.c_str(), tex.fileext.c_str(),
+                               TextureMapModeToStr(tex.mapMode_s), TextureMapModeToStr(tex.mapMode_t), TextureMapModeToStr(tex.mapMode_r),
                                compatible_with_texture_atlas ? "YES" : "NO");
                     }
+
+                    printf("\n");
                 }
                 else
                 {
