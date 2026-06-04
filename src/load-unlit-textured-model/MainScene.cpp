@@ -6,6 +6,11 @@
 // #include <InteractiveToolkit/EaseCore/EaseCore.h>
 #include "components/ComponentGrow.h"
 
+#include <InteractiveToolkit-Extension/InteractiveToolkit-Extension.h>
+
+#include <InteractiveToolkit/ITKCommon/FileSystem/File.h>
+#include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
+
 #include <cstdlib>
 #include <string>
 
@@ -14,6 +19,7 @@ using namespace AppKit::GLEngine::Components;
 using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
+using namespace ITKCommon;
 
 #include <InteractiveToolkit-Extension/model/ModelContainer.h>
 
@@ -23,6 +29,17 @@ namespace SmartImporter
     {
         std::unique_ptr<ITKExtension::Model::ModelContainer> container;
         std::unordered_map<const ITKExtension::Model::Geometry *, bool> geometryProcessed;
+
+        int textureInsertIntoAtlasBelowEqual;
+        int textureAtlasMaxDimension;
+        std::unordered_map<std::string, bool> texturesToInsertIntoAtlas;
+
+        std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> generatedAtlases;
+
+        std::string path_textures;
+
+        ITKCommon::FileSystem::File inputFile;
+
         ResourceMap *resourceMap;
 
         std::shared_ptr<Components::ComponentMaterial> createMaterial(const ITKExtension::Model::Material *mat)
@@ -237,17 +254,127 @@ namespace SmartImporter
                 traverse(container->nodes[child_index], lvl + 1);
         }
 
-    public:
-        void load(const char *filename, ResourceMap *resourceMap)
+        void getImageDimension(const char *path, int *out_w, int *out_h)
         {
+            int w, h, channels, depth;
+            bool invertY = false;
+
+            std::unique_ptr<char, void(*)(char*)> buffer(nullptr, [](char *ptr) {});
+
+            if (ITKExtension::Image::PNG::isPNGFilename(path))
+                buffer = std::unique_ptr<char, void(*)(char*)>(ITKExtension::Image::PNG::readPNG(path, &w, &h, &channels, &depth, invertY),
+                                                                  [](char *ptr)
+                                                                  { if(ptr) {char *aux = ptr;ITKExtension::Image::PNG::closePNG(aux); } });
+            else if (ITKExtension::Image::JPG::isJPGFilename(path))
+                buffer = std::unique_ptr<char, void(*)(char*)>(ITKExtension::Image::JPG::readJPG(path, &w, &h, &channels, &depth, invertY),
+                                                                  [](char *ptr)
+                                                                  { if(ptr) {char *aux = ptr;ITKExtension::Image::JPG::closeJPG(aux); } });
+
+            if (buffer == nullptr)
+                throw std::runtime_error(ITKCommon::PrintfToStdString("Error loading texture: %s", path));
+
+            if (channels != 4 || depth != 8)
+                throw std::runtime_error(ITKCommon::PrintfToStdString("Invalid image format for texture '%s': expected RGBA 8-bit", path));
+
+            *out_w = w;
+            *out_h = h;
+        }
+
+        void traverse_select_textures_for_atlas(const ITKExtension::Model::Node &node, int lvl = 0)
+        {
+            for (uint32_t gidx : node.geometries)
+            {
+                const ITKExtension::Model::Geometry *geom = &container->geometries[gidx];
+                const ITKExtension::Model::Material *mat = &container->materials[geom->materialIndex];
+
+                // process only triangle meshes for texture atlas compatibility, skip lines and points
+                if (geom->indiceCountPerFace != 3)
+                    continue;
+
+                // skip already processed geometries (for example, if the same geometry is instanced multiple times in the scene graph)
+                if (geometryProcessed.find(geom) != geometryProcessed.end())
+                    continue;
+
+                auto diffuse = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
+                                            { return tex.type == ITKExtension::Model::TextureType::TextureType_DIFFUSE; });
+                if (diffuse != mat->textures.end() && geom->is_uv_compatible_with_texture_atlas(diffuse->uvIndex))
+                {
+                    std::string filename = path_textures + diffuse->filename + "." + diffuse->fileext;
+                    if (texturesToInsertIntoAtlas.find(filename) == texturesToInsertIntoAtlas.end())
+                    {
+                        int w, h;
+                        getImageDimension(filename.c_str(), &w, &h);
+                        if (w <= textureInsertIntoAtlasBelowEqual && h <= textureInsertIntoAtlasBelowEqual)
+                            texturesToInsertIntoAtlas[filename] = true;
+                    }
+                }
+
+                geometryProcessed[geom] = true;
+            }
+
+            for (uint32_t child_index : node.children)
+                traverse_select_textures_for_atlas(container->nodes[child_index], lvl + 1);
+        }
+
+    public:
+        void load(const char *filename,
+                  ResourceMap *resourceMap,
+                  int textureInsertIntoAtlasBelowEqual = 2048, int textureAtlasMaxDimension = 4096,
+                  const char *path_textures_param = nullptr )
+        {
+            inputFile = ITKCommon::FileSystem::File::FromPath(filename);
+
+            if (!inputFile.isFile)
+                throw std::runtime_error(ITKCommon::PrintfToStdString("Input file does not exist: %s", filename));
+
             const uint32_t root_index = 0;
 
             this->resourceMap = resourceMap;
+            this->textureAtlasMaxDimension = textureAtlasMaxDimension;
+            if (path_textures_param) {
+                auto directory = ITKCommon::FileSystem::Directory(path_textures_param);
+                if (!directory)
+                    throw std::runtime_error(ITKCommon::PrintfToStdString("Invalid texture directory: %s", path_textures_param));
+                this->path_textures = directory.getBasePath();
+            } else
+                this->path_textures = inputFile.base_path;
+            this->textureInsertIntoAtlasBelowEqual = textureInsertIntoAtlasBelowEqual;
 
             container = STL_Tools::make_unique<ITKExtension::Model::ModelContainer>();
             container->read(filename);
 
-            traverse(container->nodes[root_index]);
+            geometryProcessed.clear();
+            texturesToInsertIntoAtlas.clear();
+            traverse_select_textures_for_atlas(container->nodes[root_index]);
+
+            printf("Textures to insert into atlas:\n\n");
+            for (const auto &tex : texturesToInsertIntoAtlas)
+                printf("- %s\n", tex.first.c_str());
+            printf("\n");
+
+            SpriteAtlasGenerator gen;
+
+            for (const auto &tex : texturesToInsertIntoAtlas)
+                gen.addEntry(tex.first.c_str());
+
+            auto engine = AppKit::GLEngine::Engine::Instance();
+            generatedAtlases = gen.generateAtlas("", *resourceMap, engine->sRGBCapable, true, 10);
+
+            printf("\nGenerated %zu sprite atlases:\n\n", generatedAtlases.size());
+            for (size_t i = 0; i < generatedAtlases.size(); i++)
+            {
+                const auto &atlas = generatedAtlases[i];
+                printf("- Atlas %zu: %d x %d, contains %zu textures:\n", i, atlas->texture->width, atlas->texture->height, atlas->sprites.size());
+                for (const auto &entry : atlas->sprites)
+                    printf("  - %s: uvMin (%f, %f) uvMax (%f, %f) spriteSize (%.0f, %.0f)\n", 
+                        entry.first.c_str(), 
+                        entry.second.uvMin.x, entry.second.uvMin.y, 
+                        entry.second.uvMax.x, entry.second.uvMax.y,
+                        entry.second.spriteSize.x, entry.second.spriteSize.y);
+            }
+            printf("\n\n");
+
+            Engine::Instance()->app->exitApp();
         }
     };
 
