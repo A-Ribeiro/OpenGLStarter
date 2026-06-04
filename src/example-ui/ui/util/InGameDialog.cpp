@@ -620,7 +620,7 @@ namespace ui
             gen.addEntry(sprite_path);
 
         auto engine = AppKit::GLEngine::Engine::Instance();
-        avatarAtlas = gen.generateAtlas(*node_ui->resourceMap, engine->sRGBCapable, true, 10)[0];
+        avatarAtlas = gen.generateAtlas(node_ui->resourceMap->dir.getBasePath(), *node_ui->resourceMap, engine->sRGBCapable, true, 10)[0];
     }
 
     int InGameDialog::countLinesForText(const std::string &rich_message) const

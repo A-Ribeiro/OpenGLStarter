@@ -59,7 +59,8 @@ namespace AppKit
                 throw std::runtime_error("Entry not found: " + name);
         }
 
-        std::vector<std::shared_ptr<SpriteAtlas>> SpriteAtlasGenerator::generateAtlas(const ResourceMap &resourceMap, bool sRGB, bool use_fast_positioning, int spaceBetweenSpites_px, int max_atlas_size)
+        std::vector<std::shared_ptr<SpriteAtlas>> SpriteAtlasGenerator::generateAtlas(const std::string &base_path,
+            const ResourceMap &resourceMap, bool sRGB, bool use_fast_positioning, int spaceBetweenSpites_px, int max_atlas_size)
         {
             std::vector<std::shared_ptr<SpriteAtlas>> result_array;
 
@@ -81,7 +82,8 @@ namespace AppKit
                 const std::string &name = entry.first;
                 const GeneratorEntry &genEntry = entry.second;
 
-                auto path = resourceMap.dir.getBasePath() + genEntry.texture_path;
+                //auto path = resourceMap.dir.getBasePath() + genEntry.texture_path;
+                auto path = base_path + genEntry.texture_path;
 
                 int w, h, channels, depth;
                 bool invertY = false;
