@@ -11,6 +11,9 @@
 #include <InteractiveToolkit/ITKCommon/FileSystem/File.h>
 #include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
 
+#include <InteractiveToolkit-Extension/encoding/HexString.h>
+#include <InteractiveToolkit-Extension/encoding/Base64.h>
+
 #include <cstdlib>
 #include <string>
 
@@ -35,6 +38,8 @@ namespace SmartImporter
         std::unordered_map<std::string, bool> texturesToInsertIntoAtlas;
 
         std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> generatedAtlases;
+
+        std::unordered_map<std::string, bool> material_uuid_to_instance;
 
         std::string path_textures;
 
@@ -100,6 +105,93 @@ namespace SmartImporter
             printf("%*sMaterial %s is opaque: %s\n", lvl * 2, "", mat->name.c_str(), is_opaque ? "YES" : "NO");
             printf("%*sMaterial %s is unlit: %s\n", lvl * 2, "", mat->name.c_str(), is_unlit ? "YES" : "NO");
             printf("%*sMaterial %s is two-sided: %s\n", lvl * 2, "", mat->name.c_str(), is_two_sided ? "YES" : "NO");
+        }
+
+        std::string computeMaterialUUID(const ITKExtension::Model::Geometry *geom, const ITKExtension::Model::Material *mat)
+        {
+#pragma pack(push, 1)
+            struct material_bytes
+            {
+                vec4<float, SIMD_TYPE::NONE> diffuse;
+                vec3<float, SIMD_TYPE::NONE> emission;
+                float roughness;
+                float metallic;
+                union
+                {
+                    uint8_t flags;
+                    struct
+                    {
+                        uint8_t is_unlit : 1;
+                        uint8_t is_opaque : 1;
+                        uint8_t is_two_sided : 1;
+                        uint8_t reserved : 5;
+                    };
+                };
+            };
+#pragma pack(pop)
+
+            material_bytes m_bytes;
+            memset(&m_bytes, 0, sizeof(m_bytes));
+
+            bool is_unlit = mat->is_unlit();
+            bool is_opaque = mat->is_opaque();
+            bool is_two_sided = mat->is_two_sided();
+
+            m_bytes.is_unlit = is_unlit ? 1 : 0;
+            m_bytes.is_opaque = is_opaque ? 1 : 0;
+            m_bytes.is_two_sided = is_two_sided ? 1 : 0;
+
+            auto diffuse = mat->vec4Value.find("diffuse");
+            if (diffuse != mat->vec4Value.end())
+                m_bytes.diffuse = diffuse->second;
+
+            if (!is_unlit)
+            {
+                auto emissive = mat->vec4Value.find("emissive");
+                if (emissive != mat->vec4Value.end())
+                    m_bytes.emission = CVT<vec4f>::toVec3(emissive->second);
+
+                auto roughness = mat->floatValue.find("roughnessFactor");
+                if (roughness != mat->floatValue.end())
+                    m_bytes.roughness = roughness->second;
+
+                auto metallic = mat->floatValue.find("metallicFactor");
+                if (metallic != mat->floatValue.end())
+                    m_bytes.metallic = metallic->second;
+            }
+
+            std::vector<uint8_t> info_bytes;
+            info_bytes.insert(info_bytes.end(), (uint8_t *)&m_bytes, (uint8_t *)&m_bytes + sizeof(m_bytes));
+
+            // difuse_texture part
+            auto diffuse_tex = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
+                                            { return tex.type == ITKExtension::Model::TextureType::TextureType_DIFFUSE; });
+            if (diffuse_tex != mat->textures.end())
+            {
+                std::string texture_to_use;
+                if (geom->is_uv_compatible_with_texture_atlas(diffuse_tex->uvIndex))
+                {
+                    texture_to_use = "/atlas";
+                    // in this case, search for the atlas...
+                }
+                else
+                {
+                    // in this case, create the single texture
+                    texture_to_use = "/" + diffuse_tex->filename + "." + diffuse_tex->fileext;
+                }
+
+                info_bytes.insert(info_bytes.end(), (uint8_t *)texture_to_use.c_str(), (uint8_t *)texture_to_use.c_str() + sizeof(char) * texture_to_use.size());
+            }
+            else
+            {
+                const char *slash = "/";
+                info_bytes.insert(info_bytes.end(), (uint8_t *)slash, (uint8_t *)slash + sizeof(char) * strlen(slash));
+            }
+
+            std::string out_string_b64;
+            ITKExtension::Encoding::Base64::EncodeToString(info_bytes.data(), info_bytes.size(), &out_string_b64);
+
+            return out_string_b64;
         }
 
         std::shared_ptr<Components::ComponentMaterial> createUnlitMaterial(const ITKExtension::Model::Material *mat)
@@ -259,16 +351,16 @@ namespace SmartImporter
             int w, h, channels, depth;
             bool invertY = false;
 
-            std::unique_ptr<char, void(*)(char*)> buffer(nullptr, [](char *ptr) {});
+            std::unique_ptr<char, void (*)(char *)> buffer(nullptr, [](char *ptr) {});
 
             if (ITKExtension::Image::PNG::isPNGFilename(path))
-                buffer = std::unique_ptr<char, void(*)(char*)>(ITKExtension::Image::PNG::readPNG(path, &w, &h, &channels, &depth, invertY),
-                                                                  [](char *ptr)
-                                                                  { if(ptr) {char *aux = ptr;ITKExtension::Image::PNG::closePNG(aux); } });
+                buffer = std::unique_ptr<char, void (*)(char *)>(ITKExtension::Image::PNG::readPNG(path, &w, &h, &channels, &depth, invertY),
+                                                                 [](char *ptr)
+                                                                 { if(ptr) {char *aux = ptr;ITKExtension::Image::PNG::closePNG(aux); } });
             else if (ITKExtension::Image::JPG::isJPGFilename(path))
-                buffer = std::unique_ptr<char, void(*)(char*)>(ITKExtension::Image::JPG::readJPG(path, &w, &h, &channels, &depth, invertY),
-                                                                  [](char *ptr)
-                                                                  { if(ptr) {char *aux = ptr;ITKExtension::Image::JPG::closeJPG(aux); } });
+                buffer = std::unique_ptr<char, void (*)(char *)>(ITKExtension::Image::JPG::readJPG(path, &w, &h, &channels, &depth, invertY),
+                                                                 [](char *ptr)
+                                                                 { if(ptr) {char *aux = ptr;ITKExtension::Image::JPG::closeJPG(aux); } });
 
             if (buffer == nullptr)
                 throw std::runtime_error(ITKCommon::PrintfToStdString("Error loading texture: %s", path));
@@ -316,11 +408,43 @@ namespace SmartImporter
                 traverse_select_textures_for_atlas(container->nodes[child_index], lvl + 1);
         }
 
+        void traverse_generate_materials_and_geometries(const ITKExtension::Model::Node &node, int lvl = 0)
+        {
+
+            for (uint32_t gidx : node.geometries)
+            {
+                const ITKExtension::Model::Geometry *geom = &container->geometries[gidx];
+                const ITKExtension::Model::Material *mat = &container->materials[geom->materialIndex];
+
+                // process only triangle meshes for texture atlas compatibility, skip lines and points
+                if (geom->indiceCountPerFace != 3)
+                    continue;
+
+                // skip already processed geometries (for example, if the same geometry is instanced multiple times in the scene graph)
+                if (geometryProcessed.find(geom) != geometryProcessed.end())
+                    continue;
+
+                auto uuid = computeMaterialUUID(geom, mat);
+                printf(" uuid: %s (%zu)\n", uuid.c_str(), uuid.size());
+
+                std::vector<uint8_t> out_string_b64;
+                ITKExtension::Encoding::Base64::DecodeToVector(uuid, &out_string_b64);
+                std::string decoded_str(out_string_b64.begin() + 37, out_string_b64.end());
+
+                printf("     decoded path: %s\n", decoded_str.c_str());
+
+                geometryProcessed[geom] = true;
+            }
+
+            for (uint32_t child_index : node.children)
+                traverse_generate_materials_and_geometries(container->nodes[child_index], lvl + 1);
+        }
+
     public:
         void load(const char *filename,
                   ResourceMap *resourceMap,
                   int textureInsertIntoAtlasBelowEqual = 2048, int textureAtlasMaxDimension = 4096,
-                  const char *path_textures_param = nullptr )
+                  const char *path_textures_param = nullptr)
         {
             inputFile = ITKCommon::FileSystem::File::FromPath(filename);
 
@@ -331,12 +455,14 @@ namespace SmartImporter
 
             this->resourceMap = resourceMap;
             this->textureAtlasMaxDimension = textureAtlasMaxDimension;
-            if (path_textures_param) {
+            if (path_textures_param)
+            {
                 auto directory = ITKCommon::FileSystem::Directory(path_textures_param);
                 if (!directory)
                     throw std::runtime_error(ITKCommon::PrintfToStdString("Invalid texture directory: %s", path_textures_param));
                 this->path_textures = directory.getBasePath();
-            } else
+            }
+            else
                 this->path_textures = inputFile.base_path;
             this->textureInsertIntoAtlasBelowEqual = textureInsertIntoAtlasBelowEqual;
 
@@ -366,13 +492,23 @@ namespace SmartImporter
                 const auto &atlas = generatedAtlases[i];
                 printf("- Atlas %zu: %d x %d, contains %zu textures:\n", i, atlas->texture->width, atlas->texture->height, atlas->sprites.size());
                 for (const auto &entry : atlas->sprites)
-                    printf("  - %s: uvMin (%f, %f) uvMax (%f, %f) spriteSize (%.0f, %.0f)\n", 
-                        entry.first.c_str(), 
-                        entry.second.uvMin.x, entry.second.uvMin.y, 
-                        entry.second.uvMax.x, entry.second.uvMax.y,
-                        entry.second.spriteSize.x, entry.second.spriteSize.y);
+                    printf("  - %s: uvMin (%f, %f) uvMax (%f, %f) spriteSize (%.0f, %.0f)\n",
+                           entry.first.c_str(),
+                           entry.second.uvMin.x, entry.second.uvMin.y,
+                           entry.second.uvMax.x, entry.second.uvMax.y,
+                           entry.second.spriteSize.x, entry.second.spriteSize.y);
             }
             printf("\n\n");
+
+            // generate materials and process geometries
+            geometryProcessed.clear();
+
+            printf("\nGenerated Materials And Geometries\n\n");
+
+            traverse_generate_materials_and_geometries(container->nodes[root_index]);
+
+            printf("\n\n");
+
 
             Engine::Instance()->app->exitApp();
         }
