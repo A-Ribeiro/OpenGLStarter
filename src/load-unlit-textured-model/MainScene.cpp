@@ -11,7 +11,7 @@
 #include <InteractiveToolkit/ITKCommon/FileSystem/File.h>
 #include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
 
-#include <InteractiveToolkit-Extension/encoding/HexString.h>
+// #include <InteractiveToolkit-Extension/encoding/HexString.h>
 #include <InteractiveToolkit-Extension/encoding/Base64.h>
 
 #include <cstdlib>
@@ -28,6 +28,18 @@ using namespace ITKCommon;
 
 namespace SmartImporter
 {
+    struct Material_UUID_Descriptor
+    {
+        std::string uuid;
+
+        // if has sprite from atlas
+        std::shared_ptr<SpriteAtlas> atlas;
+        AppKit::GLEngine::SpriteAtlas::Entry sprite_atlas_entry;
+
+        // if needs to load texture from file
+        std::string texture_path;
+    };
+
     class ModelSmasher
     {
         std::unique_ptr<ITKExtension::Model::ModelContainer> container;
@@ -39,7 +51,8 @@ namespace SmartImporter
 
         std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> generatedAtlases;
 
-        std::unordered_map<std::string, bool> material_uuid_to_instance;
+        std::unordered_map<std::string, std::shared_ptr<Components::ComponentMaterial>> material_uuid_to_instance;
+        std::unordered_map<const ITKExtension::Model::Geometry *, std::shared_ptr<Components::ComponentMesh>> geometry_ptr_to_instance;
 
         std::string path_textures;
 
@@ -47,16 +60,16 @@ namespace SmartImporter
 
         ResourceMap *resourceMap;
 
-        std::shared_ptr<Components::ComponentMaterial> createMaterial(const ITKExtension::Model::Material *mat)
+        std::shared_ptr<Components::ComponentMaterial> createMaterial(const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
         {
             // bool is_opaque = mat->is_opaque();
             bool is_unlit = mat->is_unlit();
             // bool is_two_sided = mat->is_two_sided();
 
             if (is_unlit)
-                return createUnlitMaterial(mat);
+                return createUnlitMaterial(mat, uuid_texture_info);
             else
-                return createPBRMaterial(mat);
+                return createPBRMaterial(mat, uuid_texture_info);
         }
 
         /*
@@ -107,7 +120,7 @@ namespace SmartImporter
             printf("%*sMaterial %s is two-sided: %s\n", lvl * 2, "", mat->name.c_str(), is_two_sided ? "YES" : "NO");
         }
 
-        std::string computeMaterialUUID(const ITKExtension::Model::Geometry *geom, const ITKExtension::Model::Material *mat)
+        Material_UUID_Descriptor computeMaterialUUID(const ITKExtension::Model::Geometry *geom, const ITKExtension::Model::Material *mat)
         {
 #pragma pack(push, 1)
             struct material_bytes
@@ -160,41 +173,62 @@ namespace SmartImporter
                     m_bytes.metallic = metallic->second;
             }
 
+            Material_UUID_Descriptor result;
+
             std::vector<uint8_t> info_bytes;
             info_bytes.insert(info_bytes.end(), (uint8_t *)&m_bytes, (uint8_t *)&m_bytes + sizeof(m_bytes));
 
             // difuse_texture part
             auto diffuse_tex = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
                                             { return tex.type == ITKExtension::Model::TextureType::TextureType_DIFFUSE; });
+            std::string texture_to_use;
             if (diffuse_tex != mat->textures.end())
             {
-                std::string texture_to_use;
+                std::string filename = diffuse_tex->filename + "." + diffuse_tex->fileext;
+                // std::string full_filename = path_textures + filename;
+
                 if (geom->is_uv_compatible_with_texture_atlas(diffuse_tex->uvIndex))
                 {
-                    texture_to_use = "/atlas";
                     // in this case, search for the atlas...
-                }
-                else
-                {
-                    // in this case, create the single texture
-                    texture_to_use = "/" + diffuse_tex->filename + "." + diffuse_tex->fileext;
+
+                    for (size_t i = 0; i < generatedAtlases.size(); i++)
+                    {
+                        if (generatedAtlases[i]->hasSprite(filename))
+                        {
+                            texture_to_use = ITKCommon::PrintfToStdString("/atlas-%zu", i);
+                            result.atlas = generatedAtlases[i];
+                            result.sprite_atlas_entry = generatedAtlases[i]->getSprite(filename);
+                            break;
+                        }
+                    }
                 }
 
-                info_bytes.insert(info_bytes.end(), (uint8_t *)texture_to_use.c_str(), (uint8_t *)texture_to_use.c_str() + sizeof(char) * texture_to_use.size());
+                if (texture_to_use.empty())
+                {
+                    // in this case, create the single texture
+                    texture_to_use = "/" + filename;
+
+                    result.texture_path = filename;
+                }
             }
-            else
+
+            if (texture_to_use.empty())
             {
                 const char *slash = "/";
                 info_bytes.insert(info_bytes.end(), (uint8_t *)slash, (uint8_t *)slash + sizeof(char) * strlen(slash));
             }
+            else
+                info_bytes.insert(info_bytes.end(), (uint8_t *)texture_to_use.c_str(), (uint8_t *)texture_to_use.c_str() + sizeof(char) * texture_to_use.size());
 
             std::string out_string_b64;
             ITKExtension::Encoding::Base64::EncodeToString(info_bytes.data(), info_bytes.size(), &out_string_b64);
 
-            return out_string_b64;
+            result.uuid = out_string_b64;
+
+            return result;
         }
 
-        std::shared_ptr<Components::ComponentMaterial> createUnlitMaterial(const ITKExtension::Model::Material *mat)
+        std::shared_ptr<Components::ComponentMaterial> createUnlitMaterial(const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
         {
             using namespace AppKit::GLEngine::Components;
 
@@ -212,6 +246,17 @@ namespace SmartImporter
             if (diffuse != mat->vec4Value.end())
                 material->property_bag.getProperty("uColor").set<MathCore::vec4f>(diffuse->second);
 
+            if (uuid_texture_info.atlas != nullptr)
+                material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)uuid_texture_info.atlas->texture);
+            else if (!uuid_texture_info.texture_path.empty())
+            {
+                auto engine = AppKit::GLEngine::Engine::Instance();
+                auto tex = resourceMap->getTexture(uuid_texture_info.texture_path, engine->sRGBCapable);
+                material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+            }
+
+            // resourceMap->getTexture()
+
             // ShaderUnlitTextureAlpha Property Bag:
 
             // bag.addProperty("uColor", uColor);
@@ -226,7 +271,7 @@ namespace SmartImporter
             return material;
         }
 
-        std::shared_ptr<Components::ComponentMaterial> createPBRMaterial(const ITKExtension::Model::Material *mat)
+        std::shared_ptr<Components::ComponentMaterial> createPBRMaterial(const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
         {
             using namespace AppKit::GLEngine::Components;
 
@@ -252,6 +297,15 @@ namespace SmartImporter
             auto metallic = mat->floatValue.find("metallicFactor");
             if (metallic != mat->floatValue.end())
                 material->property_bag.getProperty("metallic").set<float>(metallic->second);
+
+            if (uuid_texture_info.atlas != nullptr)
+                material->property_bag.getProperty("texAlbedo").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)uuid_texture_info.atlas->texture);
+            else if (!uuid_texture_info.texture_path.empty())
+            {
+                auto engine = AppKit::GLEngine::Engine::Instance();
+                auto tex = resourceMap->getTexture(uuid_texture_info.texture_path, engine->sRGBCapable);
+                material->property_bag.getProperty("texAlbedo").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+            }
 
             // PBRShaderSelector Property Bag:
 
@@ -391,11 +445,13 @@ namespace SmartImporter
                                             { return tex.type == ITKExtension::Model::TextureType::TextureType_DIFFUSE; });
                 if (diffuse != mat->textures.end() && geom->is_uv_compatible_with_texture_atlas(diffuse->uvIndex))
                 {
-                    std::string filename = path_textures + diffuse->filename + "." + diffuse->fileext;
+                    std::string filename = diffuse->filename + "." + diffuse->fileext;
+                    std::string full_filename = path_textures + filename;
+                    // std::string filename = path_textures + diffuse->filename + "." + diffuse->fileext;
                     if (texturesToInsertIntoAtlas.find(filename) == texturesToInsertIntoAtlas.end())
                     {
                         int w, h;
-                        getImageDimension(filename.c_str(), &w, &h);
+                        getImageDimension(full_filename.c_str(), &w, &h);
                         if (w <= textureInsertIntoAtlasBelowEqual && h <= textureInsertIntoAtlasBelowEqual)
                             texturesToInsertIntoAtlas[filename] = true;
                     }
@@ -424,15 +480,55 @@ namespace SmartImporter
                 if (geometryProcessed.find(geom) != geometryProcessed.end())
                     continue;
 
-                auto uuid = computeMaterialUUID(geom, mat);
-                printf(" uuid: %s (%zu)\n", uuid.c_str(), uuid.size());
+                auto uuid_texture_info = computeMaterialUUID(geom, mat);
 
-                std::vector<uint8_t> out_string_b64;
-                ITKExtension::Encoding::Base64::DecodeToVector(uuid, &out_string_b64);
-                std::string decoded_str(out_string_b64.begin() + 37, out_string_b64.end());
+                auto it_mat = material_uuid_to_instance.find(uuid_texture_info.uuid);
+                if (it_mat == material_uuid_to_instance.end())
+                {
+                    auto material = createMaterial(mat, uuid_texture_info);
+                    material_uuid_to_instance[uuid_texture_info.uuid] = material;
 
-                printf("     decoded path: %s\n", decoded_str.c_str());
+                    printf(" uuid: %s (%zu)\n", uuid_texture_info.uuid.c_str(), uuid_texture_info.uuid.size());
 
+                    std::vector<uint8_t> out_string_b64;
+                    ITKExtension::Encoding::Base64::DecodeToVector(uuid_texture_info.uuid, &out_string_b64);
+                    std::string decoded_str(out_string_b64.begin() + 37, out_string_b64.end());
+                    printf("     decoded path: %s\n", decoded_str.c_str());
+                }
+
+                // generate the geometry according the uuid_texture_info
+
+                auto mesh = Component::CreateShared<Components::ComponentMesh>();
+                if (geom->pos.size() > 0)
+                    mesh->pos = geom->pos;
+                if (geom->normals.size() > 0)
+                    mesh->normals = geom->normals;
+                if (geom->tangent.size() > 0)
+                    mesh->tangent = geom->tangent;
+                if (geom->binormal.size() > 0)
+                    mesh->binormal = geom->binormal;
+                for (int j = 0; j < 8; j++)
+                {
+                    if (geom->uv[j].size() > 0)
+                        mesh->uv[j] = geom->uv[j];
+                    if (geom->color[j].size() > 0)
+                        mesh->color[j] = geom->color[j];
+                }
+                mesh->indices = geom->indice;
+                // if (model_dynamic_upload != 0 || model_static_upload != 0)
+                //     mesh->syncVBO(model_dynamic_upload, model_static_upload);
+                if (geom->bones.size() > 0)
+                    mesh->bones = geom->bones;
+
+                if (uuid_texture_info.atlas != nullptr)
+                {
+                    // needs to post-process the UVs to fit the sprite atlas
+                    auto uvSize = vec3f(uuid_texture_info.sprite_atlas_entry.uvMax - uuid_texture_info.sprite_atlas_entry.uvMin, 0);
+                    for(auto &uv : mesh->uv[0])
+                        uv = (uv - vec3f(uuid_texture_info.sprite_atlas_entry.uvMin, 0)) * uvSize;
+                }
+
+                geometry_ptr_to_instance[geom] = mesh;
                 geometryProcessed[geom] = true;
             }
 
@@ -464,6 +560,11 @@ namespace SmartImporter
             }
             else
                 this->path_textures = inputFile.base_path;
+
+            // set resourceMap folder to be the same as the folder on model file is
+            ITKCommon::FileSystem::Directory resourceMap_BaseFolder_bpk = resourceMap->dir;
+            resourceMap->setProjectBaseFolder(this->path_textures);
+
             this->textureInsertIntoAtlasBelowEqual = textureInsertIntoAtlasBelowEqual;
 
             container = STL_Tools::make_unique<ITKExtension::Model::ModelContainer>();
@@ -484,7 +585,7 @@ namespace SmartImporter
                 gen.addEntry(tex.first.c_str());
 
             auto engine = AppKit::GLEngine::Engine::Instance();
-            generatedAtlases = gen.generateAtlas("", *resourceMap, engine->sRGBCapable, true, 10);
+            generatedAtlases = gen.generateAtlas(path_textures, *resourceMap, engine->sRGBCapable, true, 10);
 
             printf("\nGenerated %zu sprite atlases:\n\n", generatedAtlases.size());
             for (size_t i = 0; i < generatedAtlases.size(); i++)
@@ -505,10 +606,14 @@ namespace SmartImporter
 
             printf("\nGenerated Materials And Geometries\n\n");
 
+            material_uuid_to_instance.clear();
+            geometry_ptr_to_instance.clear();
+
             traverse_generate_materials_and_geometries(container->nodes[root_index]);
 
             printf("\n\n");
 
+            resourceMap->dir = resourceMap_BaseFolder_bpk;
 
             Engine::Instance()->app->exitApp();
         }
