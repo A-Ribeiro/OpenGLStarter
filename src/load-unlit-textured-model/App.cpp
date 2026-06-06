@@ -46,6 +46,8 @@ App::App()
     screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
     // screenRenderWindow.setEventForwardingEnabled(true);
 
+    renderPipeline.agregateMesh_ConcatenateLowerThanTriangleCount = 0;
+
     fps = 0;
 }
 

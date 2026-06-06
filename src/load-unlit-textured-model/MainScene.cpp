@@ -34,10 +34,13 @@ namespace SmartImporter
 
         // if has sprite from atlas
         std::shared_ptr<SpriteAtlas> atlas;
+        std::string sprite_atlas_entry_name;
         AppKit::GLEngine::SpriteAtlas::Entry sprite_atlas_entry;
 
         // if needs to load texture from file
         std::string texture_path;
+        ITKExtension::Model::TextureMapMode texture_s_wrap;
+        ITKExtension::Model::TextureMapMode texture_t_wrap;
     };
 
     class ModelSmasher
@@ -101,6 +104,18 @@ namespace SmartImporter
                 auto engine = AppKit::GLEngine::Engine::Instance();
                 auto tex = resourceMap->getTexture(uuid_texture_info.texture_path, engine->sRGBCapable, texture_base_path);
                 material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+
+
+                using namespace ITKExtension::Model;
+                if (uuid_texture_info.texture_s_wrap == TextureMapMode_Wrap || uuid_texture_info.texture_t_wrap == TextureMapMode_Wrap)
+                {
+                    tex->active(0);
+                    if (uuid_texture_info.texture_s_wrap == TextureMapMode_Wrap)
+                        OPENGL_CMD(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+                    if (uuid_texture_info.texture_t_wrap == TextureMapMode_Wrap)
+                        OPENGL_CMD(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+                    tex->deactive(0);
+                }
             }
 
             // resourceMap->getTexture()
@@ -298,9 +313,10 @@ namespace SmartImporter
                     {
                         if (data->generatedAtlases[i]->hasSprite(filename))
                         {
-                            texture_to_use = ITKCommon::PrintfToStdString("/atlas-%zu", i);
+                            texture_to_use = ITKCommon::PrintfToStdString("/atlas-%zu/%i%i", i, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp);
                             result.atlas = data->generatedAtlases[i];
                             result.sprite_atlas_entry = data->generatedAtlases[i]->getSprite(filename);
+                            result.sprite_atlas_entry_name = filename;
                             break;
                         }
                     }
@@ -309,9 +325,14 @@ namespace SmartImporter
                 if (texture_to_use.empty())
                 {
                     // in this case, create the single texture
-                    texture_to_use = "/" + filename;
+                    
 
                     result.texture_path = filename;
+                    result.texture_s_wrap = diffuse_tex->mapMode_s;
+                    result.texture_t_wrap = diffuse_tex->mapMode_t;
+
+                    texture_to_use = ITKCommon::PrintfToStdString("/%s/%i%i", filename.c_str(), (uint8_t)diffuse_tex->mapMode_s, (uint8_t)diffuse_tex->mapMode_t);
+
                 }
             }
 
@@ -522,6 +543,9 @@ namespace SmartImporter
                         mesh->color[j] = geom->color[j];
                 }
                 mesh->indices = geom->indice;
+                //invert face culling order to match OpenGL's default (counter-clockwise)
+                // for (size_t i = 0; i < mesh->indices.size(); i += 3)
+                //     std::swap(mesh->indices[i + 1], mesh->indices[i + 2]);
                 // if (model_dynamic_upload != 0 || model_static_upload != 0)
                 //     mesh->syncVBO(model_dynamic_upload, model_static_upload);
                 if (geom->bones.size() > 0)
@@ -529,10 +553,34 @@ namespace SmartImporter
 
                 if (uuid_texture_info.atlas != nullptr)
                 {
-                    // needs to post-process the UVs to fit the sprite atlas
-                    auto uvSize = vec3f(uuid_texture_info.sprite_atlas_entry.uvMax - uuid_texture_info.sprite_atlas_entry.uvMin, 0);
+
+                    /*
+
+                    mesh->pos.clear();
+                mesh->pos.push_back(size * MathCore::vec3f(1, 1, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(1, 0, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(0, 0, 0.0f));
+                mesh->pos.push_back(size * MathCore::vec3f(0, 1, 0.0f));
+
+                mesh->uv[0].clear();
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(entry.uvMax.x, entry.uvMin.y), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(entry.uvMax.x, entry.uvMax.y), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(entry.uvMin.x, entry.uvMax.y), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(entry.uvMin.x, entry.uvMin.y), 0));
+                     */
+
+                     
+                    // if (uuid_texture_info.sprite_atlas_entry_name == "c.png") {
+                    //     printf("    - atlas entry: %s\n", uuid_texture_info.sprite_atlas_entry_name.c_str());
+                    //     vec2f uv_max = uuid_texture_info.sprite_atlas_entry.lerpUV(1.0f, 1.0f);
+                    //     printf("      - uv_max: %f, %f\n", uv_max.x, uv_max.y);
+                    //     vec2f uv_min = uuid_texture_info.sprite_atlas_entry.lerpUV(0.0f, 0.0f);
+                    //     printf("      - uv_min: %f, %f\n", uv_min.x, uv_min.y);
+                    // }
+                    
                     for(auto &uv : mesh->uv[0])
-                        uv = (uv - vec3f(uuid_texture_info.sprite_atlas_entry.uvMin, 0)) * uvSize;
+                        uv = vec3f(uuid_texture_info.sprite_atlas_entry.lerpUV(uv.x, uv.y), 0.0f);
+
                 }
 
                 data->geometry_ptr_to_instance[geom] = mesh;
@@ -550,13 +598,13 @@ namespace SmartImporter
             result->setLocalRotation(node.getLocalRotation());
             result->setLocalScale(node.getLocalScale());
 
-            printf("%*sNode %s:\n"
-                "%*spos (%f, %f, %f)\n"
-                "%*srot (%f, %f, %f, %f)\n"
-                "%*sscale (%f, %f, %f)\n", lvl * 2, "+", node.name.c_str(),
-                   (lvl) * 2, "", node.getLocalPosition().x, node.getLocalPosition().y, node.getLocalPosition().z,
-                   (lvl) * 2, "", node.getLocalRotation().x, node.getLocalRotation().y, node.getLocalRotation().z, node.getLocalRotation().w,
-                   (lvl) * 2, "", node.getLocalScale().x, node.getLocalScale().y, node.getLocalScale().z);
+            // printf("%*sNode %s:\n"
+            //     "%*spos (%f, %f, %f)\n"
+            //     "%*srot (%f, %f, %f, %f)\n"
+            //     "%*sscale (%f, %f, %f)\n", lvl * 2, "+", node.name.c_str(),
+            //        (lvl) * 2, "", node.getLocalPosition().x, node.getLocalPosition().y, node.getLocalPosition().z,
+            //        (lvl) * 2, "", node.getLocalRotation().x, node.getLocalRotation().y, node.getLocalRotation().z, node.getLocalRotation().w,
+            //        (lvl) * 2, "", node.getLocalScale().x, node.getLocalScale().y, node.getLocalScale().z);
 
             ITK_ABORT(node.geometries.size() >= 2, "Node %s has %zu geometries. Max allowed is 1\n", node.name.c_str(), node.geometries.size());
             for (uint32_t gidx : node.geometries)
@@ -644,6 +692,7 @@ namespace SmartImporter
 
             auto engine = AppKit::GLEngine::Engine::Instance();
             data->generatedAtlases = gen.generateAtlas(path_textures, *resourceMap, engine->sRGBCapable, true, 10, this->textureAtlasMaxDimension);
+            // data->generatedAtlases.clear();
 
             printf("\nGenerated %zu sprite atlases:\n\n", data->generatedAtlases.size());
             for (size_t i = 0; i < data->generatedAtlases.size(); i++)
@@ -707,14 +756,16 @@ namespace Scenes
         // return Basof2ToResource::loadAndConvert(path.c_str(), resourceMap, defaultPBRMaterial, nullptr, model_dynamic_upload, model_static_upload);
 
         SmartImporter::ModelSmasher smasher;
-#if defined(__linux__) && 0
-        const char *home = std::getenv("HOME");
-        std::string inputPath = std::string(home ? home : "") + "/Documents/papercat/stages_gltf/stage3_04.bams";
-        auto path = std::unique_ptr<char, decltype(&std::free)>(realpath(inputPath.c_str(), nullptr), &std::free);
-        smasher.load(path ? path.get() : inputPath.c_str(), resourceMap);
-#else
+#if defined(__linux__)
+        // const char *home = std::getenv("HOME");
+        // std::string inputPath = std::string(home ? home : "") + "/Documents/papercat/stages_gltf/stage3_04.bams";
+        // auto path = std::unique_ptr<char, decltype(&std::free)>(realpath(inputPath.c_str(), nullptr), &std::free);
+        // smasher.load(path ? path.get() : inputPath.c_str(), resourceMap);
         loadedScene = smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams", resourceMap);
+#else
+        loadedScene = smasher.load("D:/shared/papercat/stages_gltf/stage3_04.bams", resourceMap);
 #endif
+
     }
     // to load the scene graph
     void MainScene::loadGraph()
@@ -734,22 +785,26 @@ namespace Scenes
         GLRenderState *renderState = GLRenderState::Instance();
 
         std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
+        auto mainCamera = root->findTransformByName("Main Camera");
         {
-            auto mainCamera = root->findTransformByName("Main Camera");
-
-            mainCamera->setLocalPosition(vec3f(0, 0, -10));
-
             camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
-            componentCameraOrthographic->sizeY = 5;
+            componentCameraOrthographic->useSizeY = true;
+            componentCameraOrthographic->sizeY = 10.0f;
         }
 
         sceneNode = root->findTransformByName("scene");
 
+        loadedScene->setLocalRotation(quatf());
+
         sceneNode->addChild(loadedScene);
 
-        auto rect = renderWindow->CameraViewport.c_ptr();
-        // auto *rect = &componentCameraOrthographic->viewport;
-        resize(vec2i(rect->w, rect->h));
+        auto player_pos = sceneNode->findTransformByName("Player")->getPosition();
+
+        mainCamera->setLocalPosition(vec3f(player_pos.x, player_pos.y, -10));
+
+        // auto rect = renderWindow->CameraViewport.c_ptr();
+        // // auto *rect = &componentCameraOrthographic->viewport;
+        // resize(vec2i(rect->w, rect->h));
 
         // // Add AABB for all meshs...
         // {
