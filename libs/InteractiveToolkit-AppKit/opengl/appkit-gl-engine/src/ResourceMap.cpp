@@ -41,9 +41,10 @@ namespace AppKit
             ITK_ABORT(!dir.isValid(), "invalid project path: %s\n", path.c_str());
         }
 
-        ITKCommon::FileSystem::File ResourceMap::getFile(const std::string &relative_path)
+        ITKCommon::FileSystem::File ResourceMap::getFile(const std::string &relative_path, const char *alternative_base_path)
         {
-            auto result = ITKCommon::FileSystem::File::FromPath(dir.getBasePath() + relative_path);
+            auto result = ITKCommon::FileSystem::File::FromPath(
+                ITKCommon::PrintfToStdString("%s%s", alternative_base_path ? alternative_base_path : dir.getBasePath().c_str(), relative_path.c_str()));
             ITK_ABORT(!result.isFile, "invalid file path: %s\n", relative_path.c_str());
             return result;
         }
@@ -289,7 +290,7 @@ namespace AppKit
             }
         }
 
-        std::shared_ptr<AppKit::OpenGL::GLTexture> ResourceMap::getTexture(const std::string &relative_path, bool is_srgb)
+        std::shared_ptr<AppKit::OpenGL::GLTexture> ResourceMap::getTexture(const std::string &relative_path, bool is_srgb, const char *alternative_base_path)
         {
             std::string to_query;
 
@@ -300,7 +301,7 @@ namespace AppKit
             else
                 std::string to_query = ITKCommon::PrintfToStdString("%s:%s%s",
                                                                     (is_srgb) ? "srgb" : "linear",
-                                                                    dir.getBasePath().c_str(),
+                                                                    alternative_base_path ? alternative_base_path : dir.getBasePath().c_str(),
                                                                     relative_path.c_str());
 
             to_query = encodeUUID(to_query);
@@ -351,7 +352,7 @@ namespace AppKit
                 }
                 else
                 {
-                    auto file = getFile(relative_path);
+                    auto file = getFile(relative_path, alternative_base_path);
                     ITK_ABORT(!file.isFile, "file not found: %s\n", relative_path.c_str());
 
                     std::string errorStr;
@@ -373,11 +374,11 @@ namespace AppKit
             return tex_it->second.tex;
         }
 
-        std::shared_ptr<AppKit::OpenGL::GLCubeMap> ResourceMap::getCubeMap(const std::string &relative_path, bool is_srgb, int _maxResolution)
+        std::shared_ptr<AppKit::OpenGL::GLCubeMap> ResourceMap::getCubeMap(const std::string &relative_path, bool is_srgb, int _maxResolution, const char *alternative_base_path)
         {
             std::string to_query = ITKCommon::PrintfToStdString("%s:%s%s",
                                                                 (is_srgb) ? "srgb" : "linear",
-                                                                dir.getBasePath().c_str(),
+                                                                (alternative_base_path) ? alternative_base_path : dir.getBasePath().c_str(),
                                                                 relative_path.c_str());
 
             to_query = encodeUUID(to_query);
@@ -396,7 +397,7 @@ namespace AppKit
 
                 auto cubeMap = std::make_shared<AppKit::OpenGL::GLCubeMap>(0, 0, 0xffffffff, maxResolution);
 
-                std::string basePath = dir.getBasePath();
+                std::string basePath = (alternative_base_path) ? alternative_base_path : dir.getBasePath().c_str();
                 std::string separator = std::string("/");
 
                 if (relative_path.length() > 0)
@@ -425,11 +426,11 @@ namespace AppKit
             return cube_it->second.cubemap;
         }
 
-        std::shared_ptr<ResourceMap::FontResource> ResourceMap::getTextureFont(const std::string &relative_path, bool is_srgb)
+        std::shared_ptr<ResourceMap::FontResource> ResourceMap::getTextureFont(const std::string &relative_path, bool is_srgb, const char *alternative_base_path)
         {
             std::string to_query = ITKCommon::PrintfToStdString("%s:%s%s",
                                                                 (is_srgb) ? "srgb" : "linear",
-                                                                dir.getBasePath().c_str(),
+                                                                (alternative_base_path) ? alternative_base_path : dir.getBasePath().c_str(),
                                                                 relative_path.c_str());
 
             to_query = encodeUUID(to_query);
@@ -439,7 +440,11 @@ namespace AppKit
             {
                 auto fontResource = std::make_shared<FontResource>();
                 auto fontBuilder = std::make_shared<AppKit::OpenGL::GLFont2Builder>();
-                fontBuilder->load(relative_path, is_srgb);
+                fontBuilder->load(
+                    ITKCommon::PrintfToStdString("%s%s",
+                                                 (alternative_base_path) ? alternative_base_path : dir.getBasePath().c_str(),
+                                                 relative_path.c_str()),
+                    is_srgb);
                 fontResource->fontBuilder = fontBuilder;
 
                 fontResource->material = Component::CreateShared<Components::ComponentMaterial>();
@@ -457,10 +462,10 @@ namespace AppKit
             }
             return font_it->second;
         }
-        std::shared_ptr<ResourceMap::FontResource> ResourceMap::getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb)
+        std::shared_ptr<ResourceMap::FontResource> ResourceMap::getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb, const char *alternative_base_path)
         {
             std::string to_query = ITKCommon::PrintfToStdString("%s%s:%s:%i:%i",
-                                                                dir.getBasePath().c_str(),
+                                                                (alternative_base_path) ? alternative_base_path : dir.getBasePath().c_str(),
                                                                 relative_path.c_str(),
                                                                 (is_srgb) ? "srgb" : "linear",
                                                                 (int)(MathCore::OP<float>::ceil(defaultSize) + 0.5f),
@@ -471,7 +476,7 @@ namespace AppKit
             auto font_it = geometryFontMap.find(to_query);
             if (font_it == geometryFontMap.end())
             {
-                auto fontResourceBase = getTextureFont(relative_path, is_srgb);
+                auto fontResourceBase = getTextureFont(relative_path, is_srgb, alternative_base_path);
                 auto polygonCache = fontResourceBase->fontBuilder->createPolygonCache(
                     defaultSize, max_distance_tolerance, threadPool);
                 auto fontResource = std::make_shared<FontResource>();

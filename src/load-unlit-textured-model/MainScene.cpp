@@ -42,34 +42,137 @@ namespace SmartImporter
 
     class ModelSmasher
     {
-        std::unique_ptr<ITKExtension::Model::ModelContainer> container;
-        std::unordered_map<const ITKExtension::Model::Geometry *, bool> geometryProcessed;
+        struct InternalData
+        {
+            std::unique_ptr<ITKExtension::Model::ModelContainer> container;
+            std::unordered_map<const ITKExtension::Model::Geometry *, bool> geometryProcessed;
+
+            std::unordered_map<std::string, bool> texturesToInsertIntoAtlas;
+            std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> generatedAtlases;
+
+            std::unordered_map<std::string, std::shared_ptr<Components::ComponentMaterial>> material_uuid_to_instance;
+            std::unordered_map<const ITKExtension::Model::Geometry *, std::shared_ptr<Components::ComponentMesh>> geometry_ptr_to_instance;
+        };
+
+        std::unique_ptr<InternalData> data;
 
         int textureInsertIntoAtlasBelowEqual;
         int textureAtlasMaxDimension;
-        std::unordered_map<std::string, bool> texturesToInsertIntoAtlas;
-
-        std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> generatedAtlases;
-
-        std::unordered_map<std::string, std::shared_ptr<Components::ComponentMaterial>> material_uuid_to_instance;
-        std::unordered_map<const ITKExtension::Model::Geometry *, std::shared_ptr<Components::ComponentMesh>> geometry_ptr_to_instance;
 
         std::string path_textures;
-
         ITKCommon::FileSystem::File inputFile;
 
         ResourceMap *resourceMap;
 
-        std::shared_ptr<Components::ComponentMaterial> createMaterial(const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
+        static std::shared_ptr<Components::ComponentMaterial> createMaterial(ResourceMap *resourceMap, const char *texture_base_path, const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
         {
             // bool is_opaque = mat->is_opaque();
             bool is_unlit = mat->is_unlit();
             // bool is_two_sided = mat->is_two_sided();
 
             if (is_unlit)
-                return createUnlitMaterial(mat, uuid_texture_info);
+                return createUnlitMaterial(resourceMap, texture_base_path, mat, uuid_texture_info);
             else
-                return createPBRMaterial(mat, uuid_texture_info);
+                return createPBRMaterial(resourceMap, texture_base_path, mat, uuid_texture_info);
+        }
+
+        static std::shared_ptr<Components::ComponentMaterial> createUnlitMaterial(ResourceMap *resourceMap, const char *texture_base_path, const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
+        {
+            using namespace AppKit::GLEngine::Components;
+
+            bool is_opaque = mat->is_opaque();
+            // bool is_unlit = mat->is_unlit();
+            // bool is_two_sided = mat->is_two_sided();
+
+            auto material = Component::CreateShared<Components::ComponentMaterial>();
+            if (is_opaque)
+                material->setShader(resourceMap->shaderUnlitTexture);
+            else
+                material->setShader(resourceMap->shaderUnlitTextureAlpha);
+
+            auto diffuse = mat->vec4Value.find("diffuse");
+            if (diffuse != mat->vec4Value.end())
+                material->property_bag.getProperty("uColor").set<MathCore::vec4f>(diffuse->second);
+
+            if (uuid_texture_info.atlas != nullptr)
+                material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)uuid_texture_info.atlas->texture);
+            else if (!uuid_texture_info.texture_path.empty())
+            {
+                auto engine = AppKit::GLEngine::Engine::Instance();
+                auto tex = resourceMap->getTexture(uuid_texture_info.texture_path, engine->sRGBCapable, texture_base_path);
+                material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+            }
+
+            // resourceMap->getTexture()
+
+            // ShaderUnlitTextureAlpha Property Bag:
+
+            // bag.addProperty("uColor", uColor);
+            // bag.addProperty("uTexture", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+            // bag.addProperty("BlendMode", (int)AppKit::GLEngine::BlendModeAlpha);
+
+            // example:
+            // auto albedoColor = MathCore::CVT<MathCore::vec4f>::toVec3(it->second);
+            // albedoColor = ResourceHelper::vec3ColorGammaToLinear(albedoColor);
+            // material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(albedoColor);
+
+            return material;
+        }
+
+        static std::shared_ptr<Components::ComponentMaterial> createPBRMaterial(ResourceMap *resourceMap, const char *texture_base_path, const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
+        {
+            using namespace AppKit::GLEngine::Components;
+
+            bool is_opaque = mat->is_opaque();
+            // bool is_unlit = mat->is_unlit();
+            // bool is_two_sided = mat->is_two_sided();
+
+            auto material = Component::CreateShared<Components::ComponentMaterial>();
+            material->setShader(resourceMap->pbrShaderSelector);
+
+            auto diffuse = mat->vec4Value.find("diffuse");
+            if (diffuse != mat->vec4Value.end())
+                material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(CVT<vec4f>::toVec3(diffuse->second));
+
+            auto emissive = mat->vec4Value.find("emissive");
+            if (emissive != mat->vec4Value.end())
+                material->property_bag.getProperty("emissionColor").set<MathCore::vec3f>(CVT<vec4f>::toVec3(emissive->second));
+
+            auto roughness = mat->floatValue.find("roughnessFactor");
+            if (roughness != mat->floatValue.end())
+                material->property_bag.getProperty("roughness").set<float>(roughness->second);
+
+            auto metallic = mat->floatValue.find("metallicFactor");
+            if (metallic != mat->floatValue.end())
+                material->property_bag.getProperty("metallic").set<float>(metallic->second);
+
+            if (uuid_texture_info.atlas != nullptr)
+                material->property_bag.getProperty("texAlbedo").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)uuid_texture_info.atlas->texture);
+            else if (!uuid_texture_info.texture_path.empty())
+            {
+                auto engine = AppKit::GLEngine::Engine::Instance();
+                auto tex = resourceMap->getTexture(uuid_texture_info.texture_path, engine->sRGBCapable, texture_base_path);
+                material->property_bag.getProperty("texAlbedo").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+            }
+
+            // PBRShaderSelector Property Bag:
+
+            // bag.addProperty("albedoColor", MathCore::vec3f(1.0f));
+            // bag.addProperty("emissionColor", MathCore::vec3f(0.0f));
+            // bag.addProperty("roughness", 1.0f);
+            // bag.addProperty("metallic", 0.0f);
+
+            // bag.addProperty("texAlbedo", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+            // bag.addProperty("texNormal", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+            // bag.addProperty("texSpecular", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+            // bag.addProperty("texEmission", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
+
+            // example:
+            // auto albedoColor = MathCore::CVT<MathCore::vec4f>::toVec3(it->second);
+            // albedoColor = ResourceHelper::vec3ColorGammaToLinear(albedoColor);
+            // material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(albedoColor);
+
+            return material;
         }
 
         /*
@@ -191,13 +294,13 @@ namespace SmartImporter
                 {
                     // in this case, search for the atlas...
 
-                    for (size_t i = 0; i < generatedAtlases.size(); i++)
+                    for (size_t i = 0; i < data->generatedAtlases.size(); i++)
                     {
-                        if (generatedAtlases[i]->hasSprite(filename))
+                        if (data->generatedAtlases[i]->hasSprite(filename))
                         {
                             texture_to_use = ITKCommon::PrintfToStdString("/atlas-%zu", i);
-                            result.atlas = generatedAtlases[i];
-                            result.sprite_atlas_entry = generatedAtlases[i]->getSprite(filename);
+                            result.atlas = data->generatedAtlases[i];
+                            result.sprite_atlas_entry = data->generatedAtlases[i]->getSprite(filename);
                             break;
                         }
                     }
@@ -228,104 +331,7 @@ namespace SmartImporter
             return result;
         }
 
-        std::shared_ptr<Components::ComponentMaterial> createUnlitMaterial(const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
-        {
-            using namespace AppKit::GLEngine::Components;
-
-            bool is_opaque = mat->is_opaque();
-            // bool is_unlit = mat->is_unlit();
-            // bool is_two_sided = mat->is_two_sided();
-
-            auto material = Component::CreateShared<Components::ComponentMaterial>();
-            if (is_opaque)
-                material->setShader(resourceMap->shaderUnlitTexture);
-            else
-                material->setShader(resourceMap->shaderUnlitTextureAlpha);
-
-            auto diffuse = mat->vec4Value.find("diffuse");
-            if (diffuse != mat->vec4Value.end())
-                material->property_bag.getProperty("uColor").set<MathCore::vec4f>(diffuse->second);
-
-            if (uuid_texture_info.atlas != nullptr)
-                material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)uuid_texture_info.atlas->texture);
-            else if (!uuid_texture_info.texture_path.empty())
-            {
-                auto engine = AppKit::GLEngine::Engine::Instance();
-                auto tex = resourceMap->getTexture(uuid_texture_info.texture_path, engine->sRGBCapable);
-                material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
-            }
-
-            // resourceMap->getTexture()
-
-            // ShaderUnlitTextureAlpha Property Bag:
-
-            // bag.addProperty("uColor", uColor);
-            // bag.addProperty("uTexture", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
-            // bag.addProperty("BlendMode", (int)AppKit::GLEngine::BlendModeAlpha);
-
-            // example:
-            // auto albedoColor = MathCore::CVT<MathCore::vec4f>::toVec3(it->second);
-            // albedoColor = ResourceHelper::vec3ColorGammaToLinear(albedoColor);
-            // material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(albedoColor);
-
-            return material;
-        }
-
-        std::shared_ptr<Components::ComponentMaterial> createPBRMaterial(const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
-        {
-            using namespace AppKit::GLEngine::Components;
-
-            bool is_opaque = mat->is_opaque();
-            // bool is_unlit = mat->is_unlit();
-            // bool is_two_sided = mat->is_two_sided();
-
-            auto material = Component::CreateShared<Components::ComponentMaterial>();
-            material->setShader(resourceMap->pbrShaderSelector);
-
-            auto diffuse = mat->vec4Value.find("diffuse");
-            if (diffuse != mat->vec4Value.end())
-                material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(CVT<vec4f>::toVec3(diffuse->second));
-
-            auto emissive = mat->vec4Value.find("emissive");
-            if (emissive != mat->vec4Value.end())
-                material->property_bag.getProperty("emissionColor").set<MathCore::vec3f>(CVT<vec4f>::toVec3(emissive->second));
-
-            auto roughness = mat->floatValue.find("roughnessFactor");
-            if (roughness != mat->floatValue.end())
-                material->property_bag.getProperty("roughness").set<float>(roughness->second);
-
-            auto metallic = mat->floatValue.find("metallicFactor");
-            if (metallic != mat->floatValue.end())
-                material->property_bag.getProperty("metallic").set<float>(metallic->second);
-
-            if (uuid_texture_info.atlas != nullptr)
-                material->property_bag.getProperty("texAlbedo").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)uuid_texture_info.atlas->texture);
-            else if (!uuid_texture_info.texture_path.empty())
-            {
-                auto engine = AppKit::GLEngine::Engine::Instance();
-                auto tex = resourceMap->getTexture(uuid_texture_info.texture_path, engine->sRGBCapable);
-                material->property_bag.getProperty("texAlbedo").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
-            }
-
-            // PBRShaderSelector Property Bag:
-
-            // bag.addProperty("albedoColor", MathCore::vec3f(1.0f));
-            // bag.addProperty("emissionColor", MathCore::vec3f(0.0f));
-            // bag.addProperty("roughness", 1.0f);
-            // bag.addProperty("metallic", 0.0f);
-
-            // bag.addProperty("texAlbedo", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
-            // bag.addProperty("texNormal", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
-            // bag.addProperty("texSpecular", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
-            // bag.addProperty("texEmission", std::shared_ptr<OpenGL::VirtualTexture>(nullptr));
-
-            // example:
-            // auto albedoColor = MathCore::CVT<MathCore::vec4f>::toVec3(it->second);
-            // albedoColor = ResourceHelper::vec3ColorGammaToLinear(albedoColor);
-            // material->property_bag.getProperty("albedoColor").set<MathCore::vec3f>(albedoColor);
-
-            return material;
-        }
+        
 
         std::shared_ptr<Components::ComponentMaterial> createLineMaterial(const ITKExtension::Model::Material *mat)
         {
@@ -345,62 +351,62 @@ namespace SmartImporter
             return material;
         }
 
-        void traverse(const ITKExtension::Model::Node &node, int lvl = 0)
-        {
-            auto localPosition = node.getLocalPosition();
-            auto localScale = node.getLocalScale();
-            auto localRotation = node.getLocalRotation();
+        // void traverse(const ITKExtension::Model::Node &node, int lvl = 0)
+        // {
+        //     auto localPosition = node.getLocalPosition();
+        //     auto localScale = node.getLocalScale();
+        //     auto localRotation = node.getLocalRotation();
 
-            printf("%*s(%s)\n", lvl * 2, "+", node.name.c_str());
+        //     printf("%*s(%s)\n", lvl * 2, "+", node.name.c_str());
 
-            for (uint32_t gidx : node.geometries)
-            {
-                const ITKExtension::Model::Geometry *geom = &container->geometries[gidx];
-                const ITKExtension::Model::Material *mat = &container->materials[geom->materialIndex];
+        //     for (uint32_t gidx : node.geometries)
+        //     {
+        //         const ITKExtension::Model::Geometry *geom = &container->geometries[gidx];
+        //         const ITKExtension::Model::Material *mat = &container->materials[geom->materialIndex];
 
-                if (geometryProcessed.find(geom) != geometryProcessed.end())
-                {
-                    printf("%*sGeometry %s is a repeated geometry\n", lvl * 2, "", geom->name.c_str());
-                    continue;
-                }
+        //         if (geometryProcessed.find(geom) != geometryProcessed.end())
+        //         {
+        //             printf("%*sGeometry %s is a repeated geometry\n", lvl * 2, "", geom->name.c_str());
+        //             continue;
+        //         }
 
-                if (geom->indiceCountPerFace == 2)
-                {
-                    printf("%*sGeometry %s is a line mesh\n", lvl * 2, "", geom->name.c_str());
-                }
-                else if (geom->indiceCountPerFace == 3)
-                {
-                    printf("%*sGeometry %s is a triangle mesh\n", lvl * 2, "", geom->name.c_str());
+        //         if (geom->indiceCountPerFace == 2)
+        //         {
+        //             printf("%*sGeometry %s is a line mesh\n", lvl * 2, "", geom->name.c_str());
+        //         }
+        //         else if (geom->indiceCountPerFace == 3)
+        //         {
+        //             printf("%*sGeometry %s is a triangle mesh\n", lvl * 2, "", geom->name.c_str());
 
-                    printMaterialInfo(mat, lvl * 2);
+        //             printMaterialInfo(mat, lvl * 2);
 
-                    printf("\nChecking if geometry %s is compatible with texture atlas...\n\n", geom->name.c_str());
-                    for (const auto &tex : mat->textures)
-                    {
-                        bool compatible_with_texture_atlas = geom->is_uv_compatible_with_texture_atlas(tex.uvIndex);
-                        printf("%*sMaterial Texture %s: %s.%s (Wrap Mode: %s %s %s) (Compatible with texture atlas: %s)\n", lvl * 2, "",
-                               TextureTypeToStr(tex.type),
-                               tex.filename.c_str(), tex.fileext.c_str(),
-                               TextureMapModeToStr(tex.mapMode_s), TextureMapModeToStr(tex.mapMode_t), TextureMapModeToStr(tex.mapMode_r),
-                               compatible_with_texture_atlas ? "YES" : "NO");
-                    }
+        //             printf("\nChecking if geometry %s is compatible with texture atlas...\n\n", geom->name.c_str());
+        //             for (const auto &tex : mat->textures)
+        //             {
+        //                 bool compatible_with_texture_atlas = geom->is_uv_compatible_with_texture_atlas(tex.uvIndex);
+        //                 printf("%*sMaterial Texture %s: %s.%s (Wrap Mode: %s %s %s) (Compatible with texture atlas: %s)\n", lvl * 2, "",
+        //                        TextureTypeToStr(tex.type),
+        //                        tex.filename.c_str(), tex.fileext.c_str(),
+        //                        TextureMapModeToStr(tex.mapMode_s), TextureMapModeToStr(tex.mapMode_t), TextureMapModeToStr(tex.mapMode_r),
+        //                        compatible_with_texture_atlas ? "YES" : "NO");
+        //             }
 
-                    printf("\n");
-                }
-                else
-                {
-                    printf("%*sGeometry %s is a unknown mesh with %d indices per face\n", lvl * 2, "", geom->name.c_str(), geom->indiceCountPerFace);
-                    continue;
-                }
+        //             printf("\n");
+        //         }
+        //         else
+        //         {
+        //             printf("%*sGeometry %s is a unknown mesh with %d indices per face\n", lvl * 2, "", geom->name.c_str(), geom->indiceCountPerFace);
+        //             continue;
+        //         }
 
-                geometryProcessed[geom] = true;
-            }
+        //         geometryProcessed[geom] = true;
+        //     }
 
-            for (uint32_t child_index : node.children)
-                traverse(container->nodes[child_index], lvl + 1);
-        }
+        //     for (uint32_t child_index : node.children)
+        //         traverse(container->nodes[child_index], lvl + 1);
+        // }
 
-        void getImageDimension(const char *path, int *out_w, int *out_h)
+        static void getImageDimension(const char *path, int *out_w, int *out_h)
         {
             int w, h, channels, depth;
             bool invertY = false;
@@ -428,17 +434,18 @@ namespace SmartImporter
 
         void traverse_select_textures_for_atlas(const ITKExtension::Model::Node &node, int lvl = 0)
         {
+            ITK_ABORT(node.geometries.size() >= 2, "Node %s has %zu geometries. Max allowed is 1\n", node.name.c_str(), node.geometries.size());
             for (uint32_t gidx : node.geometries)
             {
-                const ITKExtension::Model::Geometry *geom = &container->geometries[gidx];
-                const ITKExtension::Model::Material *mat = &container->materials[geom->materialIndex];
+                const ITKExtension::Model::Geometry *geom = &data->container->geometries[gidx];
+                const ITKExtension::Model::Material *mat = &data->container->materials[geom->materialIndex];
 
                 // process only triangle meshes for texture atlas compatibility, skip lines and points
                 if (geom->indiceCountPerFace != 3)
                     continue;
 
                 // skip already processed geometries (for example, if the same geometry is instanced multiple times in the scene graph)
-                if (geometryProcessed.find(geom) != geometryProcessed.end())
+                if (data->geometryProcessed.find(geom) != data->geometryProcessed.end())
                     continue;
 
                 auto diffuse = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
@@ -448,45 +455,45 @@ namespace SmartImporter
                     std::string filename = diffuse->filename + "." + diffuse->fileext;
                     std::string full_filename = path_textures + filename;
                     // std::string filename = path_textures + diffuse->filename + "." + diffuse->fileext;
-                    if (texturesToInsertIntoAtlas.find(filename) == texturesToInsertIntoAtlas.end())
+                    if (data->texturesToInsertIntoAtlas.find(filename) == data->texturesToInsertIntoAtlas.end())
                     {
                         int w, h;
                         getImageDimension(full_filename.c_str(), &w, &h);
                         if (w <= textureInsertIntoAtlasBelowEqual && h <= textureInsertIntoAtlasBelowEqual)
-                            texturesToInsertIntoAtlas[filename] = true;
+                            data->texturesToInsertIntoAtlas[filename] = true;
                     }
                 }
 
-                geometryProcessed[geom] = true;
+                data->geometryProcessed[geom] = true;
             }
 
             for (uint32_t child_index : node.children)
-                traverse_select_textures_for_atlas(container->nodes[child_index], lvl + 1);
+                traverse_select_textures_for_atlas(data->container->nodes[child_index], lvl + 1);
         }
 
         void traverse_generate_materials_and_geometries(const ITKExtension::Model::Node &node, int lvl = 0)
         {
-
+            ITK_ABORT(node.geometries.size() >= 2, "Node %s has %zu geometries. Max allowed is 1\n", node.name.c_str(), node.geometries.size());
             for (uint32_t gidx : node.geometries)
             {
-                const ITKExtension::Model::Geometry *geom = &container->geometries[gidx];
-                const ITKExtension::Model::Material *mat = &container->materials[geom->materialIndex];
+                const ITKExtension::Model::Geometry *geom = &data->container->geometries[gidx];
+                const ITKExtension::Model::Material *mat = &data->container->materials[geom->materialIndex];
 
                 // process only triangle meshes for texture atlas compatibility, skip lines and points
                 if (geom->indiceCountPerFace != 3)
                     continue;
 
                 // skip already processed geometries (for example, if the same geometry is instanced multiple times in the scene graph)
-                if (geometryProcessed.find(geom) != geometryProcessed.end())
+                if (data->geometry_ptr_to_instance.find(geom) != data->geometry_ptr_to_instance.end())
                     continue;
 
                 auto uuid_texture_info = computeMaterialUUID(geom, mat);
 
-                auto it_mat = material_uuid_to_instance.find(uuid_texture_info.uuid);
-                if (it_mat == material_uuid_to_instance.end())
+                auto it_mat = data->material_uuid_to_instance.find(uuid_texture_info.uuid);
+                if (it_mat == data->material_uuid_to_instance.end())
                 {
-                    auto material = createMaterial(mat, uuid_texture_info);
-                    material_uuid_to_instance[uuid_texture_info.uuid] = material;
+                    auto material = createMaterial(resourceMap, path_textures.c_str(), mat, uuid_texture_info);
+                    data->material_uuid_to_instance[uuid_texture_info.uuid] = material;
 
                     printf(" uuid: %s (%zu)\n", uuid_texture_info.uuid.c_str(), uuid_texture_info.uuid.size());
 
@@ -528,16 +535,59 @@ namespace SmartImporter
                         uv = (uv - vec3f(uuid_texture_info.sprite_atlas_entry.uvMin, 0)) * uvSize;
                 }
 
-                geometry_ptr_to_instance[geom] = mesh;
-                geometryProcessed[geom] = true;
+                data->geometry_ptr_to_instance[geom] = mesh;
             }
 
             for (uint32_t child_index : node.children)
-                traverse_generate_materials_and_geometries(container->nodes[child_index], lvl + 1);
+                traverse_generate_materials_and_geometries(data->container->nodes[child_index], lvl + 1);
+        }
+
+
+        std::shared_ptr<Transform> traverse_generate_scene_graph(const ITKExtension::Model::Node &node, int lvl = 0)
+        {
+            std::shared_ptr<Transform> result = Transform::CreateShared(node.name);
+            result->setLocalPosition(node.getLocalPosition());
+            result->setLocalRotation(node.getLocalRotation());
+            result->setLocalScale(node.getLocalScale());
+
+            ITK_ABORT(node.geometries.size() >= 2, "Node %s has %zu geometries. Max allowed is 1\n", node.name.c_str(), node.geometries.size());
+            for (uint32_t gidx : node.geometries)
+            {
+                const ITKExtension::Model::Geometry *geom = &data->container->geometries[gidx];
+                const ITKExtension::Model::Material *mat = &data->container->materials[geom->materialIndex];
+
+                // process only triangle meshes for texture atlas compatibility, skip lines and points
+                if (geom->indiceCountPerFace != 3)
+                    continue;
+
+                auto uuid_texture_info = computeMaterialUUID(geom, mat);
+
+                auto material_it = data->material_uuid_to_instance.find(uuid_texture_info.uuid);
+                if (material_it == data->material_uuid_to_instance.end())
+                    throw std::runtime_error(ITKCommon::PrintfToStdString("Material instance not found for material UUID '%s'", uuid_texture_info.uuid.c_str()));
+
+                auto mesh_it = data->geometry_ptr_to_instance.find(geom);
+                if (mesh_it == data->geometry_ptr_to_instance.end())
+                    throw std::runtime_error(ITKCommon::PrintfToStdString("Geometry instance not found for geometry '%s'", geom->name.c_str()));
+
+                auto material = material_it->second;
+                auto mesh = mesh_it->second;
+
+                auto meshWrapper = result->addNewComponent<Components::ComponentMeshWrapper>();
+                result->addComponent(material);
+                result->addComponent(mesh);
+                meshWrapper->updateMeshAABB(true);
+
+            }
+
+            for (uint32_t child_index : node.children)
+                result->addChild(traverse_generate_scene_graph(data->container->nodes[child_index], lvl + 1));
+
+            return result;
         }
 
     public:
-        void load(const char *filename,
+        std::shared_ptr<Transform> load(const char *filename,
                   ResourceMap *resourceMap,
                   int textureInsertIntoAtlasBelowEqual = 2048, int textureAtlasMaxDimension = 4096,
                   const char *path_textures_param = nullptr)
@@ -561,36 +611,34 @@ namespace SmartImporter
             else
                 this->path_textures = inputFile.base_path;
 
-            // set resourceMap folder to be the same as the folder on model file is
-            ITKCommon::FileSystem::Directory resourceMap_BaseFolder_bpk = resourceMap->dir;
-            resourceMap->setProjectBaseFolder(this->path_textures);
-
             this->textureInsertIntoAtlasBelowEqual = textureInsertIntoAtlasBelowEqual;
 
-            container = STL_Tools::make_unique<ITKExtension::Model::ModelContainer>();
-            container->read(filename);
+            data = STL_Tools::make_unique<InternalData>();
 
-            geometryProcessed.clear();
-            texturesToInsertIntoAtlas.clear();
-            traverse_select_textures_for_atlas(container->nodes[root_index]);
+            data->container = STL_Tools::make_unique<ITKExtension::Model::ModelContainer>();
+            data->container->read(filename);
+
+            data->geometryProcessed.clear();
+            data->texturesToInsertIntoAtlas.clear();
+            traverse_select_textures_for_atlas(data->container->nodes[root_index]);
 
             printf("Textures to insert into atlas:\n\n");
-            for (const auto &tex : texturesToInsertIntoAtlas)
+            for (const auto &tex : data->texturesToInsertIntoAtlas)
                 printf("- %s\n", tex.first.c_str());
             printf("\n");
 
             SpriteAtlasGenerator gen;
 
-            for (const auto &tex : texturesToInsertIntoAtlas)
+            for (const auto &tex : data->texturesToInsertIntoAtlas)
                 gen.addEntry(tex.first.c_str());
 
             auto engine = AppKit::GLEngine::Engine::Instance();
-            generatedAtlases = gen.generateAtlas(path_textures, *resourceMap, engine->sRGBCapable, true, 10);
+            data->generatedAtlases = gen.generateAtlas(path_textures, *resourceMap, engine->sRGBCapable, true, 10, this->textureAtlasMaxDimension);
 
-            printf("\nGenerated %zu sprite atlases:\n\n", generatedAtlases.size());
-            for (size_t i = 0; i < generatedAtlases.size(); i++)
+            printf("\nGenerated %zu sprite atlases:\n\n", data->generatedAtlases.size());
+            for (size_t i = 0; i < data->generatedAtlases.size(); i++)
             {
-                const auto &atlas = generatedAtlases[i];
+                const auto &atlas = data->generatedAtlases[i];
                 printf("- Atlas %zu: %d x %d, contains %zu textures:\n", i, atlas->texture->width, atlas->texture->height, atlas->sprites.size());
                 for (const auto &entry : atlas->sprites)
                     printf("  - %s: uvMin (%f, %f) uvMax (%f, %f) spriteSize (%.0f, %.0f)\n",
@@ -602,20 +650,21 @@ namespace SmartImporter
             printf("\n\n");
 
             // generate materials and process geometries
-            geometryProcessed.clear();
-
             printf("\nGenerated Materials And Geometries\n\n");
 
-            material_uuid_to_instance.clear();
-            geometry_ptr_to_instance.clear();
+            data->material_uuid_to_instance.clear();
+            data->geometry_ptr_to_instance.clear();
 
-            traverse_generate_materials_and_geometries(container->nodes[root_index]);
+            traverse_generate_materials_and_geometries(data->container->nodes[root_index]);
 
             printf("\n\n");
 
-            resourceMap->dir = resourceMap_BaseFolder_bpk;
+            auto result = traverse_generate_scene_graph(data->container->nodes[root_index]);
 
-            Engine::Instance()->app->exitApp();
+            // clean up
+            data.reset();
+
+            return result;
         }
     };
 
@@ -654,7 +703,7 @@ namespace Scenes
         auto path = std::unique_ptr<char, decltype(&std::free)>(realpath(inputPath.c_str(), nullptr), &std::free);
         smasher.load(path ? path.get() : inputPath.c_str(), resourceMap);
 #else
-        smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams", resourceMap);
+        loadedScene = smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams", resourceMap);
 #endif
     }
     // to load the scene graph
@@ -686,13 +735,16 @@ namespace Scenes
 
         sceneNode = root->findTransformByName("scene");
 
-        auto rect = renderWindow->CameraViewport.c_ptr();
+        sceneNode->addChild(loadedScene);
+
+        // auto rect = renderWindow->CameraViewport.c_ptr();
+        auto *rect = &componentCameraOrthographic->viewport;
         resize(vec2i(rect->w, rect->h));
 
-        // Add AABB for all meshs...
-        {
-            resourceHelper->addAABBMesh(root);
-        }
+        // // Add AABB for all meshs...
+        // {
+        //     resourceHelper->addAABBMesh(root);
+        // }
 
         this->OnUpdate.add(&MainScene::update, this);
     }
@@ -706,6 +758,7 @@ namespace Scenes
         camera = nullptr;
 
         sceneNode = nullptr;
+        loadedScene = nullptr;
     }
 
     void MainScene::update(Platform::Time *elapsed)

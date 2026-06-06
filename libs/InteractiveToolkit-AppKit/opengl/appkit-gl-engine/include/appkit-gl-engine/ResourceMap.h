@@ -96,19 +96,19 @@ namespace AppKit
 
             void setProjectBaseFolder(const std::string &path);
 
-            ITKCommon::FileSystem::File getFile(const std::string &relative_path);
+            ITKCommon::FileSystem::File getFile(const std::string &relative_path, const char *alternative_base_path = nullptr);
 
             void clear_refcount_equals_1();
             void clear(); // each scene call this on unload
 
             void ensure_default_texture_creation();
 
-            std::shared_ptr<AppKit::OpenGL::GLTexture> getTexture(const std::string &relative_path, bool is_srgb);
+            std::shared_ptr<AppKit::OpenGL::GLTexture> getTexture(const std::string &relative_path, bool is_srgb, const char *alternative_base_path = nullptr);
 
-            std::shared_ptr<AppKit::OpenGL::GLCubeMap> getCubeMap(const std::string &relative_path, bool is_srgb, int maxResolution);
+            std::shared_ptr<AppKit::OpenGL::GLCubeMap> getCubeMap(const std::string &relative_path, bool is_srgb, int maxResolution, const char *alternative_base_path = nullptr);
 
-            std::shared_ptr<FontResource> getTextureFont(const std::string &relative_path, bool is_srgb);
-            std::shared_ptr<FontResource> getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb);
+            std::shared_ptr<FontResource> getTextureFont(const std::string &relative_path, bool is_srgb, const char *alternative_base_path = nullptr);
+            std::shared_ptr<FontResource> getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb, const char *alternative_base_path = nullptr);
 
             void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer);
             void Deserialize(rapidjson::Value &_value, ResourceSet *resourceSetOutput);
@@ -129,9 +129,11 @@ namespace AppKit
                 std::shared_ptr<Components::ComponentMaterial> material;
                 std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> mask_SpriteMap;
             };
-protected:
+
+        protected:
             std::unordered_map<uint64_t, std::shared_ptr<SpriteInfo>> spriteMaterialMap;
-public:
+
+        public:
             // default shaders
             // std::shared_ptr<SpriteShader> spriteShader;
             std::shared_ptr<ShaderUnlit> shaderUnlit;
@@ -149,32 +151,28 @@ public:
             std::shared_ptr<ShaderUnlitVertexColorWithMask> shaderUnlitVertexColorWithMask;
             std::shared_ptr<SpriteShaderWithMask> spriteShaderWithMask;
 
-protected:
+        protected:
             std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> mask_RectangleMap;
 
-            void mask_clear_unused(const char* name, std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> &map);
-public:
+            void mask_clear_unused(const char *name, std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> &map);
+
+        public:
             std::shared_ptr<Components::ComponentMaterial> mask_query_or_create_rectangle(
                 std::shared_ptr<Components::ComponentCamera> &camera,
-                std::shared_ptr<Components::ComponentRectangle> &mask
-            );
+                std::shared_ptr<Components::ComponentRectangle> &mask);
 
             std::shared_ptr<SpriteInfo> query_or_create_sprite(
-                std::shared_ptr<AppKit::OpenGL::VirtualTexture> texture
-            );
+                std::shared_ptr<AppKit::OpenGL::VirtualTexture> texture);
 
             std::shared_ptr<Components::ComponentMaterial> mask_query_or_create_sprite(
                 std::shared_ptr<ResourceMap::SpriteInfo> &sprite_info,
                 std::shared_ptr<Components::ComponentCamera> &camera,
-                std::shared_ptr<Components::ComponentRectangle> &mask
-            );
+                std::shared_ptr<Components::ComponentRectangle> &mask);
 
             std::shared_ptr<Components::ComponentMaterial> mask_query_or_create_font(
                 std::shared_ptr<ResourceMap::FontResource> &font_resource,
                 std::shared_ptr<Components::ComponentCamera> &camera,
-                std::shared_ptr<Components::ComponentRectangle> &mask
-            );
-
+                std::shared_ptr<Components::ComponentRectangle> &mask);
         };
     }
 }
@@ -193,8 +191,6 @@ public:
 #include <appkit-gl-engine/shaders/LineShader.h>
 #include <appkit-gl-engine/shaders/SpriteShader.h>
 
-
 #include <appkit-gl-engine/shaders/WithMask/ShaderUnlitTextureVertexColorAlphaWithMask.h>
 #include <appkit-gl-engine/shaders/WithMask/ShaderUnlitVertexColorWithMask.h>
 #include <appkit-gl-engine/shaders/WithMask/SpriteShaderWithMask.h>
-

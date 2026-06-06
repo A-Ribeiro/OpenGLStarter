@@ -187,6 +187,7 @@ namespace AppKit
             void ComponentMeshWrapper::start()
             {
                 // computeFinalPositions(false);
+                makeDirtyToComputeFinalPositions(false);
             }
 
             void ComponentMeshWrapper::attachToTransform(std::shared_ptr<Transform> t)
@@ -215,10 +216,10 @@ namespace AppKit
                 eventHandlerSetRef = transform->eventHandlerSet;
                 auto eventHandlerSet = eventHandlerSetRef.lock();
 
-                eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
                 if (only_remove)
-                    return;
-                eventHandlerSet->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                    eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
+                else
+                    eventHandlerSet->OnAfterGraphPrecompute.add(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
             }
 
             void ComponentMeshWrapper::setShapeSphere(const MathCore::vec3f &_sphereCenter, float _sphereRadius, bool ignore_after_graph_precompute_call)
@@ -262,7 +263,7 @@ namespace AppKit
                 makeDirtyToComputeFinalPositions(false);
             }
 
-            void ComponentMeshWrapper::updateMeshSphere()
+            void ComponentMeshWrapper::updateMeshSphere(bool ignore_after_graph_precompute_call)
             {
                 auto transform = getTransform();
 
@@ -312,14 +313,14 @@ namespace AppKit
                         }
                     }
 
-                    radius = sqrt(radius);
+                    radius = MathCore::OP<float>::sqrt(radius);
 
                     // setShapeAABB(_aabb);
-                    setShapeSphere(center, radius);
+                    setShapeSphere(center, radius, ignore_after_graph_precompute_call);
                 }
             }
 
-            void ComponentMeshWrapper::updateMeshAABB()
+            void ComponentMeshWrapper::updateMeshAABB(bool ignore_after_graph_precompute_call)
             {
                 auto transform = getTransform();
 
@@ -351,11 +352,11 @@ namespace AppKit
 
                 if (count > 0)
                 {
-                    setShapeAABB(_aabb);
+                    setShapeAABB(_aabb, ignore_after_graph_precompute_call);
                 }
             }
 
-            void ComponentMeshWrapper::updateMeshOBB()
+            void ComponentMeshWrapper::updateMeshOBB(bool ignore_after_graph_precompute_call)
             {
                 auto transform = getTransform();
 
@@ -387,7 +388,7 @@ namespace AppKit
 
                 if (count > 0)
                 {
-                    setShapeOBB(_aabb);
+                    setShapeOBB(_aabb, ignore_after_graph_precompute_call);
                 }
             }
 

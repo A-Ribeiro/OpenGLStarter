@@ -84,9 +84,9 @@ namespace AppKit
 
                 void OnTransformVisited(std::shared_ptr<Transform> t);
 
-                void updateMeshSphere();
-                void updateMeshAABB();
-                void updateMeshOBB();
+                void updateMeshSphere(bool ignore_after_graph_precompute_call = false);
+                void updateMeshAABB(bool ignore_after_graph_precompute_call = false);
+                void updateMeshOBB(bool ignore_after_graph_precompute_call = false);
 
                 bool isOverlappingAABB(const CollisionCore::AABB<MathCore::vec3f> &aabb) const;
                 bool isOverlappingOBB(const CollisionCore::OBB<MathCore::vec3f> &obb) const;

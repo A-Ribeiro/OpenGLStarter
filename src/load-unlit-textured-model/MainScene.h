@@ -69,6 +69,8 @@ namespace Scenes {
 
         std::shared_ptr<Transform> sceneNode;
 
+        std::shared_ptr<Transform> loadedScene;
+
         ITKCommon::Random32 random32;
         MathRandomExt<ITKCommon::Random32> mathRandom;
 
