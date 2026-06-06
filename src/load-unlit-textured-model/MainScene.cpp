@@ -550,6 +550,14 @@ namespace SmartImporter
             result->setLocalRotation(node.getLocalRotation());
             result->setLocalScale(node.getLocalScale());
 
+            printf("%*sNode %s:\n"
+                "%*spos (%f, %f, %f)\n"
+                "%*srot (%f, %f, %f, %f)\n"
+                "%*sscale (%f, %f, %f)\n", lvl * 2, "+", node.name.c_str(),
+                   (lvl) * 2, "", node.getLocalPosition().x, node.getLocalPosition().y, node.getLocalPosition().z,
+                   (lvl) * 2, "", node.getLocalRotation().x, node.getLocalRotation().y, node.getLocalRotation().z, node.getLocalRotation().w,
+                   (lvl) * 2, "", node.getLocalScale().x, node.getLocalScale().y, node.getLocalScale().z);
+
             ITK_ABORT(node.geometries.size() >= 2, "Node %s has %zu geometries. Max allowed is 1\n", node.name.c_str(), node.geometries.size());
             for (uint32_t gidx : node.geometries)
             {
@@ -559,6 +567,8 @@ namespace SmartImporter
                 // process only triangle meshes for texture atlas compatibility, skip lines and points
                 if (geom->indiceCountPerFace != 3)
                     continue;
+
+                printf("%*sAdding geometry %s with material %s\n", lvl * 2, "", geom->name.c_str(), mat->name.c_str());
 
                 auto uuid_texture_info = computeMaterialUUID(geom, mat);
 
@@ -737,8 +747,8 @@ namespace Scenes
 
         sceneNode->addChild(loadedScene);
 
-        // auto rect = renderWindow->CameraViewport.c_ptr();
-        auto *rect = &componentCameraOrthographic->viewport;
+        auto rect = renderWindow->CameraViewport.c_ptr();
+        // auto *rect = &componentCameraOrthographic->viewport;
         resize(vec2i(rect->w, rect->h));
 
         // // Add AABB for all meshs...
