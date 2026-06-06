@@ -24,6 +24,14 @@ namespace AppKit
                 // MathCore::vec2f spritePivot;
                 MathCore::vec2f uvMin;
                 MathCore::vec2f uvMax;
+
+                MathCore::vec2f lerpUV(float u, float v) const
+                {
+                    return MathCore::vec2f(
+                        MathCore::OP<float>::lerp(uvMin.x, uvMax.x, u),
+                        MathCore::OP<float>::lerp(uvMin.y, uvMax.y, v)
+                    );
+                }
             };
             std::unordered_map<std::string, Entry> sprites;
 
@@ -34,7 +42,7 @@ namespace AppKit
             bool isEmpty() const;
             bool hasSprite(const std::string &name) const;
             const Entry &getSprite(const std::string &name) const;
-            const void addSprite(const std::string &name, const Entry &entry);
+            void addSprite(const std::string &name, const Entry &entry);
         };
 
         class SpriteAtlasGenerator

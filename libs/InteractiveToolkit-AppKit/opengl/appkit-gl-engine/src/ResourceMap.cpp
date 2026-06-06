@@ -295,11 +295,11 @@ namespace AppKit
             std::string to_query;
 
             if (relative_path.compare("DEFAULT_ALBEDO") == 0 || relative_path.compare("DEFAULT_NORMAL") == 0)
-                std::string to_query = ITKCommon::PrintfToStdString("%s:%s",
+                to_query = ITKCommon::PrintfToStdString("%s:%s",
                                                                     (is_srgb) ? "srgb" : "linear",
                                                                     relative_path.c_str());
             else
-                std::string to_query = ITKCommon::PrintfToStdString("%s:%s%s",
+                to_query = ITKCommon::PrintfToStdString("%s:%s%s",
                                                                     (is_srgb) ? "srgb" : "linear",
                                                                     alternative_base_path ? alternative_base_path : dir.getBasePath().c_str(),
                                                                     relative_path.c_str());

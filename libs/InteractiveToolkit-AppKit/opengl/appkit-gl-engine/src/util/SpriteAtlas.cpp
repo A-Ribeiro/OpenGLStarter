@@ -36,7 +36,7 @@ namespace AppKit
             return dummy;
             // throw std::runtime_error("Sprite not found in atlas: " + name);
         }
-        const void SpriteAtlas::addSprite(const std::string &name, const Entry &entry)
+        void SpriteAtlas::addSprite(const std::string &name, const Entry &entry)
         {
             if (sprites.find(name) != sprites.end())
                 throw std::runtime_error("Sprite already exists in atlas: " + name);
@@ -140,7 +140,7 @@ namespace AppKit
                     for (const auto &item : combinedEntries)
                     {
                         SpriteAtlas::Entry atlasEntry;
-                        atlasEntry.spriteSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.w);
+                        atlasEntry.spriteSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.h);
                         atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x,
                                                            item.atlasElementFace->rect.y);
                         atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteSize;
@@ -176,7 +176,7 @@ namespace AppKit
             for (const auto &item : combinedEntries)
             {
                 SpriteAtlas::Entry atlasEntry;
-                atlasEntry.spriteSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.w);
+                atlasEntry.spriteSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.h);
                 atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x,
                                                    item.atlasElementFace->rect.y);
                 atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteSize;
