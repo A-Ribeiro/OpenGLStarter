@@ -43,6 +43,9 @@ namespace AppKit
 
         class ResourceMap
         {
+            static std::string encodeUUID(const std::string &str);
+            static std::string decodeUUID(const std::string &str);
+
             std::weak_ptr<ResourceMap> mSelf;
 
             struct Texture2DInfo

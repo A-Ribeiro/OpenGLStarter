@@ -14,10 +14,26 @@
 #include <appkit-gl-engine/Components/Core/ComponentCameraPerspective.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 
+#include <InteractiveToolkit-Extension/encoding/Base64.h>
+
 namespace AppKit
 {
     namespace GLEngine
     {
+
+        std::string ResourceMap::encodeUUID(const std::string &str)
+        {
+            std::string out_string_b64;
+            ITKExtension::Encoding::Base64::EncodeToString((uint8_t *)str.c_str(), str.size(), &out_string_b64);
+            return out_string_b64;
+        }
+
+        std::string ResourceMap::decodeUUID(const std::string &str)
+        {
+            std::vector<uint8_t> out_string_b64;
+            ITKExtension::Encoding::Base64::DecodeToVector(str, &out_string_b64);
+            return std::string(out_string_b64.begin(), out_string_b64.end());
+        }
 
         void ResourceMap::setProjectBaseFolder(const std::string &path)
         {
@@ -32,7 +48,7 @@ namespace AppKit
             return result;
         }
 
-        void ResourceMap::mask_clear_unused(const char* name, std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> &map)
+        void ResourceMap::mask_clear_unused(const char *name, std::unordered_map<std::shared_ptr<Components::ComponentRectangle>, std::shared_ptr<Components::ComponentMaterial>> &map)
         {
             {
                 std::vector<std::shared_ptr<Components::ComponentRectangle>> to_remove;
@@ -57,7 +73,8 @@ namespace AppKit
                 std::vector<std::string> to_remove_str;
                 for (auto &item : geometryFontMap)
                 {
-                    if (item.second.use_count() > 1) {
+                    if (item.second.use_count() > 1)
+                    {
                         mask_clear_unused("PolygonFont", item.second->mask_FontMap);
                         continue;
                     }
@@ -70,7 +87,8 @@ namespace AppKit
                 to_remove_str.clear();
                 for (auto &item : textureFontMap)
                 {
-                    if (item.second.use_count() > 1) {
+                    if (item.second.use_count() > 1)
+                    {
                         mask_clear_unused("TextureFont", item.second->mask_FontMap);
                         continue;
                     }
@@ -86,7 +104,8 @@ namespace AppKit
                 // free sprite not used
                 for (auto &item : spriteMaterialMap)
                 {
-                    if (item.second.use_count() > 1) {
+                    if (item.second.use_count() > 1)
+                    {
                         mask_clear_unused("Sprite", item.second->mask_SpriteMap);
                         continue;
                     }
@@ -272,7 +291,19 @@ namespace AppKit
 
         std::shared_ptr<AppKit::OpenGL::GLTexture> ResourceMap::getTexture(const std::string &relative_path, bool is_srgb)
         {
-            std::string to_query = ITKCommon::PrintfToStdString("%s:%s", (is_srgb) ? "srgb" : "linear", relative_path.c_str());
+            std::string to_query;
+
+            if (relative_path.compare("DEFAULT_ALBEDO") == 0 || relative_path.compare("DEFAULT_NORMAL") == 0)
+                std::string to_query = ITKCommon::PrintfToStdString("%s:%s",
+                                                                    (is_srgb) ? "srgb" : "linear",
+                                                                    relative_path.c_str());
+            else
+                std::string to_query = ITKCommon::PrintfToStdString("%s:%s%s",
+                                                                    (is_srgb) ? "srgb" : "linear",
+                                                                    dir.getBasePath().c_str(),
+                                                                    relative_path.c_str());
+
+            to_query = encodeUUID(to_query);
 
             auto tex_it = texture2DMap.find(to_query);
             if (tex_it == texture2DMap.end())
@@ -344,7 +375,12 @@ namespace AppKit
 
         std::shared_ptr<AppKit::OpenGL::GLCubeMap> ResourceMap::getCubeMap(const std::string &relative_path, bool is_srgb, int _maxResolution)
         {
-            std::string to_query = ITKCommon::PrintfToStdString("%s:%s", (is_srgb) ? "srgb" : "linear", relative_path.c_str());
+            std::string to_query = ITKCommon::PrintfToStdString("%s:%s%s",
+                                                                (is_srgb) ? "srgb" : "linear",
+                                                                dir.getBasePath().c_str(),
+                                                                relative_path.c_str());
+
+            to_query = encodeUUID(to_query);
 
             auto cube_it = cubemapMap.find(to_query);
             if (cube_it == cubemapMap.end())
@@ -391,7 +427,12 @@ namespace AppKit
 
         std::shared_ptr<ResourceMap::FontResource> ResourceMap::getTextureFont(const std::string &relative_path, bool is_srgb)
         {
-            std::string to_query = ITKCommon::PrintfToStdString("%s:%s", (is_srgb) ? "srgb" : "linear", relative_path.c_str());
+            std::string to_query = ITKCommon::PrintfToStdString("%s:%s%s",
+                                                                (is_srgb) ? "srgb" : "linear",
+                                                                dir.getBasePath().c_str(),
+                                                                relative_path.c_str());
+
+            to_query = encodeUUID(to_query);
 
             auto font_it = textureFontMap.find(to_query);
             if (font_it == textureFontMap.end())
@@ -418,11 +459,15 @@ namespace AppKit
         }
         std::shared_ptr<ResourceMap::FontResource> ResourceMap::getPolygonFont(const std::string &relative_path, float defaultSize, float max_distance_tolerance, Platform::ThreadPool *threadPool, bool is_srgb)
         {
-            std::string to_query = ITKCommon::PrintfToStdString("%s:%s:%i:%i",
+            std::string to_query = ITKCommon::PrintfToStdString("%s%s:%s:%i:%i",
+                                                                dir.getBasePath().c_str(),
                                                                 relative_path.c_str(),
                                                                 (is_srgb) ? "srgb" : "linear",
                                                                 (int)(MathCore::OP<float>::ceil(defaultSize) + 0.5f),
                                                                 (int)(MathCore::OP<float>::ceil(max_distance_tolerance) + 0.5f));
+
+            to_query = encodeUUID(to_query);
+
             auto font_it = geometryFontMap.find(to_query);
             if (font_it == geometryFontMap.end())
             {
