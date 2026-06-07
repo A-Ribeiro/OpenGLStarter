@@ -29,8 +29,8 @@ namespace SmartImporter
         std::unique_ptr<ITKExtension::Model::ModelContainer> container;
         std::unordered_map<const ITKExtension::Model::Geometry *, bool> geometryProcessed;
 
-        std::unordered_map<std::string, bool> texturesToInsertIntoAtlas;
-        std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> generatedAtlases;
+        std::unordered_map<std::string, bool> diffuseTexturesToInsertIntoAtlas;
+        std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> diffuseAtlases;
 
         std::unordered_map<std::string, std::shared_ptr<AppKit::GLEngine::Components::ComponentMaterial>> material_uuid_to_instance;
         std::unordered_map<const ITKExtension::Model::Geometry *, std::shared_ptr<AppKit::GLEngine::Components::ComponentMesh>> geometry_ptr_to_instance;
@@ -271,7 +271,7 @@ Material mat_stageBrick is opaque: YES
         std::vector<uint8_t> info_bytes;
         info_bytes.insert(info_bytes.end(), (uint8_t *)&m_bytes, (uint8_t *)&m_bytes + sizeof(m_bytes));
 
-        // difuse_texture part
+        // diffuse_texture part
         auto diffuse_tex = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
                                         { return tex.type == ITKExtension::Model::TextureType::TextureType_DIFFUSE; });
         std::string texture_to_use;
@@ -284,13 +284,13 @@ Material mat_stageBrick is opaque: YES
             {
                 // in this case, search for the atlas...
 
-                for (size_t i = 0; i < data->generatedAtlases.size(); i++)
+                for (size_t i = 0; i < data->diffuseAtlases.size(); i++)
                 {
-                    if (data->generatedAtlases[i]->hasSprite(filename))
+                    if (data->diffuseAtlases[i]->hasSprite(filename))
                     {
                         texture_to_use = ITKCommon::PrintfToStdString("/atlas-%zu/%i%i", i, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp);
-                        result.atlas = data->generatedAtlases[i];
-                        result.sprite_atlas_entry = data->generatedAtlases[i]->getSprite(filename);
+                        result.atlas = data->diffuseAtlases[i];
+                        result.sprite_atlas_entry = data->diffuseAtlases[i]->getSprite(filename);
                         result.sprite_atlas_entry_name = filename;
                         break;
                     }
@@ -394,12 +394,12 @@ Material mat_stageBrick is opaque: YES
                 std::string filename = diffuse->filename + "." + diffuse->fileext;
                 std::string full_filename = path_textures + filename;
                 // std::string filename = path_textures + diffuse->filename + "." + diffuse->fileext;
-                if (data->texturesToInsertIntoAtlas.find(filename) == data->texturesToInsertIntoAtlas.end())
+                if (data->diffuseTexturesToInsertIntoAtlas.find(filename) == data->diffuseTexturesToInsertIntoAtlas.end())
                 {
                     int w, h;
                     getImageDimension(full_filename.c_str(), &w, &h);
                     if (w <= textureInsertIntoAtlasBelowEqual && h <= textureInsertIntoAtlasBelowEqual)
-                        data->texturesToInsertIntoAtlas[filename] = true;
+                        data->diffuseTexturesToInsertIntoAtlas[filename] = true;
                 }
             }
 
@@ -578,27 +578,27 @@ Material mat_stageBrick is opaque: YES
         data->container->read(filename);
 
         data->geometryProcessed.clear();
-        data->texturesToInsertIntoAtlas.clear();
+        data->diffuseTexturesToInsertIntoAtlas.clear();
         traverse_select_textures_for_atlas(data->container->nodes[root_index]);
 
         printf("Textures to insert into atlas:\n\n");
-        for (const auto &tex : data->texturesToInsertIntoAtlas)
+        for (const auto &tex : data->diffuseTexturesToInsertIntoAtlas)
             printf("- %s\n", tex.first.c_str());
         printf("\n");
 
         SpriteAtlasGenerator gen;
 
-        for (const auto &tex : data->texturesToInsertIntoAtlas)
+        for (const auto &tex : data->diffuseTexturesToInsertIntoAtlas)
             gen.addEntry(tex.first.c_str());
 
         auto engine = AppKit::GLEngine::Engine::Instance();
-        data->generatedAtlases = gen.generateAtlas(path_textures, *resourceMap, engine->sRGBCapable, true, 10, this->textureAtlasMaxDimension);
+        data->diffuseAtlases = gen.generateAtlas(path_textures, *resourceMap, engine->sRGBCapable, true, 10, this->textureAtlasMaxDimension);
         // data->generatedAtlases.clear();
 
-        printf("\nGenerated %zu sprite atlases:\n\n", data->generatedAtlases.size());
-        for (size_t i = 0; i < data->generatedAtlases.size(); i++)
+        printf("\nGenerated %zu sprite atlases:\n\n", data->diffuseAtlases.size());
+        for (size_t i = 0; i < data->diffuseAtlases.size(); i++)
         {
-            const auto &atlas = data->generatedAtlases[i];
+            const auto &atlas = data->diffuseAtlases[i];
             printf("- Atlas %zu: %d x %d, contains %zu textures:\n", i, atlas->texture->width, atlas->texture->height, atlas->sprites.size());
             for (const auto &entry : atlas->sprites)
                 printf("  - %s: uvMin (%f, %f) uvMax (%f, %f) spriteSize (%.0f, %.0f)\n",
