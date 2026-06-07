@@ -60,7 +60,7 @@ namespace AppKit
         }
 
         std::vector<std::shared_ptr<SpriteAtlas>> SpriteAtlasGenerator::generateAtlas(const std::string &base_path,
-            const ResourceMap &resourceMap, bool sRGB, bool use_fast_positioning, int spaceBetweenSpites_px, int max_atlas_size)
+                                                                                      const ResourceMap &resourceMap, bool sRGB, bool use_fast_positioning, int spaceBetweenSpites_px, int max_atlas_size)
         {
             std::vector<std::shared_ptr<SpriteAtlas>> result_array;
 
@@ -82,7 +82,7 @@ namespace AppKit
                 const std::string &name = entry.first;
                 const GeneratorEntry &genEntry = entry.second;
 
-                //auto path = resourceMap.dir.getBasePath() + genEntry.texture_path;
+                // auto path = resourceMap.dir.getBasePath() + genEntry.texture_path;
                 auto path = base_path + genEntry.texture_path;
 
                 int w, h, channels, depth;
@@ -121,7 +121,7 @@ namespace AppKit
                 auto atlasElementFace = atlas->addElement(name, w, h);
 
                 atlas->organizePositions(use_fast_positioning);
-                if (atlas->textureResolution.w > max_atlas_size || atlas->textureResolution.h > max_atlas_size)
+                if (combinedEntries.size() > 0 && (atlas->textureResolution.w > max_atlas_size || atlas->textureResolution.h > max_atlas_size))
                 {
                     // flush atlas and start a new one
                     atlas->removeLastInsertedElement();
@@ -155,6 +155,8 @@ namespace AppKit
                     result_single = std::make_shared<SpriteAtlas>();
                     result_single->texture = std::make_shared<AppKit::OpenGL::GLTexture>();
                     atlasElementFace = atlas->addElement(name, w, h);
+
+                    combinedEntries.clear();
                 }
 
                 atlasElementFace->copyFromRGBABuffer((uint8_t *)buffer, w * 4);
