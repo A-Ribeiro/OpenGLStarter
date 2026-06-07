@@ -21,11 +21,10 @@
 #include <InteractiveToolkit/ITKCommon/FileSystem/File.h>
 #include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
 
-
 namespace SmartImporter
 {
     struct InternalData
-    {  
+    {
         std::unique_ptr<ITKExtension::Model::ModelContainer> container;
         std::unordered_map<const ITKExtension::Model::Geometry *, bool> geometryProcessed;
 
@@ -423,63 +422,67 @@ Material mat_stageBrick is opaque: YES
             const ITKExtension::Model::Material *mat = &data->container->materials[geom->materialIndex];
 
             // process only triangle meshes for texture atlas compatibility, skip lines and points
-            if (geom->indiceCountPerFace != 3)
-                continue;
-
-            // skip already processed geometries (for example, if the same geometry is instanced multiple times in the scene graph)
-            if (data->geometry_ptr_to_instance.find(geom) != data->geometry_ptr_to_instance.end())
-                continue;
-
-            auto uuid_texture_info = computeMaterialUUID(geom, mat);
-
-            auto it_mat = data->material_uuid_to_instance.find(uuid_texture_info.uuid);
-            if (it_mat == data->material_uuid_to_instance.end())
+            if (geom->indiceCountPerFace == 3)
             {
-                auto material = createMaterial(resourceMap, path_textures.c_str(), mat, uuid_texture_info);
-                data->material_uuid_to_instance[uuid_texture_info.uuid] = material;
+                // skip already processed geometries (for example, if the same geometry is instanced multiple times in the scene graph)
+                if (data->geometry_ptr_to_instance.find(geom) != data->geometry_ptr_to_instance.end())
+                    continue;
 
-                printf(" uuid: %s (%zu)\n", uuid_texture_info.uuid.c_str(), uuid_texture_info.uuid.size());
+                auto uuid_texture_info = computeMaterialUUID(geom, mat);
 
-                std::vector<uint8_t> out_string_b64;
-                ITKExtension::Encoding::Base64::DecodeToVector(uuid_texture_info.uuid, &out_string_b64);
-                std::string decoded_str(out_string_b64.begin() + 37, out_string_b64.end());
-                printf("     decoded path: %s\n", decoded_str.c_str());
+                auto it_mat = data->material_uuid_to_instance.find(uuid_texture_info.uuid);
+                if (it_mat == data->material_uuid_to_instance.end())
+                {
+                    auto material = createMaterial(resourceMap, path_textures.c_str(), mat, uuid_texture_info);
+                    data->material_uuid_to_instance[uuid_texture_info.uuid] = material;
+
+                    printf(" uuid: %s (%zu)\n", uuid_texture_info.uuid.c_str(), uuid_texture_info.uuid.size());
+
+                    std::vector<uint8_t> out_string_b64;
+                    ITKExtension::Encoding::Base64::DecodeToVector(uuid_texture_info.uuid, &out_string_b64);
+                    std::string decoded_str(out_string_b64.begin() + 37, out_string_b64.end());
+                    printf("     decoded path: %s\n", decoded_str.c_str());
+                }
+
+                // generate the geometry according the uuid_texture_info
+
+                auto mesh = Component::CreateShared<Components::ComponentMesh>();
+                if (geom->pos.size() > 0)
+                    mesh->pos = geom->pos;
+                if (geom->normals.size() > 0)
+                    mesh->normals = geom->normals;
+                if (geom->tangent.size() > 0)
+                    mesh->tangent = geom->tangent;
+                if (geom->binormal.size() > 0)
+                    mesh->binormal = geom->binormal;
+                for (int j = 0; j < 8; j++)
+                {
+                    if (geom->uv[j].size() > 0)
+                        mesh->uv[j] = geom->uv[j];
+                    if (geom->color[j].size() > 0)
+                        mesh->color[j] = geom->color[j];
+                }
+                mesh->indices = geom->indice;
+                // invert face culling order to match OpenGL's default (counter-clockwise)
+                //  for (size_t i = 0; i < mesh->indices.size(); i += 3)
+                //      std::swap(mesh->indices[i + 1], mesh->indices[i + 2]);
+                //  if (model_dynamic_upload != 0 || model_static_upload != 0)
+                //      mesh->syncVBO(model_dynamic_upload, model_static_upload);
+                if (geom->bones.size() > 0)
+                    mesh->bones = geom->bones;
+
+                if (uuid_texture_info.atlas != nullptr)
+                {
+                    for (auto &uv : mesh->uv[0])
+                        uv = vec3f(uuid_texture_info.sprite_atlas_entry.lerpUV(uv.x, uv.y), 0.0f);
+                }
+
+                data->geometry_ptr_to_instance[geom] = mesh;
             }
-
-            // generate the geometry according the uuid_texture_info
-
-            auto mesh = Component::CreateShared<Components::ComponentMesh>();
-            if (geom->pos.size() > 0)
-                mesh->pos = geom->pos;
-            if (geom->normals.size() > 0)
-                mesh->normals = geom->normals;
-            if (geom->tangent.size() > 0)
-                mesh->tangent = geom->tangent;
-            if (geom->binormal.size() > 0)
-                mesh->binormal = geom->binormal;
-            for (int j = 0; j < 8; j++)
+            else if (geom->indiceCountPerFace == 2)
             {
-                if (geom->uv[j].size() > 0)
-                    mesh->uv[j] = geom->uv[j];
-                if (geom->color[j].size() > 0)
-                    mesh->color[j] = geom->color[j];
+                // lines... use line rendering...
             }
-            mesh->indices = geom->indice;
-            // invert face culling order to match OpenGL's default (counter-clockwise)
-            //  for (size_t i = 0; i < mesh->indices.size(); i += 3)
-            //      std::swap(mesh->indices[i + 1], mesh->indices[i + 2]);
-            //  if (model_dynamic_upload != 0 || model_static_upload != 0)
-            //      mesh->syncVBO(model_dynamic_upload, model_static_upload);
-            if (geom->bones.size() > 0)
-                mesh->bones = geom->bones;
-
-            if (uuid_texture_info.atlas != nullptr)
-            {
-                for (auto &uv : mesh->uv[0])
-                    uv = vec3f(uuid_texture_info.sprite_atlas_entry.lerpUV(uv.x, uv.y), 0.0f);
-            }
-
-            data->geometry_ptr_to_instance[geom] = mesh;
         }
 
         for (uint32_t child_index : node.children)
@@ -498,9 +501,10 @@ Material mat_stageBrick is opaque: YES
         result->setLocalScale(node.getLocalScale());
 
         printf("%*sNode %s:\n"
-            "%*spos (%f, %f, %f)\n"
-            "%*srot (%f, %f, %f, %f)\n"
-            "%*sscale (%f, %f, %f)\n", lvl * 2, "+", node.name.c_str(),
+               "%*spos (%f, %f, %f)\n"
+               "%*srot (%f, %f, %f, %f)\n"
+               "%*sscale (%f, %f, %f)\n",
+               lvl * 2, "+", node.name.c_str(),
                (lvl) * 2, "", node.getLocalPosition().x, node.getLocalPosition().y, node.getLocalPosition().z,
                (lvl) * 2, "", node.getLocalRotation().x, node.getLocalRotation().y, node.getLocalRotation().z, node.getLocalRotation().w,
                (lvl) * 2, "", node.getLocalScale().x, node.getLocalScale().y, node.getLocalScale().z);
@@ -512,28 +516,32 @@ Material mat_stageBrick is opaque: YES
             const ITKExtension::Model::Material *mat = &data->container->materials[geom->materialIndex];
 
             // process only triangle meshes for texture atlas compatibility, skip lines and points
-            if (geom->indiceCountPerFace != 3)
-                continue;
+            if (geom->indiceCountPerFace == 3)
+            {
+                printf("%*sAdding geometry %s with material %s\n", lvl * 2, "", geom->name.c_str(), mat->name.c_str());
 
-            printf("%*sAdding geometry %s with material %s\n", lvl * 2, "", geom->name.c_str(), mat->name.c_str());
+                auto uuid_texture_info = computeMaterialUUID(geom, mat);
 
-            auto uuid_texture_info = computeMaterialUUID(geom, mat);
+                auto material_it = data->material_uuid_to_instance.find(uuid_texture_info.uuid);
+                if (material_it == data->material_uuid_to_instance.end())
+                    throw std::runtime_error(ITKCommon::PrintfToStdString("Material instance not found for material UUID '%s'", uuid_texture_info.uuid.c_str()));
 
-            auto material_it = data->material_uuid_to_instance.find(uuid_texture_info.uuid);
-            if (material_it == data->material_uuid_to_instance.end())
-                throw std::runtime_error(ITKCommon::PrintfToStdString("Material instance not found for material UUID '%s'", uuid_texture_info.uuid.c_str()));
+                auto mesh_it = data->geometry_ptr_to_instance.find(geom);
+                if (mesh_it == data->geometry_ptr_to_instance.end())
+                    throw std::runtime_error(ITKCommon::PrintfToStdString("Geometry instance not found for geometry '%s'", geom->name.c_str()));
 
-            auto mesh_it = data->geometry_ptr_to_instance.find(geom);
-            if (mesh_it == data->geometry_ptr_to_instance.end())
-                throw std::runtime_error(ITKCommon::PrintfToStdString("Geometry instance not found for geometry '%s'", geom->name.c_str()));
+                auto material = material_it->second;
+                auto mesh = mesh_it->second;
 
-            auto material = material_it->second;
-            auto mesh = mesh_it->second;
-
-            auto meshWrapper = result->addNewComponent<Components::ComponentMeshWrapper>();
-            result->addComponent(material);
-            result->addComponent(mesh);
-            meshWrapper->updateMeshAABB(true);
+                auto meshWrapper = result->addNewComponent<Components::ComponentMeshWrapper>();
+                result->addComponent(material);
+                result->addComponent(mesh);
+                meshWrapper->updateMeshAABB(true);
+            }
+            else if (geom->indiceCountPerFace == 2)
+            {
+                // lines... use line rendering...
+            }
         }
 
         for (uint32_t child_index : node.children)
