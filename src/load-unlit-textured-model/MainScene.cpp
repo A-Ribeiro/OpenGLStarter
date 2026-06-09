@@ -23,16 +23,6 @@ namespace Scenes
     // to load skybox, textures, cubemaps, 3DModels and setup materials
     void MainScene::loadResources()
     {
-        SmartImporter::ModelSmasher smasher;
-#if defined(__linux__)
-        // const char *home = std::getenv("HOME");
-        // std::string inputPath = std::string(home ? home : "") + "/Documents/papercat/stages_gltf/stage3_04.bams";
-        // auto path = std::unique_ptr<char, decltype(&std::free)>(realpath(inputPath.c_str(), nullptr), &std::free);
-        // smasher.load(path ? path.get() : inputPath.c_str(), resourceMap);
-        loadedScene = smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams", resourceMap);
-#else
-        loadedScene = smasher.load("D:/shared/papercat/stages_gltf/stage3_04.bams", resourceMap);
-#endif
     }
     // to load the scene graph
     void MainScene::loadGraph()
@@ -57,6 +47,19 @@ namespace Scenes
             camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
             componentCameraOrthographic->useSizeY = true;
             componentCameraOrthographic->sizeY = 10.0f;
+        }
+
+        {
+            SmartImporter::ModelSmasher smasher;
+#if defined(__linux__)
+            // const char *home = std::getenv("HOME");
+            // std::string inputPath = std::string(home ? home : "") + "/Documents/papercat/stages_gltf/stage3_04.bams";
+            // auto path = std::unique_ptr<char, decltype(&std::free)>(realpath(inputPath.c_str(), nullptr), &std::free);
+            // smasher.load(path ? path.get() : inputPath.c_str(), resourceMap);
+            loadedScene = smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams", resourceMap, camera);
+#else
+            loadedScene = smasher.load("D:/shared/papercat/stages_gltf/stage3_04.bams", resourceMap, camera);
+#endif
         }
 
         sceneNode = root->findTransformByName("scene");
