@@ -509,17 +509,26 @@ namespace StageGen
         // // 2. Floor, ceiling, walls
         // addFloorAndWalls(container, params);
 
-        // 3. Start and end platforms
+        // // 3. Start and end platforms
         vec2f startPt, endPt;
         addStartAndEndPlatforms(container, params, startPt, endPt);
 
-        // addTestPlatformSequence(container, params, mathRnd, startPt, endPt);
+        // // addTestPlatformSequence(container, params, mathRnd, startPt, endPt);
 
         // 4. Main platform sequence + branches + slopes
         addPlatformSequence(container, params, mathRnd, startPt, endPt);
 
         // 5. Decorative box obstacles on the floor
         addDecorativeBoxes(container, params, mathRnd);
+
+
+        // float start_x = 0.0f + 500.0f;
+        // float end_x = 100.0f + 500.0f;
+        // container.addStaticStructure(
+        //                 Structure2D::FromBoxCenterSize(
+        //                     "Platform Box", 0.6f,
+        //                     vec2f((start_x+end_x)*0.5f, 10.0f),
+        //                     vec2f((end_x-start_x), 20.0f)));
 
         return StageResult{startPt, endPt};
     }
