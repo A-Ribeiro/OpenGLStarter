@@ -161,32 +161,45 @@ namespace SimplePhysics
     {
         using namespace MathCore;
 
-        if (!*ref_on_ground_called)
+        if (*ref_on_ground_called)
+            return;
+
+        float dst = FLT_MAX;
+        Segment2D closest_segment;
+        bool found_ground = false;
+
+        for (const Structure2D *structure : thread_state.structure_ptrs)
         {
-            for (const Structure2D *structure : thread_state.structure_ptrs)
+            // skip pass-through structures when player is on the pass-through side
+            if (structure->pass_through_set)
             {
-                // skip pass-through structures when player is on the pass-through side
-                if (structure->pass_through_set)
+                if (!object_state.pass_through_is_active(structure->id))
+                    continue;
+            }
+            for (const auto &segment : structure->segments)
+            {
+                if (Segment2D::circleIntersectsSegment(
+                        position, radius_grounded,
+                        segment.a, segment.b))
                 {
-                    if (!object_state.pass_through_is_active(structure->id))
-                        continue;
-                }
-                for (const auto &segment : structure->segments)
-                {
-                    if (Segment2D::circleIntersectsSegment(
-                            position, radius_grounded,
-                            segment.a, segment.b))
+                    auto nearest_pt = segment.closestPoint(position);
+                    float current_segment_dst = OP<vec2f>::sqrDistance(nearest_pt, position);
+
+                    if (current_segment_dst < dst)
                     {
-                        // emmit event grounded
-                        if (!*ref_on_ground_called)
-                        {
-                            onGrounded(&segment);
-                            *ref_on_ground_called = true;
-                        }
-                        return;
+                        dst = current_segment_dst;
+                        closest_segment = segment;
+                        found_ground = true;
                     }
                 }
             }
+        }
+
+        // emmit event grounded
+        if (found_ground)
+        {
+            onGrounded(&closest_segment);
+            *ref_on_ground_called = true;
         }
     }
 
@@ -734,9 +747,9 @@ namespace SimplePhysics
         velocity += gravity_up * (velocity_gravity_y - OP<vec2f>::dot(velocity, gravity_up));
 
         // x-axis movement logic
-
         vec2f x_axis = OP<vec2f>::cross_z_down(gravity_up);
         vec2f ground_axis = x_axis;
+
         if (jumpState.getState() == JumpState::Grounded)
         {
             vec2f segment_point = last_collision_segment.closestPoint(position);
@@ -754,6 +767,14 @@ namespace SimplePhysics
                 //     ground_axis = x_axis;
             }
         }
+
+        Debug::lineMounter->addLine(
+            vec3f(position, 0.0f),
+            vec3f(position + ground_axis * 100.0f, 0.0f),
+            5.0f,
+            ui::colorFromHex("#fff9bda7"));
+
+        const float x_axis_velocity = 600.0f;
 
         move_x_detector.setState(OP<float>::abs(input_x_axis) > 0.02f);
 
@@ -785,7 +806,7 @@ namespace SimplePhysics
                 }
             }
 
-            float desired_velocity = 600.0f * input_x_axis * speed_factor;
+            float desired_velocity = x_axis_velocity * input_x_axis * speed_factor;
 
             float curr_velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
             velocity += ground_axis * (desired_velocity - curr_velocity_on_ground);
