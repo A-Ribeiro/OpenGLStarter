@@ -51,7 +51,8 @@ namespace AppKit
                         finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, one_time_set_scale * thickness));
                     }
 
-                    meshWrapper->setShapeAABB(finalAABB, true);
+                    if (meshWrapper != nullptr)
+                        meshWrapper->setShapeAABB(finalAABB, true);
                 }
                 if (camera == nullptr)
                 {
@@ -96,7 +97,8 @@ namespace AppKit
                         finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, max_scaled * thickness));
                     }
 
-                    meshWrapper->setShapeAABB(finalAABB, true);
+                    if (meshWrapper != nullptr)
+                        meshWrapper->setShapeAABB(finalAABB, true);
                 }
                 else if (camera->compareType(Components::ComponentCameraPerspective::Type))
                 {
@@ -216,7 +218,8 @@ namespace AppKit
                         // }
                     }
 
-                    meshWrapper->setShapeAABB(finalAABB, true);
+                    if (meshWrapper != nullptr)
+                        meshWrapper->setShapeAABB(finalAABB, true);
                 }
             }
 
@@ -226,33 +229,72 @@ namespace AppKit
                 // meshWrapper->getTransform()->visited = false; // force the transform to be visited again
 
                 // another way
-                meshWrapper->forceComputeFinalPositions();
+                if (meshWrapper != nullptr)
+                    meshWrapper->forceComputeFinalPositions();
+            }
+
+            void ComponentLineMounter::start()
+            {
+                if (meshWrapper == nullptr)
+                {
+                    auto transform = getTransform();
+
+                    meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
+                    meshWrapper->OnBeforeComputeFinalPositions = EventCore::CallbackWrapper(&ComponentLineMounter::OnBeforeComputeFinalPositions, this);
+                    // transform->makeFirstComponent(meshWrapper);
+                    // meshWrapper->updateMeshAABB();
+                    meshWrapper->setShapeAABB(aabb, true);
+
+                    transform->addComponent(material);
+                    transform->addComponent(mesh);
+                }
+
+                if (is_one_time_set && camera != nullptr)
+                {
+                    this->camera = nullptr;
+                    one_time_set(camera);
+                }
             }
 
             void ComponentLineMounter::checkOrCreateAuxiliaryComponents(AppKit::GLEngine::ResourceMap *resourceMap)
             {
                 auto transform = getTransform();
-                if (material == nullptr)
-                {
-                    material = transform->addComponent<ComponentMaterial>(resourceMap->defaultLineMaterial);
-                }
-                if (mesh == nullptr)
-                {
-                    mesh = transform->addNewComponent<ComponentMesh>();
-                    mesh->always_clone = true;
-                }
-                if (meshWrapper == nullptr)
+                if (transform != nullptr)
                 {
                     meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
                     meshWrapper->OnBeforeComputeFinalPositions = EventCore::CallbackWrapper(&ComponentLineMounter::OnBeforeComputeFinalPositions, this);
                     transform->makeFirstComponent(meshWrapper);
                     // meshWrapper->updateMeshAABB();
                 }
-                transform->makeLastComponent(self());
+                // if (meshWrapper == nullptr)
+                // {
+                //     meshWrapper = transform->addNewComponent<ComponentMeshWrapper>();
+                //     meshWrapper->OnBeforeComputeFinalPositions = EventCore::CallbackWrapper(&ComponentLineMounter::OnBeforeComputeFinalPositions, this);
+                //     transform->makeFirstComponent(meshWrapper);
+                //     // meshWrapper->updateMeshAABB();
+                // }
+                // transform->makeLastComponent(self());
+
+                if (material == nullptr)
+                {
+                    material = resourceMap->defaultLineMaterial;
+                    if (transform != nullptr)
+                        transform->addComponent(material);
+                }
+                if (mesh == nullptr)
+                {
+                    mesh = Component::CreateShared<ComponentMesh>();
+                    mesh->always_clone = true;
+                    if (transform != nullptr)
+                        transform->addComponent(mesh);
+                }
             }
 
             void ComponentLineMounter::one_time_set(std::shared_ptr<ComponentCamera> p_camera)
             {
+                if (getTransform() == nullptr)
+                    return;
+
                 one_time_set_scale = 1.0f;
                 if (p_camera == nullptr)
                     return;
@@ -320,6 +362,7 @@ namespace AppKit
             void ComponentLineMounter::setCamera(AppKit::GLEngine::ResourceMap *resourceMap,
                                                  std::shared_ptr<ComponentCamera> camera, bool use_one_time_set)
             {
+                is_one_time_set = use_one_time_set;
                 checkOrCreateAuxiliaryComponents(resourceMap);
 
                 use_max_scale_update_on_change_self_scale = false;
@@ -328,8 +371,13 @@ namespace AppKit
                         EventCore::CallbackWrapper(&ComponentLineMounter::OnCameraTransformVisit, this));
                 if (use_one_time_set)
                 {
-                    this->camera = nullptr;
-                    one_time_set(camera);
+                    if (getTransform() == nullptr)
+                        this->camera = camera;
+                    else
+                    {
+                        this->camera = nullptr;
+                        one_time_set(camera);
+                    }
                     return;
                 }
                 this->camera = camera;
@@ -342,13 +390,15 @@ namespace AppKit
 
             ComponentLineMounter::ComponentLineMounter() : Component(ComponentLineMounter::Type)
             {
-                always_clone = false;
+                // always_clone = false;
 
                 dirty = true;
                 last_max_scaled = -1.0f;
 
                 use_max_scale_update_on_change_self_scale = false;
                 one_time_set_scale = 1.0f;
+
+                is_one_time_set = false;
             }
 
             ComponentLineMounter::~ComponentLineMounter()
@@ -369,7 +419,8 @@ namespace AppKit
                 mesh->indices.clear();
 
                 aabb.makeEmpty();
-                meshWrapper->clearShape();
+                if (meshWrapper != nullptr)
+                    meshWrapper->clearShape();
 
                 if (use_max_scale_update_on_change_self_scale)
                 {
@@ -581,7 +632,8 @@ namespace AppKit
                                ITKExtension::Model::CONTAINS_UV1 | ITKExtension::Model::CONTAINS_UV2 | ITKExtension::Model::CONTAINS_UV3 |
                                ITKExtension::Model::CONTAINS_COLOR0;
 
-                meshWrapper->setShapeAABB(aabb);
+                if (meshWrapper != nullptr)
+                    meshWrapper->setShapeAABB(aabb);
 
                 if (!use_max_scale_update_on_change_self_scale)
                     dirty = true;
@@ -593,7 +645,7 @@ namespace AppKit
                                                  int segment_count,
                                                  const MathCore::quatf &rotation)
             {
-                //addLine(center, center + MathCore::vec3f(radius, 0, 0), thickness, color);
+                // addLine(center, center + MathCore::vec3f(radius, 0, 0), thickness, color);
                 for (int i = 0; i < segment_count; i++)
                 {
                     float angle_a = ((float)i / (float)segment_count) * MathCore::CONSTANT<float>::PI * 2.0f;
@@ -604,6 +656,57 @@ namespace AppKit
 
                     addLine(a, b, thickness, color);
                 }
+            }
+
+            std::shared_ptr<Component> ComponentLineMounter::duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
+            {
+                auto result = Component::CreateShared<ComponentLineMounter>();
+
+                result->dirty = dirty;
+                result->last_max_scaled = last_max_scaled;
+
+                result->last_dir = last_dir;
+                result->last_cam_pos = last_cam_pos;
+                result->last_near_plane = last_near_plane;
+                result->last_far_plane = last_far_plane;
+                result->last_tan_over_viewport_height = last_tan_over_viewport_height;
+                result->last_local_to_world = last_local_to_world;
+
+                result->camera = camera;
+
+                // this calculates the max size the point can be in any projection.
+                // for orthographic camera, it is the max scaled value
+                // for perspective camera, it is the max scaled value at the far plane
+                result->use_max_scale_update_on_change_self_scale = use_max_scale_update_on_change_self_scale;
+                result->one_time_set_scale = one_time_set_scale;
+                result->one_time_word_to_local_scale = one_time_word_to_local_scale;
+                result->one_time_camera_scale = one_time_camera_scale;
+
+                result->is_one_time_set = is_one_time_set;
+
+                result->material = material;
+                result->mesh = mesh;
+                result->meshWrapper = meshWrapper;
+
+                result->aabb = aabb;
+
+                return result;
+            }
+            void ComponentLineMounter::fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
+            {
+                if (componentMap.find(material) != componentMap.end())
+                    material = std::dynamic_pointer_cast<ComponentMaterial>(componentMap[material]);
+                if (componentMap.find(mesh) != componentMap.end())
+                    mesh = std::dynamic_pointer_cast<ComponentMesh>(componentMap[mesh]);
+                if (meshWrapper != nullptr)
+                {
+                    if (componentMap.find(meshWrapper) != componentMap.end())
+                        meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(componentMap[meshWrapper]);
+                    else
+                        meshWrapper = std::dynamic_pointer_cast<ComponentMeshWrapper>(meshWrapper->duplicate_ref_or_clone(resourceMap, true));
+                }
+                if (componentMap.find(camera) != componentMap.end())
+                    camera = std::dynamic_pointer_cast<ComponentCamera>(componentMap[camera]);
             }
 
         }

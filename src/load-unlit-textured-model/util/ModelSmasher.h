@@ -30,6 +30,7 @@ namespace AppKit
         {
             class ComponentMaterial;
             class ComponentMesh;
+            class ComponentCamera;
         }
     }
 }
@@ -81,6 +82,7 @@ namespace SmartImporter
     public:
         std::shared_ptr<AppKit::GLEngine::Transform> load(const char *filename,
                                         AppKit::GLEngine::ResourceMap *resourceMap,
+                                        std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera,
                                         int textureInsertIntoAtlasBelowEqual = 2048, int textureAtlasMaxDimension = 4096,
                                         const char *path_textures_param = nullptr);
     };

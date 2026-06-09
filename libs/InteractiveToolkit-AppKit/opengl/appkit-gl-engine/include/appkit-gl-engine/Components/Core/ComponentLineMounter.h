@@ -60,10 +60,12 @@ namespace AppKit
                 float one_time_camera_scale;
                 void one_time_set(std::shared_ptr<ComponentCamera> camera);
 
+                bool is_one_time_set;
+
             public:
                 static const ComponentType Type;
 
-                bool always_clone;
+                // bool always_clone; - mesh wrapper needs to be different on each instance... always clone logic is the default
 
                 std::shared_ptr<ComponentMaterial> material;
                 std::shared_ptr<ComponentMesh> mesh;
@@ -72,6 +74,8 @@ namespace AppKit
                 using AABBType = CollisionCore::AABB<MathCore::vec3f>;
 
                 AABBType aabb;
+
+                void start();
 
                 void checkOrCreateAuxiliaryComponents(AppKit::GLEngine::ResourceMap *resourceMap);
 
@@ -96,8 +100,8 @@ namespace AppKit
                                const MathCore::quatf &rotation = MathCore::quatf());
 
                 // always clone
-                std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone) { return nullptr; }
-                void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap) {}
+                std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone);
+                void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap);
 
                 void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer) {}
                 void Deserialize(rapidjson::Value &_value,

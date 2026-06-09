@@ -6,6 +6,8 @@
 
 #include <InteractiveToolkit-Extension/model/ModelContainer.h>
 
+#include <appkit-gl-engine/Components/Core/ComponentCamera.h>
+
 #include <appkit-gl-engine/Components/Core/ComponentMaterial.h>
 #include <appkit-gl-engine/Components/Core/ComponentMesh.h>
 #include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
@@ -21,6 +23,8 @@
 #include <InteractiveToolkit/ITKCommon/FileSystem/File.h>
 #include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
 
+#include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
+
 namespace SmartImporter
 {
     struct InternalData
@@ -33,6 +37,9 @@ namespace SmartImporter
 
         std::unordered_map<std::string, std::shared_ptr<AppKit::GLEngine::Components::ComponentMaterial>> material_uuid_to_instance;
         std::unordered_map<const ITKExtension::Model::Geometry *, std::shared_ptr<AppKit::GLEngine::Components::ComponentMesh>> geometry_ptr_to_instance;
+        std::unordered_map<const ITKExtension::Model::Geometry *, std::shared_ptr<AppKit::GLEngine::Components::ComponentLineMounter>> geometry_ptr_to_instance_line;
+
+        std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera;
     };
 
     std::shared_ptr<AppKit::GLEngine::Components::ComponentMaterial> ModelSmasher::createMaterial(AppKit::GLEngine::ResourceMap *resourceMap, const char *texture_base_path, const ITKExtension::Model::Material *mat, const Material_UUID_Descriptor &uuid_texture_info)
@@ -482,6 +489,31 @@ Material mat_stageBrick is opaque: YES
             else if (geom->indiceCountPerFace == 2)
             {
                 // lines... use line rendering...
+
+                vec4f material_color(1.0f, 0.0f, 1.0f, 1.0f);
+                // auto diffuse = mat->vec4Value.find("diffuse");
+                // if (diffuse != mat->vec4Value.end())
+                //     material_color = diffuse->second;
+
+                auto line_mounter = Component::CreateShared<Components::ComponentLineMounter>();
+                line_mounter->setCamera(resourceMap, data->camera, true);
+
+                float thickness_estimative = (3.0f / 1080.0f) * (float)data->camera->viewport.h;
+
+                for (size_t i = 0; i < geom->indice.size(); i += 2)
+                {
+                    uint32_t idx0 = geom->indice[i];
+                    uint32_t idx1 = geom->indice[i + 1];
+                    vec4f line_color = material_color;
+                    if (geom->color[0].size() > 0)
+                        line_color = material_color * geom->color[0][idx0];
+                    line_mounter->addLine(
+                        geom->pos[idx0], geom->pos[idx1],
+                        thickness_estimative, // thickness
+                        line_color);
+                }
+
+                data->geometry_ptr_to_instance_line[geom] = line_mounter;
             }
         }
 
@@ -541,6 +573,13 @@ Material mat_stageBrick is opaque: YES
             else if (geom->indiceCountPerFace == 2)
             {
                 // lines... use line rendering...
+                auto line_it = data->geometry_ptr_to_instance_line.find(geom);
+                if (line_it == data->geometry_ptr_to_instance_line.end())
+                    throw std::runtime_error(ITKCommon::PrintfToStdString("Line instance not found for geometry '%s'", geom->name.c_str()));
+
+                auto line_mounter = line_it->second;
+
+                result->addComponent(line_mounter->duplicate_ref_or_clone(resourceMap, false));
             }
         }
 
@@ -552,6 +591,7 @@ Material mat_stageBrick is opaque: YES
 
     std::shared_ptr<AppKit::GLEngine::Transform> ModelSmasher::load(const char *filename,
                                                                     AppKit::GLEngine::ResourceMap *resourceMap,
+                                                                    std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera,
                                                                     int textureInsertIntoAtlasBelowEqual, int textureAtlasMaxDimension,
                                                                     const char *path_textures_param)
     {
@@ -581,6 +621,8 @@ Material mat_stageBrick is opaque: YES
         this->textureInsertIntoAtlasBelowEqual = textureInsertIntoAtlasBelowEqual;
 
         data = std::make_shared<InternalData>();
+
+        data->camera = camera;
 
         data->container = STL_Tools::make_unique<ITKExtension::Model::ModelContainer>();
         data->container->read(filename);
@@ -622,6 +664,7 @@ Material mat_stageBrick is opaque: YES
 
         data->material_uuid_to_instance.clear();
         data->geometry_ptr_to_instance.clear();
+        data->geometry_ptr_to_instance_line.clear();
 
         traverse_generate_materials_and_geometries(data->container->nodes[root_index]);
 
