@@ -6,6 +6,8 @@
 
 // #include <InteractiveToolkit/EaseCore/EaseCore.h>
 #include "components/ComponentGrow.h"
+#include <InteractiveToolkit/ITKCommon/FileSystem/Directory.h>
+
 
 #include <cstdlib>
 #include <string>
@@ -52,11 +54,21 @@ namespace Scenes
         {
             SmartImporter::ModelSmasher smasher;
 #if defined(__linux__)
-            // const char *home = std::getenv("HOME");
-            // std::string inputPath = std::string(home ? home : "") + "/Documents/papercat/stages_gltf/stage3_04.bams";
-            // auto path = std::unique_ptr<char, decltype(&std::free)>(realpath(inputPath.c_str(), nullptr), &std::free);
-            // smasher.load(path ? path.get() : inputPath.c_str(), resourceMap);
-            loadedScene = smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams", resourceMap, camera);
+            // FileSystem::Directory("/mnt/wslg/runtime-dir").isValid()
+            if (ITKCommon::Path::isDirectory("/mnt/wslg/runtime-dir"))
+            {
+                // wsl environment
+                loadedScene = smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams", resourceMap, camera);
+            }
+            else
+            {
+                // real linux environment
+                const char *home = std::getenv("HOME");
+                std::string inputPath = std::string(home ? home : "") + "/Documents/papercat/stages_gltf/stage3_04.bams";
+                auto path = std::unique_ptr<char, decltype(&std::free)>(realpath(inputPath.c_str(), nullptr), &std::free);
+                loadedScene = smasher.load(path ? path.get() : inputPath.c_str(), resourceMap, camera);
+            }
+
 #else
             loadedScene = smasher.load("D:/shared/papercat/stages_gltf/stage3_04.bams", resourceMap, camera);
 #endif
