@@ -709,6 +709,19 @@ namespace AppKit
                     camera = std::dynamic_pointer_cast<ComponentCamera>(componentMap[camera]);
             }
 
+            void ComponentLineMounter::iterate_lines(const EventCore::Callback<void(const MathCore::vec3f &a, const MathCore::vec3f &b, float thickness, const MathCore::vec4f &color)> &callback) const
+            {
+                for (size_t i = 0; i < mesh->pos.size(); i += 8)
+                {
+                    const auto &a = mesh->uv[1][i];
+                    const auto &b = mesh->uv[2][i];
+                    float thickness = mesh->uv[3][i].y;
+                    auto color = mesh->color[0][i];
+
+                    callback(a, b, thickness, color);
+                }
+            }
+
         }
     }
 }

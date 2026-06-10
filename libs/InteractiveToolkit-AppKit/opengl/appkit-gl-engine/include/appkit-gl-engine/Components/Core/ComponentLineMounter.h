@@ -108,6 +108,246 @@ namespace AppKit
                                  std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
                                  std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
                                  ResourceSet &resourceSet) {}
+
+                void iterate_lines(const EventCore::Callback<void(const MathCore::vec3f &a, const MathCore::vec3f &b, float thickness, const MathCore::vec4f &color)> &callback) const;
+
+                struct LineSegment
+                {
+                    MathCore::vec3f a;
+                    MathCore::vec3f b;
+                    float thickness;
+                    MathCore::vec4f color;
+                };
+
+                // STL-compatible type aliases
+                using value_type = LineSegment;
+                using size_type = size_t;
+                using difference_type = std::ptrdiff_t;
+                // using reference = LineSegment &;
+                using const_reference = const LineSegment &;
+                // using pointer = LineSegment *;
+                using const_pointer = const LineSegment *;
+
+                class const_iterator;
+                friend class const_iterator;
+
+                class const_iterator
+                {
+                public:
+                    using iterator_category = std::random_access_iterator_tag;
+                    using value_type = const LineSegment;
+                    using difference_type = std::ptrdiff_t;
+                    using pointer = const LineSegment *;
+                    using reference = const LineSegment &;
+
+                    inline const_iterator(const ComponentLineMounter *line_mounter, size_t idx_p) noexcept
+                        : line_mounter(line_mounter), idx(idx_p)
+                    {
+                        size_t item_count = line_mounter->mesh->pos.size() >> 3; // each line segment is 8 vertices (2 points with 4 vertices each)
+                        if (item_count == 0)
+                            idx = (std::numeric_limits<size_t>::max)(); // end
+                        else
+                        {
+                            const auto &a = line_mounter->mesh->uv[1][idx * 8];
+                            const auto &b = line_mounter->mesh->uv[2][idx * 8];
+                            float thickness = line_mounter->mesh->uv[3][idx * 8].y;
+                            const auto &color = line_mounter->mesh->color[0][idx * 8];
+
+                            this->current_line_segment = LineSegment{a, b, thickness, color};
+                        }
+                    }
+
+                    inline reference operator*() const noexcept { return this->current_line_segment; }
+                    inline pointer operator->() const noexcept { return &this->current_line_segment; }
+
+                    // Prefix increment
+                    inline const_iterator &operator++() noexcept
+                    {
+                        size_t item_count = line_mounter->mesh->pos.size() >> 3;
+                        idx++;
+                        if (idx >= item_count)
+                        {
+                            idx = (std::numeric_limits<size_t>::max)(); // end
+                            // already at end, do nothing
+                            return *this;
+                        }
+                        else
+                        {
+                            const auto &a = line_mounter->mesh->uv[1][idx * 8];
+                            const auto &b = line_mounter->mesh->uv[2][idx * 8];
+                            float thickness = line_mounter->mesh->uv[3][idx * 8].y;
+                            const auto &color = line_mounter->mesh->color[0][idx * 8];
+
+                            this->current_line_segment = LineSegment{a, b, thickness, color};
+                        }
+                        return *this;
+                    }
+
+                    // Postfix increment
+                    inline const_iterator operator++(int) noexcept
+                    {
+                        const_iterator tmp = *this;
+                        ++(*this);
+                        return tmp;
+                    }
+
+                    // Prefix decrement
+                    inline const_iterator &operator--() noexcept
+                    {
+                        size_t item_count = line_mounter->mesh->pos.size() >> 3;
+                        if (idx == (std::numeric_limits<size_t>::max)() && item_count > 0)
+                            idx = item_count;
+                        if (idx > 0)
+                            idx--;
+                        if (idx == (std::numeric_limits<size_t>::max)())
+                            idx = 0;
+                        
+                        {
+                            const auto &a = line_mounter->mesh->uv[1][idx * 8];
+                            const auto &b = line_mounter->mesh->uv[2][idx * 8];
+                            float thickness = line_mounter->mesh->uv[3][idx * 8].y;
+                            const auto &color = line_mounter->mesh->color[0][idx * 8];
+
+                            this->current_line_segment = LineSegment{a, b, thickness, color};
+                        }
+
+                        return *this;
+                    }
+
+                    // Postfix decrement
+                    inline const_iterator operator--(int) noexcept
+                    {
+                        const_iterator tmp = *this;
+                        --(*this);
+                        return tmp;
+                    }
+
+                    inline const_iterator &operator+=(difference_type offset) noexcept
+                    {
+                        if (offset == 0)
+                            return *this;
+
+                        size_t item_count = line_mounter->mesh->pos.size() >> 3;
+                        if (offset > 0)
+                        {
+                            idx += offset;
+                            if (idx >= item_count)
+                                idx = (std::numeric_limits<size_t>::max)();
+                        }
+                        else
+                        {
+                            difference_type abs_offset = -offset;
+                            idx -= abs_offset;
+                            if (idx >= item_count)
+                                idx = 0;
+                        }
+
+                        {
+
+                            const auto &a = line_mounter->mesh->uv[1][idx * 8];
+                            const auto &b = line_mounter->mesh->uv[2][idx * 8];
+                            float thickness = line_mounter->mesh->uv[3][idx * 8].y;
+                            const auto &color = line_mounter->mesh->color[0][idx * 8];
+
+                            this->current_line_segment = LineSegment{a, b, thickness, color};
+                        }
+
+                        return *this;
+                    }
+
+                    inline const_iterator &operator-=(difference_type offset) noexcept
+                    {
+                        return *this += (-offset);
+                    }
+
+                    inline const_iterator operator+(difference_type offset) const noexcept
+                    {
+                        const_iterator tmp = *this;
+                        tmp += offset;
+                        return tmp;
+                    }
+
+                    inline const_iterator operator-(difference_type offset) const noexcept
+                    {
+                        const_iterator tmp = *this;
+                        tmp -= offset;
+                        return tmp;
+                    }
+
+                    inline difference_type operator-(const const_iterator &other) const noexcept
+                    {
+                        if (idx == (std::numeric_limits<size_t>::max)() && other.idx == (std::numeric_limits<size_t>::max)())
+                            return 0; // both at end
+                        if (idx == (std::numeric_limits<size_t>::max)())
+                            return other.idx; // this is at end
+                        if (other.idx == (std::numeric_limits<size_t>::max)())
+                            return -(difference_type)idx; // other is at end
+
+                        return (difference_type)other.idx - (difference_type)idx;
+                    }
+
+                    inline reference operator[](difference_type n) const noexcept
+                    {
+                        const_iterator tmp = *this + n;
+                        return *tmp;
+                    }
+
+                    inline constexpr bool operator==(const const_iterator &other) const noexcept
+                    {
+                        return idx == other.idx && line_mounter == other.line_mounter;
+                    }
+                    inline constexpr bool operator!=(const const_iterator &other) const noexcept
+                    {
+                        return !(*this == other);
+                    }
+
+                    inline bool operator<(const const_iterator &other) const noexcept
+                    {
+                        if (line_mounter != other.line_mounter)
+                            return false;
+                        if (idx == (std::numeric_limits<size_t>::max)())
+                            return false; // this is at end
+                        if (other.idx == (std::numeric_limits<size_t>::max)())
+                            return true;                      // other is at end
+                        return idx < other.idx;
+                    }
+
+                    inline bool operator<=(const const_iterator &other) const noexcept
+                    {
+                        return *this < other || *this == other;
+                    }
+
+                    inline bool operator>(const const_iterator &other) const noexcept
+                    {
+                        return !(*this <= other);
+                    }
+
+                    inline bool operator>=(const const_iterator &other) const noexcept
+                    {
+                        return !(*this < other);
+                    }
+
+                private:
+                    const ComponentLineMounter *line_mounter;
+                    size_t idx;
+
+                    LineSegment current_line_segment;
+
+                    friend class ComponentLineMounter;
+                };
+
+                // inline iterator begin() noexcept { return iterator(this, (internal_size) ? _start : m_capacity, internal_size); }
+                // inline iterator end() noexcept { return iterator(this, m_capacity, 0); }
+                inline const_iterator begin() const noexcept { return const_iterator(this, 0); }
+                inline const_iterator end() const noexcept { return const_iterator(this, (std::numeric_limits<size_t>::max)()); }
+                inline const_iterator cbegin() const noexcept { return begin(); }
+                inline const_iterator cend() const noexcept { return end(); }
+
+                // Additional STL-compatible iterator type aliases
+                // using iterator_type = iterator;
+                using const_iterator_type = const_iterator;
+                // using reverse_iterator = std::reverse_iterator<iterator>;
+                using const_reverse_iterator = std::reverse_iterator<const_iterator>;
             };
         }
     }
