@@ -35,6 +35,18 @@ namespace SmartImporter
         std::unordered_map<std::string, bool> diffuseTexturesToInsertIntoAtlas;
         std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> diffuseAtlases;
 
+        std::unordered_map<std::string, bool> specularTexturesToInsertIntoAtlas;
+        std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> specularAtlases;
+
+        std::unordered_map<std::string, bool> emissionTexturesToInsertIntoAtlas;
+        std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> emissionAtlases;
+
+        std::unordered_map<std::string, bool> lightmapTexturesToInsertIntoAtlas;
+        std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> lightmapAtlases;
+
+        std::unordered_map<std::string, bool> normalTexturesToInsertIntoAtlas;
+        std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> normalAtlases;
+
         std::unordered_map<std::string, std::shared_ptr<AppKit::GLEngine::Components::ComponentMaterial>> material_uuid_to_instance;
         std::unordered_map<const ITKExtension::Model::Geometry *, std::shared_ptr<AppKit::GLEngine::Components::ComponentMesh>> geometry_ptr_to_instance;
         std::unordered_map<const ITKExtension::Model::Geometry *, std::shared_ptr<AppKit::GLEngine::Components::ComponentLineMounter>> geometry_ptr_to_instance_line;
@@ -277,51 +289,103 @@ Material mat_stageBrick is opaque: YES
         std::vector<uint8_t> info_bytes;
         info_bytes.insert(info_bytes.end(), (uint8_t *)&m_bytes, (uint8_t *)&m_bytes + sizeof(m_bytes));
 
-        // diffuse_texture part
-        auto diffuse_tex = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
-                                        { return tex.type == ITKExtension::Model::TextureType::TextureType_DIFFUSE; });
-        std::string texture_to_use;
-        if (diffuse_tex != mat->textures.end())
         {
-            std::string filename = diffuse_tex->filename + "." + diffuse_tex->fileext;
-            // std::string full_filename = path_textures + filename;
-
-            if (geom->is_uv_compatible_with_texture_atlas(diffuse_tex->uvIndex))
+            auto info_bytes_texture_concatenation = [&](ITKExtension::Model::TextureType tex_type,
+                                                        std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> &atlases,
+                                                        const char *atlas_prefix)
             {
-                // in this case, search for the atlas...
-
-                for (size_t i = 0; i < data->diffuseAtlases.size(); i++)
+                // diffuse_texture part
+                auto diffuse_tex = std::find_if(mat->textures.begin(), mat->textures.end(), [tex_type](const ITKExtension::Model::Texture &tex)
+                                                { return tex.type == tex_type; });
+                std::string diffuse_texture_to_use;
+                if (diffuse_tex != mat->textures.end())
                 {
-                    if (data->diffuseAtlases[i]->hasSprite(filename))
+                    std::string filename = diffuse_tex->filename + "." + diffuse_tex->fileext;
+                    // std::string full_filename = path_textures + filename;
+                    if (geom->is_uv_compatible_with_texture_atlas(diffuse_tex->uvIndex))
                     {
-                        texture_to_use = ITKCommon::PrintfToStdString("/atlas-%zu/%i%i", i, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp);
-                        result.atlas = data->diffuseAtlases[i];
-                        result.sprite_atlas_entry = data->diffuseAtlases[i]->getSprite(filename);
-                        result.sprite_atlas_entry_name = filename;
-                        break;
+                        // in this case, search for the atlas...
+                        for (size_t i = 0; i < atlases.size(); i++)
+                        {
+                            if (atlases[i]->hasSprite(filename))
+                            {
+                                diffuse_texture_to_use = ITKCommon::PrintfToStdString("/%s-atlas-%zu/%i%i:", atlas_prefix, i, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp);
+                                result.atlas = atlases[i];
+                                result.sprite_atlas_entry = atlases[i]->getSprite(filename);
+                                result.sprite_atlas_entry_name = filename;
+                                break;
+                            }
+                        }
+                    }
+                    if (diffuse_texture_to_use.empty())
+                    {
+                        // in this case, create the single texture
+                        result.texture_path = filename;
+                        result.texture_s_wrap = diffuse_tex->mapMode_s;
+                        result.texture_t_wrap = diffuse_tex->mapMode_t;
+                        diffuse_texture_to_use = ITKCommon::PrintfToStdString("/%s/%i%i:", filename.c_str(), (uint8_t)diffuse_tex->mapMode_s, (uint8_t)diffuse_tex->mapMode_t);
                     }
                 }
-            }
+                if (diffuse_texture_to_use.empty())
+                {
+                    const char *slash = "/:";
+                    info_bytes.insert(info_bytes.end(), (uint8_t *)slash, (uint8_t *)slash + sizeof(char) * strlen(slash));
+                }
+                else
+                    info_bytes.insert(info_bytes.end(), (uint8_t *)diffuse_texture_to_use.c_str(), (uint8_t *)diffuse_texture_to_use.c_str() + sizeof(char) * diffuse_texture_to_use.size());
+            };
 
-            if (texture_to_use.empty())
-            {
-                // in this case, create the single texture
+            info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_DIFFUSE,
+                                             data->diffuseAtlases, "diff");
+            info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_SPECULAR,
+                                             data->specularAtlases, "spec");
+            info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_EMISSIVE,
+                                             data->emissionAtlases, "emiss");
+            info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_NORMALS,
+                                             data->normalAtlases, "norm");
+            info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_LIGHTMAP,
+                                             data->lightmapAtlases, "lightm");
 
-                result.texture_path = filename;
-                result.texture_s_wrap = diffuse_tex->mapMode_s;
-                result.texture_t_wrap = diffuse_tex->mapMode_t;
-
-                texture_to_use = ITKCommon::PrintfToStdString("/%s/%i%i", filename.c_str(), (uint8_t)diffuse_tex->mapMode_s, (uint8_t)diffuse_tex->mapMode_t);
-            }
+            // // diffuse_texture part
+            // auto diffuse_tex = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
+            //                                 { return tex.type == ITKExtension::Model::TextureType::TextureType_DIFFUSE; });
+            // std::string diffuse_texture_to_use;
+            // if (diffuse_tex != mat->textures.end())
+            // {
+            //     std::string filename = diffuse_tex->filename + "." + diffuse_tex->fileext;
+            //     // std::string full_filename = path_textures + filename;
+            //     if (geom->is_uv_compatible_with_texture_atlas(diffuse_tex->uvIndex))
+            //     {
+            //         // in this case, search for the atlas...
+            //         for (size_t i = 0; i < data->diffuseAtlases.size(); i++)
+            //         {
+            //             if (data->diffuseAtlases[i]->hasSprite(filename))
+            //             {
+            //                 diffuse_texture_to_use = ITKCommon::PrintfToStdString("/diff-atlas-%zu/%i%i:", i, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp);
+            //                 result.atlas = data->diffuseAtlases[i];
+            //                 result.sprite_atlas_entry = data->diffuseAtlases[i]->getSprite(filename);
+            //                 result.sprite_atlas_entry_name = filename;
+            //                 break;
+            //             }
+            //         }
+            //     }
+            //     if (diffuse_texture_to_use.empty())
+            //     {
+            //         // in this case, create the single texture
+            //         result.texture_path = filename;
+            //         result.texture_s_wrap = diffuse_tex->mapMode_s;
+            //         result.texture_t_wrap = diffuse_tex->mapMode_t;
+            //         diffuse_texture_to_use = ITKCommon::PrintfToStdString("/%s/%i%i:", filename.c_str(), (uint8_t)diffuse_tex->mapMode_s, (uint8_t)diffuse_tex->mapMode_t);
+            //     }
+            // }
+            // if (diffuse_texture_to_use.empty())
+            // {
+            //     const char *slash = "/:";
+            //     info_bytes.insert(info_bytes.end(), (uint8_t *)slash, (uint8_t *)slash + sizeof(char) * strlen(slash));
+            // }
+            // else
+            //     info_bytes.insert(info_bytes.end(), (uint8_t *)diffuse_texture_to_use.c_str(), (uint8_t *)diffuse_texture_to_use.c_str() + sizeof(char) * diffuse_texture_to_use.size());
         }
-
-        if (texture_to_use.empty())
-        {
-            const char *slash = "/";
-            info_bytes.insert(info_bytes.end(), (uint8_t *)slash, (uint8_t *)slash + sizeof(char) * strlen(slash));
-        }
-        else
-            info_bytes.insert(info_bytes.end(), (uint8_t *)texture_to_use.c_str(), (uint8_t *)texture_to_use.c_str() + sizeof(char) * texture_to_use.size());
 
         std::string out_string_b64;
         ITKExtension::Encoding::Base64::EncodeToString(info_bytes.data(), info_bytes.size(), &out_string_b64);
@@ -393,20 +457,60 @@ Material mat_stageBrick is opaque: YES
             if (data->geometryProcessed.find(geom) != data->geometryProcessed.end())
                 continue;
 
-            auto diffuse = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
-                                        { return tex.type == ITKExtension::Model::TextureType::TextureType_DIFFUSE; });
-            if (diffuse != mat->textures.end() && geom->is_uv_compatible_with_texture_atlas(diffuse->uvIndex))
             {
-                std::string filename = diffuse->filename + "." + diffuse->fileext;
-                std::string full_filename = path_textures + filename;
-                // std::string filename = path_textures + diffuse->filename + "." + diffuse->fileext;
-                if (data->diffuseTexturesToInsertIntoAtlas.find(filename) == data->diffuseTexturesToInsertIntoAtlas.end())
+                auto texture_atlas_check = [&](ITKExtension::Model::TextureType tex_type,
+                                               int uv_check,
+                                               std::unordered_map<std::string, bool> &texture_list_insert_atlas)
                 {
-                    int w, h;
-                    getImageDimension(full_filename.c_str(), &w, &h);
-                    if (w <= textureInsertIntoAtlasBelowEqual && h <= textureInsertIntoAtlasBelowEqual)
-                        data->diffuseTexturesToInsertIntoAtlas[filename] = true;
-                }
+                    auto diffuse = std::find_if(mat->textures.begin(), mat->textures.end(), [tex_type](const ITKExtension::Model::Texture &tex)
+                                                { return tex.type == tex_type; });
+                    if (diffuse != mat->textures.end())
+                    {
+                        ITK_ABORT(diffuse->uvIndex != uv_check, "(%s) texture: %s is not using UV%i", TextureTypeToStr(tex_type), (diffuse->filename + "." + diffuse->fileext).c_str(), uv_check);
+                        if (geom->is_uv_compatible_with_texture_atlas(diffuse->uvIndex))
+                        {
+                            std::string filename = diffuse->filename + "." + diffuse->fileext;
+                            std::string full_filename = path_textures + filename;
+                            if (texture_list_insert_atlas.find(filename) == texture_list_insert_atlas.end())
+                            {
+                                int w, h;
+                                getImageDimension(full_filename.c_str(), &w, &h);
+                                if (w <= textureInsertIntoAtlasBelowEqual && h <= textureInsertIntoAtlasBelowEqual)
+                                    texture_list_insert_atlas[filename] = true;
+                            }
+                        }
+                    }
+                };
+
+                texture_atlas_check(ITKExtension::Model::TextureType::TextureType_DIFFUSE,
+                                    0, data->diffuseTexturesToInsertIntoAtlas);
+                texture_atlas_check(ITKExtension::Model::TextureType::TextureType_SPECULAR,
+                                    0, data->specularTexturesToInsertIntoAtlas);
+                texture_atlas_check(ITKExtension::Model::TextureType::TextureType_EMISSIVE,
+                                    0, data->emissionTexturesToInsertIntoAtlas);
+                texture_atlas_check(ITKExtension::Model::TextureType::TextureType_NORMALS,
+                                    0, data->normalTexturesToInsertIntoAtlas);
+                texture_atlas_check(ITKExtension::Model::TextureType::TextureType_LIGHTMAP,
+                                    1, data->lightmapTexturesToInsertIntoAtlas);
+
+                // auto diffuse = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
+                //                             { return tex.type == ITKExtension::Model::TextureType::TextureType_DIFFUSE; });
+                // if (diffuse != mat->textures.end())
+                // {
+                //     ITK_ABORT(diffuse->uvIndex != 0, "Diffuse texture: %s is not using UV0", (diffuse->filename + "." + diffuse->fileext).c_str());
+                //     if (geom->is_uv_compatible_with_texture_atlas(diffuse->uvIndex))
+                //     {
+                //         std::string filename = diffuse->filename + "." + diffuse->fileext;
+                //         std::string full_filename = path_textures + filename;
+                //         if (data->diffuseTexturesToInsertIntoAtlas.find(filename) == data->diffuseTexturesToInsertIntoAtlas.end())
+                //         {
+                //             int w, h;
+                //             getImageDimension(full_filename.c_str(), &w, &h);
+                //             if (w <= textureInsertIntoAtlasBelowEqual && h <= textureInsertIntoAtlasBelowEqual)
+                //                 data->diffuseTexturesToInsertIntoAtlas[filename] = true;
+                //         }
+                //     }
+                // }
             }
 
             data->geometryProcessed[geom] = true;
@@ -629,35 +733,76 @@ Material mat_stageBrick is opaque: YES
 
         data->geometryProcessed.clear();
         data->diffuseTexturesToInsertIntoAtlas.clear();
+        data->specularTexturesToInsertIntoAtlas.clear();
+        data->emissionTexturesToInsertIntoAtlas.clear();
+        data->lightmapTexturesToInsertIntoAtlas.clear();
+        data->normalTexturesToInsertIntoAtlas.clear();
+
         traverse_select_textures_for_atlas(data->container->nodes[root_index]);
 
-        printf("Textures to insert into atlas:\n\n");
-        for (const auto &tex : data->diffuseTexturesToInsertIntoAtlas)
-            printf("- %s\n", tex.first.c_str());
-        printf("\n");
+        auto gen_atlas = [&](ITKExtension::Model::TextureType tex_type,
+                             std::unordered_map<std::string, bool> &texturesToInsertIntoAtlas,
+                             std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> &outputAtlases,
+                             bool sRGB)
+        {
+            printf("Textures to insert into atlas (%s):\n\n", TextureTypeToStr(tex_type));
+            for (const auto &tex : texturesToInsertIntoAtlas)
+                printf("- %s\n", tex.first.c_str());
+            printf("\n");
 
-        SpriteAtlasGenerator gen;
+            SpriteAtlasGenerator gen;
 
-        for (const auto &tex : data->diffuseTexturesToInsertIntoAtlas)
-            gen.addEntry(tex.first.c_str());
+            for (const auto &tex : texturesToInsertIntoAtlas)
+                gen.addEntry(tex.first.c_str());
+
+            outputAtlases = gen.generateAtlas(path_textures, *resourceMap, sRGB, true, 10, this->textureAtlasMaxDimension);
+            // data->generatedAtlases.clear();
+
+            printf("\nGenerated %zu sprite atlases:\n\n", outputAtlases.size());
+            for (size_t i = 0; i < outputAtlases.size(); i++)
+            {
+                const auto &atlas = outputAtlases[i];
+                printf("- Atlas %zu: %d x %d, contains %zu textures:\n", i, atlas->texture->width, atlas->texture->height, atlas->sprites.size());
+                for (const auto &entry : atlas->sprites)
+                    printf("  - %s: uvMin (%f, %f) uvMax (%f, %f) spriteSize (%.0f, %.0f)\n",
+                           entry.first.c_str(),
+                           entry.second.uvMin.x, entry.second.uvMin.y,
+                           entry.second.uvMax.x, entry.second.uvMax.y,
+                           entry.second.spriteSize.x, entry.second.spriteSize.y);
+            }
+            printf("\n\n");
+        };
 
         auto engine = AppKit::GLEngine::Engine::Instance();
-        data->diffuseAtlases = gen.generateAtlas(path_textures, *resourceMap, engine->sRGBCapable, true, 10, this->textureAtlasMaxDimension);
-        // data->generatedAtlases.clear();
+        gen_atlas(
+            ITKExtension::Model::TextureType::TextureType_DIFFUSE,
+            data->diffuseTexturesToInsertIntoAtlas,
+            data->diffuseAtlases,
+            engine->sRGBCapable);
 
-        printf("\nGenerated %zu sprite atlases:\n\n", data->diffuseAtlases.size());
-        for (size_t i = 0; i < data->diffuseAtlases.size(); i++)
-        {
-            const auto &atlas = data->diffuseAtlases[i];
-            printf("- Atlas %zu: %d x %d, contains %zu textures:\n", i, atlas->texture->width, atlas->texture->height, atlas->sprites.size());
-            for (const auto &entry : atlas->sprites)
-                printf("  - %s: uvMin (%f, %f) uvMax (%f, %f) spriteSize (%.0f, %.0f)\n",
-                       entry.first.c_str(),
-                       entry.second.uvMin.x, entry.second.uvMin.y,
-                       entry.second.uvMax.x, entry.second.uvMax.y,
-                       entry.second.spriteSize.x, entry.second.spriteSize.y);
-        }
-        printf("\n\n");
+        gen_atlas(
+            ITKExtension::Model::TextureType::TextureType_SPECULAR,
+            data->specularTexturesToInsertIntoAtlas,
+            data->specularAtlases,
+            false);
+
+        gen_atlas(
+            ITKExtension::Model::TextureType::TextureType_EMISSIVE,
+            data->emissionTexturesToInsertIntoAtlas,
+            data->emissionAtlases,
+            engine->sRGBCapable);
+
+        gen_atlas(
+            ITKExtension::Model::TextureType::TextureType_NORMALS,
+            data->normalTexturesToInsertIntoAtlas,
+            data->normalAtlases,
+            false);
+
+        gen_atlas(
+            ITKExtension::Model::TextureType::TextureType_LIGHTMAP,
+            data->lightmapTexturesToInsertIntoAtlas,
+            data->lightmapAtlases,
+            engine->sRGBCapable);
 
         // generate materials and process geometries
         printf("\nGenerated Materials And Geometries\n\n");
