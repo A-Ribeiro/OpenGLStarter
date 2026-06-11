@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 namespace AppKit
 {
 
@@ -78,6 +77,12 @@ namespace AppKit
         void GLTexture::uploadBufferAlpha8(const void *buffer, int w, int h)
         {
             setSize(w, h, GL_ALPHA);
+            uploadBuffer(buffer);
+        }
+
+        void GLTexture::uploadBufferRed8(const void *buffer, int w, int h)
+        {
+            setSize(w, h, GL_RED);
             uploadBuffer(buffer);
         }
 
@@ -232,9 +237,9 @@ namespace AppKit
                 input_raw_element_size = sizeof(uint8_t) * 4;
                 input_component_count = 4;
             }
-            else if (internal_format == GL_R)
+            else if (internal_format == GL_RED)
             {
-                input_format = GL_R;
+                input_format = GL_RED;
                 input_data_type = GL_UNSIGNED_BYTE;
                 input_alignment = 1;
                 input_raw_element_size = sizeof(uint8_t) * 1;
@@ -475,14 +480,14 @@ namespace AppKit
                         MipMapImage *image = generator->images[i];
                         if (image->width <= maxResolution && image->height <= maxResolution)
                         {
-                            result->uploadBufferAlpha8((const void *)image->buffer, image->width, image->height);
+                            result->uploadBufferRed8((const void *)image->buffer, image->width, image->height);
                             break;
                         }
                     }
                     delete generator;
                 }
                 else
-                    result->uploadBufferAlpha8(buffer, w, h);
+                    result->uploadBufferRed8(buffer, w, h);
                 // setnullptrAndDelete(buffer);
                 closeFnc(buffer);
                 return result;
