@@ -85,21 +85,21 @@ namespace SmartImporter
         if (diffuse != mat->vec4Value.end())
             material->property_bag.getProperty("uColor").set<MathCore::vec4f>(diffuse->second);
 
-        if (uuid_texture_info.atlas != nullptr)
-            material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)uuid_texture_info.atlas->texture);
-        else if (!uuid_texture_info.texture_path.empty())
+        if (uuid_texture_info.diffuse.atlas != nullptr)
+            material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)uuid_texture_info.diffuse.atlas->texture);
+        else if (!uuid_texture_info.diffuse.texture_path.empty())
         {
             auto engine = AppKit::GLEngine::Engine::Instance();
-            auto tex = resourceMap->getTexture(uuid_texture_info.texture_path, engine->sRGBCapable, texture_base_path);
+            auto tex = resourceMap->getTexture(uuid_texture_info.diffuse.texture_path, engine->sRGBCapable, texture_base_path);
             material->property_bag.getProperty("uTexture").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
 
             using namespace ITKExtension::Model;
-            if (uuid_texture_info.texture_s_wrap == TextureMapMode_Wrap || uuid_texture_info.texture_t_wrap == TextureMapMode_Wrap)
+            if (uuid_texture_info.diffuse.texture_s_wrap == TextureMapMode_Wrap || uuid_texture_info.diffuse.texture_t_wrap == TextureMapMode_Wrap)
             {
                 tex->active(0);
-                if (uuid_texture_info.texture_s_wrap == TextureMapMode_Wrap)
+                if (uuid_texture_info.diffuse.texture_s_wrap == TextureMapMode_Wrap)
                     OPENGL_CMD(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-                if (uuid_texture_info.texture_t_wrap == TextureMapMode_Wrap)
+                if (uuid_texture_info.diffuse.texture_t_wrap == TextureMapMode_Wrap)
                     OPENGL_CMD(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
                 tex->deactive(0);
             }
@@ -150,14 +150,25 @@ namespace SmartImporter
         if (metallic != mat->floatValue.end())
             material->property_bag.getProperty("metallic").set<float>(metallic->second);
 
-        if (uuid_texture_info.atlas != nullptr)
-            material->property_bag.getProperty("texAlbedo").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)uuid_texture_info.atlas->texture);
-        else if (!uuid_texture_info.texture_path.empty())
+        auto set_texture = [&](const Material_UUID_Descriptor_TextureInfo &base_TexInfo, const char *property_name, bool sRGB)
         {
-            auto engine = AppKit::GLEngine::Engine::Instance();
-            auto tex = resourceMap->getTexture(uuid_texture_info.texture_path, engine->sRGBCapable, texture_base_path);
-            material->property_bag.getProperty("texAlbedo").set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
-        }
+            if (base_TexInfo.atlas != nullptr)
+                material->property_bag.getProperty(property_name).set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)base_TexInfo.atlas->texture);
+            else if (!base_TexInfo.texture_path.empty())
+            {
+                auto tex = resourceMap->getTexture(base_TexInfo.texture_path, sRGB, texture_base_path);
+                material->property_bag.getProperty(property_name).set((std::shared_ptr<AppKit::OpenGL::VirtualTexture>)tex);
+            }
+        };
+
+        auto engine = AppKit::GLEngine::Engine::Instance();
+        set_texture(uuid_texture_info.diffuse, "texAlbedo", engine->sRGBCapable);
+        set_texture(uuid_texture_info.specular, "texSpecular", false);
+        set_texture(uuid_texture_info.emissive, "texEmission", engine->sRGBCapable);
+        set_texture(uuid_texture_info.normals, "texNormal", false);
+        // set_texture(uuid_texture_info.lightmap, "texLightmap", engine->sRGBCapable);
+
+
 
         // PBRShaderSelector Property Bag:
 
@@ -292,6 +303,7 @@ Material mat_stageBrick is opaque: YES
         {
             auto info_bytes_texture_concatenation = [&](ITKExtension::Model::TextureType tex_type,
                                                         std::vector<std::shared_ptr<AppKit::GLEngine::SpriteAtlas>> &atlases,
+                                                        Material_UUID_Descriptor_TextureInfo &texture_info,
                                                         const char *atlas_prefix)
             {
                 // diffuse_texture part
@@ -310,9 +322,9 @@ Material mat_stageBrick is opaque: YES
                             if (atlases[i]->hasSprite(filename))
                             {
                                 diffuse_texture_to_use = ITKCommon::PrintfToStdString("/%s-atlas-%zu/%i%i:", atlas_prefix, i, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp, (uint8_t)ITKExtension::Model::TextureMapMode_Clamp);
-                                result.atlas = atlases[i];
-                                result.sprite_atlas_entry = atlases[i]->getSprite(filename);
-                                result.sprite_atlas_entry_name = filename;
+                                texture_info.atlas = atlases[i];
+                                texture_info.sprite_atlas_entry = atlases[i]->getSprite(filename);
+                                texture_info.sprite_atlas_entry_name = filename;
                                 break;
                             }
                         }
@@ -320,9 +332,9 @@ Material mat_stageBrick is opaque: YES
                     if (diffuse_texture_to_use.empty())
                     {
                         // in this case, create the single texture
-                        result.texture_path = filename;
-                        result.texture_s_wrap = diffuse_tex->mapMode_s;
-                        result.texture_t_wrap = diffuse_tex->mapMode_t;
+                        texture_info.texture_path = filename;
+                        texture_info.texture_s_wrap = diffuse_tex->mapMode_s;
+                        texture_info.texture_t_wrap = diffuse_tex->mapMode_t;
                         diffuse_texture_to_use = ITKCommon::PrintfToStdString("/%s/%i%i:", filename.c_str(), (uint8_t)diffuse_tex->mapMode_s, (uint8_t)diffuse_tex->mapMode_t);
                     }
                 }
@@ -336,15 +348,15 @@ Material mat_stageBrick is opaque: YES
             };
 
             info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_DIFFUSE,
-                                             data->diffuseAtlases, "diff");
+                                             data->diffuseAtlases, result.diffuse, "diff");
             info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_SPECULAR,
-                                             data->specularAtlases, "spec");
+                                             data->specularAtlases, result.specular, "spec");
             info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_EMISSIVE,
-                                             data->emissionAtlases, "emiss");
+                                             data->emissionAtlases, result.emissive, "emiss");
             info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_NORMALS,
-                                             data->normalAtlases, "norm");
+                                             data->normalAtlases, result.normals, "norm");
             info_bytes_texture_concatenation(ITKExtension::Model::TextureType::TextureType_LIGHTMAP,
-                                             data->lightmapAtlases, "lightm");
+                                             data->lightmapAtlases, result.lightmap, "lightm");
 
             // // diffuse_texture part
             // auto diffuse_tex = std::find_if(mat->textures.begin(), mat->textures.end(), [](const ITKExtension::Model::Texture &tex)
@@ -582,10 +594,20 @@ Material mat_stageBrick is opaque: YES
                 if (geom->bones.size() > 0)
                     mesh->bones = geom->bones;
 
-                if (uuid_texture_info.atlas != nullptr)
+                AppKit::GLEngine::SpriteAtlas::Entry *sprite_atlas_entry = nullptr;
+                if (uuid_texture_info.diffuse.atlas != nullptr)
+                    sprite_atlas_entry = &uuid_texture_info.diffuse.sprite_atlas_entry;
+                else if (uuid_texture_info.specular.atlas != nullptr)
+                    sprite_atlas_entry = &uuid_texture_info.specular.sprite_atlas_entry;
+                else if (uuid_texture_info.emissive.atlas != nullptr)
+                    sprite_atlas_entry = &uuid_texture_info.emissive.sprite_atlas_entry;
+                else if (uuid_texture_info.normals.atlas != nullptr)
+                    sprite_atlas_entry = &uuid_texture_info.normals.sprite_atlas_entry;
+
+                if (sprite_atlas_entry != nullptr)
                 {
                     for (auto &uv : mesh->uv[0])
-                        uv = vec3f(uuid_texture_info.sprite_atlas_entry.lerpUV(uv.x, uv.y), 0.0f);
+                        uv = vec3f(sprite_atlas_entry->lerpUV(uv.x, uv.y), 0.0f);
                 }
 
                 data->geometry_ptr_to_instance[geom] = mesh;
