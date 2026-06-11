@@ -64,6 +64,9 @@ namespace AppKit
         {
             std::vector<std::shared_ptr<SpriteAtlas>> result_array;
 
+            if (entries.empty())
+                return result_array;
+
             std::shared_ptr<SpriteAtlas> result_single = std::make_shared<SpriteAtlas>();
             result_single->texture = std::make_shared<AppKit::OpenGL::GLTexture>();
 
