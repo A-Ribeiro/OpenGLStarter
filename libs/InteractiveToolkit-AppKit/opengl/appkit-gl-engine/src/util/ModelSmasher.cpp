@@ -1,4 +1,4 @@
-#include "ModelSmasher.h"
+#include <appkit-gl-engine/util/ModelSmasher.h>
 
 // #include <InteractiveToolkit/common.h>
 // #include <appkit-gl-engine/util/SpriteAtlas.h>
@@ -556,6 +556,7 @@ Material mat_stageBrick is opaque: YES
                 auto it_mat = data->material_uuid_to_instance.find(uuid_texture_info.uuid);
                 if (it_mat == data->material_uuid_to_instance.end())
                 {
+                    printMaterialInfo(mat, lvl);
                     auto material = createMaterial(resourceMap, path_textures.c_str(), mat, uuid_texture_info);
                     data->material_uuid_to_instance[uuid_texture_info.uuid] = material;
 

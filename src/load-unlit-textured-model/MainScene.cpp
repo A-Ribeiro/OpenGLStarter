@@ -1,7 +1,7 @@
 ﻿#include "MainScene.h"
 #include "App.h"
 
-#include "util/ModelSmasher.h"
+#include <appkit-gl-engine/util/ModelSmasher.h>
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 
 // #include <InteractiveToolkit/EaseCore/EaseCore.h>
