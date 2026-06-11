@@ -112,6 +112,7 @@ namespace AppKit
             /// \param h texture height
             ///
             void uploadBufferAlpha8(const void *buffer, int w, int h);
+            void uploadBufferRed8(const void *buffer, int w, int h);
 
             /// \brief Upload RGB24 bits Texture
             ///

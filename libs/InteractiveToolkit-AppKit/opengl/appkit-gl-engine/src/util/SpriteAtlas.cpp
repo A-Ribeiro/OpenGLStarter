@@ -77,6 +77,8 @@ namespace AppKit
             };
             std::vector<Combined_entry> combinedEntries;
 
+            int channel_used = -1;
+
             for (const auto &entry : entries)
             {
                 const std::string &name = entry.first;
@@ -118,6 +120,9 @@ namespace AppKit
                 if ((channels != 4 && channels != 3 && channels != 1) || depth != 8)
                     throw std::runtime_error("Invalid image format for sprite '" + name + "': expected Gray, RGB, RGBA 8-bit");
 
+                if (channel_used == -1)
+                    channel_used = channels;
+
                 auto atlasElementFace = atlas->addElement(name, w, h);
 
                 atlas->organizePositions(use_fast_positioning);
@@ -127,6 +132,7 @@ namespace AppKit
                     atlas->removeLastInsertedElement();
                     atlas->organizePositions(use_fast_positioning);
 
+                    if (channel_used == 4)
                     {
                         auto rgba = atlas->createRGBA();
                         result_single->texture->uploadBufferRGBA_8888(
@@ -134,6 +140,25 @@ namespace AppKit
                             atlas->textureResolution.w,
                             atlas->textureResolution.h,
                             sRGB);
+                        // atlas.releaseRGBA(&rgba);
+                    }
+                    else if (channel_used == 3)
+                    {
+                        auto rgba = atlas->createRGB();
+                        result_single->texture->uploadBufferRGB_888(
+                            (const void *)rgba.get(),
+                            atlas->textureResolution.w,
+                            atlas->textureResolution.h,
+                            sRGB);
+                        // atlas.releaseRGBA(&rgba);
+                    }
+                    else if (channel_used == 1)
+                    {
+                        auto rgba = atlas->createGray();
+                        result_single->texture->uploadBufferRed8(
+                            (const void *)rgba.get(),
+                            atlas->textureResolution.w,
+                            atlas->textureResolution.h);
                         // atlas.releaseRGBA(&rgba);
                     }
                     MathCore::vec2f atlasSize_inv = 1.0f / MathCore::vec2f(atlas->textureResolution.w, atlas->textureResolution.h);
@@ -161,14 +186,17 @@ namespace AppKit
 
                 if (channels == 4)
                     atlasElementFace->copyFromRGBABuffer((uint8_t *)buffer, w * 4);
-                else
-                    throw std::runtime_error("not implemented texture loading into atlas...");
-                    
+                else if (channels == 3)
+                    atlasElementFace->copyFromRGBBuffer((uint8_t *)buffer);
+                else if (channels == 1)
+                    atlasElementFace->copyFromGrayBuffer((uint8_t *)buffer);
+
                 combinedEntries.push_back({name, genEntry, atlasElementFace.get()});
             }
 
             atlas->organizePositions(use_fast_positioning);
 
+            if (channel_used == 4 || channel_used == -1)
             {
                 auto rgba = atlas->createRGBA();
                 result_single->texture->uploadBufferRGBA_8888(
@@ -176,6 +204,25 @@ namespace AppKit
                     atlas->textureResolution.w,
                     atlas->textureResolution.h,
                     sRGB);
+                // atlas.releaseRGBA(&rgba);
+            }
+            else if (channel_used == 3)
+            {
+                auto rgba = atlas->createRGB();
+                result_single->texture->uploadBufferRGB_888(
+                    (const void *)rgba.get(),
+                    atlas->textureResolution.w,
+                    atlas->textureResolution.h,
+                    sRGB);
+                // atlas.releaseRGBA(&rgba);
+            }
+            else if (channel_used == 1)
+            {
+                auto rgba = atlas->createGray();
+                result_single->texture->uploadBufferRed8(
+                    (const void *)rgba.get(),
+                    atlas->textureResolution.w,
+                    atlas->textureResolution.h);
                 // atlas.releaseRGBA(&rgba);
             }
             MathCore::vec2f atlasSize_inv = 1.0f / MathCore::vec2f(atlas->textureResolution.w, atlas->textureResolution.h);
