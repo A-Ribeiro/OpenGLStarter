@@ -115,8 +115,8 @@ namespace AppKit
                             closeFnc(buffer);
                     });
 
-                if (channels != 4 || depth != 8)
-                    throw std::runtime_error("Invalid image format for sprite '" + name + "': expected RGBA 8-bit");
+                if ((channels != 4 && channels != 3 && channels != 1) || depth != 8)
+                    throw std::runtime_error("Invalid image format for sprite '" + name + "': expected Gray, RGB, RGBA 8-bit");
 
                 auto atlasElementFace = atlas->addElement(name, w, h);
 
@@ -159,7 +159,11 @@ namespace AppKit
                     combinedEntries.clear();
                 }
 
-                atlasElementFace->copyFromRGBABuffer((uint8_t *)buffer, w * 4);
+                if (channels == 4)
+                    atlasElementFace->copyFromRGBABuffer((uint8_t *)buffer, w * 4);
+                else
+                    throw std::runtime_error("not implemented texture loading into atlas...");
+                    
                 combinedEntries.push_back({name, genEntry, atlasElementFace.get()});
             }
 

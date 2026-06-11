@@ -37,10 +37,8 @@ namespace AppKit
 
 namespace SmartImporter
 {
-    struct Material_UUID_Descriptor
+    struct Material_UUID_Descriptor_TextureInfo
     {
-        std::string uuid;
-
         // if has sprite from atlas
         std::shared_ptr<AppKit::GLEngine::SpriteAtlas> atlas;
         std::string sprite_atlas_entry_name;
@@ -50,6 +48,16 @@ namespace SmartImporter
         std::string texture_path;
         ITKExtension::Model::TextureMapMode texture_s_wrap;
         ITKExtension::Model::TextureMapMode texture_t_wrap;
+    };
+
+    struct Material_UUID_Descriptor
+    {
+        std::string uuid;
+        Material_UUID_Descriptor_TextureInfo diffuse;
+        Material_UUID_Descriptor_TextureInfo specular;
+        Material_UUID_Descriptor_TextureInfo emissive;
+        Material_UUID_Descriptor_TextureInfo normals;
+        Material_UUID_Descriptor_TextureInfo lightmap;
     };
 
     struct InternalData;
@@ -81,10 +89,10 @@ namespace SmartImporter
 
     public:
         std::shared_ptr<AppKit::GLEngine::Transform> load(const char *filename,
-                                        AppKit::GLEngine::ResourceMap *resourceMap,
-                                        std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera,
-                                        int textureInsertIntoAtlasBelowEqual = 2048, int textureAtlasMaxDimension = 4096,
-                                        const char *path_textures_param = nullptr);
+                                                          AppKit::GLEngine::ResourceMap *resourceMap,
+                                                          std::shared_ptr<AppKit::GLEngine::Components::ComponentCamera> camera,
+                                                          int textureInsertIntoAtlasBelowEqual = 2048, int textureAtlasMaxDimension = 4096,
+                                                          const char *path_textures_param = nullptr);
     };
 
 }
