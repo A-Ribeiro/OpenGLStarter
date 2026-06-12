@@ -31,6 +31,9 @@ add_library( ${PROJECT_NAME} STATIC ${PUBLIC_HEADERS} ${SRC} )
 #
 tool_download_git_package("https://github.com/Tencent/rapidjson" rapidjson)
 tool_get_dirs(rapidjson_DOWNLOADED_PATH rapidjson_BINARY_PATH rapidjson)
+if(IS_DIRECTORY "${rapidjson_DOWNLOADED_PATH}/bin/jsonchecker")
+    file(REMOVE_RECURSE "${rapidjson_DOWNLOADED_PATH}/bin/jsonchecker")
+endif()
 
 target_include_directories( ${PROJECT_NAME} PUBLIC "${rapidjson_DOWNLOADED_PATH}/include" )
 
