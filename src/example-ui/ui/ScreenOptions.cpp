@@ -99,9 +99,9 @@ namespace ui
                         // update resolution options
                         // try to keep the already set option from Global Context
                         auto new_key_entries = localContext->getGroupValuesForKey("Video", "Resolution");
-                        const char *new_key_selected_entry = AppOptions::OptionsManager::Instance()->getGroupValueSelectedForKey("Video", "Resolution");
+                        std::string new_key_selected_entry = AppOptions::OptionsManager::Instance()->getGroupValueSelectedForKey("Video", "Resolution");
                         if (std::find(new_key_entries.begin(), new_key_entries.end(), new_key_selected_entry) == new_key_entries.end())
-                            new_key_selected_entry = new_key_entries.back().c_str();
+                            new_key_selected_entry = new_key_entries.back();
                         optionMap["Video"]->updateOption("Resolution", new_key_entries, new_key_selected_entry);
                     }
                 };

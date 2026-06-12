@@ -65,20 +65,20 @@ void MainScene::applySettingsChanges()
     AppOptions::OptionsManager *options = AppOptions::OptionsManager::Instance();
 
     {
-        const char *buttonAppearance = options->getGroupValueSelectedForKey("Extra", "ButtonAppearance");
-        const char *colorScheme = options->getGroupValueSelectedForKey("Extra", "ColorScheme");
-        if (strcmp(colorScheme, "Blush") == 0)
-            screenManager->setColorPalette(ui::Pallete::Blush.setAppearance(buttonAppearance));
-        else if (strcmp(colorScheme, "Purple") == 0)
-            screenManager->setColorPalette(ui::Pallete::Purple.setAppearance(buttonAppearance));
-        else if (strcmp(colorScheme, "Orange") == 0)
-            screenManager->setColorPalette(ui::Pallete::Orange.setAppearance(buttonAppearance));
-        else if (strcmp(colorScheme, "Green") == 0)
-            screenManager->setColorPalette(ui::Pallete::Green.setAppearance(buttonAppearance));
-        else if (strcmp(colorScheme, "Blue") == 0)
-            screenManager->setColorPalette(ui::Pallete::Blue.setAppearance(buttonAppearance));
-        else if (strcmp(colorScheme, "Dark") == 0)
-            screenManager->setColorPalette(ui::Pallete::Dark.setAppearance(buttonAppearance));
+        const std::string &buttonAppearance = options->getGroupValueSelectedForKey("Extra", "ButtonAppearance");
+        const std::string &colorScheme = options->getGroupValueSelectedForKey("Extra", "ColorScheme");
+        if (colorScheme == "Blush")
+            screenManager->setColorPalette(ui::Pallete::Blush.setAppearance(buttonAppearance.c_str()));
+        else if (colorScheme == "Purple")
+            screenManager->setColorPalette(ui::Pallete::Purple.setAppearance(buttonAppearance.c_str()));
+        else if (colorScheme == "Orange")
+            screenManager->setColorPalette(ui::Pallete::Orange.setAppearance(buttonAppearance.c_str()));
+        else if (colorScheme == "Green")
+            screenManager->setColorPalette(ui::Pallete::Green.setAppearance(buttonAppearance.c_str()));
+        else if (colorScheme == "Blue")
+            screenManager->setColorPalette(ui::Pallete::Blue.setAppearance(buttonAppearance.c_str()));
+        else if (colorScheme == "Dark")
+            screenManager->setColorPalette(ui::Pallete::Dark.setAppearance(buttonAppearance.c_str()));
     }
 
     // handle viewport
@@ -395,29 +395,29 @@ void MainScene::onWindowResized(const MathCore::vec2i &new_size)
 
     AppOptions::OptionsManager *options = AppOptions::OptionsManager::Instance();
     {
-        const char *uiSize = options->getGroupValueSelectedForKey("Extra", "UiSize");
-        printf("UI Size Selected: %s\n", uiSize);
-        if (strcmp(uiSize, "Extra Small") == 0)
+        const std::string &uiSize = options->getGroupValueSelectedForKey("Extra", "UiSize");
+        printf("UI Size Selected: %s\n", uiSize.c_str());
+        if (uiSize == "Extra Small")
             ui_screen_size.x = 3840;
-        else if (strcmp(uiSize, "Small") == 0)
+        else if (uiSize == "Small")
             ui_screen_size.x = 2560;
-        else if (strcmp(uiSize, "Medium") == 0)
+        else if (uiSize == "Medium")
             ui_screen_size.x = 1920;
-        else if (strcmp(uiSize, "Large") == 0)
+        else if (uiSize == "Large")
             ui_screen_size.x = 1280;
-        else if (strcmp(uiSize, "Extra Large") == 0)
+        else if (uiSize == "Extra Large")
             ui_screen_size.x = 1024;
 
-        const char *videoAspect = options->getGroupValueSelectedForKey("Video", "Aspect");
+        const std::string &videoAspect = options->getGroupValueSelectedForKey("Video", "Aspect");
 
         float target_aspect = 16.0f / 9.0f;
 
-        if (strcmp(videoAspect, "16:9") == 0)
+        if (videoAspect == "16:9")
         {
             target_aspect = 16.0f / 9.0f;
             ui_screen_size.y = (9 * ui_screen_size.x) / 16;
         }
-        else if (strcmp(videoAspect, "16:10") == 0)
+        else if (videoAspect == "16:10")
         {
             target_aspect = 16.0f / 10.0f;
             ui_screen_size.y = (10 * ui_screen_size.x) / 16;

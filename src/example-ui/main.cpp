@@ -50,19 +50,19 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
 
     auto options = AppOptions::OptionsManager::Instance();
 
-    const char *currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
-    if (strcmp(currWindowMode, "Borderless") == 0)
+    std::string currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
+    if (currWindowMode == "Borderless")
     {
         auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
 
         engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Borderless;
         engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(defaultMonitor.width, defaultMonitor.height);
     }
-    else if (strcmp(currWindowMode, "Fullscreen") == 0)
+    else if (currWindowMode == "Fullscreen")
     {
-        const char *fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
+        const std::string &fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
         int w, h;
-        if (sscanf(fullscreenRes, "%ix%i", &w, &h) == 2)
+        if (sscanf(fullscreenRes.c_str(), "%ix%i", &w, &h) == 2)
         {
 #if defined(__linux__)
             engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Borderless;
@@ -90,16 +90,16 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
     }
 
     {
-        const char *aaMode = options->getGroupValueSelectedForKey("Video", "AntiAliasing");
-        if (strcmp(aaMode, "MSAA") == 0)
+        const std::string &aaMode = options->getGroupValueSelectedForKey("Video", "AntiAliasing");
+        if (aaMode == "MSAA")
             engineConfig->glContextConfig.antialiasingLevel = 2;
         else
             engineConfig->glContextConfig.antialiasingLevel = 0;
     }
 
     {
-        const char *vsyncMode = options->getGroupValueSelectedForKey("Video", "VSync");
-        if (strcmp(vsyncMode, "ON") == 0)
+        const std::string &vsyncMode = options->getGroupValueSelectedForKey("Video", "VSync");
+        if (vsyncMode == "ON")
             engineConfig->glContextConfig.vSync = true;
         else
             engineConfig->glContextConfig.vSync = false;
@@ -114,13 +114,13 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
             auto engine = AppKit::GLEngine::Engine::Instance();
             auto options = AppOptions::OptionsManager::Instance();
 
-            const char *currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
-            if (strcmp(currWindowMode, "Fullscreen") == 0)
+            std::string currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
+            if (currWindowMode == "Fullscreen")
             {
                 // set the desired resolution with the most high FPS
-                const char *fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
+                const std::string &fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
                 int w, h;
-                if (sscanf(fullscreenRes, "%ix%i", &w, &h) == 2)
+                if (sscanf(fullscreenRes.c_str(), "%ix%i", &w, &h) == 2)
                 {
 
                     auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
@@ -138,13 +138,13 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
         [engine, options, currWindowMode, OnAfterAppCreation](AppKit::Window::GLWindow *window)
         {
             // This callback is called after the window is configured
-            if (strcmp(currWindowMode, "Borderless") == 0)
+            if (currWindowMode == "Borderless")
             {
                 engine->window->setMouseCursorVisible(false);
                 auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
                 DPI::Display::setFullscreenAttribute(engine->window->getNativeWindowHandle(), &defaultMonitor);
             }
-            else if (strcmp(currWindowMode, "Fullscreen") == 0)
+            else if (currWindowMode == "Fullscreen")
             {
 #if defined(__linux__)
                 engine->window->setMouseCursorVisible(false);
