@@ -11,10 +11,7 @@
 
 class App;
 
-namespace SimplePhysics
-{
-    class PhysicsContainer;
-}
+#include <appkit-physics/container/Container2D.h>
 
 class GameScene : public AppKit::GLEngine::SceneBase
 {
@@ -52,7 +49,7 @@ public:
 
     MathCore::vec2f screen_custom_size;
 
-    std::unique_ptr<SimplePhysics::PhysicsContainer> physicsContainer;
+    std::unique_ptr<AppKit::Physics::Container::Container2D> container2D;
 
     StageGen::StageResult stageResult;
 

@@ -4,10 +4,12 @@
 #include <InteractiveToolkit/ITKCommon/Random.h>
 #include <vector>
 
-namespace SimplePhysics
-{
-    class PhysicsContainer;
-}
+#include <appkit-physics/container/Container2D.h>
+
+// namespace SimplePhysics
+// {
+//     class PhysicsContainer;
+// }
 
 namespace StageGen
 {
@@ -38,7 +40,7 @@ namespace StageGen
         /// Generates a random platformer stage and populates the physicsContainer.
         /// Returns the start and end points for the player.
         static StageResult generate(
-            SimplePhysics::PhysicsContainer &container,
+            AppKit::Physics::Container::Container2D &container,
             const StageParams &params,
             ITKCommon::Random32 &rng);
 
@@ -52,31 +54,31 @@ namespace StageGen
         };
 
         static void addFloorAndWalls(
-            SimplePhysics::PhysicsContainer &container,
+            AppKit::Physics::Container::Container2D &container,
             const StageParams &params);
 
         static void addStartAndEndPlatforms(
-            SimplePhysics::PhysicsContainer &container,
+            AppKit::Physics::Container::Container2D &container,
             const StageParams &params,
             MathCore::vec2f &out_start,
             MathCore::vec2f &out_end);
 
         static void addPlatformSequence(
-            SimplePhysics::PhysicsContainer &container,
+            AppKit::Physics::Container::Container2D &container,
             const StageParams &params,
             MathCore::MathRandomExt<ITKCommon::Random32> &mathRnd,
             const MathCore::vec2f &start,
             const MathCore::vec2f &end);
 
         static void addTestPlatformSequence(
-            SimplePhysics::PhysicsContainer &container,
+            AppKit::Physics::Container::Container2D &container,
             const StageParams &params,
             MathCore::MathRandomExt<ITKCommon::Random32> &mathRnd,
             const MathCore::vec2f &start,
             const MathCore::vec2f &end);
 
         static void addDecorativeBoxes(
-            SimplePhysics::PhysicsContainer &container,
+            AppKit::Physics::Container::Container2D &container,
             const StageParams &params,
             MathCore::MathRandomExt<ITKCommon::Random32> &mathRnd);
 

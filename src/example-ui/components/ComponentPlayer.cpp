@@ -5,7 +5,7 @@
 #include <InteractiveToolkit/CollisionCore/CollisionCore.h>
 // #include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 #include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
-#include "../simple-physics/PhysicsContainer.h"
+// #include "../simple-physics/PhysicsContainer.h"
 
 // #include "ComponentGameArea.h"
 
@@ -53,8 +53,8 @@ namespace AppKit
 
             void ComponentPlayer::start()
             {
-                physicsController = SimplePhysics::JumpingController::CreateShared();
-                *physicsController = SimplePhysics::JumpingController::fromStaticConfig(
+                character2D = AppKit::Physics::Controller::Character2D::CreateShared();
+                *character2D = AppKit::Physics::Controller::Character2D::fromStaticConfig(
                     Radius.c_val(),
                     RadiusGrounded.c_val(),
                     OffsetGrounded.c_val(),
@@ -66,7 +66,7 @@ namespace AppKit
                     true                             // allow_double_jump
                 );
                 // app->gameScene->physicsContainer->jumpingControllerList.push_back(physicsController);
-                physicsController->teleport(MathCore::CVT<MathCore::vec3f>::toVec2(getTransform()->getLocalPosition()));
+                character2D->teleport(MathCore::CVT<MathCore::vec3f>::toVec2(getTransform()->getLocalPosition()));
 
                 if (auto eventHandlerSet = eventHandlerSetRef.lock())
                     eventHandlerSet->OnUpdate.add(&ComponentPlayer::OnUpdate, this);
@@ -113,22 +113,22 @@ namespace AppKit
 
                         float radius_to_draw = inner_radius * 20.0f;
                         line_mounter->addLine(
-                            MathCore::vec3f(-radius_to_draw, self_ref->physicsController->jumpState.getMinJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(radius_to_draw, self_ref->physicsController->jumpState.getMinJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->character2D->jumpState.getMinJumpHeight() - inner_radius,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->character2D->jumpState.getMinJumpHeight() - inner_radius, 0), // b
                             self_ref->debugDrawThickness, // thickness
                             ui::colorFromHex("#FF0000FF") // color
                         );
 
                         line_mounter->addLine(
-                            MathCore::vec3f(-radius_to_draw, self_ref->physicsController->jumpState.getMaxJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(radius_to_draw, self_ref->physicsController->jumpState.getMaxJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->character2D->jumpState.getMaxJumpHeight() - inner_radius,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->character2D->jumpState.getMaxJumpHeight() - inner_radius, 0), // b
                             self_ref->debugDrawThickness, // thickness
                             ui::colorFromHex("#FF0000FF") // color
                         );
 
                         line_mounter->addLine(
-                            MathCore::vec3f(-radius_to_draw, self_ref->physicsController->jumpState.getSecondJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(radius_to_draw, self_ref->physicsController->jumpState.getSecondJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->character2D->jumpState.getSecondJumpHeight() - inner_radius,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->character2D->jumpState.getSecondJumpHeight() - inner_radius, 0), // b
                             self_ref->debugDrawThickness * 0.5f, // thickness
                             ui::colorFromHex("#f700ffff") // color
                         );
@@ -220,22 +220,24 @@ namespace AppKit
 
                 // getTransform()->setLocalPosition(position);
 
-                SimplePhysics::ThreadState thread_state;
-                physicsController->update(app->gameScene->physicsContainer.get(),
-                                          thread_state,
-                                          time,
-                                          inputState.x_axis,
-                                          inputState.jump.pressed,
-                                          app->gameScene->physicsContainer->max_velocity);
+                AppKit::Physics::Container::ThreadState2D thread_state2d;
+                character2D->update(app->gameScene->container2D.get(),
+                                    thread_state2d,
+                                    time,
+                                    inputState.x_axis,
+                                    inputState.jump.pressed,
+                                    app->gameScene->container2D->max_velocity);
 
-                getTransform()->setLocalPosition(MathCore::vec3f(physicsController->position, 0.0f));
+                getTransform()->setLocalPosition(MathCore::vec3f(character2D->position, 0.0f));
 
                 auto debugDrawTransform = getTransform()->findTransformByName("DebugDrawCircle");
                 if (debugDrawTransform)
                 {
+                    using namespace AppKit::Physics::VelocityHelpers;
+
                     auto mesh_line_drawer = debugDrawTransform->findComponent<ComponentMesh>();
                     MathCore::vec4f color;
-                    auto state = physicsController->jumpState.getState();
+                    auto state = character2D->jumpState.getState();
                     switch (state)
                     {
                     case JumpState::Grounded:
