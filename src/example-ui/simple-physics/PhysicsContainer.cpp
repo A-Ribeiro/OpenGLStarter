@@ -736,11 +736,11 @@ namespace SimplePhysics
         vec2f gravity_up = -gravity_dir;
         float velocity_gravity_y = OP<vec2f>::dot(velocity, gravity_up);
 
-        jumpState.update(&velocity_gravity_y, // velocityY
-                         time->deltaTime,     // deltaTime
-                         -gravity_mag,        // gravity
-                         jump_pressed,        // jump_pressed
-                         allow_double_jump);  // allow_double_jump
+        jumpState.updateVelocity(&velocity_gravity_y, // velocityY
+                                 time->deltaTime,     // deltaTime
+                                 -gravity_mag,        // gravity
+                                 jump_pressed,        // jump_pressed
+                                 allow_double_jump);  // allow_double_jump
 
         // apply back the jump velocity to the velocity vector
         // removing velocity in gravity direction and adding the jump velocity in the gravity direction
@@ -750,7 +750,7 @@ namespace SimplePhysics
         vec2f x_axis = OP<vec2f>::cross_z_down(gravity_up);
         vec2f ground_axis = x_axis;
 
-        if (jumpState.getState() == JumpState::Grounded)
+        if (jumpState.getState() == VelocityHelpers::JumpState::Grounded)
         {
             vec2f segment_point = last_collision_segment.closestPoint(position);
             vec2f normal = position - segment_point;
@@ -875,13 +875,13 @@ namespace SimplePhysics
         // last_collision_segment = *on_segment;
         if (ground_touch)
         {
-            if (jumpState.getState() == JumpState::Falling)
+            if (jumpState.getState() == VelocityHelpers::JumpState::Falling)
                 jumpState.setGrounded();
         }
         else
         {
             last_collision_segment = Segment2D();
-            if (jumpState.getState() == JumpState::Grounded)
+            if (jumpState.getState() == VelocityHelpers::JumpState::Grounded)
                 jumpState.setFalling();
         }
     }

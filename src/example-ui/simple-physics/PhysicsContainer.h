@@ -11,11 +11,13 @@
 
 #include "Quadtree.h"
 
-#include "../components/util/JumpState.h"
+#include <appkit-physics/velocity-helpers/JumpState.h>
 #include "Uuid.h"
 
 namespace SimplePhysics
 {
+    using namespace AppKit::Physics;
+
     enum GameAreaSide
     {
         GameAreaSide_Top,
@@ -138,7 +140,7 @@ namespace SimplePhysics
     class JumpingController
     {
     public:
-        JumpState jumpState;
+        VelocityHelpers::JumpState jumpState;
 
         MathCore::vec2f velocity;
         MathCore::vec2f acceleration;
