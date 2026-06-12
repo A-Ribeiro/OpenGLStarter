@@ -4,13 +4,15 @@
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 #include "components/ComponentCameraToPlayer.h"
 #include "components/ComponentPlayer.h"
-#include "simple-physics/PhysicsContainer.h"
 
 #include <InteractiveToolkit/ITKCommon/Random.h>
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <appkit-gl-engine/Components/Core/ComponentLineMounter.h>
 
 #include "stage-generator/StageGenerator.h"
+
+using namespace AppKit::Physics::Container;
+using namespace AppKit::Physics::Core;
 
 namespace Debug
 {
@@ -25,7 +27,7 @@ void GameScene::generateRandomStage()
     params.player_radius = 50.0f;
     params.stage_length_screens = 5;
 
-    stageResult = StageGen::StageGenerator::generate(*physicsContainer, params, random32);
+    stageResult = StageGen::StageGenerator::generate(*container2D, params, random32);
     // using namespace MathCore;
     // using namespace SimplePhysics;
 
@@ -34,23 +36,23 @@ void GameScene::generateRandomStage()
     // vec2f screen_size = vec2f(1920.0f, 1080.0f);
     // vec2f screen_size_2 = screen_size * 0.5f;
 
-    // physicsContainer->setGameArea(
+    // container2D->setGameArea(
     //     Box2D(vec2f(-screen_size_2.x, -screen_size_2.y),
     //           vec2f(screen_size_2.x, screen_size_2.y)));
 
-    // physicsContainer->static_structures.push_back(Structure2D::FromSegment(
+    // container2D->static_structures.push_back(Structure2D::FromSegment(
     //     "wall", 0.5f,
     //     Segment2D(
     //         vec2f(-screen_size_2.x, screen_size_2.y),
     //         vec2f(-params.player_radius * 0.5f, -screen_size_2.y * 0.5f))));
 
-    // physicsContainer->static_structures.push_back(Structure2D::FromSegment(
+    // container2D->static_structures.push_back(Structure2D::FromSegment(
     //     "wall", 0.5f,
     //     Segment2D(
     //         vec2f(-params.player_radius * 0.5f, -screen_size_2.y * 0.5f),
     //         vec2f(-params.player_radius * 0.5f + 100.0f, -screen_size_2.y * 0.5f))));
 
-    // physicsContainer->static_structures.push_back(Structure2D::FromSegment(
+    // container2D->static_structures.push_back(Structure2D::FromSegment(
     //     "wall", 0.5f,
     //     Segment2D(
     //         vec2f(params.player_radius * 2.0f, screen_size_2.y),
@@ -63,11 +65,11 @@ void GameScene::loadResources()
     using namespace ITKCommon;
     using namespace MathCore;
 
-    physicsContainer = STL_Tools::make_unique<SimplePhysics::PhysicsContainer>();
+    container2D = STL_Tools::make_unique<Container2D>();
 
     generateRandomStage();
 
-    physicsContainer->buildStaticQuadtree(
+    container2D->buildStaticQuadtree(
         8,   // maxDepth_
         16); // minPointThresholdToSubdivide_
 }
@@ -97,7 +99,7 @@ void GameScene::loadGraph()
             std::shared_ptr<ComponentLineMounter> line_mounter = debugDrawTransform->addNewComponent<ComponentLineMounter>();
             line_mounter->setCamera(&app->resourceMap, app->gameScene->getCamera(), true);
 
-            auto points = physicsContainer->game_area.getBoxPoints();
+            auto points = container2D->game_area.getBoxPoints();
 
             for (size_t i = 0; i < points.size(); i++)
             {
@@ -112,9 +114,9 @@ void GameScene::loadGraph()
                 );
             }
 
-            for (const auto &structure : physicsContainer->getStaticStructures())
+            for (const auto &structure : container2D->getStaticStructures())
             {
-                if (structure->type == SimplePhysics::StructureType::Segment)
+                if (structure->type == StructureType::Segment)
                 {
                     for (const auto &segment : structure->segments)
                     {
@@ -129,7 +131,6 @@ void GameScene::loadGraph()
                     }
                     if (structure->pass_through_set)
                     {
-                        using namespace SimplePhysics;
                         vec2f center = (structure->segments[0].a + structure->segments[0].b) * 0.5f;
                         // also draw the pass-through activation line
                         float dst =  Line2D::pointDistanceToLine(center, structure->pass_through_activate_line);
@@ -188,8 +189,8 @@ void GameScene::loadGraph()
 
         // draw filled quad on game area box
         {
-            auto box_center = physicsContainer->game_area.getCenter();
-            auto box_size = physicsContainer->game_area.getSize();
+            auto box_center = container2D->game_area.getCenter();
+            auto box_size = container2D->game_area.getSize();
 
             auto box_to_draw_transform = game_area_transform->addChild(Transform::CreateShared("DebugDrawAABB"));
             box_to_draw_transform->setLocalPosition(MathCore::vec3f(
@@ -212,9 +213,9 @@ void GameScene::loadGraph()
                 MeshUploadMode_Direct,         // mesh upload mode
                 4);                            // segment count
 
-            for (const auto &structure : physicsContainer->getStaticStructures())
+            for (const auto &structure : container2D->getStaticStructures())
             {
-                if (structure->type == SimplePhysics::StructureType::Box)
+                if (structure->type == StructureType::Box)
                 {
                     auto box_center = structure->box.getCenter();
                     auto box_size = structure->box.getSize();
@@ -312,7 +313,7 @@ void GameScene::unloadAll()
 {
     root = nullptr;
     camera = nullptr;
-    physicsContainer.reset();
+    container2D.reset();
 }
 
 GameScene *GameScene::currentInstance = nullptr;

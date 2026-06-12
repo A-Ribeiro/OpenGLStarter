@@ -1,5 +1,5 @@
 #include "StageGenerator.h"
-#include "../simple-physics/PhysicsContainer.h"
+// #include "../simple-physics/PhysicsContainer.h"
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
 #include <InteractiveToolkit/ITKCommon/Random.h>
@@ -7,9 +7,15 @@
 #include <algorithm>
 #include <cmath>
 
+#include <appkit-physics/core/Box2D.h>
+#include <appkit-physics/core/Line2D.h>
+#include <appkit-physics/core/Segment2D.h>
+
+
 using namespace MathCore;
 using namespace ITKCommon;
-using namespace SimplePhysics;
+using namespace AppKit::Physics::Container;
+using namespace AppKit::Physics::Core;
 
 namespace StageGen
 {
@@ -45,7 +51,7 @@ namespace StageGen
     // ----------------------------------------------------------------
 
     void StageGenerator::addFloorAndWalls(
-        PhysicsContainer &container,
+        Container2D &container,
         const StageParams &params)
     {
         return;
@@ -77,9 +83,11 @@ namespace StageGen
     // ----------------------------------------------------------------
     // Start and end platforms
     // ----------------------------------------------------------------
+    // Start and end platforms
+    // ----------------------------------------------------------------
 
     void StageGenerator::addStartAndEndPlatforms(
-        PhysicsContainer &container,
+        Container2D &container,
         const StageParams &params,
         vec2f &out_start,
         vec2f &out_end)
@@ -114,7 +122,7 @@ namespace StageGen
     // ----------------------------------------------------------------
 
     void StageGenerator::addPlatformSequence(
-        PhysicsContainer &container,
+        Container2D &container,
         const StageParams &params,
         MathRandomExt<Random32> &mathRnd,
         const vec2f &start,
@@ -359,7 +367,7 @@ namespace StageGen
     }
 
     void StageGenerator::addTestPlatformSequence(
-        PhysicsContainer &container,
+        Container2D &container,
         const StageParams &params,
         MathRandomExt<Random32> &mathRnd,
         const vec2f &start,
@@ -445,7 +453,7 @@ namespace StageGen
     // ----------------------------------------------------------------
 
     void StageGenerator::addDecorativeBoxes(
-        PhysicsContainer &container,
+        Container2D &container,
         const StageParams &params,
         MathRandomExt<Random32> &mathRnd)
     {
@@ -474,7 +482,7 @@ namespace StageGen
     // ----------------------------------------------------------------
 
     StageResult StageGenerator::generate(
-        PhysicsContainer &container,
+        Container2D &container,
         const StageParams &params,
         Random32 &rng)
     {
@@ -486,6 +494,7 @@ namespace StageGen
 
         // 1. Set game area
         auto game_area_box = Box2D(vec2f(0.0f, 0.0f), vec2f(W, H));
+        
         container.setGameArea(game_area_box);
 
         // add game area boundary segments for collision (optional, since we have floor/walls, but good for safety)

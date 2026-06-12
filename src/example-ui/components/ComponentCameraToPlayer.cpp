@@ -6,8 +6,7 @@
 #include <appkit-gl-engine/Components/2d/ComponentRectangle.h>
 #include "./ComponentPlayer.h"
 
-#include "../simple-physics/Box2D.h"
-#include "../simple-physics/PhysicsContainer.h"
+// #include <appkit-physics/core/Box2D.h>
 
 namespace AppKit
 {
@@ -60,14 +59,14 @@ namespace AppKit
                 auto camera_transform = camera_ref->getTransform();
 
                 using namespace MathCore;
-                using namespace SimplePhysics;
+                // using namespace AppKit::Physics::Core;
 
                 vec2f windowSize_2 = vec2f(camera_ref->viewport.w, camera_ref->viewport.h) * 0.5f;
 
-                vec2f stage_camera_min_limit = app->gameScene->physicsContainer->game_area.min + windowSize_2;
-                vec2f stage_camera_max_limit = app->gameScene->physicsContainer->game_area.max - windowSize_2;
+                vec2f stage_camera_min_limit = app->gameScene->container2D->game_area.min + windowSize_2;
+                vec2f stage_camera_max_limit = app->gameScene->container2D->game_area.max - windowSize_2;
 
-                vec2f game_area_center = app->gameScene->physicsContainer->game_area.getCenter();
+                vec2f game_area_center = app->gameScene->container2D->game_area.getCenter();
 
                 for(int i=0;i<2;i++)
                 {

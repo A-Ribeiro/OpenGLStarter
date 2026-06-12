@@ -8,8 +8,8 @@
 #include <InteractiveToolkit/Platform/Core/ObjectQueue.h>
 
 #include "util/PlayerInputState.h"
-#include "util/JumpState.h"
-#include "../simple-physics/PhysicsContainer.h"
+
+#include <appkit-physics/controller/Character2D.h>
 
 class App;
 
@@ -42,7 +42,7 @@ namespace AppKit
                 EventCore::Property<float> OffsetGrounded;
 
 
-                std::shared_ptr<SimplePhysics::JumpingController> physicsController;
+                std::shared_ptr<AppKit::Physics::Controller::Character2D> character2D;
 
                 // std::weak_ptr<ComponentGameArea> gameArea;
 
