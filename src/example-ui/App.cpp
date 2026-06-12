@@ -400,21 +400,21 @@ void App::applySettingsChanges()
     auto options = AppOptions::OptionsManager::Instance();
 
     {
-        const char *vSync = options->getGroupValueSelectedForKey("Video", "VSync");
-        engine->window->glSetVSync(strcmp(vSync, "ON") == 0);
+        const std::string &vSync = options->getGroupValueSelectedForKey("Video", "VSync");
+        engine->window->glSetVSync(vSync == "ON");
     }
 
     {
-        const char *meshCrusher = options->getGroupValueSelectedForKey("Extra", "MeshCrusher");
-        if (strcmp(meshCrusher, "ON") == 0)
+        const std::string &meshCrusher = options->getGroupValueSelectedForKey("Extra", "MeshCrusher");
+        if (meshCrusher == "ON")
             renderPipeline.agregateMesh_ConcatenateLowerThanTriangleCount = 1024;
         else
             renderPipeline.agregateMesh_ConcatenateLowerThanTriangleCount = 0;
     }
 
     {
-        const char *onGameStats = options->getGroupValueSelectedForKey("Extra", "OnGameStats");
-        draw_stats_enabled = strcmp(onGameStats, "FPS") == 0;
+        const std::string &onGameStats = options->getGroupValueSelectedForKey("Extra", "OnGameStats");
+        draw_stats_enabled = onGameStats == "FPS";
     }
 
     if (mainScene != nullptr)
