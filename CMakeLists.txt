@@ -137,6 +137,10 @@ if (NOT TARGET appkit-window-imguizmo)
     add_subdirectory(libs/InteractiveToolkit-AppKit/common/appkit-window-imguizmo "${CMAKE_BINARY_DIR}/lib/appkit-window-imguizmo")
 endif()
 
+if (NOT TARGET appkit-physics)
+    add_subdirectory(libs/InteractiveToolkit-AppKit/physics/appkit-physics "${CMAKE_BINARY_DIR}/lib/appkit-physics")
+endif()
+
 add_subdirectory(src/test-open-window)
 
 add_subdirectory(src/tech-demo-pbr)
