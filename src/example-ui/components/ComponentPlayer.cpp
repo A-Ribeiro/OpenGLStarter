@@ -63,7 +63,8 @@ namespace AppKit
                     300.0f,                          // maxJumpHeight
                     200.0f,                          // secondJumpHeight
                     MathCore::vec2f(0.0f, -5000.0f), // gravity
-                    true                             // allow_double_jump
+                    true,                            // allow_double_jump
+                    1e-2f                            // skin_width: a small extra radius to avoid the character to be stuck in the geometry when moving at high speed against it, by giving some "space" for the physics to detect the collision a bit earlier and react to it before the character is already intersecting the geometry.
                 );
                 // app->gameScene->physicsContainer->jumpingControllerList.push_back(physicsController);
                 character2D->teleport(MathCore::CVT<MathCore::vec3f>::toVec2(getTransform()->getLocalPosition()));

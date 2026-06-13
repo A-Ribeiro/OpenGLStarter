@@ -104,7 +104,8 @@ namespace AppKit
                     const EventCore::Callback<void(const Core::Segment2D *on_segment)> &onGrounded,
                     const EventCore::Callback<void(const MathCore::vec2f &pos, const Core::Segment2D *on_segment)> &onMoveTouch,
                     ThreadState2D &thread_state,
-                    ObjectState2D &object_state);
+                    ObjectState2D &object_state,
+                    float skin_width = 1e-2f);
 
                 const float max_velocity = 5000.0f;
 

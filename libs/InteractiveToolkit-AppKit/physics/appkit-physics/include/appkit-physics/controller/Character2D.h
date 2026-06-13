@@ -56,13 +56,16 @@ namespace AppKit
 
                 Container::ObjectState2D object_state;
 
+                float skin_width;
+
                 Character2D();
 
                 static Character2D fromStaticConfig(
                     float radius, float radius_grounded, float offset_grounded,
                     float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
                     const MathCore::vec2f &gravity,
-                    bool allow_double_jump);
+                    bool allow_double_jump,
+                    float skin_width);
 
                 void update(Container::Container2D *Container2D, Container::ThreadState2D &thread_state, Platform::Time *time, float input_x_axis, bool jump_pressed, float max_velocity);
 

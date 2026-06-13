@@ -437,12 +437,13 @@ namespace AppKit
             float Segment2D::circleCastIntersectsSegment(
                 const MathCore::vec2f &center_from, const MathCore::vec2f &center_to,
                 const float &radius,
-                const MathCore::vec2f &segment_a, const MathCore::vec2f &segment_b)
+                const MathCore::vec2f &segment_a, const MathCore::vec2f &segment_b,
+                float skin_width)
             {
                 using namespace MathCore;
 
                 // Skin width to prevent exact-touching deadlocks in iterative collision response
-                const float skin_width = 1e-2f;
+                // const float skin_width = 1e-2f;
                 float effective_radius = radius - skin_width;
                 float effective_radius_sq = effective_radius * effective_radius;
 
@@ -552,12 +553,13 @@ namespace AppKit
                 const MathCore::vec2f &center_from, const MathCore::vec2f &center_to,
                 const float &radius,
                 const MathCore::vec2f &segment_a, const MathCore::vec2f &segment_b,
-                MathCore::vec2f *out_move_direction)
+                MathCore::vec2f *out_move_direction,
+                float skin_width)
             {
                 using namespace MathCore;
 
                 // Skin width to prevent exact-touching deadlocks in iterative collision response
-                const float skin_width = 1e-2f;
+                // const float skin_width = 1e-2f;
                 float effective_radius = radius - skin_width;
                 float effective_radius_sq = effective_radius * effective_radius;
 

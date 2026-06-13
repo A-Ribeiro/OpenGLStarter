@@ -169,12 +169,14 @@ namespace AppKit
                 static float circleCastIntersectsSegment(
                     const MathCore::vec2f &center_from, const MathCore::vec2f &center_to,
                     const float &radius,
-                    const MathCore::vec2f &segment_a, const MathCore::vec2f &segment_b);
+                    const MathCore::vec2f &segment_a, const MathCore::vec2f &segment_b,
+                    float skin_width = 1e-2f);
                 static float circleCastIntersectsSegment(
                     const MathCore::vec2f &center_from, const MathCore::vec2f &center_to,
                     const float &radius,
                     const MathCore::vec2f &segment_a, const MathCore::vec2f &segment_b,
-                    MathCore::vec2f *out_move_direction);
+                    MathCore::vec2f *out_move_direction,
+                    float skin_width = 1e-2f);
             };
         }
     }
