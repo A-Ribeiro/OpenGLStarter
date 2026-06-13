@@ -141,6 +141,10 @@ if (NOT TARGET appkit-physics)
     add_subdirectory(libs/InteractiveToolkit-AppKit/physics/appkit-physics "${CMAKE_BINARY_DIR}/lib/appkit-physics")
 endif()
 
+if (NOT TARGET appkit-ui)
+    add_subdirectory(libs/InteractiveToolkit-AppKit/opengl/appkit-ui "${CMAKE_BINARY_DIR}/lib/appkit-ui")
+endif()
+
 add_subdirectory(src/test-open-window)
 
 add_subdirectory(src/tech-demo-pbr)

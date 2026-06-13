@@ -10,35 +10,37 @@
 
 #include <appkit-gl-engine/util/SpriteAtlas.h>
 
-#include "./ui/ScreenManager.h"
-#include "./ui/ScreenMain.h"
-#include "./ui/ScreenOptions.h"
-#include "./ui/ScreenMessageBox.h"
-#include "./ui/ScreenHUD.h"
+// #include "./ui/ScreenManager.h"
+// #include "./ui/ScreenMain.h"
+// #include "./ui/ScreenOptions.h"
+// #include "./ui/ScreenMessageBox.h"
+// #include "./ui/ScreenHUD.h"
+
+#include <appkit-ui/appkit-ui.h>
 
 class App;
 
 //
 // Auto Generated: Exported Bitmaps inside the Font
 //
-#define  Font_xbox_a u8"\U00010000"
-#define  Font_xbox_b u8"\U00010001"
-#define  Font_xbox_x u8"\U00010002"
-#define  Font_xbox_y u8"\U00010003"
-#define  Font_ps_circle_color u8"\U00010004"
-#define  Font_ps_cross_color u8"\U00010005"
-#define  Font_ps_square_color u8"\U00010006"
-#define  Font_ps_triangle_color u8"\U00010007"
-#define  Font_ps_circle_white u8"\U00010008"
-#define  Font_ps_cross_white u8"\U00010009"
-#define  Font_ps_square_white u8"\U0001000a"
-#define  Font_ps_triangle_white u8"\U0001000b"
-#define  Font_L_stick u8"\U0001000c"
-#define  Font_R_stick u8"\U0001000d"
-#define  Font_Key_arrows u8"\U0001000e"
-#define  Font_Key_z u8"\U0001000f"
-#define  Font_Key_x u8"\U00010010"
-#define  Font_Key_c u8"\U00010011"
+#define Font_xbox_a u8"\U00010000"
+#define Font_xbox_b u8"\U00010001"
+#define Font_xbox_x u8"\U00010002"
+#define Font_xbox_y u8"\U00010003"
+#define Font_ps_circle_color u8"\U00010004"
+#define Font_ps_cross_color u8"\U00010005"
+#define Font_ps_square_color u8"\U00010006"
+#define Font_ps_triangle_color u8"\U00010007"
+#define Font_ps_circle_white u8"\U00010008"
+#define Font_ps_cross_white u8"\U00010009"
+#define Font_ps_square_white u8"\U0001000a"
+#define Font_ps_triangle_white u8"\U0001000b"
+#define Font_L_stick u8"\U0001000c"
+#define Font_R_stick u8"\U0001000d"
+#define Font_Key_arrows u8"\U0001000e"
+#define Font_Key_z u8"\U0001000f"
+#define Font_Key_x u8"\U00010010"
+#define Font_Key_c u8"\U00010011"
 
 class MainScene : public AppKit::GLEngine::SceneBase
 {
@@ -53,7 +55,7 @@ protected:
     // clear all loaded scene
     virtual void unloadAll();
 
-    static MainScene* currentInstance;
+    static MainScene *currentInstance;
 
     static void comes_from_app_recreation();
 
@@ -63,21 +65,21 @@ protected:
         AppKit::GLEngine::RenderPipeline *_renderPipeline,
         AppKit::GLEngine::ResourceHelper *_resourceHelper,
         AppKit::GLEngine::ResourceMap *_resourceMap,
-        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow
-    );
+        std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
+
 public:
     friend class AppKit::GLEngine::SceneBase;
 
     App *app;
 
-    std::shared_ptr<ui::ScreenManager> screenManager;
+    std::shared_ptr<AppKit::ui::ScreenManager> screenManager;
 
     ITKCommon::Random32 random32;
     MathCore::MathRandomExt<ITKCommon::Random32> mathRandom;
 
     Platform::ObjectQueue<std::shared_ptr<AppKit::GLEngine::Transform>> transformPool;
 
-    Platform::ObjectQueue<ui::UIEventEnum> uiCommands;
+    Platform::ObjectQueue<AppKit::ui::UIEventEnum> uiCommands;
 
     ~MainScene();
 

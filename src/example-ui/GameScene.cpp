@@ -110,7 +110,7 @@ void GameScene::loadGraph()
                     MathCore::vec3f(a, 0),        // a
                     MathCore::vec3f(b, 0),        // b
                     3.0f,                         // thickness
-                    ui::colorFromHex("#00FF00FF") // color
+                    AppKit::ui::colorFromHex("#00FF00FF") // color
                 );
             }
 
@@ -125,8 +125,8 @@ void GameScene::loadGraph()
                             MathCore::vec3f(segment.b, -1.0f),  // b
                             3.0f,                               // thickness
                             (structure->pass_through_set)        //
-                                ? ui::colorFromHex("#0000FFFF") // color for pass-through segments
-                                : ui::colorFromHex("#FF0000FF") // color
+                                ? AppKit::ui::colorFromHex("#0000FFFF") // color for pass-through segments
+                                : AppKit::ui::colorFromHex("#FF0000FF") // color
                         );
                     }
                     if (structure->pass_through_set)
@@ -138,7 +138,7 @@ void GameScene::loadGraph()
                             MathCore::vec3f(center + structure->pass_through_activate_line.normal * (50.0f - dst), -1.0f),
                             50.0f,                        // radius
                             3.0f,                         // thickness
-                            ui::colorFromHex("#ffff00FF") // color for pass-through segments
+                            AppKit::ui::colorFromHex("#ffff00FF") // color for pass-through segments
                         );
 
                         dst = Line2D::pointDistanceToLine(center, structure->pass_through_deactivate_line);
@@ -146,7 +146,7 @@ void GameScene::loadGraph()
                             MathCore::vec3f(center + structure->pass_through_deactivate_line.normal * (0.0f - dst), -1.0f),
                             50.0f,                        // radius
                             3.0f,                         // thickness
-                            ui::colorFromHex("#ffff00FF") // color for pass-through segments
+                            AppKit::ui::colorFromHex("#ffff00FF") // color for pass-through segments
                         );
                     }
                 }
@@ -203,7 +203,7 @@ void GameScene::loadGraph()
                 MathCore::vec2f(
                     box_size.x,
                     box_size.y),               // size
-                ui::colorFromHex("#c8e8c8FF"), // color
+                AppKit::ui::colorFromHex("#c8e8c8FF"), // color
                 MathCore::vec4f(0, 0, 0, 0),   // radius
                 StrokeModeGrowOutside,         // stroke mode
                 0.0f,                          // stroke thickness
@@ -232,8 +232,8 @@ void GameScene::loadGraph()
                             box_size.x,
                             box_size.y),                     // size
                         (structure->pass_through_set)         //
-                            ? ui::colorFromHex("#0000ffff")  // color for pass-through structures
-                            : ui::colorFromHex("#FF0000FF"), // color
+                            ? AppKit::ui::colorFromHex("#0000ffff")  // color for pass-through structures
+                            : AppKit::ui::colorFromHex("#FF0000FF"), // color
                         MathCore::vec4f(0, 0, 0, 0),         // radius
                         StrokeModeGrowOutside,               // stroke mode
                         0.0f,                                // stroke thickness
@@ -289,7 +289,7 @@ void GameScene::bindResourcesToGraph()
     {
         componentPlayer->debugDrawEnabled = true;
         componentPlayer->debugDrawThickness = 2.0f;
-        componentPlayer->debugDrawColor = ui::colorFromHex("#0000ffFF");
+        componentPlayer->debugDrawColor = AppKit::ui::colorFromHex("#0000ffFF");
         componentPlayer->Radius = 50.0f;
         float factor = 5.0f;
         componentPlayer->RadiusGrounded = 50.0f - factor;
