@@ -25,7 +25,35 @@ void on_signal(int)
 void load_options()
 {
     auto options = AppOptions::OptionsManager::Instance();
-    options->initializeDefaults();
+    options->initializeDefaults(
+        {{"Control",
+          {
+              {"Input", {"Steam 1", "Keyboard", "Steam 1 + Keyboard"}, "Steam 1 + Keyboard"},
+              {"Movement", {"Fluid", "Legacy"}, "Fluid"},
+          }},
+         {"Audio",
+          {
+              {"EffectsVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
+              {"MusicVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
+          }},
+         {"Video",
+          {
+              {"WindowMode", {"Window", "Borderless", "Fullscreen"}, "Window"},
+              {"Resolution", {}, ""},
+              {"Aspect", {"16:9", "16:10"}, "16:9"},
+              {"AntiAliasing", {"MSAA", "OFF"}, "MSAA"},
+              {"VSync", {"ON", "OFF"}, "ON"},
+          }},
+         {"Extra",
+          {
+              {"Language", {"English", "Português (BR)"}, "English"},
+              {"ColorScheme", {"Blush", "Purple", "Orange", "Green", "Blue", "Dark"}, "Blush"},
+              {"ButtonAppearance", {"Bend Up", "Bend Down", "Round", "Tip Front", "Tip Back", "Tip Up", "Tip Down", "Square"}, "Bend Up"},
+              {"UiSize", {"Extra Small", "Small", "Medium", "Large", "Extra Large"}, "Medium"},
+              {"MeshCrusher", {"ON", "OFF"}, "OFF"},
+              {"Particles", {"Low", "Medium", "High", "Ultra"}, "High"},
+              {"OnGameStats", {"OFF", "FPS"}, "OFF"},
+          }}});
 
     Platform::ObjectBuffer optionsDataRaw;
     auto optionsPath = ITKCommon::Path::getSaveGamePath("OpenGLStarter", "Options") + ITKCommon::PATH_SEPARATOR + "options.bin";
