@@ -365,6 +365,7 @@ void MainScene::update(Platform::Time *elapsed)
                     ui::DialogAppearModeType_Scroll,
                     [&]()
                     {
+                        app->freeGameScene();
                         screenManager->open_screen("ScreenMain");
                     });
             }
