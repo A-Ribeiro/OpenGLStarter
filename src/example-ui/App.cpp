@@ -281,8 +281,8 @@ void App::drawStats()
     auto builder = fontResource->fontBuilder.get();
 
     builder->size = 64.0f;
-    builder->faceColor = ui::colorFromHex("#FFFF00FF");
-    builder->strokeColor = ui::colorFromHex("#000000ff");
+    builder->faceColor = AppKit::ui::colorFromHex("#FFFF00FF");
+    builder->strokeColor = AppKit::ui::colorFromHex("#000000ff");
     builder->strokeOffset = MathCore::vec3f(0, 0, 0.001f);
     builder->horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_left;
     builder->verticalAlign = AppKit::OpenGL::GLFont2VerticalAlign_bottom;
@@ -397,7 +397,7 @@ void App::applySettingsChanges()
 {
 
     auto engine = AppKit::GLEngine::Engine::Instance();
-    auto options = AppOptions::OptionsManager::Instance();
+    auto options = AppKit::ui::OptionsManager::Instance();
 
     {
         const std::string &vSync = options->getGroupValueSelectedForKey("Video", "VSync");

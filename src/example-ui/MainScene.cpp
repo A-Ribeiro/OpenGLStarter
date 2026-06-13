@@ -45,7 +45,7 @@ void MainScene::loadResources()
 {
     auto engine = AppKit::GLEngine::Engine::Instance();
 
-    screenManager = std::make_shared<ui::ScreenManager>();
+    screenManager = std::make_shared<AppKit::ui::ScreenManager>();
 }
 // to load the scene graph
 void MainScene::loadGraph()
@@ -62,23 +62,23 @@ void MainScene::loadGraph()
 
 void MainScene::applySettingsChanges()
 {
-    AppOptions::OptionsManager *options = AppOptions::OptionsManager::Instance();
+    AppKit::ui::OptionsManager *options = AppKit::ui::OptionsManager::Instance();
 
     {
         const std::string &buttonAppearance = options->getGroupValueSelectedForKey("Extra", "ButtonAppearance");
         const std::string &colorScheme = options->getGroupValueSelectedForKey("Extra", "ColorScheme");
         if (colorScheme == "Blush")
-            screenManager->setColorPalette(ui::Pallete::Blush.setAppearance(buttonAppearance.c_str()));
+            screenManager->setColorPalette(AppKit::ui::Pallete::Blush.setAppearance(buttonAppearance.c_str()));
         else if (colorScheme == "Purple")
-            screenManager->setColorPalette(ui::Pallete::Purple.setAppearance(buttonAppearance.c_str()));
+            screenManager->setColorPalette(AppKit::ui::Pallete::Purple.setAppearance(buttonAppearance.c_str()));
         else if (colorScheme == "Orange")
-            screenManager->setColorPalette(ui::Pallete::Orange.setAppearance(buttonAppearance.c_str()));
+            screenManager->setColorPalette(AppKit::ui::Pallete::Orange.setAppearance(buttonAppearance.c_str()));
         else if (colorScheme == "Green")
-            screenManager->setColorPalette(ui::Pallete::Green.setAppearance(buttonAppearance.c_str()));
+            screenManager->setColorPalette(AppKit::ui::Pallete::Green.setAppearance(buttonAppearance.c_str()));
         else if (colorScheme == "Blue")
-            screenManager->setColorPalette(ui::Pallete::Blue.setAppearance(buttonAppearance.c_str()));
+            screenManager->setColorPalette(AppKit::ui::Pallete::Blue.setAppearance(buttonAppearance.c_str()));
         else if (colorScheme == "Dark")
-            screenManager->setColorPalette(ui::Pallete::Dark.setAppearance(buttonAppearance.c_str()));
+            screenManager->setColorPalette(AppKit::ui::Pallete::Dark.setAppearance(buttonAppearance.c_str()));
     }
 
     // handle viewport
@@ -104,11 +104,11 @@ void MainScene::bindResourcesToGraph()
         camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
     }
 
-    std::vector<std::unique_ptr<ui::Screen>> screens;
-    screens.push_back(STL_Tools::make_unique<ui::ScreenMain>());
-    screens.push_back(STL_Tools::make_unique<ui::ScreenOptions>());
-    screens.push_back(STL_Tools::make_unique<ui::ScreenMessageBox>());
-    screens.push_back(STL_Tools::make_unique<ui::ScreenHUD>());
+    std::vector<std::unique_ptr<AppKit::ui::Screen>> screens;
+    screens.push_back(STL_Tools::make_unique<AppKit::ui::ScreenMain>());
+    screens.push_back(STL_Tools::make_unique<AppKit::ui::ScreenOptions>());
+    screens.push_back(STL_Tools::make_unique<AppKit::ui::ScreenMessageBox>());
+    screens.push_back(STL_Tools::make_unique<AppKit::ui::ScreenHUD>());
 
     applySettingsChanges();
 
@@ -116,14 +116,14 @@ void MainScene::bindResourcesToGraph()
     screenManager->load_screens(engine, resourceMap, &mathRandom, screens, MathCore::vec2i(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h));
     auto ui = root->findTransformByName("ui");
     ui->addChild(screenManager->uiRoot);
-    screenManager->screen<ui::ScreenHUD>()->inGameDialog.setSpriteAvatars({
+    screenManager->screen<AppKit::ui::ScreenHUD>()->inGameDialog.setSpriteAvatars({
         "resources/look_to_right_normal.png",
         "resources/look_to_right_smile.png",
         "resources/look_to_left_normal.png",
         "resources/look_to_center_normal.png",
     });
 
-    screenManager->screen<ui::ScreenMain>()->show(
+    screenManager->screen<AppKit::ui::ScreenMain>()->show(
         {"New Game", "Options", "Exit Game"},
         "New Game",
         [&](const std::string &option)
@@ -136,11 +136,11 @@ void MainScene::bindResourcesToGraph()
 
                 app->createGameScene();
 
-                // // screenManager->screen<ui::ScreenHUD>()->inGameDialog.showDialog(
-                // //     ui::DialogAppearModeType_Scroll,
+                // // screenManager->screen<AppKit::ui::ScreenHUD>()->inGameDialog.showDialog(
+                // //     AppKit::ui::DialogAppearModeType_Scroll,
                 // //     0.5f,
                 // //     "resources/look_to_right_normal.png",
-                // //     ui::DialogTextModeType_CharAppear,
+                // //     AppKit::ui::DialogTextModeType_CharAppear,
                 // //     "Welcome to the <b>Example UI</b> demo!\nThis is a simple dialog box with <i>rich text</i> support.\n\nPress the "
                 // //     "{push;lineHeight:0.8;faceColor:ffffffff;size:40.0;}" Font_Key_z "{pop;}"
                 // //     " button to proceed.",
@@ -162,9 +162,9 @@ void MainScene::bindResourcesToGraph()
                 // //             });
                 // //     });
 
-                // screenManager->screen<ui::ScreenHUD>()->inGameDialog.smartShowDialog(
-                //     ui::DialogAppearModeType_Scroll, // appear_mode
-                //     ui::DialogAppearModeType_Scroll, // disappear_mode
+                // screenManager->screen<AppKit::ui::ScreenHUD>()->inGameDialog.smartShowDialog(
+                //     AppKit::ui::DialogAppearModeType_Scroll, // appear_mode
+                //     AppKit::ui::DialogAppearModeType_Scroll, // disappear_mode
 
                 //     "{push;lineHeight:0.6;faceColor:ffffffff;size:60.0;}" Font_Key_z "{pop;}",
 
@@ -173,56 +173,56 @@ void MainScene::bindResourcesToGraph()
                 //             0.0f,
                 //             "resources/look_to_right_normal.png",
                 //             false,
-                //             ui::DialogTextModeType_CharAppear,
+                //             AppKit::ui::DialogTextModeType_CharAppear,
                 //             "Big Moves Causes Big Wins.",
                 //         },
                 //         {
                 //             0.1f,
                 //             "resources/look_to_right_smile.png",
                 //             false,
-                //             ui::DialogTextModeType_CharAppear,
+                //             AppKit::ui::DialogTextModeType_CharAppear,
                 //             "Big Moves Causes Big Wins!\nNew line here.",
                 //         },
                 //         {
                 //             1.0f,
                 //             "resources/look_to_left_normal.png",
                 //             false,
-                //             ui::DialogTextModeType_CharAppear,
+                //             AppKit::ui::DialogTextModeType_CharAppear,
                 //             "Big Moves Causes Big Wins.",
                 //         },
                 //         {
                 //             -1.0f,
                 //             "NO_IMAGE",
                 //             false,
-                //             ui::DialogTextModeType_CharAppear,
+                //             AppKit::ui::DialogTextModeType_CharAppear,
                 //             "He deeply thoughts...",
                 //         },
                 //         {
                 //             0.5f,
                 //             "resources/look_to_center_normal.png",
                 //             false,
-                //             ui::DialogTextModeType_CharAppear,
+                //             AppKit::ui::DialogTextModeType_CharAppear,
                 //             "Shure it does!",
                 //         },
                 //         {
                 //             0.9f,
                 //             "resources/look_to_right_smile.png",
                 //             true,
-                //             ui::DialogTextModeType_CharAppear,
+                //             AppKit::ui::DialogTextModeType_CharAppear,
                 //             "Other Side!\nNew line here.",
                 //         },
                 //         {
                 //             1.0f,
                 //             "resources/look_to_right_normal.png",
                 //             true,
-                //             ui::DialogTextModeType_CharAppear,
+                //             AppKit::ui::DialogTextModeType_CharAppear,
                 //             "Dialog Finished.",
                 //         },
                 //         {
                 //             -1.0f,
                 //             "NO_IMAGE",
                 //             false,
-                //             ui::DialogTextModeType_CharAppear,
+                //             AppKit::ui::DialogTextModeType_CharAppear,
                 //             "ending...",
                 //         },
                 //     },
@@ -234,8 +234,8 @@ void MainScene::bindResourcesToGraph()
             }
             else if (option == "Options")
             {
-                screenManager->screen<ui::ScreenOptions>()->showOptions(
-                    [&](AppOptions::OptionsManager *localOptions)
+                screenManager->screen<AppKit::ui::ScreenOptions>()->showOptions(
+                    [&](AppKit::ui::OptionsManager *localOptions)
                     {
                         // AppOptions::OptionsManager *appOptions = AppOptions::OptionsManager::Instance();
                         // app->appOptions->applyOptionsFrom(localOptions);
@@ -249,9 +249,9 @@ void MainScene::bindResourcesToGraph()
                                            localOptions->hasChanged("Video", "AntiAliasing") ||
                                            localOptions->hasChanged("Extra", "ButtonAppearance");
 
-                            AppOptions::OptionsManager localOptionsCopy = *localOptions;
+                            AppKit::ui::OptionsManager localOptionsCopy = *localOptions;
 
-                            screenManager->screen<ui::ScreenMessageBox>()->showMessageBox( //
+                            screenManager->screen<AppKit::ui::ScreenMessageBox>()->showMessageBox( //
                                 "Do you want to apply the new settings?",
                                 {"Apply", "Discard"}, // options
                                 "Apply",              // init selected
@@ -259,7 +259,7 @@ void MainScene::bindResourcesToGraph()
                                 {
                                     if (option == "Apply")
                                     {
-                                        *AppOptions::OptionsManager::Instance() = localOptionsCopy;
+                                        *AppKit::ui::OptionsManager::Instance() = localOptionsCopy;
                                         if (needsRestart)
                                             app->executeOnMainThread.enqueue([this]()
                                                                              { apply_settings_to_window(&MainScene::comes_from_app_recreation); });
@@ -303,21 +303,21 @@ void MainScene::bindResourcesToGraph()
                                                    {
         if (evt.type == AppKit::Window::KeyboardEventType::KeyPressed){
             if (evt.code == AppKit::Window::Devices::KeyCode::A || evt.code == AppKit::Window::Devices::KeyCode::Left)
-                uiCommands.enqueue(ui::UIEvent_InputLeft);
+                uiCommands.enqueue(AppKit::ui::UIEvent_InputLeft);
             else if (evt.code == AppKit::Window::Devices::KeyCode::D || evt.code == AppKit::Window::Devices::KeyCode::Right)
-                uiCommands.enqueue(ui::UIEvent_InputRight);
+                uiCommands.enqueue(AppKit::ui::UIEvent_InputRight);
             else if (evt.code == AppKit::Window::Devices::KeyCode::W || evt.code == AppKit::Window::Devices::KeyCode::Up)
-                uiCommands.enqueue(ui::UIEvent_InputUp);
+                uiCommands.enqueue(AppKit::ui::UIEvent_InputUp);
             else if (evt.code == AppKit::Window::Devices::KeyCode::S || evt.code == AppKit::Window::Devices::KeyCode::Down)
-                uiCommands.enqueue(ui::UIEvent_InputDown);
+                uiCommands.enqueue(AppKit::ui::UIEvent_InputDown);
             else if (evt.code == AppKit::Window::Devices::KeyCode::Q || evt.code == AppKit::Window::Devices::KeyCode::LShift || evt.code == AppKit::Window::Devices::KeyCode::LControl || evt.code == AppKit::Window::Devices::KeyCode::LBracket)
-                uiCommands.enqueue(ui::UIEvent_InputShoulderLeft);
+                uiCommands.enqueue(AppKit::ui::UIEvent_InputShoulderLeft);
             else if (evt.code == AppKit::Window::Devices::KeyCode::E || evt.code == AppKit::Window::Devices::KeyCode::RShift || evt.code == AppKit::Window::Devices::KeyCode::RControl || evt.code == AppKit::Window::Devices::KeyCode::RBracket)
-                uiCommands.enqueue(ui::UIEvent_InputShoulderRight);
+                uiCommands.enqueue(AppKit::ui::UIEvent_InputShoulderRight);
             else if (evt.code == AppKit::Window::Devices::KeyCode::Enter)
-                uiCommands.enqueue(ui::UIEvent_InputActionEnter);
+                uiCommands.enqueue(AppKit::ui::UIEvent_InputActionEnter);
             else if (evt.code == AppKit::Window::Devices::KeyCode::Escape)
-                uiCommands.enqueue(ui::UIEvent_InputActionBack);
+                uiCommands.enqueue(AppKit::ui::UIEvent_InputActionBack);
         } });
 
     this->OnUpdate.add(&MainScene::update, this);
@@ -345,7 +345,7 @@ void MainScene::unloadAll()
 
 void MainScene::update(Platform::Time *elapsed)
 {
-    bool HUD_visible = screenManager->screenIsVisible<ui::ScreenHUD>();
+    bool HUD_visible = screenManager->screenIsVisible<AppKit::ui::ScreenHUD>();
     while (uiCommands.size() > 0)
     {
         auto command = uiCommands.dequeue(nullptr, true);
@@ -354,15 +354,15 @@ void MainScene::update(Platform::Time *elapsed)
 
         if (HUD_visible)
         {
-            if (command == ui::UIEvent_InputActionEnter)
+            if (command == AppKit::ui::UIEvent_InputActionEnter)
             {
-                screenManager->screen<ui::ScreenHUD>()->inGameDialog.pressContinue();
+                screenManager->screen<AppKit::ui::ScreenHUD>()->inGameDialog.pressContinue();
             }
-            else if (command == ui::UIEvent_InputActionBack)
+            else if (command == AppKit::ui::UIEvent_InputActionBack)
             {
                 // Hide HUD on back
-                screenManager->screen<ui::ScreenHUD>()->inGameDialog.hideDialog(
-                    ui::DialogAppearModeType_Scroll,
+                screenManager->screen<AppKit::ui::ScreenHUD>()->inGameDialog.hideDialog(
+                    AppKit::ui::DialogAppearModeType_Scroll,
                     [&]()
                     {
                         app->freeGameScene();
@@ -394,7 +394,7 @@ void MainScene::onWindowResized(const MathCore::vec2i &new_size)
 
     MathCore::vec2i ui_screen_size = MathCore::vec2i(1920, 1080);
 
-    AppOptions::OptionsManager *options = AppOptions::OptionsManager::Instance();
+    AppKit::ui::OptionsManager *options = AppKit::ui::OptionsManager::Instance();
     {
         const std::string &uiSize = options->getGroupValueSelectedForKey("Extra", "UiSize");
         printf("UI Size Selected: %s\n", uiSize.c_str());
@@ -489,7 +489,7 @@ MainScene::~MainScene()
 
 void MainScene::comes_from_app_recreation()
 {
-    MainScene::currentInstance->screenManager->screen<ui::ScreenMessageBox>()->showMessageBox( //
+    MainScene::currentInstance->screenManager->screen<AppKit::ui::ScreenMessageBox>()->showMessageBox( //
         "Keep this settings?",
         {"Keep", "Roll Back"}, // options
         "Keep",                // init selected

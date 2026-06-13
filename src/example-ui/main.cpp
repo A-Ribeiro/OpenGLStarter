@@ -2,7 +2,9 @@
 #include <InteractiveToolkit/ITKCommon/Path.h>
 #include <InteractiveToolkit/Platform/Thread.h>
 #include <InteractiveToolkit/Platform/Process.h>
-#include "util/AppOptions.h"
+
+#include <appkit-ui/util/AppOptions.h>
+
 #include <InteractiveToolkit-DPI/InteractiveToolkit-DPI.h>
 
 #include "App.h"
@@ -24,7 +26,7 @@ void on_signal(int)
 
 void load_options()
 {
-    auto options = AppOptions::OptionsManager::Instance();
+    auto options = AppKit::ui::OptionsManager::Instance();
     options->initializeDefaults(
         {{"Control",
           {
@@ -63,7 +65,7 @@ void load_options()
 
 void save_options()
 {
-    auto options = AppOptions::OptionsManager::Instance();
+    auto options = AppKit::ui::OptionsManager::Instance();
 
     Platform::ObjectBuffer optionsDataRaw;
     options->saveOptionsToBuffer(&optionsDataRaw);
@@ -76,7 +78,7 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
 {
     auto engine = AppKit::GLEngine::Engine::Instance();
 
-    auto options = AppOptions::OptionsManager::Instance();
+    auto options = AppKit::ui::OptionsManager::Instance();
 
     std::string currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
     if (currWindowMode == "Borderless")
@@ -140,7 +142,7 @@ void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engine
 #if defined(__linux__)
             // This callback is called before the window is configured
             auto engine = AppKit::GLEngine::Engine::Instance();
-            auto options = AppOptions::OptionsManager::Instance();
+            auto options = AppKit::ui::OptionsManager::Instance();
 
             std::string currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
             if (currWindowMode == "Fullscreen")
@@ -210,7 +212,7 @@ void apply_settings_to_window(const EventCore::Callback<void()> &OnAfterAppCreat
 
 void reset_monitor_mode_to_default()
 {
-    auto options = AppOptions::OptionsManager::Instance();
+    auto options = AppKit::ui::OptionsManager::Instance();
     if (!options->isInitialized())
         return;
     auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
