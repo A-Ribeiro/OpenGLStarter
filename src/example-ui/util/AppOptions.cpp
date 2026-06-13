@@ -24,67 +24,67 @@ namespace AppOptions
     //     return true;
     // }
 
-    void create_default_binary_data_v1(std::vector<OptionsGroup> *options, std::unordered_map<std::string, std::unordered_map<std::string, std::string>> *optionsState)
-    {
-        (*options) = {{"Control",
-                       {
-                           {"Input", {"Steam 1", "Keyboard", "Steam 1 + Keyboard"}, "Steam 1 + Keyboard"},
-                           {"Movement", {"Fluid", "Legacy"}, "Fluid"},
-                       }},
-                      {"Audio",
-                       {
-                           {"EffectsVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
-                           {"MusicVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
-                       }},
-                      {"Video",
-                       {
-                           {"WindowMode", {"Window", "Borderless", "Fullscreen"}, "Window"},
-                           {"Resolution", {}, ""},
-                           {"Aspect", {"16:9", "16:10"}, "16:9"},
-                           {"AntiAliasing", {"MSAA", "OFF"}, "MSAA"},
-                           {"VSync", {"ON", "OFF"}, "ON"},
-                       }},
-                      {"Extra",
-                       {
-                           {"Language", {"English", "Português (BR)"}, "English"},
-                           {"ColorScheme", {"Blush", "Purple", "Orange", "Green", "Blue", "Dark"}, "Blush"},
-                           {"ButtonAppearance", {"Bend Up", "Bend Down", "Round", "Tip Front", "Tip Back", "Tip Up", "Tip Down", "Square"}, "Bend Up"},
-                           {"UiSize", {"Extra Small", "Small", "Medium", "Large", "Extra Large"}, "Medium"},
-                           {"MeshCrusher", {"ON", "OFF"}, "OFF"},
-                           {"Particles", {"Low", "Medium", "High", "Ultra"}, "High"},
-                           {"OnGameStats", {"OFF", "FPS"}, "OFF"},
-                       }}};
-        (*optionsState).clear();
+    // void create_default_binary_data_v1(std::vector<OptionsGroup> *options, std::unordered_map<std::string, std::unordered_map<std::string, std::string>> *optionsState)
+    // {
+    //     (*options) = {{"Control",
+    //                    {
+    //                        {"Input", {"Steam 1", "Keyboard", "Steam 1 + Keyboard"}, "Steam 1 + Keyboard"},
+    //                        {"Movement", {"Fluid", "Legacy"}, "Fluid"},
+    //                    }},
+    //                   {"Audio",
+    //                    {
+    //                        {"EffectsVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
+    //                        {"MusicVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
+    //                    }},
+    //                   {"Video",
+    //                    {
+    //                        {"WindowMode", {"Window", "Borderless", "Fullscreen"}, "Window"},
+    //                        {"Resolution", {}, ""},
+    //                        {"Aspect", {"16:9", "16:10"}, "16:9"},
+    //                        {"AntiAliasing", {"MSAA", "OFF"}, "MSAA"},
+    //                        {"VSync", {"ON", "OFF"}, "ON"},
+    //                    }},
+    //                   {"Extra",
+    //                    {
+    //                        {"Language", {"English", "Português (BR)"}, "English"},
+    //                        {"ColorScheme", {"Blush", "Purple", "Orange", "Green", "Blue", "Dark"}, "Blush"},
+    //                        {"ButtonAppearance", {"Bend Up", "Bend Down", "Round", "Tip Front", "Tip Back", "Tip Up", "Tip Down", "Square"}, "Bend Up"},
+    //                        {"UiSize", {"Extra Small", "Small", "Medium", "Large", "Extra Large"}, "Medium"},
+    //                        {"MeshCrusher", {"ON", "OFF"}, "OFF"},
+    //                        {"Particles", {"Low", "Medium", "High", "Ultra"}, "High"},
+    //                        {"OnGameStats", {"OFF", "FPS"}, "OFF"},
+    //                    }}};
+    //     (*optionsState).clear();
 
-        for (const auto &group : *options)
-        {
-            for (const auto &key : group.keys)
-            {
-                (*optionsState)[group.group_name][key.key_name] = key.default_option;
-            }
-        }
+    //     for (const auto &group : *options)
+    //     {
+    //         for (const auto &key : group.keys)
+    //         {
+    //             (*optionsState)[group.group_name][key.key_name] = key.default_option;
+    //         }
+    //     }
 
-        // memset(options, 0, sizeof(AppOptions_v1));
-        // snprintf(options->Control.Input, sizeof(options->Control.Input), "%s", OptionsConstants::ControlInput[2]);
-        // snprintf(options->Control.Movement, sizeof(options->Control.Movement), "%s", OptionsConstants::ControlMovement[0]);
+    //     // memset(options, 0, sizeof(AppOptions_v1));
+    //     // snprintf(options->Control.Input, sizeof(options->Control.Input), "%s", OptionsConstants::ControlInput[2]);
+    //     // snprintf(options->Control.Movement, sizeof(options->Control.Movement), "%s", OptionsConstants::ControlMovement[0]);
 
-        // snprintf(options->Audio.EffectsVolume, sizeof(options->Audio.EffectsVolume), "%s", OptionsConstants::AudioVolume[10]);
-        // snprintf(options->Audio.MusicVolume, sizeof(options->Audio.MusicVolume), "%s", OptionsConstants::AudioVolume[10]);
+    //     // snprintf(options->Audio.EffectsVolume, sizeof(options->Audio.EffectsVolume), "%s", OptionsConstants::AudioVolume[10]);
+    //     // snprintf(options->Audio.MusicVolume, sizeof(options->Audio.MusicVolume), "%s", OptionsConstants::AudioVolume[10]);
 
-        // snprintf(options->Video.WindowMode, sizeof(options->Video.WindowMode), "%s", OptionsConstants::VideoWindowMode[0]);
-        // snprintf(options->Video.Resolution, sizeof(options->Video.Resolution), "%s", "");
-        // snprintf(options->Video.Aspect, sizeof(options->Video.Aspect), "%s", OptionsConstants::VideoAspect[0]);
-        // snprintf(options->Video.AntiAliasing, sizeof(options->Video.AntiAliasing), "%s", OptionsConstants::VideoAntiAliasing[0]);
-        // snprintf(options->Video.VSync, sizeof(options->Video.VSync), "%s", OptionsConstants::VideoVSync[0]);
+    //     // snprintf(options->Video.WindowMode, sizeof(options->Video.WindowMode), "%s", OptionsConstants::VideoWindowMode[0]);
+    //     // snprintf(options->Video.Resolution, sizeof(options->Video.Resolution), "%s", "");
+    //     // snprintf(options->Video.Aspect, sizeof(options->Video.Aspect), "%s", OptionsConstants::VideoAspect[0]);
+    //     // snprintf(options->Video.AntiAliasing, sizeof(options->Video.AntiAliasing), "%s", OptionsConstants::VideoAntiAliasing[0]);
+    //     // snprintf(options->Video.VSync, sizeof(options->Video.VSync), "%s", OptionsConstants::VideoVSync[0]);
 
-        // snprintf(options->Extra.Language, sizeof(options->Extra.Language), "%s", OptionsConstants::ExtraLanguage[0]);
-        // snprintf(options->Extra.ColorScheme, sizeof(options->Extra.ColorScheme), "%s", OptionsConstants::ExtraColorScheme[0]);
-        // snprintf(options->Extra.ButtonAppearance, sizeof(options->Extra.ButtonAppearance), "%s", OptionsConstants::ExtraButtonAppearance[0]);
-        // snprintf(options->Extra.UiSize, sizeof(options->Extra.UiSize), "%s", OptionsConstants::ExtraUiSize[2]);
-        // snprintf(options->Extra.MeshCrusher, sizeof(options->Extra.MeshCrusher), "%s", OptionsConstants::ExtraMeshCrusher[1]);
-        // snprintf(options->Extra.Particles, sizeof(options->Extra.Particles), "%s", OptionsConstants::ExtraParticles[2]);
-        // snprintf(options->Extra.OnGameStats, sizeof(options->Extra.OnGameStats), "%s", OptionsConstants::ExtraOnGameStats[0]);
-    }
+    //     // snprintf(options->Extra.Language, sizeof(options->Extra.Language), "%s", OptionsConstants::ExtraLanguage[0]);
+    //     // snprintf(options->Extra.ColorScheme, sizeof(options->Extra.ColorScheme), "%s", OptionsConstants::ExtraColorScheme[0]);
+    //     // snprintf(options->Extra.ButtonAppearance, sizeof(options->Extra.ButtonAppearance), "%s", OptionsConstants::ExtraButtonAppearance[0]);
+    //     // snprintf(options->Extra.UiSize, sizeof(options->Extra.UiSize), "%s", OptionsConstants::ExtraUiSize[2]);
+    //     // snprintf(options->Extra.MeshCrusher, sizeof(options->Extra.MeshCrusher), "%s", OptionsConstants::ExtraMeshCrusher[1]);
+    //     // snprintf(options->Extra.Particles, sizeof(options->Extra.Particles), "%s", OptionsConstants::ExtraParticles[2]);
+    //     // snprintf(options->Extra.OnGameStats, sizeof(options->Extra.OnGameStats), "%s", OptionsConstants::ExtraOnGameStats[0]);
+    // }
 
     std::vector<std::string> OptionsManager::getGroups() const
     {
@@ -353,9 +353,14 @@ namespace AppOptions
         initialized = false;
     }
 
-    void OptionsManager::initializeDefaults()
+    void OptionsManager::initializeDefaults(const std::vector<OptionsGroup> &options_p)
     {
-        AppOptions::create_default_binary_data_v1(&options, &optionsState);
+        // AppOptions::create_default_binary_data_v1(&options, &optionsState);
+        options = options_p;
+        optionsState.clear();
+        for (const auto &group : options)
+            for (const auto &key : group.keys)
+                optionsState[group.group_name][key.key_name] = key.default_option;
 
         if (!initialized)
         {

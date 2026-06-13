@@ -88,7 +88,7 @@ namespace AppOptions
     // void write_binary_data_v1(const std::vector<OptionsGroup> &options, Platform::ObjectBuffer *output);
     // bool read_binary_data_v1(const Platform::ObjectBuffer &data, std::vector<OptionsGroup> *out_options);
 
-    void create_default_binary_data_v1(std::vector<OptionsGroup> *options, std::unordered_map<std::string, std::unordered_map<std::string, std::string>> *optionsState);
+    // void create_default_binary_data_v1(std::vector<OptionsGroup> *options, std::unordered_map<std::string, std::unordered_map<std::string, std::string>> *optionsState);
 
     class OptionsManager
     {
@@ -106,7 +106,7 @@ namespace AppOptions
         OptionsManager();
 
         bool isInitialized() const { return initialized; }
-        void initializeDefaults();
+        void initializeDefaults(const std::vector<OptionsGroup> &options_p);
         bool loadOptionsFromBuffer(const Platform::ObjectBuffer &data);
         void saveOptionsToBuffer(Platform::ObjectBuffer *output);
 
