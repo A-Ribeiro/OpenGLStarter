@@ -55,4 +55,5 @@ public:
     void applySettingsChanges();
 
     void createGameScene();
+    void freeGameScene();
 };

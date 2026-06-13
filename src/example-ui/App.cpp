@@ -430,3 +430,11 @@ void App::createGameScene()
             gameScene->load();
         } });
 }
+
+void App::freeGameScene()
+{
+    executeOnMainThread.enqueue([this]()
+                                {
+        if (gameScene != nullptr)
+            gameScene.reset(); });
+}
