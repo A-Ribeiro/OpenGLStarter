@@ -330,7 +330,8 @@ namespace AppKit
                 const EventCore::Callback<void(const Core::Segment2D *on_segment)> &onGrounded,
                 const EventCore::Callback<void(const MathCore::vec2f &pos, const Core::Segment2D *on_segment)> &onMoveTouch,
                 ThreadState2D &thread_state,
-                ObjectState2D &object_state)
+                ObjectState2D &object_state,
+                float skin_width)
             {
                 using namespace MathCore;
 
@@ -522,7 +523,9 @@ namespace AppKit
                                 continue;
 
                             vec2f out_dir;
-                            float t = Core::Segment2D::circleCastIntersectsSegment(a, b, radius, segment.a, segment.b, &out_dir);
+                            float t = Core::Segment2D::circleCastIntersectsSegment(a, b, radius, segment.a, segment.b, &out_dir, skin_width);
+                            if ((remaining_move_mag * move_t) <= (skin_width * 1.1f))
+                                t = 0.0f;
                             if (t < move_t)
                             {
                                 move_t = t;

@@ -22,7 +22,8 @@ namespace AppKit
                 float radius, float radius_grounded, float offset_grounded,
                 float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
                 const MathCore::vec2f &gravity,
-                bool allow_double_jump)
+                bool allow_double_jump,
+                float skin_width)
             {
                 using namespace MathCore;
                 Character2D controller;
@@ -38,6 +39,8 @@ namespace AppKit
 
                 controller.jumpState.configureJump(
                     jump_risingVelocity, jump_minJumpHeight, jump_maxJumpHeight, jump_secondJumpHeight, -controller.gravity_mag);
+                
+                controller.skin_width = skin_width;
 
                 return controller;
             }
@@ -196,7 +199,8 @@ namespace AppKit
                         // }
                     },
                     thread_state,
-                    object_state);
+                    object_state,
+                    skin_width);
 
                 // passed = passed || (position != position_before);
                 // printf("passed: %d\n", passed);
