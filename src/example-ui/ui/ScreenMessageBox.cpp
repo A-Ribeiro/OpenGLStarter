@@ -94,10 +94,10 @@ namespace ui
         buttonManager.layoutVisibleElements(ButtonDirection_horizontal);
 
         text->getTransform()->setLocalPosition(
-            MathCore::vec3f(0, box_bg_size.y * 0.5f - ScreenMessageBox::text_margin - text_size.y * 0.5f, -102));
+            MathCore::vec3f(0, box_bg_size.y * 0.5f - ScreenMessageBox::text_margin - text_size.y * 0.5f, -120));
 
         buttonManager.node_ui->getTransform()->setLocalPosition(
-            MathCore::vec3f(0, -box_bg_size.y * 0.5f + ScreenMessageBox::text_margin + button_size.y * 0.5f, -103));
+            MathCore::vec3f(0, -box_bg_size.y * 0.5f + ScreenMessageBox::text_margin + button_size.y * 0.5f, -130));
     }
 
     void ScreenMessageBox::previousButton()
@@ -261,14 +261,14 @@ namespace ui
                                  colorFromHex("#000000", 0.0f),                                                                // stroke color
                                  0,                                                                                            // drop shadow thickness
                                  MathCore::vec4f(0),                                                                           // drop shadow color
-                                 -101,                                                                                         // z
+                                 -110,                                                                                         // z
                                  "bg")
                       .get<AppKit::GLEngine::Components::ComponentRectangle>();
 
         auto txt = uiComponent->addTextureText(
                                   "resources/Roboto-Regular-100.basof2",                            // font_path
                                   MathCore::vec2f(0, 0),                                            // pos
-                                  -102,                                                             // z
+                                  -120,                                                             // z
                                   "dummy-text",                                                     // text
                                   ScreenMessageBox::text_size,                                      // size
                                   max_size.width,                                                   // max_width
