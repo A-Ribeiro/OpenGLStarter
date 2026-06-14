@@ -1,6 +1,8 @@
 ﻿#include "MainScene.h"
 #include "App.h"
 
+#include <appkit-ui/util/AppTemplate.h>
+
 #include <appkit-gl-engine/Components/Core/ComponentCameraOrthographic.h>
 #include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 // #include <InteractiveToolkit/EaseCore/EaseCore.h>
@@ -33,10 +35,6 @@ using namespace AppKit::GLEngine::Components;
 using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
-
-void load_options();
-void save_options();
-void apply_settings_to_window(const EventCore::Callback<void()> &OnAfterAppCreation);
 
 MainScene *MainScene::currentInstance = nullptr;
 
@@ -262,11 +260,11 @@ void MainScene::bindResourcesToGraph()
                                         *AppKit::ui::OptionsManager::Instance() = localOptionsCopy;
                                         if (needsRestart)
                                             app->executeOnMainThread.enqueue([this]()
-                                                                             { apply_settings_to_window(&MainScene::comes_from_app_recreation); });
+                                                                             { AppKit::ui::AppTemplate::Instance()->apply_settings_to_window(&MainScene::comes_from_app_recreation); });
                                         else
                                             app->executeOnMainThread.enqueue([this]()
                                                                              {
-                                                                         save_options();
+                                                                         AppKit::ui::AppTemplate::Instance()->save_options();
 
                                                                          // apply global settings...
                                                                          app->applySettingsChanges();
@@ -497,13 +495,13 @@ void MainScene::comes_from_app_recreation()
         {
             if (option == "Keep")
             {
-                save_options();
+                AppKit::ui::AppTemplate::Instance()->save_options();
                 MainScene::currentInstance->screenManager->pop_screen();
             }
             else
             {
-                load_options();
-                apply_settings_to_window(nullptr);
+                AppKit::ui::AppTemplate::Instance()->load_options();
+                AppKit::ui::AppTemplate::Instance()->apply_settings_to_window(nullptr);
             }
         });
 }

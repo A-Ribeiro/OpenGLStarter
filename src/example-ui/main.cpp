@@ -9,7 +9,7 @@
 
 #include "App.h"
 
-void reset_monitor_mode_to_default();
+#include <appkit-ui/util/AppTemplate.h>
 
 static AppBase *CreateAppInstance()
 {
@@ -24,200 +24,6 @@ void on_signal(int)
         AppKit::GLEngine::Engine::Instance()->app->exitApp();
 }
 
-void load_options()
-{
-    auto options = AppKit::ui::OptionsManager::Instance();
-    options->initializeDefaults(
-        {{"Control",
-          {
-              {"Input", {"Steam 1", "Keyboard", "Steam 1 + Keyboard"}, "Steam 1 + Keyboard"},
-              {"Movement", {"Fluid", "Legacy"}, "Fluid"},
-          }},
-         {"Audio",
-          {
-              {"EffectsVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
-              {"MusicVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
-          }},
-         {"Video",
-          {
-              {"WindowMode", {"Window", "Borderless", "Fullscreen"}, "Window"},
-              {"Resolution", {}, ""},
-              {"Aspect", {"16:9", "16:10"}, "16:9"},
-              {"AntiAliasing", {"MSAA", "OFF"}, "MSAA"},
-              {"VSync", {"ON", "OFF"}, "ON"},
-          }},
-         {"Extra",
-          {
-              {"Language", {"English", "Português (BR)"}, "English"},
-              {"ColorScheme", {"Blush", "Purple", "Orange", "Green", "Blue", "Dark"}, "Blush"},
-              {"ButtonAppearance", {"Bend Up", "Bend Down", "Round", "Tip Front", "Tip Back", "Tip Up", "Tip Down", "Square"}, "Bend Up"},
-              {"UiSize", {"Extra Small", "Small", "Medium", "Large", "Extra Large"}, "Medium"},
-              {"MeshCrusher", {"ON", "OFF"}, "OFF"},
-              {"Particles", {"Low", "Medium", "High", "Ultra"}, "High"},
-              {"OnGameStats", {"OFF", "FPS"}, "OFF"},
-          }}});
-
-    Platform::ObjectBuffer optionsDataRaw;
-    auto optionsPath = ITKCommon::Path::getSaveGamePath("OpenGLStarter", "Options") + ITKCommon::PATH_SEPARATOR + "options.bin";
-    ITKCommon::FileSystem::File::FromPath(optionsPath).readContentToObjectBuffer(&optionsDataRaw);
-    options->loadOptionsFromBuffer(optionsDataRaw);
-}
-
-void save_options()
-{
-    auto options = AppKit::ui::OptionsManager::Instance();
-
-    Platform::ObjectBuffer optionsDataRaw;
-    options->saveOptionsToBuffer(&optionsDataRaw);
-
-    auto optionsPath = ITKCommon::Path::getSaveGamePath("OpenGLStarter", "Options") + ITKCommon::PATH_SEPARATOR + "options.bin";
-    ITKCommon::FileSystem::File::FromPath(optionsPath).writeContentFromObjectBuffer(&optionsDataRaw);
-}
-
-void apply_window_options_to_engine(AppKit::GLEngine::EngineWindowConfig *engineConfig, const EventCore::Callback<void()> &OnAfterAppCreation)
-{
-    auto engine = AppKit::GLEngine::Engine::Instance();
-
-    auto options = AppKit::ui::OptionsManager::Instance();
-
-    std::string currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
-    if (currWindowMode == "Borderless")
-    {
-        auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
-
-        engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Borderless;
-        engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(defaultMonitor.width, defaultMonitor.height);
-    }
-    else if (currWindowMode == "Fullscreen")
-    {
-        const std::string &fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
-        int w, h;
-        if (sscanf(fullscreenRes.c_str(), "%ix%i", &w, &h) == 2)
-        {
-#if defined(__linux__)
-            engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Borderless;
-#elif defined(_WIN32)
-            engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::FullScreen;
-#endif
-            engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(w, h);
-        }
-        else
-        {
-            auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
-
-            options->setGroupValueSelectedForKey("Video", "WindowMode", "Window");
-            currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
-            engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Default;
-            engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(defaultMonitor.width / 2, defaultMonitor.height / 2);
-        }
-    }
-    else
-    {
-        auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
-
-        engineConfig->windowConfig.windowStyle = AppKit::Window::WindowStyle::Default;
-        engineConfig->windowConfig.videoMode = AppKit::Window::VideoMode(defaultMonitor.width / 2, defaultMonitor.height / 2);
-    }
-
-    {
-        const std::string &aaMode = options->getGroupValueSelectedForKey("Video", "AntiAliasing");
-        if (aaMode == "MSAA")
-            engineConfig->glContextConfig.antialiasingLevel = 2;
-        else
-            engineConfig->glContextConfig.antialiasingLevel = 0;
-    }
-
-    {
-        const std::string &vsyncMode = options->getGroupValueSelectedForKey("Video", "VSync");
-        if (vsyncMode == "ON")
-            engineConfig->glContextConfig.vSync = true;
-        else
-            engineConfig->glContextConfig.vSync = false;
-    }
-
-    engine->configureWindow( //
-        *engineConfig,
-        []()
-        {
-#if defined(__linux__)
-            // This callback is called before the window is configured
-            auto engine = AppKit::GLEngine::Engine::Instance();
-            auto options = AppKit::ui::OptionsManager::Instance();
-
-            std::string currWindowMode = options->getGroupValueSelectedForKey("Video", "WindowMode");
-            if (currWindowMode == "Fullscreen")
-            {
-                // set the desired resolution with the most high FPS
-                const std::string &fullscreenRes = options->getGroupValueSelectedForKey("Video", "Resolution");
-                int w, h;
-                if (sscanf(fullscreenRes.c_str(), "%ix%i", &w, &h) == 2)
-                {
-
-                    auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
-                    auto modifiableMode = defaultMonitor.getMode(w, h);
-                    modifiableMode.setFrequency(options->mainMonitor_InitialMode.freqs[0]);
-
-                    defaultMonitor.setMode(modifiableMode);
-                }
-            }
-            else
-                reset_monitor_mode_to_default();
-
-#endif
-        },
-        [engine, options, currWindowMode, OnAfterAppCreation](AppKit::Window::GLWindow *window)
-        {
-            // This callback is called after the window is configured
-            if (currWindowMode == "Borderless")
-            {
-                engine->window->setMouseCursorVisible(false);
-                auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
-                DPI::Display::setFullscreenAttribute(engine->window->getNativeWindowHandle(), &defaultMonitor);
-            }
-            else if (currWindowMode == "Fullscreen")
-            {
-#if defined(__linux__)
-                engine->window->setMouseCursorVisible(false);
-                auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
-                DPI::Display::setFullscreenAttribute(engine->window->getNativeWindowHandle(), &defaultMonitor);
-#elif defined(_WIN32)
-                // windows fullscreen window seems to work fine
-                engine->window->setMouseCursorVisible(false);
-#endif
-            }
-            else
-            {
-                auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
-                // set middle screen
-                engine->window->setPosition(defaultMonitor.Position() + defaultMonitor.SizePixels() / 4);
-            }
-            if (OnAfterAppCreation != nullptr)
-                OnAfterAppCreation();
-        });
-}
-
-void apply_settings_to_window(const EventCore::Callback<void()> &OnAfterAppCreation)
-{
-    AppKit::GLEngine::EngineWindowConfig engineConfig = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
-
-    strcpy(engineConfig.windowConfig.windowName, "Opening");
-
-    engineConfig.glContextConfig.majorVersion = 2;
-    engineConfig.glContextConfig.minorVersion = 1;
-
-    engineConfig.glContextConfig.sRgbCapable = false;
-
-    apply_window_options_to_engine(&engineConfig, OnAfterAppCreation);
-}
-
-void reset_monitor_mode_to_default()
-{
-    auto options = AppKit::ui::OptionsManager::Instance();
-    if (!options->isInitialized())
-        return;
-    auto defaultMonitor = DPI::Display::QueryMonitors(true)[0];
-    defaultMonitor.setMode(options->mainMonitor_InitialMode);
-}
 
 #if defined(__linux__)
 #include <sys/prctl.h>
@@ -253,7 +59,7 @@ void fork_and_wait_parent_to_exit_from_child(int argc, char *argv[])
         //     }
 
         //     // Parent already dead
-        //     reset_monitor_mode_to_default();
+        //     AppKit::ui::AppTemplate::Instance()->reset_monitor_mode_to_default();
         //     _exit(0);
         // }
 
@@ -269,7 +75,7 @@ void fork_and_wait_parent_to_exit_from_child(int argc, char *argv[])
             if (getppid() != parent_pid)
             {
                 // Parent already dead
-                reset_monitor_mode_to_default();
+                AppKit::ui::AppTemplate::Instance()->reset_monitor_mode_to_default();
                 _exit(0);
             }
 
@@ -279,7 +85,7 @@ void fork_and_wait_parent_to_exit_from_child(int argc, char *argv[])
             pause();
 
             printf("PROGRAM ENDED, BACKING THE RESOLUTION TO DEFAULT NOW\n");
-            reset_monitor_mode_to_default();
+            AppKit::ui::AppTemplate::Instance()->reset_monitor_mode_to_default();
             _exit(0);
         }
     }
@@ -295,10 +101,53 @@ int main(int argc, char *argv[])
 
     // ITKCommon::ITKAbort::Instance()->OnAbort.add([](const char *file, int line, const char *message)
     // {
-    //     reset_monitor_mode_to_default();
+    //     AppKit::ui::AppTemplate::Instance()->reset_monitor_mode_to_default();
     // });
 
-    load_options();
+    auto appTemplate = AppKit::ui::AppTemplate::Instance();
+    appTemplate->configure(
+        {{"Control",
+          {
+              {"Input", {"Steam 1", "Keyboard", "Steam 1 + Keyboard"}, "Steam 1 + Keyboard"},
+              {"Movement", {"Fluid", "Legacy"}, "Fluid"},
+          }},
+         {"Audio",
+          {
+              {"EffectsVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
+              {"MusicVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
+          }},
+         {"Video",
+          {
+              {"WindowMode", {"Window", "Borderless", "Fullscreen"}, "Window"},
+              {"Resolution", {}, ""},
+              {"Aspect", {"16:9", "16:10"}, "16:9"},
+              {"AntiAliasing", {"MSAA", "OFF"}, "MSAA"},
+              {"VSync", {"ON", "OFF"}, "ON"},
+          }},
+         {"Extra",
+          {
+              {"Language", {"English", "Português (BR)"}, "English"},
+              {"ColorScheme", {"Blush", "Purple", "Orange", "Green", "Blue", "Dark"}, "Blush"},
+              {"ButtonAppearance", {"Bend Up", "Bend Down", "Round", "Tip Front", "Tip Back", "Tip Up", "Tip Down", "Square"}, "Bend Up"},
+              {"UiSize", {"Extra Small", "Small", "Medium", "Large", "Extra Large"}, "Medium"},
+              {"MeshCrusher", {"ON", "OFF"}, "OFF"},
+              {"Particles", {"Low", "Medium", "High", "Ultra"}, "High"},
+              {"OnGameStats", {"OFF", "FPS"}, "OFF"},
+          }}},
+        [](Platform::ObjectBuffer *out_optionsDataRaw)
+        {
+            // read options binary data from file or stream
+            auto optionsPath = ITKCommon::Path::getSaveGamePath("OpenGLStarter", "Options") + ITKCommon::PATH_SEPARATOR + "options.bin";
+            ITKCommon::FileSystem::File::FromPath(optionsPath).readContentToObjectBuffer(out_optionsDataRaw);
+        },
+        [](const Platform::ObjectBuffer &in_optionsDataRaw)
+        {
+            // write options binary data to file or stream
+            auto optionsPath = ITKCommon::Path::getSaveGamePath("OpenGLStarter", "Options") + ITKCommon::PATH_SEPARATOR + "options.bin";
+            ITKCommon::FileSystem::File::FromPath(optionsPath).writeContentFromObjectBuffer(&in_optionsDataRaw);
+        });
+
+    appTemplate->load_options();
 
 #if defined(__linux__)
     fork_and_wait_parent_to_exit_from_child(argc, argv);
@@ -308,7 +157,7 @@ int main(int argc, char *argv[])
 
     engine->initialize("Alessandro Ribeiro", "Opening", &CreateAppInstance);
 
-    apply_settings_to_window(nullptr);
+    appTemplate->apply_settings_to_window(nullptr);
 
     // AppKit::GLEngine::EngineWindowConfig engineConfig = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
 
@@ -344,7 +193,7 @@ int main(int argc, char *argv[])
 
     engine->mainLoop();
 
-    // reset_monitor_mode_to_default();
+    // AppKit::ui::AppTemplate::Instance()->reset_monitor_mode_to_default();
 
     return 0;
 }
