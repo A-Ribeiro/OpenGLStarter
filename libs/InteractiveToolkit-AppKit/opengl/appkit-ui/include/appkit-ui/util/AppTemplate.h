@@ -1,7 +1,7 @@
 #pragma once
 
 #include <InteractiveToolkit/EventCore/Callback.h>
-#include <InteractiveToolkit/platform/Core/ObjectBuffer.h>
+#include <InteractiveToolkit/Platform/Core/ObjectBuffer.h>
 #include <appkit-ui/util/AppOptions.h>
 //#include <appkit-gl-engine/Engine.h>
 
