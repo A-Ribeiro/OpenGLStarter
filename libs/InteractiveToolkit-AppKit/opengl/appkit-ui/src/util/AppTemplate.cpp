@@ -30,7 +30,7 @@ namespace AppKit
 
             this->read_options_raw_data(&optionsDataRaw);
 
-            // auto optionsPath = ITKCommon::Path::getSaveGamePath("OpenGLStarter", "Options") + ITKCommon::PATH_SEPARATOR + "options.bin";
+            // auto optionsPath = ITKCommon::Path::getSaveGamePath(this->company_name, this->app_name) + ITKCommon::PATH_SEPARATOR + "options.bin";
             // ITKCommon::FileSystem::File::FromPath(optionsPath).readContentToObjectBuffer(&optionsDataRaw);
 
             options->loadOptionsFromBuffer(optionsDataRaw);
@@ -46,7 +46,7 @@ namespace AppKit
             Platform::ObjectBuffer optionsDataRaw;
             options->saveOptionsToBuffer(&optionsDataRaw);
 
-            // auto optionsPath = ITKCommon::Path::getSaveGamePath("OpenGLStarter", "Options") + ITKCommon::PATH_SEPARATOR + "options.bin";
+            // auto optionsPath = ITKCommon::Path::getSaveGamePath(this->company_name, this->app_name) + ITKCommon::PATH_SEPARATOR + "options.bin";
             // ITKCommon::FileSystem::File::FromPath(optionsPath).writeContentFromObjectBuffer(&optionsDataRaw);
 
             this->write_options_raw_data(optionsDataRaw);
@@ -54,9 +54,10 @@ namespace AppKit
 
         void AppTemplate::apply_settings_to_window(const EventCore::Callback<void()> &OnAfterAppCreation)
         {
+            auto engine = AppKit::GLEngine::Engine::Instance();
             AppKit::GLEngine::EngineWindowConfig engineConfig = AppKit::GLEngine::Engine::CreateDefaultRenderingConfig();
 
-            strcpy(engineConfig.windowConfig.windowName, "Opening");
+            strcpy(engineConfig.windowConfig.windowName, engine->gameName.c_str());
 
             engineConfig.glContextConfig.majorVersion = 2;
             engineConfig.glContextConfig.minorVersion = 1;
