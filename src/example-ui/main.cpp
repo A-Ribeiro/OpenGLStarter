@@ -24,7 +24,6 @@ void on_signal(int)
         AppKit::GLEngine::Engine::Instance()->app->exitApp();
 }
 
-
 #if defined(__linux__)
 #include <sys/prctl.h>
 
@@ -93,6 +92,9 @@ void fork_and_wait_parent_to_exit_from_child(int argc, char *argv[])
 
 #endif
 
+const char *company_name = "OpenGLStarter";
+const char *app_name = "Example - InteractiveToolkit AppKit UI";
+
 int main(int argc, char *argv[])
 {
     ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
@@ -137,13 +139,13 @@ int main(int argc, char *argv[])
         [](Platform::ObjectBuffer *out_optionsDataRaw)
         {
             // read options binary data from file or stream
-            auto optionsPath = ITKCommon::Path::getSaveGamePath("OpenGLStarter", "Options") + ITKCommon::PATH_SEPARATOR + "options.bin";
+            auto optionsPath = ITKCommon::Path::getSaveGamePath(company_name, app_name) + ITKCommon::PATH_SEPARATOR + "options.bin";
             ITKCommon::FileSystem::File::FromPath(optionsPath).readContentToObjectBuffer(out_optionsDataRaw);
         },
         [](const Platform::ObjectBuffer &in_optionsDataRaw)
         {
             // write options binary data to file or stream
-            auto optionsPath = ITKCommon::Path::getSaveGamePath("OpenGLStarter", "Options") + ITKCommon::PATH_SEPARATOR + "options.bin";
+            auto optionsPath = ITKCommon::Path::getSaveGamePath(company_name, app_name) + ITKCommon::PATH_SEPARATOR + "options.bin";
             ITKCommon::FileSystem::File::FromPath(optionsPath).writeContentFromObjectBuffer(&in_optionsDataRaw);
         });
 
@@ -155,7 +157,7 @@ int main(int argc, char *argv[])
 
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
 
-    engine->initialize("Alessandro Ribeiro", "Opening", &CreateAppInstance);
+    engine->initialize(company_name, app_name, &CreateAppInstance);
 
     appTemplate->apply_settings_to_window(nullptr);
 
