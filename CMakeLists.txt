@@ -188,6 +188,9 @@ add_subdirectory(src/example-ui)
 add_subdirectory(src/load-unlit-textured-model)
 
 
-if(IS_DIRECTORY "src/game")
+if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/src/game")
+    message(STATUS "******************************************")
+    message(STATUS "*** Adding a Game Project on: src/game ***")
+    message(STATUS "******************************************")
     add_subdirectory(src/game)
 endif()
