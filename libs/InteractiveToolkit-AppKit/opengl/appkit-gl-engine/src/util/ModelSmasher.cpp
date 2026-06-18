@@ -616,6 +616,8 @@ Material mat_stageBrick is opaque: YES
             else if (geom->indiceCountPerFace == 2)
             {
                 // lines... use line rendering...
+                if (data->geometry_ptr_to_instance_line.find(geom) != data->geometry_ptr_to_instance_line.end())
+                    continue;
 
                 vec4f material_color(1.0f, 0.0f, 1.0f, 1.0f);
                 // auto diffuse = mat->vec4Value.find("diffuse");
