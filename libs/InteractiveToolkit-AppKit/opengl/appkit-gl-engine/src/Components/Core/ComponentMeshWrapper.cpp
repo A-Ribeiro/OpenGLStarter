@@ -216,6 +216,9 @@ namespace AppKit
                 eventHandlerSetRef = transform->eventHandlerSet;
                 auto eventHandlerSet = eventHandlerSetRef.lock();
 
+                if (!eventHandlerSet)
+                    return;
+                    
                 if (only_remove)
                     eventHandlerSet->OnAfterGraphPrecompute.remove(&ComponentMeshWrapper::OnAfterGraphComputeFinalPositionsDirty, this);
                 else
