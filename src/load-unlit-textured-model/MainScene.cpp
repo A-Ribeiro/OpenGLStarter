@@ -58,19 +58,19 @@ namespace Scenes
             if (ITKCommon::Path::isDirectory("/mnt/wslg/runtime-dir"))
             {
                 // wsl environment
-                loadedScene = smasher.load("/mnt/d/shared/papercat/stages_gltf/stage3_04.bams", resourceMap, camera);
+                loadedScene = smasher.load("/mnt/d/shared/2d_example.bams", resourceMap, camera);
             }
             else
             {
                 // real linux environment
                 const char *home = std::getenv("HOME");
-                std::string inputPath = std::string(home ? home : "") + "/Documents/papercat/stages_gltf/stage3_04.bams";
+                std::string inputPath = std::string(home ? home : "") + "/Documents/2d_example.bams";
                 auto path = std::unique_ptr<char, decltype(&std::free)>(realpath(inputPath.c_str(), nullptr), &std::free);
                 loadedScene = smasher.load(path ? path.get() : inputPath.c_str(), resourceMap, camera);
             }
 
 #else
-            loadedScene = smasher.load("D:/shared/papercat/stages_gltf/stage3_04.bams", resourceMap, camera);
+            loadedScene = smasher.load("D:/shared/2d_example.bams", resourceMap, camera);
 #endif
         }
 

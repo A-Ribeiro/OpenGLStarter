@@ -186,3 +186,8 @@ add_subdirectory(src/tech-demo-sprite-atlas)
 add_subdirectory(src/example-ui)
 
 add_subdirectory(src/load-unlit-textured-model)
+
+
+if(IS_DIRECTORY "src/game")
+    add_subdirectory(src/game)
+endif()
