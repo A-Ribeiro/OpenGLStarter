@@ -39,7 +39,7 @@ namespace AppKit
                     one_time_word_to_local_scale = new_one_time_word_to_local_scale;
                     one_time_set_scale = one_time_word_to_local_scale * one_time_camera_scale;
 
-                    AABBType finalAABB = aabb;
+                    AABBType finalAABB;
 
                     for (size_t i = 0; i < mesh->pos.size(); i += 8)
                     {
@@ -50,6 +50,8 @@ namespace AppKit
                         finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, one_time_set_scale * thickness));
                         finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, one_time_set_scale * thickness));
                     }
+
+                    aabb = finalAABB;
 
                     if (meshWrapper != nullptr)
                         meshWrapper->setShapeAABB(finalAABB, true);
@@ -85,7 +87,7 @@ namespace AppKit
 
                     // printf(".");fflush(stdout);
 
-                    AABBType finalAABB = aabb;
+                    AABBType finalAABB;
 
                     for (size_t i = 0; i < mesh->pos.size(); i += 8)
                     {
@@ -96,6 +98,8 @@ namespace AppKit
                         finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(a, max_scaled * thickness));
                         finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, max_scaled * thickness));
                     }
+
+                    aabb = finalAABB;
 
                     if (meshWrapper != nullptr)
                         meshWrapper->setShapeAABB(finalAABB, true);
@@ -145,7 +149,7 @@ namespace AppKit
                         MathCore::OP<MathCore::vec3f>::length(MathCore::CVT<MathCore::vec4f>::toVec3(world_to_local[2])));
                     float world_to_local_scale = MathCore::OP<MathCore::vec3f>::minimum(scale_vec);
 
-                    AABBType finalAABB = aabb;
+                    AABBType finalAABB;
 
                     for (size_t i = 0; i < mesh->pos.size(); i += 8)
                     {
@@ -218,6 +222,8 @@ namespace AppKit
                         // }
                     }
 
+                    aabb = finalAABB;
+
                     if (meshWrapper != nullptr)
                         meshWrapper->setShapeAABB(finalAABB, true);
                 }
@@ -251,8 +257,9 @@ namespace AppKit
 
                 if (is_one_time_set && camera != nullptr)
                 {
+                    auto camera_copy = camera;
                     this->camera = nullptr;
-                    one_time_set(camera);
+                    one_time_set(camera_copy);
                 }
             }
 
@@ -344,7 +351,7 @@ namespace AppKit
                 }
 
                 dirty = false;
-                AABBType finalAABB = aabb;
+                AABBType finalAABB;
 
                 for (size_t i = 0; i < mesh->pos.size(); i += 8)
                 {
@@ -356,11 +363,13 @@ namespace AppKit
                     finalAABB = AABBType::joinAABB(finalAABB, AABBType::fromSphere(b, one_time_set_scale * thickness));
                 }
 
+                aabb = finalAABB;
+
                 meshWrapper->setShapeAABB(finalAABB, true);
             }
 
             void ComponentLineMounter::setCamera(AppKit::GLEngine::ResourceMap *resourceMap,
-                                                 std::shared_ptr<ComponentCamera> camera, bool use_one_time_set)
+                                                 std::shared_ptr<ComponentCamera> camera_p, bool use_one_time_set)
             {
                 is_one_time_set = use_one_time_set;
                 checkOrCreateAuxiliaryComponents(resourceMap);
@@ -372,18 +381,18 @@ namespace AppKit
                 if (use_one_time_set)
                 {
                     if (getTransform() == nullptr)
-                        this->camera = camera;
+                        this->camera = camera_p;
                     else
                     {
                         this->camera = nullptr;
-                        one_time_set(camera);
+                        one_time_set(camera_p);
                     }
                     return;
                 }
-                this->camera = camera;
-                if (camera->compareType(Components::ComponentCameraPerspective::Type))
+                this->camera = camera_p;
+                if (camera_p->compareType(Components::ComponentCameraPerspective::Type))
                 {
-                    camera->getTransform()->OnVisited.add(
+                    camera_p->getTransform()->OnVisited.add(
                         EventCore::CallbackWrapper(&ComponentLineMounter::OnCameraTransformVisit, this));
                 }
             }
