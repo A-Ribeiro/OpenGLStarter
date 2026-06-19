@@ -684,6 +684,40 @@ namespace AppKit
                 // *out_velocity = vec3f(vel, out_velocity->z);
                 *out_velocity = OP<vec2f>::quadraticClamp(vec2f(0, 0), vel, max_velocity);
             }
+
+            void Container2D::dumpContent(const EventCore::Callback<void(const MathCore::vec2f &a, const MathCore::vec2f &b, bool is_pass_through)> &onLine,
+                                          const EventCore::Callback<void(const MathCore::vec2f &center, const MathCore::vec2f &size)> &onBox,
+                                          const EventCore::Callback<void(const MathCore::vec2f &center, float radius)> &onCircle,
+                                          const EventCore::Callback<void(const MathCore::vec2f &center, const MathCore::vec2f &size)> &onGameArea)
+            {
+                auto iterate_through_elements = [&](std::vector<std::unique_ptr<Structure2D>> &ref_array)
+                {
+                    for (const auto &structure : ref_array)
+                    {
+                        if (structure->type == StructureType::Segment || structure->type == StructureType::ClosedPolygon)
+                        {
+                            for (const auto &segment : structure->segments)
+                                onLine(segment.a, segment.b, structure->pass_through_set);
+                        }
+                        else if (structure->type == StructureType::Box)
+                        {
+                            auto box_center = structure->box.getCenter();
+                            auto box_size = structure->box.getSize();
+                            onBox(box_center, box_size);
+                        }
+                        else if (structure->type == StructureType::Circle)
+                        {
+                            auto circle_center = structure->box.getCenter();
+                            onCircle(circle_center, structure->circle_radius);
+                        }
+                    }
+                };
+                auto box_center = game_area.getCenter();
+                auto box_size = game_area.getSize();
+                onGameArea(box_center, box_size);
+                iterate_through_elements(static_structures);
+                iterate_through_elements(dynamic_structures);
+            }
         }
     }
 }

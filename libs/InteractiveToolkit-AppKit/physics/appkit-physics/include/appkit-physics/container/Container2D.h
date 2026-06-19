@@ -16,6 +16,8 @@
 #include <appkit-physics/util/Uuid.h>
 // #include <appkit-physics/velocity-helpers/JumpState.h>
 
+#include <InteractiveToolkit/EventCore/Callback.h>
+
 namespace AppKit
 {
     namespace Physics
@@ -110,6 +112,11 @@ namespace AppKit
                 const float max_velocity = 5000.0f;
 
                 ITK_DECLARE_CREATE_SHARED(Container2D)
+
+                void dumpContent(const EventCore::Callback<void(const MathCore::vec2f &a, const MathCore::vec2f &b, bool is_pass_through)> &onLine,
+                                 const EventCore::Callback<void(const MathCore::vec2f &center, const MathCore::vec2f &size)> &onBox,
+                                 const EventCore::Callback<void(const MathCore::vec2f &center, float radius)> &onCircle,
+                                 const EventCore::Callback<void(const MathCore::vec2f &center, const MathCore::vec2f &size)> &onGameArea);
             };
 
         }
