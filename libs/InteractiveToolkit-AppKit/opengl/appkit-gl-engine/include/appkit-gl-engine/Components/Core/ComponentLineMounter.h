@@ -144,9 +144,11 @@ namespace AppKit
                         : line_mounter(line_mounter), idx(idx_p)
                     {
                         size_t item_count = line_mounter->mesh->pos.size() >> 3; // each line segment is 8 vertices (2 points with 4 vertices each)
-                        if (item_count == 0)
+                        if (item_count == 0 || idx == (std::numeric_limits<size_t>::max)())
+                        {
                             idx = (std::numeric_limits<size_t>::max)(); // end
-                        else
+                        }
+                        else if (idx < item_count)
                         {
                             const auto &a = line_mounter->mesh->uv[1][idx * 8];
                             const auto &b = line_mounter->mesh->uv[2][idx * 8];
@@ -154,6 +156,10 @@ namespace AppKit
                             const auto &color = line_mounter->mesh->color[0][idx * 8];
 
                             this->current_line_segment = LineSegment{a, b, thickness, color};
+                        }
+                        else
+                        {
+                            idx = (std::numeric_limits<size_t>::max)(); // end
                         }
                     }
 
@@ -163,14 +169,13 @@ namespace AppKit
                     // Prefix increment
                     inline const_iterator &operator++() noexcept
                     {
+                        if (idx == (std::numeric_limits<size_t>::max)())
+                            return *this; // already at end
+
                         size_t item_count = line_mounter->mesh->pos.size() >> 3;
                         idx++;
                         if (idx >= item_count)
-                        {
                             idx = (std::numeric_limits<size_t>::max)(); // end
-                            // already at end, do nothing
-                            return *this;
-                        }
                         else
                         {
                             const auto &a = line_mounter->mesh->uv[1][idx * 8];
@@ -196,12 +201,16 @@ namespace AppKit
                     {
                         size_t item_count = line_mounter->mesh->pos.size() >> 3;
                         if (idx == (std::numeric_limits<size_t>::max)() && item_count > 0)
-                            idx = item_count;
-                        if (idx > 0)
+                            idx = item_count - 1;
+                        else if (idx > 0)
                             idx--;
-                        if (idx == (std::numeric_limits<size_t>::max)())
-                            idx = 0;
-                        
+                        else
+                            idx = 0; // already at begin
+
+                        // if item_count == 0
+                        if (idx >= item_count)
+                            idx = (std::numeric_limits<size_t>::max)(); // end
+                        else
                         {
                             const auto &a = line_mounter->mesh->uv[1][idx * 8];
                             const auto &b = line_mounter->mesh->uv[2][idx * 8];
@@ -230,6 +239,8 @@ namespace AppKit
                         size_t item_count = line_mounter->mesh->pos.size() >> 3;
                         if (offset > 0)
                         {
+                            if (idx == (std::numeric_limits<size_t>::max)())
+                                return *this; // already at end
                             idx += offset;
                             if (idx >= item_count)
                                 idx = (std::numeric_limits<size_t>::max)();
@@ -237,13 +248,23 @@ namespace AppKit
                         else
                         {
                             difference_type abs_offset = -offset;
-                            idx -= abs_offset;
-                            if (idx >= item_count)
+                            if (idx == (std::numeric_limits<size_t>::max)())
+                            {
+                                if ((size_t)abs_offset >= item_count)
+                                    idx = 0;
+                                else
+                                    idx = item_count - abs_offset;
+                            }
+                            else if ((size_t)abs_offset > idx)
                                 idx = 0;
+                            else
+                                idx -= abs_offset;
                         }
 
+                        if (idx >= item_count)
+                            idx = (std::numeric_limits<size_t>::max)(); // end
+                        else
                         {
-
                             const auto &a = line_mounter->mesh->uv[1][idx * 8];
                             const auto &b = line_mounter->mesh->uv[2][idx * 8];
                             float thickness = line_mounter->mesh->uv[3][idx * 8].y;
@@ -276,14 +297,12 @@ namespace AppKit
 
                     inline difference_type operator-(const const_iterator &other) const noexcept
                     {
-                        if (idx == (std::numeric_limits<size_t>::max)() && other.idx == (std::numeric_limits<size_t>::max)())
-                            return 0; // both at end
-                        if (idx == (std::numeric_limits<size_t>::max)())
-                            return other.idx; // this is at end
-                        if (other.idx == (std::numeric_limits<size_t>::max)())
-                            return -(difference_type)idx; // other is at end
+                        size_t item_count = line_mounter->mesh->pos.size() >> 3;
 
-                        return (difference_type)other.idx - (difference_type)idx;
+                        size_t this_pos = (idx == (std::numeric_limits<size_t>::max)()) ? item_count : idx;
+                        size_t other_pos = (other.idx == (std::numeric_limits<size_t>::max)()) ? item_count : other.idx;
+
+                        return (difference_type)this_pos - (difference_type)other_pos;
                     }
 
                     inline reference operator[](difference_type n) const noexcept
@@ -308,7 +327,7 @@ namespace AppKit
                         if (idx == (std::numeric_limits<size_t>::max)())
                             return false; // this is at end
                         if (other.idx == (std::numeric_limits<size_t>::max)())
-                            return true;                      // other is at end
+                            return true; // other is at end
                         return idx < other.idx;
                     }
 
