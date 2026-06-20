@@ -112,10 +112,10 @@ namespace AppKit
                 else
                     size = Engine::Instance()->app->window->getSize();
 
-                viewport = AppKit::GLEngine::iRect(size.width, size.height);
+                projectionAreaSizePx = MathCore::vec2f(size.width, size.height);
 
-                float x = (float)viewport.w;
-                float y = (float)viewport.h;
+                float x = (float)projectionAreaSizePx.width;
+                float y = (float)projectionAreaSizePx.height;
 
                 if (useSizeY.c_val() || useSizeX.c_val())
                 {
@@ -124,16 +124,16 @@ namespace AppKit
 
                     if (!useSizeY.c_val())
                     {
-                        float aspectY = (float)viewport.h / (float)viewport.w;
+                        float aspectY = (float)projectionAreaSizePx.height / (float)projectionAreaSizePx.width;
                         y = x * aspectY;
                     }
                     else if (!useSizeX.c_val())
                     {
-                        float aspectX = (float)viewport.w / (float)viewport.h;
+                        float aspectX = (float)projectionAreaSizePx.width / (float)projectionAreaSizePx.height;
                         x = y * aspectX;
                     }
 
-                    viewport = AppKit::GLEngine::iRect(x, y);
+                    projectionAreaSizePx = MathCore::vec2f(x, y);
                 }
 
                 if (rightHanded)

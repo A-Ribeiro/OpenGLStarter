@@ -192,7 +192,8 @@ namespace AppKit
                 shadowCache->setFromLight(sunLight->self<Components::ComponentLight>(), scene_sphere, camera_sphere);
 
                 // render the depth map...
-                shadowCache->viewport = iRect(sunShadowResolution, sunShadowResolution);
+                shadowCache->viewport = AppKit::GLEngine::iRect(0, 0, sunShadowResolution, sunShadowResolution);
+                shadowCache->projectionAreaSizePx = MathCore::vec2f(sunShadowResolution, sunShadowResolution);
                 shadowCache->depthTexture.setSize(sunShadowResolution, sunShadowResolution, GL_DEPTH_COMPONENT24);
 
                 shadowCache->depthTexture.active(0);

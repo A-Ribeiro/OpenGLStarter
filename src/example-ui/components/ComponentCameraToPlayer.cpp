@@ -61,7 +61,7 @@ namespace AppKit
                 using namespace MathCore;
                 // using namespace AppKit::Physics::Core;
 
-                vec2f windowSize_2 = vec2f(camera_ref->viewport.w, camera_ref->viewport.h) * 0.5f;
+                vec2f windowSize_2 = camera_ref->projectionAreaSizePx * 0.5f;
 
                 vec2f stage_camera_min_limit = app->gameScene->container2D->game_area.min + windowSize_2;
                 vec2f stage_camera_max_limit = app->gameScene->container2D->game_area.max - windowSize_2;

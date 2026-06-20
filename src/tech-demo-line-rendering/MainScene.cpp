@@ -113,7 +113,7 @@ void MainScene::update(Platform::Time *elapsed)
     auto rot = (this->use3DSet) ? MathCore::GEN<MathCore::quatf>::fromEuler(angle, 0, 0) : MathCore::GEN<MathCore::quatf>::fromEuler(0, 0, angle);
     // line_middle_to_half->setLocalRotation(MathCore::GEN< MathCore::quatf>::fromEuler(0, 0, angle));
 
-    auto size = MathCore::vec2i(this->camera->viewport.w, this->camera->viewport.h);
+    auto size = MathCore::vec2f(this->camera->projectionAreaSizePx.width, this->camera->projectionAreaSizePx.height);
 
     deprecated_lines->vertices.clear();
     if (this->use3DSet)
