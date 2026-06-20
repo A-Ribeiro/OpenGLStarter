@@ -12,7 +12,7 @@ namespace AppKit
     namespace GLEngine
     {
 
-        void RenderPipeline::traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap)
+        void RenderPipeline::traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap, bool render_children)
         {
             if (element->skip_traversing)
                 return;
@@ -103,8 +103,11 @@ namespace AppKit
                 }
             }
 
-            for (auto &child : element->getChildren())
-                traverse_singlepass_render(child.get(), camera, resourceMap);
+            if (render_children)
+            {
+                for (auto &child : element->getChildren())
+                    traverse_singlepass_render(child.get(), camera, resourceMap, render_children);
+            }
         }
 
         void RenderPipeline::traverse_depth_render_only_mesh(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap)
@@ -555,9 +558,7 @@ namespace AppKit
             }
 
             for (auto &transform : sceneTraverseHelper.transformList)
-            {
-                traverse_singlepass_render(transform, camera, resourceMap);
-            }
+                traverse_singlepass_render(transform, camera, resourceMap, false);
 
             setCurrentMesh(nullptr, resourceMap, camera);
             setCurrentMaterial(nullptr, resourceMap, camera);
