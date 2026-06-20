@@ -187,6 +187,7 @@ add_subdirectory(src/example-ui)
 
 add_subdirectory(src/load-unlit-textured-model)
 
+# add_subdirectory(src/test-lua)
 
 if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/src/game")
     message(STATUS "******************************************")
