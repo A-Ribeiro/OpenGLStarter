@@ -124,7 +124,7 @@ namespace AppKit
             size_t agregateMesh_FlushMoreThanTriangleCount;
         private:
 
-            void traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap);
+            void traverse_singlepass_render(Transform *element, Components::ComponentCamera *camera, ResourceMap *resourceMap, bool render_children);
 
         public:
             // lightManager calls this from outside
