@@ -1,5 +1,24 @@
 cmake_minimum_required(VERSION 3.15)
+
+# LuaJIT is incompatible with AddressSanitizer - remove sanitizer flags BEFORE project()
+# Save original compile options that might be set in parent
+get_directory_property(PARENT_COMPILE_OPTIONS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_OPTIONS)
+
+# Set the project AFTER saving parent settings
 project(LuaJIT C)
+
+# Now remove sanitizer from CMAKE_C_FLAGS and linker flags
+string(REGEX REPLACE "-fsanitize=[^ ]*" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+string(REGEX REPLACE "-fno-omit-frame-pointer" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+string(REGEX REPLACE "-fsanitize=[^ ]*" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+
+# Add back frame pointer omission (required by LuaJIT)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
+
+# Clear directory-level compile options that might include sanitizer
+set_directory_properties(PROPERTIES COMPILE_OPTIONS "")
+
+message(STATUS "LuaJIT: CMAKE_C_FLAGS=${CMAKE_C_FLAGS}")
 
 # get from git
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/luajit/")
@@ -102,11 +121,16 @@ add_executable(minilua
     "${LUAJIT_SRC_DIR}/host/minilua.c"
 )
 
-# Optimization for host tools
+# Optimization for host tools  
 if(MSVC)
-    target_compile_options(minilua PRIVATE /O2)
+    set_target_properties(minilua PROPERTIES
+        COMPILE_OPTIONS "/O2"
+    )
 else()
-    target_compile_options(minilua PRIVATE -O2)
+    # Explicitly set compile options, overriding directory-level options  
+    set_target_properties(minilua PROPERTIES
+        COMPILE_OPTIONS "-O2;-fomit-frame-pointer"
+    )
 endif()
 
 if(NOT WIN32)
@@ -188,12 +212,37 @@ else()
     execute_process(
         COMMAND ${CMAKE_C_COMPILER} -E -dM -I"${LUAJIT_SRC_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/lj_arch_test.c"
         OUTPUT_VARIABLE TARGET_TESTARCH
-        ERROR_QUIET
+        ERROR_VARIABLE TARGET_TESTARCH_ERROR
+        RESULT_VARIABLE TARGET_TESTARCH_RESULT
     )
+    
+    # Check if preprocessor command failed
+    if(NOT TARGET_TESTARCH_RESULT EQUAL 0)
+        message(WARNING "Architecture detection failed: ${TARGET_TESTARCH_ERROR}")
+        message(STATUS "Using fallback architecture detection")
+        # Fallback to CMake's detection
+        set(TARGET_TESTARCH "")
+        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            string(APPEND TARGET_TESTARCH "LJ_ARCH_BITS 64\n")
+            string(APPEND TARGET_TESTARCH "LJ_TARGET_X64 1\n")
+        else()
+            string(APPEND TARGET_TESTARCH "LJ_ARCH_BITS 32\n")
+            string(APPEND TARGET_TESTARCH "LJ_TARGET_X86 1\n")
+        endif()
+        string(APPEND TARGET_TESTARCH "LJ_LE 1\n")
+        string(APPEND TARGET_TESTARCH "LJ_HASJIT 1\n")
+        string(APPEND TARGET_TESTARCH "LJ_HASFFI 1\n")
+        string(APPEND TARGET_TESTARCH "LJ_ARCH_HASFPU 1\n")
+        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            string(APPEND TARGET_TESTARCH "LJ_FR2 1\n")
+            string(APPEND TARGET_TESTARCH "LJ_GC64 1\n")
+        endif()
+    endif()
 endif()
 
 # Debug: Show key architecture detections
 message(STATUS "Compiler: ${CMAKE_C_COMPILER}")
+message(STATUS "TARGET_TESTARCH length: ${CMAKE_MATCH_0}")
 if(TARGET_TESTARCH MATCHES "LJ_ARCH_BITS 64")
     message(STATUS "Detected: 64-bit architecture")
 else()
@@ -201,6 +250,13 @@ else()
 endif()
 if(TARGET_TESTARCH MATCHES "LJ_LE 1")
     message(STATUS "Detected: Little-endian")
+else()
+    message(STATUS "Detected: Big-endian or unknown")
+endif()
+if(TARGET_TESTARCH MATCHES "LJ_TARGET_X64")
+    message(STATUS "Detected: X64 target")
+elseif(TARGET_TESTARCH MATCHES "LJ_TARGET_X86")
+    message(STATUS "Detected: X86 target")
 endif()
 
 # Parse architecture flags for DynASM
@@ -317,9 +373,14 @@ elseif(TARGET_LJARCH STREQUAL "mips")
 endif()
 
 if(MSVC)
-    target_compile_options(buildvm PRIVATE /O2)
+    set_target_properties(buildvm PROPERTIES
+        COMPILE_OPTIONS "/O2"
+    )
 else()
-    target_compile_options(buildvm PRIVATE -O2)
+    # Explicitly set compile options, overriding directory-level options
+    set_target_properties(buildvm PROPERTIES
+        COMPILE_OPTIONS "-O2;-fomit-frame-pointer"
+    )
 endif()
 
 set_target_properties(buildvm PROPERTIES FOLDER "LuaJIT")
@@ -506,29 +567,43 @@ target_include_directories(libluajit PUBLIC
     $<INSTALL_INTERFACE:include/luajit-${LUAJIT_MMVERSION}>
 )
 
-# Compile options
-target_compile_options(libluajit PRIVATE
-    ${CCOPT_FLAGS}
-    ${CCOPT_ARCH}
-    ${CCWARN_FLAGS}
-)
-
-if(MSVC)
-    target_compile_definitions(libluajit PRIVATE
-        ${TARGET_LFSFLAGS}
-    )
-else()
-    target_compile_definitions(libluajit PRIVATE
-        ${TARGET_LFSFLAGS}
-        -U_FORTIFY_SOURCE
-    )
+# Detect unwind support (required for proper x64 exception handling)
+set(LUAJIT_UNWIND_EXTERNAL OFF)
+if(NOT MSVC AND NOT WIN32)
+    if(APPLE)
+        # macOS always needs LUAJIT_UNWIND_EXTERNAL
+        set(LUAJIT_UNWIND_EXTERNAL ON)
+    elseif(TARGET_TESTARCH MATCHES "LJ_NO_UNWIND 1")
+        # Architecture has no unwind support
+        set(LUAJIT_UNWIND_EXTERNAL OFF)
+    else()
+        # For Linux and other POSIX systems with GCC/Clang, enable LUAJIT_UNWIND_EXTERNAL
+        # The toolchain generates unwind tables by default
+        set(LUAJIT_UNWIND_EXTERNAL ON)
+    endif()
 endif()
 
-# Stack protector check
-include(CheckCCompilerFlag)
-check_c_compiler_flag("-fno-stack-protector" HAS_NO_STACK_PROTECTOR)
-if(HAS_NO_STACK_PROTECTOR AND NOT WIN32)
-    target_compile_options(libluajit PRIVATE -fno-stack-protector)
+message(STATUS "LuaJIT UNWIND_EXTERNAL: ${LUAJIT_UNWIND_EXTERNAL}")
+
+# Compile options - use set_target_properties to override directory-level options
+if(MSVC)
+    set_target_properties(libluajit PROPERTIES
+        COMPILE_OPTIONS "${CCOPT_FLAGS};${CCOPT_ARCH};${CCWARN_FLAGS};${TARGET_LFSFLAGS}"
+    )
+else()
+    set_target_properties(libluajit PROPERTIES
+        COMPILE_OPTIONS "${CCOPT_FLAGS};${CCOPT_ARCH};${CCWARN_FLAGS};${TARGET_LFSFLAGS};-U_FORTIFY_SOURCE;-fno-stack-protector"
+    )
+    
+    # Add unwind external flag if needed
+    if(LUAJIT_UNWIND_EXTERNAL)
+        target_compile_definitions(libluajit PRIVATE LUAJIT_UNWIND_EXTERNAL)
+    endif()
+    
+    # Add linker flag for export dynamic symbols
+    if(NOT APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES "SunOS")
+        target_link_options(libluajit PRIVATE -Wl,-E)
+    endif()
 endif()
 
 # Platform-specific settings
