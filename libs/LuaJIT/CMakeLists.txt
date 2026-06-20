@@ -8,12 +8,14 @@ get_directory_property(PARENT_COMPILE_OPTIONS DIRECTORY ${CMAKE_CURRENT_SOURCE_D
 project(LuaJIT C)
 
 # Now remove sanitizer from CMAKE_C_FLAGS and linker flags
-string(REGEX REPLACE "-fsanitize=[^ ]*" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+# string(REGEX REPLACE "-fsanitize=[^ ]*" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 string(REGEX REPLACE "-fno-omit-frame-pointer" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-string(REGEX REPLACE "-fsanitize=[^ ]*" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+# string(REGEX REPLACE "-fsanitize=[^ ]*" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # Add back frame pointer omission (required by LuaJIT)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
+if(NOT WIN32 AND NOT MSVC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
+endif()
 
 # Clear directory-level compile options that might include sanitizer
 set_directory_properties(PROPERTIES COMPILE_OPTIONS "")
@@ -356,6 +358,25 @@ target_include_directories(buildvm PRIVATE
     "${LUAJIT_HOST_DIR}"
     "${LUAJIT_DYNASM_DIR}"
 )
+
+# 1. Limpar as flags de compilação C do target
+get_target_property(TARGET_C_FLAGS buildvm COMPILE_OPTIONS)
+if(TARGET_C_FLAGS)
+    string(REGEX REPLACE "-fsanitize=[^ ]*" "" CLEAN_C_FLAGS "${TARGET_C_FLAGS}")
+    set_target_properties(buildvm PROPERTIES COMPILE_OPTIONS "${CLEAN_C_FLAGS}")
+endif()
+
+# 2. Limpar as flags de linkagem do target
+get_target_property(TARGET_LINK_FLAGS buildvm LINK_FLAGS)
+if(TARGET_LINK_FLAGS)
+    string(REGEX REPLACE "-fsanitize=[^ ]*" "" CLEAN_LINK_FLAGS "${TARGET_LINK_FLAGS}")
+    set_target_properties(buildvm PROPERTIES LINK_FLAGS "${CLEAN_LINK_FLAGS}")
+endif()
+
+if(NOT WIN32 AND NOT MSVC)
+    target_compile_options(buildvm PRIVATE "-fno-sanitize=all")
+    target_link_options(buildvm PRIVATE "-fno-sanitize=all")
+endif()
 
 # Define target architecture for buildvm
 if(TARGET_LJARCH STREQUAL "x64")
