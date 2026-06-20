@@ -218,3 +218,33 @@
         "" Shader_Spherical_st2normal                     \
         "" Shader_Spherical_normal2st                     \
         "" Shader_sampleEnvironmentSpheremap
+
+#define Liang_Barsky_GENTYPE(genType)                                                                                 \
+    "// Liang-Barsky line clipping algorithm (simplified branch-less version)\n"                                      \
+    "" #genType " barsky_clip_test(" #genType " p, " #genType " q, inout " #genType " u1, inout " #genType " u2) {\n" \
+    "  const " #genType " epsilon = " #genType "(1e-10);\n"                                                           \
+    "  // Handle p ≈ 0 case: line is parallel to clipping plane\n"                                                    \
+    "  " #genType " is_p_zero = step(abs(p), epsilon);\n"                                                             \
+    "  " #genType " parallel_reject = is_p_zero * step(q, -epsilon); // reject if q < 0 \n"                           \
+    "  // Calculate intersection parameter r, avoiding division by zero\n"                                            \
+    "  " #genType " safe_p = p + epsilon * sign(p + epsilon); // ensure non-zero with correct sign\n"                 \
+    "  " #genType " r = q / safe_p;\n"                                                                                \
+    "  // Determine which parameter to update based on sign of p\n"                                                   \
+    "  " #genType " is_entering = step(p, -epsilon); // p < 0 (entering region)\n"                                    \
+    "  " #genType " is_exiting = step(epsilon, p); // p > 0 (exiting region)\n"                                       \
+    "  // Update u1 (entry) if entering and r > u1\n"                                                                 \
+    "  " #genType " update_u1 = is_entering * step(u1, r);\n"                                                         \
+    "  u1 = u1 * (1.0 - update_u1) + r * update_u1; \n"                                                               \
+    "  // Update u2 (exit) if exiting and r < u2\n"                                                                   \
+    "  " #genType " update_u2 = is_exiting * step(r, u2);\n"                                                          \
+    "  u2 = u2 * (1.0 - update_u2) + r * update_u2; \n"                                                               \
+    "  // Check validity: not parallel-rejected AND u1 <= u2\n"                                                       \
+    "  " #genType " is_valid = (1.0 - parallel_reject) * step(u1, u2);\n"                                             \
+    "  return is_valid; // return 1.0 if valid, 0.0 if u1 and u2 are completely clipped\n"                                                      \
+    "}\n"
+
+#define barsky_clip_test_float Liang_Barsky_GENTYPE(float)
+#define barsky_clip_test_vec2 Liang_Barsky_GENTYPE(vec2)
+#define barsky_clip_test_vec3 Liang_Barsky_GENTYPE(vec3)
+#define barsky_clip_test_vec4 Liang_Barsky_GENTYPE(vec4)
+#define barsky_clip_test_mat2x3 Liang_Barsky_GENTYPE(mat2x3)
