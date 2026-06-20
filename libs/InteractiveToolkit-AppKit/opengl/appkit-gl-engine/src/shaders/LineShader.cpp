@@ -6,6 +6,9 @@
 #include <appkit-gl-engine/Components/Core/ComponentCamera.h>
 #include <appkit-gl-engine/ResourceMap.h>
 
+#include <appkit-gl-engine/shaders/BasicShadersDefinitions.inl>
+
+
 namespace AppKit
 {
     namespace GLEngine
@@ -73,34 +76,36 @@ namespace AppKit
                 // "  return u1 <= u2;" // return true if not completely clipped
                 // "}"
 
-                // Liang-Barsky line clipping algorithm (simplified branch-less version)
-                "bool barsky_clip_test(float p, float q, inout float u1, inout float u2) {\n"
-                "  const float epsilon = 1e-10;\n"
+                // // Liang-Barsky line clipping algorithm (simplified branch-less version)
+                // "bool barsky_clip_test(float p, float q, inout float u1, inout float u2) {\n"
+                // "  const float epsilon = 1e-10;\n"
 
-                // Handle p ≈ 0 case: line is parallel to clipping plane
-                "  float is_p_zero = step(abs(p), epsilon);\n"
-                "  float parallel_reject = is_p_zero * step(q, -epsilon);\n" // reject if q < 0
+                // // Handle p ≈ 0 case: line is parallel to clipping plane
+                // "  float is_p_zero = step(abs(p), epsilon);\n"
+                // "  float parallel_reject = is_p_zero * step(q, -epsilon);\n" // reject if q < 0
 
-                // Calculate intersection parameter r, avoiding division by zero
-                "  float safe_p = p + epsilon * sign(p + epsilon);\n" // ensure non-zero with correct sign
-                "  float r = q / safe_p;\n"
+                // // Calculate intersection parameter r, avoiding division by zero
+                // "  float safe_p = p + epsilon * sign(p + epsilon);\n" // ensure non-zero with correct sign
+                // "  float r = q / safe_p;\n"
 
-                // Determine which parameter to update based on sign of p
-                "  float is_entering = step(p, -epsilon);\n" // p < 0 (entering region)
-                "  float is_exiting = step(epsilon, p);\n"   // p > 0 (exiting region)
+                // // Determine which parameter to update based on sign of p
+                // "  float is_entering = step(p, -epsilon);\n" // p < 0 (entering region)
+                // "  float is_exiting = step(epsilon, p);\n"   // p > 0 (exiting region)
 
-                // Update u1 (entry) if entering and r > u1
-                "  float update_u1 = is_entering * step(u1, r);\n"
-                "  u1 = mix(u1, r, update_u1);\n"
+                // // Update u1 (entry) if entering and r > u1
+                // "  float update_u1 = is_entering * step(u1, r);\n"
+                // "  u1 = mix(u1, r, update_u1);\n"
 
-                // Update u2 (exit) if exiting and r < u2
-                "  float update_u2 = is_exiting * step(r, u2);\n"
-                "  u2 = mix(u2, r, update_u2);\n"
+                // // Update u2 (exit) if exiting and r < u2
+                // "  float update_u2 = is_exiting * step(r, u2);\n"
+                // "  u2 = mix(u2, r, update_u2);\n"
 
-                // Check validity: not parallel-rejected AND u1 <= u2
-                "  float is_valid = (1.0 - parallel_reject) * step(u1, u2);\n"
-                "  return is_valid > 0.5;\n"
-                "}\n"
+                // // Check validity: not parallel-rejected AND u1 <= u2
+                // "  float is_valid = (1.0 - parallel_reject) * step(u1, u2);\n"
+                // "  return is_valid > 0.5;\n"
+                // "}\n"
+
+                barsky_clip_test_vec2
 
                 "void main() {\n"
                 "  windowViewportToScreenSizePx.xy = uWindowViewportPx.xy;\n"
@@ -121,19 +126,32 @@ namespace AppKit
                 "  float u2 = 1.0;\n"
                 "  const float epsilon = 1e-3;\n"
 
+                // // Near plane clipping: -w <= z <= w, so z >= -w means z + w >= 0
+                // // min test on lim_min = -(-line_p1_clip.w + epsilon)
+                // "  bool near_clipped = barsky_clip_test(-p1p2_clip_dir.z - p1p2_clip_dir.w, line_p1_clip.z - (-line_p1_clip.w + epsilon), u1, u2) > 0.5;\n"
+                // // Far plane clipping: z <= w means w - z >= 0
+                // // max test on lim_max = (line_p1_clip.w - epsilon)
+                // "  bool far_clipped = barsky_clip_test(p1p2_clip_dir.z - p1p2_clip_dir.w, (line_p1_clip.w - epsilon) - line_p1_clip.z, u1, u2) > 0.5;\n"
+
                 // Near plane clipping: -w <= z <= w, so z >= -w means z + w >= 0
                 // min test on lim_min = -(-line_p1_clip.w + epsilon)
-                "  bool near_clipped = barsky_clip_test(-p1p2_clip_dir.z - p1p2_clip_dir.w, line_p1_clip.z - (-line_p1_clip.w + epsilon), u1, u2);\n"
                 // Far plane clipping: z <= w means w - z >= 0
                 // max test on lim_max = (line_p1_clip.w - epsilon)
-                "  bool far_clipped = barsky_clip_test(p1p2_clip_dir.z - p1p2_clip_dir.w, (line_p1_clip.w - epsilon) - line_p1_clip.z, u1, u2);\n"
+                "  vec2 u1_array = vec2(0.0);\n"
+                "  vec2 u2_array = vec2(1.0);\n"
+                "  vec2 coord_set_dir = vec2(-p1p2_clip_dir.z, p1p2_clip_dir.z);\n"
+                "  vec2 coord_set_lim = vec2(line_p1_clip.z, - line_p1_clip.z);\n"
+                "  vec2 near_far_valid = barsky_clip_test(coord_set_dir - p1p2_clip_dir.w, coord_set_lim + (line_p1_clip.w - epsilon), u1_array, u2_array);\n"
 
                 // Check if the line segment is completely clipped
                 // early discard vertex by putting it out of the NDC view
-                "  if (!near_clipped || !far_clipped) {\n"
+                "  if (near_far_valid.x < 0.5 || near_far_valid.y < 0.5) {\n"
                 "    gl_Position = vec4(0.0, 0.0, -2.0, 1.0);\n"
                 "    return;\n"
                 "  }\n"
+
+                "  u1 = max(u1_array.x, u1_array.y);\n"
+                "  u2 = min(u2_array.x, u2_array.y);\n"
 
                 "  line_p2_clip = line_p1_clip + p1p2_clip_dir * u2;\n"
                 "  line_p1_clip = line_p1_clip + p1p2_clip_dir * u1;\n"
