@@ -89,7 +89,7 @@ void SceneGUI::draw()
             auto ortho = std::dynamic_pointer_cast<ComponentCameraOrthographic>(camera);
             if (ortho->useSizeY)
             {
-                float factor = ortho->sizeY / (float)ortho->viewport.h;
+                float factor = ortho->sizeY / (float)ortho->projectionAreaSizePx.height;
                 pos *= factor;
             }
         }

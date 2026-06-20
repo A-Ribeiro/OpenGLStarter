@@ -333,7 +333,7 @@ namespace AppKit
             const MathCore::mat4f *mvInv)
         {
             setMVP(*mvp);
-            setScreenSizePx(MathCore::vec2f(camera->viewport.w, camera->viewport.h));
+            setScreenSizePx(camera->projectionAreaSizePx);
         }
 
         Utils::ShaderPropertyBag LineShader::createDefaultBag() const

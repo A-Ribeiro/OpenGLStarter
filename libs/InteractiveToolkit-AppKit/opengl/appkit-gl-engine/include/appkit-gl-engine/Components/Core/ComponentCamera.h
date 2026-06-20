@@ -23,7 +23,7 @@ namespace AppKit
                 virtual ~ComponentCamera();
 
                 MathCore::mat4f projection;
-                AppKit::GLEngine::iRect viewport;
+                MathCore::vec2f projectionAreaSizePx;
 
                 void precomputeViewProjection(bool useVisitedFlag);
 

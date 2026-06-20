@@ -64,7 +64,7 @@ namespace AppKit
                 {
                     auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(camera);
                     MathCore::vec3f camera_px_scale =
-                        (MathCore::vec3f(ortho->viewport.w, ortho->viewport.h, -1.0f)) *
+                        (MathCore::vec3f(ortho->projectionAreaSizePx.width, ortho->projectionAreaSizePx.height, -1.0f)) *
                         (MathCore::vec3f(ortho->projection.a1, ortho->projection.b2, 1.0f));
                     // camera_px_scale *= 0.5f;
                     camera_px_scale = 1.0f / camera_px_scale;
@@ -116,7 +116,7 @@ namespace AppKit
                     // Pre-calculate the conversion factor: 2 * tan_half_fov / viewport_height
                     // after that multiply by 0.5 to pass as radius to the sphere parameter
                     // final factor: tan_half_fov / viewport_height
-                    float tan_over_viewport_height = tan_half_fov / (float)perspective->viewport.h;
+                    float tan_over_viewport_height = tan_half_fov / (float)perspective->projectionAreaSizePx.height;
 
                     const auto &local_to_world = getTransform()->getMatrix(true);
 
@@ -311,7 +311,7 @@ namespace AppKit
                 {
                     auto ortho = std::dynamic_pointer_cast<Components::ComponentCameraOrthographic>(p_camera);
                     MathCore::vec3f camera_px_scale =
-                        (MathCore::vec3f(ortho->viewport.w, ortho->viewport.h, -1.0f)) *
+                        (MathCore::vec3f(ortho->projectionAreaSizePx.width, ortho->projectionAreaSizePx.height, -1.0f)) *
                         (MathCore::vec3f(ortho->projection.a1, ortho->projection.b2, 1.0f));
                     camera_px_scale = 1.0f / camera_px_scale;
 
@@ -333,7 +333,7 @@ namespace AppKit
                     // Pre-calculate the conversion factor: 2 * tan_half_fov / viewport_height
                     // after that multiply by 0.5 to pass as radius to the sphere parameter
                     // final factor: tan_half_fov / viewport_height
-                    float tan_over_viewport_height = tan_half_fov / (float)perspective->viewport.h;
+                    float tan_over_viewport_height = tan_half_fov / (float)perspective->projectionAreaSizePx.height;
 
                     const auto &world_to_local = getTransform()->getMatrixInverse(false); // compute inverse until root
                     // Calculate the uniform scale factor for converting world space thickness to local space

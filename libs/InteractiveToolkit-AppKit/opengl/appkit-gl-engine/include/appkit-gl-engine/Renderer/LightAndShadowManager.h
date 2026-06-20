@@ -38,6 +38,8 @@ namespace AppKit
         public:
             static ComponentType Type;
 
+            AppKit::GLEngine::iRect viewport;
+
             std::shared_ptr<Components::ComponentLight> light;
             AppKit::OpenGL::GLTexture depthTexture;
 
@@ -61,35 +63,34 @@ namespace AppKit
                 std::shared_ptr<Components::ComponentLight> _light,
                 const CollisionCore::Sphere<MathCore::vec3f> &scene_sphere,
                 const CollisionCore::Sphere<MathCore::vec3f> &camera_sphere);
-            
 
-            std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone) {
+            std::shared_ptr<Component> duplicate_ref_or_clone(AppKit::GLEngine::ResourceMap *resourceMap, bool force_clone)
+            {
                 return nullptr;
             }
-            void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap){
-                
+            void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap)
+            {
             }
 
-            void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer){
+            void Serialize(rapidjson::Writer<rapidjson::StringBuffer> &writer)
+            {
                 // writer.StartObject();
                 // writer.String("type");
                 // writer.String(ShadowCache::Type);
                 // writer.String("id");
                 // writer.Uint64((intptr_t)self().get());
                 // writer.EndObject();
-                
             }
             void Deserialize(rapidjson::Value &_value,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
-                                 std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
-                                 ResourceSet &resourceSet){
+                             std::unordered_map<uint64_t, std::shared_ptr<Transform>> &transform_map,
+                             std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
+                             ResourceSet &resourceSet)
+            {
                 // if (!_value.HasMember("type") || !_value["type"].IsString())
                 //     return;
                 // if (!strcmp(_value["type"].GetString(), ShadowCache::Type) == 0)
                 //     return;
-                
             }
-
         };
 
         class LightAndShadowManager
@@ -112,7 +113,7 @@ namespace AppKit
             CollisionCore::Sphere<MathCore::vec3f> scene_sphere;
             CollisionCore::Frustum<MathCore::vec3f> camera_frustum;
             CollisionCore::Sphere<MathCore::vec3f> camera_sphere;
-            
+
             Transform *scene_root;
 
             SceneTraverseHelper *visibleObjects;

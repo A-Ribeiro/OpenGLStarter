@@ -627,7 +627,7 @@ Material mat_stageBrick is opaque: YES
                 auto line_mounter = Component::CreateShared<Components::ComponentLineMounter>();
                 line_mounter->setCamera(resourceMap, data->camera, true);
 
-                float thickness_estimative = (3.0f / 1080.0f) * (float)data->camera->viewport.h;
+                float thickness_estimative = (3.0f / 1080.0f) * (float)data->camera->projectionAreaSizePx.height;
 
                 for (size_t i = 0; i < geom->indice.size(); i += 2)
                 {
