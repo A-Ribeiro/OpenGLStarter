@@ -187,7 +187,7 @@ add_custom_command(
 
 # Create a test file to detect architecture features
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lj_arch_test.c"
-    "#include \"lj_arch.h\"\n"
+    "#include <lj_arch.h>\n"
 )
 
 # Run preprocessor to get architecture defines
@@ -212,7 +212,7 @@ if(MSVC)
 else()
     # GCC/Clang preprocessor
     execute_process(
-        COMMAND ${CMAKE_C_COMPILER} -E -dM -I"${LUAJIT_SRC_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/lj_arch_test.c"
+        COMMAND ${CMAKE_C_COMPILER} -E -dM -I "${LUAJIT_SRC_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/lj_arch_test.c"
         OUTPUT_VARIABLE TARGET_TESTARCH
         ERROR_VARIABLE TARGET_TESTARCH_ERROR
         RESULT_VARIABLE TARGET_TESTARCH_RESULT
