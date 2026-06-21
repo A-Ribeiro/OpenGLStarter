@@ -11,7 +11,7 @@ set_property(CACHE APPKIT_WINDOW PROPERTY STRINGS None AutoDetect SFML GLFW Rasp
 if (ITK_RPI)
     message(STATUS "[appkit-window] Forcing using the Raspberry Pi wrapper")
     set( APPKIT_WINDOW Raspberry_Pi CACHE STRING "Choose the base window library." FORCE )
-elseif (APPKIT_WINDOW STREQUAL AutoDetect)
+elseif (APPKIT_WINDOW STREQUAL "AutoDetect")
 
     message(FATAL_ERROR "You need to set APPKIT_WINDOW to SFML, GLFW or Raspberry_Pi")
 
@@ -49,7 +49,7 @@ if (APPKIT_WINDOW_VULKAN)
     list(APPEND WINDOW_COMPILE_DEFS APPKIT_WINDOW_VULKAN)
 endif()
 
-if (APPKIT_WINDOW STREQUAL SFML)
+if (APPKIT_WINDOW STREQUAL "SFML")
 
     include(../../../InteractiveToolkit-Extension/cmake/libsfmlFromSource.cmake)
 
@@ -69,11 +69,11 @@ if (APPKIT_WINDOW STREQUAL SFML)
     list(APPEND WINDOW_LINK_LIBS sfml-window sfml-system)
     
 
-elseif (APPKIT_WINDOW STREQUAL GLFW)
+elseif (APPKIT_WINDOW STREQUAL "GLFW")
     message(STATUS "[appkit-window] USING GLFW")
     list(APPEND WINDOW_COMPILE_DEFS APPKIT_WINDOW_GLFW)
     list(APPEND WINDOW_LINK_LIBS glfw)
-elseif (APPKIT_WINDOW STREQUAL Raspberry_Pi)
+elseif (APPKIT_WINDOW STREQUAL "Raspberry_Pi")
     message(STATUS "[appkit-window] USING CUSTOM RPI")
     list(APPEND WINDOW_COMPILE_DEFS APPKIT_WINDOW_RPI)
     list(APPEND WINDOW_LINK_LIBS ${EGL_LIBRARY} ${GLES_LIBRARY} ${RPI_LIBRARIES})

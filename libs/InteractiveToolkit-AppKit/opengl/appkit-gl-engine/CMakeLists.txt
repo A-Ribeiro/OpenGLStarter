@@ -37,9 +37,9 @@ endif()
 
 target_include_directories( ${PROJECT_NAME} PUBLIC "${rapidjson_DOWNLOADED_PATH}/include" )
 
-# if(MINI_GL_ENGINE_PBR_MODE STREQUAL LearnOpengl_Com)
+# if(MINI_GL_ENGINE_PBR_MODE STREQUAL "LearnOpengl_Com")
 #     target_compile_options(${PROJECT_NAME} PUBLIC -DPBR_MODE_LEARN_OPENGL)
-# elseif(MINI_GL_ENGINE_PBR_MODE STREQUAL Optimized)
+# elseif(MINI_GL_ENGINE_PBR_MODE STREQUAL "Optimized")
 #     target_compile_options(${PROJECT_NAME} PUBLIC -DPBR_MODE_OPTIMIZED)
 # endif()
 

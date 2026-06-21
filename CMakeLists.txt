@@ -41,7 +41,7 @@ if(WIN32)
     #
     if(CMAKE_COMPILER_IS_GNUCXX)
 
-        if (CMAKE_BUILD_TYPE STREQUAL Release)
+        if (CMAKE_BUILD_TYPE STREQUAL "Release")
             add_definitions(-DNDEBUG)
             add_compile_options(-O3 -fno-strict-aliasing)
         endif()
@@ -69,7 +69,7 @@ elseif(APPLE)
     #
     # MacOS X, iOS, watchOS, tvOS (since 3.10.3)
     #
-    if (CMAKE_BUILD_TYPE STREQUAL Release)
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
         add_definitions(-DNDEBUG)
         add_compile_options(-O3 -fno-strict-aliasing)
     endif()
@@ -80,10 +80,10 @@ elseif(UNIX)
     #
     # Linux, BSD, Solaris, Minix
     #
-    if (CMAKE_BUILD_TYPE STREQUAL Release)
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
         add_definitions(-DNDEBUG)
         add_compile_options(-O3 -fno-strict-aliasing)
-    elseif( CMAKE_BUILD_TYPE STREQUAL Debug)
+    elseif( CMAKE_BUILD_TYPE STREQUAL "Debug")
         add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
         SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address") # -static-libasan
     endif()
