@@ -1,8 +1,6 @@
 project (test-lua)
 
-if (NOT TARGET libluajit)
-    add_subdirectory(../../libs/LuaJIT "${CMAKE_BINARY_DIR}/lib/LuaJIT")
-endif()
+include(../../libs/libLua.cmake)
 
 FILE( GLOB_RECURSE PUBLIC_HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" *.h)
 FILE( GLOB_RECURSE SRC RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" *.cpp)
@@ -19,5 +17,5 @@ target_link_libraries(${PROJECT_NAME}
 PUBLIC 
 #    InteractiveToolkit-Extension
 PRIVATE 
-    libluajit
+    liblua
 )
