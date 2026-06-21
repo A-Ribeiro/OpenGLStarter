@@ -10,7 +10,7 @@ endif()
 set_property(CACHE ITK_LUA_MODE PROPERTY STRINGS USE_LUA USE_LUA_JIT)
 
 
-if (ITK_LUA_MODE STREQUAL USE_LUA_JIT)
+if (ITK_LUA_MODE STREQUAL "USE_LUA_JIT")
     if (NOT TARGET libluajit)
         add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/LuaJIT" "${CMAKE_BINARY_DIR}/lib/LuaJIT")
         # alias for LuaJIT
