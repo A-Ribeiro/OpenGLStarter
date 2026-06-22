@@ -1054,7 +1054,7 @@ namespace AppKit
 
         // VirtualProperty<std::string> Name;
 
-        std::shared_ptr<Transform> Transform::findTransformByName(const std::string &name, int maxLevel)
+        std::shared_ptr<Transform> Transform::findTransformByName(const std::string &name, int maxLevel) const
         {
             if (this->name == name)
                 return this->self();
@@ -1071,7 +1071,36 @@ namespace AppKit
             return nullptr;
         }
 
-        std::vector<std::shared_ptr<Transform>> Transform::findTransformsByName(const std::string &name, int maxLevel)
+        std::shared_ptr<Transform> Transform::findTransformByPath(const std::string &path, bool include_self_name) const
+        {
+            auto tokens = ITKCommon::StringUtil::tokenizer(path, "/");
+            if (tokens.size() == 0)
+                return nullptr;
+
+            int curr_token = 0;
+            auto selected_transform = this->self();
+
+            if (include_self_name)
+            {
+                if (tokens[0] != name)
+                    return nullptr;
+                curr_token++;
+            }
+
+            if (curr_token >= tokens.size())
+                return selected_transform;
+
+            while (curr_token < tokens.size())
+            {
+                selected_transform = selected_transform->findTransformByName(tokens[curr_token], 1);
+                if (selected_transform == nullptr)
+                    return nullptr;
+                curr_token++;
+            }
+            return selected_transform;
+        }
+
+        std::vector<std::shared_ptr<Transform>> Transform::findTransformsByName(const std::string &name, int maxLevel) const
         {
             std::vector<std::shared_ptr<Transform>> result;
             std::vector<std::shared_ptr<Transform>> parcialResult;
@@ -1241,8 +1270,10 @@ namespace AppKit
             return this->self();
         }
 
-        void Transform::setChildRightEventsRef() {
-            for (auto &child : children) {
+        void Transform::setChildRightEventsRef()
+        {
+            for (auto &child : children)
+            {
                 child->renderWindowRegion = this->renderWindowRegion;
                 child->eventHandlerSet = this->eventHandlerSet;
                 child->setChildRightEventsRef();
@@ -1920,7 +1951,6 @@ namespace AppKit
 
             return result;
         }
-
 
         std::string Transform::getParentPathString() const
         {
