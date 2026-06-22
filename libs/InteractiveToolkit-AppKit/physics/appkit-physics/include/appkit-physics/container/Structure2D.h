@@ -63,8 +63,8 @@ namespace AppKit
                 uint32_t id;
 
                 // bool pass_through_is_inside_or_touching_left_right_bound(const MathCore::vec2f &point, float radius) const;
-                bool pass_through_is_above_activation_line(const MathCore::vec2f &point, float radius) const;
-                bool pass_through_is_below_or_touching_deactivation_line(const MathCore::vec2f &point, float radius) const;
+                bool pass_through_is_above_activation_line(const MathCore::vec2f &point, float radius, float offset_above) const;
+                bool pass_through_is_below_or_touching_deactivation_line(const MathCore::vec2f &point, float radius, float offset_below) const;
 
                 Structure2D(int segment_count = 0);
 
