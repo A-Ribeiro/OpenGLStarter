@@ -395,8 +395,9 @@ namespace AppKit
             const std::string &getName() const;
             EventCore::VirtualProperty<std::string> Name;
 
-            std::shared_ptr<Transform> findTransformByName(const std::string &name, int maxLevel = INT_MAX);
-            std::vector<std::shared_ptr<Transform>> findTransformsByName(const std::string &name, int maxLevel = INT_MAX);
+            std::shared_ptr<Transform> findTransformByName(const std::string &name, int maxLevel = INT_MAX) const;
+            std::shared_ptr<Transform> findTransformByPath(const std::string &path, bool include_self_name = false) const;
+            std::vector<std::shared_ptr<Transform>> findTransformsByName(const std::string &name, int maxLevel = INT_MAX) const;
 
             Transform();
             ~Transform();
