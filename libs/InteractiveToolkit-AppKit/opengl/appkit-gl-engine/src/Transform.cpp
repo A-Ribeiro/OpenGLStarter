@@ -205,7 +205,7 @@ namespace AppKit
             // renderWindowRegion.reset();// = nullptr;
         }
 
-        std::shared_ptr<Transform> Transform::getParent()
+        std::shared_ptr<Transform> Transform::getParent() const
         {
             return ToShared(mParent);
         }
@@ -1213,7 +1213,7 @@ namespace AppKit
             this->eventHandlerSet = eventHandlerSet;
             return this->self();
         }
-        std::shared_ptr<Transform> Transform::setRootPropertiesFromDefaultScene(std::shared_ptr<SceneBase> defaultScene) 
+        std::shared_ptr<Transform> Transform::setRootPropertiesFromDefaultScene(std::shared_ptr<SceneBase> defaultScene)
         {
             this->affectComponentStart = true;
             this->renderWindowRegion = defaultScene->renderWindow;
@@ -1227,14 +1227,14 @@ namespace AppKit
             return this->self();
         }
 
-        std::shared_ptr<Transform> Transform::setRootPropertiesFrom_RenderWindow_and_EventHandlerSet(std::shared_ptr<RenderWindowRegion> renderWindowRegion, std::shared_ptr<EventHandlerSet> eventHandlerSet) 
+        std::shared_ptr<Transform> Transform::setRootPropertiesFrom_RenderWindow_and_EventHandlerSet(std::shared_ptr<RenderWindowRegion> renderWindowRegion, std::shared_ptr<EventHandlerSet> eventHandlerSet)
         {
             this->affectComponentStart = true;
             this->renderWindowRegion = renderWindowRegion;
             this->eventHandlerSet = eventHandlerSet;
 
             this->setChildRightEventsRef();
-            
+
             this->unregisterComponentStartRecursive();
             this->registerComponentStartRecursive();
 
@@ -1251,7 +1251,7 @@ namespace AppKit
 
         bool Transform::traversePreOrder_DepthFirst(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
-            void *userData, int maxLevel)
+            void *userData, int maxLevel) const
         {
             // struct itemT
             // {
@@ -1300,7 +1300,7 @@ namespace AppKit
 
         bool Transform::traversePostOrder_DepthFirst(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
-            void *userData, int maxLevel)
+            void *userData, int maxLevel) const
         {
 
             // // implementation with one stack:
@@ -1380,7 +1380,7 @@ namespace AppKit
 
         bool Transform::traversePreOrder_DepthFirst(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
-            const void *userData, int maxLevel)
+            const void *userData, int maxLevel) const
         {
             // struct itemT
             // {
@@ -1429,7 +1429,7 @@ namespace AppKit
 
         bool Transform::traversePostOrder_DepthFirst(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
-            const void *userData, int maxLevel)
+            const void *userData, int maxLevel) const
         {
             // // implementation with one stack:
 
@@ -1507,7 +1507,7 @@ namespace AppKit
 
         bool Transform::traverse_BreadthFirst(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
-            void *userData, int maxLevel)
+            void *userData, int maxLevel) const
         {
             // struct itemT
             // {
@@ -1561,7 +1561,7 @@ namespace AppKit
 
         bool Transform::traverse_BreadthFirst(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
-            const void *userData, int maxLevel)
+            const void *userData, int maxLevel) const
         {
             // struct itemT
             // {
@@ -1616,7 +1616,7 @@ namespace AppKit
         bool Transform::traverse_Generic(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnPreOrderNode,
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnPostOrderNode,
-            void *userData, int maxLevel)
+            void *userData, int maxLevel) const
         {
             // struct itemT
             // {
@@ -1707,7 +1707,7 @@ namespace AppKit
         bool Transform::traverse_Generic(
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnPreOrderNode,
             const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnPostOrderNode,
-            const void *userData, int maxLevel)
+            const void *userData, int maxLevel) const
         {
             // struct itemT
             // {
@@ -1919,6 +1919,19 @@ namespace AppKit
             }
 
             return result;
+        }
+
+
+        std::string Transform::getParentPathString() const
+        {
+            std::string path = getName();
+            auto current = getParent();
+            while (current)
+            {
+                path = current->getName() + "/" + path;
+                current = current->getParent();
+            }
+            return path;
         }
 
     }
