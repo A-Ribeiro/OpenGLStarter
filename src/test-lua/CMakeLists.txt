@@ -1,6 +1,6 @@
 project (test-lua)
 
-include(../../libs/libLua.cmake)
+include(../../libs/liblua.cmake)
 
 FILE( GLOB_RECURSE PUBLIC_HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" *.h)
 FILE( GLOB_RECURSE SRC RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" *.cpp)
