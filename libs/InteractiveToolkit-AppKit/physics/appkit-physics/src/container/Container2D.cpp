@@ -370,7 +370,7 @@ namespace AppKit
                     *out_position = a;
 
                     // do ground check
-                    vec2f ground_pos = a + vec2f(0, -offset_grounded);
+                    vec2f ground_pos = a + vec2f(0, offset_grounded);
                     Core::Box2D ground_box = Core::Box2D().wrapCircle(ground_pos, radius_grounded);
                     // const auto &static_ids = static_quadtree->query_box(ground_box.min, ground_box.max);
                     thread_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max, true);
@@ -389,7 +389,7 @@ namespace AppKit
                     // ground check
                     groundCheck(
                         &on_ground_called,
-                        a + vec2f(0, -offset_grounded),
+                        a + vec2f(0, offset_grounded),
                         radius_grounded,
                         onGrounded,
                         thread_state,
@@ -563,7 +563,7 @@ namespace AppKit
                         // ground check when the move is completed
                         groundCheck(
                             &on_ground_called,
-                            b + vec2f(0, -offset_grounded),
+                            b + vec2f(0, offset_grounded),
                             radius_grounded,
                             onGrounded,
                             thread_state,
@@ -582,7 +582,7 @@ namespace AppKit
                     // ground check
                     groundCheck(
                         &on_ground_called,
-                        b + vec2f(0, -offset_grounded),
+                        b + vec2f(0, offset_grounded),
                         radius_grounded,
                         onGrounded,
                         thread_state,
