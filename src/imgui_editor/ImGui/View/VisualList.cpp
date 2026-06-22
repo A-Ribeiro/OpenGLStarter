@@ -239,7 +239,7 @@ ListElement &ListElement::setName(const char *value)
 //     return *this;
 // }
 
-std::shared_ptr<ListElement> ListElement::self()
+std::shared_ptr<ListElement> ListElement::self() const
 {
     // return visualList->findUID(uid);
     return std::shared_ptr<ListElement>(this->mSelf);

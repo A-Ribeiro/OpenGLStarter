@@ -211,7 +211,7 @@ namespace AppKit
         }
 
         // void Transform::setParent(Transform *const &prnt)
-        void Transform::setParent(std::shared_ptr<Transform> new_parent)
+        void Transform::setParent(std::shared_ptr<Transform> new_parent) const
         {
             auto self = this->self();
             auto currentParent = this->getParent();

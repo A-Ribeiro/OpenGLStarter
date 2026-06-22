@@ -450,7 +450,7 @@ TreeNode &TreeNode::setName(const char *value)
     return *this;
 }
 
-std::shared_ptr<TreeNode> TreeNode::self()
+std::shared_ptr<TreeNode> TreeNode::self() const
 {
     // if (this->parent != nullptr)
     //     return this->parent->findUID(this->uid);
@@ -458,7 +458,7 @@ std::shared_ptr<TreeNode> TreeNode::self()
     return std::shared_ptr<TreeNode>(this->mSelf);
 }
 
-std::shared_ptr<TreeNode> TreeNode::removeSelf()
+std::shared_ptr<TreeNode> TreeNode::removeSelf() const
 {
 
     auto parent = getParent();

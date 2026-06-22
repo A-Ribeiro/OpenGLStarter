@@ -87,7 +87,7 @@ namespace AppKit
                 return result;
             }
 
-            inline std::shared_ptr<ResourceMap> self()
+            inline std::shared_ptr<ResourceMap> self() const
             {
                 return ToShared(mSelf);
             }

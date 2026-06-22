@@ -98,7 +98,7 @@ public:
     inline const char *getName() const { return name; }
     inline const char *getNameToLowerNoAccents() const { return name_tolower_no_accent; }
 
-    std::shared_ptr<TreeNode> getParent() {
+    std::shared_ptr<TreeNode> getParent() const {
         return AppKit::GLEngine::ToShared(mParent);
     }
 
@@ -132,8 +132,8 @@ public:
     std::shared_ptr<TreeNode> findChildByName(const char* name, bool recursive);
 
 
-    std::shared_ptr<TreeNode> self();
-    std::shared_ptr<TreeNode> removeSelf();
+    std::shared_ptr<TreeNode> self() const;
+    std::shared_ptr<TreeNode> removeSelf() const;
     void makeFirst();
     void makeLast();
 
