@@ -67,7 +67,12 @@ namespace AppKit
                     bool allow_double_jump,
                     float skin_width);
 
-                void update(Container::Container2D *Container2D, Container::ThreadState2D &thread_state, Platform::Time *time, float input_x_axis, bool jump_pressed, float max_velocity);
+                void update(Container::Container2D *Container2D, 
+                    Container::ThreadState2D &thread_state, 
+                    Platform::Time *time, 
+                    float input_x_axis, 
+                    float x_axis_velocity,
+                    bool jump_pressed, float max_velocity);
 
                 // set the position and make reset velocity and acceleration, useful for teleporting the player
                 void teleport(const MathCore::vec2f &position);

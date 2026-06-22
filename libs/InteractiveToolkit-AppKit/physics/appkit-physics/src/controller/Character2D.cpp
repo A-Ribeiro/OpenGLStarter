@@ -50,6 +50,7 @@ namespace AppKit
                 Container::ThreadState2D &thread_state,
                 Platform::Time *time,
                 float input_x_axis,
+                float x_axis_velocity,
                 bool jump_pressed,
                 float max_velocity)
             {
@@ -106,7 +107,7 @@ namespace AppKit
                 //     5.0f,
                 //     ui::colorFromHex("#fff9bda7"));
 
-                const float x_axis_velocity = 600.0f;
+                // const float x_axis_velocity = 600.0f;
 
                 move_x_detector.setState(OP<float>::abs(input_x_axis) > 0.02f);
 
