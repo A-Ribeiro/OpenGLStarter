@@ -72,13 +72,13 @@ namespace AppKit
 
             bool isRoot();
 
-            inline std::shared_ptr<Transform> self()
+            inline std::shared_ptr<Transform> self() const
             {
                 return ToShared<Transform>(mSelf);
                 // return std::shared_ptr<Transform>(mSelf);
             }
 
-            std::shared_ptr<Transform> getParent();
+            std::shared_ptr<Transform> getParent() const;
             void setParent(std::shared_ptr<Transform> new_parent);
 
             void makeFirst()
@@ -436,35 +436,35 @@ namespace AppKit
 
             bool traversePreOrder_DepthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
-                void *userData = nullptr, int maxLevel = INT_MAX);
+                void *userData = nullptr, int maxLevel = INT_MAX) const;
             bool traversePostOrder_DepthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
-                void *userData = nullptr, int maxLevel = INT_MAX);
+                void *userData = nullptr, int maxLevel = INT_MAX) const;
 
             bool traversePreOrder_DepthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
-                const void *userData = nullptr, int maxLevel = INT_MAX);
+                const void *userData = nullptr, int maxLevel = INT_MAX) const;
             bool traversePostOrder_DepthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
-                const void *userData = nullptr, int maxLevel = INT_MAX);
+                const void *userData = nullptr, int maxLevel = INT_MAX) const;
 
             bool traverse_BreadthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnNode,
-                void *userData = nullptr, int maxLevel = INT_MAX);
+                void *userData = nullptr, int maxLevel = INT_MAX) const;
 
             bool traverse_BreadthFirst(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnNode,
-                const void *userData = nullptr, int maxLevel = INT_MAX);
+                const void *userData = nullptr, int maxLevel = INT_MAX) const;
 
             bool traverse_Generic(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnPreOrderNode,
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, void *userData)> &OnPostOrderNode,
-                void *userData = nullptr, int maxLevel = INT_MAX);
+                void *userData = nullptr, int maxLevel = INT_MAX) const;
 
             bool traverse_Generic(
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnPreOrderNode,
                 const EventCore::Callback<bool(std::shared_ptr<Transform> t, const void *userData)> &OnPostOrderNode,
-                const void *userData = nullptr, int maxLevel = INT_MAX);
+                const void *userData = nullptr, int maxLevel = INT_MAX) const;
 
             ///////////////////////////////////////////////////////
             //
@@ -491,6 +491,19 @@ namespace AppKit
                                                       bool force_make_component_copy,
                                                       std::shared_ptr<TransformMapT> transformMap,
                                                       std::shared_ptr<ComponentMapT> componentMap);
+
+        public:
+            ///////////////////////////////////////////////////////
+            //
+            //
+            //
+            // Aux Methods
+            //
+            //
+            //
+            ///////////////////////////////////////////////////////
+            // get the path from root to this transform, with each name separated by "/"
+            std::string getParentPathString() const;
         };
 
     }
