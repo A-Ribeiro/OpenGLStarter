@@ -62,7 +62,7 @@ namespace AppKit
             virtual void precomputeSceneGraphAndCamera();
 
 
-            inline std::shared_ptr<SceneBase> self()
+            inline std::shared_ptr<SceneBase> self() const
             {
                 return std::shared_ptr<SceneBase>(mSelf);
             }
@@ -71,7 +71,7 @@ namespace AppKit
                       typename std::enable_if<
                           std::is_base_of<SceneBase, _SceneType>::value,
                           bool>::type = true>
-            inline std::shared_ptr<_SceneType> self()
+            inline std::shared_ptr<_SceneType> self() const
             {
                 return std::dynamic_pointer_cast<_SceneType>(self());
             }

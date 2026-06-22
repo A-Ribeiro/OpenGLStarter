@@ -79,9 +79,9 @@ namespace AppKit
             }
 
             std::shared_ptr<Transform> getParent() const;
-            void setParent(std::shared_ptr<Transform> new_parent);
+            void setParent(std::shared_ptr<Transform> new_parent) const;
 
-            void makeFirst()
+            void makeFirst() const
             {
                 auto parent = getParent();
                 if (parent == nullptr)
@@ -94,7 +94,7 @@ namespace AppKit
                 parent->children.insert(parent->children.begin(), self_transform);
             }
 
-            void makeLast()
+            void makeLast() const
             {
                 auto parent = getParent();
                 if (parent == nullptr)
@@ -107,7 +107,7 @@ namespace AppKit
                 parent->children.push_back(self_transform);
             }
 
-            std::shared_ptr<AppKit::GLEngine::Transform> removeSelf()
+            std::shared_ptr<AppKit::GLEngine::Transform> removeSelf() const
             {
                 auto self_transform = this->self();
                 auto parent = getParent();

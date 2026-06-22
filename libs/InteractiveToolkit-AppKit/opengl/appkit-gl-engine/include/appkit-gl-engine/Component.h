@@ -62,7 +62,7 @@ namespace AppKit
             Component(const Component &v) = delete;
             Component& operator=(const Component &v) = delete;
         
-            std::shared_ptr<Transform> getTransform(int i = 0)
+            std::shared_ptr<Transform> getTransform(int i = 0) const
             {
                 if (i >= (int)mTransform.size())
                     return nullptr;
@@ -95,7 +95,7 @@ namespace AppKit
             virtual void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, TransformMapT &transformMap, ComponentMapT &componentMap) = 0;
 
         public:
-            inline std::shared_ptr<Component> self()
+            inline std::shared_ptr<Component> self() const
             {
                 return std::shared_ptr<Component>(mSelf);
             }
@@ -104,7 +104,7 @@ namespace AppKit
                       typename std::enable_if<
                           std::is_base_of<Component, _ComponentType>::value,
                           bool>::type = true>
-            inline std::shared_ptr<_ComponentType> self()
+            inline std::shared_ptr<_ComponentType> self() const
             {
                 return std::dynamic_pointer_cast<_ComponentType>(self());
             }

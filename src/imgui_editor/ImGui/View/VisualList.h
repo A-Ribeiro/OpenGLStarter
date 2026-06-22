@@ -98,7 +98,7 @@ public:
 
     EventCore::PressReleaseDetector hovered;
 
-    std::shared_ptr<ListElement> self();
+    std::shared_ptr<ListElement> self() const;
     std::shared_ptr<ListElement> removeSelf();
 
     void makeFirst();

@@ -13,6 +13,8 @@
 #include <appkit-gl-base/GLRenderBuffer.h>
 #include <appkit-gl-base/GLDynamicFBO.h>
 
+#include <appkit-gl-engine/ToShared.h>
+
 namespace AppKit
 {
     namespace GLEngine
@@ -138,9 +140,14 @@ namespace AppKit
 
             bool isLocalInsideViewport(const MathCore::vec2i &input) const;
 
-            inline std::shared_ptr<RenderWindowRegion> self()
+            inline std::shared_ptr<RenderWindowRegion> self() const
             {
-                return std::shared_ptr<RenderWindowRegion>(mSelf);
+                return ToShared<RenderWindowRegion>(mSelf);
+            }
+
+            inline std::shared_ptr<RenderWindowRegion> parent() const
+            {
+                return ToShared<RenderWindowRegion>(parentRef);
             }
 
             static inline std::shared_ptr<RenderWindowRegion> CreateShared()

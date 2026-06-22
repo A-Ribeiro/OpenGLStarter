@@ -17,7 +17,7 @@ public:
 
 	void renderAndLogic(int count);
 
-	inline std::shared_ptr<InspectorImGuiComponent> self()
+	inline std::shared_ptr<InspectorImGuiComponent> self() const
 	{
 		return AppKit::GLEngine::ToShared(mSelf);
 	}
