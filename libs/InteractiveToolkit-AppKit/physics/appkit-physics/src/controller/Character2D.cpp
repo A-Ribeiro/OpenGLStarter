@@ -23,7 +23,9 @@ namespace AppKit
                 float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
                 const MathCore::vec2f &gravity,
                 bool allow_double_jump,
-                float skin_width)
+                float skin_width,
+                float offset_above_activation_line,
+                float offset_below_deactivation_line)
             {
                 using namespace MathCore;
                 Character2D controller;
@@ -39,8 +41,10 @@ namespace AppKit
 
                 controller.jumpState.configureJump(
                     jump_risingVelocity, jump_minJumpHeight, jump_maxJumpHeight, jump_secondJumpHeight, -controller.gravity_mag);
-                
+
                 controller.skin_width = skin_width;
+                controller.offset_above_activation_line = offset_above_activation_line;
+                controller.offset_below_deactivation_line = offset_below_deactivation_line;
 
                 return controller;
             }
@@ -163,6 +167,7 @@ namespace AppKit
                 //     time->deltaTime = OP<vec2f>::length(v_diff) / OP<vec2f>::length(velocity);
                 //     // passed = true;
                 // }
+                // time->deltaTime = 0.000234200008f;
 
                 position += velocity * time->deltaTime;
 
@@ -202,7 +207,9 @@ namespace AppKit
                     thread_state,
                     object_state,
                     skin_width,
-                    max_velocity);
+                    max_velocity,
+                    offset_above_activation_line,
+                    offset_below_deactivation_line);
 
                 // passed = passed || (position != position_before);
                 // printf("passed: %d\n", passed);

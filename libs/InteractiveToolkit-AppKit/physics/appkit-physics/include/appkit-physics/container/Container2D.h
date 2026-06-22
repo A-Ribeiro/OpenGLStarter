@@ -108,7 +108,9 @@ namespace AppKit
                     ThreadState2D &thread_state,
                     ObjectState2D &object_state,
                     float skin_width = 1e-2f,
-                    float max_velocity = 5000.0f);
+                    float max_velocity = 5000.0f,
+                    float offset_above_activation_line = 0.0f,
+                    float offset_below_deactivation_line = 1e-2f);
 
                 // float max_velocity = 5000.0f;
 

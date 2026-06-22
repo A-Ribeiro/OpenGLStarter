@@ -66,18 +66,18 @@ namespace AppKit
             //     return true;
             // }
 
-            bool Structure2D::pass_through_is_above_activation_line(const MathCore::vec2f &point, float radius) const
+            bool Structure2D::pass_through_is_above_activation_line(const MathCore::vec2f &point, float radius, float offset_above) const
             {
                 float dst = Core::Line2D::pointDistanceToLine(point, pass_through_activate_line);
                 // printf("is_above: %d\n", (int)(dst > radius));
-                return dst > radius;
+                return dst > radius + offset_above;
             }
 
-            bool Structure2D::pass_through_is_below_or_touching_deactivation_line(const MathCore::vec2f &point, float radius) const
+            bool Structure2D::pass_through_is_below_or_touching_deactivation_line(const MathCore::vec2f &point, float radius, float offset_below) const
             {
                 float dst = Core::Line2D::pointDistanceToLine(point, pass_through_deactivate_line);
                 // printf("is_below: %d\n", (int)(dst > 0));
-                return dst > 0;
+                return dst > -radius + offset_below;
             }
 
             Structure2D::Structure2D(int segment_count) : tag{'\0'}, segments(segment_count)

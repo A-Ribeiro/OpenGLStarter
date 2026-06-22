@@ -13,7 +13,6 @@
 #include <appkit-physics/container/ObjectState2D.h>
 #include <appkit-physics/container/ThreadState2D.h>
 
-
 // #include <appkit-physics/util/Quadtree.h>
 // #include <appkit-physics/util/Uuid.h>
 #include <appkit-physics/velocity-helpers/JumpState.h>
@@ -58,6 +57,9 @@ namespace AppKit
 
                 float skin_width;
 
+                float offset_above_activation_line;
+                float offset_below_deactivation_line;
+
                 Character2D();
 
                 static Character2D fromStaticConfig(
@@ -65,14 +67,16 @@ namespace AppKit
                     float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
                     const MathCore::vec2f &gravity,
                     bool allow_double_jump,
-                    float skin_width);
+                    float skin_width,
+                    float offset_above_activation_line,
+                    float offset_below_deactivation_line);
 
-                void update(Container::Container2D *Container2D, 
-                    Container::ThreadState2D &thread_state, 
-                    Platform::Time *time, 
-                    float input_x_axis, 
-                    float x_axis_velocity,
-                    bool jump_pressed, float max_velocity);
+                void update(Container::Container2D *Container2D,
+                            Container::ThreadState2D &thread_state,
+                            Platform::Time *time,
+                            float input_x_axis,
+                            float x_axis_velocity,
+                            bool jump_pressed, float max_velocity);
 
                 // set the position and make reset velocity and acceleration, useful for teleporting the player
                 void teleport(const MathCore::vec2f &position);

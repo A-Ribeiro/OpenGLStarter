@@ -332,7 +332,10 @@ namespace AppKit
                 ThreadState2D &thread_state,
                 ObjectState2D &object_state,
                 float skin_width,
-                float max_velocity)
+                float max_velocity,
+                float offset_above_activation_line,
+                float offset_below_deactivation_line
+             )
             {
                 using namespace MathCore;
 
@@ -342,7 +345,7 @@ namespace AppKit
 
                 {
                     vec2f push_offset, push_normal;
-                    if (pushOutOfSegments(a, radius, &a, &push_offset, &push_normal, vel, thread_state, object_state))
+                    if (pushOutOfSegments(a, radius + skin_width * 0.05f, &a, &push_offset, &push_normal, vel, thread_state, object_state))
                     {
                         // need recompute velocity and b offset
                         b += push_offset;
@@ -413,7 +416,6 @@ namespace AppKit
                     //         }
                     //     }
                     // }
-
                     return;
                 }
 
@@ -458,9 +460,13 @@ namespace AppKit
                 vec2f remaining_dir_norm = ab * (1.0f / ab_mag);
                 float remaining_move_mag = ab_mag;
 
+                bool no_iteration = true;
+
                 int max_iterations_without_move = 3;
-                while (remaining_move_mag > EPSILON<float>::low_precision)
+                while (remaining_move_mag > skin_width)
                 {
+                    no_iteration = false;
+
                     Core::Box2D move_box = Core::Box2D(a, b).expand(radius);
 
                     const Core::Segment2D *segment_collision = nullptr;
@@ -489,12 +495,12 @@ namespace AppKit
                             bool &is_active = object_state.pass_through_get_active_ref(structure->id);
 
                             // the current position is a
-                            bool below_deactivation_line = structure->pass_through_is_below_or_touching_deactivation_line(a, radius);
+                            bool below_deactivation_line = structure->pass_through_is_below_or_touching_deactivation_line(a, radius, offset_below_deactivation_line);
                             if (below_deactivation_line)
                                 is_active = false;
                             else
                             {
-                                bool above_activation_line = structure->pass_through_is_above_activation_line(a, radius);
+                                bool above_activation_line = structure->pass_through_is_above_activation_line(a, radius, offset_above_activation_line);
                                 if (above_activation_line)
                                     is_active = true;
                                 // if (above_activation_line)
@@ -597,13 +603,15 @@ namespace AppKit
                     }
                     else
                         max_iterations_without_move = 3;
-                    //if (remaining_move_mag > EPSILON<float>::low_precision) // test to avoid b to have move after the logic
+                    // if (remaining_move_mag > EPSILON<float>::low_precision) // test to avoid b to have move after the logic
                     if (remaining_move_mag > skin_width) // test to avoid b to have move after the logic
                     {
                         float remaining_move_cos = OP<vec2f>::dot(remaining_dir_norm, new_remaining_dir_norm);
                         remaining_move_cos = OP<float>::clamp(remaining_move_cos, -1.0f, 1.0f);
-                        if (remaining_move_cos < 1e-3f) // if the remaining move is almost perpendicular to the collision surface, just stop
+                        // MathCore::OP<float>::cos(MathCore::OP<float>::deg_2_rad(89.0f))
+                        if (MathCore::OP<float>::abs(remaining_move_cos) <= 1.745240e-2) // if the remaining move is almost perpendicular to the collision surface, just stop
                         {
+                            // printf("cosseno perpendicular: %f\n", remaining_move_cos);
                             // if (remaining_move_cos < 0.0f)
                             //     printf("################### Error scabroso no slide negativo...\n");
                             break;
@@ -679,6 +687,56 @@ namespace AppKit
                     5.0f,
                     ui::colorFromHex("#ffff004c"));
 #endif
+
+                if (no_iteration)
+                {
+                    *out_position = a;
+
+                    // do ground check
+                    vec2f ground_pos = a + vec2f(0, offset_grounded);
+                    Core::Box2D ground_box = Core::Box2D().wrapCircle(ground_pos, radius_grounded);
+                    // const auto &static_ids = static_quadtree->query_box(ground_box.min, ground_box.max);
+                    thread_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max, true);
+                    if (dynamic_quadtree)
+                        thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, ground_box.min, ground_box.max, false);
+
+                    if (thread_state.structure_ptrs.empty())
+                    {
+                        // for (const auto *structure : always_check_structures)
+                        //     thread_state.quadtree_ids.push_back(structure->id);
+
+                        thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
+                        thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
+                    }
+
+                    // ground check
+                    groundCheck(
+                        &on_ground_called,
+                        a + vec2f(0, offset_grounded),
+                        radius_grounded,
+                        onGrounded,
+                        thread_state,
+                        object_state);
+
+                    // for (uint32_t idx : static_ids)
+                    // {
+                    //     const auto &structure = static_structures[idx];
+                    //     // skip pass-through structures when player is on the pass-through side
+                    //     if (structure.pass_through_set && !structure.pass_through_is_active)
+                    //         continue;
+                    //     for (const auto &segment : structure.segments)
+                    //     {
+                    //         if (Segment2D::circleIntersectsSegment(
+                    //                 ground_pos, radius_grounded,
+                    //                 segment.a, segment.b))
+                    //         {
+                    //             onGrounded(&segment);
+                    //             // onMoveTouch(a, &segment);
+                    //         }
+                    //     }
+                    // }
+                    return;
+                }
 
                 vel = remaining_dir_norm * OP<vec2f>::length(b - a_copy) * delta_time_inv;
 
