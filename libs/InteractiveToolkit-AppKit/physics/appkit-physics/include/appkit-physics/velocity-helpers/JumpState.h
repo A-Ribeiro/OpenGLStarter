@@ -95,6 +95,9 @@ namespace AppKit
                 float getMaxJumpHeight() const;
                 float getSecondJumpHeight() const;
 
+                static float VelocityToReachDistance(float distance, float risingVelocity, float minJumpHeight, float maxJumpHeight, float gravity, float lrp);
+                static float LimitMaxRisingVelocity(float risingVelocity, float minJumpHeight, float gravity);
+
                 void configureJump(float risingVelocity, float minJumpHeight, float maxJumpHeight, float secondJumpHeight, float gravity);
 
                 void setGrounded();

@@ -118,6 +118,32 @@ namespace AppKit
 
             float JumpState::getSecondJumpHeight() const { return secondJumpHeight; }
 
+            float JumpState::VelocityToReachDistance(float distance, float risingVelocity, float minJumpHeight, float maxJumpHeight, float gravity, float lrp)
+            {
+                float required_initial_velocity = HeightAndTime::CalcVelocityToReachHeight(minJumpHeight, gravity);
+                float rising_velocity_without_impulse = MathCore::OP<float>::minimum(risingVelocity, required_initial_velocity);
+
+                float minJumpHeight_time_to_reach_max_height_without_impulse = HeightAndTime::CalcTimeToReachZeroVelocity(rising_velocity_without_impulse, gravity);
+
+                float minJumpHeight_height_without_impulse = HeightAndTime::CalcHeightFromVelocity(rising_velocity_without_impulse, gravity);
+
+                float maxJumpHeight_keep_impulse_until_height = maxJumpHeight - minJumpHeight_height_without_impulse;
+
+                float _t_keep_impulse_max_jump = maxJumpHeight_keep_impulse_until_height / rising_velocity_without_impulse;
+
+                float _2t = minJumpHeight_time_to_reach_max_height_without_impulse * 2.0f;
+
+                return distance / (_2t + 2.0f * _t_keep_impulse_max_jump * lrp);
+            }
+
+            float JumpState::LimitMaxRisingVelocity(float risingVelocity, float minJumpHeight, float gravity)
+            {
+                float required_initial_velocity = HeightAndTime::CalcVelocityToReachHeight(minJumpHeight, gravity);
+                float rising_velocity_without_impulse = MathCore::OP<float>::minimum(risingVelocity, required_initial_velocity);
+
+                return (rising_velocity_without_impulse < risingVelocity) ? rising_velocity_without_impulse : risingVelocity;
+            }
+
             void JumpState::configureJump(float risingVelocity, float minJumpHeight, float maxJumpHeight, float secondJumpHeight, float gravity)
             {
                 this->risingVelocity = risingVelocity;
@@ -131,6 +157,9 @@ namespace AppKit
 
                 float required_initial_velocity = HeightAndTime::CalcVelocityToReachHeight(minJumpHeight_max_height, gravity);
                 rising_velocity_without_impulse = MathCore::OP<float>::minimum(risingVelocity, required_initial_velocity);
+
+                // if (rising_velocity_without_impulse < rising_velocity_with_impulse)
+                //     rising_velocity_with_impulse = rising_velocity_without_impulse;
 
                 minJumpHeight_height_without_impulse = HeightAndTime::CalcHeightFromVelocity(rising_velocity_without_impulse, gravity);
                 minJumpHeight_keep_impulse_until_height = minJumpHeight_max_height - minJumpHeight_height_without_impulse;
