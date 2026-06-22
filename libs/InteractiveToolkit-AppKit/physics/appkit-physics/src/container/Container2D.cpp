@@ -331,7 +331,8 @@ namespace AppKit
                 const EventCore::Callback<void(const MathCore::vec2f &pos, const Core::Segment2D *on_segment)> &onMoveTouch,
                 ThreadState2D &thread_state,
                 ObjectState2D &object_state,
-                float skin_width)
+                float skin_width,
+                float max_velocity)
             {
                 using namespace MathCore;
 
@@ -341,7 +342,7 @@ namespace AppKit
 
                 {
                     vec2f push_offset, push_normal;
-                    if (pushOutOfSegments(a, radius + 1e-2f, &a, &push_offset, &push_normal, vel, thread_state, object_state))
+                    if (pushOutOfSegments(a, radius, &a, &push_offset, &push_normal, vel, thread_state, object_state))
                     {
                         // need recompute velocity and b offset
                         b += push_offset;
@@ -524,7 +525,7 @@ namespace AppKit
 
                             vec2f out_dir;
                             float t = Core::Segment2D::circleCastIntersectsSegment(a, b, radius, segment.a, segment.b, &out_dir, skin_width);
-                            if ((remaining_move_mag * move_t) <= (skin_width * 1.1f))
+                            if ((remaining_move_mag * move_t) <= skin_width)
                                 t = 0.0f;
                             if (t < move_t)
                             {
@@ -596,7 +597,8 @@ namespace AppKit
                     }
                     else
                         max_iterations_without_move = 3;
-                    if (remaining_move_mag > EPSILON<float>::low_precision) // test to avoid b to have move after the logic
+                    //if (remaining_move_mag > EPSILON<float>::low_precision) // test to avoid b to have move after the logic
+                    if (remaining_move_mag > skin_width) // test to avoid b to have move after the logic
                     {
                         float remaining_move_cos = OP<vec2f>::dot(remaining_dir_norm, new_remaining_dir_norm);
                         remaining_move_cos = OP<float>::clamp(remaining_move_cos, -1.0f, 1.0f);

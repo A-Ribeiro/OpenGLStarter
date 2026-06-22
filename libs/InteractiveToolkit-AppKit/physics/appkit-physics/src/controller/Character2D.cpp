@@ -201,7 +201,8 @@ namespace AppKit
                     },
                     thread_state,
                     object_state,
-                    skin_width);
+                    skin_width,
+                    max_velocity);
 
                 // passed = passed || (position != position_before);
                 // printf("passed: %d\n", passed);
