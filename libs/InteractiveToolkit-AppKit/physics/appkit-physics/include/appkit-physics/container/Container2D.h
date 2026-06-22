@@ -107,9 +107,10 @@ namespace AppKit
                     const EventCore::Callback<void(const MathCore::vec2f &pos, const Core::Segment2D *on_segment)> &onMoveTouch,
                     ThreadState2D &thread_state,
                     ObjectState2D &object_state,
-                    float skin_width = 1e-2f);
+                    float skin_width = 1e-2f,
+                    float max_velocity = 5000.0f);
 
-                const float max_velocity = 5000.0f;
+                // float max_velocity = 5000.0f;
 
                 ITK_DECLARE_CREATE_SHARED(Container2D)
 
