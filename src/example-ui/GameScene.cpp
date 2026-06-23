@@ -313,9 +313,9 @@ void GameScene::bindResourcesToGraph()
             max_jump_height,                                        // maxJumpHeight
             second_jump_height,                                     // secondJumpHeight
             true,                                                   // allow_double_jump
-            (componentCameraOrthographic->sizeY / 2160.0f) * 1e-2f, // skin_width
+            (componentCameraOrthographic->sizeY / 2160.0f) * 0.33f, // skin_width: 33% of a px in 4k screen
             0.0f,                                                   // offset_above_activation_line
-            componentPlayer->Radius.c_val() * 1.0f,               // offset_below_deactivation_line
+            componentPlayer->Radius.c_val() * 1.0f,                 // offset_below_deactivation_line
             MathCore::vec2f(0.0f, -gravity),                        // gravity
             walk_velocity,                                          // walk_velocity
             gravity * 3.0f                                          // max_velocity
@@ -323,6 +323,8 @@ void GameScene::bindResourcesToGraph()
 
         // componentPlayer->gameArea = componentGameArea;
         player_0->setLocalPosition(MathCore::vec3f(stageResult.start_point.x, stageResult.start_point.y, 0.0f));
+
+        // player_0->setLocalPosition(MathCore::vec3f(9530.000000f, 79.996666f, 0.000000f));
     }
 
     auto componentCameraToPlayer = player_0->addNewComponent<ComponentCameraToPlayer>();
@@ -514,7 +516,6 @@ void GameScene::printHierarchy()
             nodes.push_back({child.get(), node_struct.depth + 1});
     }
 }
-
 
 void GameScene::windowViewportToCameraOrthoSize()
 {

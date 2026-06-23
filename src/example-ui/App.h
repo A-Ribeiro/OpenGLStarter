@@ -40,6 +40,9 @@ public:
 
 
     float fps;
+    float fps_acc;
+    float fps_timer_acc;
+    int64_t fps_count;
     bool gain_focus;
 
     App();

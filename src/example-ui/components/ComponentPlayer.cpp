@@ -239,6 +239,11 @@ namespace AppKit
                 //     });
 
                 // getTransform()->setLocalPosition(position);
+                // static float use_axis_1 = 0.0f;
+                // if (inputState.x_axis > 0.0f)
+                //     use_axis_1 = inputState.x_axis;
+                // if (use_axis_1 != 0.0f)
+                //     inputState.x_axis = use_axis_1;
 
                 AppKit::Physics::Container::ThreadState2D thread_state2d;
                 character2D->update(app->gameScene->container2D.get(),
