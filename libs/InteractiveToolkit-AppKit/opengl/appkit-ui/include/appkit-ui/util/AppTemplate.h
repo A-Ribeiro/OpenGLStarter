@@ -36,6 +36,7 @@ namespace AppKit
             void save_options();
 
             void apply_settings_to_window(const EventCore::Callback<void()> &OnAfterAppCreation);
+            void apply_non_restart_needed_settings_to_engine();
 
             void reset_monitor_mode_to_default();
 

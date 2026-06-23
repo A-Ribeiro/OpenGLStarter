@@ -67,6 +67,22 @@ namespace AppKit
             apply_window_options_to_engine(&engineConfig, OnAfterAppCreation);
         }
 
+        void AppTemplate::apply_non_restart_needed_settings_to_engine()
+        {
+            auto engine = AppKit::GLEngine::Engine::Instance();
+            auto options = AppKit::ui::OptionsManager::Instance();
+
+            {
+                const std::string &vSync = options->getGroupValueSelectedForKey("Video", "VSync");
+                engine->window->glSetVSync(vSync == "ON");
+            }
+
+            {
+                const std::string &antiStutterMode = options->getGroupValueSelectedForKey("Video", "OpenGLAntiStutter");
+                engine->OpenGLAntiStutter = (antiStutterMode == "ON");
+            }
+        }
+
         void AppTemplate::reset_monitor_mode_to_default()
         {
             auto options = AppKit::ui::OptionsManager::Instance();
@@ -142,6 +158,16 @@ namespace AppKit
                 else
                     engineConfig->glContextConfig.vSync = false;
             }
+
+            {
+                const std::string &antiStutterMode = options->getGroupValueSelectedForKey("Video", "OpenGLAntiStutter");
+                if (antiStutterMode == "ON")
+                    engine->OpenGLAntiStutter = true;
+                else
+                    engine->OpenGLAntiStutter = false;
+            }
+
+            // engine->alwaysDraw = true;
 
             engine->configureWindow( //
                 *engineConfig,

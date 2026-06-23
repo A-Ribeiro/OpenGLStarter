@@ -1,6 +1,7 @@
 #include "App.h"
 
 #include <appkit-gl-engine/StartEventManager.h>
+#include <appkit-ui/util/AppTemplate.h>
 
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
@@ -395,14 +396,17 @@ void App::onWindowEvent(const AppKit::Window::WindowEvent &evt)
 
 void App::applySettingsChanges()
 {
+    auto appTemplate = AppKit::ui::AppTemplate::Instance();
+    appTemplate->apply_non_restart_needed_settings_to_engine();
 
-    auto engine = AppKit::GLEngine::Engine::Instance();
+
+    // auto engine = AppKit::GLEngine::Engine::Instance();
     auto options = AppKit::ui::OptionsManager::Instance();
 
-    {
-        const std::string &vSync = options->getGroupValueSelectedForKey("Video", "VSync");
-        engine->window->glSetVSync(vSync == "ON");
-    }
+    // {
+    //     const std::string &vSync = options->getGroupValueSelectedForKey("Video", "VSync");
+    //     engine->window->glSetVSync(vSync == "ON");
+    // }
 
     {
         const std::string &meshCrusher = options->getGroupValueSelectedForKey("Extra", "MeshCrusher");

@@ -21,6 +21,25 @@ namespace AppKit
         {
             // class ComponentGameArea;
 
+            struct PlayerConfig
+            {
+                float risingVelocity;
+                float minJumpHeight;
+                float maxJumpHeight;
+                float secondJumpHeight;
+
+                bool allow_double_jump;
+                float skin_width;
+
+                float offset_above_activation_line;
+                float offset_below_deactivation_line;
+
+                MathCore::vec2f gravity;
+                float walk_velocity;
+
+                float max_velocity;
+            };
+
             class ComponentPlayer : public Component
             {
 
@@ -37,12 +56,17 @@ namespace AppKit
                 bool debugDrawEnabled;
                 float debugDrawThickness;
                 MathCore::vec4f debugDrawColor;
+
+                float initial_z;
+
+                EventCore::Property<MathCore::vec2f> Offset;
                 EventCore::Property<float> Radius;
                 EventCore::Property<float> RadiusGrounded;
                 EventCore::Property<float> OffsetGrounded;
 
-
                 std::shared_ptr<AppKit::Physics::Controller::Character2D> character2D;
+
+                PlayerConfig config;
 
                 // std::weak_ptr<ComponentGameArea> gameArea;
 

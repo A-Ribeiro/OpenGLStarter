@@ -43,6 +43,22 @@ namespace AppKit
                 //     200.0f,  // secondJumpHeight
                 //     -5000.0f // gravity
                 // );
+
+                initial_z = 0.0f;
+
+                config = PlayerConfig{
+                    10.0f,                         // risingVelocity
+                    1.5f,                          // minJumpHeight
+                    3.0f,                          // maxJumpHeight
+                    2.0f,                          // secondJumpHeight
+                    true,                          // allow_double_jump
+                    (10.0f / 2160.0f) * 1e-2f,     // skin_width
+                    0.0f,                          // offset_above_activation_line
+                    0.1f,                          // offset_below_deactivation_line
+                    MathCore::vec2f(0.0f, -20.0f), // gravity
+                    5.0f,                          // walk_velocity
+                    50.0f                          // max_velocity
+                };
             }
 
             ComponentPlayer::~ComponentPlayer()
@@ -53,21 +69,24 @@ namespace AppKit
 
             void ComponentPlayer::start()
             {
+                initial_z = getTransform()->getLocalPosition().z;
+
                 character2D = AppKit::Physics::Controller::Character2D::CreateShared();
                 *character2D = AppKit::Physics::Controller::Character2D::fromStaticConfig(
                     Radius.c_val(),
                     RadiusGrounded.c_val(),
-                    OffsetGrounded.c_val(),
-                    1000.0f,                         // risingVelocity
-                    150.0f,                          // minJumpHeight
-                    300.0f,                          // maxJumpHeight
-                    200.0f,                          // secondJumpHeight
-                    MathCore::vec2f(0.0f, -5000.0f), // gravity
-                    true,                            // allow_double_jump
-                    1e-2f                            // skin_width: a small extra radius to avoid the character to be stuck in the geometry when moving at high speed against it, by giving some "space" for the physics to detect the collision a bit earlier and react to it before the character is already intersecting the geometry.
-                );
+                    OffsetGrounded.c_val() - Offset.c_val().y,
+                    config.risingVelocity,
+                    config.minJumpHeight,
+                    config.maxJumpHeight,
+                    config.secondJumpHeight,
+                    config.gravity,
+                    config.allow_double_jump,
+                    config.skin_width,
+                    config.offset_above_activation_line,
+                    config.offset_below_deactivation_line);
                 // app->gameScene->physicsContainer->jumpingControllerList.push_back(physicsController);
-                character2D->teleport(MathCore::CVT<MathCore::vec3f>::toVec2(getTransform()->getLocalPosition()));
+                character2D->teleport(MathCore::CVT<MathCore::vec3f>::toVec2(getTransform()->getLocalPosition()) + Offset.c_val());
 
                 if (auto eventHandlerSet = eventHandlerSetRef.lock())
                     eventHandlerSet->OnUpdate.add(&ComponentPlayer::OnUpdate, this);
@@ -88,13 +107,13 @@ namespace AppKit
 
                         float inner_radius = self_ref->Radius.c_val() - self_ref->debugDrawThickness * 0.5f;
                         line_mounter->addLine(
-                            MathCore::vec3f(0,0,0), // a
-                            MathCore::vec3f(inner_radius, 0, 0), // b
+                            MathCore::vec3f(self_ref->Offset.c_val(),0), // a
+                            MathCore::vec3f(self_ref->Offset.c_val() + MathCore::vec2f(inner_radius, 0), 0), // b
                             self_ref->debugDrawThickness, // thickness
                             self_ref->debugDrawColor // color
                         );
                         line_mounter->addCircle(
-                            MathCore::vec3f(0,0,0), // pos
+                            MathCore::vec3f(self_ref->Offset.c_val(),0), // pos
                             inner_radius,    // radius
                             self_ref->debugDrawThickness, // thickness
                             self_ref->debugDrawColor, // color
@@ -104,9 +123,9 @@ namespace AppKit
 
 
                         line_mounter->addCircle(
-                            MathCore::vec3f(0, -self_ref->OffsetGrounded.c_val(),0), // pos
-                            self_ref->RadiusGrounded - 2.0f,    // radius
-                            2.0f, // thickness
+                            MathCore::vec3f(0, self_ref->OffsetGrounded.c_val(),0), // pos
+                            self_ref->RadiusGrounded - self_ref->debugDrawThickness * 0.5f,    // radius
+                            self_ref->debugDrawThickness, // thickness
                             ui::colorFromHex("#0008ff"), // color
                             32, // segment_count
                             MathCore::quatf() // rotation
@@ -114,22 +133,22 @@ namespace AppKit
 
                         float radius_to_draw = inner_radius * 20.0f;
                         line_mounter->addLine(
-                            MathCore::vec3f(-radius_to_draw, self_ref->character2D->jumpState.getMinJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(radius_to_draw, self_ref->character2D->jumpState.getMinJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->character2D->jumpState.getMinJumpHeight() - inner_radius + self_ref->Offset.c_val().y,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->character2D->jumpState.getMinJumpHeight() - inner_radius + self_ref->Offset.c_val().y, 0), // b
                             self_ref->debugDrawThickness, // thickness
                             ui::colorFromHex("#FF0000FF") // color
                         );
 
                         line_mounter->addLine(
-                            MathCore::vec3f(-radius_to_draw, self_ref->character2D->jumpState.getMaxJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(radius_to_draw, self_ref->character2D->jumpState.getMaxJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->character2D->jumpState.getMaxJumpHeight() - inner_radius + self_ref->Offset.c_val().y,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->character2D->jumpState.getMaxJumpHeight() - inner_radius + self_ref->Offset.c_val().y, 0), // b
                             self_ref->debugDrawThickness, // thickness
                             ui::colorFromHex("#FF0000FF") // color
                         );
 
                         line_mounter->addLine(
-                            MathCore::vec3f(-radius_to_draw, self_ref->character2D->jumpState.getSecondJumpHeight() - inner_radius,0), // a
-                            MathCore::vec3f(radius_to_draw, self_ref->character2D->jumpState.getSecondJumpHeight() - inner_radius, 0), // b
+                            MathCore::vec3f(-radius_to_draw, self_ref->character2D->jumpState.getSecondJumpHeight() - inner_radius + self_ref->Offset.c_val().y,0), // a
+                            MathCore::vec3f(radius_to_draw, self_ref->character2D->jumpState.getSecondJumpHeight() - inner_radius + self_ref->Offset.c_val().y, 0), // b
                             self_ref->debugDrawThickness * 0.5f, // thickness
                             ui::colorFromHex("#f700ffff") // color
                         );
@@ -226,10 +245,14 @@ namespace AppKit
                                     thread_state2d,
                                     time,
                                     inputState.x_axis,
+                                    config.walk_velocity,
                                     inputState.jump.pressed,
-                                    app->gameScene->container2D->max_velocity);
+                                    config.max_velocity);
 
-                getTransform()->setLocalPosition(MathCore::vec3f(character2D->position, 0.0f));
+                auto new_position3d = MathCore::vec3f(character2D->position - Offset.c_val(),
+                                                      initial_z);
+                getTransform()->setLocalPosition(new_position3d);
+                // printf("position: %f, %f, %f\n", new_position3d.x, new_position3d.y, new_position3d.z);
 
                 auto debugDrawTransform = getTransform()->findTransformByName("DebugDrawCircle");
                 if (debugDrawTransform)
