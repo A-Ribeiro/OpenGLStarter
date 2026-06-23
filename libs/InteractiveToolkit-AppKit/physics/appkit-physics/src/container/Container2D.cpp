@@ -345,7 +345,7 @@ namespace AppKit
 
                 {
                     vec2f push_offset, push_normal;
-                    if (pushOutOfSegments(a, radius + skin_width * 0.05f, &a, &push_offset, &push_normal, vel, thread_state, object_state))
+                    if (pushOutOfSegments(a, radius + skin_width * 0.1f, &a, &push_offset, &push_normal, vel, thread_state, object_state))
                     {
                         // need recompute velocity and b offset
                         b += push_offset;
@@ -531,7 +531,7 @@ namespace AppKit
 
                             vec2f out_dir;
                             float t = Core::Segment2D::circleCastIntersectsSegment(a, b, radius, segment.a, segment.b, &out_dir, skin_width);
-                            if ((remaining_move_mag * move_t) <= skin_width)
+                            if ((remaining_move_mag * t) <= skin_width)
                                 t = 0.0f;
                             if (t < move_t)
                             {

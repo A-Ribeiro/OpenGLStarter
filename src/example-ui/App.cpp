@@ -55,6 +55,9 @@ App::App() : threadPool( // set the minimum thread count to avoid stalling the m
     // screenRenderWindow.setEventForwardingEnabled(true);
 
     fps = 0;
+    fps_acc = 0;
+    fps_timer_acc = 0;
+    fps_count = 0;
     below_min_hz_count = 0;
     draw_stats_enabled = false;
 
@@ -110,8 +113,23 @@ void App::draw()
         fps_timer.reset();
     }
 
-    if (fps_timer.unscaledDeltaTime > EPSILON<float>::high_precision)
-        fps = MathCore::OP<float>::lerp(fps, 1.0f / fps_timer.unscaledDeltaTime, 0.05f);
+    if (fps_timer.unscaledDeltaTime > 0.0f)
+    {
+        fps_timer_acc += fps_timer.unscaledDeltaTime;
+        fps_acc += (1.0f / fps_timer.unscaledDeltaTime);
+        fps_count++;
+    }
+
+    if (fps_timer_acc > 1.0f && fps_count > 0)
+    {
+        fps = fps_acc / (float)fps_count;
+        fps_acc = 0;
+        fps_timer_acc = 0;
+        fps_count = 0;
+    }
+
+    // if (fps_timer.unscaledDeltaTime > EPSILON<float>::high_precision)
+    //     fps = MathCore::OP<float>::lerp(fps, 1.0f / fps_timer.unscaledDeltaTime, 0.05f);
 
     // set min delta time (the passed time or the time to render at 24fps)
     // time.deltaTime = minimum(time.deltaTime,1.0f/24.0f);
