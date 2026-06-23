@@ -740,6 +740,11 @@ namespace AppKit
 
                 vel = remaining_dir_norm * OP<vec2f>::length(b - a_copy) * delta_time_inv;
 
+                // If grounded and has upward velocity, cancel it to prevent floating/bouncing artifacts
+                // This ensures consistent behavior regardless of framerate
+                if (on_ground_called && vel.y > 0.0f)
+                    vel.y = 0.0f;
+
                 *out_position = b;
                 // *out_velocity = vec3f(vel, out_velocity->z);
                 *out_velocity = OP<vec2f>::quadraticClamp(vec2f(0, 0), vel, max_velocity);

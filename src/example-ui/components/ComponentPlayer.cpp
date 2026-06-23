@@ -9,6 +9,11 @@
 
 // #include "ComponentGameArea.h"
 
+// namespace Debug
+// {
+//     extern AppKit::GLEngine::Components::ComponentLineMounter *lineMounter;
+// }
+
 namespace AppKit
 {
     namespace GLEngine
@@ -87,6 +92,33 @@ namespace AppKit
                     config.offset_below_deactivation_line);
                 // app->gameScene->physicsContainer->jumpingControllerList.push_back(physicsController);
                 character2D->teleport(MathCore::CVT<MathCore::vec3f>::toVec2(getTransform()->getLocalPosition()) + Offset.c_val());
+
+                // character2D->OnDebugDrawLine = [&](const MathCore::vec2f &a, const MathCore::vec2f &b, int color_code)
+                // {
+                //     using namespace AppKit::Physics;
+
+                //     // auto ortho = std::dynamic_pointer_cast<AppKit::GLEngine::Components::ComponentCameraOrthographic>(app->gameScene->getCamera());
+
+                //     if (Debug::lineMounter == nullptr)
+                //         return;
+
+                //     MathCore::vec4f color = ui::colorFromHex("#ffffffff");
+                //     switch (color_code)
+                //     {
+                //     case COLOR_CODE_GROUND_AXIS:
+                //         color = ui::colorFromHex("#ff8800ff");
+                //         break;
+                //     case COLOR_CODE_GROUND_AXIS_ON_SEGMENT:
+                //         color = ui::colorFromHex("#00ff00ff");
+                //         break;
+                //     }
+
+                //     Debug::lineMounter->addLine(
+                //         MathCore::vec3f(a, 0.0f),
+                //         MathCore::vec3f(b, 0.0f),
+                //         this->debugDrawThickness, // thickness
+                //         color);
+                // };
 
                 if (auto eventHandlerSet = eventHandlerSetRef.lock())
                     eventHandlerSet->OnUpdate.add(&ComponentPlayer::OnUpdate, this);
@@ -174,6 +206,23 @@ namespace AppKit
 
             void ComponentPlayer::OnUpdate(Platform::Time *time)
             {
+                // if (Debug::lineMounter != nullptr && character2D != nullptr && time->deltaTime > 0.0f)
+                // {
+                //     Debug::lineMounter->clear();
+                //     using namespace AppKit::Physics;
+
+                //     // character2D->OnDebugDrawLine(
+                //     //     character2D->position - Offset.c_val(),
+                //     //     character2D->position - Offset.c_val() + MathCore::vec2f(character2D->jumpState.getMinJumpHeight(), 0),
+                //     //     COLOR_CODE_GROUND_AXIS);
+                //     // Debug::lineMounter->addLine(
+                //     //     MathCore::vec3f(character2D->position - Offset.c_val(), 0.0f),
+                //     //     MathCore::vec3f(character2D->position - Offset.c_val() + MathCore::vec2f(character2D->jumpState.getMinJumpHeight(), 0), 0.0f),
+                //     //     this->debugDrawThickness * 0.5f, // thickness
+                //     //     ui::colorFromHex("#dd00ff") // color
+                //     // );
+                // }
+
                 inputState.fillState();
 
                 // MathCore::vec3f position = getTransform()->getLocalPosition();

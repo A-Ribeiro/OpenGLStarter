@@ -26,6 +26,9 @@ namespace AppKit
             class Container2D;
         }
 
+        const int COLOR_CODE_GROUND_AXIS = 0;
+        const int COLOR_CODE_GROUND_AXIS_ON_SEGMENT = 1;
+
         namespace Controller
         {
             class Character2D
@@ -80,6 +83,8 @@ namespace AppKit
 
                 // set the position and make reset velocity and acceleration, useful for teleporting the player
                 void teleport(const MathCore::vec2f &position);
+
+                EventCore::Callback<void(const MathCore::vec2f &a, const MathCore::vec2f &b, int color_code)> OnDebugDrawLine;
 
                 ITK_DECLARE_CREATE_SHARED(Character2D)
             };
