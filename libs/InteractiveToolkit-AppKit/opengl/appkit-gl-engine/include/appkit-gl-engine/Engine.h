@@ -73,6 +73,7 @@ namespace AppKit
 
             // after initialization this variable will hold the sRGB information about the buffer
             bool sRGBCapable;
+            bool OpenGLAntiStutter;
 
             bool isNVidiaCard;
             bool isAMDCard;

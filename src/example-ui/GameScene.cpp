@@ -107,9 +107,9 @@ void GameScene::loadGraph()
                 auto b = points[(i + 1) % points.size()];
 
                 line_mounter->addLine(
-                    MathCore::vec3f(a, 0),        // a
-                    MathCore::vec3f(b, 0),        // b
-                    3.0f,                         // thickness
+                    MathCore::vec3f(a, 0),                // a
+                    MathCore::vec3f(b, 0),                // b
+                    3.0f,                                 // thickness
                     AppKit::ui::colorFromHex("#00FF00FF") // color
                 );
             }
@@ -121,10 +121,10 @@ void GameScene::loadGraph()
                     for (const auto &segment : structure->segments)
                     {
                         line_mounter->addLine(
-                            MathCore::vec3f(segment.a, -1.0f),  // a
-                            MathCore::vec3f(segment.b, -1.0f),  // b
-                            3.0f,                               // thickness
-                            (structure->pass_through_set)        //
+                            MathCore::vec3f(segment.a, -1.0f),          // a
+                            MathCore::vec3f(segment.b, -1.0f),          // b
+                            3.0f,                                       // thickness
+                            (structure->pass_through_set)               //
                                 ? AppKit::ui::colorFromHex("#0000FFFF") // color for pass-through segments
                                 : AppKit::ui::colorFromHex("#FF0000FF") // color
                         );
@@ -133,19 +133,19 @@ void GameScene::loadGraph()
                     {
                         vec2f center = (structure->segments[0].a + structure->segments[0].b) * 0.5f;
                         // also draw the pass-through activation line
-                        float dst =  Line2D::pointDistanceToLine(center, structure->pass_through_activate_line);
+                        float dst = Line2D::pointDistanceToLine(center, structure->pass_through_activate_line);
                         line_mounter->addCircle(
                             MathCore::vec3f(center + structure->pass_through_activate_line.normal * (50.0f - dst), -1.0f),
-                            50.0f,                        // radius
-                            3.0f,                         // thickness
+                            50.0f,                                // radius
+                            3.0f,                                 // thickness
                             AppKit::ui::colorFromHex("#ffff00FF") // color for pass-through segments
                         );
 
                         dst = Line2D::pointDistanceToLine(center, structure->pass_through_deactivate_line);
                         line_mounter->addCircle(
                             MathCore::vec3f(center + structure->pass_through_deactivate_line.normal * (0.0f - dst), -1.0f),
-                            50.0f,                        // radius
-                            3.0f,                         // thickness
+                            50.0f,                                // radius
+                            3.0f,                                 // thickness
                             AppKit::ui::colorFromHex("#ffff00FF") // color for pass-through segments
                         );
                     }
@@ -202,16 +202,16 @@ void GameScene::loadGraph()
                 &app->resourceMap, // use app's resource map
                 MathCore::vec2f(
                     box_size.x,
-                    box_size.y),               // size
+                    box_size.y),                       // size
                 AppKit::ui::colorFromHex("#c8e8c8FF"), // color
-                MathCore::vec4f(0, 0, 0, 0),   // radius
-                StrokeModeGrowOutside,         // stroke mode
-                0.0f,                          // stroke thickness
-                MathCore::vec4f(0, 0, 0, 0),   // stroke color
-                0.0f,                          // drop shadow thickness
-                MathCore::vec4f(0, 0, 0, 0),   // drop shadow color
-                MeshUploadMode_Direct,         // mesh upload mode
-                4);                            // segment count
+                MathCore::vec4f(0, 0, 0, 0),           // radius
+                StrokeModeGrowOutside,                 // stroke mode
+                0.0f,                                  // stroke thickness
+                MathCore::vec4f(0, 0, 0, 0),           // stroke color
+                0.0f,                                  // drop shadow thickness
+                MathCore::vec4f(0, 0, 0, 0),           // drop shadow color
+                MeshUploadMode_Direct,                 // mesh upload mode
+                4);                                    // segment count
 
             for (const auto &structure : container2D->getStaticStructures())
             {
@@ -230,18 +230,18 @@ void GameScene::loadGraph()
                         &app->resourceMap, // use app's resource map
                         MathCore::vec2f(
                             box_size.x,
-                            box_size.y),                     // size
-                        (structure->pass_through_set)         //
+                            box_size.y),                             // size
+                        (structure->pass_through_set)                //
                             ? AppKit::ui::colorFromHex("#0000ffff")  // color for pass-through structures
                             : AppKit::ui::colorFromHex("#FF0000FF"), // color
-                        MathCore::vec4f(0, 0, 0, 0),         // radius
-                        StrokeModeGrowOutside,               // stroke mode
-                        0.0f,                                // stroke thickness
-                        MathCore::vec4f(0, 0, 0, 0),         // stroke color
-                        0.0f,                                // drop shadow thickness
-                        MathCore::vec4f(0, 0, 0, 0),         // drop shadow color
-                        MeshUploadMode_Direct,               // mesh upload mode
-                        4);                                  // segment count
+                        MathCore::vec4f(0, 0, 0, 0),                 // radius
+                        StrokeModeGrowOutside,                       // stroke mode
+                        0.0f,                                        // stroke thickness
+                        MathCore::vec4f(0, 0, 0, 0),                 // stroke color
+                        0.0f,                                        // drop shadow thickness
+                        MathCore::vec4f(0, 0, 0, 0),                 // drop shadow color
+                        MeshUploadMode_Direct,                       // mesh upload mode
+                        4);                                          // segment count
                 }
             }
         }
@@ -259,16 +259,18 @@ void GameScene::bindResourcesToGraph()
         camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
     }
 
-    const auto &camera_viewport = renderWindow->WindowViewport.c_val();
+    windowViewportToCameraOrthoSize();
 
-    screen_custom_size.x = 1920.0f;
-    screen_custom_size.y = (screen_custom_size.x * camera_viewport.h) / camera_viewport.w;
+    // const auto &camera_viewport = renderWindow->WindowViewport.c_val();
 
-    componentCameraOrthographic->sizeX = screen_custom_size.x;
-    componentCameraOrthographic->sizeY = screen_custom_size.y;
+    // screen_custom_size.x = 1280.0f;
+    // screen_custom_size.y = (screen_custom_size.x * camera_viewport.h) / camera_viewport.w;
 
-    componentCameraOrthographic->useSizeX = true;
-    componentCameraOrthographic->useSizeY = true;
+    // componentCameraOrthographic->sizeX = screen_custom_size.x;
+    // componentCameraOrthographic->sizeY = screen_custom_size.y;
+
+    // componentCameraOrthographic->useSizeX = true;
+    // componentCameraOrthographic->useSizeY = true;
 
     // auto gameArea = root->findTransformByName("Game Area");
     // auto componentGameArea = gameArea->addNewComponent<ComponentGameArea>();
@@ -288,13 +290,37 @@ void GameScene::bindResourcesToGraph()
     auto componentPlayer = player_0->addNewComponent<ComponentPlayer>();
     {
         componentPlayer->debugDrawEnabled = true;
-        componentPlayer->debugDrawThickness = 2.0f;
+        componentPlayer->debugDrawThickness = 3.0f;
         componentPlayer->debugDrawColor = AppKit::ui::colorFromHex("#0000ffFF");
+        componentPlayer->Offset = 0.0f;
         componentPlayer->Radius = 50.0f;
         float factor = 5.0f;
         componentPlayer->RadiusGrounded = 50.0f - factor;
-        componentPlayer->OffsetGrounded = 7.0f + factor;
+        componentPlayer->OffsetGrounded = -(7.0f + factor);
         componentPlayer->app = app;
+
+        float min_jump_height = 1.5f * 100.0f;
+        float max_jump_height = 3.0f * 100.0f;
+        float second_jump_height = 2.0f * 100.0f;
+        float gravity = 50.0f * 100.0f;
+        float walk_distance = 3.5f * 100.0f;
+        float rising_velocity_clamped = AppKit::Physics::VelocityHelpers::JumpState::LimitMaxRisingVelocity(1000.0f, min_jump_height, -gravity);
+        float walk_velocity = AppKit::Physics::VelocityHelpers::JumpState::VelocityToReachDistance(walk_distance, rising_velocity_clamped, min_jump_height, max_jump_height, -gravity, 0.0f);
+
+        componentPlayer->config = PlayerConfig{
+            rising_velocity_clamped,                                // risingVelocity
+            min_jump_height,                                        // minJumpHeight
+            max_jump_height,                                        // maxJumpHeight
+            second_jump_height,                                     // secondJumpHeight
+            true,                                                   // allow_double_jump
+            (componentCameraOrthographic->sizeY / 2160.0f) * 1e-2f, // skin_width
+            0.0f,                                                   // offset_above_activation_line
+            componentPlayer->Radius.c_val() * 1.0f,               // offset_below_deactivation_line
+            MathCore::vec2f(0.0f, -gravity),                        // gravity
+            walk_velocity,                                          // walk_velocity
+            gravity * 3.0f                                          // max_velocity
+        };
+
         // componentPlayer->gameArea = componentGameArea;
         player_0->setLocalPosition(MathCore::vec3f(stageResult.start_point.x, stageResult.start_point.y, 0.0f));
     }
@@ -354,18 +380,20 @@ void GameScene::draw()
 
 void GameScene::onCameraViewportUpdate(const MathCore::vec2i &viewport_size)
 {
-    const auto &camera_viewport = renderWindow->WindowViewport.c_val();
+    windowViewportToCameraOrthoSize();
+    // const auto &camera_viewport = renderWindow->WindowViewport.c_val();
 
-    screen_custom_size.x = 1920.0f;
-    screen_custom_size.y = (screen_custom_size.x * camera_viewport.h) / camera_viewport.w;
+    // //screen_custom_size.x = 1920.0f;
+    // screen_custom_size.x = 1280.0f;
+    // screen_custom_size.y = (screen_custom_size.x * camera_viewport.h) / camera_viewport.w;
 
-    auto componentCameraOrthographic = std::dynamic_pointer_cast<ComponentCameraOrthographic>(camera);
+    // auto componentCameraOrthographic = std::dynamic_pointer_cast<ComponentCameraOrthographic>(camera);
 
-    componentCameraOrthographic->sizeX = screen_custom_size.x;
-    componentCameraOrthographic->sizeY = screen_custom_size.y;
+    // componentCameraOrthographic->sizeX = screen_custom_size.x;
+    // componentCameraOrthographic->sizeY = screen_custom_size.y;
 
-    componentCameraOrthographic->useSizeX = true;
-    componentCameraOrthographic->useSizeY = true;
+    // componentCameraOrthographic->useSizeX = true;
+    // componentCameraOrthographic->useSizeY = true;
 }
 
 void GameScene::update(Platform::Time *elapsed)
@@ -485,4 +513,26 @@ void GameScene::printHierarchy()
         for (auto &child : STL_Tools::Reversal(node_struct.node->getChildren()))
             nodes.push_back({child.get(), node_struct.depth + 1});
     }
+}
+
+
+void GameScene::windowViewportToCameraOrthoSize()
+{
+    const auto &camera_viewport = renderWindow->WindowViewport.c_val();
+
+    screen_custom_size.x = 1280.0f;
+    screen_custom_size.y = (screen_custom_size.x * camera_viewport.h) / camera_viewport.w;
+
+    // screen_custom_size.y = 10.0f;
+    // screen_custom_size.x = (screen_custom_size.y * camera_viewport.w) / camera_viewport.h;
+
+    auto componentCameraOrthographic = std::dynamic_pointer_cast<ComponentCameraOrthographic>(camera);
+    if (componentCameraOrthographic == nullptr)
+        return;
+
+    componentCameraOrthographic->sizeX = screen_custom_size.x;
+    componentCameraOrthographic->sizeY = screen_custom_size.y;
+
+    componentCameraOrthographic->useSizeX = true;
+    componentCameraOrthographic->useSizeY = true;
 }

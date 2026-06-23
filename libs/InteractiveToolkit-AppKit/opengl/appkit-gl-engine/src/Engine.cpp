@@ -49,7 +49,7 @@ bool check_is_nvidia_or_amd_opengl()
 
     const GLubyte *(*custom_glGetString)(GLenum name);
 
-    void* handle = dlopen("libGL.so.1", RTLD_LAZY | RTLD_LOCAL);
+    void *handle = dlopen("libGL.so.1", RTLD_LAZY | RTLD_LOCAL);
     if (!handle)
         handle = dlopen("libGL.so", RTLD_LAZY | RTLD_LOCAL);
     ITK_ABORT(!handle, "Cannot open libGL.so: %s\n", dlerror());
@@ -58,16 +58,16 @@ bool check_is_nvidia_or_amd_opengl()
 
     custom_glGetString = (const GLubyte *(*)(GLenum))dlsym(handle, "glGetString");
 
-    char * err = dlerror();
+    char *err = dlerror();
     ITK_ABORT(err != nullptr, "Cannot find glGetString in libGL.so: %s\n", err);
 
-// #if defined(GLAD_GLES2)
-//     gladLoaderUnloadGLES2();
-//     gladLoaderLoadGLES2();
-// #else
-//     gladLoaderUnloadGL();
-//     gladLoaderLoadGL();
-// #endif
+    // #if defined(GLAD_GLES2)
+    //     gladLoaderUnloadGLES2();
+    //     gladLoaderLoadGLES2();
+    // #else
+    //     gladLoaderUnloadGL();
+    //     gladLoaderLoadGL();
+    // #endif
 
     // while (true) {
     //     glClear(GL_COLOR_BUFFER_BIT);
@@ -110,6 +110,7 @@ namespace AppKit
             window = nullptr;
             setNewWindowConfig = false;
             alwaysDraw = false;
+            OpenGLAntiStutter = true;
         }
 
         void Engine::initialize(const std::string &_companyName, const std::string &_gameName,
@@ -145,7 +146,7 @@ namespace AppKit
 #endif
 
         void Engine::configureWindow(const EngineWindowConfig &windowConfig,
-                                    const EventCore::Callback<void()> &_OnConfigureWindowBefore,
+                                     const EventCore::Callback<void()> &_OnConfigureWindowBefore,
                                      const EventCore::Callback<void(AppKit::Window::GLWindow *window)> &_OnConfigureWindowDone)
         {
             OnConfigureWindowBefore = _OnConfigureWindowBefore;
@@ -308,7 +309,8 @@ namespace AppKit
                 window->glSwapBuffers();
                 // force terminate all GL commands after swap buffers...
                 //  reduces a bit of stuttering
-                glFinish();
+                if (OpenGLAntiStutter)
+                    glFinish();
                 return;
             }
             // only handles the resize and redraw...
@@ -327,13 +329,9 @@ namespace AppKit
                 focusChange.setState(window->hasFocus());
 
                 if (focusChange.down)
-                {
                     app->OnGainFocus();
-                }
                 else if (focusChange.up)
-                {
                     app->OnLostFocus();
-                }
 
                 if (alwaysDraw)
                 {
@@ -345,7 +343,8 @@ namespace AppKit
 
                     // force terminate all GL commands after swap buffers...
                     //  reduces a bit of stuttering
-                    glFinish();
+                    if (OpenGLAntiStutter)
+                        glFinish();
 
                     if (!focusChange.pressed)
                     {
@@ -353,7 +352,12 @@ namespace AppKit
                         Platform::Sleep::millis(1000 / 24);
                     }
                 }
-                else if (focusChange.pressed)
+                else if (!focusChange.pressed)
+                {
+                    // avoid linux 100% CPU usage
+                    Platform::Sleep::millis(100);
+                }
+                else
                 {
                     window->glSetActivate(true);
                     app->draw();
@@ -363,12 +367,8 @@ namespace AppKit
 
                     // force terminate all GL commands after swap buffers...
                     //  reduces a bit of stuttering
-                    glFinish();
-                }
-                else
-                {
-                    // avoid linux 100% CPU usage
-                    Platform::Sleep::millis(100);
+                    if (OpenGLAntiStutter)
+                        glFinish();
                 }
 
                 AppKit::Window::InputManager *inputManager = nullptr;
@@ -384,7 +384,7 @@ namespace AppKit
                 {
                     setNewWindowConfig = false;
                     clear();
-                    configureWindow(changeWindowConfig, OnConfigureWindowBefore , OnConfigureWindowDoneFnc);
+                    configureWindow(changeWindowConfig, OnConfigureWindowBefore, OnConfigureWindowDoneFnc);
                 }
             }
         }

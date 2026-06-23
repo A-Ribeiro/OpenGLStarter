@@ -79,13 +79,11 @@ namespace AppKit
                     }
                 }
 
-                vec3f camera_look_to = player_transform->getLocalPosition();
+                vec3f camera_look_to = player_transform->getLocalPosition() + vec3f(player_ref->Offset.c_val(), 0.0f);
 
                 camera_look_to = OP<vec3f>::clamp(camera_look_to, 
                     vec3f(stage_camera_min_limit, camera_look_to.z), 
                     vec3f(stage_camera_max_limit, camera_look_to.z));
-
-
 
                 camera_transform->setLocalPosition(camera_look_to);
             }

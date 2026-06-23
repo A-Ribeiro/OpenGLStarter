@@ -125,6 +125,7 @@ int main(int argc, char *argv[])
               {"Aspect", {"16:9", "16:10"}, "16:9"},
               {"AntiAliasing", {"MSAA", "OFF"}, "MSAA"},
               {"VSync", {"ON", "OFF"}, "ON"},
+              {"OpenGLAntiStutter", {"ON", "OFF"}, "ON"},
           }},
          {"Extra",
           {
