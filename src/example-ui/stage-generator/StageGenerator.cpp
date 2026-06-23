@@ -323,47 +323,47 @@ namespace StageGen
             placed.push_back({center, platW, platformThickness, false});
         }
 
-        // // --- Add some angled / sloped segments for variety ---
-        // int slopedCount = numScreens * 2;
-        // for (int i = 0; i < slopedCount; i++)
-        // {
-        //     if (placed.empty())
-        //         break;
-        //     int anchorIdx = mathRnd.random->getRange<int32_t>(0, (int32_t)(placed.size() - 1));
-        //     auto &anchor = placed[anchorIdx];
+        // --- Add some angled / sloped segments for variety ---
+        int slopedCount = numScreens * 2;
+        for (int i = 0; i < slopedCount; i++)
+        {
+            if (placed.empty())
+                break;
+            int anchorIdx = mathRnd.random->getRange<int32_t>(0, (int32_t)(placed.size() - 1));
+            auto &anchor = placed[anchorIdx];
 
-        //     float slopeLen = mathRnd.nextRange<float>(80.0f, 200.0f);
-        //     //float angle = mathRnd.nextRange<float>(-0.4f, 0.4f); // mild slope in radians
-        //     float angle = mathRnd.nextRange<float>(OP<float>::deg_2_rad(45.0f), OP<float>::deg_2_rad(60.0f)) *
-        //                   OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f));
+            float slopeLen = mathRnd.nextRange<float>(80.0f, 200.0f);
+            //float angle = mathRnd.nextRange<float>(-0.4f, 0.4f); // mild slope in radians
+            float angle = mathRnd.nextRange<float>(OP<float>::deg_2_rad(45.0f), OP<float>::deg_2_rad(60.0f)) *
+                          OP<float>::sign(mathRnd.nextRange<float>(-1.0f, 1.0f));
 
-        //     float dx = mathRnd.nextRange<float>(-maxHorizontalGap * 0.7f, maxHorizontalGap * 0.7f);
-        //     float dy = mathRnd.nextRange<float>(-maxVerticalGap * 0.5f, maxVerticalGap * 0.5f);
+            float dx = mathRnd.nextRange<float>(-maxHorizontalGap * 0.7f, maxHorizontalGap * 0.7f);
+            float dy = mathRnd.nextRange<float>(-maxVerticalGap * 0.5f, maxVerticalGap * 0.5f);
 
-        //     vec2f slopeCenter(
-        //         OP<float>::clamp(anchor.position.x + dx, slopeLen + 10.0f, W - slopeLen - 10.0f),
-        //         OP<float>::clamp(anchor.position.y + dy, minY, maxY));
+            vec2f slopeCenter(
+                OP<float>::clamp(anchor.position.x + dx, slopeLen + 10.0f, W - slopeLen - 10.0f),
+                OP<float>::clamp(anchor.position.y + dy, minY, maxY));
 
-        //     vec2f dir(OP<float>::cos(angle), OP<float>::sin(angle));
-        //     vec2f segA = slopeCenter - dir * (slopeLen * 0.5f);
-        //     vec2f segB = slopeCenter + dir * (slopeLen * 0.5f);
+            vec2f dir(OP<float>::cos(angle), OP<float>::sin(angle));
+            vec2f segA = slopeCenter - dir * (slopeLen * 0.5f);
+            vec2f segB = slopeCenter + dir * (slopeLen * 0.5f);
 
-        //     // Clamp endpoints to game area
-        //     segA.y = OP<float>::clamp(segA.y, 10.0f, H - 10.0f);
-        //     segB.y = OP<float>::clamp(segB.y, 10.0f, H - 10.0f);
+            // Clamp endpoints to game area
+            segA.y = OP<float>::clamp(segA.y, 10.0f, H - 10.0f);
+            segB.y = OP<float>::clamp(segB.y, 10.0f, H - 10.0f);
 
-        //     // Simple overlap check using bounding box
-        //     float bw = OP<float>::abs(segB.x - segA.x);
-        //     float bh = OP<float>::abs(segB.y - segA.y) + 10.0f;
-        //     vec2f bCenter = (segA + segB) * 0.5f;
+            // Simple overlap check using bounding box
+            float bw = OP<float>::abs(segB.x - segA.x);
+            float bh = OP<float>::abs(segB.y - segA.y) + 10.0f;
+            vec2f bCenter = (segA + segB) * 0.5f;
 
-        //     if (!overlapsExisting(placed, bCenter, bw, bh, overlapMargin * 0.5f))
-        //     {
-        //         container.addStaticStructure(
-        //             Structure2D::FromSegment("Slope", 0.4f, Segment2D(segA, segB)));
-        //         placed.push_back({bCenter, bw, bh, false});
-        //     }
-        // }
+            if (!overlapsExisting(placed, bCenter, bw, bh, overlapMargin * 0.5f))
+            {
+                container.addStaticStructure(
+                    Structure2D::FromSegment("Slope", 0.4f, Segment2D(segA, segB)));
+                placed.push_back({bCenter, bw, bh, false});
+            }
+        }
     }
 
     void StageGenerator::addTestPlatformSequence(

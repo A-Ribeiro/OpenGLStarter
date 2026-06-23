@@ -103,8 +103,23 @@ namespace AppKit
                         // if (OP<vec2f>::dot(ground_axis, x_axis) < OP<float>::cos( OP<float>::deg_2_rad(45.0f) ) )
                         //     ground_axis = x_axis;
                     }
+
+                    // if (OnDebugDrawLine)
+                    // {
+                    //     OnDebugDrawLine(
+                    //         segment_point,
+                    //         segment_point + ground_axis * 100.0f,
+                    //         COLOR_CODE_GROUND_AXIS_ON_SEGMENT);
+                    // }
                 }
 
+                // if (OnDebugDrawLine)
+                // {
+                //     OnDebugDrawLine(
+                //         position,
+                //         position + ground_axis * 100.0f,
+                //         COLOR_CODE_GROUND_AXIS);
+                // }
                 // Debug::lineMounter->addLine(
                 //     vec3f(position, 0.0f),
                 //     vec3f(position + ground_axis * 100.0f, 0.0f),
@@ -150,8 +165,20 @@ namespace AppKit
                 }
                 else
                 {
-                    float velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
-                    velocity -= ground_axis * velocity_on_ground;
+                    // When stopped, remove velocity in the horizontal plane (x_axis direction)
+                    // instead of along ground_axis to prevent mini-jumps at platform edges
+                    // This preserves vertical velocity for gravity/jump calculations
+                    if (jumpState.getState() == VelocityHelpers::JumpState::Grounded)
+                    {
+                        float velocity_on_x_axis = OP<vec2f>::dot(velocity, x_axis);
+                        velocity -= x_axis * velocity_on_x_axis;
+                    }
+                    // else
+                    {
+                        // When airborne, use ground_axis for consistency
+                        float velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
+                        velocity -= ground_axis * velocity_on_ground;
+                    }
                 }
 
                 vec2f position_before = position;
