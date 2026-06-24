@@ -2,9 +2,11 @@
 
 #include <InteractiveToolkit/MathCore/MathCore.h>
 
-//#include <appkit-gl-base/GLTexture.h>
+// #include <appkit-gl-base/GLTexture.h>
 
 #include <appkit-gl-engine/DefaultEngineShader.h>
+
+#include <appkit-gl-engine/types/iRect.h>
 
 namespace AppKit
 {
@@ -38,6 +40,7 @@ namespace AppKit
             int u_texture;
             int u_DepthTextureComponent24;
             int u_color;
+            int u_uScreenOrigin;
             int u_uScreenSize;
             int u_FMinusN_FPlusN_FTimesNTimes2_N;
 
@@ -51,7 +54,10 @@ namespace AppKit
             void setTexture(int texunit);
             void setDepthTextureComponent24(int texunit);
             void setColor(const MathCore::vec4f &color);
-            void setScreenSize(const MathCore::vec2f &ss);
+            // void setScreenSize(const MathCore::vec2f &ss);
+
+            void setWindowViewport(const AppKit::GLEngine::iRect &rect);
+
             void setCamera_FMinusN_FPlusN_FTimesNTimes2_N(const MathCore::vec4f &v);
         };
     }

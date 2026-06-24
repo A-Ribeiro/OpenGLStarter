@@ -110,11 +110,11 @@ void SceneGUI::draw()
 
     if (cursorTransform != nullptr)
         cursorTransform->setLocalPosition(
-            MathCore::vec3f(engine->app->screenRenderWindow->MousePosRelatedToCenter, 0.0f));
+            MathCore::vec3f(renderWindow->MousePosRelatedToCenter_OriginBottom * renderWindow->windowToCameraScale, 0.0f));
 
     if (button != nullptr)
         button->update(
-            MathCore::vec3f(engine->app->screenRenderWindow->MousePosRelatedToCenter, 0.0f)
+            MathCore::vec3f(renderWindow->MousePosRelatedToCenter_OriginBottom * renderWindow->windowToCameraScale, 0.0f)
 
             // Button::App2MousePosition()
         );
@@ -130,10 +130,10 @@ void SceneGUI::draw()
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
-void SceneGUI::resize(const MathCore::vec2i &size)
+void SceneGUI::resize(const MathCore::vec2f &size)
 {
     if (button != nullptr)
-        button->resize(size);
+        button->resize();
 }
 
 SceneGUI::SceneGUI(

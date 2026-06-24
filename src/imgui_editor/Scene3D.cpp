@@ -193,7 +193,7 @@ void Scene3D::OnUpdateImpl(Platform::Time *time)
         {
             mainCamera->addComponent(Component::CreateShared<Components::ComponentCameraMove>());
             is_to_hide_mouse.setState(true);
-            savedMouseCoordi = this->renderWindow->screenCenterI;
+            savedMouseCoordi = this->renderWindow->screenCenterI_OriginBottom;
         }
         else
         {
@@ -208,7 +208,7 @@ void Scene3D::OnUpdateImpl(Platform::Time *time)
     {
 
         auto window_rect = this->renderWindow->WindowViewport.c_val();
-        auto mouse_relative_to_window = this->renderWindow->MousePos.c_val();
+        auto mouse_relative_to_window = this->renderWindow->MousePos_OriginBottom.c_val();
         if (window_rect.contains(mouse_relative_to_window))
         {
             // force camera movement
@@ -217,7 +217,7 @@ void Scene3D::OnUpdateImpl(Platform::Time *time)
             {
                 mainCamera->addComponent(Component::CreateShared<Components::ComponentCameraMove>());
                 is_to_hide_mouse.setState(true);
-                savedMouseCoordi = this->renderWindow->iMousePosLocal;
+                savedMouseCoordi = this->renderWindow->iMousePosLocal_OriginTop.c_val();
             }
         }
     }
@@ -229,7 +229,7 @@ void Scene3D::OnUpdateImpl(Platform::Time *time)
         {
             mainCamera->removeComponent(cameraMove);
             is_to_hide_mouse.setState(false);
-            this->renderWindow->forceMouseToCoord(savedMouseCoordi);
+            this->renderWindow->forceMouseToCoord_OriginTop(savedMouseCoordi);
         }
     }
 }

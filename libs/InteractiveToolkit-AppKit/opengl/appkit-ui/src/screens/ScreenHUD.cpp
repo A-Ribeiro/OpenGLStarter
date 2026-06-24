@@ -5,7 +5,7 @@ namespace AppKit
 {
     namespace ui
     {
-        void ScreenHUD::layoutElements(const MathCore::vec2i &size)
+        void ScreenHUD::layoutElements(const MathCore::vec2f &size)
         {
             inGameDialog.layoutVisibleElements(size);
         }
@@ -30,7 +30,7 @@ namespace AppKit
         {
             return Name;
         }
-        void ScreenHUD::resize(const MathCore::vec2i &size)
+        void ScreenHUD::resize(const MathCore::vec2f &size)
         {
             layoutElements(size);
         }
@@ -44,7 +44,7 @@ namespace AppKit
             AppKit::GLEngine::ResourceMap *resourceMap,
             MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
             ui::ScreenManager *screenManager,
-            const MathCore::vec2i &size)
+            const MathCore::vec2f &size)
         {
             if (uiNode)
                 return uiNode;

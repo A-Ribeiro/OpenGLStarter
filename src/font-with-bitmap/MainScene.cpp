@@ -120,8 +120,8 @@ void MainScene::bindResourcesToGraph()
     std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
     camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
 
-    auto rect = renderWindow->CameraViewport.c_ptr();
-    resize(MathCore::vec2i(rect->w, rect->h));
+    //auto rect = renderWindow->CameraViewport.c_ptr();
+    resize(renderWindow->CameraScreenSize.c_val());
 
     // Add AABB for all meshs...
     {
@@ -141,8 +141,8 @@ void MainScene::bindResourcesToGraph()
                     ,&app->threadPool
                 );
             }
-            auto rect = renderWindow->CameraViewport.c_ptr();
-            resize(MathCore::vec2i(rect->w, rect->h));
+            //auto rect = renderWindow->CameraViewport.c_ptr();
+            resize(renderWindow->CameraScreenSize.c_val());
         } });
 
 }
@@ -169,7 +169,7 @@ void MainScene::draw()
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
-void MainScene::resize(const MathCore::vec2i &size)
+void MainScene::resize(const MathCore::vec2f &size)
 {
     // fixed height of 1080 pixels
     float new_scale = (float)size.height / 1080.0f;

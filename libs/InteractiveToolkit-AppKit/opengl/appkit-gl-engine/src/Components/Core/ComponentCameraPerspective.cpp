@@ -42,7 +42,7 @@ namespace AppKit
 
                 if (renderWindowRegion != nullptr)
                 {
-                    renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraPerspective::OnViewportChanged, this);
+                    renderWindowRegion->CameraScreenSize.OnChange.remove(&ComponentCameraPerspective::OnCameraScreenSizeChanged, this);
                 }
             }
 
@@ -54,10 +54,10 @@ namespace AppKit
 
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
-                renderWindowRegion->CameraViewport.OnChange.add(&ComponentCameraPerspective::OnViewportChanged, this);
+                renderWindowRegion->CameraScreenSize.OnChange.add(&ComponentCameraPerspective::OnCameraScreenSizeChanged, this);
 
                 // call the first setup
-                OnViewportChanged(renderWindowRegion->CameraViewport, renderWindowRegion->CameraViewport);
+                OnCameraScreenSizeChanged(renderWindowRegion->CameraScreenSize, renderWindowRegion->CameraScreenSize);
             }
 
             void ComponentCameraPerspective::OnUpdateCameraFloatParameter(const float &value, const float &oldValue)
@@ -65,7 +65,7 @@ namespace AppKit
                 configureProjection();
             }
 
-            void ComponentCameraPerspective::OnViewportChanged(const iRect &value, const iRect &oldValue)
+            void ComponentCameraPerspective::OnCameraScreenSizeChanged(const MathCore::vec2f &value, const MathCore::vec2f &oldValue)
             {
                 configureProjection();
             }
@@ -84,19 +84,14 @@ namespace AppKit
 
             void ComponentCameraPerspective::configureProjection()
             {
-                // AppBase* appBase = Engine::Instance()->app;
-                MathCore::vec2f size;
-
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
                 if (renderWindowRegion != nullptr)
-                    size = MathCore::vec2f(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
+                    projectionAreaSizePx = renderWindowRegion->CameraScreenSize;
                 else
-                    size = (MathCore::vec2f)Engine::Instance()->app->window->getSize();
+                    projectionAreaSizePx = (MathCore::vec2f)Engine::Instance()->app->window->getSize();
 
-                float aspect = (float)size.width / (float)size.height;
-
-                projectionAreaSizePx = MathCore::vec2f(size.width, size.height);
+                float aspect = (float)projectionAreaSizePx.width / (float)projectionAreaSizePx.height;
 
                 if (rightHanded)
                     projection = MathCore::GEN<MathCore::mat4f>::projection_perspective_rh_negative_one(fovDegrees, aspect, nearPlane, farPlane);
@@ -218,7 +213,7 @@ namespace AppKit
             {
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
                 if (renderWindowRegion != nullptr)
-                    renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraPerspective::OnViewportChanged, this);
+                    renderWindowRegion->CameraScreenSize.OnChange.remove(&ComponentCameraPerspective::OnCameraScreenSizeChanged, this);
                 renderWindowRegionRef.reset();
             }
 

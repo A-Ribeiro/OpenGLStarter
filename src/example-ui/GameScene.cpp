@@ -380,7 +380,7 @@ void GameScene::draw()
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
-void GameScene::onCameraViewportUpdate(const MathCore::vec2i &viewport_size)
+void GameScene::onCameraScreenSizeChange(const MathCore::vec2f &screen_size)
 {
     windowViewportToCameraOrthoSize();
     // const auto &camera_viewport = renderWindow->WindowViewport.c_val();

@@ -5,7 +5,7 @@ namespace AppKit
 {
     namespace ui
     {
-        void ScreenMain::layoutElements(const MathCore::vec2i &size)
+        void ScreenMain::layoutElements(const MathCore::vec2f &size)
         {
             float y_start = -size.height * 0.5f + ScreenMain::margin_bottom;
 
@@ -85,9 +85,9 @@ namespace AppKit
             return Name;
         }
 
-        void ScreenMain::resize(const MathCore::vec2i &size)
+        void ScreenMain::resize(const MathCore::vec2f &size)
         {
-            printf("    [ScreenMain] resize %i %i\n", size.width, size.height);
+            printf("    [ScreenMain] resize %f %f\n", size.width, size.height);
             layoutElements(size);
         }
 
@@ -104,7 +104,7 @@ namespace AppKit
             AppKit::GLEngine::ResourceMap *resourceMap,
             MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
             ui::ScreenManager *screenManager,
-            const MathCore::vec2i &size)
+            const MathCore::vec2f &size)
         {
             if (uiNode)
                 return uiNode;

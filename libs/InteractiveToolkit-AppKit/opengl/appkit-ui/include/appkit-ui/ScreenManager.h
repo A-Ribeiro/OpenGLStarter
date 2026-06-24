@@ -75,12 +75,12 @@ namespace AppKit
                               AppKit::GLEngine::ResourceMap *resourceMap,
                               MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
                               std::vector<std::unique_ptr<Screen>> &screens,
-                              const MathCore::vec2i &size);
+                              const MathCore::vec2f &size);
             void unload_screens();
 
             void triggerEvent(UIEventEnum event);
 
-            void resize(const MathCore::vec2i &size);
+            void resize(const MathCore::vec2f &size);
             void update(Platform::Time *elapsed);
 
             ColorPalette colorPalette;

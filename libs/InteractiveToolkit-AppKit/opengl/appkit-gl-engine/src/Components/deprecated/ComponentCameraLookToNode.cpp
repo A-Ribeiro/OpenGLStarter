@@ -32,13 +32,13 @@ namespace AppKit
                 auto eventHandlerSet = ToShared(eventHandlerSetRef);
 
                 eventHandlerSet->OnLateUpdate.add(&ComponentCameraLookToNode::OnLateUpdate, this);
-                renderWindowRegion->MousePos.OnChange.add(&ComponentCameraLookToNode::OnMousePosChanged, this);
+                renderWindowRegion->MousePos_OriginBottom.OnChange.add(&ComponentCameraLookToNode::OnMousePosChanged, this);
                 renderWindowRegion->WindowViewport.OnChange.add(&ComponentCameraLookToNode::OnViewportChanged, this);
 
                 //renderWindowRegion->Viewport.triggerOnChange();
                 //renderWindowRegion->MousePos.triggerOnChange();
                 OnViewportChanged(renderWindowRegion->WindowViewport, renderWindowRegion->WindowViewport);
-                OnMousePosChanged(renderWindowRegion->MousePos, renderWindowRegion->MousePos);
+                OnMousePosChanged(renderWindowRegion->MousePos_OriginBottom, renderWindowRegion->MousePos_OriginBottom);
             }
 
             void ComponentCameraLookToNode::OnLateUpdate(Platform::Time *time)
@@ -92,7 +92,7 @@ namespace AppKit
 
                 MathCore::vec2f pos = value;
 
-                MathCore::vec2f delta = pos - renderWindowRegion->screenCenterF;
+                MathCore::vec2f delta = pos - renderWindowRegion->screenCenterF_OriginBottom;
 
                 if ( MathCore::OP<MathCore::vec2f>::sqrLength(delta) > MathCore::EPSILON<float>::high_precision)
                 {
@@ -135,7 +135,7 @@ namespace AppKit
                     auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
 
-                    renderWindowRegion->MousePos = renderWindowRegion->screenCenterF; // set app state do cursor center
+                    // renderWindowRegion->MousePos_OriginBottom = renderWindowRegion->screenCenterF_OriginBottom; // set app state do cursor center
                     renderWindowRegion->moveMouseToScreenCenter();                    // queue update to screen center
 
                     auto transform = getTransform();
@@ -188,7 +188,7 @@ namespace AppKit
                     eventHandlerSet->OnLateUpdate.remove(&ComponentCameraLookToNode::OnLateUpdate, this);
                 if (renderWindowRegion != nullptr)
                 {
-                    renderWindowRegion->MousePos.OnChange.remove(&ComponentCameraLookToNode::OnMousePosChanged, this);
+                    renderWindowRegion->MousePos_OriginBottom.OnChange.remove(&ComponentCameraLookToNode::OnMousePosChanged, this);
                     renderWindowRegion->WindowViewport.OnChange.remove(&ComponentCameraLookToNode::OnViewportChanged, this);
                 }
             }

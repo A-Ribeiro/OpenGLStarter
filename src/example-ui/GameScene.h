@@ -57,7 +57,7 @@ public:
 
     virtual void draw();
 
-    void onCameraViewportUpdate(const MathCore::vec2i &viewport_size);
+    void onCameraScreenSizeChange(const MathCore::vec2f &screen_size);
 
     void update(Platform::Time *elapsed);
 

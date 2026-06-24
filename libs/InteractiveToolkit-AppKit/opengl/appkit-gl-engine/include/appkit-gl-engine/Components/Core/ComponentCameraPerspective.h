@@ -22,7 +22,7 @@ namespace AppKit
                 std::weak_ptr<RenderWindowRegion> renderWindowRegionRef;
 
                 void OnUpdateCameraFloatParameter(const float &value, const float &oldValue);
-                void OnViewportChanged(const iRect &value, const iRect &oldValue);
+                void OnCameraScreenSizeChanged(const MathCore::vec2f &value, const MathCore::vec2f &oldValue);
 
                 void OnLeftHandedChanged(const bool &value, const bool &oldValue);
                 void OnRightHandedChanged(const bool &value, const bool &oldValue);

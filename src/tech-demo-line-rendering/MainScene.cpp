@@ -82,8 +82,9 @@ void MainScene::bindResourcesToGraph()
     // bag.getProperty("uColor").set(MathCore::vec4f(1.0f, 0.0f, 0.0f, 1.0f));
     bag.getProperty("uAntialias").set(1.0f);
 
-    auto rect = renderWindow->CameraViewport.c_ptr();
-    resize(MathCore::vec2i(rect->w, rect->h));
+    // auto rect = renderWindow->CameraViewport.c_ptr();
+    //resize(MathCore::vec2i(rect->w, rect->h));
+    resize(renderWindow->CameraScreenSize.c_val());
 
     // Add AABB for all meshs...
     {
@@ -260,7 +261,7 @@ void MainScene::draw()
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
-void MainScene::resize(const MathCore::vec2i &size)
+void MainScene::resize(const MathCore::vec2f &size)
 {
     /*deprecated_lines->vertices.clear();
     deprecated_lines->vertices.push_back(MathCore::vec3f(0, 0, 0));

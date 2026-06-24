@@ -29,7 +29,7 @@ namespace AppKit
                 std::shared_ptr<AppKit::GLEngine::Components::ComponentUI> uiComponent,
                 ScreenManager *screenManager);
 
-            void layoutElements(const MathCore::vec2i &size);
+            void layoutElements(const MathCore::vec2f &size);
 
             void shoulderNext();
             void shoulderPrevious();

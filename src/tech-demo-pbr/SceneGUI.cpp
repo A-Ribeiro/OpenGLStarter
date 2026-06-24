@@ -158,8 +158,9 @@ void SceneGUI::bindResourcesToGraph()
     // texRefCount->add(cursorTexture);
 
     // call resize
-    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
-    resize(engine->app->window->getSize());
+    // AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+    //resize(engine->app->window->getSize());
+    resize( renderWindow->CameraScreenSize.c_val() );
 
     // Add AABB for all meshs...
     {
@@ -240,7 +241,7 @@ void SceneGUI::draw()
 
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
     MathCore::vec3f pos3D = MathCore::vec3f(
-        engine->app->screenRenderWindow->MousePosRelatedToCenter, 
+        renderWindow->MousePosRelatedToCenter_OriginBottom * renderWindow->windowToCameraScale,
         0.0f
     );
 
@@ -263,16 +264,16 @@ void SceneGUI::draw()
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
-void SceneGUI::resize(const MathCore::vec2i &size)
+void SceneGUI::resize(const MathCore::vec2f &size)
 {
     for (size_t i = 0; i < allButtons.size(); i++)
     {
-        allButtons[i]->resize(size);
+        allButtons[i]->resize();
     }
 
-    int center_x = size.width >> 1;
-    int center_y = size.height >> 1;
-    int margin = 32 - 9;
+    float center_x = size.width * 0.5f;
+    float center_y = size.height * 0.5f;
+    float margin = 32 - 9;
 
     float font_size = 32.0f / fontBuilder.glFont2.size;
 

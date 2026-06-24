@@ -133,6 +133,7 @@ namespace AppKit
                 "uniform vec4 uColor;\n"
                 "uniform sampler2D uTexture;\n"
 
+                "uniform vec2 uScreenOrigin;\n"
                 "uniform vec2 uScreenSize;\n"
                 "uniform vec4 u_FMinusN_FPlusN_FTimesNTimes2_N;\n"
 
@@ -148,7 +149,7 @@ namespace AppKit
                 "  vec4 texel = texture2D(uTexture, uv);\n"
                 "  vec4 result = texel * uColor * color;\n"
 
-                "  float framebuffer_depth = texture2D(uDepthTextureComponent24, (gl_FragCoord.xy / uScreenSize) ).x;\n"
+                "  float framebuffer_depth = texture2D(uDepthTextureComponent24, ((gl_FragCoord.xy - uScreenOrigin) / uScreenSize) ).x;\n"
 
                 //"if (framebuffer_depth < 0.5){ result = vec4(1,0,0,1);  }else{\n"
 
@@ -208,6 +209,7 @@ namespace AppKit
             u_DepthTextureComponent24 = getUniformLocation("uDepthTextureComponent24");
             u_color = getUniformLocation("uColor");
 
+            u_uScreenOrigin = getUniformLocation("uScreenOrigin");
             u_uScreenSize = getUniformLocation("uScreenSize");
             u_FMinusN_FPlusN_FTimesNTimes2_N = getUniformLocation("u_FMinusN_FPlusN_FTimesNTimes2_N");
         }
@@ -251,9 +253,10 @@ namespace AppKit
             setUniform(u_color, color);
         }
 
-        void SoftParticleShader::setScreenSize(const MathCore::vec2f &ss)
+        void SoftParticleShader::setWindowViewport(const AppKit::GLEngine::iRect &rect)
         {
-            setUniform(u_uScreenSize, ss);
+            setUniform(u_uScreenOrigin, MathCore::vec2f(rect.x, rect.y));
+            setUniform(u_uScreenSize, MathCore::vec2f(rect.w, rect.h));
         }
 
         void SoftParticleShader::setCamera_FMinusN_FPlusN_FTimesNTimes2_N(const MathCore::vec4f &v)

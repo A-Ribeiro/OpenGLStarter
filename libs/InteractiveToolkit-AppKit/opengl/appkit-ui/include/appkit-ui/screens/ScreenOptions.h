@@ -15,7 +15,7 @@ namespace AppKit
         {
             ui::ScreenManager *screenManager;
 
-            void layoutElements(const MathCore::vec2i &size);
+            void layoutElements(const MathCore::vec2f &size);
 
             void activeCurrentTab();
 
@@ -55,7 +55,7 @@ namespace AppKit
             ScreenOptions();
 
             std::string name() const;
-            void resize(const MathCore::vec2i &size);
+            void resize(const MathCore::vec2f &size);
             void update(Platform::Time *elapsed);
 
             std::shared_ptr<AppKit::GLEngine::Transform> initializeTransform(
@@ -63,7 +63,7 @@ namespace AppKit
                 AppKit::GLEngine::ResourceMap *resourceMap,
                 MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
                 ui::ScreenManager *screenManager,
-                const MathCore::vec2i &size);
+                const MathCore::vec2f &size);
 
             void triggerEvent(ui::UIEventEnum event);
 

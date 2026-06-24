@@ -56,7 +56,7 @@ namespace AppKit
 
             void updateText(const std::string &newText);
 
-            void resize(const MathCore::vec2i &size);
+            void resize();
 
             std::shared_ptr<Transform> getTransform();
 

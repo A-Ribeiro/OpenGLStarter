@@ -40,5 +40,5 @@ public:
 
     void OnUpdateImpl(Platform::Time *time);
 
-    void OnViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue);
+    void onCameraScreenSizeChange(const MathCore::vec2f &value, const MathCore::vec2f &oldValue);
 };

@@ -82,8 +82,8 @@ namespace Scenes
 
         mainCamera->setLocalPosition(vec3f(player_pos.x, player_pos.y, -10));
 
-        auto rect = renderWindow->CameraViewport.c_ptr();
-        resize(vec2i(rect->w, rect->h));
+        // auto rect = renderWindow->CameraViewport.c_ptr();
+        resize(renderWindow->CameraScreenSize.c_val());
 
         this->OnUpdate.add(&MainScene::update, this);
     }
@@ -116,7 +116,7 @@ namespace Scenes
             glEnable(GL_FRAMEBUFFER_SRGB);
     }
 
-    void MainScene::resize(const vec2i &size)
+    void MainScene::resize(const vec2f &size)
     {
     }
 
