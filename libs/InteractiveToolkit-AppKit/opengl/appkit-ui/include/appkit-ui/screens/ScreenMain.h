@@ -10,7 +10,7 @@ namespace AppKit
     {
         class ScreenMain : public ui::Screen, public OsciloscopeWithTrigger
         {
-            void layoutElements(const MathCore::vec2i &size);
+            void layoutElements(const MathCore::vec2f &size);
             // void addButton(const std::string &text);
             void previousButton();
             void nextButton();
@@ -49,7 +49,7 @@ namespace AppKit
             ScreenMain();
 
             std::string name() const;
-            void resize(const MathCore::vec2i &size);
+            void resize(const MathCore::vec2f &size);
             void update(Platform::Time *elapsed);
 
             std::shared_ptr<AppKit::GLEngine::Transform> initializeTransform(
@@ -57,7 +57,7 @@ namespace AppKit
                 AppKit::GLEngine::ResourceMap *resourceMap,
                 MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
                 ui::ScreenManager *screenManager,
-                const MathCore::vec2i &size);
+                const MathCore::vec2f &size);
 
             void triggerEvent(ui::UIEventEnum event);
 

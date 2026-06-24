@@ -78,7 +78,7 @@ namespace AppKit
                                          AppKit::GLEngine::ResourceMap *resourceMap,
                                          MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
                                          std::vector<std::unique_ptr<Screen>> &screens,
-                                         const MathCore::vec2i &size)
+                                         const MathCore::vec2f &size)
         {
             if (uiRoot)
                 return;
@@ -112,9 +112,9 @@ namespace AppKit
                 screen_stack.back()->triggerEvent(event);
         }
 
-        void ScreenManager::resize(const MathCore::vec2i &size)
+        void ScreenManager::resize(const MathCore::vec2f &size)
         {
-            printf("[ScreenManager] resize %i %i\n", size.width, size.height);
+            printf("[ScreenManager] resize %f %f\n", size.width, size.height);
             current_size = size;
             for (auto &screen : screen_map)
                 screen.second->resize(size);

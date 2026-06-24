@@ -69,8 +69,8 @@ namespace AppKit
             // Variables
             //
 
-            MathCore::vec2f screenCenterF; // Mouse FPS controller helper
-            MathCore::vec2i screenCenterI; // used for FPS like mouse move
+            MathCore::vec2f screenCenterF_OriginBottom; // Mouse FPS controller helper
+            MathCore::vec2i screenCenterI_OriginBottom; // used for FPS like mouse move
 
             float viewportScaleFactor;
             MathCore::vec2f windowToCameraScale;
@@ -81,14 +81,15 @@ namespace AppKit
             //
             // EventCore::Property<MathCore::vec2i> WindowSize;
 
+            // OpenGL Viewport has y coord inverted, so we need to convert it
             EventCore::Property<AppKit::GLEngine::iRect> WindowViewport; // before apply viewportScaleFactor
-            EventCore::Property<AppKit::GLEngine::iRect> CameraViewport; // after apply viewportScaleFactor
+            EventCore::Property<MathCore::vec2f> CameraScreenSize; // after apply viewportScaleFactor
             
-            EventCore::Property<MathCore::vec2i> iMousePosLocal; // y is in window local coord, increase to bottom (inverted).
+            EventCore::Property<MathCore::vec2i> iMousePosLocal_OriginTop;
 
-            EventCore::Property<MathCore::vec2f> MousePos;
-            EventCore::Property<MathCore::vec2f> MousePosRelatedToCenter;
-            EventCore::Property<MathCore::vec2f> MousePosRelatedToCenterNormalized;
+            EventCore::Property<MathCore::vec2f> MousePos_OriginBottom;
+            EventCore::Property<MathCore::vec2f> MousePosRelatedToCenter_OriginBottom;
+            EventCore::Property<MathCore::vec2f> MousePosRelatedToCenterNormalized_OriginBottom;
 
             //
             // Application Logic Events
@@ -110,6 +111,7 @@ namespace AppKit
             ~RenderWindowRegion();
 
             AppKit::GLEngine::iRect getWindowViewport() const;
+            MathCore::vec2i getCameraScreenSizei() const;
 
             std::shared_ptr<RenderWindowRegion> setWindowViewport(const AppKit::GLEngine::iRect &viewport);
             std::shared_ptr<RenderWindowRegion> createFBO();
@@ -118,7 +120,8 @@ namespace AppKit
             std::shared_ptr<RenderWindowRegion> setViewportFromRealWindowSizeEnabled(bool v);
 
             void forceViewportFromRealWindowSize();
-            void forceMouseToCoord(const MathCore::vec2i &iPos) const;
+            void forceMouseToCoord_OriginTop(const MathCore::vec2i &iPos_origin_top) const;
+            void forceMouseToCoord_OriginBottom(const MathCore::vec2i &iPos_origin_bottom) const;
 
             int getChildCount() const;
             std::shared_ptr<RenderWindowRegion> getChild(int at) const;
@@ -126,19 +129,20 @@ namespace AppKit
             void removeChild(std::shared_ptr<RenderWindowRegion> child);
             void clearChildren();
 
-            void moveMouseToScreenCenter() const;
+            void moveMouseToScreenCenter();
 
-            MathCore::vec2i windowToLocal(const MathCore::vec2i &input) const;
+            MathCore::vec2i windowOriginTop_To_LocalOriginTop(const MathCore::vec2i &mouse_origin_top) const;
 
-            MathCore::vec2f localCoordToAppCoord(const MathCore::vec2i &input) const;
+            MathCore::vec2i invertYCoordi(const MathCore::vec2i &mouse_origin_top) const;
+            MathCore::vec2f invertYCoordf(const MathCore::vec2f &mouse_origin_top) const;
 
-            MathCore::vec2f appCoordRelativeToCenter(const MathCore::vec2f &appCoord) const;
+            MathCore::vec2f appCoordRelativeToCenter_OriginBottom(const MathCore::vec2f &appCoord_origin_bottom) const;
 
             MathCore::vec2f normalizeAppCoord(const MathCore::vec2f &appCoord) const;
 
-            MathCore::vec2f localCoordToNormalizedAppCoordRelativeToCenter(const MathCore::vec2i &input) const;
+            MathCore::vec2f mouse_OriginTop_To_NormalizedAppCoordRelativeToCenter_OriginBottom(const MathCore::vec2i &mouse_coord_origin_top) const;
 
-            bool isLocalInsideViewport(const MathCore::vec2i &input) const;
+            bool isLocalInsideViewport_OriginBottom(const MathCore::vec2i &coord_origin_bottom) const;
 
             inline std::shared_ptr<RenderWindowRegion> self() const
             {

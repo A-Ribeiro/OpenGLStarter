@@ -48,7 +48,7 @@ namespace AppKit
                 ScreenManager *screenManager,
                 std::shared_ptr<AppKit::GLEngine::Components::ComponentRectangle> &mask);
 
-            void layoutElements(const MathCore::vec2i &size);
+            void layoutElements(const MathCore::vec2f &size);
 
             void leftButton();
             void rightButton();

@@ -220,9 +220,8 @@ namespace AppKit
 
             auto renderWindowRegion = ToShared(particleSystem_transform->renderWindowRegion);
 
-            iRect s = renderWindowRegion->CameraViewport;
-            MathCore::vec2f ss = MathCore::vec2f(s.w, s.h);
-            softShader.setScreenSize(ss);
+            softShader.setWindowViewport(state->Viewport.c_val());
+            // softShader.setWindowViewport(renderWindowRegion->WindowViewport);
 
             // get texture size...
             /*

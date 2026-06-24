@@ -248,7 +248,7 @@ namespace AppKit
             return items[0];
         }
 
-        void OptionSet::layoutElements(const MathCore::vec2i &size)
+        void OptionSet::layoutElements(const MathCore::vec2f &size)
         {
             auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
                                               size.height - ScreenOptions::margin * 2.0f - ScreenOptions::top_bar_height);

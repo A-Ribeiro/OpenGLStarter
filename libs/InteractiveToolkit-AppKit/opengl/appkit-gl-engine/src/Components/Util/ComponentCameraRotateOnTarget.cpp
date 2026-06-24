@@ -64,7 +64,7 @@ namespace AppKit
 
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
-                renderWindowRegion->MousePosRelatedToCenterNormalized.OnChange.add(&ComponentCameraRotateOnTarget::OnNormalizedMousePosChanged, this);
+                renderWindowRegion->MousePosRelatedToCenterNormalized_OriginBottom.OnChange.add(&ComponentCameraRotateOnTarget::OnNormalizedMousePosChanged, this);
 
                 renderWindowRegion->inputManager.onMouseEvent.add(&ComponentCameraRotateOnTarget::onMouseEvent, this);
 
@@ -105,7 +105,8 @@ namespace AppKit
 
                     auto renderWindowRegion = ToShared(renderWindowRegionRef);
 
-                    lastPosition = renderWindowRegion->localCoordToNormalizedAppCoordRelativeToCenter(mouseEvent.position);
+                    lastPosition = renderWindowRegion->mouse_OriginTop_To_NormalizedAppCoordRelativeToCenter_OriginBottom(mouseEvent.position);
+                    printf("lastPosition: %f %f\n", lastPosition.x, lastPosition.y);
                     // time->timeScale = 0.0f;
                     mouseMoving = true;
                     break;
@@ -132,14 +133,14 @@ namespace AppKit
 
                 if (!enabled)
                 {
-                    lastPosition = renderWindowRegion->MousePosRelatedToCenterNormalized.c_val();
+                    lastPosition = renderWindowRegion->MousePosRelatedToCenterNormalized_OriginBottom.c_val();
                     return;
                 }
 
                 auto transform = getTransform();
 
-                MathCore::vec2f delta = renderWindowRegion->MousePosRelatedToCenterNormalized.c_val() - lastPosition;
-                lastPosition = renderWindowRegion->MousePosRelatedToCenterNormalized.c_val();
+                MathCore::vec2f delta = renderWindowRegion->MousePosRelatedToCenterNormalized_OriginBottom.c_val() - lastPosition;
+                lastPosition = renderWindowRegion->MousePosRelatedToCenterNormalized_OriginBottom.c_val();
 
                 auto toLookNode = target;
 
@@ -184,7 +185,7 @@ namespace AppKit
 
                 if (renderWindowRegion != nullptr)
                 {
-                    renderWindowRegion->MousePosRelatedToCenterNormalized.OnChange.remove(&ComponentCameraRotateOnTarget::OnNormalizedMousePosChanged, this);
+                    renderWindowRegion->MousePosRelatedToCenterNormalized_OriginBottom.OnChange.remove(&ComponentCameraRotateOnTarget::OnNormalizedMousePosChanged, this);
                     // app->OnMouseDown.remove(this, &ComponentCameraRotateOnTarget::OnMouseDown);
                     // app->OnMouseUp.remove(this, &ComponentCameraRotateOnTarget::OnMouseUp);
                     renderWindowRegion->inputManager.onMouseEvent.remove(&ComponentCameraRotateOnTarget::onMouseEvent, this);

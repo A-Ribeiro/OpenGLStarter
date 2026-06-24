@@ -111,7 +111,7 @@ void MainScene::bindResourcesToGraph()
     applySettingsChanges();
 
     screenManager->camera = camera;
-    screenManager->load_screens(engine, resourceMap, &mathRandom, screens, MathCore::vec2i(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h));
+    screenManager->load_screens(engine, resourceMap, &mathRandom, screens, renderWindow->CameraScreenSize.c_val());
     auto ui = root->findTransformByName("ui");
     ui->addChild(screenManager->uiRoot);
     screenManager->screen<AppKit::ui::ScreenHUD>()->inGameDialog.setSpriteAvatars({
@@ -451,8 +451,8 @@ void MainScene::onWindowResized(const MathCore::vec2i &new_size)
     else
         renderWindow->WindowViewport.forceTriggerOnChange();
 
-    auto cameraViewport = renderWindow->CameraViewport.c_val();
-    screenManager->resize(MathCore::vec2i(cameraViewport.w, cameraViewport.h));
+    // auto cameraViewport = renderWindow->CameraViewport.c_val();
+    screenManager->resize(renderWindow->CameraScreenSize.c_val());
 
     auto windowViewport = renderWindow->WindowViewport.c_val();
 

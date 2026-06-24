@@ -27,16 +27,16 @@ namespace AppKit
                 auto renderWindowRegion = ToShared(renderWindowRegionRef);
                 auto eventHandlerSet = ToShared(eventHandlerSetRef);
 
-                renderWindowRegion->MousePos = renderWindowRegion->screenCenterF; // set app state do cursor center
+                //renderWindowRegion->MousePos_OriginBottom = renderWindowRegion->screenCenterF_OriginBottom; // set app state do cursor center
                 renderWindowRegion->moveMouseToScreenCenter();                    // queue update to screen center
 
-                renderWindowRegion->MousePos.OnChange.add(&ComponentCameraMove::OnMousePosChanged, this);
+                renderWindowRegion->MousePos_OriginBottom.OnChange.add(&ComponentCameraMove::OnMousePosChanged, this);
                 renderWindowRegion->WindowViewport.OnChange.add(&ComponentCameraMove::OnViewportChanged, this);
 
                 eventHandlerSet->OnLateUpdate.add(&ComponentCameraMove::OnLateUpdate, this);
 
                 OnViewportChanged(renderWindowRegion->WindowViewport, renderWindowRegion->WindowViewport);
-                OnMousePosChanged(renderWindowRegion->MousePos, renderWindowRegion->MousePos);
+                OnMousePosChanged(renderWindowRegion->MousePos_OriginBottom, renderWindowRegion->MousePos_OriginBottom);
 
                 // AppBase* app = Engine::Instance()->app;
 
@@ -125,7 +125,7 @@ namespace AppKit
 
                 MathCore::vec2f pos = value;
 
-                MathCore::vec2f delta = pos - renderWindowRegion->screenCenterF;
+                MathCore::vec2f delta = pos - renderWindowRegion->screenCenterF_OriginBottom;
 
                 if (MathCore::OP<MathCore::vec2f>::sqrLength(delta) > MathCore::EPSILON<float>::high_precision)
                 {
@@ -168,7 +168,7 @@ namespace AppKit
 
                 if (renderWindowRegion != nullptr)
                 {
-                    renderWindowRegion->MousePos.OnChange.remove(&ComponentCameraMove::OnMousePosChanged, this);
+                    renderWindowRegion->MousePos_OriginBottom.OnChange.remove(&ComponentCameraMove::OnMousePosChanged, this);
                     renderWindowRegion->WindowViewport.OnChange.remove(&ComponentCameraMove::OnViewportChanged, this);
                 }
             }

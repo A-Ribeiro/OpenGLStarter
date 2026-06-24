@@ -24,7 +24,7 @@ namespace AppKit
             setButtonColors();
         }
 
-        void TopBar::layoutElements(const MathCore::vec2i &size)
+        void TopBar::layoutElements(const MathCore::vec2f &size)
         {
             if (btns.size() == 0)
                 return;

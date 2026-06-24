@@ -131,6 +131,8 @@ namespace AppKit
 #endif
             EventCore::Property<float> LineWidth;
             EventCore::Property<AppKit::OpenGL::GLShader *> CurrentShader;
+            
+            // OpenGL Viewport has y coord inverted
             EventCore::Property<iRect> Viewport;
             EventCore::Property<AppKit::OpenGL::GLFramebufferObject *> CurrentFramebufferObject;
             EventCore::Property<ColorWriteType> ColorWrite;

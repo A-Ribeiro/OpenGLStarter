@@ -10,7 +10,7 @@ namespace AppKit
 {
     namespace ui
     {
-        void ScreenOptions::layoutElements(const MathCore::vec2i &size)
+        void ScreenOptions::layoutElements(const MathCore::vec2f &size)
         {
 
             auto valid_size = MathCore::vec2f(size.width - ScreenOptions::margin * 2.0f,
@@ -144,9 +144,9 @@ namespace AppKit
             return Name;
         }
 
-        void ScreenOptions::resize(const MathCore::vec2i &size)
+        void ScreenOptions::resize(const MathCore::vec2f &size)
         {
-            printf("    [ScreenOptions] resize %i %i\n", size.width, size.height);
+            printf("    [ScreenOptions] resize %f %f\n", size.width, size.height);
             layoutElements(size);
         }
 
@@ -165,7 +165,7 @@ namespace AppKit
             AppKit::GLEngine::ResourceMap *resourceMap,
             MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
             ui::ScreenManager *screenManager,
-            const MathCore::vec2i &size)
+            const MathCore::vec2f &size)
         {
             if (uiNode)
                 return uiNode;

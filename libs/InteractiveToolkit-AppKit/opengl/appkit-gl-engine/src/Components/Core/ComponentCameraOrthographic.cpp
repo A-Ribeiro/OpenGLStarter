@@ -62,16 +62,16 @@ namespace AppKit
             {
                 // AppBase* appBase = Engine::Instance()->app;
                 if (auto renderWindowRegion = renderWindowRegionRef.lock())
-                    renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
+                    renderWindowRegion->CameraScreenSize.OnChange.remove(&ComponentCameraOrthographic::OnCameraScreenSizeChanged, this);
             }
 
             void ComponentCameraOrthographic::start()
             {
                 if (auto renderWindowRegion = renderWindowRegionRef.lock())
                 {
-                    renderWindowRegion->CameraViewport.OnChange.add(&ComponentCameraOrthographic::OnViewportChanged, this);
+                    renderWindowRegion->CameraScreenSize.OnChange.add(&ComponentCameraOrthographic::OnCameraScreenSizeChanged, this);
                     // call the first setup
-                    OnViewportChanged(renderWindowRegion->CameraViewport, renderWindowRegion->CameraViewport);
+                    OnCameraScreenSizeChanged(renderWindowRegion->CameraScreenSize, renderWindowRegion->CameraScreenSize);
                 }
             }
 
@@ -85,7 +85,7 @@ namespace AppKit
                 configureProjection();
             }
 
-            void ComponentCameraOrthographic::OnViewportChanged(const iRect &value, const iRect &oldValue)
+            void ComponentCameraOrthographic::OnCameraScreenSizeChanged(const MathCore::vec2f &value, const MathCore::vec2f &oldValue)
             {
                 configureProjection();
             }
@@ -105,14 +105,10 @@ namespace AppKit
             void ComponentCameraOrthographic::configureProjection()
             {
                 // AppBase* appBase = Engine::Instance()->app;
-                MathCore::vec2i size;
-
                 if (auto renderWindowRegion = renderWindowRegionRef.lock())
-                    size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
+                    projectionAreaSizePx = renderWindowRegion->CameraScreenSize;
                 else
-                    size = Engine::Instance()->app->window->getSize();
-
-                projectionAreaSizePx = MathCore::vec2f(size.width, size.height);
+                    projectionAreaSizePx = (MathCore::vec2f)Engine::Instance()->app->window->getSize();
 
                 float x = (float)projectionAreaSizePx.width;
                 float y = (float)projectionAreaSizePx.height;
@@ -273,7 +269,7 @@ namespace AppKit
             void ComponentCameraOrthographic::detachFromTransform(std::shared_ptr<Transform> t)
             {
                 if (auto renderWindowRegion = renderWindowRegionRef.lock())
-                    renderWindowRegion->CameraViewport.OnChange.remove(&ComponentCameraOrthographic::OnViewportChanged, this);
+                    renderWindowRegion->CameraScreenSize.OnChange.remove(&ComponentCameraOrthographic::OnCameraScreenSizeChanged, this);
                 renderWindowRegionRef.reset();
             }
 

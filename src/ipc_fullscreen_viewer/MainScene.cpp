@@ -8,8 +8,9 @@ using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
-//to load skybox, textures, cubemaps, 3DModels and setup materials
-void MainScene::loadResources(){
+// to load skybox, textures, cubemaps, 3DModels and setup materials
+void MainScene::loadResources()
+{
     auto engine = AppKit::GLEngine::Engine::Instance();
 #if defined(ARIBEIRO_LINUX_LOADER_USE_USR_LOCAL_PATH)
     fontBuilder.load("/usr/local/etc/OpenMultimedia/Roboto-Regular-100.basof2", engine->sRGBCapable);
@@ -17,27 +18,28 @@ void MainScene::loadResources(){
     fontBuilder.load("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
 #endif
 }
-//to load the scene graph
-void MainScene::loadGraph(){
+// to load the scene graph
+void MainScene::loadGraph()
+{
     // root = Transform::CreateShared();
     // root->affectComponentStart = true;
-    
+
     root = Transform::CreateShared()->setRootPropertiesFromDefaultScene(this->self());
 
-    root->addChild( Transform::CreateShared() )->Name = "Main Camera";
+    root->addChild(Transform::CreateShared())->Name = "Main Camera";
 
     scaleNode = root->addChild(Transform::CreateShared());
 
-    //text transform
+    // text transform
     {
         auto textNode = scaleNode->addChild(Transform::CreateShared());
         textNode->Name = "center Text";
-        textNode->setLocalPosition(MathCore::vec3f(0,0,-0.1f));
+        textNode->setLocalPosition(MathCore::vec3f(0, 0, -0.1f));
 
         componentFontToMesh = textNode->addNewComponent<AppKit::GLEngine::Components::ComponentFontToMesh>();
     }
 
-    //plane with texture
+    // plane with texture
     {
         imageNode = scaleNode->addChild(Transform::CreateShared());
         imageNode->Name = "yuv420 image";
@@ -45,8 +47,9 @@ void MainScene::loadGraph(){
     }
 }
 
-void MainScene::setText(const std::string &text, float _size, float horiz_margin) {
-    
+void MainScene::setText(const std::string &text, float _size, float horiz_margin)
+{
+
     if (componentFontToMesh == nullptr)
         return;
 
@@ -55,7 +58,7 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
     this->text_margin = horiz_margin;
     float text_scale_factor = text_size / fontBuilder.glFont2.size;
     float text_margin_scale_factor = text_margin / fontBuilder.glFont2.size;
-    
+
     fontBuilder.faceColor = MathCore::vec4f(1, 1, 1, 1);
     fontBuilder.strokeColor = MathCore::vec4f(0.75f, 0.75f, 0.75f, 1);
     fontBuilder.horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_center;
@@ -66,7 +69,7 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
     fontBuilder.lineHeight = 1.3f;
     fontBuilder.firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight;
 
-    //split by lines
+    // split by lines
     std::vector<std::string> lines = ITKCommon::StringUtil::tokenizer(text, "\n");
     std::vector<std::string> result;
 
@@ -75,18 +78,20 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
     float valid_width = window_width / screen_scale - text_margin * 2.0f;
     valid_width /= text_scale_factor;
 
-    for (auto line : lines) {
+    for (auto line : lines)
+    {
         std::vector<std::string> words = ITKCommon::StringUtil::tokenizer(line, " ");
         std::string aux = "";
         bool first = true;
-        for (auto word : words) {
+        for (auto word : words)
+        {
             std::string aux_with_word = aux;
             if (first)
                 aux_with_word += word;
-            else 
+            else
                 aux_with_word += " " + word;
             float xmin, xmax, ymin, ymax;
-            
+
             auto aabb = fontBuilder.richComputeBox(aux_with_word.c_str());
             xmin = aabb.min_box.x;
             xmax = aabb.max_box.x;
@@ -94,11 +99,13 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
             ymax = aabb.max_box.y;
 
             float width = xmax - xmin;
-            if (!first && width > valid_width) {
+            if (!first && width > valid_width)
+            {
                 result.push_back(aux);
                 aux = word;
             }
-            else {
+            else
+            {
                 aux = aux_with_word;
             }
             first = false;
@@ -108,8 +115,10 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
 
     std::string breakLinedTest = "";
     bool first = true;
-    for (auto line : result) {
-        if (first) {
+    for (auto line : result)
+    {
+        if (first)
+        {
             breakLinedTest += line;
             first = false;
         }
@@ -123,28 +132,29 @@ void MainScene::setText(const std::string &text, float _size, float horiz_margin
     componentFontToMesh_transform->setLocalScale(text_scale_factor);
 }
 
-//to bind the resources to the current graph
-void MainScene::bindResourcesToGraph(){
+// to bind the resources to the current graph
+void MainScene::bindResourcesToGraph()
+{
 
     GLRenderState *renderState = GLRenderState::Instance();
 
-    //setup renderstate
+    // setup renderstate
 
     auto mainCamera = root->findTransformByName("Main Camera");
     std::shared_ptr<ComponentCameraOrthographic> componentCameraOrthographic;
     camera = componentCameraOrthographic = mainCamera->addNewComponent<ComponentCameraOrthographic>();
 
-    //ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
+    // ReferenceCounter<AppKit::OpenGL::GLTexture*> *texRefCount = &AppKit::GLEngine::Engine::Instance()->textureReferenceCounter;
 
     {
         auto imageNode = root->findTransformByName("yuv420 image");
-        
+
         auto imageMaterial = imageNode->addNewComponent<ComponentMaterial>();
         imageNode->addComponent(ComponentMesh::createPlaneXY(1920.0f, 1080.0f));
 
         imageMaterial->setShader(resourceMap->shaderUnlitTexture);
-        //imageMaterial->type = MaterialUnlitTexture;
-        //imageMaterial->unlit.blendMode = BlendModeAlpha;
+        // imageMaterial->type = MaterialUnlitTexture;
+        // imageMaterial->unlit.blendMode = BlendModeAlpha;
         imageMaterial->property_bag.getProperty("BlendMode").set((int)AppKit::GLEngine::BlendModeDisabled);
 
         texture = std::make_shared<AppKit::OpenGL::GLTexture>(1920, 1080, GL_RGBA);
@@ -153,27 +163,29 @@ void MainScene::bindResourcesToGraph(){
         texture->uploadBufferRGBA_8888(&data[0], 1920, 1080, false);
 
         imageMaterial->property_bag.getProperty("uTexture").set<std::shared_ptr<AppKit::OpenGL::VirtualTexture>>(texture);
-        //imageMaterial->unlit.tex = texture;
+        // imageMaterial->unlit.tex = texture;
     }
 
     // texRefCount->add(&fontBuilder.glFont2.texture);
     // texRefCount->add(texture);
 
     // call resize
-    AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
-    resize( engine->app->window->getSize() );
+    // AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
+    // resize(engine->app->window->getSize());
+    resize( renderWindow->CameraScreenSize.c_val() );
 
-    //Add AABB for all meshs...
+    // Add AABB for all meshs...
     {
-        //root->traversePreOrder_DepthFirst( AddAABBMesh );
+        // root->traversePreOrder_DepthFirst( AddAABBMesh );
         resourceHelper->addAABBMesh(root);
     }
 }
 
-//clear all loaded scene
-void MainScene::unloadAll(){
+// clear all loaded scene
+void MainScene::unloadAll()
+{
 
-    //ResourceHelper::releaseTransformRecursive(&root);
+    // ResourceHelper::releaseTransformRecursive(&root);
     root = nullptr;
     camera = nullptr;
 
@@ -191,30 +203,34 @@ void MainScene::unloadAll(){
     scaleNode = nullptr;
 }
 
-void MainScene::draw() {
+void MainScene::draw()
+{
 
-    if (yuy2_queue.queue_header_ptr->size > 0 && yuy2_queue.read(&data_buffer)) {
-        //new texture
+    if (yuy2_queue.queue_header_ptr->size > 0 && yuy2_queue.read(&data_buffer))
+    {
+        // new texture
         int64_t size_check = 1920 * 1080 * 2;
-        if (data_buffer.size == size_check) {
-            if (aux_rgb_buffer.size != 1920 * 1080 * 4) {
+        if (data_buffer.size == size_check)
+        {
+            if (aux_rgb_buffer.size != 1920 * 1080 * 4)
+            {
                 aux_rgb_buffer.setSize(1920 * 1080 * 4);
                 memset(aux_rgb_buffer.data, 255, 1920 * 1080 * 4);
 
                 componentFontToMesh = nullptr;
-                
+
                 auto textNode = scaleNode->findTransformByName("center Text");
                 textNode->setParent(nullptr);
                 textNode = nullptr;
-                //ResourceHelper::releaseTransformRecursive(&textNode);
+                // ResourceHelper::releaseTransformRecursive(&textNode);
 
                 imageNode->setLocalRotation(MathCore::quatf());
             }
-            
-            uint8_t* in_buffer = (uint8_t*)data_buffer.data;
-            uint8_t* out_buffer = (uint8_t*)aux_rgb_buffer.data;
-            
-            //memset(aux_rgb_buffer.data, 128, 1920 * 1080 * 4);
+
+            uint8_t *in_buffer = (uint8_t *)data_buffer.data;
+            uint8_t *out_buffer = (uint8_t *)aux_rgb_buffer.data;
+
+            // memset(aux_rgb_buffer.data, 128, 1920 * 1080 * 4);
 
             m_YUV2RGB_Multithread.yuy2_to_rgba(in_buffer, out_buffer, 1920, 1080);
             /*
@@ -223,7 +239,7 @@ void MainScene::draw() {
                     int index = x + y * 1920;
 
                     int y = in_buffer[index * 2 + 0];
-                    
+
                     int u, v;
                     if (x % 2 == 0) {
                         u = in_buffer[index * 2 + 1];
@@ -259,15 +275,17 @@ void MainScene::draw() {
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
-void MainScene::resize(const MathCore::vec2i&size) {
+void MainScene::resize(const MathCore::vec2f &size)
+{
     // fixed height of 1080 pixels
     float new_scale = size.height / 1080.0f;
-    
+
     float aspect_window = (float)size.width / (float)size.height;
     float aspect_image = (float)texture->width / (float)texture->height;
-    
+
     bool fit_width = (aspect_window < aspect_image);
-    if (fit_width) {
+    if (fit_width)
+    {
         new_scale /= aspect_image / aspect_window;
     }
 
@@ -280,12 +298,11 @@ MainScene::MainScene(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
-    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : 
-        AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
-        text_size(0), 
-        text_margin(0),
-        yuy2_queue( "aRibeiro Cam 01", Platform::IPC::QueueIPC_READ, 8, 1920 * 1080 * 2, false),
-        m_YUV2RGB_Multithread( Platform::Thread::QueryNumberOfSystemThreads(), Platform::Thread::QueryNumberOfSystemThreads()*4 )
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
+                                                                          text_size(0),
+                                                                          text_margin(0),
+                                                                          yuy2_queue("aRibeiro Cam 01", Platform::IPC::QueueIPC_READ, 8, 1920 * 1080 * 2, false),
+                                                                          m_YUV2RGB_Multithread(Platform::Thread::QueryNumberOfSystemThreads(), Platform::Thread::QueryNumberOfSystemThreads() * 4)
 {
     texture = nullptr;
     componentFontToMesh = nullptr;
@@ -293,6 +310,7 @@ MainScene::MainScene(
     imageNode = nullptr;
 }
 
-MainScene::~MainScene() {
+MainScene::~MainScene()
+{
     unload();
 }

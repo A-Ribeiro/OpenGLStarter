@@ -319,7 +319,7 @@ namespace AppKit
             }
         }
 
-        void InGameDialog::layoutVisibleElements(const MathCore::vec2i &size)
+        void InGameDialog::layoutVisibleElements(const MathCore::vec2f &size)
         {
             if (!components_created)
                 return;

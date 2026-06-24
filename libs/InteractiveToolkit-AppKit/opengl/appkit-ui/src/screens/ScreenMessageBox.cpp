@@ -5,7 +5,7 @@ namespace AppKit
 {
     namespace ui
     {
-        void ScreenMessageBox::layoutElements(const MathCore::vec2i &size)
+        void ScreenMessageBox::layoutElements(const MathCore::vec2f &size)
         {
             auto max_size = MathCore::vec2f(size.width - ScreenMessageBox::screen_margin * 2.0f,
                                             size.height - ScreenMessageBox::screen_margin * 2.0f);
@@ -206,9 +206,9 @@ namespace AppKit
         {
             return Name;
         }
-        void ScreenMessageBox::resize(const MathCore::vec2i &size)
+        void ScreenMessageBox::resize(const MathCore::vec2f &size)
         {
-            printf("    [ScreenMessageBox] resize %i %i\n", size.width, size.height);
+            printf("    [ScreenMessageBox] resize %f %f\n", size.width, size.height);
             layoutElements(size);
         }
         void ScreenMessageBox::update(Platform::Time *elapsed)
@@ -224,7 +224,7 @@ namespace AppKit
             AppKit::GLEngine::ResourceMap *resourceMap,
             MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
             ui::ScreenManager *screenManager,
-            const MathCore::vec2i &size)
+            const MathCore::vec2f &size)
         {
             if (uiNode)
                 return uiNode;

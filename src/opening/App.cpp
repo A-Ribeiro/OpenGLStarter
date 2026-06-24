@@ -32,7 +32,7 @@ App::App()
 #endif
 
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
-    AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->CameraScreenSize.OnChange.add(&App::onCameraScreenSizeChange, this);
 
     // fade->fadeOut(5.0f, nullptr);
     time.update();
@@ -105,10 +105,12 @@ void App::onGainFocus()
     time.update();
 }
 
-void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue)
+void App::onCameraScreenSizeChange(const MathCore::vec2f &value, const MathCore::vec2f &oldValue)
 {
     GLRenderState *renderState = GLRenderState::Instance();
-    renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
+    
+    renderState->Viewport = screenRenderWindow->WindowViewport.c_val();//AppKit::GLEngine::iRect(value.w, value.h);
+
     if (mainScene != nullptr)
-        mainScene->resize(vec2i(value.w, value.h));
+        mainScene->resize(value);
 }

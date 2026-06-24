@@ -30,7 +30,7 @@ App::App()
 #endif
 
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
-    AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->CameraScreenSize.OnChange.add(&App::onCameraScreenSizeChange, this);
     AppBase::screenRenderWindow->inputManager.onMouseEvent.add(&App::OnMouseEvent, this);
 
     // AppBase::OnMouseDown.add(this, &App::onMouseDown);
@@ -48,12 +48,28 @@ App::App()
     renderPipeline.ambientLight.lightMode = AmbientLightMode_SphereMapTexture; // AmbientLightMode_SkyBoxCubeTexture;
 
     screenRenderWindow->setHandleWindowCloseButtonEnabled(true);
-    screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
+    // screenRenderWindow->setViewportFromRealWindowSizeEnabled(true);
+
     // screenRenderWindow.setEventForwardingEnabled(true);
 
     this->fps_accumulator = App::fps_time_sec;
 
     mainThread_EventHandlerSet = std::make_shared<EventHandlerSet>();
+
+    screenRenderWindow->inputManager.onWindowEvent.add(
+        [this](const AppKit::Window::WindowEvent &evt)
+        {
+            if (evt.type == AppKit::Window::WindowEventType::Resized)
+            {
+                screenRenderWindow->viewportScaleFactor = (float)evt.resized.height / 768.0f;
+                screenRenderWindow->setWindowViewport(AppKit::GLEngine::iRect(evt.resized.width, evt.resized.height));
+            }
+        });
+
+    auto window_size = window->getSize();
+    screenRenderWindow->viewportScaleFactor = (float)window_size.height / 768.0f;
+    screenRenderWindow->setWindowViewport(AppKit::GLEngine::iRect(window_size.width, window_size.height));
+    screenRenderWindow->WindowViewport.forceTriggerOnChange();
 }
 
 void App::load()
@@ -73,7 +89,7 @@ void App::load()
 App::~App()
 {
     AppBase::OnGainFocus.remove(&App::onGainFocus, this);
-    AppBase::screenRenderWindow->CameraViewport.OnChange.remove(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->CameraScreenSize.OnChange.remove(&App::onCameraScreenSizeChange, this);
     AppBase::screenRenderWindow->inputManager.onMouseEvent.remove(&App::OnMouseEvent, this);
 
     activeScene.reset();
@@ -210,12 +226,14 @@ void App::onGainFocus()
     time.update();
 }
 
-void App::onViewportChange(const iRect &value, const iRect &oldValue)
+void App::onCameraScreenSizeChange(const MathCore::vec2f &value, const MathCore::vec2f &oldValue)
 {
     GLRenderState *renderState = GLRenderState::Instance();
-    renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
+
+    renderState->Viewport = screenRenderWindow->WindowViewport.c_val(); // AppKit::GLEngine::iRect(value.w, value.h);
+
     if (sceneGUI != nullptr)
-        sceneGUI->resize(vec2i(value.w, value.h));
+        sceneGUI->resize(value);
 }
 
 void App::OnMouseEvent(const AppKit::Window::MouseEvent &evt)

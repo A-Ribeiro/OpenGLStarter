@@ -15,6 +15,14 @@ namespace AppKit
         //         this->screenRenderWindow.Viewport = iRect(evt.resized.width, evt.resized.height);
         // }
 
+        iRect AppBase::getFullWindowViewport() const
+        {
+            if (!window)
+                return AppKit::GLEngine::iRect(0, 0, 10, 10);
+            auto size = window->getSize();
+            return AppKit::GLEngine::iRect(size.width, size.height);
+        }
+
         AppBase::AppBase()
         {
             // normalization_factor = 1.0f;

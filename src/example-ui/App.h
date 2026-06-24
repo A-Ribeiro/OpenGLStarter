@@ -51,7 +51,7 @@ public:
 
     void load();
     void onGainFocus();
-    void onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue);
+    void onCameraScreenSizeChange(const MathCore::vec2f &value, const MathCore::vec2f &oldValue);
     void onWindowEvent(const AppKit::Window::WindowEvent &evt);
 
 

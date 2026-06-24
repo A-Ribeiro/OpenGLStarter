@@ -128,7 +128,7 @@ namespace AppKit
 
             void update(Platform::Time *elapsed, float blink_01_lerp_factor);
 
-            void layoutVisibleElements(const MathCore::vec2i &size); // called on resize
+            void layoutVisibleElements(const MathCore::vec2f &size); // called on resize
 
             CollisionCore::AABB<MathCore::vec3f> computeAABB();
 

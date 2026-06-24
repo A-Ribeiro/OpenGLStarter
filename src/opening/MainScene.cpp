@@ -200,8 +200,8 @@ void MainScene::bindResourcesToGraph()
     // call resize
     // AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
 
-    auto rect = renderWindow->CameraViewport.c_ptr();
-    resize(MathCore::vec2i(rect->w, rect->h));
+    // auto rect = renderWindow->CameraViewport.c_ptr();
+    resize(renderWindow->CameraScreenSize.c_val());
 
     // Add AABB for all meshs...
     {
@@ -315,7 +315,7 @@ void MainScene::draw()
         // printf("%s\n", out_filename.c_str());
 
         // auto screenRenderWindow = AppKit::GLEngine::Engine::Instance()->app->screenRenderWindow;
-        fbo.setSize(renderWindow->CameraViewport.c_val().w, renderWindow->CameraViewport.c_val().h);
+        fbo.setSize(renderWindow->WindowViewport.c_val().w, renderWindow->WindowViewport.c_val().h);
         fbo.blitFromBackBuffer(0, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
         while ((int)queue.size() > mThreadPool.threadCount() * 2)
@@ -373,7 +373,7 @@ void MainScene::draw()
     }
 }
 
-void MainScene::resize(const MathCore::vec2i &size)
+void MainScene::resize(const MathCore::vec2f &size)
 {
     // // fixed height of 1080 pixels
     // float new_scale = size.height / 1080.0f;

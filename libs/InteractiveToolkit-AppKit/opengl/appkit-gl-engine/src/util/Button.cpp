@@ -33,7 +33,7 @@ namespace AppKit
             // resize(AppKit::GLEngine::Engine::Instance()->app->WindowSize);
             // auto renderWindowRegion = ToShared(root->renderWindowRegion);
             if (auto renderWindow = this->renderWindowRegion.lock())
-                resize(MathCore::vec2i(renderWindow->CameraViewport.c_ptr()->w, renderWindow->CameraViewport.c_ptr()->h));
+                resize();
 
             // resize(MathCore::vec2i(camera->viewport.w, camera->viewport.h));
 
@@ -69,7 +69,7 @@ namespace AppKit
             // resize(MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h));
             // resize(MathCore::vec2i(camera->viewport.w, camera->viewport.h));
             if (auto renderWindow = this->renderWindowRegion.lock())
-                resize(MathCore::vec2i(renderWindow->CameraViewport.c_ptr()->w, renderWindow->CameraViewport.c_ptr()->h));
+                resize();
 
             selected = false;
         }
@@ -81,10 +81,10 @@ namespace AppKit
                 return;
 
             float scale_factor = 1.0f;
-            
+
             if (camera != nullptr)
                 if (camera->useSizeY)
-                    scale_factor = camera->sizeY / (float)renderWindow->CameraViewport.c_ptr()->h;
+                    scale_factor = camera->sizeY / (float)renderWindow->CameraScreenSize.c_val().y;
 
             if (CollisionCore::AABB<MathCore::vec3f>::pointInsideAABB(mousePosition * scale_factor, aabb))
             {
@@ -108,21 +108,23 @@ namespace AppKit
 
             // resize(MathCore::vec2i(camera->viewport.w, camera->viewport.h));
             if (auto renderWindow = this->renderWindowRegion.lock())
-                resize(MathCore::vec2i(renderWindow->CameraViewport.c_ptr()->w, renderWindow->CameraViewport.c_ptr()->h));
+                resize();
         }
 
-        void Button::resize(const MathCore::vec2i &size_)
+        void Button::resize()
         {
             // auto renderWindowRegion = ToShared(root->renderWindowRegion);
             // MathCore::vec2i size = MathCore::vec2i(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
-            MathCore::vec2i size(512, 512); // = MathCore::vec2i(camera->viewport.w, camera->viewport.h);
+            MathCore::vec2f size(512, 512); // = MathCore::vec2i(camera->viewport.w, camera->viewport.h);
             if (auto renderWindow = this->renderWindowRegion.lock())
-                size = MathCore::vec2i(renderWindow->CameraViewport.c_ptr()->w, renderWindow->CameraViewport.c_ptr()->h);
-
+                size = renderWindow->CameraScreenSize;
+printf("window size: %f %f\n", size.x, size.y);
             // auto camera = root->findComponentInChildren<Components::ComponentCameraOrthographic>();
             if (camera != nullptr)
+            {
                 if (camera->useSizeY)
-                    size = (MathCore::vec2i)((MathCore::vec2f)size * (camera->sizeY / (float)size.height));
+                    size = (size * (camera->sizeY / (float)size.height));
+            }
 
             float margin = 32.0f;
             float indexSpacing = 32.0f + 10.0f;

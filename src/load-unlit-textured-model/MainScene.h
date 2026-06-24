@@ -80,7 +80,7 @@ namespace Scenes {
 
         virtual void draw();
 
-        void resize(const vec2i &size);
+        void resize(const vec2f &size);
 
         void update(Platform::Time *elapsed);
     };

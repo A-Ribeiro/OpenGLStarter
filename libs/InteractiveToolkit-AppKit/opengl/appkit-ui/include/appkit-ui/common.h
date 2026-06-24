@@ -32,7 +32,7 @@ namespace AppKit
         public:
             virtual ~Screen() = default;
             virtual std::string name() const = 0;
-            virtual void resize(const MathCore::vec2i &size) = 0;
+            virtual void resize(const MathCore::vec2f &size) = 0;
             // virtual std::unordered_map<std::string, std::string> get_config_params() const = 0;
             // virtual void set_config_params(const std::unordered_map<std::string, std::string> &params) const = 0;
 
@@ -43,7 +43,7 @@ namespace AppKit
                 AppKit::GLEngine::ResourceMap *resourceMap,
                 MathCore::MathRandomExt<ITKCommon::Random32> *mathRandom,
                 ScreenManager *screenManager,
-                const MathCore::vec2i &size) = 0;
+                const MathCore::vec2f &size) = 0;
 
             virtual void triggerEvent(UIEventEnum event) = 0;
 

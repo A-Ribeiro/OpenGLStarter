@@ -58,7 +58,7 @@ App::App()
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
     AppBase::OnLostFocus.add(&App::onLostFocus, this);
 
-    screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
+    screenRenderWindow->CameraScreenSize.OnChange.add(&App::onCameraScreenSizeChange, this);
 
     renderPipeline.ambientLight.lightMode = AmbientLightMode_None;
 
@@ -282,10 +282,14 @@ void App::onLostFocus()
     // window->setMouseCursorVisible(true);
 }
 
-void App::onViewportChange(const iRect &value, const iRect &oldValue)
+void App::onCameraScreenSizeChange(const MathCore::vec2f &value, const MathCore::vec2f &oldValue)
 {
     // GLRenderState *renderState = GLRenderState::Instance();
-    // renderState->Viewport = AppKit::GLEngine::iRect(prop->value.width, prop->value.height);
+    
+    // renderState->Viewport = screenRenderWindow->WindowViewport.c_val();//AppKit::GLEngine::iRect(value.w, value.h);
+
+    // if (sceneGUI != nullptr)
+    //     sceneGUI->resize(value);
 }
 
 void App::applyGlobalScale()

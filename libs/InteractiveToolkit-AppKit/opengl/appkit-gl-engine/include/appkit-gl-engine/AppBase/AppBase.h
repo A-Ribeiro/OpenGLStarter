@@ -70,6 +70,8 @@ namespace AppKit
             std::shared_ptr<RenderWindowRegion> screenRenderWindow;
             //std::shared_ptr<EventHandlerSet> eventHandlerSet;
 
+            iRect getFullWindowViewport() const;
+
             AppBase();
 
             virtual ~AppBase();

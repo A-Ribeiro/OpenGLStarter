@@ -173,7 +173,8 @@ namespace AppKit
             // screen or FBO?
             if (renderWindowRegion->fbo == nullptr)
             {
-                fbo.setSize(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
+                //fbo.setSize(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
+                fbo.setSize(renderWindowRegion->WindowViewport.c_ptr()->w, renderWindowRegion->WindowViewport.c_ptr()->h);
                 fbo.blitFromBackBuffer(0, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             }
             else
@@ -202,7 +203,8 @@ namespace AppKit
         {
             auto renderWindowRegion = ToShared(root->renderWindowRegion);
 
-            fbo.setSize(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
+            //fbo.setSize(renderWindowRegion->CameraViewport.c_ptr()->w, renderWindowRegion->CameraViewport.c_ptr()->h);
+            fbo.setSize(renderWindowRegion->WindowViewport.c_ptr()->w, renderWindowRegion->WindowViewport.c_ptr()->h);
             fbo.enable();
 
             GLRenderState *state = GLRenderState::Instance();

@@ -128,12 +128,16 @@ void InnerViewport::OnUpdate(Platform::Time *time)
     }
     else
     {
-        auto wViewport = renderWindow->WindowViewport.c_ptr();
-        auto new_window_viewport = AppKit::GLEngine::iRect(
-            wViewport->x,
-            app->screenRenderWindow->WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
-            wViewport->w,
-            wViewport->h);
+        // auto wViewport = renderWindow->WindowViewport.c_ptr();
+        // auto new_window_viewport = AppKit::GLEngine::iRect(
+        //     wViewport->x,
+        //     app->screenRenderWindow->WindowViewport.c_ptr()->h - 1 - (wViewport->h - 1 + wViewport->y),
+        //     wViewport->w,
+        //     wViewport->h);
+        // renderState->Viewport = new_window_viewport;
+
+        //auto new_window_viewport = renderWindow->WindowViewport.c_val().convert_y_coord_to_opengl(app->screenRenderWindow->WindowViewport.c_val());
+        auto new_window_viewport = renderWindow->WindowViewport.c_val();
         renderState->Viewport = new_window_viewport;
 
         glEnable(GL_SCISSOR_TEST);

@@ -82,7 +82,7 @@ public:
 
     virtual void draw();
 
-    void resize(const MathCore::vec2i &size);
+    void resize(const MathCore::vec2f &size);
 
     void update(Platform::Time *elapsed);
 };

@@ -19,7 +19,7 @@ namespace AppKit
                 (*this) = v;
             }
 
-            iRect& operator=(const iRect &v)
+            iRect &operator=(const iRect &v)
             {
                 x = v.x;
                 y = v.y;
@@ -57,6 +57,17 @@ namespace AppKit
                 this->h = h;
             }
 
+            // y coordinate is inverted in OpenGL, so we need to convert it
+            iRect convert_y_coord_to_opengl(const iRect &screenViewport) const
+            {
+                iRect result = *this;
+                // y coordinate is inverted in OpenGL, so we need to convert it
+                result.y = screenViewport.h - 1 - (h - 1 + y);
+                return result;
+            }
+
+            iRect convert_y_coord_to_opengl_using_app_screen() const;
+
             template <typename Tx, typename Ty,
                       typename std::enable_if<
                           (std::is_integral<Tx>::value || std::is_floating_point<Tx>::value) &&
@@ -76,7 +87,6 @@ namespace AppKit
                 using _f_type = typename MathCore::MathTypeInfo<Tvec>::_type;
                 return vec.x >= (_f_type)0 && vec.x < (_f_type)w && vec.y >= (_f_type)0 && vec.y < (_f_type)h;
             }
-
         };
 
     }

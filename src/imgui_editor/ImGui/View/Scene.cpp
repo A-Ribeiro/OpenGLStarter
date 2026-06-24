@@ -41,13 +41,13 @@ void Scene::RenderAndLogic()
         ImGui::BeginChild("scene_toolbar", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_AutoResizeY, 0 /*ImGuiWindowFlags_HorizontalScrollbar*/);
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 10) * ImGuiManager::Instance()->GlobalScale);
-        if (ImGui::Button("T")||ImGui::IsKeyPressed(ImGuiKey_W))
+        if (ImGui::Button("T") || ImGui::IsKeyPressed(ImGuiKey_W))
             mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
         ImGui::SameLine();
-        if (ImGui::Button("R")||ImGui::IsKeyPressed(ImGuiKey_E))
+        if (ImGui::Button("R") || ImGui::IsKeyPressed(ImGuiKey_E))
             mCurrentGizmoOperation = ImGuizmo::ROTATE;
         ImGui::SameLine();
-        if (ImGui::Button("S")||ImGui::IsKeyPressed(ImGuiKey_R)) // ImGui::SameLine();
+        if (ImGui::Button("S") || ImGui::IsKeyPressed(ImGuiKey_R)) // ImGui::SameLine();
             mCurrentGizmoOperation = ImGuizmo::SCALE;
         ImGui::PopStyleVar();
 
@@ -100,7 +100,8 @@ void Scene::RenderAndLogic()
             ImGuiManager::Instance()->innerViewport->setVisible(true);
             auto RenderWindowRegion = ImGuiManager::Instance()->innerViewport->renderWindow;
             // resize viewport
-            iRect newViewport = iRect(pos.x, pos.y, size.x, size.y);
+            iRect newViewport = iRect(pos.x, pos.y, size.x, size.y)
+                                    .convert_y_coord_to_opengl_using_app_screen();
             bool viewportChanged = RenderWindowRegion->WindowViewport.c_val() != newViewport;
             RenderWindowRegion->WindowViewport = newViewport;
             // image draw

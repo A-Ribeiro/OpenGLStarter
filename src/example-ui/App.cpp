@@ -36,7 +36,7 @@ App::App() : threadPool( // set the minimum thread count to avoid stalling the m
 #endif
 
     AppBase::OnGainFocus.add(&App::onGainFocus, this);
-    AppBase::screenRenderWindow->CameraViewport.OnChange.add(&App::onViewportChange, this);
+    AppBase::screenRenderWindow->CameraScreenSize.OnChange.add(&App::onCameraScreenSizeChange, this);
     AppBase::screenRenderWindow->inputManager.onWindowEvent.add(&App::onWindowEvent, this);
 
     // fade = STL_Tools::make_unique<Fade>(&time, this->eventHandlerSet);
@@ -295,7 +295,8 @@ void App::drawStats()
 
     auto renderState = GLRenderState::Instance();
     // AppKit::GLEngine::iRect viewport = renderState->Viewport;
-    AppKit::GLEngine::iRect viewport = screenRenderWindow->CameraViewport;
+    // AppKit::GLEngine::iRect viewport = screenRenderWindow->CameraViewport;
+    MathCore::vec2f CameraScreenSize = screenRenderWindow->CameraScreenSize;
 
     auto builder = fontResource->fontBuilder.get();
 
@@ -330,12 +331,12 @@ void App::drawStats()
 
     shader->setMVP(
         MathCore::GEN<MathCore::mat4f>::projection_ortho_lh_negative_one(
-            0.0f,              // Left
-            (float)viewport.w, // Right
-            0.0f,              // Bottom
-            (float)viewport.h, // Top
-            -1.0f,             // ZNear
-            1.0f               // ZFar
+            0.0f,                    // Left
+            CameraScreenSize.width,  // Right
+            0.0f,                    // Bottom
+            CameraScreenSize.height, // Top
+            -1.0f,                   // ZNear
+            1.0f                     // ZFar
             ) *
         MathCore::GEN<MathCore::mat4f>::translateHomogeneous(
             16.0f,
@@ -393,14 +394,14 @@ void App::onGainFocus()
     gain_focus = true;
 }
 
-void App::onViewportChange(const AppKit::GLEngine::iRect &value, const AppKit::GLEngine::iRect &oldValue)
+void App::onCameraScreenSizeChange(const MathCore::vec2f &value, const MathCore::vec2f &oldValue)
 {
     // GLRenderState *renderState = GLRenderState::Instance();
     // renderState->Viewport = AppKit::GLEngine::iRect(value.w, value.h);
     // if (mainScene != nullptr)
     //     mainScene->resize(value, oldValue);
     if (gameScene != nullptr)
-        gameScene->onCameraViewportUpdate(MathCore::vec2i(value.w, value.h));
+        gameScene->onCameraScreenSizeChange(value);
 }
 
 void App::onWindowEvent(const AppKit::Window::WindowEvent &evt)
@@ -416,7 +417,6 @@ void App::applySettingsChanges()
 {
     auto appTemplate = AppKit::ui::AppTemplate::Instance();
     appTemplate->apply_non_restart_needed_settings_to_engine();
-
 
     // auto engine = AppKit::GLEngine::Engine::Instance();
     auto options = AppKit::ui::OptionsManager::Instance();

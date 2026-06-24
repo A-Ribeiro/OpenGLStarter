@@ -111,7 +111,7 @@ void SceneGUI::draw()
     AppKit::GLEngine::Engine *engine = AppKit::GLEngine::Engine::Instance();
 
     MathCore::vec3f pos3D = MathCore::vec3f(
-        engine->app->screenRenderWindow->MousePosRelatedToCenter,
+        renderWindow->MousePosRelatedToCenter_OriginBottom * renderWindow->windowToCameraScale,
         0.0f);
 
     if (cursorTransform != nullptr)
@@ -132,10 +132,10 @@ void SceneGUI::draw()
         glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
-void SceneGUI::resize(const MathCore::vec2i &size)
+void SceneGUI::resize(const MathCore::vec2f &size)
 {
     if (button != nullptr)
-        button->resize(size);
+        button->resize();
 }
 
 SceneGUI::SceneGUI(
