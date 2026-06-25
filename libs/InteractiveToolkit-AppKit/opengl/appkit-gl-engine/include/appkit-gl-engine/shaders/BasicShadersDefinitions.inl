@@ -247,4 +247,3 @@
 #define barsky_clip_test_vec2 Liang_Barsky_GENTYPE(vec2)
 #define barsky_clip_test_vec3 Liang_Barsky_GENTYPE(vec3)
 #define barsky_clip_test_vec4 Liang_Barsky_GENTYPE(vec4)
-#define barsky_clip_test_mat2x3 Liang_Barsky_GENTYPE(mat2x3)
