@@ -334,8 +334,7 @@ namespace AppKit
                 float skin_width,
                 float max_velocity,
                 float offset_above_activation_line,
-                float offset_below_deactivation_line
-             )
+                float offset_below_deactivation_line)
             {
                 using namespace MathCore;
 
@@ -463,7 +462,7 @@ namespace AppKit
                 bool no_iteration = true;
 
                 int max_iterations_without_move = 3;
-                while (remaining_move_mag > skin_width)
+                while (remaining_move_mag > skin_width * 0.66f)
                 {
                     no_iteration = false;
 
