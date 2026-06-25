@@ -48,6 +48,17 @@ namespace AppKit
                     //     resourceMap->spriteMaterialMap[spriteMaterialId] = material;
                     // }
                 }
+                else if (last_SpriteInfo != nullptr)
+                {
+                    last_SpriteInfo = resourceMap->query_or_create_sprite(texture);
+                    std::shared_ptr<ComponentMaterial> new_material;
+                    if (mask != nullptr && camera != nullptr)
+                        new_material = resourceMap->mask_query_or_create_sprite(last_SpriteInfo, camera, mask);
+                    else
+                        new_material = last_SpriteInfo->material;
+                    if (new_material != material)
+                        transform->replaceComponent(material, new_material);
+                }
 
                 if (mesh == nullptr)
                 {
