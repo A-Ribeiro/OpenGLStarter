@@ -61,7 +61,19 @@ namespace AppKit
 
             void removeEntry(const std::string &name);
 
+            void clear();
+
             std::vector<std::shared_ptr<SpriteAtlas>> generateAtlas(
+                const std::string &base_path,
+                const ResourceMap &resourceMap, 
+                bool sRGB, 
+                bool use_fast_positioning = true, 
+                int spaceBetweenSpites_px = 10,
+                int max_atlas_size = 4096
+            );
+
+
+            int estimateGeneratedAtlasCount(
                 const std::string &base_path,
                 const ResourceMap &resourceMap, 
                 bool sRGB, 
