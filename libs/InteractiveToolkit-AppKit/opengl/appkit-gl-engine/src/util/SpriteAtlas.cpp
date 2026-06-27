@@ -64,10 +64,14 @@ namespace AppKit
             entries.clear();
         }
 
-        struct ImageBuffer
+        class ImageBuffer
         {
+        public:
             int w, h, channels, depth;
             std::unique_ptr<char, void (*)(char *)> buffer;
+
+            ImageBuffer() : buffer(nullptr, [](char *) {}) {};
+            ~ImageBuffer() = default;
         };
 
         std::shared_ptr<ImageBuffer> smartLoadImage(const char *path)
