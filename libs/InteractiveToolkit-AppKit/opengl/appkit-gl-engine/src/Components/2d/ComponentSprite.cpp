@@ -196,6 +196,22 @@ namespace AppKit
                 bool y_invert,
                 MeshUploadMode meshUploadMode)
             {
+                SpriteAtlas::Entry entry = atlas->getSprite(name);
+                setTextureFromAtlasFromEntry(resourceMap, atlas, entry, pivot, color, size_constraint, x_invert, y_invert, meshUploadMode);
+            }
+
+            void ComponentSprite::setTextureFromAtlasFromEntry(
+                AppKit::GLEngine::ResourceMap *resourceMap,
+                std::shared_ptr<SpriteAtlas> atlas,
+                const SpriteAtlas::Entry entry,
+                const MathCore::vec2f &pivot,
+                const MathCore::vec4f &color,
+                const MathCore::vec2f &size_constraint, // = MathCore::vec2f(-1, -1),
+                bool x_invert,                          // = false,
+                bool y_invert,                          // = false,
+                MeshUploadMode meshUploadMode           //= MeshUploadMode_Static
+            )
+            {
                 checkOrCreateAuxiliaryComponents(resourceMap, atlas->texture);
 
                 bool onCloneNoModify =
@@ -205,8 +221,6 @@ namespace AppKit
 
                 mesh->always_clone = !onCloneNoModify;
                 this->always_clone = !onCloneNoModify;
-
-                SpriteAtlas::Entry entry = atlas->getSprite(name);
 
                 MathCore::vec3f size((float)entry.spriteSize.width, (float)entry.spriteSize.height, 0.0f);
                 if (size_constraint.x > 0.0f && size_constraint.y > 0.0f)
@@ -281,11 +295,12 @@ namespace AppKit
                     mesh->pos[0],
                     mesh->pos[2]);
 
-                meshWrapper->setShapeAABB(
-                    CollisionCore::AABB<MathCore::vec3f>(
-                        mesh->pos[0],
-                        mesh->pos[2]),
-                    true);
+                // meshWrapper->setShapeAABB(
+                //     CollisionCore::AABB<MathCore::vec3f>(
+                //         mesh->pos[0],
+                //         mesh->pos[2]),
+                //     true);
+                meshWrapper->setShapeAABB(last_local_box, true);
             }
 
             const CollisionCore::AABB<MathCore::vec3f> &ComponentSprite::getLastLocalBox() const

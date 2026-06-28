@@ -63,6 +63,18 @@ namespace AppKit
                     MeshUploadMode meshUploadMode           // = MeshUploadMode_Static
                 );
 
+                void setTextureFromAtlasFromEntry(
+                    AppKit::GLEngine::ResourceMap *resourceMap,
+                    std::shared_ptr<SpriteAtlas> atlas,
+                    const SpriteAtlas::Entry atlas_entry,
+                    const MathCore::vec2f &pivot,
+                    const MathCore::vec4f &color,
+                    const MathCore::vec2f &size_constraint, // = MathCore::vec2f(-1, -1),
+                    bool x_invert,                          // = false,
+                    bool y_invert,                          // = false,
+                    MeshUploadMode meshUploadMode           //= MeshUploadMode_Static
+                );
+
                 void setTextureFromAtlas(
                     AppKit::GLEngine::ResourceMap *resourceMap,
                     std::shared_ptr<SpriteAtlas> atlas,
