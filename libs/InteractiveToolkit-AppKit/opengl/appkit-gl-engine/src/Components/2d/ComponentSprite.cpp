@@ -203,7 +203,7 @@ namespace AppKit
             void ComponentSprite::setTextureFromAtlasFromEntry(
                 AppKit::GLEngine::ResourceMap *resourceMap,
                 std::shared_ptr<SpriteAtlas> atlas,
-                const SpriteAtlas::Entry entry,
+                const SpriteAtlas::Entry entry_param,
                 const MathCore::vec2f &pivot,
                 const MathCore::vec4f &color,
                 const MathCore::vec2f &size_constraint, // = MathCore::vec2f(-1, -1),
@@ -221,6 +221,8 @@ namespace AppKit
 
                 mesh->always_clone = !onCloneNoModify;
                 this->always_clone = !onCloneNoModify;
+
+                SpriteAtlas::Entry entry = entry_param;
 
                 MathCore::vec3f size((float)entry.spriteSize.width, (float)entry.spriteSize.height, 0.0f);
                 if (size_constraint.x > 0.0f && size_constraint.y > 0.0f)
