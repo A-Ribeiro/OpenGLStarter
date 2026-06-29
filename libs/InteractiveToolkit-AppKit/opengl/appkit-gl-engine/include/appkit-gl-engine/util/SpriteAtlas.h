@@ -22,7 +22,7 @@ namespace AppKit
             {
                 MathCore::vec2f spriteRealSize;
                 MathCore::vec2f spriteCroppedSize;
-                MathCore::vec2f spriteCroppedMin;
+                MathCore::vec2f spriteCroppedMin_OriginBottom;
 
                 MathCore::vec2f transform_crop_vert_scale;
                 MathCore::vec2f transform_crop_vert_translate;
@@ -30,6 +30,8 @@ namespace AppKit
                 // MathCore::vec2f spritePivot;
                 MathCore::vec2f uvMin;
                 MathCore::vec2f uvMax;
+
+                // MathCore::vec3f uvQuad[4];
 
                 MathCore::vec2f lerpUV(float u, float v) const
                 {
