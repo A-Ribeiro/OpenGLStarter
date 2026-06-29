@@ -238,9 +238,9 @@ namespace AppKit
                         frame.atlas_entry = frame.atlas->getSprite(frame_info.name);
 
                         frame.sprite_name = frame_info.name;
-                        frame.pivot = frame_info.pivot;
+                        frame.pivot = frame_info.pivot;// sprite_pool->fixPivot(frame.pivot);
                         frame.color = frame_info.color;
-                        frame.size_constraint = frame_info.size_constraint;
+                        frame.size_constraint = frame_info.size_constraint;// sprite_pool->fixSize(frame_info.size_constraint);
                         frame.x_invert = frame_info.x_invert;
                         frame.y_invert = frame_info.y_invert;
 

@@ -45,7 +45,7 @@ namespace AppKit
 
             void addSprites(const std::vector<std::string> &sprite_list, bool try_to_keep_in_same_atlas = true);
 
-            void generateAtlases(AppKit::GLEngine::ResourceMap *resourceMap, int maxAtlasResolution = 4096);
+            void generateAtlases(AppKit::GLEngine::ResourceMap *resourceMap, int maxAtlasResolution = 4096, bool crop_alpha = true);
 
             std::shared_ptr<AppKit::GLEngine::SpriteAtlas> getAtlasContainingSprite(const std::string &sprite_name);
 

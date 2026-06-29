@@ -68,13 +68,15 @@ namespace AppKit
         {
         public:
             int w, h, channels, depth;
+            int real_w, real_h;
+            int crop_start_x, crop_start_y;
             std::unique_ptr<char, void (*)(char *)> buffer;
 
             ImageBuffer() : buffer(nullptr, [](char *) {}) {};
             ~ImageBuffer() = default;
         };
 
-        std::shared_ptr<ImageBuffer> smartLoadImage(const char *path)
+        std::shared_ptr<ImageBuffer> smartLoadImage(const char *path, bool crop_alpha)
         {
             auto imageBuffer = std::make_shared<ImageBuffer>();
 
@@ -91,11 +93,68 @@ namespace AppKit
             if (!imageBuffer->buffer)
                 return nullptr;
 
+            imageBuffer->real_w = imageBuffer->w;
+            imageBuffer->real_h = imageBuffer->h;
+            imageBuffer->crop_start_x = 0;
+            imageBuffer->crop_start_y = 0;
+
+            // crop buffer removing alpha == 0
+            if (imageBuffer->channels == 4 && crop_alpha)
+            {
+                int min_x = imageBuffer->w, min_y = imageBuffer->h, max_x = 0, max_y = 0;
+                for (int y = 0; y < imageBuffer->h; y++)
+                {
+                    for (int x = 0; x < imageBuffer->w; x++)
+                    {
+                        int idx = (y * imageBuffer->w + x) * 4;
+                        uint8_t alpha = ((uint8_t *)imageBuffer->buffer.get())[idx + 3];
+                        if (alpha > 0)
+                        {
+                            if (x < min_x)
+                                min_x = x;
+                            if (x > max_x)
+                                max_x = x;
+                            if (y < min_y)
+                                min_y = y;
+                            if (y > max_y)
+                                max_y = y;
+                        }
+                    }
+                }
+
+                if (min_x <= max_x && min_y <= max_y)
+                {
+                    int new_w = max_x - min_x + 1;
+                    int new_h = max_y - min_y + 1;
+
+                    std::unique_ptr<char, void (*)(char *)> new_buffer(new char[new_w * new_h * 4], [](char *ptr)
+                                                                       { delete[] ptr; });
+
+                    for (int y = 0; y < new_h; y++)
+                    {
+                        for (int x = 0; x < new_w; x++)
+                        {
+                            int old_idx = ((min_y + y) * imageBuffer->w + (min_x + x)) * 4;
+                            int new_idx = (y * new_w + x) * 4;
+                            memcpy(&new_buffer.get()[new_idx], &imageBuffer->buffer.get()[old_idx], 4);
+                        }
+                    }
+
+                    imageBuffer->buffer.swap(new_buffer);
+                    imageBuffer->w = new_w;
+                    imageBuffer->h = new_h;
+                    imageBuffer->crop_start_x = min_x;
+                    imageBuffer->crop_start_y = min_y;
+                }
+            }
+
             return imageBuffer;
         }
 
-        std::vector<std::shared_ptr<SpriteAtlas>> SpriteAtlasGenerator::generateAtlas(const std::string &base_path,
-                                                                                      const ResourceMap &resourceMap, bool sRGB, bool use_fast_positioning, int spaceBetweenSpites_px, int max_atlas_size)
+        std::vector<std::shared_ptr<SpriteAtlas>> SpriteAtlasGenerator::generateAtlas(
+            const std::string &base_path,
+            const ResourceMap &resourceMap, bool sRGB, bool use_fast_positioning, int spaceBetweenSpites_px, int max_atlas_size,
+            bool crop_alpha)
         {
             std::vector<std::shared_ptr<SpriteAtlas>> result_array;
 
@@ -112,6 +171,8 @@ namespace AppKit
                 const std::string &name;
                 const GeneratorEntry &genEntry;
                 ITKExtension::Atlas::AtlasElement *atlasElementFace;
+                MathCore::vec2i spriteRealSize;
+                MathCore::vec2i spriteCropStart;
             };
             std::vector<Combined_entry> combinedEntries;
 
@@ -128,7 +189,7 @@ namespace AppKit
                 // int w, h, channels, depth;
                 bool invertY = false;
 
-                auto imageBuffer = smartLoadImage(path.c_str());
+                auto imageBuffer = smartLoadImage(path.c_str(), crop_alpha);
                 if (!imageBuffer)
                     throw std::runtime_error("Failed to load image for sprite '" + name + "': " + path);
 
@@ -167,10 +228,21 @@ namespace AppKit
                     for (const auto &item : combinedEntries)
                     {
                         SpriteAtlas::Entry atlasEntry;
-                        atlasEntry.spriteSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.h);
+                        atlasEntry.spriteRealSize = MathCore::vec2f(item.spriteRealSize);
+                        atlasEntry.spriteCroppedSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.h);
+                        atlasEntry.spriteCroppedMin = MathCore::vec2f(item.spriteCropStart);
+
+                        MathCore::vec2f real_size_inv = 1.0f / atlasEntry.spriteRealSize;
+
+                        atlasEntry.transform_crop_vert_scale = atlasEntry.spriteCroppedSize * real_size_inv;
+                        atlasEntry.transform_crop_vert_translate =
+                            MathCore::vec2f(atlasEntry.spriteCroppedMin.x,
+                                            (atlasEntry.spriteCroppedMin.y)) *
+                            real_size_inv;
+
                         atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x,
                                                            item.atlasElementFace->rect.y);
-                        atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteSize;
+                        atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteCroppedSize;
                         atlasEntry.uvMin *= atlasSize_inv;
                         atlasEntry.uvMax *= atlasSize_inv;
                         result_single->addSprite(item.name, atlasEntry);
@@ -193,7 +265,9 @@ namespace AppKit
                 else if (imageBuffer->channels == 1)
                     atlasElementFace->copyFromGrayBuffer((uint8_t *)imageBuffer->buffer.get());
 
-                combinedEntries.push_back({name, genEntry, atlasElementFace.get()});
+                combinedEntries.push_back({name, genEntry, atlasElementFace.get(),
+                                           MathCore::vec2i(imageBuffer->real_w, imageBuffer->real_h),
+                                           MathCore::vec2i(imageBuffer->crop_start_x, imageBuffer->crop_start_y)});
             }
 
             atlas->organizePositions(use_fast_positioning);
@@ -218,10 +292,21 @@ namespace AppKit
             for (const auto &item : combinedEntries)
             {
                 SpriteAtlas::Entry atlasEntry;
-                atlasEntry.spriteSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.h);
+                atlasEntry.spriteRealSize = MathCore::vec2f(item.spriteRealSize);
+                atlasEntry.spriteCroppedSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.h);
+                atlasEntry.spriteCroppedMin = MathCore::vec2f(item.spriteCropStart);
+
+                MathCore::vec2f real_size_inv = 1.0f / atlasEntry.spriteRealSize;
+
+                atlasEntry.transform_crop_vert_scale = atlasEntry.spriteCroppedSize * real_size_inv;
+                atlasEntry.transform_crop_vert_translate =
+                    MathCore::vec2f(atlasEntry.spriteCroppedMin.x,
+                                    (atlasEntry.spriteCroppedMin.y)) *
+                    real_size_inv;
+
                 atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x,
                                                    item.atlasElementFace->rect.y);
-                atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteSize;
+                atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteCroppedSize;
                 atlasEntry.uvMin *= atlasSize_inv;
                 atlasEntry.uvMax *= atlasSize_inv;
                 result_single->addSprite(item.name, atlasEntry);
@@ -237,7 +322,8 @@ namespace AppKit
             bool sRGB,
             bool use_fast_positioning,
             int spaceBetweenSpites_px,
-            int max_atlas_size)
+            int max_atlas_size,
+            bool crop_alpha)
         {
             std::vector<std::shared_ptr<SpriteAtlas>> result_array;
 
@@ -253,6 +339,8 @@ namespace AppKit
                 const std::string &name;
                 const GeneratorEntry &genEntry;
                 ITKExtension::Atlas::AtlasElement *atlasElementFace;
+                MathCore::vec2i spriteRealSize;
+                MathCore::vec2i spriteCropStart;
             };
             std::vector<Combined_entry> combinedEntries;
 
@@ -267,7 +355,7 @@ namespace AppKit
 
                 bool invertY = false;
 
-                auto imageBuffer = smartLoadImage(path.c_str());
+                auto imageBuffer = smartLoadImage(path.c_str(), crop_alpha);
                 if (!imageBuffer)
                     throw std::runtime_error("Failed to load image for sprite '" + name + "': " + path);
 
@@ -293,7 +381,9 @@ namespace AppKit
                     combinedEntries.clear();
                 }
 
-                combinedEntries.push_back({name, genEntry, atlasElementFace.get()});
+                combinedEntries.push_back({name, genEntry, atlasElementFace.get(),
+                                           MathCore::vec2i(imageBuffer->real_w, imageBuffer->real_h),
+                                           MathCore::vec2i(imageBuffer->crop_start_x, imageBuffer->crop_start_y)});
             }
 
             atlas->organizePositions(use_fast_positioning);
