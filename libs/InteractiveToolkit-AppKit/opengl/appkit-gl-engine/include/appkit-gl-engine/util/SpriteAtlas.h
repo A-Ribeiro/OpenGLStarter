@@ -20,7 +20,13 @@ namespace AppKit
             std::shared_ptr<AppKit::OpenGL::GLTexture> texture;
             struct Entry
             {
-                MathCore::vec2f spriteSize;
+                MathCore::vec2f spriteRealSize;
+                MathCore::vec2f spriteCroppedSize;
+                MathCore::vec2f spriteCroppedMin;
+
+                MathCore::vec2f transform_crop_vert_scale;
+                MathCore::vec2f transform_crop_vert_translate;
+
                 // MathCore::vec2f spritePivot;
                 MathCore::vec2f uvMin;
                 MathCore::vec2f uvMax;
@@ -69,7 +75,8 @@ namespace AppKit
                 bool sRGB, 
                 bool use_fast_positioning = true, 
                 int spaceBetweenSpites_px = 10,
-                int max_atlas_size = 4096
+                int max_atlas_size = 4096,
+                bool crop_alpha = false
             );
 
 
@@ -79,7 +86,8 @@ namespace AppKit
                 bool sRGB, 
                 bool use_fast_positioning = true, 
                 int spaceBetweenSpites_px = 10,
-                int max_atlas_size = 4096
+                int max_atlas_size = 4096,
+                bool crop_alpha = false
             );
         };
     }

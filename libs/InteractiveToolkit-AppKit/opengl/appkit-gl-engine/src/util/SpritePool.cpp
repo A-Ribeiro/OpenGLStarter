@@ -43,7 +43,7 @@ namespace AppKit
             sprite_data.push_back(data);
         }
 
-        void SpritePool::generateAtlases(AppKit::GLEngine::ResourceMap *resourceMap, int maxAtlasResolution)
+        void SpritePool::generateAtlases(AppKit::GLEngine::ResourceMap *resourceMap, int maxAtlasResolution, bool crop_alpha)
         {
             this->resourceMap = resourceMap;
             atlases.clear();
@@ -73,7 +73,7 @@ namespace AppKit
                 if (!sprite_list_entry.try_to_keep_in_same_atlas)
                     continue;
 
-                int atlases_count_before = gen.estimateGeneratedAtlasCount(resourceMap->dir.getBasePath(), *resourceMap, engine->sRGBCapable, true, 10, maxAtlasResolution);
+                int atlases_count_before = gen.estimateGeneratedAtlasCount(resourceMap->dir.getBasePath(), *resourceMap, engine->sRGBCapable, true, 10, maxAtlasResolution, crop_alpha);
 
                 for (const auto &sprite : sprite_list_entry.sprite_list)
                 {
@@ -83,7 +83,7 @@ namespace AppKit
                     gen.addEntry(sprite.first.c_str());
                 }
 
-                int atlases_count_after = gen.estimateGeneratedAtlasCount(resourceMap->dir.getBasePath(), *resourceMap, engine->sRGBCapable, true, 10, maxAtlasResolution);
+                int atlases_count_after = gen.estimateGeneratedAtlasCount(resourceMap->dir.getBasePath(), *resourceMap, engine->sRGBCapable, true, 10, maxAtlasResolution, crop_alpha);
 
                 if (atlases_count_before > 0 && atlases_count_after > atlases_count_before)
                 {
@@ -91,7 +91,7 @@ namespace AppKit
                     for (const auto &sprite : sprite_list_entry.sprite_list)
                         gen.removeEntry(sprite.first.c_str());
 
-                    auto atlases_no_last_insert = gen.generateAtlas(resourceMap->dir.getBasePath(), *resourceMap, engine->sRGBCapable, true, 10, maxAtlasResolution);
+                    auto atlases_no_last_insert = gen.generateAtlas(resourceMap->dir.getBasePath(), *resourceMap, engine->sRGBCapable, true, 10, maxAtlasResolution, crop_alpha);
                     atlases.insert(atlases.end(), atlases_no_last_insert.begin(), atlases_no_last_insert.end());
 
                     gen.clear();
@@ -102,7 +102,7 @@ namespace AppKit
                     throw std::runtime_error("Sprite Pool Generation Failed: Sprites that are marked to be kept in the same atlas cannot fit into a single atlas. Please reduce the number of sprites or increase the maximum atlas resolution.");
             }
 
-            auto last_atlases = gen.generateAtlas(resourceMap->dir.getBasePath(), *resourceMap, engine->sRGBCapable, true, 10, maxAtlasResolution);
+            auto last_atlases = gen.generateAtlas(resourceMap->dir.getBasePath(), *resourceMap, engine->sRGBCapable, true, 10, maxAtlasResolution, crop_alpha);
             atlases.insert(atlases.end(), last_atlases.begin(), last_atlases.end());
 
             printf("\n[SpritePool] Generated %zu sprite atlases:\n\n", atlases.size());
@@ -115,7 +115,7 @@ namespace AppKit
                            entry.first.c_str(),
                            entry.second.uvMin.x, entry.second.uvMin.y,
                            entry.second.uvMax.x, entry.second.uvMax.y,
-                           entry.second.spriteSize.x, entry.second.spriteSize.y);
+                           entry.second.spriteRealSize.x, entry.second.spriteRealSize.y);
             }
             printf("\n\n");
         }

@@ -793,7 +793,7 @@ Material mat_stageBrick is opaque: YES
                            entry.first.c_str(),
                            entry.second.uvMin.x, entry.second.uvMin.y,
                            entry.second.uvMax.x, entry.second.uvMax.y,
-                           entry.second.spriteSize.x, entry.second.spriteSize.y);
+                           entry.second.spriteRealSize.x, entry.second.spriteRealSize.y);
             }
             printf("\n\n");
         };

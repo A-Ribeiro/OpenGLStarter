@@ -224,13 +224,43 @@ namespace AppKit
 
                 SpriteAtlas::Entry entry = entry_param;
 
-                MathCore::vec3f size((float)entry.spriteSize.width, (float)entry.spriteSize.height, 0.0f);
+                MathCore::vec2f constraint_scale = entry.spriteRealSize;
+                // MathCore::vec2f constraint_scale_old = MathCore::vec2f(1.0f);
+                // MathCore::vec2f constraint_translate = MathCore::vec2f(0.0f);
+
+                // MathCore::vec2f constraint_size = entry.spriteRealSize;
+                // MathCore::vec2f real_to_constraint_scale = MathCore::vec2f(1.0f);
+
                 if (size_constraint.x > 0.0f && size_constraint.y > 0.0f)
-                    size = MathCore::vec3f(size_constraint.x, size_constraint.y, 0.0f);
+                {
+                    constraint_scale = MathCore::vec2f(size_constraint.x, size_constraint.y);
+                    // constraint_scale_old = constraint_scale / entry.spriteRealSize;
+                    // constraint_size = MathCore::vec2f(size_constraint.x, size_constraint.y);
+                    // real_to_constraint_scale = constraint_size / entry.spriteRealSize;
+                }
                 else if (size_constraint.x > 0.0f)
-                    size = MathCore::vec3f(size_constraint.x, (size.y * size_constraint.x) / size.x, 0.0f);
+                {
+                    float aspect = entry.spriteRealSize.y / entry.spriteRealSize.x;
+                    constraint_scale = MathCore::vec2f(size_constraint.x, size_constraint.x * aspect);
+                    // constraint_scale_old.x = constraint_scale.x / entry.spriteRealSize.x;
+                    // constraint_scale_old.y = constraint_scale_old.x * aspect;
+
+                    // constraint_size = MathCore::vec2f(size_constraint.x, size_constraint.x * aspect);
+                    // real_to_constraint_scale.x = constraint_size.x / entry.spriteRealSize.x;
+                    // real_to_constraint_scale.y = real_to_constraint_scale.x * aspect;
+                }
                 else if (size_constraint.y > 0.0f)
-                    size = MathCore::vec3f((size.x * size_constraint.y) / size.y, size_constraint.y, 0.0f);
+                {
+                    float aspect = entry.spriteRealSize.x / entry.spriteRealSize.y;
+                    constraint_scale = MathCore::vec2f(size_constraint.y * aspect, size_constraint.y);
+                    // constraint_scale_old.y = constraint_scale.y / entry.spriteRealSize.y;
+                    // constraint_scale_old.x = constraint_scale_old.y * aspect;
+
+                    // float aspect = constraint_size.x / constraint_size.y;
+                    // constraint_size = MathCore::vec2f(size_constraint.y * aspect, size_constraint.y);
+                    // real_to_constraint_scale.y = constraint_size.y / entry.spriteRealSize.y;
+                    // real_to_constraint_scale.x = real_to_constraint_scale.y * aspect;
+                }
 
                 float xmin = -pivot.x;
                 float xmax = 1.0f - pivot.x;
@@ -244,10 +274,12 @@ namespace AppKit
                     std::swap(entry.uvMin.y, entry.uvMax.y);
 
                 mesh->pos.clear();
-                mesh->pos.push_back(size * MathCore::vec3f(xmax, ymax, 0.0f));
-                mesh->pos.push_back(size * MathCore::vec3f(xmax, ymin, 0.0f));
-                mesh->pos.push_back(size * MathCore::vec3f(xmin, ymin, 0.0f));
-                mesh->pos.push_back(size * MathCore::vec3f(xmin, ymax, 0.0f));
+                MathCore::vec2f apply_translate = entry.transform_crop_vert_translate * constraint_scale;
+                MathCore::vec2f apply_scale = entry.transform_crop_vert_scale * constraint_scale;
+                mesh->pos.push_back(MathCore::vec3f(MathCore::vec2f(xmax, ymax) * apply_scale + apply_translate, 0.0f));
+                mesh->pos.push_back(MathCore::vec3f(MathCore::vec2f(xmax, ymin) * apply_scale + apply_translate, 0.0f));
+                mesh->pos.push_back(MathCore::vec3f(MathCore::vec2f(xmin, ymin) * apply_scale + apply_translate, 0.0f));
+                mesh->pos.push_back(MathCore::vec3f(MathCore::vec2f(xmin, ymax) * apply_scale + apply_translate, 0.0f));
 
                 mesh->uv[0].clear();
                 mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(entry.uvMax.x, entry.uvMin.y), 0));
