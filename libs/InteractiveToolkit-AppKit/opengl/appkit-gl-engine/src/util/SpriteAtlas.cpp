@@ -69,7 +69,7 @@ namespace AppKit
         public:
             int w, h, channels, depth;
             int real_w, real_h;
-            int crop_start_x, crop_start_y;
+            int crop_start_x, crop_start_y_origin_bottom;
             std::unique_ptr<char, void (*)(char *)> buffer;
 
             ImageBuffer() : buffer(nullptr, [](char *) {}) {};
@@ -96,7 +96,7 @@ namespace AppKit
             imageBuffer->real_w = imageBuffer->w;
             imageBuffer->real_h = imageBuffer->h;
             imageBuffer->crop_start_x = 0;
-            imageBuffer->crop_start_y = 0;
+            imageBuffer->crop_start_y_origin_bottom = 0;
 
             // crop buffer removing alpha == 0
             if (imageBuffer->channels == 4 && crop_alpha)
@@ -144,7 +144,7 @@ namespace AppKit
                     imageBuffer->w = new_w;
                     imageBuffer->h = new_h;
                     imageBuffer->crop_start_x = min_x;
-                    imageBuffer->crop_start_y = min_y;
+                    imageBuffer->crop_start_y_origin_bottom = imageBuffer->real_h - 1 - max_y;
                 }
             }
 
@@ -230,21 +230,28 @@ namespace AppKit
                         SpriteAtlas::Entry atlasEntry;
                         atlasEntry.spriteRealSize = MathCore::vec2f(item.spriteRealSize);
                         atlasEntry.spriteCroppedSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.h);
-                        atlasEntry.spriteCroppedMin = MathCore::vec2f(item.spriteCropStart);
+                        atlasEntry.spriteCroppedMin_OriginBottom = MathCore::vec2f(item.spriteCropStart);
 
                         MathCore::vec2f real_size_inv = 1.0f / atlasEntry.spriteRealSize;
 
                         atlasEntry.transform_crop_vert_scale = atlasEntry.spriteCroppedSize * real_size_inv;
-                        atlasEntry.transform_crop_vert_translate =
-                            MathCore::vec2f(atlasEntry.spriteCroppedMin.x,
-                                            (atlasEntry.spriteCroppedMin.y)) *
-                            real_size_inv;
+                        atlasEntry.transform_crop_vert_translate = atlasEntry.spriteCroppedMin_OriginBottom * real_size_inv;
+                        // atlasEntry.transform_crop_vert_translate =
+                        //     MathCore::vec2f(atlasEntry.spriteCroppedMin.x,
+                        //                     (atlasEntry.spriteRealSize.y - (atlasEntry.spriteCroppedMin.y + atlasEntry.spriteCroppedSize.y))) *
+                        //     real_size_inv;
 
                         atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x,
                                                            item.atlasElementFace->rect.y);
                         atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteCroppedSize;
                         atlasEntry.uvMin *= atlasSize_inv;
                         atlasEntry.uvMax *= atlasSize_inv;
+
+                        // atlasEntry.uvQuad[0] = MathCore::vec3f(atlasEntry.uvMax.x, atlasEntry.uvMin.y, 0);
+                        // atlasEntry.uvQuad[1] = MathCore::vec3f(atlasEntry.uvMax.x, atlasEntry.uvMax.y, 0);
+                        // atlasEntry.uvQuad[2] = MathCore::vec3f(atlasEntry.uvMin.x, atlasEntry.uvMax.y, 0);
+                        // atlasEntry.uvQuad[3] = MathCore::vec3f(atlasEntry.uvMin.x, atlasEntry.uvMin.y, 0);
+
                         result_single->addSprite(item.name, atlasEntry);
                     }
                     result_array.push_back(result_single);
@@ -267,7 +274,7 @@ namespace AppKit
 
                 combinedEntries.push_back({name, genEntry, atlasElementFace.get(),
                                            MathCore::vec2i(imageBuffer->real_w, imageBuffer->real_h),
-                                           MathCore::vec2i(imageBuffer->crop_start_x, imageBuffer->crop_start_y)});
+                                           MathCore::vec2i(imageBuffer->crop_start_x, imageBuffer->crop_start_y_origin_bottom)});
             }
 
             atlas->organizePositions(use_fast_positioning);
@@ -294,21 +301,28 @@ namespace AppKit
                 SpriteAtlas::Entry atlasEntry;
                 atlasEntry.spriteRealSize = MathCore::vec2f(item.spriteRealSize);
                 atlasEntry.spriteCroppedSize = MathCore::vec2f(item.atlasElementFace->rect.w, item.atlasElementFace->rect.h);
-                atlasEntry.spriteCroppedMin = MathCore::vec2f(item.spriteCropStart);
+                atlasEntry.spriteCroppedMin_OriginBottom = MathCore::vec2f(item.spriteCropStart);
 
                 MathCore::vec2f real_size_inv = 1.0f / atlasEntry.spriteRealSize;
 
                 atlasEntry.transform_crop_vert_scale = atlasEntry.spriteCroppedSize * real_size_inv;
-                atlasEntry.transform_crop_vert_translate =
-                    MathCore::vec2f(atlasEntry.spriteCroppedMin.x,
-                                    (atlasEntry.spriteCroppedMin.y)) *
-                    real_size_inv;
+                atlasEntry.transform_crop_vert_translate = atlasEntry.spriteCroppedMin_OriginBottom * real_size_inv;
+                // atlasEntry.transform_crop_vert_translate =
+                //     MathCore::vec2f(atlasEntry.spriteCroppedMin.x,
+                //                     (atlasEntry.spriteRealSize.y - (atlasEntry.spriteCroppedMin.y + atlasEntry.spriteCroppedSize.y))) *
+                //     real_size_inv;
 
                 atlasEntry.uvMin = MathCore::vec2f(item.atlasElementFace->rect.x,
                                                    item.atlasElementFace->rect.y);
                 atlasEntry.uvMax = atlasEntry.uvMin + atlasEntry.spriteCroppedSize;
                 atlasEntry.uvMin *= atlasSize_inv;
                 atlasEntry.uvMax *= atlasSize_inv;
+
+                // atlasEntry.uvQuad[0] = MathCore::vec3f(atlasEntry.uvMax.x, atlasEntry.uvMin.y, 0);
+                // atlasEntry.uvQuad[1] = MathCore::vec3f(atlasEntry.uvMax.x, atlasEntry.uvMax.y, 0);
+                // atlasEntry.uvQuad[2] = MathCore::vec3f(atlasEntry.uvMin.x, atlasEntry.uvMax.y, 0);
+                // atlasEntry.uvQuad[3] = MathCore::vec3f(atlasEntry.uvMin.x, atlasEntry.uvMin.y, 0);
+
                 result_single->addSprite(item.name, atlasEntry);
             }
             result_array.push_back(result_single);
@@ -383,7 +397,7 @@ namespace AppKit
 
                 combinedEntries.push_back({name, genEntry, atlasElementFace.get(),
                                            MathCore::vec2i(imageBuffer->real_w, imageBuffer->real_h),
-                                           MathCore::vec2i(imageBuffer->crop_start_x, imageBuffer->crop_start_y)});
+                                           MathCore::vec2i(imageBuffer->crop_start_x, imageBuffer->crop_start_y_origin_bottom)});
             }
 
             atlas->organizePositions(use_fast_positioning);
