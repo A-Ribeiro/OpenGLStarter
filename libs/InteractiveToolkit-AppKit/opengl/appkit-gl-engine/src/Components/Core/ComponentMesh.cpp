@@ -948,6 +948,22 @@ namespace AppKit
                     syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload);
             }
 
+            CollisionCore::AABB<MathCore::vec3f> ComponentMesh::computeAABBFromPositions()
+            {
+                CollisionCore::AABB<MathCore::vec3f> result;
+                if (pos.size() > 0)
+                {
+                    result.min_box = pos[0];
+                    result.max_box = pos[0];
+                    for (const auto &v : pos)
+                    {
+                        result.min_box = MathCore::OP<MathCore::vec3f>::minimum(result.min_box, v);
+                        result.max_box = MathCore::OP<MathCore::vec3f>::maximum(result.max_box, v);
+                    }
+                }
+                return result;
+            }
+
             //
             // Another constructor
             //
