@@ -16,6 +16,8 @@
 #include <appkit-gl-base/GLVertexBufferObject.h>
 #include <appkit-gl-base/GLVertexArrayObject.h>
 
+#include <InteractiveToolkit/CollisionCore/CollisionCore.h>
+
 
 
 namespace AppKit
@@ -117,6 +119,7 @@ namespace AppKit
                                  std::unordered_map<uint64_t, std::shared_ptr<Component>> &component_map,
                                  ResourceSet &resourceSet);
 
+                CollisionCore::AABB<MathCore::vec3f> computeAABBFromPositions();
 
                 //
                 // Another constructor
