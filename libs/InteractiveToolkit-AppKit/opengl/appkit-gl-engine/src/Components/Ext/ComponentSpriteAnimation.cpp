@@ -128,9 +128,10 @@ namespace AppKit
 
                 if (try_enqueue_first && mainThreadQueue != nullptr)
                 {
+                    auto self_ref = this->self<ComponentSpriteAnimation>();
                     mainThreadQueue->enqueue(
-                        [this]()
-                        { sample_current_frame(false); });
+                        [self_ref]()
+                        { self_ref->sample_current_frame(false); });
                     return;
                 }
 
