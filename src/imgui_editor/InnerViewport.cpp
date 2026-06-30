@@ -14,6 +14,7 @@ InnerViewport::InnerViewport(App *app, bool createFBO)
 
     this->visible = true;
     this->app = app;
+    this->shaderColor = STL_Tools::make_unique<AppKit::OpenGL::GLShaderColor>();
     this->fade = STL_Tools::make_unique<Fade>(&app->time, app->mainThread_EventHandlerSet);
 
     renderWindow->WindowViewport = iRect(100, 100, 300, 200);
@@ -48,6 +49,7 @@ InnerViewport::~InnerViewport()
     app->mainThread_EventHandlerSet->OnAfterOverlayDraw.remove(&InnerViewport::OnUpdate, this);
 
     fade.reset();
+    shaderColor.reset();
 }
 
 void InnerViewport::setVisible(bool v)
@@ -154,7 +156,7 @@ void InnerViewport::OnUpdate(Platform::Time *time)
             scene->draw();
 
     if (fade != nullptr)
-        fade->draw();
+        fade->draw(shaderColor.get());
 
     if (isFBO)
     {

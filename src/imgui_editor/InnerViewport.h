@@ -16,6 +16,7 @@ class InnerViewport: public EventCore::HandleCallback
 public:
     App *app;
     std::shared_ptr<RenderWindowRegion> renderWindow;
+    std::unique_ptr<AppKit::OpenGL::GLShaderColor> shaderColor;
     std::unique_ptr<Fade> fade;
 
     std::shared_ptr<SceneGUI> sceneGUI;

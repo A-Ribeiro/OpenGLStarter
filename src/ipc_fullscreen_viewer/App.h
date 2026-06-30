@@ -16,6 +16,7 @@ class App : public AppBase {
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
 
+    std::unique_ptr<AppKit::OpenGL::GLShaderColor> shaderColor;
     std::unique_ptr<Fade> fade;
 public:
     std::shared_ptr<MainScene> mainScene;

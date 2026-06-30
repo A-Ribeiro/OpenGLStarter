@@ -18,6 +18,7 @@ class App : public AppBase {
 
     
 public:
+    std::unique_ptr<AppKit::OpenGL::GLShaderColor> shaderColor;
     std::unique_ptr<Fade> fade;
     std::shared_ptr<MainScene> mainScene;
 

@@ -28,6 +28,15 @@ namespace AppKit
         namespace Components
         {
 
+            enum class MeshIndexUploadMode: uint8_t
+            {
+                None = 0,
+                Static = 1,
+                Dynamic = 2,
+                Static_FirstTime = 3,
+                Dynamic_FirstTime = 4
+            };
+
             class ComponentMesh : public Component
             {
 
@@ -51,10 +60,11 @@ namespace AppKit
 
                 ITKExtension::Model::BitMask last_model_dynamic_upload;
                 ITKExtension::Model::BitMask last_model_static_upload;
+                MeshIndexUploadMode last_index_upload_mode;
 
                 void allocateVBO();
 
-                void uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, bool index = true);
+                void uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, MeshIndexUploadMode index_upload_mode);
 
             public:
                 static const ComponentType Type;
@@ -94,11 +104,11 @@ namespace AppKit
 
                 void releaseVBO();
 
-                void syncVBOStatic();
+                void syncVBOStatic(MeshIndexUploadMode index_upload_mode);
 
-                void syncVBODynamic();
+                void syncVBODynamic(MeshIndexUploadMode index_upload_mode);
 
-                void syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, bool index = true);
+                void syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, MeshIndexUploadMode index_upload_mode);
 
                 void setLayoutPointers(const DefaultEngineShader *shader);
                 void setLayoutPointers(ITKExtension::Model::BitMask shaderFormat);

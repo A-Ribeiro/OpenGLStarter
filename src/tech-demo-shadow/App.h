@@ -29,6 +29,7 @@ public:
     std::shared_ptr<SceneGUI> sceneGUI;
     std::shared_ptr<SceneSplash> sceneSplash;
 
+    std::unique_ptr<AppKit::OpenGL::GLShaderColor> shaderColor;
     std::unique_ptr<Fade> fade;
 
     std::shared_ptr<EventHandlerSet> mainThread_EventHandlerSet;

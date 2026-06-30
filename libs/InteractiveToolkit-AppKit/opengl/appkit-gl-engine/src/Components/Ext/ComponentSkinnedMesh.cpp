@@ -201,7 +201,7 @@ namespace AppKit
                         bone_processed[i] = true;
                 }
 
-                componentMesh->syncVBO(SkinnedMesh_VBO_Upload_Bitflag, 0);
+                componentMesh->syncVBO(SkinnedMesh_VBO_Upload_Bitflag, 0, MeshIndexUploadMode::Static_FirstTime);
             }
 
             ComponentSkinnedMesh::ComponentSkinnedMesh(ResourceHelper *_resourceHelper, bool _isGPUSkinning) : Component(ComponentSkinnedMesh::Type)
@@ -371,7 +371,7 @@ namespace AppKit
                             }
 
                             // sync all static...
-                            componentMesh->syncVBO(0, 0xffffffff);
+                            componentMesh->syncVBO(0, 0xffffffff, MeshIndexUploadMode::Static_FirstTime);
                             componentMesh->always_clone = false;
                         }
                     }
@@ -389,7 +389,7 @@ namespace AppKit
                     // SkinnedMesh_VBO_Upload_Bitflag,0xffffffff ^ SkinnedMesh_VBO_Upload_Bitflag
                     // componentMesh->syncVBO(SkinnedMesh_VBO_Upload_Bitflag, 0);
 
-                    componentMesh->syncVBO(SkinnedMesh_VBO_Upload_Bitflag, 0xffffffff ^ SkinnedMesh_VBO_Upload_Bitflag);
+                    componentMesh->syncVBO(SkinnedMesh_VBO_Upload_Bitflag, 0xffffffff ^ SkinnedMesh_VBO_Upload_Bitflag, MeshIndexUploadMode::Static_FirstTime);
                     componentMesh->always_clone = true;
                 }
             }

@@ -44,10 +44,28 @@ namespace AppKit
                 vao = new AppKit::OpenGL::GLVertexArrayObject();
             }
 
-            void ComponentMesh::uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, bool index)
+            void ComponentMesh::uploadVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, MeshIndexUploadMode index_upload_mode)
             {
                 last_model_dynamic_upload = model_dynamic_upload;
                 last_model_static_upload = model_static_upload;
+
+                bool set_index = false;
+
+                if (index_upload_mode == MeshIndexUploadMode::Dynamic_FirstTime && last_index_upload_mode != MeshIndexUploadMode::Dynamic_FirstTime)
+                {
+                    last_index_upload_mode = index_upload_mode;
+                    set_index = true;
+                }
+                else if (index_upload_mode == MeshIndexUploadMode::Static_FirstTime && last_index_upload_mode != MeshIndexUploadMode::Static_FirstTime)
+                {
+                    last_index_upload_mode = index_upload_mode;
+                    set_index = true;
+                }
+                else if (index_upload_mode == MeshIndexUploadMode::Static || index_upload_mode == MeshIndexUploadMode::Dynamic)
+                {
+                    last_index_upload_mode = index_upload_mode;
+                    set_index = true;
+                }
 
                 // printf("uploadVBO getTransformCount(): %i\n", getTransformCount());
                 for (int i = 0; i < getTransformCount(); i++)
@@ -128,10 +146,12 @@ namespace AppKit
                     vbo_skin_weights->uploadData((void *)&skin_weights[0], sizeof(MathCore::vec4f) * (int)skin_weights.size(), _dynamic);
                 }
 
-                if (index)
+                if (set_index)
                 {
                     vbo_indexCount = (int)indices.size();
-                    vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), _dynamic);
+                    vbo_index->uploadIndex(
+                        (void *)&indices[0], (int)indices.size() * sizeof(uint32_t),
+                        last_index_upload_mode == MeshIndexUploadMode::Dynamic || last_index_upload_mode == MeshIndexUploadMode::Dynamic_FirstTime);
                 }
             }
 
@@ -196,6 +216,7 @@ namespace AppKit
 
                 last_model_dynamic_upload = 0;
                 last_model_static_upload = 0;
+                last_index_upload_mode = MeshIndexUploadMode::None;
             }
 
             ComponentMesh::~ComponentMesh()
@@ -579,9 +600,10 @@ namespace AppKit
 
                 last_model_dynamic_upload = 0;
                 last_model_static_upload = 0;
+                last_index_upload_mode = MeshIndexUploadMode::None;
             }
 
-            void ComponentMesh::syncVBOStatic()
+            void ComponentMesh::syncVBOStatic(MeshIndexUploadMode index_upload_mode)
             {
                 ComputeFormat();
                 if (pos.size() == 0 || indices.size() == 0)
@@ -592,10 +614,10 @@ namespace AppKit
                 else
                     ITK_ABORT(!format, "mesh without vertex\n.");
                 allocateVBO();
-                uploadVBO(0, 0xffffffff);
+                uploadVBO(0, 0xffffffff, index_upload_mode);
             }
 
-            void ComponentMesh::syncVBODynamic()
+            void ComponentMesh::syncVBODynamic(MeshIndexUploadMode index_upload_mode)
             {
                 ComputeFormat();
                 if (pos.size() == 0 || indices.size() == 0)
@@ -606,10 +628,10 @@ namespace AppKit
                 else
                     ITK_ABORT(!format, "mesh without vertex\n.");
                 allocateVBO();
-                uploadVBO(0xffffffff, 0);
+                uploadVBO(0xffffffff, 0, index_upload_mode);
             }
 
-            void ComponentMesh::syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, bool index)
+            void ComponentMesh::syncVBO(ITKExtension::Model::BitMask model_dynamic_upload, ITKExtension::Model::BitMask model_static_upload, MeshIndexUploadMode index_upload_mode)
             {
                 ComputeFormat();
                 if (pos.size() == 0 || indices.size() == 0)
@@ -620,7 +642,7 @@ namespace AppKit
                 else
                     ITK_ABORT(!format, "mesh without vertex\n.");
                 allocateVBO();
-                uploadVBO(model_dynamic_upload, model_static_upload, index);
+                uploadVBO(model_dynamic_upload, model_static_upload, index_upload_mode);
             }
 
             void ComponentMesh::setLayoutPointers(const DefaultEngineShader *shader)
@@ -850,7 +872,7 @@ namespace AppKit
 
                 // check VBO
                 if (usesVBO())
-                    result->syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload);
+                    result->syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload, this->last_index_upload_mode);
 
                 return result;
             }
@@ -944,8 +966,8 @@ namespace AppKit
                 SerializerUtil::read_vector(_value, "skin_index", skin_index);
                 SerializerUtil::read_vector(_value, "skin_weights", skin_weights);
 
-                if (last_model_dynamic_upload != 0 || last_model_static_upload != 0)
-                    syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload);
+                if (last_model_dynamic_upload != 0 || last_model_static_upload != 0 || this->last_index_upload_mode != MeshIndexUploadMode::None)
+                    syncVBO(this->last_model_dynamic_upload, this->last_model_static_upload, this->last_index_upload_mode);
             }
 
             CollisionCore::AABB<MathCore::vec3f> ComponentMesh::computeAABBFromPositions()
@@ -977,7 +999,7 @@ namespace AppKit
                     &result->normals,
                     &result->tangent,
                     &result->binormal);
-                result->syncVBOStatic();
+                result->syncVBOStatic(MeshIndexUploadMode::Static);
                 return result;
             }
 
@@ -992,7 +1014,7 @@ namespace AppKit
                          &result->normals,
                          &result->tangent,
                          &result->binormal);
-                result->syncVBOStatic();
+                result->syncVBOStatic(MeshIndexUploadMode::Static);
                 return result;
             }
 
@@ -1007,7 +1029,7 @@ namespace AppKit
                          &result->normals,
                          &result->tangent,
                          &result->binormal);
-                result->syncVBOStatic();
+                result->syncVBOStatic(MeshIndexUploadMode::Static);
                 return result;
             }
 
@@ -1021,7 +1043,7 @@ namespace AppKit
                        &result->normals,
                        &result->tangent,
                        &result->binormal);
-                result->syncVBOStatic();
+                result->syncVBOStatic(MeshIndexUploadMode::Static);
                 return result;
             }
 
@@ -1035,7 +1057,7 @@ namespace AppKit
                           &result->normals,
                           &result->tangent,
                           &result->binormal);
-                result->syncVBOStatic();
+                result->syncVBOStatic(MeshIndexUploadMode::Static);
                 return result;
             }
         }

@@ -29,6 +29,7 @@ public:
     ResourceHelper resourceHelper;
     ResourceMap resourceMap;
     
+    std::unique_ptr<AppKit::OpenGL::GLShaderColor> shaderColor;
     std::unique_ptr<Fade> fade;
 
     // EventCore::PressReleaseDetector CtrlO_Detector;

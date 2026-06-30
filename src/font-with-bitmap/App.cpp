@@ -52,7 +52,8 @@ void App::load()
 {
     mainScene = SceneBase::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     mainScene->load();
-
+    
+    shaderColor = STL_Tools::make_unique<AppKit::OpenGL::GLShaderColor>();
     fade = STL_Tools::make_unique<Fade>(&time, mainScene);
 }
 
@@ -60,6 +61,7 @@ App::~App()
 {
     mainScene.reset();
     fade.reset();
+    shaderColor.reset();
     resourceMap.clear();
     resourceHelper.finalize();
 }
@@ -101,7 +103,7 @@ void App::draw()
             scene->draw();
 
     if (fade != nullptr)
-        fade->draw();
+        fade->draw(shaderColor.get());
 
     if (Keyboard::isPressed(KeyCode::Escape))
         exitApp();

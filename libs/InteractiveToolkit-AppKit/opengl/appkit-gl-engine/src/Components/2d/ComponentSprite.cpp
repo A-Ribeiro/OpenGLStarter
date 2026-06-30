@@ -131,10 +131,10 @@ namespace AppKit
                 mesh->pos.push_back(size * MathCore::vec3f(xmin, ymax, 0.0f));
 
                 mesh->uv[0].clear();
-                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(uvMax_x, uvMin_y), 0));
-                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(uvMax_x, uvMax_y), 0));
-                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(uvMin_x, uvMax_y), 0));
-                mesh->uv[0].push_back(MathCore::vec3f(MathCore::vec2f(uvMin_x, uvMin_y), 0));
+                mesh->uv[0].push_back(MathCore::vec3f(uvMax_x, uvMin_y, 0));
+                mesh->uv[0].push_back(MathCore::vec3f(uvMax_x, uvMax_y, 0));
+                mesh->uv[0].push_back(MathCore::vec3f(uvMin_x, uvMax_y, 0));
+                mesh->uv[0].push_back(MathCore::vec3f(uvMin_x, uvMin_y, 0));
 
                 mesh->color[0].clear();
                 mesh->color[0].push_back(color);
@@ -170,9 +170,9 @@ namespace AppKit
                 mesh->indices.push_back(2);
 
                 if (meshUploadMode == MeshUploadMode_Static || meshUploadMode == MeshUploadMode_Static_OnClone_NoModify)
-                    mesh->syncVBO(0, 0xffffffff);
+                    mesh->syncVBO(0, 0xffffffff, MeshIndexUploadMode::Static_FirstTime);
                 else if (meshUploadMode == MeshUploadMode_Dynamic || meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify)
-                    mesh->syncVBO(0xffffffff, 0);
+                    mesh->syncVBO(0xffffffff, 0, MeshIndexUploadMode::Dynamic_FirstTime);
 
                 last_local_box = CollisionCore::AABB<MathCore::vec3f>(
                     mesh->pos[0],
@@ -299,9 +299,9 @@ namespace AppKit
                 mesh->indices.push_back(2);
 
                 if (meshUploadMode == MeshUploadMode_Static || meshUploadMode == MeshUploadMode_Static_OnClone_NoModify)
-                    mesh->syncVBO(0, 0xffffffff);
+                    mesh->syncVBO(0, 0xffffffff, MeshIndexUploadMode::Static_FirstTime);
                 else if (meshUploadMode == MeshUploadMode_Dynamic || meshUploadMode == MeshUploadMode_Dynamic_OnClone_NoModify)
-                    mesh->syncVBO(0xffffffff, 0);
+                    mesh->syncVBO(0xffffffff, 0, MeshIndexUploadMode::Dynamic_FirstTime);
 
                 last_local_box = CollisionCore::AABB<MathCore::vec3f>(
                     mesh->pos[0],
