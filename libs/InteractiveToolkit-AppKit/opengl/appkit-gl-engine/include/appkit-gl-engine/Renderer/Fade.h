@@ -19,7 +19,7 @@ namespace AppKit
         class Fade: public EventCore::HandleCallback
         {
             std::vector<MathCore::vec3f> vertex;
-            AppKit::OpenGL::GLShaderColor shaderColor;
+            //AppKit::OpenGL::GLShaderColor shaderColor;
 
             Platform::Time *time;
             EventCore::Callback<void()> OnEndCall;
@@ -51,9 +51,9 @@ namespace AppKit
 
             void fadeOut(float _sec, const EventCore::Callback<void()> &_OnEndCall);
 
-            void draw();
+            void draw(AppKit::OpenGL::GLShaderColor *shaderColor);
 
-            AppKit::OpenGL::GLShaderColor *getShaderColor() { return &shaderColor; }
+            // AppKit::OpenGL::GLShaderColor *getShaderColor() { return &shaderColor; }
         };
 
     }
