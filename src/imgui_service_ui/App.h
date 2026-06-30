@@ -36,6 +36,7 @@ public:
     MathCore::vec2i mainMonitorCenter;
     MathCore::vec2i windowResolution;
 
+    std::unique_ptr<AppKit::OpenGL::GLShaderColor> shaderColor;
     std::unique_ptr<Fade> fade;
 
     std::shared_ptr<EventHandlerSet> mainThread_EventHandlerSet;

@@ -167,7 +167,7 @@ namespace AppKit
                         mesh->indices = geom->indice;
 
                         if (model_dynamic_upload != 0 || model_static_upload != 0)
-                            mesh->syncVBO(model_dynamic_upload, model_static_upload);
+                            mesh->syncVBO(model_dynamic_upload, model_static_upload, Components::MeshIndexUploadMode::Static_FirstTime);
 
                         if (geom->bones.size() > 0)
                             mesh->bones = geom->bones;

@@ -69,7 +69,10 @@ void App::load()
     mainScene = SceneBase::CreateShared<MainScene>(this, &time, &renderPipeline, &resourceHelper, &resourceMap, this->screenRenderWindow);
     mainScene->load();
 
+    shaderColor = STL_Tools::make_unique<AppKit::OpenGL::GLShaderColor>();
     fade = STL_Tools::make_unique<Fade>(&time, mainScene);
+    drawBlackBars = DrawBlackBars::CreateShared();
+    drawStats = DrawStats::CreateShared();
 }
 
 App::~App()
@@ -77,6 +80,9 @@ App::~App()
     gameScene.reset();
     mainScene.reset();
     fade.reset();
+    drawBlackBars.reset();
+    drawStats.reset();
+    shaderColor.reset();
 
     resourceMap.clear();
     resourceHelper.finalize();
@@ -193,88 +199,92 @@ void App::draw()
             scene->draw();
 
     if (fade != nullptr)
-        fade->draw();
+        fade->draw(shaderColor.get());
 
     if (draw_stats_enabled)
-        drawStats();
+        drawStats->draw(
+            ITKCommon::PrintfToStdString("%i FPS", (int)(fps + 0.5f)).c_str(),
+            &resourceMap, screenRenderWindow.get(), &renderPipeline);
 
     // draw black bars
-    if (fade != nullptr)
-    {
+    glDisable(GL_SCISSOR_TEST);
+    drawBlackBars->draw(window, shaderColor.get());
+    // if (fade != nullptr)
+    // {
 
-        glDisable(GL_SCISSOR_TEST);
+    //     glDisable(GL_SCISSOR_TEST);
 
-        GLRenderState *renderState = GLRenderState::Instance();
+    //     GLRenderState *renderState = GLRenderState::Instance();
 
-        AppKit::GLEngine::DepthTestType oldDepthTest = renderState->DepthTest;
-        bool oldDepthTestEnabled = renderState->DepthWrite;
-        AppKit::GLEngine::BlendModeType oldBlendMode = renderState->BlendMode;
-        AppKit::GLEngine::iRect viewport = renderState->Viewport;
-        MathCore::vec2i windowSize = window->getSize();
-        renderState->Viewport = AppKit::GLEngine::iRect(windowSize.x, windowSize.y);
+    //     AppKit::GLEngine::DepthTestType oldDepthTest = renderState->DepthTest;
+    //     bool oldDepthTestEnabled = renderState->DepthWrite;
+    //     AppKit::GLEngine::BlendModeType oldBlendMode = renderState->BlendMode;
+    //     AppKit::GLEngine::iRect viewport = renderState->Viewport;
+    //     MathCore::vec2i windowSize = window->getSize();
+    //     renderState->Viewport = AppKit::GLEngine::iRect(windowSize.x, windowSize.y);
 
-        MathCore::vec3f vertex[8] = {
-            MathCore::vec3f(0, 0, 0),
-            MathCore::vec3f(windowSize.x, 0, 0),
-            MathCore::vec3f(windowSize.x, windowSize.y, 0),
-            MathCore::vec3f(0, windowSize.y, 0),
+    //     MathCore::vec3f vertex[8] = {
+    //         MathCore::vec3f(0, 0, 0),
+    //         MathCore::vec3f(windowSize.x, 0, 0),
+    //         MathCore::vec3f(windowSize.x, windowSize.y, 0),
+    //         MathCore::vec3f(0, windowSize.y, 0),
 
-            MathCore::vec3f(viewport.x, viewport.y, 0),
-            MathCore::vec3f(viewport.x + viewport.w, viewport.y, 0),
-            MathCore::vec3f(viewport.x + viewport.w, viewport.y + viewport.h, 0),
-            MathCore::vec3f(viewport.x, viewport.y + viewport.h, 0)};
+    //         MathCore::vec3f(viewport.x, viewport.y, 0),
+    //         MathCore::vec3f(viewport.x + viewport.w, viewport.y, 0),
+    //         MathCore::vec3f(viewport.x + viewport.w, viewport.y + viewport.h, 0),
+    //         MathCore::vec3f(viewport.x, viewport.y + viewport.h, 0)};
 
-        /*
-        3     2
-          7 6
-          4 5
-        0     1
-        */
-        uint32_t indices[24] = {
-            0, 1, 5,
-            0, 5, 4,
+    //     /*
+    //     3     2
+    //       7 6
+    //       4 5
+    //     0     1
+    //     */
+    //     uint32_t indices[24] = {
+    //         0, 1, 5,
+    //         0, 5, 4,
 
-            1, 2, 6,
-            1, 6, 5,
+    //         1, 2, 6,
+    //         1, 6, 5,
 
-            2, 3, 7,
-            2, 7, 6,
+    //         2, 3, 7,
+    //         2, 7, 6,
 
-            3, 0, 4,
-            3, 4, 7};
+    //         3, 0, 4,
+    //         3, 4, 7};
 
-        AppKit::OpenGL::GLShaderColor *shaderColor = fade->getShaderColor();
+    //     AppKit::OpenGL::GLShaderColor *shaderColor = fade->getShaderColor();
 
-        renderState->CurrentShader = shaderColor;
-        renderState->DepthTest = AppKit::GLEngine::DepthTestDisabled;
-        renderState->DepthWrite = false;
-        renderState->BlendMode = AppKit::GLEngine::BlendModeDisabled;
+    //     renderState->CurrentShader = shaderColor;
+    //     renderState->DepthTest = AppKit::GLEngine::DepthTestDisabled;
+    //     renderState->DepthWrite = false;
+    //     renderState->BlendMode = AppKit::GLEngine::BlendModeDisabled;
 
-        shaderColor->setMatrix(
-            MathCore::GEN<MathCore::mat4f>::projection_ortho_lh_negative_one(
-                0.0f,                // Left
-                (float)windowSize.x, // Right
-                0.0f,                // Bottom
-                (float)windowSize.y, // Top
-                -1.0f,               // ZNear
-                1.0f                 // ZFar
-                ));
+    //     shaderColor->setMatrix(
+    //         MathCore::GEN<MathCore::mat4f>::projection_ortho_lh_negative_one(
+    //             0.0f,                // Left
+    //             (float)windowSize.x, // Right
+    //             0.0f,                // Bottom
+    //             (float)windowSize.y, // Top
+    //             -1.0f,               // ZNear
+    //             1.0f                 // ZFar
+    //             ));
 
-        shaderColor->setColor(MathCore::vec4f(0, 0, 0, 1));
+    //     shaderColor->setColor(MathCore::vec4f(0, 0, 0, 1));
 
-        OPENGL_CMD(glEnableVertexAttribArray(shaderColor->vPosition));
-        OPENGL_CMD(glVertexAttribPointer(shaderColor->vPosition, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertex[0]));
-        // OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, 3));
-        OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)(sizeof(indices) / sizeof(indices[0])), GL_UNSIGNED_INT, &indices[0]));
+    //     OPENGL_CMD(glEnableVertexAttribArray(shaderColor->vPosition));
+    //     OPENGL_CMD(glVertexAttribPointer(shaderColor->vPosition, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertex[0]));
+    //     // OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, 3));
+    //     OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)(sizeof(indices) / sizeof(indices[0])), GL_UNSIGNED_INT, &indices[0]));
 
-        OPENGL_CMD(glDisableVertexAttribArray(shaderColor->vPosition));
+    //     OPENGL_CMD(glDisableVertexAttribArray(shaderColor->vPosition));
 
-        // renderstate->CurrentShader = oldShader;
-        renderState->DepthTest = oldDepthTest;
-        renderState->DepthWrite = oldDepthTestEnabled;
-        renderState->BlendMode = oldBlendMode;
-        renderState->Viewport = viewport;
-    }
+    //     // renderstate->CurrentShader = oldShader;
+    //     renderState->DepthTest = oldDepthTest;
+    //     renderState->DepthWrite = oldDepthTestEnabled;
+    //     renderState->BlendMode = oldBlendMode;
+    //     renderState->Viewport = viewport;
+    // }
 
     // if (Keyboard::isPressed(KeyCode::Escape))
     //     exitApp();
@@ -283,110 +293,110 @@ void App::draw()
         return;
 }
 
-void App::drawStats()
-{
-    auto engine = AppKit::GLEngine::Engine::Instance();
+// void App::drawStats()
+// {
+//     auto engine = AppKit::GLEngine::Engine::Instance();
 
-    std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource =
-        resourceMap.getTextureFont("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
+//     std::shared_ptr<AppKit::GLEngine::ResourceMap::FontResource> fontResource =
+//         resourceMap.getTextureFont("resources/Roboto-Regular-100.basof2", engine->sRGBCapable);
 
-    if (!fontResource->material->shader->compareType(AppKit::GLEngine::ShaderUnlitTextureVertexColorAlpha::Type))
-        return;
+//     if (!fontResource->material->shader->compareType(AppKit::GLEngine::ShaderUnlitTextureVertexColorAlpha::Type))
+//         return;
 
-    auto renderState = GLRenderState::Instance();
-    // AppKit::GLEngine::iRect viewport = renderState->Viewport;
-    // AppKit::GLEngine::iRect viewport = screenRenderWindow->CameraViewport;
-    MathCore::vec2f CameraScreenSize = screenRenderWindow->CameraScreenSize;
+//     auto renderState = GLRenderState::Instance();
+//     // AppKit::GLEngine::iRect viewport = renderState->Viewport;
+//     // AppKit::GLEngine::iRect viewport = screenRenderWindow->CameraViewport;
+//     MathCore::vec2f CameraScreenSize = screenRenderWindow->CameraScreenSize;
 
-    auto builder = fontResource->fontBuilder.get();
+//     auto builder = fontResource->fontBuilder.get();
 
-    builder->size = 64.0f;
-    builder->faceColor = AppKit::ui::colorFromHex("#FFFF00FF");
-    builder->strokeColor = AppKit::ui::colorFromHex("#000000ff");
-    builder->strokeOffset = MathCore::vec3f(0, 0, 0.001f);
-    builder->horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_left;
-    builder->verticalAlign = AppKit::OpenGL::GLFont2VerticalAlign_bottom;
-    builder->lineHeight = 1.0f;
-    builder->wrapMode = AppKit::OpenGL::GLFont2WrapMode_NoWrap;
-    builder->firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight;
-    builder->wordSeparatorChar = U' ';
-    builder->drawFace = true;
-    builder->drawStroke = true;
+//     builder->size = 64.0f;
+//     builder->faceColor = AppKit::ui::colorFromHex("#FFFF00FF");
+//     builder->strokeColor = AppKit::ui::colorFromHex("#000000ff");
+//     builder->strokeOffset = MathCore::vec3f(0, 0, 0.001f);
+//     builder->horizontalAlign = AppKit::OpenGL::GLFont2HorizontalAlign_left;
+//     builder->verticalAlign = AppKit::OpenGL::GLFont2VerticalAlign_bottom;
+//     builder->lineHeight = 1.0f;
+//     builder->wrapMode = AppKit::OpenGL::GLFont2WrapMode_NoWrap;
+//     builder->firstLineHeightMode = AppKit::OpenGL::GLFont2FirstLineHeightMode_UseCharacterMaxHeight;
+//     builder->wordSeparatorChar = U' ';
+//     builder->drawFace = true;
+//     builder->drawStroke = true;
 
-    builder->richBuild(
-        ITKCommon::PrintfToStdString("%i FPS", (int)(fps + 0.5f)).c_str(),
-        engine->sRGBCapable,
-        -1,
-        fontResource->polygonFontCache);
+//     builder->richBuild(
+//         ITKCommon::PrintfToStdString("%i FPS", (int)(fps + 0.5f)).c_str(),
+//         engine->sRGBCapable,
+//         -1,
+//         fontResource->polygonFontCache);
 
-    if (builder->vertexAttrib.size() == 0)
-        return;
+//     if (builder->vertexAttrib.size() == 0)
+//         return;
 
-    auto shader = (AppKit::GLEngine::ShaderUnlitTextureVertexColorAlpha *)fontResource->material->shader.get();
+//     auto shader = (AppKit::GLEngine::ShaderUnlitTextureVertexColorAlpha *)fontResource->material->shader.get();
 
-    shader->ActiveShader_And_SetUniformsFromMaterial(
-        renderState, &resourceMap,
-        &renderPipeline,
-        fontResource->material.get());
+//     shader->ActiveShader_And_SetUniformsFromMaterial(
+//         renderState, &resourceMap,
+//         &renderPipeline,
+//         fontResource->material.get());
 
-    shader->setMVP(
-        MathCore::GEN<MathCore::mat4f>::projection_ortho_lh_negative_one(
-            0.0f,                    // Left
-            CameraScreenSize.width,  // Right
-            0.0f,                    // Bottom
-            CameraScreenSize.height, // Top
-            -1.0f,                   // ZNear
-            1.0f                     // ZFar
-            ) *
-        MathCore::GEN<MathCore::mat4f>::translateHomogeneous(
-            16.0f,
-            16.0f));
+//     shader->setMVP(
+//         MathCore::GEN<MathCore::mat4f>::projection_ortho_lh_negative_one(
+//             0.0f,                    // Left
+//             CameraScreenSize.width,  // Right
+//             0.0f,                    // Bottom
+//             CameraScreenSize.height, // Top
+//             -1.0f,                   // ZNear
+//             1.0f                     // ZFar
+//             ) *
+//         MathCore::GEN<MathCore::mat4f>::translateHomogeneous(
+//             16.0f,
+//             16.0f));
 
-    AppKit::GLEngine::DepthTestType oldDepthTest = renderState->DepthTest;
-    bool oldDepthTestEnabled = renderState->DepthWrite;
+//     AppKit::GLEngine::DepthTestType oldDepthTest = renderState->DepthTest;
+//     bool oldDepthTestEnabled = renderState->DepthWrite;
 
-    renderState->DepthTest = AppKit::GLEngine::DepthTestDisabled;
-    renderState->DepthWrite = false;
+//     renderState->DepthTest = AppKit::GLEngine::DepthTestDisabled;
+//     renderState->DepthWrite = false;
 
-    int aPos = shader->queryAttribLocation("aPosition");
-    int aUV = shader->queryAttribLocation("aUV0");
-    int aColor = shader->queryAttribLocation("aColor0");
+//     int aPos = shader->queryAttribLocation("aPosition");
+//     int aUV = shader->queryAttribLocation("aUV0");
+//     int aColor = shader->queryAttribLocation("aColor0");
 
-    OPENGL_CMD(glEnableVertexAttribArray(aPos));
-    OPENGL_CMD(glVertexAttribPointer(aPos, 3, GL_FLOAT, false, sizeof(AppKit::OpenGL::GLFont2Builder_VertexAttrib), builder->vertexAttrib[0].pos.array));
-    OPENGL_CMD(glEnableVertexAttribArray(aUV));
-    OPENGL_CMD(glVertexAttribPointer(aUV, 2, GL_FLOAT, false, sizeof(AppKit::OpenGL::GLFont2Builder_VertexAttrib), builder->vertexAttrib[0].uv.array));
-    OPENGL_CMD(glEnableVertexAttribArray(aColor));
-    OPENGL_CMD(glVertexAttribPointer(aColor, 4, GL_FLOAT, false, sizeof(AppKit::OpenGL::GLFont2Builder_VertexAttrib), builder->vertexAttrib[0].color.array));
+//     OPENGL_CMD(glEnableVertexAttribArray(aPos));
+//     OPENGL_CMD(glVertexAttribPointer(aPos, 3, GL_FLOAT, false, sizeof(AppKit::OpenGL::GLFont2Builder_VertexAttrib), builder->vertexAttrib[0].pos.array));
+//     OPENGL_CMD(glEnableVertexAttribArray(aUV));
+//     OPENGL_CMD(glVertexAttribPointer(aUV, 2, GL_FLOAT, false, sizeof(AppKit::OpenGL::GLFont2Builder_VertexAttrib), builder->vertexAttrib[0].uv.array));
+//     OPENGL_CMD(glEnableVertexAttribArray(aColor));
+//     OPENGL_CMD(glVertexAttribPointer(aColor, 4, GL_FLOAT, false, sizeof(AppKit::OpenGL::GLFont2Builder_VertexAttrib), builder->vertexAttrib[0].color.array));
 
-    OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, (GLsizei)builder->vertexAttrib.size()));
-    // OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)(sizeof(indices) / sizeof(indices[0])), GL_UNSIGNED_INT, &indices[0]));
+//     OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, (GLsizei)builder->vertexAttrib.size()));
+//     // OPENGL_CMD(glDrawElements(GL_TRIANGLES, (GLsizei)(sizeof(indices) / sizeof(indices[0])), GL_UNSIGNED_INT, &indices[0]));
 
-    OPENGL_CMD(glDisableVertexAttribArray(aPos));
-    OPENGL_CMD(glDisableVertexAttribArray(aUV));
-    OPENGL_CMD(glDisableVertexAttribArray(aColor));
+//     OPENGL_CMD(glDisableVertexAttribArray(aPos));
+//     OPENGL_CMD(glDisableVertexAttribArray(aUV));
+//     OPENGL_CMD(glDisableVertexAttribArray(aColor));
 
-    renderState->DepthTest = oldDepthTest;
-    renderState->DepthWrite = oldDepthTestEnabled;
+//     renderState->DepthTest = oldDepthTest;
+//     renderState->DepthWrite = oldDepthTestEnabled;
 
-    renderState->clearTextureUnitActivationArray();
-    renderState->CurrentShader = nullptr;
+//     renderState->clearTextureUnitActivationArray();
+//     renderState->CurrentShader = nullptr;
 
-    // for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
-    // {
-    //     mesh->pos.push_back(builder->vertexAttrib[i].pos);
-    //     mesh->uv[0].push_back(MathCore::vec3f(builder->vertexAttrib[i].uv, 0.0f));
-    //     mesh->color[0].push_back(builder->vertexAttrib[i].color);
+//     // for (size_t i = 0; i < builder->vertexAttrib.size(); i++)
+//     // {
+//     //     mesh->pos.push_back(builder->vertexAttrib[i].pos);
+//     //     mesh->uv[0].push_back(MathCore::vec3f(builder->vertexAttrib[i].uv, 0.0f));
+//     //     mesh->color[0].push_back(builder->vertexAttrib[i].color);
 
-    //     // keep CCW orientation
-    //     if ((i % 3) == 0)
-    //     {
-    //         mesh->indices.push_back((uint16_t)i);
-    //         mesh->indices.push_back((uint16_t)(i + 1));
-    //         mesh->indices.push_back((uint16_t)(i + 2));
-    //     }
-    // }
-}
+//     //     // keep CCW orientation
+//     //     if ((i % 3) == 0)
+//     //     {
+//     //         mesh->indices.push_back((uint16_t)i);
+//     //         mesh->indices.push_back((uint16_t)(i + 1));
+//     //         mesh->indices.push_back((uint16_t)(i + 2));
+//     //     }
+//     // }
+// }
 
 void App::onGainFocus()
 {

@@ -148,6 +148,7 @@ void App::load()
 
     this->applyGlobalScale();
 
+    shaderColor = STL_Tools::make_unique<AppKit::OpenGL::GLShaderColor>();
     fade = STL_Tools::make_unique<Fade>(&time, mainThread_EventHandlerSet);
 
     // fade->fadeOut(5.0f, nullptr);
@@ -194,6 +195,7 @@ App::~App()
     ImGui::DestroyContext();
 
     fade.reset();
+    shaderColor.reset();
     resourceMap.clear();
     resourceHelper.finalize();
 
@@ -384,7 +386,7 @@ void App::draw()
     renderState->DepthTest = DepthTestLessEqual;
 
     if (fade != nullptr)
-        fade->draw();
+        fade->draw(shaderColor.get());
     bool ctrl_pressed = Keyboard::isPressed(KeyCode::LControl) || Keyboard::isPressed(KeyCode::RControl);
     if (
         // Keyboard::isPressed(KeyCode::Escape) ||

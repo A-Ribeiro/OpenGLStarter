@@ -71,9 +71,9 @@ namespace AppKit
                 mesh->ComputeFormat(false);
 
                 if (dynamic)
-                    mesh->syncVBODynamic();
+                    mesh->syncVBODynamic(MeshIndexUploadMode::Dynamic);
                 else
-                    mesh->syncVBOStatic();
+                    mesh->syncVBOStatic(MeshIndexUploadMode::Static);
 
                 // mesh wrapper logic...
                 auto meshWrapper = transform->findComponent<Components::ComponentMeshWrapper>();

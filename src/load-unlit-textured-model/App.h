@@ -20,6 +20,7 @@ class App : public AppBase {
     const float fps_time_sec = 0.5f;
     float fps_accumulator;
 public:
+    std::unique_ptr<AppKit::OpenGL::GLShaderColor> shaderColor;
     std::unique_ptr<Fade> fade;
     std::shared_ptr<Scenes::MainScene> mainScene;
     Platform::ThreadPool threadPool;

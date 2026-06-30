@@ -37,7 +37,7 @@ time.update();
     //
     // ... app draw commands
     //
-    fade->draw(); // will draw the current state of the fade
+    fade->draw(shaderColor.get()); // will draw the current state of the fade
 }
 ```
 ## Particle System Renderer

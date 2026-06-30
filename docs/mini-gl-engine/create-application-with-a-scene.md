@@ -155,7 +155,7 @@ public:
         if (activeScene != nullptr)
             activeScene->draw();
 
-        fade->draw();
+        fade->draw(shaderColor.get());
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
             exitApp();

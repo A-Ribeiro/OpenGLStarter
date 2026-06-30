@@ -89,6 +89,7 @@ void App::load()
 
     Editor::Instance()->init();
 
+    shaderColor = STL_Tools::make_unique<AppKit::OpenGL::GLShaderColor>();
     fade = STL_Tools::make_unique<Fade>(&time, mainThread_EventHandlerSet);
 
     //fade->fadeOut(5.0f, nullptr);
@@ -105,6 +106,7 @@ App::~App()
     ImGuiManager::Instance()->Finalize();
 
     fade.reset();
+    shaderColor.reset();
     resourceMap.clear();
     resourceHelper.finalize();
 
@@ -151,7 +153,7 @@ void App::draw()
     mainThread_EventHandlerSet->OnAfterOverlayDraw(&time);
 
     if (fade != nullptr)
-        fade->draw();
+        fade->draw(shaderColor.get());
     bool ctrl_pressed = Keyboard::isPressed(KeyCode::LControl) || Keyboard::isPressed(KeyCode::RControl);
     CtrlQ_Detector.setState(ctrl_pressed && Keyboard::isPressed(KeyCode::Q));
     CtrlS_Detector.setState(ctrl_pressed && Keyboard::isPressed(KeyCode::S));

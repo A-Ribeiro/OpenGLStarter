@@ -4,6 +4,9 @@
 #include <appkit-gl-engine/util/ResourceHelper.h>
 #include <appkit-gl-engine/Renderer/Fade.h>
 
+#include "util/DrawBlackBars.h"
+#include "util/DrawStats.h"
+
 #include "MainScene.h"
 #include "GameScene.h"
 
@@ -23,12 +26,15 @@ class App : public AppBase {
     ResourceHelper resourceHelper;
     
     bool draw_stats_enabled;
-    void drawStats();
+    // void drawStats();
 public:
 
     ResourceMap resourceMap;
 
+    std::unique_ptr<AppKit::OpenGL::GLShaderColor> shaderColor;
     std::unique_ptr<Fade> fade;
+    std::shared_ptr<DrawBlackBars> drawBlackBars;
+    std::shared_ptr<DrawStats> drawStats;
     
     std::shared_ptr<MainScene> mainScene;
     std::shared_ptr<GameScene> gameScene;
