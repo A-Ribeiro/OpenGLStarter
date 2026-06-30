@@ -131,7 +131,7 @@ namespace AppKit
                 if (index)
                 {
                     vbo_indexCount = (int)indices.size();
-                    vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), false);
+                    vbo_index->uploadIndex((void *)&indices[0], (int)indices.size() * sizeof(uint32_t), _dynamic);
                 }
             }
 

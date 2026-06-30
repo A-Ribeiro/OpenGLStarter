@@ -125,7 +125,7 @@ namespace AppKit
 			completeOnNextFrame = false;
 		}
 
-		void Fade::draw()
+		void Fade::draw(AppKit::OpenGL::GLShaderColor *shaderColor)
 		{
 
 			if (!draw_visible)
@@ -138,21 +138,21 @@ namespace AppKit
 			bool oldDepthTestEnabled = renderstate->DepthWrite;
 			AppKit::GLEngine::BlendModeType oldBlendMode = renderstate->BlendMode;
 
-			renderstate->CurrentShader = &shaderColor;
+			renderstate->CurrentShader = shaderColor;
 			renderstate->DepthTest = AppKit::GLEngine::DepthTestDisabled;
 			renderstate->DepthWrite = false;
 			renderstate->BlendMode = AppKit::GLEngine::BlendModeAlpha;
 
-			shaderColor.setMatrix(MathCore::mat4f());
-			shaderColor.setColor(color);
+			shaderColor->setMatrix(MathCore::mat4f());
+			shaderColor->setColor(color);
 
 			// direct draw commands
-			OPENGL_CMD(glEnableVertexAttribArray(shaderColor.vPosition));
-			OPENGL_CMD(glVertexAttribPointer(shaderColor.vPosition, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertex[0]));
+			OPENGL_CMD(glEnableVertexAttribArray(shaderColor->vPosition));
+			OPENGL_CMD(glVertexAttribPointer(shaderColor->vPosition, 3, GL_FLOAT, false, sizeof(MathCore::vec3f), &vertex[0]));
 
 			OPENGL_CMD(glDrawArrays(GL_TRIANGLES, 0, 6));
 
-			OPENGL_CMD(glDisableVertexAttribArray(shaderColor.vPosition));
+			OPENGL_CMD(glDisableVertexAttribArray(shaderColor->vPosition));
 
 			// renderstate->CurrentShader = oldShader;
 			renderstate->DepthTest = oldDepthTest;
