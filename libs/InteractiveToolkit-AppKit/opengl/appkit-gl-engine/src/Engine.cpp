@@ -324,7 +324,7 @@ namespace AppKit
         {
             EventCore::PressReleaseDetector focusChange;
 
-            while (window != nullptr && window->isOpen())
+            while (window != nullptr && window->isOpen() && !Platform::Thread::isCurrentThreadInterrupted())
             {
                 focusChange.setState(window->hasFocus());
 
