@@ -154,12 +154,12 @@ SceneGUI::SceneGUI(App *app, std::shared_ptr<RenderWindowRegion> renderWindow) :
     cursorTexture = nullptr;
     cursorTransform = nullptr;
 
-    this->OnUpdate.add(&SceneGUI::OnUpdateImpl, this);
+    this->OnLateUpdate.add(&SceneGUI::OnUpdateImpl, this);
 }
 
 SceneGUI::~SceneGUI()
 {
-    this->OnUpdate.remove(&SceneGUI::OnUpdateImpl, this);
+    this->OnLateUpdate.remove(&SceneGUI::OnUpdateImpl, this);
     unload();
 }
 
@@ -201,6 +201,12 @@ void SceneGUI::OnUpdateImpl(Platform::Time *time)
     // } else {
     //     printf("not inside...\n");
     // }
+
+    // auto cursorTransform_copy = cursorTransform;
+    // ImGuiManager::Instance()->PostAction.add([cursorTransform_copy]() {
+    //     if (cursorTransform_copy != nullptr)
+    //         cursorTransform_copy->skip_traversing = ImGuiManager::Instance()->innerViewport->scene3D->is_to_hide_mouse.pressed;
+    // });
 
     cursorTransform->skip_traversing = ImGuiManager::Instance()->innerViewport->scene3D->is_to_hide_mouse.pressed;
 }

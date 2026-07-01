@@ -353,8 +353,16 @@ namespace AppKit
             setWindowViewport(AppKit::GLEngine::iRect(size.width, size.height));
         }
 
-        void RenderWindowRegion::forceMouseToCoord_OriginTop(const MathCore::vec2i &iPos_origin_top) const
+        void RenderWindowRegion::forceMouseToCoord_OriginTop(const MathCore::vec2i &iPos_origin_top)
         {
+            // MathCore::vec2f appCoord_origin_bottom = invertYCoordf(iPos_origin_top);
+            // MousePos_OriginBottom.setValueNoCallback(appCoord_origin_bottom);
+            // appCoord_origin_bottom -= screenCenterF_OriginBottom;
+            // MousePosRelatedToCenter_OriginBottom.setValueNoCallback(appCoord_origin_bottom);
+            // // appCoord = app->normalizeAppCoord(appCoord);
+            // appCoord_origin_bottom *= normalization_factor;
+            // MousePosRelatedToCenterNormalized_OriginBottom.setValueNoCallback(appCoord_origin_bottom);
+
             auto parent = ToShared(parentRef);
 
             if (parent == nullptr && force_viewport_from_real_window_size)
@@ -379,8 +387,16 @@ namespace AppKit
             }
         }
 
-        void RenderWindowRegion::forceMouseToCoord_OriginBottom(const MathCore::vec2i &iPos_origin_bottom) const
+        void RenderWindowRegion::forceMouseToCoord_OriginBottom(const MathCore::vec2i &iPos_origin_bottom)
         {
+            // MathCore::vec2f appCoord_origin_bottom = iPos_origin_bottom;
+            // MousePos_OriginBottom.setValueNoCallback(appCoord_origin_bottom);
+            // appCoord_origin_bottom -= screenCenterF_OriginBottom;
+            // MousePosRelatedToCenter_OriginBottom.setValueNoCallback(appCoord_origin_bottom);
+            // // appCoord = app->normalizeAppCoord(appCoord);
+            // appCoord_origin_bottom *= normalization_factor;
+            // MousePosRelatedToCenterNormalized_OriginBottom.setValueNoCallback(appCoord_origin_bottom);
+
             auto parent = ToShared(parentRef);
 
             if (parent == nullptr && force_viewport_from_real_window_size)
@@ -443,9 +459,12 @@ namespace AppKit
 
         void RenderWindowRegion::moveMouseToScreenCenter()
         {
-            MousePos_OriginBottom = screenCenterF_OriginBottom; // set app state do cursor center
-            MousePosRelatedToCenter_OriginBottom = MathCore::vec2f(0, 0);
-            MousePosRelatedToCenterNormalized_OriginBottom = MathCore::vec2f(0, 0);
+            // MousePos_OriginBottom = screenCenterF_OriginBottom; // set app state do cursor center
+            // MousePosRelatedToCenter_OriginBottom = MathCore::vec2f(0, 0);
+            // MousePosRelatedToCenterNormalized_OriginBottom = MathCore::vec2f(0, 0);
+            // MousePos_OriginBottom.setValueNoCallback(screenCenterF_OriginBottom); // set app state do cursor center
+            // MousePosRelatedToCenter_OriginBottom.setValueNoCallback(MathCore::vec2f(0, 0));
+            // MousePosRelatedToCenterNormalized_OriginBottom.setValueNoCallback(MathCore::vec2f(0, 0));
             forceMouseToCoord_OriginBottom(screenCenterI_OriginBottom);
         }
 

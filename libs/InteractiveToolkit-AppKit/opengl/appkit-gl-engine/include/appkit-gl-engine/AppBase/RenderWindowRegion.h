@@ -120,8 +120,8 @@ namespace AppKit
             std::shared_ptr<RenderWindowRegion> setViewportFromRealWindowSizeEnabled(bool v);
 
             void forceViewportFromRealWindowSize();
-            void forceMouseToCoord_OriginTop(const MathCore::vec2i &iPos_origin_top) const;
-            void forceMouseToCoord_OriginBottom(const MathCore::vec2i &iPos_origin_bottom) const;
+            void forceMouseToCoord_OriginTop(const MathCore::vec2i &iPos_origin_top);
+            void forceMouseToCoord_OriginBottom(const MathCore::vec2i &iPos_origin_bottom);
 
             int getChildCount() const;
             std::shared_ptr<RenderWindowRegion> getChild(int at) const;
