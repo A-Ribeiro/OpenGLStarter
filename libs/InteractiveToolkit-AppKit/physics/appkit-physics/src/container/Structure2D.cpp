@@ -82,6 +82,7 @@ namespace AppKit
 
             Structure2D::Structure2D(int segment_count) : tag{'\0'}, segments(segment_count)
             {
+                id = STRUCTURE2D_ID_INVALID;
                 friction = 0.0f;
                 type = StructureType::None;
                 pass_through_set = false;
@@ -97,13 +98,13 @@ namespace AppKit
             //     return OP<vec2f>::dot(move_direction, pass_through_direction) > 0.0f;
             // }
 
-            Structure2D &Structure2D::setAlwaysCheck(bool value)
+            std::shared_ptr<Structure2D> Structure2D::setAlwaysCheck(bool value)
             {
                 always_check = value;
-                return *this;
+                return self<Structure2D>();
             }
 
-            Structure2D Structure2D::FromSegmentPassThrough(
+            std::shared_ptr<Structure2D> Structure2D::FromSegmentPassThrough(
                 const char *tag,
                 float friction,
                 const Core::Segment2D &segment,
@@ -111,64 +112,64 @@ namespace AppKit
                 // but with 90 degree against the segment
                 const MathCore::vec2f &pass_through_normal_hint)
             {
-                Structure2D result(1);
+                auto result = Structure2D::CreateShared(1);
 
-                result.friction = friction;
-                strncpy(result.tag, tag, sizeof(result.tag) - 1);
-                result.type = StructureType::Segment;
-                result.segments[0] = segment;
+                result->friction = friction;
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::Segment;
+                result->segments[0] = segment;
 
-                result.computeBox();
+                result->computeBox();
 
-                result.computePassThroughLines(pass_through_normal_hint);
+                result->computePassThroughLines(pass_through_normal_hint);
 
                 return result;
             }
 
-            Structure2D Structure2D::FromSegment(
+            std::shared_ptr<Structure2D> Structure2D::FromSegment(
                 const char *tag,
                 float friction,
                 const Core::Segment2D &segment)
             {
-                Structure2D result(1);
+                auto result = Structure2D::CreateShared(1);
 
-                result.friction = friction;
-                strncpy(result.tag, tag, sizeof(result.tag) - 1);
-                result.type = StructureType::Segment;
-                result.segments[0] = segment;
+                result->friction = friction;
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::Segment;
+                result->segments[0] = segment;
 
-                result.computeBox();
+                result->computeBox();
 
                 return result;
             }
 
-            Structure2D Structure2D::FromSegmentList(
+            std::shared_ptr<Structure2D> Structure2D::FromSegmentList(
                 const char *tag,
                 float friction,
                 const std::vector<Core::Segment2D> &segments)
             {
-                Structure2D result((int)segments.size());
+                auto result = Structure2D::CreateShared((int)segments.size());
 
-                result.friction = friction;
-                strncpy(result.tag, tag, sizeof(result.tag) - 1);
-                result.type = StructureType::Segment;
-                result.segments.assign(segments.begin(), segments.end());
+                result->friction = friction;
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::Segment;
+                result->segments.assign(segments.begin(), segments.end());
 
-                result.computeBox();
+                result->computeBox();
 
                 return result;
             }
 
-            Structure2D Structure2D::FromClosedPolygon(
+            std::shared_ptr<Structure2D> Structure2D::FromClosedPolygon(
                 const char *tag,
                 float friction,
                 const std::vector<MathCore::vec2f> &vertices)
             {
-                Structure2D result((int)vertices.size());
+                auto result = Structure2D::CreateShared((int)vertices.size());
 
-                result.friction = friction;
-                strncpy(result.tag, tag, sizeof(result.tag) - 1);
-                result.type = StructureType::ClosedPolygon;
+                result->friction = friction;
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::ClosedPolygon;
 
                 // force ccw order for polygons
                 bool is_ccw = AlgorithmCore::Polygon::Polygon2DUtils::signedArea(vertices) >= 0;
@@ -182,7 +183,7 @@ namespace AppKit
                         reverse_next_i = reverse_next_i < 0 ? last_i : reverse_next_i;
                         const MathCore::vec2f &p1 = vertices[reverse_i];
                         const MathCore::vec2f &p2 = vertices[reverse_next_i];
-                        result.segments[i] = Core::Segment2D(p1, p2);
+                        result->segments[i] = Core::Segment2D(p1, p2);
                     }
                 }
                 else
@@ -193,64 +194,64 @@ namespace AppKit
                         next_i = (i + 1) >= (int)vertices.size() ? 0 : next_i;
                         const MathCore::vec2f &p1 = vertices[i];
                         const MathCore::vec2f &p2 = vertices[next_i];
-                        result.segments[i] = Core::Segment2D(p1, p2);
+                        result->segments[i] = Core::Segment2D(p1, p2);
                     }
                 }
 
-                result.computeBox();
+                result->computeBox();
 
                 return result;
             }
 
-            Structure2D Structure2D::FromBoxCenterSize(
+            std::shared_ptr<Structure2D> Structure2D::FromBoxCenterSize(
                 const char *tag,
                 float friction,
                 const MathCore::vec2f &center,
                 const MathCore::vec2f &size)
             {
 
-                Structure2D result(4);
+                auto result = Structure2D::CreateShared(4);
 
-                result.friction = friction;
-                strncpy(result.tag, tag, sizeof(result.tag) - 1);
-                result.type = StructureType::Box;
+                result->friction = friction;
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::Box;
 
                 MathCore::vec2f half_size = size * 0.5f;
 
-                result.box = Core::Box2D(center - half_size, center + half_size);
+                result->box = Core::Box2D(center - half_size, center + half_size);
 
-                result.segments[0] = Core::Segment2D(result.box.min, MathCore::vec2f(result.box.max.x, result.box.min.y));
-                result.segments[1] = Core::Segment2D(MathCore::vec2f(result.box.max.x, result.box.min.y), result.box.max);
-                result.segments[2] = Core::Segment2D(result.box.max, MathCore::vec2f(result.box.min.x, result.box.max.y));
-                result.segments[3] = Core::Segment2D(MathCore::vec2f(result.box.min.x, result.box.max.y), result.box.min);
+                result->segments[0] = Core::Segment2D(result->box.min, MathCore::vec2f(result->box.max.x, result->box.min.y));
+                result->segments[1] = Core::Segment2D(MathCore::vec2f(result->box.max.x, result->box.min.y), result->box.max);
+                result->segments[2] = Core::Segment2D(result->box.max, MathCore::vec2f(result->box.min.x, result->box.max.y));
+                result->segments[3] = Core::Segment2D(MathCore::vec2f(result->box.min.x, result->box.max.y), result->box.min);
 
                 return result;
             }
 
-            Structure2D Structure2D::FromBoxMinMax(
+            std::shared_ptr<Structure2D> Structure2D::FromBoxMinMax(
                 const char *tag,
                 float friction,
                 const MathCore::vec2f &min,
                 const MathCore::vec2f &max)
             {
 
-                Structure2D result(4);
+                auto result = Structure2D::CreateShared(4);
 
-                result.friction = friction;
-                strncpy(result.tag, tag, sizeof(result.tag) - 1);
-                result.type = StructureType::Box;
+                result->friction = friction;
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::Box;
 
-                result.box = Core::Box2D(min, max);
+                result->box = Core::Box2D(min, max);
 
-                result.segments[0] = Core::Segment2D(result.box.min, MathCore::vec2f(result.box.max.x, result.box.min.y));
-                result.segments[1] = Core::Segment2D(MathCore::vec2f(result.box.max.x, result.box.min.y), result.box.max);
-                result.segments[2] = Core::Segment2D(result.box.max, MathCore::vec2f(result.box.min.x, result.box.max.y));
-                result.segments[3] = Core::Segment2D(MathCore::vec2f(result.box.min.x, result.box.max.y), result.box.min);
+                result->segments[0] = Core::Segment2D(result->box.min, MathCore::vec2f(result->box.max.x, result->box.min.y));
+                result->segments[1] = Core::Segment2D(MathCore::vec2f(result->box.max.x, result->box.min.y), result->box.max);
+                result->segments[2] = Core::Segment2D(result->box.max, MathCore::vec2f(result->box.min.x, result->box.max.y));
+                result->segments[3] = Core::Segment2D(MathCore::vec2f(result->box.min.x, result->box.max.y), result->box.min);
 
                 return result;
             }
 
-            Structure2D Structure2D::FromCircle(
+            std::shared_ptr<Structure2D> Structure2D::FromCircle(
                 const char *tag,
                 float friction,
                 const MathCore::vec2f &center,
@@ -258,14 +259,14 @@ namespace AppKit
                 int segment_count)
             {
 
-                Structure2D result(segment_count);
+                auto result = Structure2D::CreateShared(segment_count);
 
-                result.friction = friction;
-                strncpy(result.tag, tag, sizeof(result.tag) - 1);
-                result.type = StructureType::Circle;
+                result->friction = friction;
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::Circle;
 
-                result.box.wrapCircle(center, radius);
-                result.circle_radius = radius;
+                result->box.wrapCircle(center, radius);
+                result->circle_radius = radius;
 
                 // iterate segment count
                 for (int i = 0; i < segment_count; i++)
@@ -277,13 +278,13 @@ namespace AppKit
                     MathCore::vec2f p1 = center + MathCore::vec2f(std::cos(angle0), std::sin(angle0)) * radius;
                     MathCore::vec2f p2 = center + MathCore::vec2f(std::cos(angle1), std::sin(angle1)) * radius;
 
-                    result.segments[i] = Core::Segment2D(p1, p2);
+                    result->segments[i] = Core::Segment2D(p1, p2);
                 }
 
                 return result;
             }
 
-            Structure2D Structure2D::FromCircleTol(
+            std::shared_ptr<Structure2D> Structure2D::FromCircleTol(
                 const char *tag,
                 float friction,
                 const MathCore::vec2f &center,
@@ -299,6 +300,69 @@ namespace AppKit
                     center,
                     radius,
                     segment_count);
+            }
+
+            std::shared_ptr<Structure2D> Structure2D::FromSegmentTrigger(
+                const char *tag,
+                const Core::Segment2D &segment)
+            {
+                auto result = Structure2D::CreateShared(1);
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::SegmentTrigger;
+                result->segments[0] = segment;
+                result->computeBox();
+                return result;
+            }
+
+            std::shared_ptr<Structure2D> Structure2D::FromSegmentListTrigger(
+                const char *tag,
+                const std::vector<Core::Segment2D> &segments)
+            {
+                auto result = Structure2D::CreateShared((int)segments.size());
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::SegmentTrigger;
+                result->segments.assign(segments.begin(), segments.end());
+                result->computeBox();
+                return result;
+            }
+
+            std::shared_ptr<Structure2D> Structure2D::FromBoxCenterSizeTrigger(
+                const char *tag,
+                const MathCore::vec2f &center,
+                const MathCore::vec2f &size)
+            {
+
+                auto result = Structure2D::CreateShared(0);
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::BoxTrigger;
+                MathCore::vec2f half_size = size * 0.5f;
+                result->box = Core::Box2D(center - half_size, center + half_size);
+                return result;
+            }
+
+            std::shared_ptr<Structure2D> Structure2D::FromBoxMinMaxTrigger(
+                const char *tag,
+                const MathCore::vec2f &min,
+                const MathCore::vec2f &max)
+            {
+                auto result = Structure2D::CreateShared(0);
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::BoxTrigger;
+                result->box = Core::Box2D(min, max);
+                return result;
+            }
+
+            std::shared_ptr<Structure2D> Structure2D::FromCircleTrigger(
+                const char *tag,
+                const MathCore::vec2f &center,
+                float radius)
+            {
+                auto result = Structure2D::CreateShared(0);
+                snprintf(result->tag, 32, "%s", tag);
+                result->type = StructureType::CircleTrigger;
+                result->box.wrapCircle(center, radius);
+                result->circle_radius = radius;
+                return result;
             }
 
             MathCore::vec2f Structure2D::getCenter() const
@@ -379,18 +443,18 @@ namespace AppKit
                 if (!Util::QuadtreeNode::box_overlaps(box.min, box.max, min, max))
                     return false;
 
-                if (type == StructureType::Box || pass_through_set)
+                if (type == StructureType::Box || type == StructureType::BoxTrigger || pass_through_set)
                 {
                     return true;
                 }
-                else if (type == StructureType::Circle)
+                else if (type == StructureType::Circle || type == StructureType::CircleTrigger)
                 {
                     // check if the closest point in the box to the circle center is within the circle radius
                     MathCore::vec2f circle_center = box.getCenter();
                     MathCore::vec2f closest_point = Core::Box2D::closestPointToBox(circle_center, min, max);
                     return MathCore::OP<MathCore::vec2f>::sqrDistance(closest_point, circle_center) <= (circle_radius * circle_radius);
                 }
-                else if (type == StructureType::ClosedPolygon || type == StructureType::Segment)
+                else if (type == StructureType::ClosedPolygon || type == StructureType::Segment || type == StructureType::SegmentTrigger)
                 {
                     // check if any of the polygon edges intersect with the box
                     for (const Core::Segment2D &segment : segments)

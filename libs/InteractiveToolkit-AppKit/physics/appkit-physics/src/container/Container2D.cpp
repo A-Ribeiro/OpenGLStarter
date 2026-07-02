@@ -10,90 +10,78 @@ namespace AppKit
     {
         namespace Container
         {
-            std::vector<std::unique_ptr<Structure2D>> &Container2D::getStaticStructures() { return static_structures; }
+            std::vector<std::shared_ptr<Structure2D>> &Container2D::getStaticStructures() { return static_structures; }
 
-            std::vector<std::unique_ptr<Structure2D>> &Container2D::getDynamicStructures() { return dynamic_structures; }
+            std::vector<std::shared_ptr<Structure2D>> &Container2D::getDynamicStructures() { return dynamic_structures; }
 
-            Structure2D *Container2D::addStaticStructure(const Structure2D &structure)
+            void Container2D::addStaticStructure(std::shared_ptr<Structure2D> structure)
             {
-                uint32_t new_id = uuid.next();
-                std::unique_ptr<Structure2D> structure_copy = STL_Tools::make_unique<Structure2D>(structure);
-                structure_copy->id = new_id;
-
-                Structure2D *result = structure_copy.get();
-
+                ITK_ABORT(structure->id != STRUCTURE2D_ID_INVALID, "Structure2D must have an invalid id when adding to Container2D");
+                structure->id = uuid.next();
                 static_structures.insert(
-                    std::upper_bound(static_structures.begin(), static_structures.end(), structure_copy,
-                                     [](const std::unique_ptr<Structure2D> &a, const std::unique_ptr<Structure2D> &b)
+                    std::upper_bound(static_structures.begin(), static_structures.end(), structure,
+                                     [](const std::shared_ptr<Structure2D> &a, const std::shared_ptr<Structure2D> &b)
                                      { return a->id < b->id; }),
-                    std::move(structure_copy));
-
-                return result;
+                    structure);
             }
             void Container2D::removeStaticStructure(uint32_t idx)
             {
                 auto it = std::lower_bound(static_structures.begin(), static_structures.end(), idx,
-                                           [](const std::unique_ptr<Structure2D> &structure, uint32_t id)
+                                           [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
                                            { return structure->id < id; });
                 if (it == static_structures.end() || (*it)->id != idx)
                     return;
-
                 static_structures.erase(it);
+                (*it)->id = STRUCTURE2D_ID_INVALID;
 
                 // for (auto &item : jumpingControllerList)
                 //     item->object_state.pass_through_remove_id(idx);
 
                 uuid.release(idx);
             }
-            Structure2D *Container2D::getStaticStructure(uint32_t idx)
+            std::shared_ptr<Structure2D> Container2D::getStaticStructure(uint32_t idx)
             {
                 auto it = std::lower_bound(static_structures.begin(), static_structures.end(), idx,
-                                           [](const std::unique_ptr<Structure2D> &structure, uint32_t id)
+                                           [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
                                            { return structure->id < id; });
                 if (it == static_structures.end() || (*it)->id != idx)
                     return nullptr;
-                return (*it).get();
+                return (*it);
             }
 
-            Structure2D *Container2D::addDynamicStructure(const Structure2D &structure)
+            void Container2D::addDynamicStructure(std::shared_ptr<Structure2D> structure)
             {
-                uint32_t new_id = uuid.next();
-                std::unique_ptr<Structure2D> structure_copy = STL_Tools::make_unique<Structure2D>(structure);
-                structure_copy->id = new_id;
-
-                Structure2D *result = structure_copy.get();
-
+                structure->id = uuid.next();
                 dynamic_structures.insert(
-                    std::upper_bound(dynamic_structures.begin(), dynamic_structures.end(), structure_copy,
-                                     [](const std::unique_ptr<Structure2D> &a, const std::unique_ptr<Structure2D> &b)
+                    std::upper_bound(dynamic_structures.begin(), dynamic_structures.end(), structure,
+                                     [](const std::shared_ptr<Structure2D> &a, const std::shared_ptr<Structure2D> &b)
                                      { return a->id < b->id; }),
-                    std::move(structure_copy));
-
-                return result;
+                    structure);
             }
             void Container2D::removeDynamicStructure(uint32_t idx)
             {
                 auto it = std::lower_bound(dynamic_structures.begin(), dynamic_structures.end(), idx,
-                                           [](const std::unique_ptr<Structure2D> &structure, uint32_t id)
+                                           [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
                                            { return structure->id < id; });
                 if (it == dynamic_structures.end() || (*it)->id != idx)
                     return;
-
                 dynamic_structures.erase(it);
+                (*it)->id = STRUCTURE2D_ID_INVALID;
 
                 // for (auto &item : jumpingControllerList)
                 //     item->object_state.pass_through_remove_id(idx);
 
                 uuid.release(idx);
             }
-            Structure2D *Container2D::getDynamicStructure(uint32_t idx)
+
+            std::shared_ptr<Structure2D> Container2D::getDynamicStructure(uint32_t idx)
             {
                 auto it = std::lower_bound(dynamic_structures.begin(), dynamic_structures.end(), idx,
-                                           [](const std::unique_ptr<Structure2D> &structure, uint32_t id)
+                                           [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
                                            { return structure->id < id; });
                 if (it == dynamic_structures.end() || (*it)->id != idx)
                     return nullptr;
-                return (*it).get();
+                return (*it);
             }
 
             void Container2D::buildStaticQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_)
@@ -754,7 +742,7 @@ namespace AppKit
                                           const EventCore::Callback<void(const MathCore::vec2f &center, float radius)> &onCircle,
                                           const EventCore::Callback<void(const MathCore::vec2f &center, const MathCore::vec2f &size)> &onGameArea)
             {
-                auto iterate_through_elements = [&](std::vector<std::unique_ptr<Structure2D>> &ref_array)
+                auto iterate_through_elements = [&](std::vector<std::shared_ptr<Structure2D>> &ref_array)
                 {
                     for (const auto &structure : ref_array)
                     {

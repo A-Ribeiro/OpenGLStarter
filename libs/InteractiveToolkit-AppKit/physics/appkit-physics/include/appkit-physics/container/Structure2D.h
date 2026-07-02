@@ -13,13 +13,19 @@ namespace AppKit
         namespace Container
         {
 
+            const uint32_t STRUCTURE2D_ID_INVALID = UINT32_C(0xFFFFFFFF);
+
             enum class StructureType : uint8_t
             {
                 None,
                 Segment,
                 Box,
                 Circle,
-                ClosedPolygon
+                ClosedPolygon,
+
+                BoxTrigger,
+                CircleTrigger,
+                SegmentTrigger,
             };
 
             class Structure2D
@@ -28,10 +34,12 @@ namespace AppKit
 
                 void computePassThroughLines(const MathCore::vec2f &pass_through_normal_hint);
 
+                Structure2D(int segment_count = 0);
+
             public:
                 struct QuadtreeIntegration
                 {
-                    using type = std::unique_ptr<Structure2D>;
+                    using type = std::shared_ptr<Structure2D>;
                     ITK_INLINE static bool CheckBoxOverlap(const type &item, const MathCore::vec2f &min, const MathCore::vec2f &max) { return item->checkBoxOverlap(min, max); }
                     ITK_INLINE static const MathCore::vec2f &GetBoxMin(const type &item) { return item->box.min; }
                     ITK_INLINE static const MathCore::vec2f &GetBoxMax(const type &item) { return item->box.max; }
@@ -66,11 +74,9 @@ namespace AppKit
                 bool pass_through_is_above_activation_line(const MathCore::vec2f &point, float radius, float offset_above) const;
                 bool pass_through_is_below_or_touching_deactivation_line(const MathCore::vec2f &point, float radius, float offset_below) const;
 
-                Structure2D(int segment_count = 0);
+                std::shared_ptr<Structure2D> setAlwaysCheck(bool value);
 
-                Structure2D &setAlwaysCheck(bool value);
-
-                static Structure2D FromSegmentPassThrough(
+                static std::shared_ptr<Structure2D> FromSegmentPassThrough(
                     const char *tag,
                     float friction,
                     const Core::Segment2D &segment,
@@ -78,46 +84,71 @@ namespace AppKit
                     // but with 90 degree against the segment
                     const MathCore::vec2f &pass_through_normal_hint);
 
-                static Structure2D FromSegment(
+                static std::shared_ptr<Structure2D> FromSegment(
                     const char *tag,
                     float friction,
                     const Core::Segment2D &segment);
 
-                static Structure2D FromSegmentList(
+                static std::shared_ptr<Structure2D> FromSegmentList(
                     const char *tag,
                     float friction,
                     const std::vector<Core::Segment2D> &segments);
 
-                static Structure2D FromClosedPolygon(
+                static std::shared_ptr<Structure2D> FromClosedPolygon(
                     const char *tag,
                     float friction,
                     const std::vector<MathCore::vec2f> &vertices);
 
-                static Structure2D FromBoxCenterSize(
+                static std::shared_ptr<Structure2D> FromBoxCenterSize(
                     const char *tag,
                     float friction,
                     const MathCore::vec2f &center,
                     const MathCore::vec2f &size);
 
-                static Structure2D FromBoxMinMax(
+                static std::shared_ptr<Structure2D> FromBoxMinMax(
                     const char *tag,
                     float friction,
                     const MathCore::vec2f &min,
                     const MathCore::vec2f &max);
 
-                static Structure2D FromCircle(
+                static std::shared_ptr<Structure2D> FromCircle(
                     const char *tag,
                     float friction,
                     const MathCore::vec2f &center,
                     float radius,
                     int segment_count);
 
-                static Structure2D FromCircleTol(
+                static std::shared_ptr<Structure2D> FromCircleTol(
                     const char *tag,
                     float friction,
                     const MathCore::vec2f &center,
                     float radius,
                     float tolerance);
+
+                //
+
+                static std::shared_ptr<Structure2D> FromSegmentTrigger(
+                    const char *tag,
+                    const Core::Segment2D &segment);
+
+                static std::shared_ptr<Structure2D> FromSegmentListTrigger(
+                    const char *tag,
+                    const std::vector<Core::Segment2D> &segments);
+
+                static std::shared_ptr<Structure2D> FromBoxCenterSizeTrigger(
+                    const char *tag,
+                    const MathCore::vec2f &center,
+                    const MathCore::vec2f &size);
+
+                static std::shared_ptr<Structure2D> FromBoxMinMaxTrigger(
+                    const char *tag,
+                    const MathCore::vec2f &min,
+                    const MathCore::vec2f &max);
+
+                static std::shared_ptr<Structure2D> FromCircleTrigger(
+                    const char *tag,
+                    const MathCore::vec2f &center,
+                    float radius);
 
                 MathCore::vec2f getCenter() const;
                 MathCore::vec2f getSize() const;
@@ -126,6 +157,9 @@ namespace AppKit
                 bool checkPointInside(const MathCore::vec2f &point) const;
                 bool checkBoxOverlap(const Core::Box2D &other) const;
                 bool checkBoxOverlap(const MathCore::vec2f &min, const MathCore::vec2f &max) const;
+
+                ITK_DECLARE_CREATE_SHARED(Structure2D)
+
             };
         }
     }

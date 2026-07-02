@@ -37,25 +37,25 @@ namespace AppKit
             {
                 Util::UuidUint32 uuid;
 
-                std::vector<std::unique_ptr<Structure2D>> static_structures;
+                std::vector<std::shared_ptr<Structure2D>> static_structures;
                 std::unique_ptr<Util::Quadtree<Structure2D::QuadtreeIntegration>> static_quadtree;
                 std::vector<const Structure2D *> static_always_check;
 
-                std::vector<std::unique_ptr<Structure2D>> dynamic_structures;
+                std::vector<std::shared_ptr<Structure2D>> dynamic_structures;
                 std::unique_ptr<Util::Quadtree<Structure2D::QuadtreeIntegration>> dynamic_quadtree;
                 std::vector<const Structure2D *> dynamic_always_check;
 
             public:
-                std::vector<std::unique_ptr<Structure2D>> &getStaticStructures();
-                std::vector<std::unique_ptr<Structure2D>> &getDynamicStructures();
+                std::vector<std::shared_ptr<Structure2D>> &getStaticStructures();
+                std::vector<std::shared_ptr<Structure2D>> &getDynamicStructures();
 
-                Structure2D *addStaticStructure(const Structure2D &structure);
+                void addStaticStructure(std::shared_ptr<Structure2D> structure);
                 void removeStaticStructure(uint32_t idx);
-                Structure2D *getStaticStructure(uint32_t idx);
+                std::shared_ptr<Structure2D> getStaticStructure(uint32_t idx);
 
-                Structure2D *addDynamicStructure(const Structure2D &structure);
+                void addDynamicStructure(std::shared_ptr<Structure2D> structure);
                 void removeDynamicStructure(uint32_t idx);
-                Structure2D *getDynamicStructure(uint32_t idx);
+                std::shared_ptr<Structure2D> getDynamicStructure(uint32_t idx);
 
                 // Platform::SmartVector<std::shared_ptr<JumpingController>> jumpingControllerList;
 
