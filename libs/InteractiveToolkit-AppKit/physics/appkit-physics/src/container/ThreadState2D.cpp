@@ -12,7 +12,7 @@ namespace AppKit
 
             void ThreadState2D::query_box(
                 Util::Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
-                const std::vector<std::unique_ptr<Structure2D>> &structures,
+                const std::vector<std::shared_ptr<Structure2D>> &structures,
                 const MathCore::vec2f &min, const MathCore::vec2f &max,
                 bool clear_structure_ptrs)
             {
@@ -26,7 +26,7 @@ namespace AppKit
 
             void ThreadState2D::query_segment_radius(
                 Util::Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
-                const std::vector<std::unique_ptr<Structure2D>> &structures,
+                const std::vector<std::shared_ptr<Structure2D>> &structures,
                 const MathCore::vec2f &a, const MathCore::vec2f &b, float radius,
                 bool clear_structure_ptrs)
             {
