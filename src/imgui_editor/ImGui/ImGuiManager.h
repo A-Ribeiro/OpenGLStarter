@@ -55,7 +55,7 @@ public:
     EventCore::Event<void(View*,bool)> OnHover;
     EventCore::Event<void(View*,bool)> OnFocus;
 
-    EventCore::Event<void()> PostAction;
+    EventCore::Event<void()> executeOnMainThread;
 
 
     ImGuiManager();

@@ -279,6 +279,9 @@ void ImGuiManager::Finalize()
 		}
 	}
 
+    // clear que queue
+    executeOnMainThread.clear();
+
 	// Cleanup
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_WindowGL_Shutdown();
@@ -472,8 +475,8 @@ void ImGuiManager::RenderAndLogic(AppKit::Window::GLWindow* window, Platform::Ti
 		ImGuiManager::Instance()->LoadLayout();
 	}
 
-    PostAction();
-    PostAction.clear();
+    executeOnMainThread();
+    executeOnMainThread.clear();
 
     if (innerViewport->scene3D->is_to_hide_mouse.pressed || innerViewport->scene3D->is_to_hide_mouse.up) {
         ImGui::SetMouseCursor(ImGuiMouseCursor_None);

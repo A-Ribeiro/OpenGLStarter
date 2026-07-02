@@ -215,7 +215,7 @@ void FolderFileOperations::init()
                                 // on success
                                 clipboardState = nullptr;
                                 // refresh
-                                imGuiManager->PostAction.add([&,output](){
+                                imGuiManager->executeOnMainThread.add([&,output](){
                                     refreshCurrentFilesAndSelectPath(output);
                                 });
                             });
@@ -230,7 +230,7 @@ void FolderFileOperations::init()
                                 // on success
                                 clipboardState = nullptr;
                                 // refresh
-                                imGuiManager->PostAction.add([&,output,srcTreeNode](){
+                                imGuiManager->executeOnMainThread.add([&,output,srcTreeNode](){
                                     refreshCurrentFilesAndSelectPath(output);
                                     refreshDirectoryStructure(srcTreeNode, true);
                                 });
@@ -354,7 +354,7 @@ void FolderFileOperations::init()
                                 // on success
                                 clipboardState = nullptr;
                                 // refresh
-                                imGuiManager->PostAction.add([&, file_to_select_after_refresh](){
+                                imGuiManager->executeOnMainThread.add([&, file_to_select_after_refresh](){
                                     refreshCurrentFilesAndSelectPath(file_to_select_after_refresh);
                                 });
                             });
@@ -434,7 +434,7 @@ void FolderFileOperations::init()
                                 // on success
                                 clipboardState = nullptr;
                                 // refresh
-                                imGuiManager->PostAction.add([&,output](){
+                                imGuiManager->executeOnMainThread.add([&,output](){
                                     refreshCurrentFilesAndSelectPath(output);
                                 });
                             });
@@ -449,7 +449,7 @@ void FolderFileOperations::init()
                                 // on success
                                 clipboardState = nullptr;
                                 // refresh
-                                imGuiManager->PostAction.add([&,output,srcTreeNode](){
+                                imGuiManager->executeOnMainThread.add([&,output,srcTreeNode](){
                                     refreshCurrentFilesAndSelectPath(output);
                                     refreshDirectoryStructure(srcTreeNode, true);
                                 });
@@ -649,7 +649,7 @@ void FolderFileOperations::openFolder_FolderFileOperations(const std::string &pa
         });
     }
 
-    imGuiManager->PostAction.add([&](){
+    imGuiManager->executeOnMainThread.add([&](){
         imGuiManager->project.OnTreeSelect(
             imGuiManager->project.getTreeRoot()
         );
@@ -816,7 +816,7 @@ void FolderFileOperations::createNewSceneOnCurrentDirectory(const std::string &f
             chmod(full_path_file.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP );
 #endif
 
-            imGuiManager->PostAction.add([&, full_path_file](){
+            imGuiManager->executeOnMainThread.add([&, full_path_file](){
                 this->refreshCurrentFilesAndSelectPath(full_path_file);
             });
         },
@@ -882,7 +882,7 @@ void FolderFileOperations::createNewDirectoryOnCurrentDirectory(const std::strin
                 return;
             }
 
-            imGuiManager->PostAction.add([&, full_path_file](){
+            imGuiManager->executeOnMainThread.add([&, full_path_file](){
                 this->refreshDirectoryStructure(selectedTreeNode);
             });
 
@@ -1079,7 +1079,7 @@ void FolderFileOperations::renameSelectedFile(const std::string &newfileName) {
                 return;
             
             {
-                imGuiManager->PostAction.add([&,new_filename](){
+                imGuiManager->executeOnMainThread.add([&,new_filename](){
                     refreshCurrentFilesAndSelectPath(new_filename);
                 });
             }
@@ -1140,7 +1140,7 @@ void FolderFileOperations::renameSelectedDirectory(const std::string &newdirname
                 selectedTreeNode->getParent()->sort();
                 selectedTreeNode->scrollToThisItem();
 
-                imGuiManager->PostAction.add([&](){
+                imGuiManager->executeOnMainThread.add([&](){
                     if (selectedTreeNode != nullptr){
                         refreshDirectoryStructure(selectedTreeNode);
 
