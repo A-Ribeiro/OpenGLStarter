@@ -109,12 +109,22 @@ namespace AppKit
 
             void Container2D::clearStatic()
             {
+                for (auto &structure : static_structures)
+                {
+                    uuid.release(structure->id);
+                    structure->id = STRUCTURE2D_ID_INVALID;
+                }
                 static_structures.clear();
                 static_quadtree.reset();
             }
 
             void Container2D::clearDynamic()
             {
+                for (auto &structure : dynamic_structures)
+                {
+                    uuid.release(structure->id);
+                    structure->id = STRUCTURE2D_ID_INVALID;
+                }
                 dynamic_structures.clear();
                 dynamic_quadtree.reset();
             }
