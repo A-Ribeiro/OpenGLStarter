@@ -515,7 +515,7 @@ void HierarchyOperations::openFile_HierarchyOperations(const ITKCommon::FileSyst
             printf("[Hierarchy][Tree] OnTreeDragDrop. drag_payload: %s\n", drag_payload);
             if (target != nullptr && drag_payload == DRAG_PAYLOAD_ID_HIERARCHY_TREE){
                 std::shared_ptr<TreeNode> source_node = ((TreeNode*)src)->self();
-                ImGuiManager::Instance()->PostAction.add([&, source_node, target](){
+                ImGuiManager::Instance()->executeOnMainThread.add([&, source_node, target](){
                     hierarchyDragMove(source_node, target);
                     // if (TreeNode::Reparent(source_node, target)){
                     //     printf("                  Reparent OK!\n");
