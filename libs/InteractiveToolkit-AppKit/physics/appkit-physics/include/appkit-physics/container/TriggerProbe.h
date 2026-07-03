@@ -39,7 +39,7 @@ namespace AppKit
 
                 std::vector<Core::Segment2D> segments;
 
-                MathCore::vec2f offset;
+                // MathCore::vec2f offset;
                 MathCore::vec2f character_offset;
                 std::vector<Core::Segment2D> segments_offset_applied;
 
@@ -51,32 +51,27 @@ namespace AppKit
 
                 std::unordered_map<std::shared_ptr<Structure2D>, bool> active_structures;
                 std::unordered_map<std::shared_ptr<Structure2D>, bool> current_structures;
-                EventCore::Event<void(std::shared_ptr<Structure2D> structureTrigger)> onEnter;
-                EventCore::Event<void(std::shared_ptr<Structure2D> structureTrigger)> onExit;
+                EventCore::Callback<void(std::shared_ptr<AppKit::Physics::Container::Structure2D> structureTrigger)> onEnter;
+                EventCore::Callback<void(std::shared_ptr<AppKit::Physics::Container::Structure2D> structureTrigger)> onExit;
 
-                void setOffset(const MathCore::vec2f &offset_);
+                // void setOffset(const MathCore::vec2f &offset_);
                 void setCharacterOffset(const MathCore::vec2f &offset_);
 
-                static std::shared_ptr<TriggerProbe> FromSegment(
-                    const MathCore::vec2f &offset,
+                void setSegment(
                     const Core::Segment2D &segment);
 
-                static std::shared_ptr<TriggerProbe> FromSegmentList(
-                    const MathCore::vec2f &offset,
+                void setSegmentList(
                     const std::vector<Core::Segment2D> &segments);
 
-                static std::shared_ptr<TriggerProbe> FromBoxCenterSize(
-                    const MathCore::vec2f &offset,
+                void setBoxCenterSize(
                     const MathCore::vec2f &center,
                     const MathCore::vec2f &size);
 
-                static std::shared_ptr<TriggerProbe> FromBoxMinMax(
-                    const MathCore::vec2f &offset,
+                void setBoxMinMax(
                     const MathCore::vec2f &min,
                     const MathCore::vec2f &max);
 
-                static std::shared_ptr<TriggerProbe> FromCircle(
-                    const MathCore::vec2f &offset,
+                void setCircle(
                     const MathCore::vec2f &center,
                     float radius);
 

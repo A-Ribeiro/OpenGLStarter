@@ -16,6 +16,7 @@ namespace AppKit
 {
     namespace GLEngine
     {
+        typedef const char *SceneBaseType;
 
         class SceneBase : public EventHandlerSet
         {
@@ -36,13 +37,19 @@ namespace AppKit
             // clear all loaded scene
             virtual void unloadAll() = 0;
 
+            SceneBaseType type_const_ref;
             SceneBase(Platform::Time *_time,
                       RenderPipeline *_renderPipeline,
                       ResourceHelper *_resourceHelper,
                       ResourceMap *_resourceMap,
-                      std::shared_ptr<RenderWindowRegion> renderWindow);
+                      std::shared_ptr<RenderWindowRegion> renderWindow,
+                      SceneBaseType type_const_ref);
 
         public:
+
+            SceneBaseType getType() const;
+            bool compareType(SceneBaseType t) const;
+
             Platform::Time *time;
             RenderPipeline *renderPipeline;
             ResourceHelper *resourceHelper;

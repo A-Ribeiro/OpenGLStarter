@@ -31,6 +31,7 @@ protected:
 
 public:
     friend class AppKit::GLEngine::SceneBase;
+    static const AppKit::GLEngine::SceneBaseType Type;
 
     AppKit::GLEngine::Button *button;
 

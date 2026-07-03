@@ -14,6 +14,8 @@ using namespace MathCore;
 #include "./InnerViewport.h"
 #include "./Scene3D.h"
 
+const AppKit::GLEngine::SceneBaseType SceneGUI::Type = "SceneGUI";
+
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void SceneGUI::loadResources()
 {
@@ -145,7 +147,7 @@ void SceneGUI::onCameraScreenSizeChange(const MathCore::vec2f &value, const Math
     textNode->setLocalPosition(MathCore::vec3f(-center_x + margin, -center_y + margin, 0));
 }
 
-SceneGUI::SceneGUI(App *app, std::shared_ptr<RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelper, &app->resourceMap, renderWindow)
+SceneGUI::SceneGUI(App *app, std::shared_ptr<RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelper, &app->resourceMap, renderWindow, SceneGUI::Type)
 {
 
     this->app = app;

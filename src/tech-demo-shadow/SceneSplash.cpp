@@ -11,6 +11,7 @@ using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
+const AppKit::GLEngine::SceneBaseType SceneSplash::Type = "SceneSplash";
 
 //to load skybox, textures, cubemaps, 3DModels and setup materials
 void SceneSplash::loadResources(){
@@ -101,7 +102,7 @@ SceneSplash::SceneSplash(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
-    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow, SceneSplash::Type)
 {
     
     Milky_512_512 = nullptr;

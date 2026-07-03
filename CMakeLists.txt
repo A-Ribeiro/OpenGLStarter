@@ -146,49 +146,24 @@ if (NOT TARGET appkit-ui)
 endif()
 
 add_subdirectory(src/test-open-window)
-
 add_subdirectory(src/tech-demo-pbr)
-
 add_subdirectory(src/tech-demo-particle)
-
 add_subdirectory(src/tech-demo-animation)
-
 add_subdirectory(src/tech-demo-shadow)
-
+# add_subdirectory(src/imgui)
 add_subdirectory(src/imgui_example)
-
 add_subdirectory(src/imguizmo_example)
-
 add_subdirectory(src/imgui_editor)
-
 add_subdirectory(src/imgui_service_ui)
-
 # add_subdirectory(src/ipc_fullscreen_viewer)
-
-# option(ARIBEIRO_BUILD_IMGUI_PROJECTS OFF)
-# if (ARIBEIRO_BUILD_IMGUI_PROJECTS)
-#     add_subdirectory(src/imgui)
-#     add_subdirectory(src/imgui_example)
-#     add_subdirectory(src/imgui_service_ui)
-#     add_subdirectory(src/imgui_editor)
-# endif()
-
 add_subdirectory(src/test-pbr-coefs)
-
 add_subdirectory(src/opening)
-
 add_subdirectory(src/font-with-bitmap)
-
 add_subdirectory(src/tech-demo-line-rendering)
-
 add_subdirectory(src/tech-demo-sprite-atlas)
-
 add_subdirectory(src/example-ui)
-
 add_subdirectory(src/load-unlit-textured-model)
-
 # add_subdirectory(src/test-lua)
-
 if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/src/game")
     message(STATUS "******************************************")
     message(STATUS "*** Adding a Game Project on: src/game ***")

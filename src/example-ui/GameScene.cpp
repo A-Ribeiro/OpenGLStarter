@@ -14,6 +14,8 @@
 using namespace AppKit::Physics::Container;
 using namespace AppKit::Physics::Core;
 
+const AppKit::GLEngine::SceneBaseType GameScene::Type = "GameScene";
+
 namespace Debug
 {
     ComponentLineMounter *lineMounter = nullptr;
@@ -352,7 +354,7 @@ GameScene::GameScene(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
-    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow, GameScene::Type),
                                                                           random32(ITKCommon::RandomDefinition<uint32_t>::randomSeed()),
                                                                           mathRandom(&random32)
 {

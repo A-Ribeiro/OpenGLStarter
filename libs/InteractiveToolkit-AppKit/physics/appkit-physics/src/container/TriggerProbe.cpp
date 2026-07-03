@@ -29,31 +29,11 @@ namespace AppKit
                 type = TriggerProbeType::None;
             }
 
-            void TriggerProbe::setOffset(const MathCore::vec2f &offset_)
-            {
-                offset = offset_;
-                setCharacterOffset(character_offset);
-                // if (type == TriggerProbeType::Segment)
-                // {
-                //     segments_offset_applied.clear();
-                //     segments_offset_applied.reserve(segments.size());
-                //     for (const Core::Segment2D &segment : segments)
-                //         segments_offset_applied.push_back(Core::Segment2D(segment.a + offset, segment.b + offset));
-                // }
-
-                // if (type == TriggerProbeType::Segment || type == TriggerProbeType::Box || type == TriggerProbeType::Circle)
-                // {
-                //     box_offset_applied = box;
-                //     box_offset_applied.min += offset;
-                //     box_offset_applied.max += offset;
-                // }
-            }
-
             void TriggerProbe::setCharacterOffset(const MathCore::vec2f &offset_)
             {
                 character_offset = offset_;
 
-                auto total_offset = offset + character_offset;
+                auto total_offset = character_offset;
 
                 if (type == TriggerProbeType::Segment)
                 {
@@ -71,77 +51,56 @@ namespace AppKit
                 }
             }
 
-            std::shared_ptr<TriggerProbe> TriggerProbe::FromSegment(
-                const MathCore::vec2f &offset,
+            void TriggerProbe::setSegment(
                 const Core::Segment2D &segment)
             {
-                auto result = TriggerProbe::CreateShared(1);
-
-                result->type = TriggerProbeType::Segment;
-                result->segments[0] = segment;
-                result->computeSegmentBox();
-                result->setOffset(offset);
-
-                return result;
+                type = TriggerProbeType::Segment;
+                segments.resize(1);
+                segments[0] = segment;
+                computeSegmentBox();
+                setCharacterOffset(character_offset);
             }
 
-            std::shared_ptr<TriggerProbe> TriggerProbe::FromSegmentList(
-                const MathCore::vec2f &offset,
-                const std::vector<Core::Segment2D> &segments)
+            void TriggerProbe::setSegmentList(
+                const std::vector<Core::Segment2D> &segments_)
             {
-                auto result = TriggerProbe::CreateShared((int)segments.size());
-
-                result->type = TriggerProbeType::Segment;
-                result->segments.assign(segments.begin(), segments.end());
-                result->computeSegmentBox();
-                result->setOffset(offset);
-
-                return result;
+                type = TriggerProbeType::Segment;
+                segments.resize((int)segments_.size());
+                segments.assign(segments_.begin(), segments_.end());
+                computeSegmentBox();
+                setCharacterOffset(character_offset);
             }
 
-            std::shared_ptr<TriggerProbe> TriggerProbe::FromBoxCenterSize(
-                const MathCore::vec2f &offset,
+            void TriggerProbe::setBoxCenterSize(
                 const MathCore::vec2f &center,
                 const MathCore::vec2f &size)
             {
-                auto result = TriggerProbe::CreateShared(0);
-
-                result->type = TriggerProbeType::Box;
+                type = TriggerProbeType::Box;
+                segments.clear();
                 MathCore::vec2f half_size = size * 0.5f;
-                result->box = Core::Box2D(center - half_size, center + half_size);
-                result->setOffset(offset);
-
-                return result;
+                box = Core::Box2D(center - half_size, center + half_size);
+                setCharacterOffset(character_offset);
             }
 
-            std::shared_ptr<TriggerProbe> TriggerProbe::FromBoxMinMax(
-                const MathCore::vec2f &offset,
+            void TriggerProbe::setBoxMinMax(
                 const MathCore::vec2f &min,
                 const MathCore::vec2f &max)
             {
-                auto result = TriggerProbe::CreateShared(0);
-
-                result->setOffset(offset);
-                result->type = TriggerProbeType::Box;
-                result->box = Core::Box2D(min, max);
-                result->setOffset(offset);
-
-                return result;
+                type = TriggerProbeType::Box;
+                segments.clear();
+                box = Core::Box2D(min, max);
+                setCharacterOffset(character_offset);
             }
 
-            std::shared_ptr<TriggerProbe> TriggerProbe::FromCircle(
-                const MathCore::vec2f &offset,
+            void TriggerProbe::setCircle(
                 const MathCore::vec2f &center,
                 float radius)
             {
-                auto result = TriggerProbe::CreateShared(0);
-
-                result->type = TriggerProbeType::Circle;
-                result->box.wrapCircle(center, radius);
-                result->circle_radius = radius;
-                result->setOffset(offset);
-
-                return result;
+                type = TriggerProbeType::Circle;
+                segments.clear();
+                box.makeEmpty().wrapCircle(center, radius);
+                circle_radius = radius;
+                setCharacterOffset(character_offset);
             }
 
             MathCore::vec2f TriggerProbe::getCenter() const
@@ -162,24 +121,30 @@ namespace AppKit
             void TriggerProbe::endOverlapCheck()
             {
                 // for active_structures not in current_structures
-                for (auto it = active_structures.begin(); it != active_structures.end(); ++it)
+                if (onExit)
                 {
-                    auto structure_ptr = it->first;
-                    if (current_structures.find(structure_ptr) == current_structures.end())
+                    for (auto it = active_structures.begin(); it != active_structures.end(); ++it)
                     {
-                        // not found, trigger exit
-                        onExit(structure_ptr);
+                        auto structure_ptr = it->first;
+                        if (current_structures.find(structure_ptr) == current_structures.end())
+                        {
+                            // not found, trigger exit
+                            onExit(structure_ptr);
+                        }
                     }
                 }
 
                 // for current_structures not in active_structures
-                for (auto it = current_structures.begin(); it != current_structures.end(); ++it)
+                if (onEnter)
                 {
-                    auto structure_ptr = it->first;
-                    if (active_structures.find(structure_ptr) == active_structures.end())
+                    for (auto it = current_structures.begin(); it != current_structures.end(); ++it)
                     {
-                        // not found, trigger enter
-                        onEnter(structure_ptr);
+                        auto structure_ptr = it->first;
+                        if (active_structures.find(structure_ptr) == active_structures.end())
+                        {
+                            // not found, trigger enter
+                            onEnter(structure_ptr);
+                        }
                     }
                 }
 
@@ -188,6 +153,9 @@ namespace AppKit
 
             void TriggerProbe::checkStructureOverlap(std::shared_ptr<Structure2D> structureTrigger)
             {
+                if (type == TriggerProbeType::None)
+                    return;
+
                 if (structureTrigger->type == StructureType::BoxTrigger)
                 {
                     if (type == TriggerProbeType::Box)

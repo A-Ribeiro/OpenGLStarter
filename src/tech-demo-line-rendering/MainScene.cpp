@@ -16,6 +16,8 @@ using namespace AppKit::Window::Devices;
 using namespace MathCore;
 using namespace AppKit::GLEngine::Components;
 
+const AppKit::GLEngine::SceneBaseType MainScene::Type = "MainScene";
+
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources()
 {
@@ -358,7 +360,7 @@ MainScene::MainScene(
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
     std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow,
-    bool _3d) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
+    bool _3d) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow, MainScene::Type),
                 mathRnd(ITKCommon::Random::Instance())
 {
     this->app = app;
