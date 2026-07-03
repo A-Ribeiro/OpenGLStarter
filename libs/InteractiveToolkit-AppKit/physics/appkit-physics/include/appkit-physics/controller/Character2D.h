@@ -35,6 +35,8 @@ namespace AppKit
         {
             class Character2D
             {
+                Character2D();
+
             public:
                 VelocityHelpers::JumpState jumpState;
 
@@ -68,9 +70,7 @@ namespace AppKit
 
                 std::unordered_map<std::string, std::shared_ptr<Container::TriggerProbe>> trigger_probes;
 
-                Character2D();
-
-                static Character2D fromStaticConfig(
+                void setStaticConfig(
                     float radius, float radius_grounded, float offset_grounded,
                     float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
                     const MathCore::vec2f &gravity,

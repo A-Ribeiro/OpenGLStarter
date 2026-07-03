@@ -18,7 +18,7 @@ namespace AppKit
                 has_last_collision_segment = false;
             }
 
-            Character2D Character2D::fromStaticConfig(
+            void Character2D::setStaticConfig(
                 float radius, float radius_grounded, float offset_grounded,
                 float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
                 const MathCore::vec2f &gravity,
@@ -28,25 +28,23 @@ namespace AppKit
                 float offset_below_deactivation_line)
             {
                 using namespace MathCore;
-                Character2D controller;
+                // std::shared_ptr<Character2D> controller = Character2D::CreateShared();
 
-                controller.radius = radius;
-                controller.radius_grounded = radius_grounded;
-                controller.offset_grounded = offset_grounded;
-                controller.allow_double_jump = allow_double_jump;
+                this->radius = radius;
+                this->radius_grounded = radius_grounded;
+                this->offset_grounded = offset_grounded;
+                this->allow_double_jump = allow_double_jump;
 
-                controller.gravity = gravity;
-                controller.gravity_mag = OP<vec2f>::length(gravity);
-                controller.gravity_dir = gravity * (1.0f / controller.gravity_mag);
+                this->gravity = gravity;
+                this->gravity_mag = OP<vec2f>::length(gravity);
+                this->gravity_dir = gravity * (1.0f / this->gravity_mag);
 
-                controller.jumpState.configureJump(
-                    jump_risingVelocity, jump_minJumpHeight, jump_maxJumpHeight, jump_secondJumpHeight, -controller.gravity_mag);
+                this->jumpState.configureJump(
+                    jump_risingVelocity, jump_minJumpHeight, jump_maxJumpHeight, jump_secondJumpHeight, -this->gravity_mag);
 
-                controller.skin_width = skin_width;
-                controller.offset_above_activation_line = offset_above_activation_line;
-                controller.offset_below_deactivation_line = offset_below_deactivation_line;
-
-                return controller;
+                this->skin_width = skin_width;
+                this->offset_above_activation_line = offset_above_activation_line;
+                this->offset_below_deactivation_line = offset_below_deactivation_line;
             }
 
             void Character2D::update(
