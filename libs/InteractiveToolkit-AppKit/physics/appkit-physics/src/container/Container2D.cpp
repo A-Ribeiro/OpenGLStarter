@@ -10,6 +10,9 @@ namespace AppKit
     {
         namespace Container
         {
+            Container2D::Container2D()
+            {
+            }
             std::vector<std::shared_ptr<Structure2D>> &Container2D::getStaticStructures() { return static_structures; }
 
             std::vector<std::shared_ptr<Structure2D>> &Container2D::getDynamicStructures() { return dynamic_structures; }
@@ -287,9 +290,9 @@ namespace AppKit
             {
                 Core::Box2D b_box = Core::Box2D().wrapCircle(point, radius);
 
-                thread_state.query_box(static_quadtree.get(), static_structures, b_box.min, b_box.max, true);
+                thread_state.query_box(static_quadtree.get(), static_structures, b_box.min, b_box.max, true, QUERY_MASK_ONLY_SOLID);
                 if (dynamic_quadtree)
-                    thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, b_box.min, b_box.max, false);
+                    thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, b_box.min, b_box.max, false, QUERY_MASK_ONLY_SOLID);
                 if (thread_state.structure_ptrs.empty())
                 {
                     // for (const auto *structure : always_check_structures)
@@ -345,6 +348,7 @@ namespace AppKit
                 const EventCore::Callback<void(const MathCore::vec2f &pos, const Core::Segment2D *on_segment)> &onMoveTouch,
                 ThreadState2D &thread_state,
                 ObjectState2D &object_state,
+                std::unordered_map<std::string, std::shared_ptr<Container::TriggerProbe>> *trigger_probes,
                 float skin_width,
                 float max_velocity,
                 float offset_above_activation_line,
@@ -390,9 +394,9 @@ namespace AppKit
                     vec2f ground_pos = a + vec2f(0, offset_grounded);
                     Core::Box2D ground_box = Core::Box2D().wrapCircle(ground_pos, radius_grounded);
                     // const auto &static_ids = static_quadtree->query_box(ground_box.min, ground_box.max);
-                    thread_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max, true);
+                    thread_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max, true, QUERY_MASK_ONLY_SOLID);
                     if (dynamic_quadtree)
-                        thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, ground_box.min, ground_box.max, false);
+                        thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, ground_box.min, ground_box.max, false, QUERY_MASK_ONLY_SOLID);
 
                     if (thread_state.structure_ptrs.empty())
                     {
@@ -429,6 +433,8 @@ namespace AppKit
                     //         }
                     //     }
                     // }
+                    if (trigger_probes && !trigger_probes->empty())
+                        computeTriggerProbeOverlaps(*out_position, thread_state, trigger_probes);
                     return;
                 }
 
@@ -488,9 +494,9 @@ namespace AppKit
                     vec2f new_remaining_dir_norm = vec2f(0.0f);
 
                     // const std::vector<uint32_t> &static_ids = static_quadtree->query_segment_radius(a, b, query_radius);
-                    thread_state.query_segment_radius(static_quadtree.get(), static_structures, a, b, query_radius, true);
+                    thread_state.query_segment_radius(static_quadtree.get(), static_structures, a, b, query_radius, true, QUERY_MASK_ONLY_SOLID);
                     if (dynamic_quadtree)
-                        thread_state.query_segment_radius(dynamic_quadtree.get(), dynamic_structures, a, b, query_radius, false);
+                        thread_state.query_segment_radius(dynamic_quadtree.get(), dynamic_structures, a, b, query_radius, false, QUERY_MASK_ONLY_SOLID);
                     if (thread_state.structure_ptrs.empty())
                     {
                         // for (const auto *structure : always_check_structures)
@@ -709,9 +715,9 @@ namespace AppKit
                     vec2f ground_pos = a + vec2f(0, offset_grounded);
                     Core::Box2D ground_box = Core::Box2D().wrapCircle(ground_pos, radius_grounded);
                     // const auto &static_ids = static_quadtree->query_box(ground_box.min, ground_box.max);
-                    thread_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max, true);
+                    thread_state.query_box(static_quadtree.get(), static_structures, ground_box.min, ground_box.max, true, QUERY_MASK_ONLY_SOLID);
                     if (dynamic_quadtree)
-                        thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, ground_box.min, ground_box.max, false);
+                        thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, ground_box.min, ground_box.max, false, QUERY_MASK_ONLY_SOLID);
 
                     if (thread_state.structure_ptrs.empty())
                     {
@@ -748,6 +754,8 @@ namespace AppKit
                     //         }
                     //     }
                     // }
+                    if (trigger_probes && !trigger_probes->empty())
+                        computeTriggerProbeOverlaps(*out_position, thread_state, trigger_probes);
                     return;
                 }
 
@@ -761,6 +769,54 @@ namespace AppKit
                 *out_position = b;
                 // *out_velocity = vec3f(vel, out_velocity->z);
                 *out_velocity = OP<vec2f>::quadraticClamp(vec2f(0, 0), vel, max_velocity);
+
+                if (trigger_probes && !trigger_probes->empty())
+                    computeTriggerProbeOverlaps(*out_position, thread_state, trigger_probes);
+            }
+
+            void Container2D::computeTriggerProbeOverlaps(
+                const MathCore::vec2f &character_position,
+                ThreadState2D &thread_state,
+                std::unordered_map<std::string, std::shared_ptr<Container::TriggerProbe>> *trigger_probes)
+            {
+                Core::Box2D probes_box;
+                for (auto &item : *trigger_probes)
+                {
+                    auto &probe = item.second;
+                    probe->setCharacterOffset(character_position);
+                    probes_box.wrapBox(probe->box_offset_applied);
+                    probe->startOverlapCheck();
+                }
+
+                thread_state.query_box(static_quadtree.get(), static_structures, probes_box.min, probes_box.max, true, QUERY_MASK_ONLY_TRIGGERS);
+                if (dynamic_quadtree)
+                    thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, probes_box.min, probes_box.max, false, QUERY_MASK_ONLY_TRIGGERS);
+
+                if (thread_state.structure_ptrs.empty())
+                {
+                    thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
+                    thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
+                }
+
+                for (const Structure2D *structure : thread_state.structure_ptrs)
+                {
+                    if (structure->type != StructureType::BoxTrigger &&
+                        structure->type != StructureType::CircleTrigger &&
+                        structure->type != StructureType::SegmentTrigger)
+                        continue;
+                    for (auto &item : *trigger_probes)
+                    {
+                        auto &probe = item.second;
+                        if (Core::Box2D::overlaps(probe->box_offset_applied.min, probe->box_offset_applied.max, structure->box.min, structure->box.max))
+                            probe->checkStructureOverlap(structure->self());
+                    }
+                }
+
+                for (auto &item : *trigger_probes)
+                {
+                    auto &probe = item.second;
+                    probe->endOverlapCheck();
+                }
             }
 
             void Container2D::dumpContent(const EventCore::Callback<void(const MathCore::vec2f &a, const MathCore::vec2f &b, bool is_pass_through)> &onLine,

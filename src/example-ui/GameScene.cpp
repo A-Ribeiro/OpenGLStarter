@@ -65,7 +65,7 @@ void GameScene::loadResources()
     using namespace ITKCommon;
     using namespace MathCore;
 
-    container2D = STL_Tools::make_unique<Container2D>();
+    container2D = Container2D::CreateShared();
 
     generateRandomStage();
 

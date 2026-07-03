@@ -233,6 +233,7 @@ namespace AppKit
                     },
                     thread_state,
                     object_state,
+                    &trigger_probes,
                     skin_width,
                     max_velocity,
                     offset_above_activation_line,

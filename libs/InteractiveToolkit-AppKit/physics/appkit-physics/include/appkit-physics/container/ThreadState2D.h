@@ -11,6 +11,10 @@ namespace AppKit
         namespace Container
         {
 
+            const uint32_t QUERY_MASK_ONLY_TRIGGERS = 1;
+            const uint32_t QUERY_MASK_ONLY_SOLID = 1 << 1;
+            const uint32_t QUERY_MASK_ALL = QUERY_MASK_ONLY_TRIGGERS | QUERY_MASK_ONLY_SOLID;
+
             struct ThreadState2D
             {
                 // aux for quadtree queries
@@ -26,13 +30,15 @@ namespace AppKit
                     Util::Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
                     const std::vector<std::shared_ptr<Structure2D>> &structures,
                     const MathCore::vec2f &min, const MathCore::vec2f &max,
-                    bool clear_structure_ptrs);
+                    bool clear_structure_ptrs,
+                    uint32_t query_mask);
 
                 void query_segment_radius(
                     Util::Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
                     const std::vector<std::shared_ptr<Structure2D>> &structures,
                     const MathCore::vec2f &a, const MathCore::vec2f &b, float radius,
-                    bool clear_structure_ptrs);
+                    bool clear_structure_ptrs,
+                    uint32_t query_mask);
             };
         }
     }

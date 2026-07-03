@@ -49,7 +49,7 @@ public:
 
     MathCore::vec2f screen_custom_size;
 
-    std::unique_ptr<AppKit::Physics::Container::Container2D> container2D;
+    std::shared_ptr<AppKit::Physics::Container::Container2D> container2D;
 
     StageGen::StageResult stageResult;
 

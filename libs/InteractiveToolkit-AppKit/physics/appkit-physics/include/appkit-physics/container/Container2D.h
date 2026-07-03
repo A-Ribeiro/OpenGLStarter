@@ -11,6 +11,7 @@
 #include <appkit-physics/container/Structure2D.h>
 #include <appkit-physics/container/ObjectState2D.h>
 #include <appkit-physics/container/ThreadState2D.h>
+#include <appkit-physics/container/TriggerProbe.h>
 
 #include <appkit-physics/util/Quadtree.h>
 #include <appkit-physics/util/Uuid.h>
@@ -45,7 +46,7 @@ namespace AppKit
                 std::unique_ptr<Util::Quadtree<Structure2D::QuadtreeIntegration>> dynamic_quadtree;
                 std::vector<const Structure2D *> dynamic_always_check;
 
-                Container2D() = default;
+                Container2D();
 
             public:
                 std::vector<std::shared_ptr<Structure2D>> &getStaticStructures();
@@ -112,11 +113,17 @@ namespace AppKit
                     const EventCore::Callback<void(const MathCore::vec2f &pos, const Core::Segment2D *on_segment)> &onMoveTouch,
                     ThreadState2D &thread_state,
                     ObjectState2D &object_state,
+                    std::unordered_map<std::string, std::shared_ptr<Container::TriggerProbe>> *trigger_probes,
                     float skin_width = 1e-2f,
                     float max_velocity = 5000.0f,
                     float offset_above_activation_line = 0.0f,
                     float offset_below_deactivation_line = 1e-2f);
 
+
+                void computeTriggerProbeOverlaps(
+                    const MathCore::vec2f &character_position,
+                    ThreadState2D &thread_state,
+                    std::unordered_map<std::string, std::shared_ptr<Container::TriggerProbe>> *trigger_probes);
                 // float max_velocity = 5000.0f;
 
                 ITK_DECLARE_CREATE_SHARED(Container2D)
