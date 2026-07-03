@@ -23,6 +23,8 @@ namespace AppKit
                                      [](const std::shared_ptr<Structure2D> &a, const std::shared_ptr<Structure2D> &b)
                                      { return a->id < b->id; }),
                     structure);
+                // any modification on data invalidates the created quadtree, so we need to reset it
+                static_quadtree.reset();
             }
             void Container2D::removeStaticStructure(uint32_t idx)
             {
@@ -38,6 +40,9 @@ namespace AppKit
                 //     item->object_state.pass_through_remove_id(idx);
 
                 uuid.release(idx);
+
+                // any modification on data invalidates the created quadtree, so we need to reset it
+                static_quadtree.reset();
             }
             std::shared_ptr<Structure2D> Container2D::getStaticStructure(uint32_t idx)
             {
@@ -57,6 +62,8 @@ namespace AppKit
                                      [](const std::shared_ptr<Structure2D> &a, const std::shared_ptr<Structure2D> &b)
                                      { return a->id < b->id; }),
                     structure);
+                // any modification on data invalidates the created quadtree, so we need to reset it
+                dynamic_quadtree.reset();
             }
             void Container2D::removeDynamicStructure(uint32_t idx)
             {
@@ -72,6 +79,8 @@ namespace AppKit
                 //     item->object_state.pass_through_remove_id(idx);
 
                 uuid.release(idx);
+                // any modification on data invalidates the created quadtree, so we need to reset it
+                dynamic_quadtree.reset();
             }
 
             std::shared_ptr<Structure2D> Container2D::getDynamicStructure(uint32_t idx)
@@ -84,8 +93,13 @@ namespace AppKit
                 return (*it);
             }
 
-            void Container2D::buildStaticQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_)
+            bool Container2D::isStaticQuadtreeBuilt() const { return static_quadtree != nullptr; }
+            bool Container2D::isDynamicQuadtreeBuilt() const { return dynamic_quadtree != nullptr; }
+
+            void Container2D::buildStaticQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_, bool if_created_skip)
             {
+                if (if_created_skip && static_quadtree)
+                    return;
                 static_always_check.clear();
 
                 for (uint32_t i = 0; i < static_structures.size(); ++i)
@@ -95,8 +109,10 @@ namespace AppKit
                 }
                 static_quadtree = STL_Tools::make_unique<Util::Quadtree<Structure2D::QuadtreeIntegration>>(&static_structures, maxDepth_, minPointThresholdToSubdivide_, game_area);
             }
-            void Container2D::buildDynamicQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_)
+            void Container2D::buildDynamicQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_, bool if_created_skip)
             {
+                if (if_created_skip && dynamic_quadtree)
+                    return;
                 dynamic_always_check.clear();
 
                 for (uint32_t i = 0; i < dynamic_structures.size(); ++i)
