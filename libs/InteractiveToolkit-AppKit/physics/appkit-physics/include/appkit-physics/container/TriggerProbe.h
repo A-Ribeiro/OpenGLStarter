@@ -40,6 +40,7 @@ namespace AppKit
                 std::vector<Core::Segment2D> segments;
 
                 MathCore::vec2f offset;
+                MathCore::vec2f character_offset;
                 std::vector<Core::Segment2D> segments_offset_applied;
 
                 Core::Box2D box;
@@ -54,6 +55,7 @@ namespace AppKit
                 EventCore::Event<void(std::shared_ptr<Structure2D> structureTrigger)> onExit;
 
                 void setOffset(const MathCore::vec2f &offset_);
+                void setCharacterOffset(const MathCore::vec2f &offset_);
 
                 static std::shared_ptr<TriggerProbe> FromSegment(
                     const MathCore::vec2f &offset,

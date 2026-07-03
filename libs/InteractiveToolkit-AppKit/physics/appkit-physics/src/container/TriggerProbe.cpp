@@ -32,20 +32,42 @@ namespace AppKit
             void TriggerProbe::setOffset(const MathCore::vec2f &offset_)
             {
                 offset = offset_;
+                setCharacterOffset(character_offset);
+                // if (type == TriggerProbeType::Segment)
+                // {
+                //     segments_offset_applied.clear();
+                //     segments_offset_applied.reserve(segments.size());
+                //     for (const Core::Segment2D &segment : segments)
+                //         segments_offset_applied.push_back(Core::Segment2D(segment.a + offset, segment.b + offset));
+                // }
+                
+                // if (type == TriggerProbeType::Segment || type == TriggerProbeType::Box || type == TriggerProbeType::Circle)
+                // {
+                //     box_offset_applied = box;
+                //     box_offset_applied.min += offset;
+                //     box_offset_applied.max += offset;
+                // }
+            }
+
+            void TriggerProbe::setCharacterOffset(const MathCore::vec2f &offset_)
+            {
+                character_offset = offset_;
+
+                auto total_offset = offset + character_offset;
 
                 if (type == TriggerProbeType::Segment)
                 {
                     segments_offset_applied.clear();
                     segments_offset_applied.reserve(segments.size());
                     for (const Core::Segment2D &segment : segments)
-                        segments_offset_applied.push_back(Core::Segment2D(segment.a + offset, segment.b + offset));
+                        segments_offset_applied.push_back(Core::Segment2D(segment.a + total_offset, segment.b + total_offset));
                 }
                 
                 if (type == TriggerProbeType::Segment || type == TriggerProbeType::Box || type == TriggerProbeType::Circle)
                 {
                     box_offset_applied = box;
-                    box_offset_applied.min += offset;
-                    box_offset_applied.max += offset;
+                    box_offset_applied.min += total_offset;
+                    box_offset_applied.max += total_offset;
                 }
             }
 

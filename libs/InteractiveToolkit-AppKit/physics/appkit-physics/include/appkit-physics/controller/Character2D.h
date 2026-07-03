@@ -17,6 +17,8 @@
 // #include <appkit-physics/util/Uuid.h>
 #include <appkit-physics/velocity-helpers/JumpState.h>
 
+#include <appkit-physics/container/TriggerProbe.h>
+
 namespace AppKit
 {
     namespace Physics
@@ -62,6 +64,9 @@ namespace AppKit
 
                 float offset_above_activation_line;
                 float offset_below_deactivation_line;
+
+
+                std::unordered_map<std::string, std::shared_ptr<Container::TriggerProbe>> trigger_probes;
 
                 Character2D();
 

@@ -14,28 +14,76 @@ namespace AppKit
                 Util::Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
                 const std::vector<std::shared_ptr<Structure2D>> &structures,
                 const MathCore::vec2f &min, const MathCore::vec2f &max,
-                bool clear_structure_ptrs)
+                bool clear_structure_ptrs,
+                uint32_t query_mask)
             {
                 quadtree_ids.clear();
                 quadtree->query_box(min, max, &quadtree_ids, &tmp_array);
                 if (clear_structure_ptrs)
                     structure_ptrs.clear();
-                for (uint32_t idx : quadtree_ids)
-                    structure_ptrs.push_back(structures[idx].get());
+                if (query_mask == QUERY_MASK_ONLY_TRIGGERS)
+                {
+                    for (uint32_t idx : quadtree_ids)
+                    {
+                        if (structures[idx]->type < StructureType::BoxTrigger ||
+                            structures[idx]->type > StructureType::SegmentTrigger)
+                            continue;
+                        structure_ptrs.push_back(structures[idx].get());
+                    }
+                }
+                else if (query_mask == QUERY_MASK_ONLY_SOLID)
+                {
+                    for (uint32_t idx : quadtree_ids)
+                    {
+                        if (structures[idx]->type >= StructureType::BoxTrigger &&
+                            structures[idx]->type <= StructureType::SegmentTrigger)
+                            continue;
+                        structure_ptrs.push_back(structures[idx].get());
+                    }
+                }
+                else
+                {
+                    for (uint32_t idx : quadtree_ids)
+                        structure_ptrs.push_back(structures[idx].get());
+                }
             }
 
             void ThreadState2D::query_segment_radius(
                 Util::Quadtree<Structure2D::QuadtreeIntegration> *quadtree,
                 const std::vector<std::shared_ptr<Structure2D>> &structures,
                 const MathCore::vec2f &a, const MathCore::vec2f &b, float radius,
-                bool clear_structure_ptrs)
+                bool clear_structure_ptrs,
+                uint32_t query_mask)
             {
                 quadtree_ids.clear();
                 quadtree->query_segment_radius(a, b, radius, &quadtree_ids, &tmp_array);
                 if (clear_structure_ptrs)
                     structure_ptrs.clear();
-                for (uint32_t idx : quadtree_ids)
-                    structure_ptrs.push_back(structures[idx].get());
+                if (query_mask == QUERY_MASK_ONLY_TRIGGERS)
+                {
+                    for (uint32_t idx : quadtree_ids)
+                    {
+                        if (structures[idx]->type < StructureType::BoxTrigger ||
+                            structures[idx]->type > StructureType::SegmentTrigger)
+                            continue;
+                        structure_ptrs.push_back(structures[idx].get());
+                    }
+                }
+                else if (query_mask == QUERY_MASK_ONLY_SOLID)
+                {
+                    for (uint32_t idx : quadtree_ids)
+                    {
+                        if (structures[idx]->type >= StructureType::BoxTrigger &&
+                            structures[idx]->type <= StructureType::SegmentTrigger)
+                            continue;
+                        structure_ptrs.push_back(structures[idx].get());
+                    }
+                }
+                else
+                {
+                    for (uint32_t idx : quadtree_ids)
+                        structure_ptrs.push_back(structures[idx].get());
+                }
             }
         }
     }
