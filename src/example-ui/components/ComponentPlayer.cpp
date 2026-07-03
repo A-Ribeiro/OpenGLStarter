@@ -64,6 +64,8 @@ namespace AppKit
                     5.0f,                          // walk_velocity
                     50.0f                          // max_velocity
                 };
+
+                character2D = AppKit::Physics::Controller::Character2D::CreateShared();
             }
 
             ComponentPlayer::~ComponentPlayer()
@@ -76,8 +78,7 @@ namespace AppKit
             {
                 initial_z = getTransform()->getLocalPosition().z;
 
-                character2D = AppKit::Physics::Controller::Character2D::CreateShared();
-                *character2D = AppKit::Physics::Controller::Character2D::fromStaticConfig(
+                character2D->setStaticConfig(
                     Radius.c_val(),
                     RadiusGrounded.c_val(),
                     OffsetGrounded.c_val() - Offset.c_val().y,
