@@ -40,7 +40,7 @@ namespace AppKit
                 //     for (const Core::Segment2D &segment : segments)
                 //         segments_offset_applied.push_back(Core::Segment2D(segment.a + offset, segment.b + offset));
                 // }
-                
+
                 // if (type == TriggerProbeType::Segment || type == TriggerProbeType::Box || type == TriggerProbeType::Circle)
                 // {
                 //     box_offset_applied = box;
@@ -62,7 +62,7 @@ namespace AppKit
                     for (const Core::Segment2D &segment : segments)
                         segments_offset_applied.push_back(Core::Segment2D(segment.a + total_offset, segment.b + total_offset));
                 }
-                
+
                 if (type == TriggerProbeType::Segment || type == TriggerProbeType::Box || type == TriggerProbeType::Circle)
                 {
                     box_offset_applied = box;
@@ -153,76 +153,153 @@ namespace AppKit
                 return box.getSize();
             }
 
-            void TriggerProbe::startOverlapCheck() {
+            void TriggerProbe::startOverlapCheck()
+            {
                 // active_structures.clear();
-                // current_structures.clear();
+                current_structures.clear();
             }
 
-            void TriggerProbe::endOverlapCheck() {
-                // for (const auto &pair : active_structures) {
-                //     if (pair.second) {
-                //         onExit(pair.first);
-                //     }
-                // }
+            void TriggerProbe::endOverlapCheck()
+            {
+                // for active_structures not in current_structures
+                for (auto it = active_structures.begin(); it != active_structures.end(); ++it)
+                {
+                    auto structure_ptr = it->first;
+                    if (current_structures.find(structure_ptr) == current_structures.end())
+                    {
+                        // not found, trigger exit
+                        onExit(structure_ptr);
+                    }
+                }
+
+                // for current_structures not in active_structures
+                for (auto it = current_structures.begin(); it != current_structures.end(); ++it)
+                {
+                    auto structure_ptr = it->first;
+                    if (active_structures.find(structure_ptr) == active_structures.end())
+                    {
+                        // not found, trigger enter
+                        onEnter(structure_ptr);
+                    }
+                }
+
+                std::swap(active_structures, current_structures);
             }
 
             void TriggerProbe::checkStructureOverlap(std::shared_ptr<Structure2D> structureTrigger)
             {
-                // if (type == StructureType::Box)
-                // {
-                //     return box.isPointInside(point);
-                // }
-                // else if (type == StructureType::Circle)
-                // {
-                //     return MathCore::OP<MathCore::vec2f>::sqrDistance(box.getCenter(), point) <= (circle_radius * circle_radius);
-                // }
-                // else if (type == StructureType::ClosedPolygon)
-                // {
-                //     if (!box.isPointInside(point))
-                //         return false;
+                if (structureTrigger->type == StructureType::BoxTrigger)
+                {
+                    if (type == TriggerProbeType::Box)
+                    {
+                        if (box_offset_applied.overlaps(structureTrigger->box))
+                            current_structures[structureTrigger] = true;
+                    }
+                    else if (type == TriggerProbeType::Circle)
+                    {
+                        auto center = box_offset_applied.getCenter();
+                        auto structure_closes_pt_box = structureTrigger->box.closestPoint(center);
+                        float dst_to_center = MathCore::OP<MathCore::vec2f>::sqrDistance(structure_closes_pt_box, center);
+                        if (dst_to_center <= (circle_radius * circle_radius))
+                            current_structures[structureTrigger] = true;
+                    }
+                    else if (type == TriggerProbeType::Segment)
+                    {
+                        const auto &struct_box = structureTrigger->box;
+                        for (const Core::Segment2D &probe_segment : segments_offset_applied)
+                        {
+                            if (probe_segment.intersectsBox(struct_box))
+                            {
+                                current_structures[structureTrigger] = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else if (structureTrigger->type == StructureType::CircleTrigger)
+                {
+                    if (type == TriggerProbeType::Box)
+                    {
+                        auto structure_center = structureTrigger->box.getCenter();
+                        float structure_radius = structureTrigger->circle_radius;
+                        auto closes_pt_box = box_offset_applied.closestPoint(structure_center);
+                        float structure_dst_to_center = MathCore::OP<MathCore::vec2f>::sqrDistance(closes_pt_box, structure_center);
 
-                //     bool inside = false;
-                //     size_t count = segments.size();
-                //     if (count < 3)
-                //         return false; // A polygon must have at least 3 points
-                //     size_t prev_i = count - 1;
-                //     for (size_t i = 0; i < count; i++)
-                //     {
-                //         const MathCore::vec2f &pt_curr = segments[i].a;
-                //         const MathCore::vec2f &pt_prev = segments[prev_i].a;
-                //         // check if the point is within the y-bounds of the polygon edge
-                //         if ((pt_curr.y > point.y) != (pt_prev.y > point.y))
-                //         {
-                //             if (pt_curr.x > point.x && pt_prev.x > point.x)
-                //             {
-                //                 // both points are to the right of the point
-                //                 // the edge is always to the right of the point
-                //                 inside = !inside;
-                //             }
-                //             else
-                //             {
-                //                 // if pt_curr is at bottom
-                //                 // if side is positive, the point is to the left of the edge (edge is at right)
-                //                 // if side is negative, the point is to the right of the edge (edge is at left)
+                        if (structure_dst_to_center <= (structure_radius * structure_radius))
+                            current_structures[structureTrigger] = true;
+                    }
+                    else if (type == TriggerProbeType::Circle)
+                    {
+                        auto structure_center = structureTrigger->box.getCenter();
+                        float structure_radius = structureTrigger->circle_radius;
+                        auto center = box_offset_applied.getCenter();
+                        float total_radius = structure_radius + circle_radius;
 
-                //                 // if pt_prev is at bottom
-                //                 // the side will be reversed
-                //                 float side = MathCore::OP<MathCore::vec2f>::orientation(pt_curr, pt_prev, point);
+                        float dst_center_to_center = MathCore::OP<MathCore::vec2f>::sqrDistance(structure_center, center);
+                        if (dst_center_to_center <= (total_radius * total_radius))
+                            current_structures[structureTrigger] = true;
+                    }
+                    else if (type == TriggerProbeType::Segment)
+                    {
+                        auto structure_center = structureTrigger->box.getCenter();
+                        float structure_radius = structureTrigger->circle_radius;
+                        float structure_radius_sq = structure_radius * structure_radius;
+                        for (const Core::Segment2D &probe_segment : segments_offset_applied)
+                        {
+                            auto closest_pt = probe_segment.closestPoint(structure_center);
+                            float dst_to_center = MathCore::OP<MathCore::vec2f>::sqrDistance(closest_pt, structure_center);
+                            if (dst_to_center <= structure_radius_sq)
+                            {
+                                current_structures[structureTrigger] = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else if (structureTrigger->type == StructureType::SegmentTrigger)
+                {
+                    if (type == TriggerProbeType::Box)
+                    {
+                        for (const Core::Segment2D &struct_segment : structureTrigger->segments)
+                        {
+                            if (struct_segment.intersectsBox(box_offset_applied))
+                            {
+                                current_structures[structureTrigger] = true;
+                                break;
+                            }
+                        }
+                    }
+                    else if (type == TriggerProbeType::Circle)
+                    {
+                        auto center = box_offset_applied.getCenter();
+                        float circle_radius_sq = circle_radius * circle_radius;
 
-                //                 // if prev is at bottom
-                //                 // flip the side
-                //                 if (pt_prev.y < pt_curr.y)
-                //                     side = -side;
-
-                //                 if (side > 0)
-                //                     inside = !inside;
-                //             }
-                //         }
-                //         prev_i = i;
-                //     }
-                //     return inside;
-                // }
-                // return false;
+                        for (const Core::Segment2D &struct_segment : structureTrigger->segments)
+                        {
+                            auto closest_pt = struct_segment.closestPoint(center);
+                            float dst_to_center = MathCore::OP<MathCore::vec2f>::sqrDistance(closest_pt, center);
+                            if (dst_to_center <= circle_radius_sq)
+                            {
+                                current_structures[structureTrigger] = true;
+                                break;
+                            }
+                        }
+                    }
+                    else if (type == TriggerProbeType::Segment)
+                    {
+                        for (const Core::Segment2D &probe_segment : segments_offset_applied)
+                        {
+                            for (const Core::Segment2D &struct_segment : structureTrigger->segments)
+                            {
+                                if (probe_segment.intersects(struct_segment))
+                                {
+                                    current_structures[structureTrigger] = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
         }
