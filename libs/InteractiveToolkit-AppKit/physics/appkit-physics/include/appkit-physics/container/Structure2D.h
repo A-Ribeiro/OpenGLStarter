@@ -30,7 +30,7 @@ namespace AppKit
 
             class Structure2D
             {
-                void computeBox();
+                void computeSegmentBox();
 
                 void computePassThroughLines(const MathCore::vec2f &pass_through_normal_hint);
 

@@ -45,6 +45,8 @@ namespace AppKit
                 std::unique_ptr<Util::Quadtree<Structure2D::QuadtreeIntegration>> dynamic_quadtree;
                 std::vector<const Structure2D *> dynamic_always_check;
 
+                Container2D() = default;
+
             public:
                 std::vector<std::shared_ptr<Structure2D>> &getStaticStructures();
                 std::vector<std::shared_ptr<Structure2D>> &getDynamicStructures();
@@ -62,8 +64,11 @@ namespace AppKit
                 Core::Line2D game_area_inequality_eq[GameAreaSide_Count];
                 Core::Box2D game_area;
 
-                void buildStaticQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16);
-                void buildDynamicQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16);
+                bool isStaticQuadtreeBuilt() const;
+                bool isDynamicQuadtreeBuilt() const;
+
+                void buildStaticQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16, bool if_created_skip = true);
+                void buildDynamicQuadtree(int32_t maxDepth_ = 8, int32_t minPointThresholdToSubdivide_ = 16, bool if_created_skip = true);
 
                 void clearStatic();
                 void clearDynamic();

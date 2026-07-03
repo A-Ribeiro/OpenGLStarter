@@ -15,7 +15,7 @@ namespace AppKit
     {
         namespace Container
         {
-            void Structure2D::computeBox()
+            void Structure2D::computeSegmentBox()
             {
                 box.makeEmpty();
 
@@ -118,9 +118,7 @@ namespace AppKit
                 snprintf(result->tag, 32, "%s", tag);
                 result->type = StructureType::Segment;
                 result->segments[0] = segment;
-
-                result->computeBox();
-
+                result->computeSegmentBox();
                 result->computePassThroughLines(pass_through_normal_hint);
 
                 return result;
@@ -137,8 +135,7 @@ namespace AppKit
                 snprintf(result->tag, 32, "%s", tag);
                 result->type = StructureType::Segment;
                 result->segments[0] = segment;
-
-                result->computeBox();
+                result->computeSegmentBox();
 
                 return result;
             }
@@ -154,8 +151,7 @@ namespace AppKit
                 snprintf(result->tag, 32, "%s", tag);
                 result->type = StructureType::Segment;
                 result->segments.assign(segments.begin(), segments.end());
-
-                result->computeBox();
+                result->computeSegmentBox();
 
                 return result;
             }
@@ -198,7 +194,7 @@ namespace AppKit
                     }
                 }
 
-                result->computeBox();
+                result->computeSegmentBox();
 
                 return result;
             }
@@ -209,15 +205,12 @@ namespace AppKit
                 const MathCore::vec2f &center,
                 const MathCore::vec2f &size)
             {
-
                 auto result = Structure2D::CreateShared(4);
 
                 result->friction = friction;
                 snprintf(result->tag, 32, "%s", tag);
                 result->type = StructureType::Box;
-
                 MathCore::vec2f half_size = size * 0.5f;
-
                 result->box = Core::Box2D(center - half_size, center + half_size);
 
                 result->segments[0] = Core::Segment2D(result->box.min, MathCore::vec2f(result->box.max.x, result->box.min.y));
@@ -234,13 +227,11 @@ namespace AppKit
                 const MathCore::vec2f &min,
                 const MathCore::vec2f &max)
             {
-
                 auto result = Structure2D::CreateShared(4);
 
                 result->friction = friction;
                 snprintf(result->tag, 32, "%s", tag);
                 result->type = StructureType::Box;
-
                 result->box = Core::Box2D(min, max);
 
                 result->segments[0] = Core::Segment2D(result->box.min, MathCore::vec2f(result->box.max.x, result->box.min.y));
@@ -258,13 +249,11 @@ namespace AppKit
                 float radius,
                 int segment_count)
             {
-
                 auto result = Structure2D::CreateShared(segment_count);
 
                 result->friction = friction;
                 snprintf(result->tag, 32, "%s", tag);
                 result->type = StructureType::Circle;
-
                 result->box.wrapCircle(center, radius);
                 result->circle_radius = radius;
 
@@ -310,7 +299,7 @@ namespace AppKit
                 snprintf(result->tag, 32, "%s", tag);
                 result->type = StructureType::SegmentTrigger;
                 result->segments[0] = segment;
-                result->computeBox();
+                result->computeSegmentBox();
                 return result;
             }
 
@@ -322,7 +311,7 @@ namespace AppKit
                 snprintf(result->tag, 32, "%s", tag);
                 result->type = StructureType::SegmentTrigger;
                 result->segments.assign(segments.begin(), segments.end());
-                result->computeBox();
+                result->computeSegmentBox();
                 return result;
             }
 
