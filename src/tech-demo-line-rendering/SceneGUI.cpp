@@ -8,6 +8,8 @@ using namespace AppKit::OpenGL;
 using namespace AppKit::Window::Devices;
 using namespace MathCore;
 
+const AppKit::GLEngine::SceneBaseType SceneGUI::Type = "SceneGUI";
+
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void SceneGUI::loadResources()
 {
@@ -118,7 +120,7 @@ SceneGUI::SceneGUI(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
-    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow, SceneGUI::Type)
 {
     button = nullptr;
 }

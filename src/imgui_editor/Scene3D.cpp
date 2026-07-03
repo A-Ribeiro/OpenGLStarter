@@ -26,6 +26,8 @@ static bool ReplaceMaterial(std::shared_ptr<Transform> element, void *userData)
     return true;
 }
 
+const AppKit::GLEngine::SceneBaseType Scene3D::Type = "Scene3D";
+
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void Scene3D::loadResources()
 {
@@ -83,7 +85,7 @@ void Scene3D::unloadAll()
 }
 
 Scene3D::Scene3D(App *app, std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow)
-    : AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelper, &app->resourceMap, renderWindow)
+    : AppKit::GLEngine::SceneBase(&app->time, &app->renderPipeline, &app->resourceHelper, &app->resourceMap, renderWindow, Scene3D::Type)
 {
     this->app = app;
     this->renderWindow = renderWindow;

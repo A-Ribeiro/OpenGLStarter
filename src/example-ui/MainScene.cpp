@@ -38,6 +38,8 @@ using namespace MathCore;
 
 MainScene *MainScene::currentInstance = nullptr;
 
+const AppKit::GLEngine::SceneBaseType MainScene::Type = "MainScene";
+
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void MainScene::loadResources()
 {
@@ -470,7 +472,7 @@ MainScene::MainScene(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
-    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow),
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow, MainScene::Type),
                                                                           random32(ITKCommon::RandomDefinition<uint32_t>::randomSeed()),
                                                                           mathRandom(&random32),
                                                                           transformPool(false)

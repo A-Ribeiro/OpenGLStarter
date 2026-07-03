@@ -28,6 +28,7 @@ protected:
         std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow);
 public:
     friend class AppKit::GLEngine::SceneBase;
+    static const AppKit::GLEngine::SceneBaseType Type;
 
     //left
     AppKit::GLEngine::Button* button_NormalMap;

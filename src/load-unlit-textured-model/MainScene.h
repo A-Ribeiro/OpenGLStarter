@@ -62,6 +62,8 @@ namespace Scenes {
 
     public:
         friend class SceneBase;
+        static const AppKit::GLEngine::SceneBaseType Type;
+
 
         App *app;
 

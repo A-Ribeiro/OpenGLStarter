@@ -1323,8 +1323,9 @@ namespace AppKit
             if (maxLevel > 0)
             {
                 for (auto &chld : children)
-                    if (!chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel))
-                        return false;
+                    chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel);
+                    // if (!chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel))
+                    //     return false;
             }
             return true;
         }
@@ -1452,8 +1453,9 @@ namespace AppKit
             if (maxLevel > 0)
             {
                 for (auto &chld : children)
-                    if (!chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel))
-                        return false;
+                    chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel);
+                    // if (!chld->traversePreOrder_DepthFirst(OnNode, userData, maxLevel))
+                    //     return false;
             }
             return true;
         }

@@ -34,6 +34,8 @@ static bool ReplaceMaterial(std::shared_ptr<Transform> element, void *userData)
     return true;
 }
 
+const AppKit::GLEngine::SceneBaseType ScenePalace::Type = "ScenePalace";
+
 // to load skybox, textures, cubemaps, 3DModels and setup materials
 void ScenePalace::loadResources()
 {
@@ -275,7 +277,7 @@ ScenePalace::ScenePalace(
     AppKit::GLEngine::RenderPipeline *_renderPipeline,
     AppKit::GLEngine::ResourceHelper *_resourceHelper,
     AppKit::GLEngine::ResourceMap *_resourceMap,
-    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow)
+    std::shared_ptr<AppKit::GLEngine::RenderWindowRegion> renderWindow) : AppKit::GLEngine::SceneBase(_time, _renderPipeline, _resourceHelper, _resourceMap, renderWindow, ScenePalace::Type)
 {
     Model_Palace = nullptr;
     // Model_Cross = nullptr;

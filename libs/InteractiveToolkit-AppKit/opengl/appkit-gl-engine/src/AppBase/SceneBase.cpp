@@ -15,7 +15,8 @@ namespace AppKit
             RenderPipeline *_renderPipeline,
             ResourceHelper *_resourceHelper,
             ResourceMap *_resourceMap,
-            std::shared_ptr<RenderWindowRegion> renderWindow)
+            std::shared_ptr<RenderWindowRegion> renderWindow,
+            SceneBaseType type_const_ref)
         {
 
             this->time = _time;
@@ -23,9 +24,24 @@ namespace AppKit
             this->resourceHelper = _resourceHelper;
             this->resourceMap = _resourceMap;
             this->renderWindow = renderWindow;
+            this->type_const_ref = type_const_ref;
 
             // camera = nullptr;
             // root = nullptr;
+        }
+
+        SceneBaseType SceneBase::getType() const
+        {
+            return type_const_ref;
+            // return type.c_str();
+        }
+
+        bool SceneBase::compareType(SceneBaseType t) const
+        {
+            return (type_const_ref == t);
+            // if (type_const_ref == t)
+            // return true;
+            // return strcmp(type_const_ref,t) == 0;
         }
 
         void SceneBase::load()

@@ -57,6 +57,7 @@ protected:
     );
 public:
     friend class AppKit::GLEngine::SceneBase;
+    static const AppKit::GLEngine::SceneBaseType Type;
 
     App *app;
 

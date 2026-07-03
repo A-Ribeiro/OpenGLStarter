@@ -116,6 +116,9 @@ namespace AppKit
             {
                 if (if_created_skip && dynamic_quadtree)
                     return;
+                
+                printf("Building dynamic quadtree with %zu structures\n", dynamic_structures.size());
+
                 dynamic_always_check.clear();
 
                 for (uint32_t i = 0; i < dynamic_structures.size(); ++i)
