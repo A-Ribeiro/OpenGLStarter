@@ -11,6 +11,14 @@ struct OutputInfo
     std::string model;
 
     wl_output *output;
+
+    int32_t x = 0;
+    int32_t y = 0;
+
+    int32_t mwidth = 0;
+    int32_t mheight = 0;
+
+    int32_t refresh = 0;
 };
 
 // Callback for geometry event
@@ -22,6 +30,12 @@ static void handle_geometry(void *data, struct wl_output *output,
     OutputInfo *info = static_cast<OutputInfo *>(data);
     info->make = make;
     info->model = model;
+
+    info->x = x;
+    info->y = y;
+
+    info->mwidth = physical_width;
+    info->mheight = physical_height;
 }
 
 // Callback for mode event
@@ -33,6 +47,7 @@ static void handle_mode(void *data, struct wl_output *output,
     {
         info->width = width;
         info->height = height;
+        info->refresh = refresh;
     }
 
     std::cout << "info->width: " << info->width << " info->height: " << info->height << "\n";
@@ -126,8 +141,11 @@ int main_2()
     for (const auto &output : wldata.outputs)
     {
         std::cout << "Monitor: " << output.make << " " << output.model << "\n";
-        std::cout << "Resolution: " << output.width << "x" << output.height << "\n";
+        std::cout << "Position: " << output.x << " " << output.x << "\n";
+        std::cout << "Resolution: " << output.width << "x" << output.height << " " << (float)output.refresh * 1e-3f << "hz" << "\n";
         std::cout << "Scale: " << output.scale << "\n";
+        std::cout << "RealSize: " << output.mwidth << "x" << output.mheight << " mm" << "\n";
+
 
         wl_output_destroy(output.output);
     }
