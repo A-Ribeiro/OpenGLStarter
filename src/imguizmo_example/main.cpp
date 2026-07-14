@@ -1,3 +1,6 @@
+#define ASAN_CONFIG_OPENGL
+// #define ASAN_CONFIG_CUDA
+#include <InteractiveToolkit-Extension/asan-config/all.inl>
 // https://github.com/CedricGuillemet/ImGuizmo
 // v 1.89 WIP
 //

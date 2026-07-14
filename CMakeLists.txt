@@ -34,6 +34,12 @@ if( NOT CMAKE_BUILD_TYPE AND (NOT WIN32 OR CMAKE_COMPILER_IS_GNUCXX) )
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS None Debug Release RelWithDebInfo MinSizeRel)
 endif()
 
+if (UNIX)
+    set( LEAK_ANALYSE_TOOL libasan CACHE STRING
+        "Choose the type of debug option: libasan Valgrind.")
+    set_property(CACHE LEAK_ANALYSE_TOOL PROPERTY STRINGS libasan Valgrind)
+endif()
+
 # configure compile vars
 if(WIN32)
     #
@@ -84,8 +90,15 @@ elseif(UNIX)
         add_definitions(-DNDEBUG)
         add_compile_options(-O3 -fno-strict-aliasing)
     elseif( CMAKE_BUILD_TYPE STREQUAL "Debug")
-        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-        SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address") # -static-libasan
+        if (LEAK_ANALYSE_TOOL STREQUAL "Valgrind")
+            # valgrind options
+            add_compile_options(-g -O0 -fno-inline -fno-omit-frame-pointer)
+            SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -no-pie")
+        elseif(LEAK_ANALYSE_TOOL STREQUAL "libasan")
+            # libasan options
+            add_compile_options(-g -O0 -fno-inline -fsanitize=address -fno-omit-frame-pointer)
+            SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -no-pie -fsanitize=address") # -static-libasan
+        endif()
     endif()
 else()
     message(FATAL_ERROR "Cmake not configured for this OS")

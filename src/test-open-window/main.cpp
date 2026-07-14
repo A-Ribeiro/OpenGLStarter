@@ -1,3 +1,6 @@
+#define ASAN_CONFIG_OPENGL
+// #define ASAN_CONFIG_CUDA
+#include <InteractiveToolkit-Extension/asan-config/all.inl>
 #include <InteractiveToolkit/InteractiveToolkit.h>
 // #include <InteractiveToolkit-Extension/InteractiveToolkit-Extension.h>
 #include <AppKit/window/Window.h>
