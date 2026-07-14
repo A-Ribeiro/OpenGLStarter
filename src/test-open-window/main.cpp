@@ -7,11 +7,11 @@
 // #include <SFML/Window.hpp>
 // #include <SFML/Graphics.hpp>
 
-#include "wayland_query_monitors.h"
+#include "monitors_main.h"
 
 int main(int argc, char *argv[])
 {
-    main_2();
+    run_wayland_queries();
     return 0;
 
 
