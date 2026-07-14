@@ -11,6 +11,9 @@
 
 int main(int argc, char *argv[])
 {
+    if (const char* env_p = std::getenv("WAYLAND_DISPLAY")) 
+    {
+    }
     run_wayland_queries();
     return 0;
 
