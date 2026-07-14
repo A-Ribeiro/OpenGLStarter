@@ -104,6 +104,9 @@ static const struct wl_registry_listener registry_listener = {
 
 int main_2()
 {
+    if (const char* env_p = std::getenv("WAYLAND_DISPLAY")) {
+        printf("WAYLAND MONITORS!!!\n");
+    }
 
     WaylandData wldata;
 
