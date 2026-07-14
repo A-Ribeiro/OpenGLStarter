@@ -1,3 +1,9 @@
+#if !defined(NDEBUG) && (defined(__clang__) || defined(__GNUC__))
+#if defined(__has_include) && __has_include(<sanitizer/lsan_interface.h>)
+#include <sanitizer/lsan_interface.h>
+#define WITH_LSAN_DISABLE 1
+#endif
+#endif
 #include <appkit-gl-base/GLPostProcess.h>
 #include <appkit-gl-base/platform/PlatformGL.h>
 
@@ -114,6 +120,12 @@ namespace AppKit
 
         void GLPostProcess::drawQuad(GLPostProcessingShader *shader)
         {
+// Everything allocated within this scope (including inside the driver
+// by glDrawElements) will be completely ignored by LeakSanitizer.
+#ifdef WITH_LSAN_DISABLE
+            __lsan::ScopedDisabler disabler;
+#endif
+
             const MathCore::vec2f vpos[] = {
                 MathCore::vec2f(-1, -1),
                 MathCore::vec2f(1, -1),

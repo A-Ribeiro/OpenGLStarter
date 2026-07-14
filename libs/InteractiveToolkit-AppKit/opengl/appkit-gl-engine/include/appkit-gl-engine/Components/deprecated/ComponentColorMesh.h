@@ -1,5 +1,12 @@
 #pragma once
 
+#if !defined(NDEBUG) && (defined(__clang__) || defined(__GNUC__))
+#if defined(__has_include) && __has_include(<sanitizer/lsan_interface.h>)
+#include <sanitizer/lsan_interface.h>
+#define WITH_LSAN_DISABLE 1
+#endif
+#endif
+
 #include <InteractiveToolkit/MathCore/MathCore.h>
 
 #include <appkit-gl-base/GLVertexBufferObject.h>
@@ -139,6 +146,11 @@ namespace AppKit
 
                 void draw()
                 {
+// Everything allocated within this scope (including inside the driver
+// by glDrawElements) will be completely ignored by LeakSanitizer.
+#ifdef WITH_LSAN_DISABLE
+            __lsan::ScopedDisabler disabler;
+#endif
                     if (vbo_indexCount > 0)
                     {
                         vbo_index->drawIndex(GL_TRIANGLES, vbo_indexCount, GL_UNSIGNED_INT);
