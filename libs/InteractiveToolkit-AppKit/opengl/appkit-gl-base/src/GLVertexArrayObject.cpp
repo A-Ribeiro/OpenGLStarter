@@ -1,4 +1,4 @@
-#if defined(__clang__) || defined(__GNUC__)
+#if !defined(NDEBUG) && (defined(__clang__) || defined(__GNUC__))
 #if defined(__has_include) && __has_include(<sanitizer/lsan_interface.h>)
 #include <sanitizer/lsan_interface.h>
 #define WITH_LSAN_DISABLE 1
