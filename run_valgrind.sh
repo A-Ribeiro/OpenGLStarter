@@ -1,16 +1,23 @@
 #!/bin/sh
-#
-# CMake Config to Use Valgrind on Debug
-#
-# add_compile_options(-g -O0 -fno-inline -fno-omit-frame-pointer)
-# SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -no-pie")
-#
-# or
-#
-# target_compile_options(${PROJECT_NAME} PRIVATE -g -O0 -fno-inline -fno-omit-frame-pointer)
-# target_link_options(${PROJECT_NAME} PRIVATE -no-pie)
-#
 
+# Display setup documentation
+echo "================================================================="
+echo "  Memory Leak Analysis Automation"
+echo "================================================================="
+echo "Configure your CMake project using the LEAK_ANALYSE_TOOL flag:"
+echo ""
+echo "  cmake .. -DLEAK_ANALYSE_TOOL=libasan"
+echo "    -> Enables AddressSanitizer. Do NOT use this script."
+echo "    -> Run your binary directly in the terminal."
+echo ""
+echo "  cmake .. -DLEAK_ANALYSE_TOOL=Valgrind"
+echo "    -> Disables ASan and enables maximum debugging symbols."
+echo "    -> Required flags injected by CMake for Valgrind:"
+echo "       -g -O0 -fno-inline -fno-omit-frame-pointer -no-pie"
+echo "================================================================="
+echo " Running Valgrind... Check 'valgrind-out.txt' for the report."
+
+# Execute Valgrind with standard leak-checking parameters
 valgrind --leak-check=full \
          --show-leak-kinds=all \
          --track-origins=yes \
