@@ -1,3 +1,9 @@
+#if !defined(NDEBUG) && (defined(__clang__) || defined(__GNUC__))
+#if defined(__has_include) && __has_include(<sanitizer/lsan_interface.h>)
+#include <sanitizer/lsan_interface.h>
+#define WITH_LSAN_DISABLE 1
+#endif
+#endif
 #include <AppKit/window/Window.h>
 #include <AppKit/window/Event.h>
 
@@ -30,6 +36,16 @@ namespace AppKit
 
         GLWindow::GLWindow(const WindowConfig &_windowConfig, const GLContextConfig &_glContextConfig)
         {
+// Everything allocated within this scope (including inside the driver
+// by glDrawElements) will be completely ignored by LeakSanitizer.
+#ifdef WITH_LSAN_DISABLE
+            __lsan::ScopedDisabler disabler;
+#endif
+#if defined(_WIN32)
+            AppKit_Window_win32_map.erase(this->getNativeWindowHandle());
+            if (AppKit_Window_win32_map.empty())
+                AppKit_Window_win32_draw_on_resize_or_move = nullptr;
+#endif
             libraryHandle = nullptr;
             usr1Handle = nullptr;
             usr2Handle = nullptr;
@@ -103,6 +119,11 @@ namespace AppKit
 
         GLWindow::~GLWindow()
         {
+// Everything allocated within this scope (including inside the driver
+// by glDrawElements) will be completely ignored by LeakSanitizer.
+#ifdef WITH_LSAN_DISABLE
+            __lsan::ScopedDisabler disabler;
+#endif
 #if defined(_WIN32)
             AppKit_Window_win32_map.erase(this->getNativeWindowHandle());
             if (AppKit_Window_win32_map.empty())
