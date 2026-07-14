@@ -1,5 +1,7 @@
 project (test-open-window)
 
+set(CMAKE_CXX_STANDARD 17)
+
 find_package(PkgConfig REQUIRED)
 
 message(STATUS "")

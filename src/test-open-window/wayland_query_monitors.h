@@ -1,9 +1,18 @@
 #include <wayland-client.h>
 #include <iostream>
 #include <list>
+#include <vector>
 
 struct OutputInfo
 {
+    struct Mode
+    {
+        int32_t width = 0;
+        int32_t height = 0;
+        int32_t refresh = 0;
+        uint32_t flags = 0;
+    };
+
     int32_t width = 0;
     int32_t height = 0;
     int32_t scale = 1;
@@ -19,6 +28,7 @@ struct OutputInfo
     int32_t mheight = 0;
 
     int32_t refresh = 0;
+    std::vector<Mode> modes;
 };
 
 // Callback for geometry event
@@ -43,14 +53,14 @@ static void handle_mode(void *data, struct wl_output *output,
                         uint32_t flags, int32_t width, int32_t height, int32_t refresh)
 {
     OutputInfo *info = static_cast<OutputInfo *>(data);
+    info->modes.push_back({width, height, refresh, flags});
+
     if (flags & WL_OUTPUT_MODE_CURRENT)
     {
         info->width = width;
         info->height = height;
         info->refresh = refresh;
     }
-
-    std::cout << "info->width: " << info->width << " info->height: " << info->height << "\n";
 }
 
 // Callback for scale event
@@ -141,11 +151,21 @@ int main_2()
     for (const auto &output : wldata.outputs)
     {
         std::cout << "Monitor: " << output.make << " " << output.model << "\n";
-        std::cout << "Position: " << output.x << " " << output.x << "\n";
-        std::cout << "Resolution: " << output.width << "x" << output.height << " " << (float)output.refresh * 1e-3f << "hz" << "\n";
+        std::cout << "Position: " << output.x << " " << output.y << "\n";
+        std::cout << "Current resolution: " << output.width << "x" << output.height << " " << (float)output.refresh * 1e-3f << "hz" << "\n";
         std::cout << "Scale: " << output.scale << "\n";
         std::cout << "RealSize: " << output.mwidth << "x" << output.mheight << " mm" << "\n";
 
+        std::cout << "Available modes:\n";
+        for (const auto &mode : output.modes)
+        {
+            std::cout << "  " << mode.width << "x" << mode.height << " " << (float)mode.refresh * 1e-3f << "hz";
+            if (mode.flags & WL_OUTPUT_MODE_CURRENT)
+                std::cout << " [current]";
+            if (mode.flags & WL_OUTPUT_MODE_PREFERRED)
+                std::cout << " [preferred]";
+            std::cout << "\n";
+        }
 
         wl_output_destroy(output.output);
     }
