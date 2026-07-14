@@ -1,3 +1,9 @@
+#if !defined(NDEBUG) && (defined(__clang__) || defined(__GNUC__))
+#if defined(__has_include) && __has_include(<sanitizer/lsan_interface.h>)
+#include <sanitizer/lsan_interface.h>
+#define WITH_LSAN_DISABLE 1
+#endif
+#endif
 #include <appkit-gl-engine/Components/Core/ComponentMesh.h>
 #include <appkit-gl-engine/Components/Core/ComponentMeshWrapper.h>
 
@@ -754,6 +760,11 @@ namespace AppKit
 
             void ComponentMesh::draw()
             {
+// Everything allocated within this scope (including inside the driver
+// by glDrawElements) will be completely ignored by LeakSanitizer.
+#ifdef WITH_LSAN_DISABLE
+                __lsan::ScopedDisabler disabler;
+#endif
                 ComputeFormat();
                 if (!format)
                     return;
