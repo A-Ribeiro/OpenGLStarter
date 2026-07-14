@@ -1,3 +1,10 @@
+#if defined(__clang__) || defined(__GNUC__)
+#if defined(__has_include) && __has_include(<sanitizer/lsan_interface.h>)
+#include <sanitizer/lsan_interface.h>
+#define WITH_LSAN_DISABLE 1
+#endif
+#endif
+
 #include <appkit-gl-base/GLVertexArrayObject.h>
 
 #include <appkit-gl-base/platform/PlatformGL.h>
@@ -74,6 +81,11 @@ namespace AppKit
 
         void GLVertexArrayObject::drawIndex(GLint primitive, int count, GLint type, int offset)
         {
+// Everything allocated within this scope (including inside the driver
+// by glDrawElements) will be completely ignored by LeakSanitizer.
+#ifdef WITH_LSAN_DISABLE
+            __lsan::ScopedDisabler disabler;
+#endif
             OPENGL_CMD(glDrawElements(primitive,                // mode
                                       count,                    // count
                                       type,                     // type
@@ -83,6 +95,11 @@ namespace AppKit
 
         void GLVertexArrayObject::drawArrays(GLint primitive, int count, int offset)
         {
+// Everything allocated within this scope (including inside the driver
+// by glDrawElements) will be completely ignored by LeakSanitizer.
+#ifdef WITH_LSAN_DISABLE
+            __lsan::ScopedDisabler disabler;
+#endif
             OPENGL_CMD(glDrawArrays(primitive, offset, count));
         }
     }

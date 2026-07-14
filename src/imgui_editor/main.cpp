@@ -1,3 +1,6 @@
+#define ASAN_CONFIG_OPENGL
+// #define ASAN_CONFIG_CUDA
+#include <InteractiveToolkit-Extension/asan-config/all.inl>
 #include <appkit-gl-engine/Engine.h>
 #include <InteractiveToolkit/ITKCommon/Path.h>
 #include <InteractiveToolkit/Platform/Thread.h>
