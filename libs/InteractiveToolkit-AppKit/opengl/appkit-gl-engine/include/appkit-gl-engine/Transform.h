@@ -22,7 +22,7 @@ namespace AppKit
         // DefineMethodPointer(EventCore::CallbackWrapper, bool, Transform *t, void *userData) ReturnMethodCall(t, userData);
         // DefineMethodPointer(EventCore::CallbackWrapper_const, bool, Transform *t, const void *userData) ReturnMethodCall(t, userData);
 
-        class Transform : public EventCore::HandleCallback
+        class Transform : public EventCore::HandleCallback, public ITKCommon::AttachableObject
         {
             ///////////////////////////////////////////////////////
             //
