@@ -88,6 +88,7 @@ namespace AppKit
                 pass_through_set = false;
                 always_check = false;
                 // pass_through_is_active = true;
+                attachedUserPtr = nullptr;
             }
 
             // bool Structure2D::shouldPassThrough(const MathCore::vec2f &move_direction) const
