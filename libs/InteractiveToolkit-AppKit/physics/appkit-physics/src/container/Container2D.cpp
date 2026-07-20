@@ -31,21 +31,24 @@ namespace AppKit
             }
             void Container2D::removeStaticStructure(uint32_t idx)
             {
-                auto it = std::lower_bound(static_structures.begin(), static_structures.end(), idx,
-                                           [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
-                                           { return structure->id < id; });
-                if (it == static_structures.end() || (*it)->id != idx)
+                if (idx == STRUCTURE2D_ID_INVALID)
                     return;
-                static_structures.erase(it);
-                (*it)->id = STRUCTURE2D_ID_INVALID;
+                late_remove_static[idx] = true;
+                // auto it = std::lower_bound(static_structures.begin(), static_structures.end(), idx,
+                //                            [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
+                //                            { return structure->id < id; });
+                // if (it == static_structures.end() || (*it)->id != idx)
+                //     return;
+                // static_structures.erase(it);
+                // (*it)->id = STRUCTURE2D_ID_INVALID;
 
-                // for (auto &item : jumpingControllerList)
-                //     item->object_state.pass_through_remove_id(idx);
+                // // for (auto &item : jumpingControllerList)
+                // //     item->object_state.pass_through_remove_id(idx);
 
-                uuid.release(idx);
+                // uuid.release(idx);
 
-                // any modification on data invalidates the created quadtree, so we need to reset it
-                static_quadtree.reset();
+                // // any modification on data invalidates the created quadtree, so we need to reset it
+                // static_quadtree.reset();
             }
             std::shared_ptr<Structure2D> Container2D::getStaticStructure(uint32_t idx)
             {
@@ -70,20 +73,25 @@ namespace AppKit
             }
             void Container2D::removeDynamicStructure(uint32_t idx)
             {
-                auto it = std::lower_bound(dynamic_structures.begin(), dynamic_structures.end(), idx,
-                                           [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
-                                           { return structure->id < id; });
-                if (it == dynamic_structures.end() || (*it)->id != idx)
+                if (idx == STRUCTURE2D_ID_INVALID)
                     return;
-                dynamic_structures.erase(it);
-                (*it)->id = STRUCTURE2D_ID_INVALID;
+                late_remove_dynamic[idx] = true;
+                // if (idx == STRUCTURE2D_ID_INVALID)
+                //     return;
+                // auto it = std::lower_bound(dynamic_structures.begin(), dynamic_structures.end(), idx,
+                //                            [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
+                //                            { return structure->id < id; });
+                // if (it == dynamic_structures.end() || (*it)->id != idx)
+                //     return;
+                // dynamic_structures.erase(it);
+                // (*it)->id = STRUCTURE2D_ID_INVALID;
 
-                // for (auto &item : jumpingControllerList)
-                //     item->object_state.pass_through_remove_id(idx);
+                // // for (auto &item : jumpingControllerList)
+                // //     item->object_state.pass_through_remove_id(idx);
 
-                uuid.release(idx);
-                // any modification on data invalidates the created quadtree, so we need to reset it
-                dynamic_quadtree.reset();
+                // uuid.release(idx);
+                // // any modification on data invalidates the created quadtree, so we need to reset it
+                // dynamic_quadtree.reset();
             }
 
             std::shared_ptr<Structure2D> Container2D::getDynamicStructure(uint32_t idx)
@@ -96,13 +104,52 @@ namespace AppKit
                 return (*it);
             }
 
+            void Container2D::lateRemoveStructure(uint32_t idx, bool from_static, bool from_dynamic)
+            {
+                if (idx == STRUCTURE2D_ID_INVALID)
+                    return;
+                if (from_static)
+                {
+                    auto it = std::lower_bound(static_structures.begin(), static_structures.end(), idx,
+                                               [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
+                                               { return structure->id < id; });
+                    if (it != static_structures.end() && (*it)->id == idx)
+                    {
+                        static_structures.erase(it);
+                        (*it)->id = STRUCTURE2D_ID_INVALID;
+                        uuid.release(idx);
+                    }
+                }
+                if (from_dynamic)
+                {
+                    auto it = std::lower_bound(dynamic_structures.begin(), dynamic_structures.end(), idx,
+                                               [](const std::shared_ptr<Structure2D> &structure, uint32_t id)
+                                               { return structure->id < id; });
+                    if (it != dynamic_structures.end() && (*it)->id == idx)
+                    {
+                        dynamic_structures.erase(it);
+                        (*it)->id = STRUCTURE2D_ID_INVALID;
+                        uuid.release(idx);
+                    }
+                }
+            }
+
             bool Container2D::isStaticQuadtreeBuilt() const { return static_quadtree != nullptr; }
             bool Container2D::isDynamicQuadtreeBuilt() const { return dynamic_quadtree != nullptr; }
 
             void Container2D::buildStaticQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_, bool if_created_skip)
             {
-                if (if_created_skip && static_quadtree)
+                if (if_created_skip && static_quadtree && late_remove_static.empty())
                     return;
+
+                if (!late_remove_static.empty())
+                {
+                    static_quadtree.reset();
+                    for (const auto &pair : late_remove_static)
+                        lateRemoveStructure(pair.first, true, false);
+                    late_remove_static.clear();
+                }
+
                 static_always_check.clear();
 
                 for (uint32_t i = 0; i < static_structures.size(); ++i)
@@ -114,9 +161,17 @@ namespace AppKit
             }
             void Container2D::buildDynamicQuadtree(int32_t maxDepth_, int32_t minPointThresholdToSubdivide_, bool if_created_skip)
             {
-                if (if_created_skip && dynamic_quadtree)
+                if (if_created_skip && dynamic_quadtree && late_remove_dynamic.empty())
                     return;
-                
+
+                if (!late_remove_dynamic.empty())
+                {
+                    dynamic_quadtree.reset();
+                    for (const auto &pair : late_remove_dynamic)
+                        lateRemoveStructure(pair.first, false, true);
+                    late_remove_dynamic.clear();
+                }
+
                 printf("Building dynamic quadtree with %zu structures\n", dynamic_structures.size());
 
                 dynamic_always_check.clear();

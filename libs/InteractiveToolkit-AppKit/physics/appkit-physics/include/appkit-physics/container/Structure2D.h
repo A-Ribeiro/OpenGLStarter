@@ -70,60 +70,8 @@ namespace AppKit
                 uint32_t id;
 
                 void* attachedUserPtr;
-                std::weak_ptr<ITKCommon::AttachableObject> attachedWeakObject;
-                std::shared_ptr<ITKCommon::AttachableObject> attachedSharedObject;
-
-                // weak ptr ops
-                template <typename _ChildClassType>
-                inline typename std::enable_if<
-                    !std::is_same<_ChildClassType, ITKCommon::AttachableObject>::value &&
-                        std::is_base_of<ITKCommon::AttachableObject, _ChildClassType>::value,
-                    std::shared_ptr<_ChildClassType>>::type
-                weakObjectAs() const { return std::dynamic_pointer_cast<_ChildClassType>(attachedWeakObject.lock()); }
-                template <typename _ParentClassType>
-                inline typename std::enable_if<
-                    !std::is_same<_ParentClassType, ITKCommon::AttachableObject>::value &&
-                        std::is_base_of<_ParentClassType, ITKCommon::AttachableObject>::value,
-                    std::shared_ptr<_ParentClassType>>::type
-                weakObjectAs() const { return std::shared_ptr<_ParentClassType>(attachedWeakObject.lock()); }
-                template <typename _SameClassType>
-                inline typename std::enable_if<
-                    std::is_same<_SameClassType, ITKCommon::AttachableObject>::value,
-                    std::shared_ptr<ITKCommon::AttachableObject>>::type
-                weakObjectAs() const { return attachedWeakObject.lock(); }
-                template <typename _AnyOtherClass>
-                inline typename std::enable_if<
-                    (!std::is_same<_AnyOtherClass, ITKCommon::AttachableObject>::value &&
-                     !std::is_base_of<_AnyOtherClass, ITKCommon::AttachableObject>::value &&
-                     !std::is_base_of<ITKCommon::AttachableObject, _AnyOtherClass>::value),
-                    std::shared_ptr<_AnyOtherClass>>::type
-                weakObjectAs() const { return nullptr; }
-
-                // shared ptr ops
-                template <typename _ChildClassType>
-                inline typename std::enable_if<
-                    !std::is_same<_ChildClassType, ITKCommon::AttachableObject>::value &&
-                        std::is_base_of<ITKCommon::AttachableObject, _ChildClassType>::value,
-                    std::shared_ptr<_ChildClassType>>::type
-                sharedObjectAs() const { return std::dynamic_pointer_cast<_ChildClassType>(attachedSharedObject); }
-                template <typename _ParentClassType>
-                inline typename std::enable_if<
-                    !std::is_same<_ParentClassType, ITKCommon::AttachableObject>::value &&
-                        std::is_base_of<_ParentClassType, ITKCommon::AttachableObject>::value,
-                    std::shared_ptr<_ParentClassType>>::type
-                sharedObjectAs() const { return std::shared_ptr<_ParentClassType>(attachedSharedObject); }
-                template <typename _SameClassType>
-                inline typename std::enable_if<
-                    std::is_same<_SameClassType, ITKCommon::AttachableObject>::value,
-                    std::shared_ptr<ITKCommon::AttachableObject>>::type
-                sharedObjectAs() const { return attachedSharedObject; }
-                template <typename _AnyOtherClass>
-                inline typename std::enable_if<
-                    (!std::is_same<_AnyOtherClass, ITKCommon::AttachableObject>::value &&
-                     !std::is_base_of<_AnyOtherClass, ITKCommon::AttachableObject>::value &&
-                     !std::is_base_of<ITKCommon::AttachableObject, _AnyOtherClass>::value),
-                    std::shared_ptr<_AnyOtherClass>>::type
-                sharedObjectAs() const { return nullptr; }
+                ITKCommon::AttachedWeakObject attachedWeakObject;
+                ITKCommon::AttachedSharedObject attachedSharedObject;
 
                 // bool pass_through_is_inside_or_touching_left_right_bound(const MathCore::vec2f &point, float radius) const;
                 bool pass_through_is_above_activation_line(const MathCore::vec2f &point, float radius, float offset_above) const;

@@ -48,6 +48,9 @@ namespace AppKit
 
                 Container2D();
 
+                std::unordered_map<uint32_t, bool> late_remove_static;
+                std::unordered_map<uint32_t, bool> late_remove_dynamic;
+                void lateRemoveStructure(uint32_t idx, bool from_static, bool from_dynamic);
             public:
                 std::vector<std::shared_ptr<Structure2D>> &getStaticStructures();
                 std::vector<std::shared_ptr<Structure2D>> &getDynamicStructures();

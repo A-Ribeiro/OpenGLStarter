@@ -18,6 +18,29 @@ namespace AppKit
                 has_last_collision_segment = false;
             }
 
+            void Character2D::setGravity(const MathCore::vec2f &gravity)
+            {
+                if (gravityStack.size() == 0)
+                    gravityStack.push_back(GravityDescriptor{});
+
+                auto &gravityInfo = gravityStack.back();
+
+                gravityInfo.gravity = gravity;
+                gravityInfo.gravity_mag = OP<vec2f>::length(gravity);
+                gravityInfo.gravity_dir = gravity * (1.0f / gravityInfo.gravity_mag);
+            }
+
+            void Character2D::pushGravity(const MathCore::vec2f &gravity)
+            {
+                gravityStack.push_back(GravityDescriptor{});
+                setGravity(gravity);
+            }
+            void Character2D::popGravity()
+            {
+                if (gravityStack.size() > 1)
+                    gravityStack.pop_back();
+            }
+
             void Character2D::setStaticConfig(
                 float radius, float radius_grounded, float offset_grounded,
                 float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
@@ -35,12 +58,15 @@ namespace AppKit
                 this->offset_grounded = offset_grounded;
                 this->allow_double_jump = allow_double_jump;
 
-                this->gravity = gravity;
-                this->gravity_mag = OP<vec2f>::length(gravity);
-                this->gravity_dir = gravity * (1.0f / this->gravity_mag);
+                setGravity(gravity);
+                // this->gravity = gravity;
+                // this->gravity_mag = OP<vec2f>::length(gravity);
+                // this->gravity_dir = gravity * (1.0f / this->gravity_mag);
+
+                const auto &gravityInfo = gravityStack.back();
 
                 this->jumpState.configureJump(
-                    jump_risingVelocity, jump_minJumpHeight, jump_maxJumpHeight, jump_secondJumpHeight, -this->gravity_mag);
+                    jump_risingVelocity, jump_minJumpHeight, jump_maxJumpHeight, jump_secondJumpHeight, -gravityInfo.gravity_mag);
 
                 this->skin_width = skin_width;
                 this->offset_above_activation_line = offset_above_activation_line;
@@ -58,24 +84,27 @@ namespace AppKit
             {
                 if (time->deltaTime == 0.0f)
                     return;
+                // copy of the element,
+                // to avoid problem if any event change it in this method
+                auto gravityInfo = gravityStack.back();
 
                 using namespace MathCore;
 
                 // reset acceleration
                 acceleration = vec2f(0.0f, 0.0f);
-                acceleration += gravity;
+                acceleration += gravityInfo.gravity;
 
                 velocity += acceleration * time->deltaTime;
                 velocity = OP<vec2f>::quadraticClamp(vec2f(0.0f, 0.0f), velocity, max_velocity);
 
-                vec2f gravity_up = -gravity_dir;
+                vec2f gravity_up = -gravityInfo.gravity_dir;
                 float velocity_gravity_y = OP<vec2f>::dot(velocity, gravity_up);
 
-                jumpState.updateVelocity(&velocity_gravity_y, // velocityY
-                                         time->deltaTime,     // deltaTime
-                                         -gravity_mag,        // gravity
-                                         jump_pressed,        // jump_pressed
-                                         allow_double_jump);  // allow_double_jump
+                jumpState.updateVelocity(&velocity_gravity_y,      // velocityY
+                                         time->deltaTime,          // deltaTime
+                                         -gravityInfo.gravity_mag, // gravity
+                                         jump_pressed,             // jump_pressed
+                                         allow_double_jump);       // allow_double_jump
 
                 // apply back the jump velocity to the velocity vector
                 // removing velocity in gravity direction and adding the jump velocity in the gravity direction

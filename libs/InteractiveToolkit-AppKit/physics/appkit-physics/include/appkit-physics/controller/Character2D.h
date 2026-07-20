@@ -45,9 +45,12 @@ namespace AppKit
 
                 MathCore::vec2f position;
 
-                MathCore::vec2f gravity;
-                MathCore::vec2f gravity_dir;
-                float gravity_mag;
+                struct GravityDescriptor {
+                    MathCore::vec2f gravity;
+                    MathCore::vec2f gravity_dir;
+                    float gravity_mag;
+                };
+                std::vector<GravityDescriptor> gravityStack;
 
                 float radius;
                 float radius_grounded;
@@ -69,6 +72,11 @@ namespace AppKit
 
 
                 std::unordered_map<std::string, std::shared_ptr<Container::TriggerProbe>> trigger_probes;
+
+
+                void setGravity(const MathCore::vec2f &gravity);
+                void pushGravity(const MathCore::vec2f &gravity);
+                void popGravity();
 
                 void setStaticConfig(
                     float radius, float radius_grounded, float offset_grounded,
