@@ -80,7 +80,8 @@ namespace AppKit
                 float input_x_axis,
                 float x_axis_velocity,
                 bool jump_pressed,
-                float max_velocity)
+                float max_velocity,
+                bool dash_pressed, VelocityHelpers::DashState::State dash_to_apply)
             {
                 if (time->deltaTime == 0.0f)
                     return;

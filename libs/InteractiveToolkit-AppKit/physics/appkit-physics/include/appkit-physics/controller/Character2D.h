@@ -16,6 +16,7 @@
 // #include <appkit-physics/util/Quadtree.h>
 // #include <appkit-physics/util/Uuid.h>
 #include <appkit-physics/velocity-helpers/JumpState.h>
+#include <appkit-physics/velocity-helpers/DashState.h>
 
 #include <appkit-physics/container/TriggerProbe.h>
 
@@ -39,13 +40,15 @@ namespace AppKit
 
             public:
                 VelocityHelpers::JumpState jumpState;
+                VelocityHelpers::DashState dashState;
 
                 MathCore::vec2f velocity;
                 MathCore::vec2f acceleration;
 
                 MathCore::vec2f position;
 
-                struct GravityDescriptor {
+                struct GravityDescriptor
+                {
                     MathCore::vec2f gravity;
                     MathCore::vec2f gravity_dir;
                     float gravity_mag;
@@ -70,9 +73,7 @@ namespace AppKit
                 float offset_above_activation_line;
                 float offset_below_deactivation_line;
 
-
                 std::unordered_map<std::string, std::shared_ptr<Container::TriggerProbe>> trigger_probes;
-
 
                 void setGravity(const MathCore::vec2f &gravity);
                 void pushGravity(const MathCore::vec2f &gravity);
@@ -92,7 +93,8 @@ namespace AppKit
                             Platform::Time *time,
                             float input_x_axis,
                             float x_axis_velocity,
-                            bool jump_pressed, float max_velocity);
+                            bool jump_pressed, float max_velocity,
+                            bool dash_pressed = false, VelocityHelpers::DashState::State dash_to_apply = VelocityHelpers::DashState::State::DashingRight);
 
                 // set the position and make reset velocity and acceleration, useful for teleporting the player
                 void teleport(const MathCore::vec2f &position);
