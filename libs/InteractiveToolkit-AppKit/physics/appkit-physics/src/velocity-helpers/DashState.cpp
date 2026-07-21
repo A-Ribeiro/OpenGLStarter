@@ -80,11 +80,19 @@ namespace AppKit
 
                 if (state == State::DashingRight || state == State::DashingLeft)
                 {
-                    if (norm_time_acc == 1.0f || state == State::RestUntilNextFrame)
+                    if (state == State::RestUntilNextFrame2)
                     {
                         // previous pass was 1.0
                         // make little stop in air
                         state = State::None;
+                        // *velocityX = 0.0f;
+                    }
+                    else
+                    if (norm_time_acc == 1.0f || state == State::RestUntilNextFrame1)
+                    {
+                        // previous pass was 1.0
+                        // make little stop in air
+                        state = State::RestUntilNextFrame2;
                         *velocityX = 0.0f;
                     }
                     else
@@ -92,7 +100,7 @@ namespace AppKit
                         bool neg_result = (state == State::DashingLeft);
                         if (norm_time_acc > 1.0f)
                         {
-                            state = State::RestUntilNextFrame;
+                            state = State::RestUntilNextFrame1;
                             norm_time_acc = 1.0f;
                         }
 

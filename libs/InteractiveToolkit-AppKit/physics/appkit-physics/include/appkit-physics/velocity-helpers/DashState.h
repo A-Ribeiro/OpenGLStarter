@@ -20,7 +20,8 @@ namespace AppKit
                     None,
                     DashingRight,
                     DashingLeft,
-                    RestUntilNextFrame,
+                    RestUntilNextFrame1,
+                    RestUntilNextFrame2,
                 };
 
                 static const char *stateToString(DashState::State state);
