@@ -115,8 +115,8 @@ namespace AppKit
                                                { return structure->id < id; });
                     if (it != static_structures.end() && (*it)->id == idx)
                     {
-                        static_structures.erase(it);
                         (*it)->id = STRUCTURE2D_ID_INVALID;
+                        static_structures.erase(it);
                         uuid.release(idx);
                     }
                 }
@@ -127,8 +127,8 @@ namespace AppKit
                                                { return structure->id < id; });
                     if (it != dynamic_structures.end() && (*it)->id == idx)
                     {
-                        dynamic_structures.erase(it);
                         (*it)->id = STRUCTURE2D_ID_INVALID;
+                        dynamic_structures.erase(it);
                         uuid.release(idx);
                     }
                 }
