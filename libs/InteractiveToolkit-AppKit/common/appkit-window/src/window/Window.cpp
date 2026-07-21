@@ -41,15 +41,16 @@ namespace AppKit
 #ifdef WITH_LSAN_DISABLE
             __lsan::ScopedDisabler disabler;
 #endif
-#if defined(_WIN32)
-            AppKit_Window_win32_map.erase(this->getNativeWindowHandle());
-            if (AppKit_Window_win32_map.empty())
-                AppKit_Window_win32_draw_on_resize_or_move = nullptr;
-#endif
             libraryHandle = nullptr;
             usr1Handle = nullptr;
             usr2Handle = nullptr;
             usr3Handle = nullptr;
+
+#if defined(_WIN32)
+            // AppKit_Window_win32_map.erase(this->getNativeWindowHandle());
+            if (AppKit_Window_win32_map.empty())
+                AppKit_Window_win32_draw_on_resize_or_move = nullptr;
+#endif
 
             windowConfig = _windowConfig;
             glContextConfig = _glContextConfig;
@@ -1016,6 +1017,8 @@ namespace AppKit
 
         NativeWindowHandleType Window::getNativeWindowHandle()
         {
+            if (usr1Handle == nullptr)
+                return NativeWindowHandleType();
             sf::WindowBase *window = static_cast<sf::WindowBase *>(usr1Handle);
             return (NativeWindowHandleType)window->getNativeHandle();
         }
