@@ -32,7 +32,7 @@ namespace AppKit
             DashState::DashState()
             {
                 state = State::None;
-                enabled = false;
+                enabled = true;
 
                 ease_eq = EaseCore::Easef::none<float>; // lerp
             }
@@ -78,7 +78,7 @@ namespace AppKit
                 else
                     norm_time_acc += deltaTime * total_time_inv;
 
-                if (state == State::DashingRight || state == State::DashingLeft)
+                if (state != State::None)
                 {
                     if (state == State::RestUntilNextFrame2)
                     {

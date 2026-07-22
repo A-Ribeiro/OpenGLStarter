@@ -101,7 +101,7 @@ namespace AppKit
                 void configureJump(float risingVelocity, float minJumpHeight, float maxJumpHeight, float secondJumpHeight, float gravity);
 
                 void setGrounded();
-                void setFalling();
+                void setFalling(bool from_any_state = false);
 
                 void updateVelocity(float *velocityY, float deltaTime, float gravity, bool jump_pressedp, bool allow_double_jump, bool double_jump_at_any_time = true);
             };

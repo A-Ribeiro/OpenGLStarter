@@ -45,7 +45,6 @@ namespace AppKit
                 float radius, float radius_grounded, float offset_grounded,
                 float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
                 const MathCore::vec2f &gravity,
-                bool allow_double_jump,
                 float skin_width,
                 float offset_above_activation_line,
                 float offset_below_deactivation_line)
@@ -56,7 +55,6 @@ namespace AppKit
                 this->radius = radius;
                 this->radius_grounded = radius_grounded;
                 this->offset_grounded = offset_grounded;
-                this->allow_double_jump = allow_double_jump;
 
                 setGravity(gravity);
                 // this->gravity = gravity;
@@ -81,7 +79,9 @@ namespace AppKit
                 float x_axis_velocity,
                 bool jump_pressed,
                 float max_velocity,
-                bool dash_pressed, VelocityHelpers::DashState::State dash_to_apply)
+                JumpBehavior jumpBehavior,
+                bool dash_pressed, VelocityHelpers::DashState::State dash_to_apply,
+                DashBehavior dashBehavior)
             {
                 if (time->deltaTime == 0.0f)
                     return;
@@ -91,30 +91,15 @@ namespace AppKit
 
                 using namespace MathCore;
 
-                // reset acceleration
-                acceleration = vec2f(0.0f, 0.0f);
-                acceleration += gravityInfo.gravity;
-
-                velocity += acceleration * time->deltaTime;
+                // integrate gravity to current velocity
+                velocity += gravityInfo.gravity * time->deltaTime;
                 velocity = OP<vec2f>::quadraticClamp(vec2f(0.0f, 0.0f), velocity, max_velocity);
 
                 vec2f gravity_up = -gravityInfo.gravity_dir;
-                float velocity_gravity_y = OP<vec2f>::dot(velocity, gravity_up);
-
-                jumpState.updateVelocity(&velocity_gravity_y,      // velocityY
-                                         time->deltaTime,          // deltaTime
-                                         -gravityInfo.gravity_mag, // gravity
-                                         jump_pressed,             // jump_pressed
-                                         allow_double_jump);       // allow_double_jump
-
-                // apply back the jump velocity to the velocity vector
-                // removing velocity in gravity direction and adding the jump velocity in the gravity direction
-                velocity += gravity_up * (velocity_gravity_y - OP<vec2f>::dot(velocity, gravity_up));
 
                 // x-axis movement logic
                 vec2f x_axis = OP<vec2f>::cross_z_down(gravity_up);
                 vec2f ground_axis = x_axis;
-
                 if (jumpState.getState() == VelocityHelpers::JumpState::Grounded)
                 {
                     vec2f segment_point = last_collision_segment.closestPoint(position);
@@ -141,6 +126,92 @@ namespace AppKit
                     // }
                 }
 
+                // Dash Logic
+                float velocity_dash_x = OP<vec2f>::dot(velocity, x_axis);
+                dashState.updateVelocity(
+                    &velocity_dash_x, // float *velocityX,
+                    time->deltaTime,  // float deltaTime,
+                    dash_pressed,     // bool dash_pressed_,
+                    dash_to_apply     // DashState::State dash_to_apply
+                );
+                bool block_x_move_from_dash = (dashState.getState() != VelocityHelpers::DashState::State::None);
+
+                // velocity += x_axis * (velocity_dash_x - OP<vec2f>::dot(velocity, x_axis));
+                if (block_x_move_from_dash)
+                {
+                    velocity = x_axis * velocity_dash_x; // replace entire jump move
+                    jumpState.setFalling(true);
+                }
+                else
+                {
+                    // Jump Logic
+                    float velocity_gravity_y = OP<vec2f>::dot(velocity, gravity_up);
+                    bool allow_double_jump = (jumpBehavior != JumpBehavior::SimpleJump);
+                    bool double_jump_at_any_time = (jumpBehavior == JumpBehavior::DoubleJumpAnyTime);
+                    jumpState.updateVelocity(&velocity_gravity_y,      // velocityY
+                                             time->deltaTime,          // deltaTime
+                                             -gravityInfo.gravity_mag, // gravity
+                                             jump_pressed,             // jump_pressed
+                                             allow_double_jump,        // allow_double_jump
+                                             double_jump_at_any_time); // double_jump_at_any_time
+                    // apply back the jump velocity to the velocity vector
+                    // removing velocity in gravity direction and adding the jump velocity in the gravity direction
+                    velocity += gravity_up * (velocity_gravity_y - OP<vec2f>::dot(velocity, gravity_up));
+
+                    // X-Axis Logic
+                    move_x_detector.setState(OP<float>::abs(input_x_axis) > 0.02f);
+                    if (move_x_detector.pressed)
+                    {
+
+                        float move_direction = OP<float>::sign(input_x_axis);
+
+                        // Debug::lineMounter->addLine(
+                        //     vec3f(position, -1.0f),
+                        //     vec3f(position + move_direction * ground_axis * 100, -1.0f),
+                        //     5.0f,
+                        //     ui::colorFromHex("#ff00004c"));
+
+                        float speed_factor = 1.0f;
+                        float up_down_detector = OP<vec2f>::dot(move_direction * ground_axis, gravity_up);
+                        float slope_factor = OP<vec2f>::dot(ground_axis, x_axis);
+                        if (OP<float>::abs(slope_factor) > EPSILON<float>::low_precision)
+                        {
+                            if (up_down_detector > EPSILON<float>::low_precision)
+                            {
+                                speed_factor = OP<vec2f>::dot(ground_axis, x_axis);
+                                // printf("up hill speed: %f\n", speed_factor);
+                            }
+                            else if (up_down_detector < -EPSILON<float>::low_precision)
+                            {
+                                speed_factor = 1.0f / OP<vec2f>::dot(ground_axis, x_axis);
+                                // printf("down hill speed: %f\n", speed_factor);
+                            }
+                        }
+
+                        float desired_velocity = x_axis_velocity * input_x_axis * speed_factor;
+
+                        float curr_velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
+                        velocity += ground_axis * (desired_velocity - curr_velocity_on_ground);
+                    }
+                    else
+                    {
+                        // When stopped, remove velocity in the horizontal plane (x_axis direction)
+                        // instead of along ground_axis to prevent mini-jumps at platform edges
+                        // This preserves vertical velocity for gravity/jump calculations
+                        if (jumpState.getState() == VelocityHelpers::JumpState::Grounded)
+                        {
+                            float velocity_on_x_axis = OP<vec2f>::dot(velocity, x_axis);
+                            velocity -= x_axis * velocity_on_x_axis;
+                        }
+                        // else
+                        {
+                            // When airborne, use ground_axis for consistency
+                            float velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
+                            velocity -= ground_axis * velocity_on_ground;
+                        }
+                    }
+                }
+
                 // if (OnDebugDrawLine)
                 // {
                 //     OnDebugDrawLine(
@@ -155,59 +226,6 @@ namespace AppKit
                 //     ui::colorFromHex("#fff9bda7"));
 
                 // const float x_axis_velocity = 600.0f;
-
-                move_x_detector.setState(OP<float>::abs(input_x_axis) > 0.02f);
-
-                if (move_x_detector.pressed)
-                {
-
-                    float move_direction = OP<float>::sign(input_x_axis);
-
-                    // Debug::lineMounter->addLine(
-                    //     vec3f(position, -1.0f),
-                    //     vec3f(position + move_direction * ground_axis * 100, -1.0f),
-                    //     5.0f,
-                    //     ui::colorFromHex("#ff00004c"));
-
-                    float speed_factor = 1.0f;
-                    float up_down_detector = OP<vec2f>::dot(move_direction * ground_axis, gravity_up);
-                    float slope_factor = OP<vec2f>::dot(ground_axis, x_axis);
-                    if (OP<float>::abs(slope_factor) > EPSILON<float>::low_precision)
-                    {
-                        if (up_down_detector > EPSILON<float>::low_precision)
-                        {
-                            speed_factor = OP<vec2f>::dot(ground_axis, x_axis);
-                            // printf("up hill speed: %f\n", speed_factor);
-                        }
-                        else if (up_down_detector < -EPSILON<float>::low_precision)
-                        {
-                            speed_factor = 1.0f / OP<vec2f>::dot(ground_axis, x_axis);
-                            // printf("down hill speed: %f\n", speed_factor);
-                        }
-                    }
-
-                    float desired_velocity = x_axis_velocity * input_x_axis * speed_factor;
-
-                    float curr_velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
-                    velocity += ground_axis * (desired_velocity - curr_velocity_on_ground);
-                }
-                else
-                {
-                    // When stopped, remove velocity in the horizontal plane (x_axis direction)
-                    // instead of along ground_axis to prevent mini-jumps at platform edges
-                    // This preserves vertical velocity for gravity/jump calculations
-                    if (jumpState.getState() == VelocityHelpers::JumpState::Grounded)
-                    {
-                        float velocity_on_x_axis = OP<vec2f>::dot(velocity, x_axis);
-                        velocity -= x_axis * velocity_on_x_axis;
-                    }
-                    // else
-                    {
-                        // When airborne, use ground_axis for consistency
-                        float velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
-                        velocity -= ground_axis * velocity_on_ground;
-                    }
-                }
 
                 vec2f position_before = position;
                 // static bool passed = false;
@@ -284,12 +302,11 @@ namespace AppKit
                 }
             }
 
-            // set the position and make reset velocity and acceleration, useful for teleporting the player
+            // set the position and make reset velocity, useful for teleporting the player
             void Character2D::teleport(const MathCore::vec2f &position)
             {
                 this->position = position;
                 velocity = vec2f(0);
-                acceleration = vec2f(0);
             }
         }
     }

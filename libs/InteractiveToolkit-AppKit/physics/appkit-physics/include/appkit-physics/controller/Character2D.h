@@ -34,6 +34,22 @@ namespace AppKit
 
         namespace Controller
         {
+            enum class JumpBehavior : uint8_t
+            {
+                None,
+                SimpleJump,
+                DoubleJumpWhenFalling,
+                DoubleJumpAnyTime,
+            };
+
+            enum class DashBehavior : uint8_t
+            {
+                None,
+                DashOnlyWhenGrounded,
+                DashOnlyWhenInAir,
+                DashAnyTime,
+            };
+
             class Character2D
             {
                 Character2D();
@@ -43,8 +59,6 @@ namespace AppKit
                 VelocityHelpers::DashState dashState;
 
                 MathCore::vec2f velocity;
-                MathCore::vec2f acceleration;
-
                 MathCore::vec2f position;
 
                 struct GravityDescriptor
@@ -59,7 +73,7 @@ namespace AppKit
                 float radius_grounded;
                 float offset_grounded;
 
-                bool allow_double_jump;
+                // bool allow_double_jump;
 
                 Core::Segment2D last_collision_segment;
                 bool has_last_collision_segment;
@@ -83,7 +97,6 @@ namespace AppKit
                     float radius, float radius_grounded, float offset_grounded,
                     float jump_risingVelocity, float jump_minJumpHeight, float jump_maxJumpHeight, float jump_secondJumpHeight,
                     const MathCore::vec2f &gravity,
-                    bool allow_double_jump,
                     float skin_width,
                     float offset_above_activation_line,
                     float offset_below_deactivation_line);
@@ -94,7 +107,10 @@ namespace AppKit
                             float input_x_axis,
                             float x_axis_velocity,
                             bool jump_pressed, float max_velocity,
-                            bool dash_pressed = false, VelocityHelpers::DashState::State dash_to_apply = VelocityHelpers::DashState::State::DashingRight);
+                            JumpBehavior jumpBehavior = JumpBehavior::SimpleJump,
+                            bool dash_pressed = false,
+                            VelocityHelpers::DashState::State dash_to_apply = VelocityHelpers::DashState::State::DashingRight,
+                            DashBehavior dashBehavior = DashBehavior::DashOnlyWhenGrounded);
 
                 // set the position and make reset velocity and acceleration, useful for teleporting the player
                 void teleport(const MathCore::vec2f &position);

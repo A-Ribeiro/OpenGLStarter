@@ -178,9 +178,9 @@ namespace AppKit
                 state = Grounded;
             }
 
-            void JumpState::setFalling()
+            void JumpState::setFalling(bool from_any_state)
             {
-                if (state != Grounded)
+                if (state != Grounded && !from_any_state)
                     return;
                 state = Falling;
                 can_double_jump = false;
