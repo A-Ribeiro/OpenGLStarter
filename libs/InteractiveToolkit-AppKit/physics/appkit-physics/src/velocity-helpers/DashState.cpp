@@ -35,6 +35,7 @@ namespace AppKit
                 enabled = true;
 
                 ease_eq = EaseCore::Easef::none<float>; // lerp
+                allow_second_dash_temporarily = false;
             }
 
             DashState::State DashState::getState() const
@@ -57,25 +58,28 @@ namespace AppKit
                 this->ease_eq = ease_eq;
             }
 
-            void DashState::setEnableDash(bool v)
+            void DashState::setEnabled(bool v)
             {
                 enabled = v;
             }
 
-            void DashState::updateVelocity(float *velocityX, float deltaTime, bool dash_pressed_, DashState::State dash_to_apply)
+            void DashState::updateVelocity(
+                float *velocityX, float deltaTime, bool dash_pressed_, DashState::State dash_to_apply,
+                bool can_dash)
             {
                 dash_trigger_detector.setState(dash_pressed_);
 
-                if (enabled && state == State::None)
+                if ((enabled || allow_second_dash_temporarily) && state == State::None)
                 {
-                    if (dash_trigger_detector.down)
+                    if (dash_trigger_detector.down && (allow_second_dash_temporarily || can_dash))
                     {
+                        allow_second_dash_temporarily = false;
                         state = dash_to_apply;
                         norm_time_acc = 0;
                         last_distance_traveled = 0;
                     }
                 }
-                else
+                else if (state != State::None)
                     norm_time_acc += deltaTime * total_time_inv;
 
                 if (state != State::None)
@@ -87,8 +91,7 @@ namespace AppKit
                         state = State::None;
                         // *velocityX = 0.0f;
                     }
-                    else
-                    if (norm_time_acc == 1.0f || state == State::RestUntilNextFrame1)
+                    else if (norm_time_acc == 1.0f || state == State::RestUntilNextFrame1)
                     {
                         // previous pass was 1.0
                         // make little stop in air
@@ -111,6 +114,11 @@ namespace AppKit
                         *velocityX = (neg_result) ? -delta / deltaTime : delta / deltaTime;
                     }
                 }
+            }
+
+            void DashState::reloadDashOneMoreTime()
+            {
+                allow_second_dash_temporarily = true;
             }
 
         }

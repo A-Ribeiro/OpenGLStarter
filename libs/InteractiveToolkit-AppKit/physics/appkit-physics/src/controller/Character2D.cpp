@@ -81,7 +81,8 @@ namespace AppKit
                 float max_velocity,
                 JumpBehavior jumpBehavior,
                 bool dash_pressed, VelocityHelpers::DashState::State dash_to_apply,
-                DashBehavior dashBehavior)
+                DashBehavior dashBehavior,
+                bool dash_reloads_second_jump)
             {
                 if (time->deltaTime == 0.0f)
                     return;
@@ -102,6 +103,8 @@ namespace AppKit
                 vec2f ground_axis = x_axis;
                 if (jumpState.getState() == VelocityHelpers::JumpState::Grounded)
                 {
+                    dashState.setEnabled(true);
+
                     vec2f segment_point = last_collision_segment.closestPoint(position);
                     vec2f normal = position - segment_point;
                     float normal_mag_2 = OP<vec2f>::sqrLength(normal);
@@ -125,22 +128,37 @@ namespace AppKit
                     //         COLOR_CODE_GROUND_AXIS_ON_SEGMENT);
                     // }
                 }
+                else
+                {
+                    if (dashBehavior == DashBehavior::DashOnlyWhenGrounded)
+                        dashState.setEnabled(false);
+                }
 
                 // Dash Logic
+                bool can_dash = true;
+                if (dashBehavior == DashBehavior::None)
+                    can_dash = false;
+                else if (dashBehavior == DashBehavior::DashOnlyWhenInAir)
+                    if (jumpState.getState() == VelocityHelpers::JumpState::Grounded)
+                        can_dash = false;
                 float velocity_dash_x = OP<vec2f>::dot(velocity, x_axis);
                 dashState.updateVelocity(
                     &velocity_dash_x, // float *velocityX,
                     time->deltaTime,  // float deltaTime,
                     dash_pressed,     // bool dash_pressed_,
-                    dash_to_apply     // DashState::State dash_to_apply
+                    dash_to_apply,    // DashState::State dash_to_apply
+                    can_dash          // can_dash
                 );
                 bool block_x_move_from_dash = (dashState.getState() != VelocityHelpers::DashState::State::None);
 
                 // velocity += x_axis * (velocity_dash_x - OP<vec2f>::dot(velocity, x_axis));
                 if (block_x_move_from_dash)
                 {
+                    dashState.setEnabled(false);
                     velocity = x_axis * velocity_dash_x; // replace entire jump move
-                    jumpState.setFalling(true);
+                    jumpState.setFalling(true, true);
+                    if (dash_reloads_second_jump)
+                        jumpState.reloadSecondJumpOneMoreTime();
                 }
                 else
                 {
@@ -158,11 +176,13 @@ namespace AppKit
                     // removing velocity in gravity direction and adding the jump velocity in the gravity direction
                     velocity += gravity_up * (velocity_gravity_y - OP<vec2f>::dot(velocity, gravity_up));
 
+                    // if (jumpState.isJumping())
+                    //     dashState.reloadDashOneMoreTime();
+
                     // X-Axis Logic
                     move_x_detector.setState(OP<float>::abs(input_x_axis) > 0.02f);
                     if (move_x_detector.pressed)
                     {
-
                         float move_direction = OP<float>::sign(input_x_axis);
 
                         // Debug::lineMounter->addLine(

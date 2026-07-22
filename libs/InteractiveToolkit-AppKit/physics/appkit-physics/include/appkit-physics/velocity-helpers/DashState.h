@@ -41,6 +41,9 @@ namespace AppKit
                 EventCore::PressReleaseDetector dash_trigger_detector;
 
                 bool enabled;
+
+                bool allow_second_dash_temporarily;
+
             public:
                 DashState();
 
@@ -49,10 +52,12 @@ namespace AppKit
                 void configureDash(float distance, float time);
 
                 void setEaseEq(const EventCore::Callback<float(float, float, float)> &ease_eq);
-                void setEnableDash(bool v);
+                void setEnabled(bool v);
 
-                void updateVelocity(float *velocityX, float deltaTime, bool dash_pressed_, DashState::State dash_to_apply);
-                
+                void updateVelocity(float *velocityX, float deltaTime, bool dash_pressed_, DashState::State dash_to_apply,
+                                    bool can_dash);
+
+                void reloadDashOneMoreTime();
             };
 
         }

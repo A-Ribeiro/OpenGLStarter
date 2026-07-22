@@ -110,7 +110,8 @@ namespace AppKit
                             JumpBehavior jumpBehavior = JumpBehavior::SimpleJump,
                             bool dash_pressed = false,
                             VelocityHelpers::DashState::State dash_to_apply = VelocityHelpers::DashState::State::DashingRight,
-                            DashBehavior dashBehavior = DashBehavior::DashOnlyWhenGrounded);
+                            DashBehavior dashBehavior = DashBehavior::DashOnlyWhenGrounded,
+                            bool dash_reloads_second_jump = false);
 
                 // set the position and make reset velocity and acceleration, useful for teleporting the player
                 void teleport(const MathCore::vec2f &position);

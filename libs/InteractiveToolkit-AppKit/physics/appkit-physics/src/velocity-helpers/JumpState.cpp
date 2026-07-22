@@ -105,6 +105,9 @@ namespace AppKit
                 jump_pressed = false;
                 can_double_jump = true;
                 double_jump_used = false;
+
+                allow_second_jump_temporarily = false;
+                is_jumping = false;
             }
 
             JumpState::State JumpState::getState() const { return state; }
@@ -176,14 +179,17 @@ namespace AppKit
                 if (state == Grounded)
                     return;
                 state = Grounded;
+                allow_second_jump_temporarily = false;
+                is_jumping = false;
             }
 
-            void JumpState::setFalling(bool from_any_state)
+            void JumpState::setFalling(bool from_any_state, bool keep_second_jump_)
             {
                 if (state != Grounded && !from_any_state)
                     return;
                 state = Falling;
-                can_double_jump = false;
+                if (!keep_second_jump_)
+                    can_double_jump = false;
             }
 
             void JumpState::updateVelocity(float *velocityY, float deltaTime, float gravity, bool jump_pressedp, bool allow_double_jump, bool double_jump_at_any_time)
@@ -198,13 +204,15 @@ namespace AppKit
                         can_double_jump = true;
                         double_jump_used = false;
                         time_aux = 0.0f;
+                        allow_second_jump_temporarily = false;
                     }
-                    else if (allow_double_jump && can_double_jump && (state == Falling || double_jump_at_any_time))
+                    else if (allow_second_jump_temporarily || (allow_double_jump && can_double_jump && (state == Falling || double_jump_at_any_time)))
                     {
                         can_double_jump = false;
                         double_jump_used = true;
                         state = StartJump;
                         time_aux = 0.0f;
+                        allow_second_jump_temporarily = false;
                     }
                 }
 
@@ -215,6 +223,7 @@ namespace AppKit
 
                 if (state == StartJump)
                 {
+                    is_jumping = true;
                     estimated_jump_height = 0.0f;
                     state = Rising;
                     velocity_replacer = rising_velocity_with_impulse;
@@ -352,6 +361,15 @@ namespace AppKit
                     state = Falling;
                     *velocityY = 0.0f;
                 }
+            }
+
+            void JumpState::reloadSecondJumpOneMoreTime()
+            {
+                allow_second_jump_temporarily = true;
+            }
+
+            bool JumpState::isJumping() const {
+                return is_jumping;
             }
         }
     }
