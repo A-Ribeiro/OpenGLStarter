@@ -183,13 +183,15 @@ namespace AppKit
                 is_jumping = false;
             }
 
-            void JumpState::setFalling(bool from_any_state, bool keep_second_jump_)
+            void JumpState::setFalling(bool from_any_state, bool keep_second_jump_, bool reset_is_jumping)
             {
                 if (state != Grounded && !from_any_state)
                     return;
                 state = Falling;
                 if (!keep_second_jump_)
                     can_double_jump = false;
+                if (reset_is_jumping)
+                    is_jumping = false;
             }
 
             void JumpState::updateVelocity(float *velocityY, float deltaTime,

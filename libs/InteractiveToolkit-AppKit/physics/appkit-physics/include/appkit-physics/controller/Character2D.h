@@ -104,6 +104,7 @@ namespace AppKit
                 void update(Container::Container2D *Container2D,
                             Container::ThreadState2D &thread_state,
                             Platform::Time *time,
+                            const EventCore::Callback<MathCore::vec2f(const MathCore::vec2f& vel)> &velocity_modifier,
                             float input_x_axis,
                             float x_axis_velocity,
                             bool jump_pressed, float max_velocity,

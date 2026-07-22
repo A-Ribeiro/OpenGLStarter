@@ -75,6 +75,7 @@ namespace AppKit
                 Container::Container2D *physicsContainer,
                 Container::ThreadState2D &thread_state,
                 Platform::Time *time,
+                const EventCore::Callback<MathCore::vec2f(const MathCore::vec2f &vel)> &velocity_modifier,
                 float input_x_axis,
                 float x_axis_velocity,
                 bool jump_pressed,
@@ -263,6 +264,9 @@ namespace AppKit
                 //     // passed = true;
                 // }
                 // time->deltaTime = 0.000234200008f;
+
+                if (velocity_modifier)
+                    velocity = velocity_modifier(velocity);
 
                 position += velocity * time->deltaTime;
 
