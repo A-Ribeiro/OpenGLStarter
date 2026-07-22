@@ -372,6 +372,11 @@ namespace AppKit
                 allow_second_jump_temporarily = true;
             }
 
+            void JumpState::cancelReloadSecondJumpOneMoreTime()
+            {
+                allow_second_jump_temporarily = false;
+            }
+
             bool JumpState::isJumping() const
             {
                 return is_jumping;

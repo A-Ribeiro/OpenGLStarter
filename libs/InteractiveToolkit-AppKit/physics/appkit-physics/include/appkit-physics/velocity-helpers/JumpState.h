@@ -112,6 +112,8 @@ namespace AppKit
 
                 // renew second jump one more time
                 void reloadSecondJumpOneMoreTime();
+                void cancelReloadSecondJumpOneMoreTime();
+
 
                 bool isJumping() const;
             };
