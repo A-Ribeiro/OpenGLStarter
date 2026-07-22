@@ -179,7 +179,7 @@ namespace AppKit
                 if (state == Grounded)
                     return;
                 state = Grounded;
-                allow_second_jump_temporarily = false;
+                // allow_second_jump_temporarily = false;
                 is_jumping = false;
             }
 
@@ -192,11 +192,13 @@ namespace AppKit
                     can_double_jump = false;
             }
 
-            void JumpState::updateVelocity(float *velocityY, float deltaTime, float gravity, bool jump_pressedp, bool allow_double_jump, bool double_jump_at_any_time)
+            void JumpState::updateVelocity(float *velocityY, float deltaTime,
+                                           float gravity, bool jump_pressedp, bool can_jump,
+                                           bool allow_double_jump, bool double_jump_at_any_time)
             {
                 jump_trigger_detector.setState(jump_pressedp);
 
-                if (jump_trigger_detector.down)
+                if (jump_trigger_detector.down && (can_jump || allow_second_jump_temporarily))
                 {
                     if (state == Grounded)
                     {
@@ -368,7 +370,8 @@ namespace AppKit
                 allow_second_jump_temporarily = true;
             }
 
-            bool JumpState::isJumping() const {
+            bool JumpState::isJumping() const
+            {
                 return is_jumping;
             }
         }

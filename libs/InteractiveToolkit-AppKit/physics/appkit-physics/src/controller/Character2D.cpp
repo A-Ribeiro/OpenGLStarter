@@ -166,10 +166,12 @@ namespace AppKit
                     float velocity_gravity_y = OP<vec2f>::dot(velocity, gravity_up);
                     bool allow_double_jump = (jumpBehavior != JumpBehavior::SimpleJump);
                     bool double_jump_at_any_time = (jumpBehavior == JumpBehavior::DoubleJumpAnyTime);
+                    bool can_jump = (jumpBehavior != JumpBehavior::None);
                     jumpState.updateVelocity(&velocity_gravity_y,      // velocityY
                                              time->deltaTime,          // deltaTime
                                              -gravityInfo.gravity_mag, // gravity
                                              jump_pressed,             // jump_pressed
+                                             can_jump,                 // can_jump
                                              allow_double_jump,        // allow_double_jump
                                              double_jump_at_any_time); // double_jump_at_any_time
                     // apply back the jump velocity to the velocity vector
