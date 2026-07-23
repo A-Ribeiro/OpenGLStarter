@@ -34,6 +34,8 @@ namespace AppKit
 
                 TriggerProbe(int segment_count = 0);
 
+                std::unordered_map<std::shared_ptr<Structure2D>, bool> current_structures;
+
             public:
                 TriggerProbeType type;
 
@@ -50,7 +52,6 @@ namespace AppKit
                 float circle_radius;
 
                 std::unordered_map<std::shared_ptr<Structure2D>, bool> active_structures;
-                std::unordered_map<std::shared_ptr<Structure2D>, bool> current_structures;
                 EventCore::Callback<void(std::shared_ptr<AppKit::Physics::Container::Structure2D> structureTrigger)> onEnter;
                 EventCore::Callback<void(std::shared_ptr<AppKit::Physics::Container::Structure2D> structureTrigger)> onExit;
 
@@ -88,7 +89,6 @@ namespace AppKit
                 void endOverlapCheck();
 
                 ITK_DECLARE_CREATE_SHARED(TriggerProbe)
-
             };
         }
     }

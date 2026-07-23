@@ -85,6 +85,37 @@ namespace AppKit
                         structure_ptrs.push_back(structures[idx].get());
                 }
             }
+
+            void ThreadState2D::add_from_list(const std::vector<const Structure2D *> &list, uint32_t query_mask)
+            {
+                if (list.empty())
+                    return;
+                if (query_mask == QUERY_MASK_ONLY_TRIGGERS)
+                {
+                    for (const auto &item : list)
+                    {
+                        if (item->type < StructureType::BoxTrigger ||
+                            item->type > StructureType::SegmentTrigger)
+                            continue;
+                        structure_ptrs.push_back(item);
+                    }
+                }
+                else if (query_mask == QUERY_MASK_ONLY_SOLID)
+                {
+                    for (const auto &item : list)
+                    {
+                        if (item->type >= StructureType::BoxTrigger &&
+                            item->type <= StructureType::SegmentTrigger)
+                            continue;
+                        structure_ptrs.push_back(item);
+                    }
+                }
+                else
+                {
+                    structure_ptrs.insert(structure_ptrs.end(), list.begin(), list.end());
+                }
+            }
+
         }
     }
 }

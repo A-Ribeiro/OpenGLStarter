@@ -353,10 +353,8 @@ namespace AppKit
                     thread_state.query_box(dynamic_quadtree.get(), dynamic_structures, b_box.min, b_box.max, false, QUERY_MASK_ONLY_SOLID);
                 if (thread_state.structure_ptrs.empty())
                 {
-                    // for (const auto *structure : always_check_structures)
-                    //     thread_state.quadtree_ids.push_back(structure->id);
-                    thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
-                    thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
+                    thread_state.add_from_list(static_always_check, QUERY_MASK_ONLY_SOLID);
+                    thread_state.add_from_list(dynamic_always_check, QUERY_MASK_ONLY_SOLID);
                 }
 
                 // push out of all overlapping segments
@@ -458,11 +456,8 @@ namespace AppKit
 
                     if (thread_state.structure_ptrs.empty())
                     {
-                        // for (const auto *structure : always_check_structures)
-                        //     thread_state.quadtree_ids.push_back(structure->id);
-
-                        thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
-                        thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
+                        thread_state.add_from_list(static_always_check, QUERY_MASK_ONLY_SOLID);
+                        thread_state.add_from_list(dynamic_always_check, QUERY_MASK_ONLY_SOLID);
                     }
 
                     // ground check
@@ -557,10 +552,8 @@ namespace AppKit
                         thread_state.query_segment_radius(dynamic_quadtree.get(), dynamic_structures, a, b, query_radius, false, QUERY_MASK_ONLY_SOLID);
                     if (thread_state.structure_ptrs.empty())
                     {
-                        // for (const auto *structure : always_check_structures)
-                        //     thread_state.quadtree_ids.push_back(structure->id);
-                        thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
-                        thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
+                        thread_state.add_from_list(static_always_check, QUERY_MASK_ONLY_SOLID);
+                        thread_state.add_from_list(dynamic_always_check, QUERY_MASK_ONLY_SOLID);
                     }
 
                     // const auto &static_ids = static_quadtree->query_box(move_box.min, move_box.max);
@@ -779,11 +772,8 @@ namespace AppKit
 
                     if (thread_state.structure_ptrs.empty())
                     {
-                        // for (const auto *structure : always_check_structures)
-                        //     thread_state.quadtree_ids.push_back(structure->id);
-
-                        thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
-                        thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
+                        thread_state.add_from_list(static_always_check, QUERY_MASK_ONLY_SOLID);
+                        thread_state.add_from_list(dynamic_always_check, QUERY_MASK_ONLY_SOLID);
                     }
 
                     // ground check
@@ -852,8 +842,8 @@ namespace AppKit
 
                 if (thread_state.structure_ptrs.empty())
                 {
-                    thread_state.structure_ptrs.assign(static_always_check.begin(), static_always_check.end());
-                    thread_state.structure_ptrs.insert(thread_state.structure_ptrs.end(), dynamic_always_check.begin(), dynamic_always_check.end());
+                    thread_state.add_from_list(static_always_check, QUERY_MASK_ONLY_TRIGGERS);
+                    thread_state.add_from_list(dynamic_always_check, QUERY_MASK_ONLY_TRIGGERS);
                 }
 
                 for (const Structure2D *structure : thread_state.structure_ptrs)

@@ -39,6 +39,8 @@ namespace AppKit
                     const MathCore::vec2f &a, const MathCore::vec2f &b, float radius,
                     bool clear_structure_ptrs,
                     uint32_t query_mask);
+
+                void add_from_list(const std::vector<const Structure2D *> &list, uint32_t query_mask);
             };
         }
     }
