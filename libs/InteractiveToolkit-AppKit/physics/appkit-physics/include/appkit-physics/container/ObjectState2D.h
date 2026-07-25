@@ -18,6 +18,9 @@ namespace AppKit
 
             struct ObjectState2D
             {
+                private:
+                float time_acc_sec;
+                public:
                 // aux for pass through platforms
                 Platform::SmartVector<PassThroughState> pass_through_active_circular_list;
 
@@ -30,7 +33,9 @@ namespace AppKit
                 bool pass_through_get_active(uint32_t idx);
                 void pass_through_set_active(uint32_t idx, bool active);
 
-                void temporarily_turn_off_pass_through(float amount_time_sec = 0.100f);
+                void temporarily_turn_off_pass_through(float amount_time_sec = .050f);
+
+                void elapsed_time(float elapsed_sec);
 
             };
 

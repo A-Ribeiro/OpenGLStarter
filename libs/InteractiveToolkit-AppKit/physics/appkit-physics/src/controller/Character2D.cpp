@@ -87,6 +87,9 @@ namespace AppKit
             {
                 if (time->deltaTime == 0.0f)
                     return;
+
+                object_state.elapsed_time(time->deltaTime);
+
                 // copy of the element,
                 // to avoid problem if any event change it in this method
                 auto gravityInfo = gravityStack.back();

@@ -9,6 +9,7 @@ namespace AppKit
             ObjectState2D::ObjectState2D() : pass_through_active_circular_list(MAX_ACTIVE_PASS_THROUGH)
             {
                 pass_through_active_circular_list.clear();
+                time_acc_sec = -1.0f;
             }
 
             void ObjectState2D::pass_through_remove_id(uint32_t idx)
@@ -55,6 +56,9 @@ namespace AppKit
                 //     printf("{id: %u, is_active: %d} ", state.id, state.is_active);
                 // printf("\n");
 
+                if (time_acc_sec > 0)
+                    it->is_active = false;
+
                 return it->is_active;
             }
 
@@ -85,15 +89,23 @@ namespace AppKit
                 //     printf("{id: %u, is_active: %d} ", state.id, state.is_active);
                 // printf("\n");
 
-                it->is_active = active;
+                if (time_acc_sec > 0)
+                    it->is_active = false;
+                else
+                    it->is_active = active;
             }
 
             void ObjectState2D::temporarily_turn_off_pass_through(float amount_time_sec)
             {
-                for(auto &item: pass_through_active_circular_list)
-                {
+                for (auto &item : pass_through_active_circular_list)
                     item.is_active = false;
-                }
+                time_acc_sec = amount_time_sec;
+            }
+
+            void ObjectState2D::elapsed_time(float elapsed_sec)
+            {
+                if (time_acc_sec > 0)
+                    time_acc_sec -= elapsed_sec;
             }
 
         }
