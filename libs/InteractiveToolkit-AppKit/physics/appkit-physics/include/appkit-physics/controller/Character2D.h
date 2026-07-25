@@ -89,6 +89,8 @@ namespace AppKit
 
                 std::unordered_map<std::string, std::shared_ptr<Container::TriggerProbe>> trigger_probes;
 
+                EventCore::PressReleaseDetector down_jump_press_detector;
+
                 void setGravity(const MathCore::vec2f &gravity);
                 void pushGravity(const MathCore::vec2f &gravity);
                 void popGravity();
@@ -105,7 +107,7 @@ namespace AppKit
                             Container::ThreadState2D &thread_state,
                             Platform::Time *time,
                             const EventCore::Callback<MathCore::vec2f(const MathCore::vec2f& vel)> &velocity_modifier,
-                            float input_x_axis,
+                            const MathCore::vec2f & input_axis,
                             float x_axis_velocity,
                             bool jump_pressed, float max_velocity,
                             JumpBehavior jumpBehavior = JumpBehavior::SimpleJump,

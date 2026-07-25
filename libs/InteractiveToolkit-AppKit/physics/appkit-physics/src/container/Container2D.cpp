@@ -562,17 +562,17 @@ namespace AppKit
                         // pass-through logic
                         if (structure->pass_through_set)
                         {
-                            bool &is_active = object_state.pass_through_get_active_ref(structure->id);
+                            // bool &is_active = object_state.pass_through_get_active_ref(structure->id);
 
                             // the current position is a
                             bool below_deactivation_line = structure->pass_through_is_below_or_touching_deactivation_line(a, radius, offset_below_deactivation_line);
                             if (below_deactivation_line)
-                                is_active = false;
+                                object_state.pass_through_set_active(structure->id, false);
                             else
                             {
                                 bool above_activation_line = structure->pass_through_is_above_activation_line(a, radius, offset_above_activation_line);
                                 if (above_activation_line)
-                                    is_active = true;
+                                    object_state.pass_through_set_active(structure->id, true);
                                 // if (above_activation_line)
                                 // {
                                 //     bool inside_or_touching_left_right = structure.pass_through_is_inside_or_touching_left_right_bound(a, radius);
@@ -580,7 +580,7 @@ namespace AppKit
                                 // }
                             }
 
-                            if (!is_active)
+                            if (!object_state.pass_through_get_active(structure->id))
                                 continue;
                         }
                         for (const auto &segment : structure->segments)

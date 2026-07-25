@@ -25,7 +25,12 @@ namespace AppKit
 
                 void pass_through_remove_id(uint32_t idx);
                 bool pass_through_is_active(uint32_t idx) const;
-                bool &pass_through_get_active_ref(uint32_t idx);
+                // bool &pass_through_get_active_ref(uint32_t idx);
+
+                bool pass_through_get_active(uint32_t idx);
+                void pass_through_set_active(uint32_t idx, bool active);
+
+                void temporarily_turn_off_pass_through(float amount_time_sec = 0.100f);
 
             };
 

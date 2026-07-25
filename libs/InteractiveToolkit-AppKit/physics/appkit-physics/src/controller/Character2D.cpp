@@ -76,7 +76,7 @@ namespace AppKit
                 Container::ThreadState2D &thread_state,
                 Platform::Time *time,
                 const EventCore::Callback<MathCore::vec2f(const MathCore::vec2f &vel)> &velocity_modifier,
-                float input_x_axis,
+                const MathCore::vec2f &input_axis,
                 float x_axis_velocity,
                 bool jump_pressed,
                 float max_velocity,
@@ -163,11 +163,38 @@ namespace AppKit
                 }
                 else
                 {
+                    const float JOYSTICK_DEAD_ZONE = 0.5f;
+                    // jump_down_logic
+                    float input_length = OP<vec2f>::sqrLength(input_axis);
+                    bool input_axis_down_pressed = false;
+                    if (input_length >= JOYSTICK_DEAD_ZONE * JOYSTICK_DEAD_ZONE)
+                    {
+                        // vec2f input_dir = input_axis * OP<float>::rsqrt(input_length);
+                        float angle_input = OP<float>::atan2(input_axis.y, input_axis.x);
+                        angle_input = OP<float>::rad_2_deg(angle_input);
+
+                        const float input_range = 30.0f;
+                        input_axis_down_pressed = (angle_input >= 90.0f - input_range && angle_input <= 90.0f + input_range);
+
+                        // printf("length: %f\n", input_length);
+                        input_length = OP<float>::sqrt(input_length);
+                        input_axis_down_pressed =
+                            input_axis_down_pressed && input_length > 0.8f;
+                    }
+
                     // Jump Logic
                     float velocity_gravity_y = OP<vec2f>::dot(velocity, gravity_up);
                     bool allow_double_jump = (jumpBehavior != JumpBehavior::SimpleJump);
                     bool double_jump_at_any_time = (jumpBehavior == JumpBehavior::DoubleJumpAnyTime);
                     bool can_jump = (jumpBehavior != JumpBehavior::None);
+
+                    down_jump_press_detector.setState(jump_pressed);
+                    if (input_axis_down_pressed && down_jump_press_detector.down)
+                    {
+                        can_jump = false;
+                        object_state.temporarily_turn_off_pass_through();
+                    }
+
                     jumpState.updateVelocity(&velocity_gravity_y,      // velocityY
                                              time->deltaTime,          // deltaTime
                                              -gravityInfo.gravity_mag, // gravity
@@ -183,10 +210,10 @@ namespace AppKit
                     //     dashState.reloadDashOneMoreTime();
 
                     // X-Axis Logic
-                    move_x_detector.setState(OP<float>::abs(input_x_axis) > 0.02f);
+                    move_x_detector.setState(OP<float>::abs(input_axis.x) > JOYSTICK_DEAD_ZONE);
                     if (move_x_detector.pressed)
                     {
-                        float move_direction = OP<float>::sign(input_x_axis);
+                        float move_direction = OP<float>::sign(input_axis.x);
 
                         // Debug::lineMounter->addLine(
                         //     vec3f(position, -1.0f),
@@ -211,7 +238,7 @@ namespace AppKit
                             }
                         }
 
-                        float desired_velocity = x_axis_velocity * input_x_axis * speed_factor;
+                        float desired_velocity = x_axis_velocity * input_axis.x * speed_factor;
 
                         float curr_velocity_on_ground = OP<vec2f>::dot(velocity, ground_axis);
                         velocity += ground_axis * (desired_velocity - curr_velocity_on_ground);
