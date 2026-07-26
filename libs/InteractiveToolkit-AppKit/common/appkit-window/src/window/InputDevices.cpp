@@ -7,6 +7,8 @@
 #include <SFML/Window.hpp>
 // #include <SFML/Graphics.hpp>
 
+// needs to use XInput (xinput.h) or the modern Windows Gaming Input (Windows.Gaming.Input.h) API to get improved data reading from xbox controller...
+
 namespace AppKit
 {
 
