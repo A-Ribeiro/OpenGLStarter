@@ -41,6 +41,10 @@ endif()
 set(WINDOW_COMPILE_DEFS)
 set(WINDOW_LINK_LIBS)
 
+if(WIN32)
+    list(APPEND WINDOW_LINK_LIBS xinput)
+endif()
+
 if (APPKIT_WINDOW_GL)
     list(APPEND WINDOW_COMPILE_DEFS APPKIT_WINDOW_GL)
 endif()

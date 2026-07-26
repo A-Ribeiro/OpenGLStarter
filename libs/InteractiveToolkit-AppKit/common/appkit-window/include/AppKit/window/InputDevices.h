@@ -53,6 +53,9 @@ namespace AppKit
                 float getAxis(JoystickAxis axis);
                 bool isButtonPressed(uint32_t button);
                 JoystickInfo queryJoystickInfo();
+
+                void set_vibration_win32(float low_frequency_left_motor, float high_frequency_right_motor);
+                static bool update_all_joystick_win32();
             };
 
             class Keyboard

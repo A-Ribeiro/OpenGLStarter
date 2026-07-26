@@ -577,7 +577,7 @@ namespace AppKit
             mouseEventg.type = MouseEventType::None;
 
             std::optional<sf::Event> event_reader;
-            while (window->isOpen() && (event_reader = window->pollEvent()))
+            while (window->isOpen() && (event_reader = window->pollEvent()) && (Devices::Joystick::update_all_joystick_win32()))
             {
                 const sf::Event &event = event_reader.value();
 

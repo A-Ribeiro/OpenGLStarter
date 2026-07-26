@@ -1,3 +1,5 @@
+#include <InteractiveToolkit/MathCore/MathCore.h>
+
 #include <AppKit/window/InputDevices.h>
 #include <AppKit/window/Window.h>
 
@@ -9,6 +11,10 @@
 
 // needs to use XInput (xinput.h) or the modern Windows Gaming Input (Windows.Gaming.Input.h) API to get improved data reading from xbox controller...
 
+#if defined(_WIN32)
+#include <xinput.h>
+#endif
+
 namespace AppKit
 {
 
@@ -17,6 +23,10 @@ namespace AppKit
 
         namespace Devices
         {
+#if defined(_WIN32)
+            XINPUT_STATE ___xbox_joy_state[XUSER_MAX_COUNT];
+            bool valid_xinput[XUSER_MAX_COUNT] = {};
+#endif
 
             //
             // Joystick
@@ -36,10 +46,101 @@ namespace AppKit
             }
             bool Joystick::isConnected()
             {
+#if defined(_WIN32)
+                if (id < XUSER_MAX_COUNT) // could be a xbox controller
+                {
+                    if (valid_xinput[id])
+                        return true;
+                }
+#endif
                 return sf::Joystick::isConnected(id);
             }
             float Joystick::getAxis(JoystickAxis axis)
             {
+#if defined(_WIN32)
+                if (id < XUSER_MAX_COUNT) // could be a xbox controller
+                {
+                    if (valid_xinput[id])
+                    {
+                        if (axis == AppKit::Window::Devices::JoystickAxis::X)
+                        {
+                            short value = ___xbox_joy_state[id].Gamepad.sThumbLX;
+                            if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                                return 0.0f;
+                            return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
+                        }
+                        else if (axis == AppKit::Window::Devices::JoystickAxis::Y)
+                        {
+                            short value = ___xbox_joy_state[id].Gamepad.sThumbLY;
+                            if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                                return 0.0f;
+                            return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
+                        }
+                        else if (axis == AppKit::Window::Devices::JoystickAxis::Z)
+                        {
+                            return float(___xbox_joy_state[id].Gamepad.bLeftTrigger) / 255.0f;
+                        }
+                        else if (axis == AppKit::Window::Devices::JoystickAxis::R)
+                        {
+                            return float(___xbox_joy_state[id].Gamepad.bRightTrigger) / 255.0f;
+                        }
+                        else if (axis == AppKit::Window::Devices::JoystickAxis::U)
+                        {
+                            short value = ___xbox_joy_state[id].Gamepad.sThumbRX;
+                            if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                                return 0.0f;
+                            return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
+                        }
+                        else if (axis == AppKit::Window::Devices::JoystickAxis::V)
+                        {
+                            short value = ___xbox_joy_state[id].Gamepad.sThumbRY;
+                            if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                                return 0.0f;
+                            return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
+                        }
+                        else if (axis == AppKit::Window::Devices::JoystickAxis::PovX)
+                        {
+                            bool pov_left = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
+                            bool pov_right = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
+                            bool pov_up = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
+                            bool pov_down = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
+
+                            bool valid_x = pov_left ^ pov_right;
+                            bool valid_y = pov_up ^ pov_down;
+
+                            if (!valid_x)
+                                return 0.0f;
+
+                            if (valid_y) // limit cos(45)
+                                return (pov_left) ? -0.70710678f : 0.70710678f;
+                            else
+                                return (pov_left) ? -1.0f : 1.0f;
+                        }
+                        else if (axis == AppKit::Window::Devices::JoystickAxis::PovY)
+                        {
+                            bool pov_left = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
+                            bool pov_right = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
+                            bool pov_up = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
+                            bool pov_down = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
+
+                            bool valid_x = pov_left ^ pov_right;
+                            bool valid_y = pov_down ^ pov_up;
+
+                            if (!valid_y)
+                                return 0.0f;
+
+                            if (valid_x) // limit cos(45)
+                                return (pov_down) ? -0.70710678f : 0.70710678f;
+                            else
+                                return (pov_down) ? -1.0f : 1.0f;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+#endif
                 if (!sf::Joystick::hasAxis(id, joy_axis_mapping[(int)axis]))
                     return 0.0f;
                 float result = sf::Joystick::getAxisPosition(id, joy_axis_mapping[(int)axis]) * 0.01f;
@@ -50,6 +151,29 @@ namespace AppKit
             }
             bool Joystick::isButtonPressed(uint32_t button)
             {
+#if defined(_WIN32)
+                if (id < XUSER_MAX_COUNT) // could be a xbox controller
+                {
+                    if (valid_xinput[id])
+                    {
+                        const WORD XINPUT_BUTTONS[10] = {
+                            XINPUT_GAMEPAD_A,              // Button_A  = 0,
+                            XINPUT_GAMEPAD_B,              // Button_B  = 1,
+                            XINPUT_GAMEPAD_X,              // Button_X  = 2,
+                            XINPUT_GAMEPAD_Y,              // Button_Y  = 3,
+                            XINPUT_GAMEPAD_LEFT_SHOULDER,  // Button_LB = 4,
+                            XINPUT_GAMEPAD_RIGHT_SHOULDER, // Button_RB = 5,
+                            XINPUT_GAMEPAD_START,          // Button_Select = 6,
+                            XINPUT_GAMEPAD_BACK,           // Button_Start = 7
+                            XINPUT_GAMEPAD_LEFT_THUMB,
+                            XINPUT_GAMEPAD_RIGHT_THUMB};
+
+                        if (button >= 10)
+                            return false;
+                        return (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_BUTTONS[button]) != 0;
+                    }
+                }
+#endif
                 if (button >= sf::Joystick::getButtonCount(id))
                     return false;
                 return sf::Joystick::isButtonPressed(id, button);
@@ -66,6 +190,36 @@ namespace AppKit
                 result.vendorId = id_info.vendorId;
 
                 return result;
+            }
+
+            void Joystick::set_vibration_win32(float low_frequency_left_motor, float high_frequency_right_motor)
+            {
+#if defined(_WIN32)
+                XINPUT_VIBRATION vibration;
+                ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
+
+                int32_t left_v = int32_t(low_frequency_left_motor * 65536.0f);
+                int32_t right_v = int32_t(high_frequency_right_motor * 65536.0f);
+                left_v = MathCore::OP<int32_t>::clamp(left_v, 0, 65535);
+                right_v = MathCore::OP<int32_t>::clamp(right_v, 0, 65535);
+                vibration.wLeftMotorSpeed = (WORD)left_v;   // max WORD 16bits: 65535
+                vibration.wRightMotorSpeed = (WORD)right_v; // max WORD 16bits: 65535
+
+                XInputSetState(id, &vibration);
+#endif
+            }
+
+            bool Joystick::update_all_joystick_win32()
+            {
+#if defined(_WIN32)
+                for (DWORD slot = 0; slot < XUSER_MAX_COUNT; slot++)
+                {
+                    ZeroMemory(&___xbox_joy_state[slot], sizeof(XINPUT_STATE));
+                    DWORD result = XInputGetState(slot, &___xbox_joy_state[slot]);
+                    valid_xinput[slot] = (result == ERROR_SUCCESS);
+                }
+#endif
+                return true;
             }
 
             //
