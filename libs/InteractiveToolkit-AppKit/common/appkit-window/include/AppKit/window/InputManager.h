@@ -23,12 +23,12 @@ namespace AppKit
         {
 
         public:
-            EventCore::Event<void(const WindowEvent &)> onWindowEvent;
-            EventCore::Event<void(const KeyboardEvent &)> onKeyboardEvent;
-            EventCore::Event<void(const MouseEvent &)> onMouseEvent;
-            EventCore::Event<void(const JoystickEvent &)> onJoystickEvent;
-            EventCore::Event<void(const TouchEvent &)> onTouchEvent;
-            EventCore::Event<void(const SensorEvent &)> onSensorEvent;
+            EventCore::Event<void(const AppKit::Window::WindowEvent &)> onWindowEvent;
+            EventCore::Event<void(const AppKit::Window::KeyboardEvent &)> onKeyboardEvent;
+            EventCore::Event<void(const AppKit::Window::MouseEvent &)> onMouseEvent;
+            EventCore::Event<void(const AppKit::Window::JoystickEvent &)> onJoystickEvent;
+            EventCore::Event<void(const AppKit::Window::TouchEvent &)> onTouchEvent;
+            EventCore::Event<void(const AppKit::Window::SensorEvent &)> onSensorEvent;
 
             friend class Window;
         };

@@ -40,7 +40,11 @@ namespace AppKit
             {
                 if (!sf::Joystick::hasAxis(id, joy_axis_mapping[(int)axis]))
                     return 0.0f;
-                return sf::Joystick::getAxisPosition(id, joy_axis_mapping[(int)axis]) * 0.01f;
+                float result = sf::Joystick::getAxisPosition(id, joy_axis_mapping[(int)axis]) * 0.01f;
+                if (axis == AppKit::Window::Devices::JoystickAxis::Y)
+                    return -result;
+                else
+                    return result;
             }
             bool Joystick::isButtonPressed(uint32_t button)
             {
@@ -117,10 +121,10 @@ namespace AppKit
                 sf::Keyboard::Key::Semicolon,
                 sf::Keyboard::Key::Comma,
                 sf::Keyboard::Key::Period,
-                sf::Keyboard::Key::Apostrophe,// Quote,
+                sf::Keyboard::Key::Apostrophe, // Quote,
                 sf::Keyboard::Key::Slash,
                 sf::Keyboard::Key::Backslash,
-                sf::Keyboard::Key::Grave,// Tilde,
+                sf::Keyboard::Key::Grave, // Tilde,
                 sf::Keyboard::Key::Equal,
                 sf::Keyboard::Key::Hyphen,
                 sf::Keyboard::Key::Space,
@@ -341,7 +345,7 @@ namespace windowGLWrapper
             set(m_fd, m_restore, false);
         }
 
-        //deleted copy constructor and assign operator, to avoid copy...
+        // deleted copy constructor and assign operator, to avoid copy...
         Terminal(const Terminal &) = delete;
         const Terminal &operator=(const Terminal &) = delete;
 

@@ -75,7 +75,7 @@ namespace AppKit
                 Container::Container2D *physicsContainer,
                 Container::ThreadState2D &thread_state,
                 Platform::Time *time,
-                const EventCore::Callback<MathCore::vec2f(const MathCore::vec2f &vel)> &velocity_modifier,
+                const EventCore::Callback<MathCore::vec2f(const MathCore::vec2f &vel, const AppKit::Physics::Controller::Character2D::GravityDescriptor &gravityDescriptor, float elapsed_sec, float max_velocity)> &velocity_modifier,
                 const MathCore::vec2f &input_axis,
                 float x_axis_velocity,
                 bool jump_pressed,
@@ -177,7 +177,7 @@ namespace AppKit
                         angle_input = OP<float>::rad_2_deg(angle_input);
 
                         const float input_range = 30.0f;
-                        input_axis_down_pressed = (angle_input >= 90.0f - input_range && angle_input <= 90.0f + input_range);
+                        input_axis_down_pressed = (angle_input >= -90.0f - input_range && angle_input <= -90.0f + input_range);
 
                         // printf("length: %f\n", input_length);
                         input_length = OP<float>::sqrt(input_length);
@@ -296,7 +296,9 @@ namespace AppKit
                 // time->deltaTime = 0.000234200008f;
 
                 if (velocity_modifier)
-                    velocity = velocity_modifier(velocity);
+                    velocity = velocity_modifier(velocity, gravityInfo, time->deltaTime, max_velocity);
+
+                // printf("velocity: %f max: %f\n", OP<vec2f>::length(velocity), max_velocity);
 
                 position += velocity * time->deltaTime;
 
