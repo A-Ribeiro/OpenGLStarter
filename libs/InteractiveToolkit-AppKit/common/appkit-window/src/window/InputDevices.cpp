@@ -64,7 +64,7 @@ namespace AppKit
                     if (valid_xinput[id])
                     {
                         if ((int)axis < (int)AppKit::Window::Devices::JoystickAxis::X || (int)axis > (int)AppKit::Window::Devices::JoystickAxis::PovY)
-                            return false;
+                            return 0.0f;
                         return ___xbox_axis_value[(int)axis];
                         // if (axis == AppKit::Window::Devices::JoystickAxis::X)
                         // {
@@ -140,7 +140,7 @@ namespace AppKit
                         // }
                         // else
                         // {
-                        //     return false;
+                        //     return 0.0f;
                         // }
                     }
                 }
