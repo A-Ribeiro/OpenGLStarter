@@ -26,6 +26,7 @@ namespace AppKit
 #if defined(_WIN32)
             XINPUT_STATE ___xbox_joy_state[XUSER_MAX_COUNT];
             bool valid_xinput[XUSER_MAX_COUNT] = {};
+            float ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::Count] = {};
 #endif
 
             //
@@ -62,82 +63,85 @@ namespace AppKit
                 {
                     if (valid_xinput[id])
                     {
-                        if (axis == AppKit::Window::Devices::JoystickAxis::X)
-                        {
-                            short value = ___xbox_joy_state[id].Gamepad.sThumbLX;
-                            if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-                                return 0.0f;
-                            return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
-                        }
-                        else if (axis == AppKit::Window::Devices::JoystickAxis::Y)
-                        {
-                            short value = ___xbox_joy_state[id].Gamepad.sThumbLY;
-                            if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-                                return 0.0f;
-                            return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
-                        }
-                        else if (axis == AppKit::Window::Devices::JoystickAxis::Z)
-                        {
-                            return float(___xbox_joy_state[id].Gamepad.bLeftTrigger) / 255.0f;
-                        }
-                        else if (axis == AppKit::Window::Devices::JoystickAxis::R)
-                        {
-                            return float(___xbox_joy_state[id].Gamepad.bRightTrigger) / 255.0f;
-                        }
-                        else if (axis == AppKit::Window::Devices::JoystickAxis::U)
-                        {
-                            short value = ___xbox_joy_state[id].Gamepad.sThumbRX;
-                            if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-                                return 0.0f;
-                            return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
-                        }
-                        else if (axis == AppKit::Window::Devices::JoystickAxis::V)
-                        {
-                            short value = ___xbox_joy_state[id].Gamepad.sThumbRY;
-                            if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-                                return 0.0f;
-                            return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
-                        }
-                        else if (axis == AppKit::Window::Devices::JoystickAxis::PovX)
-                        {
-                            bool pov_left = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
-                            bool pov_right = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
-                            bool pov_up = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
-                            bool pov_down = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
-
-                            bool valid_x = pov_left ^ pov_right;
-                            bool valid_y = pov_up ^ pov_down;
-
-                            if (!valid_x)
-                                return 0.0f;
-
-                            if (valid_y) // limit cos(45)
-                                return (pov_left) ? -0.70710678f : 0.70710678f;
-                            else
-                                return (pov_left) ? -1.0f : 1.0f;
-                        }
-                        else if (axis == AppKit::Window::Devices::JoystickAxis::PovY)
-                        {
-                            bool pov_left = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
-                            bool pov_right = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
-                            bool pov_up = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
-                            bool pov_down = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
-
-                            bool valid_x = pov_left ^ pov_right;
-                            bool valid_y = pov_down ^ pov_up;
-
-                            if (!valid_y)
-                                return 0.0f;
-
-                            if (valid_x) // limit cos(45)
-                                return (pov_down) ? -0.70710678f : 0.70710678f;
-                            else
-                                return (pov_down) ? -1.0f : 1.0f;
-                        }
-                        else
-                        {
+                        if ((int)axis < (int)AppKit::Window::Devices::JoystickAxis::X || (int)axis > (int)AppKit::Window::Devices::JoystickAxis::PovY)
                             return false;
-                        }
+                        return ___xbox_axis_value[(int)axis];
+                        // if (axis == AppKit::Window::Devices::JoystickAxis::X)
+                        // {
+                        //     short value = ___xbox_joy_state[id].Gamepad.sThumbLX;
+                        //     if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                        //         return 0.0f;
+                        //     return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
+                        // }
+                        // else if (axis == AppKit::Window::Devices::JoystickAxis::Y)
+                        // {
+                        //     short value = ___xbox_joy_state[id].Gamepad.sThumbLY;
+                        //     if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                        //         return 0.0f;
+                        //     return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
+                        // }
+                        // else if (axis == AppKit::Window::Devices::JoystickAxis::Z)
+                        // {
+                        //     return float(___xbox_joy_state[id].Gamepad.bLeftTrigger) / 255.0f;
+                        // }
+                        // else if (axis == AppKit::Window::Devices::JoystickAxis::R)
+                        // {
+                        //     return float(___xbox_joy_state[id].Gamepad.bRightTrigger) / 255.0f;
+                        // }
+                        // else if (axis == AppKit::Window::Devices::JoystickAxis::U)
+                        // {
+                        //     short value = ___xbox_joy_state[id].Gamepad.sThumbRX;
+                        //     if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                        //         return 0.0f;
+                        //     return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
+                        // }
+                        // else if (axis == AppKit::Window::Devices::JoystickAxis::V)
+                        // {
+                        //     short value = ___xbox_joy_state[id].Gamepad.sThumbRY;
+                        //     if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                        //         return 0.0f;
+                        //     return MathCore::OP<float>::clamp(float(value) / 32768.0f, -1.0f, 1.0f);
+                        // }
+                        // else if (axis == AppKit::Window::Devices::JoystickAxis::PovX)
+                        // {
+                        //     bool pov_left = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
+                        //     bool pov_right = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
+                        //     bool pov_up = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
+                        //     bool pov_down = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
+
+                        //     bool valid_x = pov_left ^ pov_right;
+                        //     bool valid_y = pov_up ^ pov_down;
+
+                        //     if (!valid_x)
+                        //         return 0.0f;
+
+                        //     if (valid_y) // limit cos(45)
+                        //         return (pov_left) ? -0.70710678f : 0.70710678f;
+                        //     else
+                        //         return (pov_left) ? -1.0f : 1.0f;
+                        // }
+                        // else if (axis == AppKit::Window::Devices::JoystickAxis::PovY)
+                        // {
+                        //     bool pov_left = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
+                        //     bool pov_right = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
+                        //     bool pov_up = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
+                        //     bool pov_down = (___xbox_joy_state[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
+
+                        //     bool valid_x = pov_left ^ pov_right;
+                        //     bool valid_y = pov_down ^ pov_up;
+
+                        //     if (!valid_y)
+                        //         return 0.0f;
+
+                        //     if (valid_x) // limit cos(45)
+                        //         return (pov_down) ? -0.70710678f : 0.70710678f;
+                        //     else
+                        //         return (pov_down) ? -1.0f : 1.0f;
+                        // }
+                        // else
+                        // {
+                        //     return false;
+                        // }
                     }
                 }
 #endif
@@ -216,7 +220,59 @@ namespace AppKit
                 {
                     ZeroMemory(&___xbox_joy_state[slot], sizeof(XINPUT_STATE));
                     DWORD result = XInputGetState(slot, &___xbox_joy_state[slot]);
-                    valid_xinput[slot] = (result == ERROR_SUCCESS);
+                    bool valid = (result == ERROR_SUCCESS);
+                    valid_xinput[slot] = valid;
+                    if (!valid)
+                        continue;
+
+                    short value = ___xbox_joy_state[slot].Gamepad.sThumbLX; // range: [-32768 .. 32767]
+                    if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::X] = 0.0f;
+                    else
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::X] = MathCore::OP<float>::clamp(float(value) / 32767.0f, -1.0f, 1.0f);
+
+                    value = ___xbox_joy_state[slot].Gamepad.sThumbLY; // range: [-32768 .. 32767]
+                    if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::Y] = 0.0f;
+                    else
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::Y] = MathCore::OP<float>::clamp(float(value) / 32767.0f, -1.0f, 1.0f);
+
+                    ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::Z] = float(___xbox_joy_state[slot].Gamepad.bLeftTrigger) / 255.0f;
+                    ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::R] = float(___xbox_joy_state[slot].Gamepad.bRightTrigger) / 255.0f;
+
+                    value = ___xbox_joy_state[slot].Gamepad.sThumbRX; // range: [-32768 .. 32767]
+                    if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::U] = 0.0f;
+                    else
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::U] = MathCore::OP<float>::clamp(float(value) / 32767.0f, -1.0f, 1.0f);
+
+                    value = ___xbox_joy_state[slot].Gamepad.sThumbRY; // range: [-32768 .. 32767]
+                    if (value > -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && value < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::V] = 0.0f;
+                    else
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::V] = MathCore::OP<float>::clamp(float(value) / 32767.0f, -1.0f, 1.0f);
+
+                    bool pov_left = (___xbox_joy_state[slot].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0;
+                    bool pov_right = (___xbox_joy_state[slot].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0;
+                    bool pov_up = (___xbox_joy_state[slot].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0;
+                    bool pov_down = (___xbox_joy_state[slot].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0;
+
+                    bool valid_x = pov_left ^ pov_right;
+                    bool valid_y = pov_up ^ pov_down;
+
+                    if (!valid_x)
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::PovX] = 0.0f;
+                    else if (valid_y) // limit cos(45)
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::PovX] = (pov_left) ? -0.70710678f : 0.70710678f;
+                    else
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::PovX] = (pov_left) ? -1.0f : 1.0f;
+
+                    if (!valid_y)
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::PovY] = 0.0f;
+                    else if (valid_x) // limit cos(45)
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::PovY] = (pov_down) ? -0.70710678f : 0.70710678f;
+                    else
+                        ___xbox_axis_value[(int)AppKit::Window::Devices::JoystickAxis::PovY] = (pov_down) ? -1.0f : 1.0f;
                 }
 #endif
                 return true;
