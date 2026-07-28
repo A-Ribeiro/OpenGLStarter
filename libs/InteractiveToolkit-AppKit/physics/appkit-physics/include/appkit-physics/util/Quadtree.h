@@ -333,13 +333,16 @@ namespace AppKit
 
                         MathCore::vec2f max_copy = _max;
 
-                        MathCore::vec2f size_relative = (_max - _min) * MathCore::EPSILON<float>::low_precision;
-                        size_relative = MathCore::OP<MathCore::vec2f>::maximum(size_relative, MathCore::vec2f(MathCore::EPSILON<float>::low_precision));
+                        // MathCore::vec2f size_relative = (_max - _min) * MathCore::EPSILON<float>::low_precision;
+                        // size_relative = MathCore::OP<MathCore::vec2f>::maximum(size_relative, MathCore::vec2f(MathCore::EPSILON<float>::low_precision));
 
                         // increase max until max could be inside the quadtree
                         int max_tries = 10; // safety to avoid infinite loop, should not be needed
                         while (!QuadtreeNode::box_isPointInside(max_copy, _min, _max) && max_tries-- > 0)
-                            _max += size_relative;
+                        {
+                            _max.x += nextafterf(_max.x, FLT_MAX);
+                            _max.y += nextafterf(_max.y, FLT_MAX);
+                        }
                         if (max_tries <= 0)
                         {
                             _max = MathCore::OP<MathCore::vec2f>::lerp(_min, _max, 1.0f + MathCore::EPSILON<float>::low_precision);
