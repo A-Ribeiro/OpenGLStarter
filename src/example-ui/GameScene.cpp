@@ -314,13 +314,15 @@ void GameScene::bindResourcesToGraph()
             min_jump_height,                                        // minJumpHeight
             max_jump_height,                                        // maxJumpHeight
             second_jump_height,                                     // secondJumpHeight
-            true,                                                   // allow_double_jump
             (componentCameraOrthographic->sizeY / 2160.0f) * 0.33f, // skin_width: 33% of a px in 4k screen
             0.0f,                                                   // offset_above_activation_line
-            componentPlayer->Radius.c_val() * 1.0f,                 // offset_below_deactivation_line
+            componentPlayer->Radius.c_val() * 0.125f,               // offset_below_deactivation_line
             MathCore::vec2f(0.0f, -gravity),                        // gravity
             walk_velocity,                                          // walk_velocity
-            gravity * 3.0f                                          // max_velocity
+            gravity * 1.5f,                                         // max_velocity
+            2.0f * 100.0f,                                          // tear_down_velocity
+            2.0f * 200.0f,                                          // dash_distance
+            0.3f                                                    // dash_time_sec
         };
 
         // componentPlayer->gameArea = componentGameArea;

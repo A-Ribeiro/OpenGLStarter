@@ -1,7 +1,6 @@
 #include "PlayerInputState.h"
 
-
-PlayerInputState::PlayerInputState(RawInputFromDevice input_device):inputJoy(0)
+PlayerInputState::PlayerInputState(RawInputFromDevice input_device) : inputJoy(0)
 {
     this->input_device = input_device;
     state = InputState_None;
@@ -24,6 +23,7 @@ void PlayerInputState::fillState()
                        AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Right));
 
         jump.setState(AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Space));
+        dash.setState(AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Z));
         action.setState(AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Enter));
 
         start.setState(AppKit::Window::Devices::Keyboard::isPressed(AppKit::Window::Devices::KeyCode::Escape));
@@ -46,16 +46,50 @@ void PlayerInputState::fillState()
         x_axis = inputJoy.getAxis(AppKit::Window::Devices::JoystickAxis::X);
         y_axis = inputJoy.getAxis(AppKit::Window::Devices::JoystickAxis::Y);
 
+        float pov_x = inputJoy.getAxis(AppKit::Window::Devices::JoystickAxis::PovX);
+        float pov_y = inputJoy.getAxis(AppKit::Window::Devices::JoystickAxis::PovY);
+
+        if (MathCore::OP<float>::abs(pov_x) > 0.1f)
+            x_axis = pov_x;
+        if (MathCore::OP<float>::abs(pov_y) > 0.1f)
+            y_axis = pov_y;
+
         up.setState(y_axis > 0.5f);
         down.setState(y_axis < -0.5f);
         left.setState(x_axis < -0.5f);
         right.setState(x_axis > 0.5f);
 
+        // Action-Adventure Setup
+        // A Button: Jump.
+        // B Button: Dash or Evade.
+        // X Button: Primary Attack.
+        // Y Button: Heavy or Special Attack.
+
+        // Fast-Paced Platformer
+        // A Button: Jump.
+        // B Button: Attack.
+        // X Button: Dash.
+        // Y Button: Heavy or Special Attack.
+
+        // Modern Platformer
+        // A Button: Jump.
+        // B Button: Dash / Roll.
+        // RB / RT: Light / Heavy Attack.
+
         jump.setState(inputJoy.isButtonPressed(XboxButtons::Button_A));
-        action.setState(inputJoy.isButtonPressed(XboxButtons::Button_B));
+        dash.setState(inputJoy.isButtonPressed(XboxButtons::Button_X));
+
+        action.setState(inputJoy.isButtonPressed(XboxButtons::Button_A));
+        back.setState(inputJoy.isButtonPressed(XboxButtons::Button_B));
 
         start.setState(inputJoy.isButtonPressed(XboxButtons::Button_Start));
         select.setState(inputJoy.isButtonPressed(XboxButtons::Button_Select));
+
+        float z_axis = inputJoy.getAxis(AppKit::Window::Devices::JoystickAxis::Z);
+        float r_axis = inputJoy.getAxis(AppKit::Window::Devices::JoystickAxis::R);
+
+        shouder_left.setState(inputJoy.isButtonPressed(XboxButtons::Button_LB) || z_axis > 0.5f);
+        shouder_right.setState(inputJoy.isButtonPressed(XboxButtons::Button_RB) || r_axis > 0.5f);
     }
     state = InputState_None;
     if (up.pressed)

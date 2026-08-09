@@ -56,13 +56,15 @@ namespace AppKit
                     1.5f,                          // minJumpHeight
                     3.0f,                          // maxJumpHeight
                     2.0f,                          // secondJumpHeight
-                    true,                          // allow_double_jump
                     (10.0f / 2160.0f) * 1e-2f,     // skin_width
                     0.0f,                          // offset_above_activation_line
                     0.1f,                          // offset_below_deactivation_line
                     MathCore::vec2f(0.0f, -20.0f), // gravity
                     5.0f,                          // walk_velocity
-                    50.0f                          // max_velocity
+                    50.0f,                         // max_velocity
+                    2.0f,                          // tear_down_velocity
+                    2.0f,                          // dash_distance
+                    0.3f                           // dash_time_sec
                 };
 
                 character2D = AppKit::Physics::Controller::Character2D::CreateShared();
@@ -87,10 +89,18 @@ namespace AppKit
                     config.maxJumpHeight,
                     config.secondJumpHeight,
                     config.gravity,
-                    config.allow_double_jump,
                     config.skin_width,
                     config.offset_above_activation_line,
                     config.offset_below_deactivation_line);
+
+                character2D->dashState.configureDash(
+                    config.dash_distance,
+                    config.dash_time_sec);
+
+                dash_dir = AppKit::Physics::VelocityHelpers::DashState::State::DashingRight;
+
+                character2D->dashState.setEaseEq(EaseCore::Easef::outSine<float>);
+
                 // app->gameScene->physicsContainer->jumpingControllerList.push_back(physicsController);
                 character2D->teleport(MathCore::CVT<MathCore::vec3f>::toVec2(getTransform()->getLocalPosition()) + Offset.c_val());
 
@@ -299,10 +309,21 @@ namespace AppKit
                 character2D->update(app->gameScene->container2D.get(),
                                     thread_state2d,
                                     time,
-                                    inputState.x_axis,
+                                    nullptr, // velocity_modifier,
+                                    MathCore::vec2f(inputState.x_axis, inputState.y_axis),
                                     config.walk_velocity,
                                     inputState.jump.pressed,
-                                    config.max_velocity);
+                                    config.max_velocity,
+                                    AppKit::Physics::Controller::JumpBehavior::SimpleJump,
+                                    inputState.dash.pressed,
+                                    dash_dir,
+                                    AppKit::Physics::Controller::DashBehavior::DashAnyTime,
+                                    true);
+
+                if (inputState.x_axis > 0.5f)
+                    dash_dir = AppKit::Physics::VelocityHelpers::DashState::State::DashingRight;
+                else if (inputState.x_axis < -0.5f)
+                    dash_dir = AppKit::Physics::VelocityHelpers::DashState::State::DashingLeft;
 
                 auto new_position3d = MathCore::vec3f(character2D->position - Offset.c_val(),
                                                       initial_z);

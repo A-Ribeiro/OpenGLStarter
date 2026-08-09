@@ -28,7 +28,6 @@ namespace AppKit
                 float maxJumpHeight;
                 float secondJumpHeight;
 
-                bool allow_double_jump;
                 float skin_width;
 
                 float offset_above_activation_line;
@@ -38,6 +37,10 @@ namespace AppKit
                 float walk_velocity;
 
                 float max_velocity;
+                float tear_down_velocity;
+
+                float dash_distance;
+                float dash_time_sec;
             };
 
             class ComponentPlayer : public Component
@@ -80,6 +83,8 @@ namespace AppKit
 
                 PlayerInputState inputState;
                 // JumpState jumpState;
+
+                AppKit::Physics::VelocityHelpers::DashState::State dash_dir;
 
                 ComponentPlayer();
                 ~ComponentPlayer();

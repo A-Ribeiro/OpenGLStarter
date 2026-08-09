@@ -35,7 +35,9 @@ enum XboxButtons
     Button_LB = 4,
     Button_RB = 5,
     Button_Select = 6,
-    Button_Start = 7
+    Button_Start = 7,
+    Thumb_Left = 8,
+    Thumb_Right = 9,
 };
 
 class PlayerInputState
@@ -54,10 +56,16 @@ public:
     EventCore::PressReleaseDetector right;
 
     EventCore::PressReleaseDetector jump;
+    EventCore::PressReleaseDetector dash;
+    
     EventCore::PressReleaseDetector action;
+    EventCore::PressReleaseDetector back;
 
     EventCore::PressReleaseDetector start;
     EventCore::PressReleaseDetector select;
+
+    EventCore::PressReleaseDetector shouder_left;
+    EventCore::PressReleaseDetector shouder_right;
 
     IntInputState state;
 
