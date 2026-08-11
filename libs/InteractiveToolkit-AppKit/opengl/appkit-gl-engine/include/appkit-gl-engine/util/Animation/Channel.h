@@ -23,11 +23,14 @@ namespace AppKit
                     int64_t min_idx_a = getIndex(min_idx);
                     int64_t min_idx_b = getIndex(min_idx + 1);
 
-                    if (min_idx_a != min_idx_b && min_duration != keys[min_idx_a].time)
+                    // if (min_idx_a != min_idx_b)
                     {
-                        T zero_value;
-                        interpolate(min_idx_a, min_idx_b, min_duration, &zero_value);
-                        keys[min_idx_a] = Key<T>(min_duration, zero_value);
+                        if (min_duration > keys[min_idx_a].time)
+                        {
+                            T zero_value;
+                            interpolate(min_idx_a, min_idx_b, min_duration, &zero_value);
+                            keys[min_idx_a] = Key<T>(min_duration, zero_value);
+                        }
                         if (min_idx_a > 0)
                             keys.erase(keys.begin(), keys.begin() + min_idx_a);
                     }
@@ -38,11 +41,14 @@ namespace AppKit
                     int64_t max_idx_a = getIndex(max_idx - 1);
                     int64_t max_idx_b = getIndex(max_idx);
 
-                    if (max_idx_a != max_idx_b && max_duration != keys[max_idx_b].time)
+                    // if (max_idx_a != max_idx_b)
                     {
-                        T last_value;
-                        interpolate(max_idx_a, max_idx_b, max_duration, &last_value);
-                        keys[max_idx_b] = Key<T>(max_duration, last_value);
+                        if (max_duration < keys[max_idx_b].time)
+                        {
+                            T last_value;
+                            interpolate(max_idx_a, max_idx_b, max_duration, &last_value);
+                            keys[max_idx_b] = Key<T>(max_duration, last_value);
+                        }
                         if (max_idx_b < key_max - 1)
                             keys.erase(keys.begin() + max_idx_b + 1, keys.end());
                     }

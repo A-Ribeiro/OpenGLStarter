@@ -162,11 +162,13 @@ int main(int argc, char *argv[])
 
     Channel<float> channel;
 
+    channel.keys.push_back(Key<float>(-2.0f, -2.0f));
     channel.keys.push_back(Key<float>(-1.0f, -1.0f));
     channel.keys.push_back(Key<float>(1.0f, 1.0f));
-    channel.keys.push_back(Key<float>(3.0f, 3.0f));
+    channel.keys.push_back(Key<float>(5.0f, 5.0f));
+    channel.keys.push_back(Key<float>(6.0f, 6.0f));
 
-    channel.clampDuration(-1.0f, 3.0f);
+    channel.clampDuration(0.0f, 0.0f);
 
     for(const auto& k :channel.keys)
     {
