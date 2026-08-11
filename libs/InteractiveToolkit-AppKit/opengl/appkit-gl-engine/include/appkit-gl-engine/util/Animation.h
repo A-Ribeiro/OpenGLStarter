@@ -9,6 +9,8 @@
 // #include <appkit-gl-engine/util/Interpolators.h>
 #include <appkit-gl-engine/util/Animation/all.h>
 
+#include <appkit-gl-engine/ResourceMap.h>
+
 #include <InteractiveToolkit-Extension/model/Animation.h>
 
 namespace AppKit
@@ -127,64 +129,67 @@ namespace AppKit
             // we need to clamp the curve to avoid this situation...
             void clampDuration(float min_duration, float max_duration)
             {
+                channel_position.clampDuration(min_duration, max_duration);
+                channel_scale.clampDuration(min_duration, max_duration);
+                channel_rotation.clampDuration(min_duration, max_duration);
 
-                if (position.keys.size() <= 1)
-                    return;
+                // if (position.keys.size() <= 1)
+                //     return;
 
-                float last_time = position.keys[position.keys.size() - 1].time;
+                // float last_time = position.keys[position.keys.size() - 1].time;
 
-                printf("[NodeAnimation] clampToMaxDuration\n");
-                printf("  max_duration to set: %f\n", max_duration);
-                printf("  last_time: %f\n", last_time);
-                if (last_time > max_duration)
-                {
-                    printf("  NEED SET LAST FRAME TIME!!!\n");
-                    MathCore::vec3f valueToSet = position.getValue_ForwardLoop(max_duration);
-                    int i = (int)position.keys.size() - 1;
-                    // remove all index
-                    while (i > 0)
-                    {
-                        if (position.keys[i].time < max_duration)
-                            break;
-                        else
-                            position.keys.erase(position.keys.begin() + i);
-                        i--;
-                    }
-                    position.keys.push_back(Key<MathCore::vec3f>(max_duration, valueToSet));
-                    // reset delta frame
-                    position.getValue_ForwardLoop(0);
-                }
+                // printf("[NodeAnimation] clampToMaxDuration\n");
+                // printf("  max_duration to set: %f\n", max_duration);
+                // printf("  last_time: %f\n", last_time);
+                // if (last_time > max_duration)
+                // {
+                //     printf("  NEED SET LAST FRAME TIME!!!\n");
+                //     MathCore::vec3f valueToSet = position.getValue_ForwardLoop(max_duration);
+                //     int i = (int)position.keys.size() - 1;
+                //     // remove all index
+                //     while (i > 0)
+                //     {
+                //         if (position.keys[i].time < max_duration)
+                //             break;
+                //         else
+                //             position.keys.erase(position.keys.begin() + i);
+                //         i--;
+                //     }
+                //     position.keys.push_back(Key<MathCore::vec3f>(max_duration, valueToSet));
+                //     // reset delta frame
+                //     position.getValue_ForwardLoop(0);
+                // }
 
-                if (position.keys.size() <= 1)
-                    return;
+                // if (position.keys.size() <= 1)
+                //     return;
 
-                // check if the first frame starts with 0
-                float first_time = position.keys[0].time;
-                if (first_time < min_duration)
-                {
-                    printf("  NEED SET FIRST FRAME TIME!!!\n");
-                    MathCore::vec3f valueToSet = position.getValue_ForwardLoop(min_duration);
-                    int i = 0;
-                    // remove all index
-                    while (i < position.keys.size())
-                    {
-                        if (position.keys[i].time > min_duration)
-                            break;
-                        else
-                            position.keys.erase(position.keys.begin());
-                        i++;
-                    }
-                    position.keys.insert(position.keys.begin(), Key<MathCore::vec3f>(min_duration, valueToSet));
-                    // reset delta frame
-                    position.getValue_ForwardLoop(min_duration);
+                // // check if the first frame starts with 0
+                // float first_time = position.keys[0].time;
+                // if (first_time < min_duration)
+                // {
+                //     printf("  NEED SET FIRST FRAME TIME!!!\n");
+                //     MathCore::vec3f valueToSet = position.getValue_ForwardLoop(min_duration);
+                //     int i = 0;
+                //     // remove all index
+                //     while (i < position.keys.size())
+                //     {
+                //         if (position.keys[i].time > min_duration)
+                //             break;
+                //         else
+                //             position.keys.erase(position.keys.begin());
+                //         i++;
+                //     }
+                //     position.keys.insert(position.keys.begin(), Key<MathCore::vec3f>(min_duration, valueToSet));
+                //     // reset delta frame
+                //     position.getValue_ForwardLoop(min_duration);
 
-                    // move all times to 0
-                    for (int i = 0; i < position.keys.size(); i++)
-                        position.keys[i].time -= min_duration;
+                //     // move all times to 0
+                //     for (int i = 0; i < position.keys.size(); i++)
+                //         position.keys[i].time -= min_duration;
 
-                    // reset delta frame
-                    position.getValue_ForwardLoop(0);
-                }
+                //     // reset delta frame
+                //     position.getValue_ForwardLoop(0);
+                // }
             }
 
             // need this to play new animations starting from zero
@@ -239,23 +244,23 @@ namespace AppKit
 
             ITK_INLINE MathCore::vec3f samplePos(float secs, MathCore::vec3f *interframe_delta)
             {
-                if (position.keys.size() > 0)
-                    return position.getValue_ForwardLoop(secs, interframe_delta);
-                *interframe_delta = MathCore::vec3f(0);
+                // if (position.keys.size() > 0)
+                //     return position.getValue_ForwardLoop(secs, interframe_delta);
+                // *interframe_delta = MathCore::vec3f(0);
                 return MathCore::vec3f(0);
             }
 
             ITK_INLINE MathCore::vec3f sampleScale(float secs)
             {
-                if (scale.keys.size() > 0)
-                    return scale.getValue_ForwardLoop(secs);
+                // if (scale.keys.size() > 0)
+                //     return scale.getValue_ForwardLoop(secs);
                 return MathCore::vec3f(1);
             }
 
             ITK_INLINE MathCore::quatf sampleRotation(float secs)
             {
-                if (rotation.keys.size() > 0)
-                    return rotation.getValue_ForwardLoop(secs);
+                // if (rotation.keys.size() > 0)
+                //     return rotation.getValue_ForwardLoop(secs);
                 return MathCore::quatf();
             }
 
@@ -312,57 +317,57 @@ namespace AppKit
 
             ITK_INLINE void sampleTime(float secs, float amount, RootMotionAnalyser *rootMotionAnalyser)
             {
-                if (amount == 1.0f)
-                {
-                    if (position.keys.size() > 0)
-                    {
-                        if (isRootNode && rootMotionAnalyser->method != nullptr)
-                        {
+                //     if (amount == 1.0f)
+                //     {
+                //         if (position.keys.size() > 0)
+                //         {
+                //             if (isRootNode && rootMotionAnalyser->method != nullptr)
+                //             {
 
-                            // MathCore::vec3f local_position = position.getValue_ForwardLoop(secs);
-                            rootMotionAnalyser->data.setFromNodeAnimation(this, secs, 1.0f);
+                //                 // MathCore::vec3f local_position = position.getValue_ForwardLoop(secs);
+                //                 rootMotionAnalyser->data.setFromNodeAnimation(this, secs, 1.0f);
 
-                            /*
-                            node->setLocalPosition(position.getValue_ForwardLoop(secs));
-                            motion_last_value = node->getPosition();
-                            (*computed_root_delta) = motion_last_value;
+                //                 /*
+                //                 node->setLocalPosition(position.getValue_ForwardLoop(secs));
+                //                 motion_last_value = node->getPosition();
+                //                 (*computed_root_delta) = motion_last_value;
 
-                            node->setLocalPosition(start_position);
-                            */
-                        }
-                        else
-                            node->setLocalPosition(position.getValue_ForwardLoop(secs));
-                    }
-                    if (scale.keys.size() > 0)
-                        node->setLocalScale(scale.getValue_ForwardLoop(secs));
-                    if (rotation.keys.size() > 0)
-                        node->setLocalRotation(rotation.getValue_ForwardLoop(secs));
-                }
-                else
-                {
-                    if (position.keys.size() > 0)
-                    {
-                        if (isRootNode && rootMotionAnalyser->method != nullptr)
-                        {
+                //                 node->setLocalPosition(start_position);
+                //                 */
+                //             }
+                //             else
+                //                 node->setLocalPosition(position.getValue_ForwardLoop(secs));
+                //         }
+                //         if (scale.keys.size() > 0)
+                //             node->setLocalScale(scale.getValue_ForwardLoop(secs));
+                //         if (rotation.keys.size() > 0)
+                //             node->setLocalRotation(rotation.getValue_ForwardLoop(secs));
+                //     }
+                //     else
+                //     {
+                //         if (position.keys.size() > 0)
+                //         {
+                //             if (isRootNode && rootMotionAnalyser->method != nullptr)
+                //             {
 
-                            // MathCore::vec3f local_position = position.getValue_ForwardLoop(secs);
-                            rootMotionAnalyser->data.setFromNodeAnimation(this, secs, amount);
-                            /*
-                            node->setLocalPosition(aRibeiro::lerp(start_position, position.getValue_ForwardLoop(secs), amount));
-                            motion_last_value = node->getPosition();
-                            (*computed_root_delta) = motion_last_value;
+                //                 // MathCore::vec3f local_position = position.getValue_ForwardLoop(secs);
+                //                 rootMotionAnalyser->data.setFromNodeAnimation(this, secs, amount);
+                //                 /*
+                //                 node->setLocalPosition(aRibeiro::lerp(start_position, position.getValue_ForwardLoop(secs), amount));
+                //                 motion_last_value = node->getPosition();
+                //                 (*computed_root_delta) = motion_last_value;
 
-                            node->setLocalPosition(start_position);
-                            */
-                        }
-                        else
-                            node->setLocalPosition(MathCore::OP<MathCore::vec3f>::lerp(start_position, position.getValue_ForwardLoop(secs), amount));
-                    }
-                    if (scale.keys.size() > 0)
-                        node->setLocalScale(MathCore::OP<MathCore::vec3f>::lerp(start_scale, scale.getValue_ForwardLoop(secs), amount));
-                    if (rotation.keys.size() > 0)
-                        node->setLocalRotation(MathCore::OP<MathCore::quatf>::slerp(start_rotation, rotation.getValue_ForwardLoop(secs), amount));
-                }
+                //                 node->setLocalPosition(start_position);
+                //                 */
+                //             }
+                //             else
+                //                 node->setLocalPosition(MathCore::OP<MathCore::vec3f>::lerp(start_position, position.getValue_ForwardLoop(secs), amount));
+                //         }
+                //         if (scale.keys.size() > 0)
+                //             node->setLocalScale(MathCore::OP<MathCore::vec3f>::lerp(start_scale, scale.getValue_ForwardLoop(secs), amount));
+                //         if (rotation.keys.size() > 0)
+                //             node->setLocalRotation(MathCore::OP<MathCore::quatf>::slerp(start_rotation, rotation.getValue_ForwardLoop(secs), amount));
+                //     }
             }
         };
 
@@ -515,6 +520,5 @@ namespace AppKit
 
             void fix_internal_references(AppKit::GLEngine::ResourceMap *resourceMap, Transform::TransformMapT &transformMap);
         };
-
     }
 }
