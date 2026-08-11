@@ -14,44 +14,34 @@ namespace AppKit
             public:
                 std::vector<Key<T>> keys;
 
-                inline void clampDuration(float min_duration, float max_duration)
+                inline void clamp_time(float time_min_s, float time_max_s)
                 {
                     if (keys.size() == 0)
                         return;
-                    int64_t min_idx = indexForwardTimeSearch(0, min_duration);
-
+                    int64_t min_idx = indexForwardTimeSearch(0, time_min_s);
                     int64_t min_idx_a = getIndex(min_idx);
                     int64_t min_idx_b = getIndex(min_idx + 1);
-
-                    // if (min_idx_a != min_idx_b)
+                    if (time_min_s > keys[min_idx_a].time)
                     {
-                        if (min_duration > keys[min_idx_a].time)
-                        {
-                            T zero_value;
-                            interpolate(min_idx_a, min_idx_b, min_duration, &zero_value);
-                            keys[min_idx_a] = Key<T>(min_duration, zero_value);
-                        }
-                        if (min_idx_a > 0)
-                            keys.erase(keys.begin(), keys.begin() + min_idx_a);
+                        T zero_value;
+                        interpolate(min_idx_a, min_idx_b, time_min_s, &zero_value);
+                        keys[min_idx_a] = Key<T>(time_min_s, zero_value);
                     }
+                    if (min_idx_a > 0)
+                        keys.erase(keys.begin(), keys.begin() + min_idx_a);
 
-                    int64_t key_max = (int64_t)keys.size();
-                    int64_t max_idx = indexBackwardTimeSearch(key_max - 1, max_duration);
-
+                    int64_t last_item_idx = (int64_t)keys.size() - 1;
+                    int64_t max_idx = indexBackwardTimeSearch(last_item_idx, time_max_s);
                     int64_t max_idx_a = getIndex(max_idx - 1);
                     int64_t max_idx_b = getIndex(max_idx);
-
-                    // if (max_idx_a != max_idx_b)
+                    if (time_max_s < keys[max_idx_b].time)
                     {
-                        if (max_duration < keys[max_idx_b].time)
-                        {
-                            T last_value;
-                            interpolate(max_idx_a, max_idx_b, max_duration, &last_value);
-                            keys[max_idx_b] = Key<T>(max_duration, last_value);
-                        }
-                        if (max_idx_b < key_max - 1)
-                            keys.erase(keys.begin() + max_idx_b + 1, keys.end());
+                        T last_value;
+                        interpolate(max_idx_a, max_idx_b, time_max_s, &last_value);
+                        keys[max_idx_b] = Key<T>(time_max_s, last_value);
                     }
+                    if (max_idx_b < last_item_idx)
+                        keys.erase(keys.begin() + max_idx_b + 1, keys.end());
                 }
 
                 inline int64_t getIndex(int64_t idx) const

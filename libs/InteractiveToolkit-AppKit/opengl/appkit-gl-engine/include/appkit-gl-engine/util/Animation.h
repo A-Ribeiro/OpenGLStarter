@@ -129,9 +129,9 @@ namespace AppKit
             // we need to clamp the curve to avoid this situation...
             void clampDuration(float min_duration, float max_duration)
             {
-                channel_position.clampDuration(min_duration, max_duration);
-                channel_scale.clampDuration(min_duration, max_duration);
-                channel_rotation.clampDuration(min_duration, max_duration);
+                channel_position.clamp_time(min_duration, max_duration);
+                channel_scale.clamp_time(min_duration, max_duration);
+                channel_rotation.clamp_time(min_duration, max_duration);
 
                 // if (position.keys.size() <= 1)
                 //     return;

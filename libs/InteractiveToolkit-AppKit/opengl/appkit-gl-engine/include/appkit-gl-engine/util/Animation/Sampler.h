@@ -51,13 +51,14 @@ namespace AppKit
 
                 template <typename DeltaType = SMART_DELTA_TYPE::POSITION,
                           typename std::enable_if<
-                              std::is_same<DeltaType, SMART_DELTA_TYPE::QUATERNION>::value,
+                              std::is_same<DeltaType, SMART_DELTA_TYPE::QUATERNION>::value &&
+                              std::is_same<typename MathCore::MathTypeInfo<T>::_class, MathCore::MathTypeClass::_class_quat>::value,
                               bool>::type = true>
                 inline void resetForwardSmartDelta(T *delta)
                 {
                     T new_value, old_value;
                     resetForwardDelta(&new_value, &old_value);
-                    *delta = MathCore::OP<decltype(T)>::inverse(old_value) * new_value;
+                    *delta = MathCore::OP<T>::inverse(old_value) * new_value;
                 }
 
                 inline void resetBackward()
@@ -90,13 +91,14 @@ namespace AppKit
 
                 template <typename DeltaType = SMART_DELTA_TYPE::POSITION,
                           typename std::enable_if<
-                              std::is_same<DeltaType, SMART_DELTA_TYPE::QUATERNION>::value,
+                              std::is_same<DeltaType, SMART_DELTA_TYPE::QUATERNION>::value &&
+                              std::is_same<typename MathCore::MathTypeInfo<T>::_class, MathCore::MathTypeClass::_class_quat>::value,
                               bool>::type = true>
                 inline void resetBackwardSmartDelta(T *delta)
                 {
                     T new_value, old_value;
                     resetBackwardDelta(&new_value, &old_value);
-                    *delta = MathCore::OP<decltype(T)>::inverse(old_value) * new_value;
+                    *delta = MathCore::OP<T>::inverse(old_value) * new_value;
                 }
 
                 inline void configure(const Channel<T> *channel_src_, const T &initial_value, const T &offset_value)

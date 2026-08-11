@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     channel.keys.push_back(Key<float>(5.0f, 5.0f));
     channel.keys.push_back(Key<float>(6.0f, 6.0f));
 
-    channel.clampDuration(0.0f, 0.0f);
+    channel.clamp_time(0.0f, 0.0f);
 
     for(const auto& k :channel.keys)
     {
