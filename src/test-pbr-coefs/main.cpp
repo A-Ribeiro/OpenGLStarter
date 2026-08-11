@@ -38,7 +38,7 @@ static double smartToDouble(float v)
 struct OptionKey
 {
     const char *key_name;
-    std::vector<const char*> options;
+    std::vector<const char *> options;
     const char *default_option;
 };
 struct OptionsGroup
@@ -124,7 +124,6 @@ int main(int argc, char *argv[])
     // printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("    ").c_str() );
     // printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("").c_str() );
 
-
     // argv_.push_back("");
     // argv_.push_back("AnotherString");
     // argv_.push_back("Another\\ Space\\ String");
@@ -168,14 +167,23 @@ int main(int argc, char *argv[])
     channel.keys.push_back(Key<float>(5.0f, 5.0f));
     channel.keys.push_back(Key<float>(6.0f, 6.0f));
 
-    channel.clamp_time(0.0f, 0.0f);
+    channel.clamp_time(0.0f, 3.0f);
 
-    for(const auto& k :channel.keys)
-    {
+    printf("Original:\n");
+
+    for (const auto &k : channel.keys)
         printf("time: %g value: %g\n", k.time, k.value);
-    }
 
+    Channel<float> channel_resampled;
 
+    Sampler<float> sampler;
+    sampler.configure(&channel, 0, 0);
+    sampler.resample(&channel_resampled, 31);
+
+    printf("Resampled:\n");
+
+    for (const auto &k : channel_resampled.keys)
+        printf("time: %g value: %g\n", k.time, k.value);
 
     return 0;
 }
