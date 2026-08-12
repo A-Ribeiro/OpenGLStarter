@@ -23,6 +23,7 @@ namespace AppKit
                 int64_t idx;
                 T value;
                 T offset;
+                float sampled_time_s;
 
                 inline void resample(Channel<T> *channel_output, size_t new_sample_count)
                 {
@@ -60,6 +61,7 @@ namespace AppKit
                 {
                     idx = 0;
                     channel_src->readValue(idx, &value);
+                    channel_src->readTime(idx, &sampled_time_s);
                 }
 
                 inline void resetForwardDelta(T *new_value, T *old_value)
@@ -100,6 +102,7 @@ namespace AppKit
                     else
                         idx = (int64_t)channel_src->keys.size() - 1;
                     channel_src->readValue(idx, &value);
+                    channel_src->readTime(idx, &sampled_time_s);
                 }
 
                 inline void resetBackwardDelta(T *new_value, T *old_value)
@@ -144,28 +147,34 @@ namespace AppKit
 
                 inline void sampleForward(float current_time_s)
                 {
+                    if (current_time_s <= sampled_time_s)
+                        return;
                     idx = channel_src->indexForwardTimeSearch(idx, current_time_s);
                     channel_src->interpolate(idx, idx + 1, current_time_s, &value);
+                    sampled_time_s = current_time_s;
                 }
 
                 inline void sampleForwardDelta(float current_time_s, T *new_value_, T *old_value_)
                 {
+                    if (current_time_s <= sampled_time_s)
+                        return;
                     T new_value = value;
                     idx = channel_src->indexForwardTimeSearch(idx, current_time_s);
                     channel_src->interpolate(idx, idx + 1, current_time_s, &new_value);
                     *new_value_ = new_value;
                     *old_value_ = value;
                     value = new_value;
+                    sampled_time_s = current_time_s;
                 }
 
                 template <typename DeltaType = SMART_DELTA_TYPE::POSITION,
                           typename std::enable_if<
                               std::is_same<DeltaType, SMART_DELTA_TYPE::POSITION>::value,
                               bool>::type = true>
-                inline void sampleForwardSmartDelta(T *delta)
+                inline void sampleForwardSmartDelta(float current_time_s, T *delta)
                 {
                     T new_value, old_value;
-                    sampleForwardDelta(&new_value, &old_value);
+                    sampleForwardDelta(current_time_s, &new_value, &old_value);
                     *delta = new_value - old_value;
                 }
 
@@ -174,37 +183,43 @@ namespace AppKit
                               std::is_same<DeltaType, SMART_DELTA_TYPE::QUATERNION>::value &&
                                   std::is_same<typename MathCore::MathTypeInfo<T>::_class, MathCore::MathTypeClass::_class_quat>::value,
                               bool>::type = true>
-                inline void sampleForwardSmartDelta(T *delta)
+                inline void sampleForwardSmartDelta(float current_time_s, T *delta)
                 {
                     T new_value, old_value;
-                    sampleForwardDelta(&new_value, &old_value);
+                    sampleForwardDelta(current_time_s, &new_value, &old_value);
                     *delta = MathCore::OP<T>::inverse(old_value) * new_value;
                 }
 
                 inline void sampleBackward(float current_time_s)
                 {
+                    if (current_time_s >= sampled_time_s)
+                        return;
                     idx = channel_src->indexBackwardTimeSearch(idx, current_time_s);
                     channel_src->interpolate(idx - 1, idx, current_time_s, &value);
+                    sampled_time_s = current_time_s;
                 }
 
                 inline void sampleBackwardDelta(float current_time_s, T *new_value_, T *old_value_)
                 {
+                    if (current_time_s >= sampled_time_s)
+                        return;
                     T new_value = value;
                     idx = channel_src->indexBackwardTimeSearch(idx, current_time_s);
                     channel_src->interpolate(idx - 1, idx, current_time_s, &new_value);
                     *new_value_ = new_value;
                     *old_value_ = value;
                     value = new_value;
+                    sampled_time_s = current_time_s;
                 }
 
                 template <typename DeltaType = SMART_DELTA_TYPE::POSITION,
                           typename std::enable_if<
                               std::is_same<DeltaType, SMART_DELTA_TYPE::POSITION>::value,
                               bool>::type = true>
-                inline void sampleBackwardSmartDelta(T *delta)
+                inline void sampleBackwardSmartDelta(float current_time_s, T *delta)
                 {
                     T new_value, old_value;
-                    sampleBackwardDelta(&new_value, &old_value);
+                    sampleBackwardDelta(current_time_s, &new_value, &old_value);
                     *delta = new_value - old_value;
                 }
 
@@ -213,10 +228,10 @@ namespace AppKit
                               std::is_same<DeltaType, SMART_DELTA_TYPE::QUATERNION>::value &&
                                   std::is_same<typename MathCore::MathTypeInfo<T>::_class, MathCore::MathTypeClass::_class_quat>::value,
                               bool>::type = true>
-                inline void sampleBackwardSmartDelta(T *delta)
+                inline void sampleBackwardSmartDelta(float current_time_s, T *delta)
                 {
                     T new_value, old_value;
-                    sampleBackwardDelta(&new_value, &old_value);
+                    sampleBackwardDelta(current_time_s, &new_value, &old_value);
                     *delta = MathCore::OP<T>::inverse(old_value) * new_value;
                 }
             };

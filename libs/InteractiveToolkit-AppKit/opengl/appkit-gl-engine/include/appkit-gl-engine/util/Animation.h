@@ -242,26 +242,49 @@ namespace AppKit
                 // motion_last_value = MathCore::CVT<MathCore::vec4f>::toVec3(node->getMatrix() * MathCore::CVT<MathCore::vec3f>::toPtn4(motion_last_value - start_position));
             }
 
-            ITK_INLINE MathCore::vec3f samplePos(float secs, MathCore::vec3f *interframe_delta)
+            ITK_INLINE MathCore::vec3f samplePosition(float secs, MathCore::vec3f *interframe_delta)
             {
                 // if (position.keys.size() > 0)
                 //     return position.getValue_ForwardLoop(secs, interframe_delta);
                 // *interframe_delta = MathCore::vec3f(0);
-                return MathCore::vec3f(0);
+                // return MathCore::vec3f(0);
+                MathCore::vec3f total_delta;
+                if (secs < sampler_position.sampled_time_s)
+                    sampler_position.resetForwardSmartDelta<Animation::SMART_DELTA_TYPE::POSITION>(&total_delta);
+                MathCore::vec3f delta;
+                sampler_position.sampleForwardSmartDelta<Animation::SMART_DELTA_TYPE::POSITION>(secs, &delta);
+                *interframe_delta = total_delta + delta;
+                return sampler_position.value;
+            }
+
+            ITK_INLINE MathCore::vec3f samplePosition(float secs)
+            {
+                if (secs < sampler_position.sampled_time_s)
+                    sampler_position.resetForward();
+                sampler_position.sampleForward(secs);
+                return sampler_position.value;
             }
 
             ITK_INLINE MathCore::vec3f sampleScale(float secs)
             {
                 // if (scale.keys.size() > 0)
                 //     return scale.getValue_ForwardLoop(secs);
-                return MathCore::vec3f(1);
+                // return MathCore::vec3f(1);
+                if (secs < sampler_scale.sampled_time_s)
+                    sampler_scale.resetForward();
+                sampler_scale.sampleForward(secs);
+                return sampler_scale.value;
             }
 
             ITK_INLINE MathCore::quatf sampleRotation(float secs)
             {
                 // if (rotation.keys.size() > 0)
                 //     return rotation.getValue_ForwardLoop(secs);
-                return MathCore::quatf();
+                // return MathCore::quatf();
+                if (secs < sampler_rotation.sampled_time_s)
+                    sampler_rotation.resetForward();
+                sampler_rotation.sampleForward(secs);
+                return sampler_rotation.value;
             }
 
             ITK_INLINE void Sample_Lerp_to_Another_Node(float time_a, NodeAnimation *b, float time_b, float lrp, RootMotionAnalyser *rootMotionAnalyser)
@@ -277,8 +300,8 @@ namespace AppKit
 
                     ITK_ABORT(node != b->node, "The animation root nodes dont have the same transform...\n");
 
-                    // MathCore::vec3f _a = samplePos(time_a);
-                    // MathCore::vec3f _b = b->samplePos(time_b);
+                    // MathCore::vec3f _a = samplePosition(time_a);
+                    // MathCore::vec3f _b = b->samplePosition(time_b);
 
                     rootMotionAnalyser->data.setFromNodeAnimationBlend(this, time_a, b, time_b, lrp);
 
@@ -308,7 +331,7 @@ namespace AppKit
                     // rootMotionAnalyser->data.clipInfo[0].position_delta_interframe = MathCore::vec3f(0);
                     // rootMotionAnalyser->data.clipInfo[1].position_delta_interframe = MathCore::vec3f(0);
 
-                    MathCore::vec3f pos = MathCore::OP<MathCore::vec3f>::lerp(samplePos(time_a, nullptr), b->samplePos(time_b, nullptr), lrp);
+                    MathCore::vec3f pos = MathCore::OP<MathCore::vec3f>::lerp(samplePosition(time_a), b->samplePosition(time_b), lrp);
                     node->setLocalPosition(pos);
                 }
                 node->setLocalScale(scale);
@@ -317,57 +340,57 @@ namespace AppKit
 
             ITK_INLINE void sampleTime(float secs, float amount, RootMotionAnalyser *rootMotionAnalyser)
             {
-                //     if (amount == 1.0f)
-                //     {
-                //         if (position.keys.size() > 0)
-                //         {
-                //             if (isRootNode && rootMotionAnalyser->method != nullptr)
-                //             {
+                if (amount == 1.0f)
+                {
+                    if (channel_position.keys.size() > 0)
+                    {
+                        if (isRootNode && rootMotionAnalyser->method != nullptr)
+                        {
 
-                //                 // MathCore::vec3f local_position = position.getValue_ForwardLoop(secs);
-                //                 rootMotionAnalyser->data.setFromNodeAnimation(this, secs, 1.0f);
+                            // MathCore::vec3f local_position = position.getValue_ForwardLoop(secs);
+                            rootMotionAnalyser->data.setFromNodeAnimation(this, secs, 1.0f);
 
-                //                 /*
-                //                 node->setLocalPosition(position.getValue_ForwardLoop(secs));
-                //                 motion_last_value = node->getPosition();
-                //                 (*computed_root_delta) = motion_last_value;
+                            /*
+                            node->setLocalPosition(position.getValue_ForwardLoop(secs));
+                            motion_last_value = node->getPosition();
+                            (*computed_root_delta) = motion_last_value;
 
-                //                 node->setLocalPosition(start_position);
-                //                 */
-                //             }
-                //             else
-                //                 node->setLocalPosition(position.getValue_ForwardLoop(secs));
-                //         }
-                //         if (scale.keys.size() > 0)
-                //             node->setLocalScale(scale.getValue_ForwardLoop(secs));
-                //         if (rotation.keys.size() > 0)
-                //             node->setLocalRotation(rotation.getValue_ForwardLoop(secs));
-                //     }
-                //     else
-                //     {
-                //         if (position.keys.size() > 0)
-                //         {
-                //             if (isRootNode && rootMotionAnalyser->method != nullptr)
-                //             {
+                            node->setLocalPosition(start_position);
+                            */
+                        }
+                        else
+                            node->setLocalPosition(samplePosition(secs));
+                    }
+                    if (channel_scale.keys.size() > 0)
+                        node->setLocalScale(sampleScale(secs));
+                    if (channel_rotation.keys.size() > 0)
+                        node->setLocalRotation(sampleRotation(secs));
+                }
+                else
+                {
+                    if (channel_position.keys.size() > 0)
+                    {
+                        if (isRootNode && rootMotionAnalyser->method != nullptr)
+                        {
 
-                //                 // MathCore::vec3f local_position = position.getValue_ForwardLoop(secs);
-                //                 rootMotionAnalyser->data.setFromNodeAnimation(this, secs, amount);
-                //                 /*
-                //                 node->setLocalPosition(aRibeiro::lerp(start_position, position.getValue_ForwardLoop(secs), amount));
-                //                 motion_last_value = node->getPosition();
-                //                 (*computed_root_delta) = motion_last_value;
+                            // MathCore::vec3f local_position = position.getValue_ForwardLoop(secs);
+                            rootMotionAnalyser->data.setFromNodeAnimation(this, secs, amount);
+                            /*
+                            node->setLocalPosition(aRibeiro::lerp(start_position, position.getValue_ForwardLoop(secs), amount));
+                            motion_last_value = node->getPosition();
+                            (*computed_root_delta) = motion_last_value;
 
-                //                 node->setLocalPosition(start_position);
-                //                 */
-                //             }
-                //             else
-                //                 node->setLocalPosition(MathCore::OP<MathCore::vec3f>::lerp(start_position, position.getValue_ForwardLoop(secs), amount));
-                //         }
-                //         if (scale.keys.size() > 0)
-                //             node->setLocalScale(MathCore::OP<MathCore::vec3f>::lerp(start_scale, scale.getValue_ForwardLoop(secs), amount));
-                //         if (rotation.keys.size() > 0)
-                //             node->setLocalRotation(MathCore::OP<MathCore::quatf>::slerp(start_rotation, rotation.getValue_ForwardLoop(secs), amount));
-                //     }
+                            node->setLocalPosition(start_position);
+                            */
+                        }
+                        else
+                            node->setLocalPosition(MathCore::OP<MathCore::vec3f>::lerp(sampler_position.offset, samplePosition(secs), amount));
+                    }
+                    if (channel_scale.keys.size() > 0)
+                        node->setLocalScale(MathCore::OP<MathCore::vec3f>::lerp(sampler_scale.offset, sampleScale(secs), amount));
+                    if (channel_rotation.keys.size() > 0)
+                        node->setLocalRotation(MathCore::OP<MathCore::quatf>::slerp(sampler_rotation.offset, sampleRotation(secs), amount));
+                }
             }
         };
 

@@ -599,7 +599,7 @@ namespace AppKit
             auto node = node_animation->node;
             ClipInfo *_clipInfo = &clipInfo[clip_to_process];
 
-            MathCore::vec3f target_local_position = node_animation->samplePos(time, &_clipInfo->position_delta_interframe);
+            MathCore::vec3f target_local_position = node_animation->samplePosition(time, &_clipInfo->position_delta_interframe);
 
             // make global
             node->setLocalPosition(_clipInfo->position_delta_interframe);
@@ -634,8 +634,8 @@ namespace AppKit
 
             auto node = node_animation_a->node;
 
-            MathCore::vec3f target_local_position_a = node_animation_a->samplePos(time_a, &clipInfo_a->position_delta_interframe);
-            MathCore::vec3f target_local_position_b = node_animation_b->samplePos(time_b, &clipInfo_b->position_delta_interframe);
+            MathCore::vec3f target_local_position_a = node_animation_a->samplePosition(time_a, &clipInfo_a->position_delta_interframe);
+            MathCore::vec3f target_local_position_b = node_animation_b->samplePosition(time_b, &clipInfo_b->position_delta_interframe);
 
             // make global
             node->setLocalPosition(clipInfo_a->position_delta_interframe);

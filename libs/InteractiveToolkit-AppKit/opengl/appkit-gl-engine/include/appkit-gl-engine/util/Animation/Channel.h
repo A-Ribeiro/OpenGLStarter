@@ -61,6 +61,15 @@ namespace AppKit
                     *output = keys[idx].value;
                 }
 
+                inline void readTime(int64_t idx, float *output) const
+                {
+                    int64_t keys_size = (int64_t)keys.size();
+                    if (keys_size == 0)
+                        return;
+                    idx = MathCore::OP<int64_t>::clamp(idx, 0, keys_size - 1);
+                    *output = keys[idx].time;
+                }
+
                 inline int64_t indexForwardTimeSearch(int64_t start_idx, float curr_time_s) const
                 {
                     int64_t keys_size = (int64_t)keys.size();
