@@ -64,21 +64,21 @@ namespace AppKit
                         for (int j = 0; j < node_anim.positionKeys.size(); j++)
                         {
                             const ITKExtension::Model::Vec3Key &key = node_anim.positionKeys[j];
-                            result.position.addKey(Key<MathCore::vec3f>(key.time / animation.ticksPerSecond, key.value));
+                            result.channel_position.keys.push_back(Animation::Key<MathCore::vec3f>(key.time / animation.ticksPerSecond, key.value));
                         }
 
                     if (node_anim.scalingKeys.size() > 0)
                         for (int j = 0; j < node_anim.scalingKeys.size(); j++)
                         {
                             const ITKExtension::Model::Vec3Key &key = node_anim.scalingKeys[j];
-                            result.scale.addKey(Key<MathCore::vec3f>(key.time / animation.ticksPerSecond, key.value));
+                            result.channel_scale.keys.push_back(Animation::Key<MathCore::vec3f>(key.time / animation.ticksPerSecond, key.value));
                         }
 
                     if (node_anim.rotationKeys.size() > 0)
                         for (int j = 0; j < node_anim.rotationKeys.size(); j++)
                         {
                             const ITKExtension::Model::QuatKey &key = node_anim.rotationKeys[j];
-                            result.rotation.addKey(Key<MathCore::quatf>(key.time / animation.ticksPerSecond, key.value));
+                            result.channel_rotation.keys.push_back(Animation::Key<MathCore::quatf>(key.time / animation.ticksPerSecond, key.value));
                         }
 
                     // result.node = t_node;
@@ -599,7 +599,7 @@ namespace AppKit
             auto node = node_animation->node;
             ClipInfo *_clipInfo = &clipInfo[clip_to_process];
 
-            MathCore::vec3f target_local_position = node_animation->samplePos(time, &_clipInfo->position_delta_interframe);
+            MathCore::vec3f target_local_position = node_animation->samplePosition(time, &_clipInfo->position_delta_interframe);
 
             // make global
             node->setLocalPosition(_clipInfo->position_delta_interframe);
@@ -608,11 +608,11 @@ namespace AppKit
             node->setLocalPosition(target_local_position);
             _clipInfo->position = node->getPosition();
 
-            node->setLocalPosition(node_animation->start_position);
+            node->setLocalPosition(node_animation->sampler_position.offset);
             _clipInfo->start = node->getPosition();
 
             _clipInfo->local_position = target_local_position;
-            _clipInfo->local_start = node_animation->start_position;
+            _clipInfo->local_start = node_animation->sampler_position.offset;
 
             // compute deltas
             _clipInfo->position_delta = _clipInfo->position - _clipInfo->start;
@@ -634,8 +634,8 @@ namespace AppKit
 
             auto node = node_animation_a->node;
 
-            MathCore::vec3f target_local_position_a = node_animation_a->samplePos(time_a, &clipInfo_a->position_delta_interframe);
-            MathCore::vec3f target_local_position_b = node_animation_b->samplePos(time_b, &clipInfo_b->position_delta_interframe);
+            MathCore::vec3f target_local_position_a = node_animation_a->samplePosition(time_a, &clipInfo_a->position_delta_interframe);
+            MathCore::vec3f target_local_position_b = node_animation_b->samplePosition(time_b, &clipInfo_b->position_delta_interframe);
 
             // make global
             node->setLocalPosition(clipInfo_a->position_delta_interframe);
@@ -644,13 +644,13 @@ namespace AppKit
             node->setLocalPosition(target_local_position_a);
             clipInfo_a->position = node->getPosition();
 
-            node->setLocalPosition(node_animation_a->start_position);
+            node->setLocalPosition(node_animation_a->sampler_position.offset);
             clipInfo_a->start = node->getPosition();
 
             clipInfo_a->weight = 1.0f - lrp;
 
             clipInfo_a->local_position = target_local_position_a;
-            clipInfo_a->local_start = node_animation_a->start_position;
+            clipInfo_a->local_start = node_animation_a->sampler_position.offset;
 
             clipInfo_a->position_delta = clipInfo_a->position - clipInfo_a->start;
             clipInfo_a->local_position_delta = clipInfo_a->local_position - clipInfo_a->local_start;
@@ -662,13 +662,13 @@ namespace AppKit
             node->setLocalPosition(target_local_position_b);
             clipInfo_b->position = node->getPosition();
 
-            node->setLocalPosition(node_animation_b->start_position);
+            node->setLocalPosition(node_animation_b->sampler_position.offset);
             clipInfo_b->start = node->getPosition();
 
             clipInfo_b->weight = lrp;
 
             clipInfo_b->local_position = target_local_position_b;
-            clipInfo_b->local_start = node_animation_b->start_position;
+            clipInfo_b->local_start = node_animation_b->sampler_position.offset;
 
             clipInfo_b->position_delta = clipInfo_b->position - clipInfo_b->start;
             clipInfo_b->local_position_delta = clipInfo_b->local_position - clipInfo_b->local_start;

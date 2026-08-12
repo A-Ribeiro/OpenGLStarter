@@ -38,7 +38,7 @@ static double smartToDouble(float v)
 struct OptionKey
 {
     const char *key_name;
-    std::vector<const char*> options;
+    std::vector<const char *> options;
     const char *default_option;
 };
 struct OptionsGroup
@@ -65,97 +65,125 @@ void complex_string_hierarchy_as_parameter(
         }
     }
 }
+#include <appkit-gl-engine/util/Animation/all.h>
 
 int main(int argc, char *argv[])
 {
-    ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
-    // initialize self referencing of the main thread.
-    Platform::Thread::staticInitialization();
+    // ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
+    // // initialize self referencing of the main thread.
+    // Platform::Thread::staticInitialization();
 
-    // example of several groups with keys, options and default values, all passed as a single parameter to a function.
-    complex_string_hierarchy_as_parameter({{"Control",
-                                            {
-                                                {"Input", {"Steam 1", "Keyboard", "Steam 1 + Keyboard"}, "Steam 1 + Keyboard"},
-                                                {"Movement", {"Fluid", "Legacy"}, "Fluid"},
-                                            }},
-                                           {"Audio",
-                                            {
-                                                {"EffectsVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
-                                                {"MusicVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
-                                            }},
-                                           {"Video",
-                                            {
-                                                {"WindowMode", {"Window", "Borderless", "Fullscreen"}, "Window"},
-                                                {"Resolution", {"-"}, "-"},
-                                                {"Aspect", {"16:9", "16:10"}, "16:9"},
-                                                {"AntiAliasing", {"MSAA", "OFF"}, "MSAA"},
-                                                {"VSync", {"ON", "OFF"}, "ON"},
-                                            }},
-                                           {"Extra",
-                                            {
-                                                {"Language", {"English", "Português (BR)"}, "English"},
-                                                {"ColorScheme", {"Blush", "Purple", "Orange", "Green", "Blue", "Dark"}, "Blush"},
-                                                {"ButtonAppearance", {"Bend Up", "Bend Down", "Round", "Tip Front", "Tip Back", "Tip Up", "Tip Down", "Square"}, "Bend Up"},
-                                                {"UiSize", {"Extra Small", "Small", "Medium", "Large", "Extra Large"}, "Medium"},
-                                                {"MeshCrusher", {"ON", "OFF"}, "OFF"},
-                                                {"Particles", {"Low", "Medium", "High", "Ultra"}, "High"},
-                                                {"OnGameStats", {"OFF", "FPS"}, "OFF"},
-                                            }}});
+    // // example of several groups with keys, options and default values, all passed as a single parameter to a function.
+    // complex_string_hierarchy_as_parameter({{"Control",
+    //                                         {
+    //                                             {"Input", {"Steam 1", "Keyboard", "Steam 1 + Keyboard"}, "Steam 1 + Keyboard"},
+    //                                             {"Movement", {"Fluid", "Legacy"}, "Fluid"},
+    //                                         }},
+    //                                        {"Audio",
+    //                                         {
+    //                                             {"EffectsVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
+    //                                             {"MusicVolume", {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, "100"},
+    //                                         }},
+    //                                        {"Video",
+    //                                         {
+    //                                             {"WindowMode", {"Window", "Borderless", "Fullscreen"}, "Window"},
+    //                                             {"Resolution", {"-"}, "-"},
+    //                                             {"Aspect", {"16:9", "16:10"}, "16:9"},
+    //                                             {"AntiAliasing", {"MSAA", "OFF"}, "MSAA"},
+    //                                             {"VSync", {"ON", "OFF"}, "ON"},
+    //                                         }},
+    //                                        {"Extra",
+    //                                         {
+    //                                             {"Language", {"English", "Português (BR)"}, "English"},
+    //                                             {"ColorScheme", {"Blush", "Purple", "Orange", "Green", "Blue", "Dark"}, "Blush"},
+    //                                             {"ButtonAppearance", {"Bend Up", "Bend Down", "Round", "Tip Front", "Tip Back", "Tip Up", "Tip Down", "Square"}, "Bend Up"},
+    //                                             {"UiSize", {"Extra Small", "Small", "Medium", "Large", "Extra Large"}, "Medium"},
+    //                                             {"MeshCrusher", {"ON", "OFF"}, "OFF"},
+    //                                             {"Particles", {"Low", "Medium", "High", "Ultra"}, "High"},
+    //                                             {"OnGameStats", {"OFF", "FPS"}, "OFF"},
+    //                                         }}});
 
-    // Platform::Signal::Set(&on_signal);
+    // // Platform::Signal::Set(&on_signal);
 
-    // testPBR_Values();
-    // testPolar_Values();
-    // linear_depth_Values();
-    // linear_ortho_Values();
-    // sunFlowerValues();
+    // // testPBR_Values();
+    // // testPolar_Values();
+    // // linear_depth_Values();
+    // // linear_ortho_Values();
+    // // sunFlowerValues();
 
-    /*auto s = "test \\\\\" ";
-    printf("original: %s\n", s);
-    auto v = ITKCommon::StringUtil::quote_cmd(s);
-    printf("quote_cmd: %s\n", v.c_str());
+    // /*auto s = "test \\\\\" ";
+    // printf("original: %s\n", s);
+    // auto v = ITKCommon::StringUtil::quote_cmd(s);
+    // printf("quote_cmd: %s\n", v.c_str());
 
-    auto argv_ = ITKCommon::StringUtil::parseArgv("\"Another\\\\ Space\\\\ String\"");
-    printf("parsed argv: %s\n", argv_[0].c_str());
+    // auto argv_ = ITKCommon::StringUtil::parseArgv("\"Another\\\\ Space\\\\ String\"");
+    // printf("parsed argv: %s\n", argv_[0].c_str());
 
-    printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("   a").c_str() );
-    printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("a   ").c_str() );
-    printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("    ").c_str() );
-    printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("").c_str() );
+    // printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("   a").c_str() );
+    // printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("a   ").c_str() );
+    // printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("    ").c_str() );
+    // printf("trim: \'%s\'\n",  ITKCommon::StringUtil::trim("").c_str() );
 
+    // argv_.push_back("");
+    // argv_.push_back("AnotherString");
+    // argv_.push_back("Another\\ Space\\ String");
+    // printf("cmd: \'%s\'\n",  ITKCommon::StringUtil::argvToCmd(argv_).c_str() );*/
 
-    argv_.push_back("");
-    argv_.push_back("AnotherString");
-    argv_.push_back("Another\\ Space\\ String");
-    printf("cmd: \'%s\'\n",  ITKCommon::StringUtil::argvToCmd(argv_).c_str() );*/
+    // // ITKCommon::FileSystem::Directory dir(ITKCommon::Path::getWorkingPath());
 
-    // ITKCommon::FileSystem::Directory dir(ITKCommon::Path::getWorkingPath());
+    // // for (auto & file : dir) {
+    // //     printf("file: %s\n", file.full_path.c_str());
+    // //     printf("      Creation: %s\n", file.creationTime.toString(true).c_str());
+    // //     printf("      Modification: %s\n", file.lastWriteTime.toString(true).c_str());
+    // //     printf("      size: %" PRIu64 " KB\n", file.size / 1024);
+    // // }
 
-    // for (auto & file : dir) {
-    //     printf("file: %s\n", file.full_path.c_str());
-    //     printf("      Creation: %s\n", file.creationTime.toString(true).c_str());
-    //     printf("      Modification: %s\n", file.lastWriteTime.toString(true).c_str());
-    //     printf("      size: %" PRIu64 " KB\n", file.size / 1024);
-    // }
+    // // auto date = ITKCommon::Date::NowUTC();
+    // // printf("Now: %s\n", date.toISOString().c_str());
+    // // printf("Now(local): %s\n", date.toLocal().toString().c_str());
+    // // printf("ns %u\n", date.nanoseconds);
 
-    // auto date = ITKCommon::Date::NowUTC();
-    // printf("Now: %s\n", date.toISOString().c_str());
-    // printf("Now(local): %s\n", date.toLocal().toString().c_str());
-    // printf("ns %u\n", date.nanoseconds);
+    // //  Platform::Time tim;
+    // //  int64_t t = 0;
+    // //  while (t < INT64_C(5000000)) {
+    // //      tim.update();
+    // //      t += tim.deltaTimeMicro;
+    // //      printf("t: %" PRIi64 "\n", t);
+    // //  }
 
-    //  Platform::Time tim;
-    //  int64_t t = 0;
-    //  while (t < INT64_C(5000000)) {
-    //      tim.update();
-    //      t += tim.deltaTimeMicro;
-    //      printf("t: %" PRIi64 "\n", t);
-    //  }
+    // float v = 1234567e-10f;
+    // printf("%.6e\n", v);
 
-    float v = 1234567e-10f;
-    printf("%.6e\n", v);
+    // double vd = smartToDouble(v); // 1234567.891234567e-10;
+    // printf("%.15e\n", vd);
 
-    double vd = smartToDouble(v); // 1234567.891234567e-10;
-    printf("%.15e\n", vd);
+    using namespace AppKit::GLEngine::Animation;
+
+    Channel<float> channel;
+
+    channel.keys.push_back(Key<float>(-2.0f, -2.0f));
+    channel.keys.push_back(Key<float>(-1.0f, -1.0f));
+    channel.keys.push_back(Key<float>(1.0f, 1.0f));
+    channel.keys.push_back(Key<float>(5.0f, 5.0f));
+    channel.keys.push_back(Key<float>(6.0f, 6.0f));
+
+    channel.clamp_time(0.0f, 3.0f);
+
+    printf("Original:\n");
+
+    for (const auto &k : channel.keys)
+        printf("time: %g value: %g\n", k.time, k.value);
+
+    Channel<float> channel_resampled;
+
+    Sampler<float> sampler;
+    sampler.configure(&channel, 0, 0);
+    sampler.resample(&channel_resampled, 31);
+
+    printf("Resampled:\n");
+
+    for (const auto &k : channel_resampled.keys)
+        printf("time: %g value: %g\n", k.time, k.value);
 
     return 0;
 }
