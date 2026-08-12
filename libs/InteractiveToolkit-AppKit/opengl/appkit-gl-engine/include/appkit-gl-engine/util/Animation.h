@@ -126,7 +126,77 @@ namespace AppKit
                 sampler_position.configure(&channel_position, MathCore::vec3f(0.0f), MathCore::vec3f(0.0f));
                 sampler_scale.configure(&channel_scale, MathCore::vec3f(1.0f), MathCore::vec3f(1.0f));
                 sampler_rotation.configure(&channel_rotation, MathCore::quatf(), MathCore::quatf());
+            }
 
+            NodeAnimation(const NodeAnimation &other)
+                : node(other.node),
+                  channel_position(other.channel_position),
+                  channel_scale(other.channel_scale),
+                  channel_rotation(other.channel_rotation),
+                  sampler_position(other.sampler_position),
+                  sampler_scale(other.sampler_scale),
+                  sampler_rotation(other.sampler_rotation),
+                  isRootNode(other.isRootNode)
+            {
+                sampler_position.channel_src = &channel_position;
+                sampler_scale.channel_src = &channel_scale;
+                sampler_rotation.channel_src = &channel_rotation;
+            }
+
+            NodeAnimation &operator=(const NodeAnimation &other)
+            {
+                if (this != &other)
+                {
+                    node = other.node;
+                    channel_position = other.channel_position;
+                    channel_scale = other.channel_scale;
+                    channel_rotation = other.channel_rotation;
+                    sampler_position = other.sampler_position;
+                    sampler_scale = other.sampler_scale;
+                    sampler_rotation = other.sampler_rotation;
+                    isRootNode = other.isRootNode;
+
+                    sampler_position.channel_src = &channel_position;
+                    sampler_scale.channel_src = &channel_scale;
+                    sampler_rotation.channel_src = &channel_rotation;
+                }
+                return *this;
+            }
+
+            NodeAnimation(NodeAnimation &&other) noexcept
+                : node(std::move(other.node)),
+                  channel_position(std::move(other.channel_position)),
+                  channel_scale(std::move(other.channel_scale)),
+                  channel_rotation(std::move(other.channel_rotation)),
+                  sampler_position(std::move(other.sampler_position)),
+                  sampler_scale(std::move(other.sampler_scale)),
+                  sampler_rotation(std::move(other.sampler_rotation)),
+                  isRootNode(other.isRootNode)
+            {
+                sampler_position.channel_src = &channel_position;
+                sampler_scale.channel_src = &channel_scale;
+                sampler_rotation.channel_src = &channel_rotation;
+            }
+
+            NodeAnimation &operator=(NodeAnimation &&other) noexcept
+            {
+                if (this != &other)
+                {
+                    node = std::move(other.node);
+                    channel_position = std::move(other.channel_position);
+                    channel_scale = std::move(other.channel_scale);
+                    channel_rotation = std::move(other.channel_rotation);
+                    sampler_position = std::move(other.sampler_position);
+                    sampler_scale = std::move(other.sampler_scale);
+                    sampler_rotation = std::move(other.sampler_rotation);
+                    isRootNode = other.isRootNode;
+
+                    sampler_position.channel_src = &channel_position;
+                    sampler_scale.channel_src = &channel_scale;
+                    sampler_rotation.channel_src = &channel_rotation;
+                }
+
+                return *this;
             }
 
             // some animations have more keys outside the animation original duration...

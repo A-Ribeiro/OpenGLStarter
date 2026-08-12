@@ -14,6 +14,37 @@ namespace AppKit
             public:
                 std::vector<Key<T>> keys;
 
+                Channel() = default;
+
+                Channel(const Channel<T> &other)
+                    : keys(other.keys)
+                {
+                }
+
+                Channel<T> &operator=(const Channel<T> &other)
+                {
+                    if (this != &other)
+                    {
+                        keys = other.keys;
+                    }
+                    return *this;
+                }
+
+                Channel(Channel<T> &&other) noexcept
+                    : keys(std::move(other.keys))
+                {
+                }
+
+                Channel<T> &operator=(Channel<T> &&other) noexcept
+                {
+                    if (this != &other)
+                    {
+                        keys = std::move(other.keys);
+                    }
+
+                    return *this;
+                }
+
                 inline void clamp_time(float time_min_s, float time_max_s)
                 {
                     if (keys.size() == 0)
