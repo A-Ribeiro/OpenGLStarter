@@ -25,6 +25,15 @@ namespace AppKit
                 T offset;
                 float sampled_time_s;
 
+                Sampler()
+                {
+                    channel_src = nullptr;
+                    idx = 0;
+                    value = T();
+                    offset = T();
+                    sampled_time_s = 0;
+                }
+
                 inline void resample(Channel<T> *channel_output, size_t new_sample_count)
                 {
                     channel_output->keys.resize(new_sample_count);

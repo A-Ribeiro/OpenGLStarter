@@ -122,6 +122,11 @@ namespace AppKit
             NodeAnimation()
             {
                 isRootNode = false;
+
+                sampler_position.configure(&channel_position, MathCore::vec3f(0.0f), MathCore::vec3f(0.0f));
+                sampler_scale.configure(&channel_scale, MathCore::vec3f(1.0f), MathCore::vec3f(1.0f));
+                sampler_rotation.configure(&channel_rotation, MathCore::quatf(), MathCore::quatf());
+
             }
 
             // some animations have more keys outside the animation original duration...
