@@ -202,14 +202,13 @@ static inline type_ nextafter_optim(type_ x, type_ y)
 
     utype bits_number_only = bits_x & IEEE_754_Info<type_>::number_except_sign_bit_u;
 
-    bits_number_only += increment;
+    bool is_inf = IEEE_754_Info<type_>::is_inf(bits_number_only);
+    bits_number_only = (is_inf) ? bits_number_only : bits_number_only + increment;
 
     // overflow, transform bits_number_only into +inf
-    if (bits_number_only & IEEE_754_Info<type_>::sign_bit_u)
-        bits_number_only = IEEE_754_Info<type_>::inf_u;
+    bits_number_only = (bits_number_only & IEEE_754_Info<type_>::sign_bit_u) ? IEEE_754_Info<type_>::inf_u : bits_number_only;
 
-    bits_x = is_sign_negative_x |
-             (bits_number_only & IEEE_754_Info<type_>::number_except_sign_bit_u);
+    bits_x = is_sign_negative_x | bits_number_only;
 
     return x;
 }
