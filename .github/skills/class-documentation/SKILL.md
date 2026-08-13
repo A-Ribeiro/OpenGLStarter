@@ -144,9 +144,54 @@ Start: Document a class
 - [ ] Language is English
 - [ ] Descriptions are concise but complete
 
-## Example: Full Class Documentation
+## Minimal Reference Example
 
-See `libs/InteractiveToolkit/include/InteractiveToolkit/CollisionCore/Sphere.h` for a complete reference implementation.
+```cpp
+/// \brief A simple sphere collision primitive.
+///
+/// Represents a sphere in 3D space defined by a center point and radius.
+/// Used for broad-phase collision detection.
+///
+/// \author John Doe
+///
+/// \tparam T Numeric type for coordinates (e.g., float, double).
+///
+template <typename T>
+class Sphere {
+public:
+    /// \brief The center point of the sphere.
+    ///
+    Vector3<T> center;
+
+    /// \brief The radius of the sphere.
+    ///
+    T radius;
+
+    /// \brief Construct a Sphere with default values (center at origin, radius 0).
+    ///
+    /// \author John Doe
+    ///
+    inline Sphere();
+
+    /// \brief Construct a Sphere with the given center and radius.
+    ///
+    /// \author John Doe
+    /// \param center The center point of the sphere.
+    /// \param radius The radius of the sphere. Must be non-negative.
+    ///
+    inline Sphere(const Vector3<T> &center, T radius);
+
+    /// \brief Compute the squared distance from a point to the sphere surface.
+    ///
+    /// Returns zero if the point is inside or on the sphere.
+    ///
+    /// \author John Doe
+    /// \param point The query point.
+    /// \return Squared distance to the sphere surface.
+    ///
+    inline T squaredDistanceTo(const Vector3<T> &point) const;
+};
+```
 
 ## Anti-patterns
 
