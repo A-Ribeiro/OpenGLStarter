@@ -14,6 +14,32 @@ disable-model-invocation: false
 - Reviewing class documentation for consistency with the InteractiveToolkit pattern
 - Generating documentation from code or vice versa
 
+## Critical Rule: Preserve Implementations
+
+**NEVER remove or strip the original method or function implementation when adding documentation.**
+
+When documenting a class, only add `///` comment blocks above the existing code. The implementation body (function body, constructor initializer list, etc.) must remain intact. Adding documentation should never change the compiled behavior of the code.
+
+**Wrong** — removing the implementation:
+```cpp
+/// \brief Description.
+///
+inline void foo();
+```
+
+**Correct** — preserving the implementation:
+```cpp
+/// \brief Description.
+///
+inline void foo() { /* existing body */ }
+```
+
+## Author Question
+
+When creating new documentation, always ask the user: **"What is the author name?"**
+
+Use the provided author name to fill all `\author` tags in the generated documentation. If the user does not provide an author, use a placeholder like `Unknown` and prompt them to update it.
+
 ## The Pattern (from `Sphere.h`)
 
 Every documented class follows this structure:
@@ -116,21 +142,30 @@ inline return_type methodName(const param_type &param);
 ```
 Start: Document a class
   │
+  ├─ Ask: "What is the author name?" → store as $author
+  │
   ├─ Class-level docs?
-  │   └─ Yes → \brief + extended description + \author
+  │   └─ Yes → \brief + extended description + \author ($author)
   │
   ├─ Member variables?
   │   └─ Yes → \brief before each member
   │
   ├─ Constructors?
-  │   └─ Yes → \brief + \author + \code example
+  │   └─ Yes → \brief + \author ($author) + \code example
   │
   ├─ Static methods?
-  │   └─ Yes → \brief + \author + \param + \return + \code example
+  │   └─ Yes → \brief + \author ($author) + \param + \return + \code example
   │
   └─ Instance methods?
-      └─ Yes → \brief + \author + \param + \return + \code example
+      └─ Yes → \brief + \author ($author) + \param + \return + \code example
 ```
+
+## Implementation Preservation Checklist
+
+Before finalizing any documentation edit:
+- [ ] All original function bodies are preserved
+- [ ] No implementation was stripped or replaced with a declaration-only form
+- [ ] Only `///` comment blocks were added above existing code
 
 ## Quality Checklist
 
