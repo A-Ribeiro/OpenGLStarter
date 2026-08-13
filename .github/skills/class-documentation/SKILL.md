@@ -1,0 +1,158 @@
+---
+name: class-documentation
+description: 'Create Doxygen-compatible C++ class documentation following the InteractiveToolkit pattern. Use when documenting new classes, adding docs to existing classes, or reviewing class documentation quality. Triggers: "document", "Doxygen", "class docs", "Sphere.h pattern", "add documentation".'
+argument-hint: 'Class name or file path to document'
+user-invocable: true
+disable-model-invocation: false
+---
+
+# C++ Class Documentation (Doxygen)
+
+## When to Use
+- Creating documentation for new C++ classes
+- Adding Doxygen comments to existing undocumented classes
+- Reviewing class documentation for consistency with the InteractiveToolkit pattern
+- Generating documentation from code or vice versa
+
+## The Pattern (from `Sphere.h`)
+
+Every documented class follows this structure:
+
+### Class-Level Documentation
+```cpp
+/// \brief Short one-line description of the class.
+///
+/// Extended description explaining purpose, design, and usage.
+/// Can span multiple paragraphs.
+///
+/// \author Author Name
+///
+template <typename T>
+class ClassName { ... };
+```
+
+### Member Variables
+```cpp
+/// \brief Description of the member variable.
+///
+type member_name;
+```
+
+### Constructors
+```cpp
+/// \brief Construct a ClassName with default values.
+///
+/// Extended description of what the constructor does.
+///
+/// Example:
+///
+/// \code
+/// ClassName obj;
+/// \endcode
+///
+/// \author Author Name
+///
+inline ClassName();
+```
+
+### Static Methods
+```cpp
+/// \brief Short description of what the method does.
+///
+/// Extended description with mathematical or algorithmic details.
+///
+/// Example:
+///
+/// \code
+/// // setup
+/// Type a, b;
+/// ClassName obj;
+///
+/// Type result = ClassName::methodName( a, b, obj );
+/// \endcode
+///
+/// \author Author Name
+/// \param param_name Description of the parameter.
+/// \param another_param Description of another parameter.
+/// \return Description of the return value.
+///
+static inline return_type methodName(const Type &a, const Type &b);
+```
+
+### Instance Methods
+```cpp
+/// \brief Short description of the method.
+///
+/// Extended description.
+///
+/// Example:
+///
+/// \code
+/// ClassName obj;
+/// Type result = obj.methodName( input );
+/// \endcode
+///
+/// \author Author Name
+/// \param param_name Description.
+/// \return Description.
+///
+inline return_type methodName(const param_type &param);
+```
+
+## Required Doxygen Tags
+
+| Tag | Purpose | Required? |
+|-----|---------|-----------|
+| `\brief` | One-line summary | Yes (class, method, member) |
+| `\author` | Author attribution | Yes (class, constructor, method) |
+| `\param` | Parameter description | Yes (methods with params) |
+| `\return` | Return value description | Yes (methods with return) |
+| `\code` / `\endcode` | Code example | Recommended |
+| `\note` | Additional notes | Optional |
+| `\see` | Cross-references | Optional |
+
+## Decision Flow
+
+```
+Start: Document a class
+  │
+  ├─ Class-level docs?
+  │   └─ Yes → \brief + extended description + \author
+  │
+  ├─ Member variables?
+  │   └─ Yes → \brief before each member
+  │
+  ├─ Constructors?
+  │   └─ Yes → \brief + \author + \code example
+  │
+  ├─ Static methods?
+  │   └─ Yes → \brief + \author + \param + \return + \code example
+  │
+  └─ Instance methods?
+      └─ Yes → \brief + \author + \param + \return + \code example
+```
+
+## Quality Checklist
+
+- [ ] Class has `\brief` and `\author`
+- [ ] Every public method has `\brief`, `\author`, `\param` (if applicable), `\return` (if applicable)
+- [ ] Every constructor has `\brief` and `\author`
+- [ ] Code examples use `\code` / `\endcode` blocks
+- [ ] Examples show typical usage patterns
+- [ ] Template classes document the template parameter purpose
+- [ ] Overloaded methods are all documented (not just one signature)
+- [ ] Language is English
+- [ ] Descriptions are concise but complete
+
+## Example: Full Class Documentation
+
+See `libs/InteractiveToolkit/include/InteractiveToolkit/CollisionCore/Sphere.h` for a complete reference implementation.
+
+## Anti-patterns
+
+- **Missing `\author`**: Every class and method should attribute the author.
+- **No code examples**: At minimum, show how to call the method.
+- **Vague `\brief`**: "Does something" is not useful. Be specific.
+- **Inconsistent tag order**: Always `\brief` → extended → `\author` → `\param` → `\return`.
+- **Undocumented overloads**: Document all overloaded signatures.
+- **Referencing other methods instead of documenting**: Never write "Same as \c methodName" or similar cross-references in place of actual documentation. Each method must have its own complete `\brief`, extended description, and examples. For near-identical methods, document each fully.
