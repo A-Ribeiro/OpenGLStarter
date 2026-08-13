@@ -1,0 +1,283 @@
+#pragma once
+// #include <iostream>
+// #include <cmath>
+// #include <cstdint>
+// #include <limits>
+
+// // --- Funções Auxiliares (Mantidas como no seu código) ---
+
+// static inline void extract_double_bits(double value, uint64_t &sign_out, uint64_t &exponent_out, uint64_t &mantissa_out)
+// {
+//     uint64_t raw_bits = *(uint64_t *)&value;
+//     sign_out = (raw_bits >> 63) & 0x1;
+//     exponent_out = (raw_bits >> 52) & 0x7FF;         // 11 bits
+//     mantissa_out = raw_bits & 0x000FFFFFFFFFFFFFULL; // 52 bits
+// }
+
+// static inline double reconstruct_double(uint64_t sign, uint64_t exponent, uint64_t mantissa)
+// {
+//     uint64_t raw_bits = (sign << 63) | (exponent << 52) | mantissa;
+//     return *(double *)&raw_bits;
+// }
+
+// // --- Constantes de IEEE 754 ---
+// // Máscara de 52 bits
+// constexpr uint64_t MANTISSA_MASK = 0x000FFFFFFFFFFFFF;
+// // Limite máximo da mantissa (52 bits)
+// constexpr uint64_t MAX_MANTISSA_VALUE = 0x000FFFFFFFFFFFFF;
+
+// static inline double nextafter_custom_double(double x, double y)
+// {
+//     int64_t sign, exponent, mantissa;
+//     extract_double_bits(x, *(uint64_t *)&sign, *(uint64_t *)&exponent, *(uint64_t *)&mantissa);
+
+//     bool positive = y > x;
+//     bool sign_dir = (bool)sign ^ !positive;
+
+//     sign_dir = sign_dir ^ !mantissa;
+
+//     if (sign_dir)
+//     {
+//         mantissa = mantissa - 1;
+//         if (mantissa < 0)
+//         {
+//             if (mantissa == 0)
+//                 return 0.0;
+//             mantissa = 0;
+//             exponent--;
+//         }
+//     }
+//     else
+//     {
+//         mantissa = mantissa + 1;
+//         if (mantissa > MAX_MANTISSA_VALUE)
+//         {
+//             mantissa = 0;
+//             exponent++;
+//             if (exponent > 2047) // 11 bits - 1
+//                 return std::numeric_limits<double>::infinity();
+//         }
+//     }
+
+//     return reconstruct_double((uint64_t)sign, (uint64_t)exponent, (uint64_t)mantissa);
+// }
+
+#include <cstdint>
+#include <cstring>
+#include <cmath>
+#include <limits>
+
+static inline uint64_t double_to_bits(double x)
+{
+    uint64_t bits;
+    std::memcpy(&bits, &x, sizeof(bits));
+    return bits;
+}
+
+static inline double bits_to_double(uint64_t bits)
+{
+    double x;
+    std::memcpy(&x, &bits, sizeof(x));
+    return x;
+}
+
+static inline uint32_t float_to_bits(float x)
+{
+    uint32_t bits;
+    std::memcpy(&bits, &x, sizeof(bits));
+    return bits;
+}
+
+static inline float bits_to_float(uint32_t bits)
+{
+    float x;
+    std::memcpy(&x, &bits, sizeof(x));
+    return x;
+}
+
+template <typename T>
+struct IEEE_754_Info
+{
+};
+
+union double_bits
+{
+    uint64_t u;
+    double d;
+};
+
+union float_bits
+{
+    uint32_t u;
+    float d;
+};
+
+template <>
+struct IEEE_754_Info<double>
+{
+    typedef uint64_t utype;
+
+    static constexpr uint64_t minus_one_u = UINT64_C(0xFFFFFFFFFFFFFFFF);
+    static constexpr uint64_t one_u = UINT64_C(1);
+    static constexpr uint64_t sign_bit_u = UINT64_C(0x8000000000000000);
+    static constexpr uint64_t mantissa_bit_u = UINT64_C(0x000FFFFFFFFFFFFF);
+    static constexpr uint64_t expoent_bit_u = UINT64_C(0x7FF0000000000000);
+    static constexpr uint64_t number_except_sign_bit_u = mantissa_bit_u | expoent_bit_u;
+
+    static constexpr uint64_t mantissa_min_u = UINT64_C(1);
+
+    static constexpr uint64_t inf_u = UINT64_C(0x7FF0000000000000);
+    static constexpr uint64_t q_nan_u = UINT64_C(0x7FF8000000000000);
+    static constexpr double inf = std::numeric_limits<double>::infinity();
+    static constexpr double q_nan = std::numeric_limits<double>::quiet_NaN();
+
+    static constexpr int shift_to_sign = 63;
+
+    static inline uint64_t &as_uint(double &v) noexcept { return *(uint64_t *)&v; }
+    static inline constexpr uint64_t invert_signal_2complement(const uint64_t &v) noexcept { return uint64_t(-int64_t(v)); }
+    static inline constexpr bool is_nan(const double &v) noexcept { return std::isnan(v); }
+    static inline constexpr bool is_inf(const double &v) noexcept { return std::isinf(v); }
+    static inline constexpr bool is_nan(const uint64_t &v) noexcept { return (v & expoent_bit_u == inf_u) && (v & mantissa_bit_u != 0); }
+    static inline constexpr bool is_inf(const uint64_t &v) noexcept { return (v & expoent_bit_u == inf_u) && (v & mantissa_bit_u == 0); }
+};
+
+template <>
+struct IEEE_754_Info<float>
+{
+    typedef uint32_t utype;
+
+    static constexpr uint32_t minus_one_u = UINT32_C(0xFFFFFFFF);
+    static constexpr uint32_t one_u = UINT32_C(1);
+    static constexpr uint32_t sign_bit_u = UINT32_C(0x80000000);
+    static constexpr uint32_t mantissa_bit_u = UINT32_C(0x007FFFFF);
+    static constexpr uint32_t expoent_bit_u = UINT32_C(0x7F800000);
+    static constexpr uint32_t number_except_sign_bit_u = mantissa_bit_u | expoent_bit_u;
+
+    static constexpr uint32_t mantissa_min_u = UINT32_C(1);
+
+    static constexpr uint32_t inf_u = UINT32_C(0x7F800000);
+    static constexpr uint32_t q_nan_u = UINT32_C(0x7FC00000);
+    static constexpr float inf = std::numeric_limits<float>::infinity();
+    static constexpr float q_nan = std::numeric_limits<float>::quiet_NaN();
+
+    static constexpr int shift_to_sign = 31;
+
+    static inline uint32_t &as_uint(float &v) noexcept { return *(uint32_t *)&v; }
+    static inline constexpr uint32_t invert_signal_2complement(const uint32_t &v) noexcept { return uint32_t(-int32_t(v)); }
+    static inline constexpr bool is_nan(const float &v) noexcept { return std::isnan(v); }
+    static inline constexpr bool is_inf(const float &v) noexcept { return std::isinf(v); }
+    static inline constexpr bool is_nan(const uint32_t &v) noexcept { return (v & expoent_bit_u == inf_u) && (v & mantissa_bit_u != 0); }
+    static inline constexpr bool is_inf(const uint32_t &v) noexcept { return (v & expoent_bit_u == inf_u) && (v & mantissa_bit_u == 0); }
+};
+
+template <typename type_>
+static inline type_ nextafter_optim(type_ x, type_ y)
+{
+    if (IEEE_754_Info<type_>::is_nan(x) || IEEE_754_Info<type_>::is_nan(y))
+        return IEEE_754_Info<type_>::q_nan;
+    if (x == y)
+        return y;
+
+    typedef typename IEEE_754_Info<type_>::utype utype;
+
+    utype &bits_x = IEEE_754_Info<type_>::as_uint(x);
+    utype mantissa_x = bits_x & IEEE_754_Info<type_>::mantissa_bit_u;
+    utype is_descending = utype(y < x);
+    if (!mantissa_x)
+    {
+        // is zero
+        utype is_descending_sign = is_descending << IEEE_754_Info<type_>::shift_to_sign;
+        bits_x = is_descending_sign | IEEE_754_Info<type_>::mantissa_min_u;
+        return x;
+    }
+
+    utype is_sign_negative_x = (bits_x & IEEE_754_Info<type_>::sign_bit_u);
+
+    // increment will be -1 if is_descenting is true, and 1 if not
+    bool select_minus_one = is_descending ^ (is_sign_negative_x >> IEEE_754_Info<type_>::shift_to_sign);
+    utype increment = (select_minus_one) ? IEEE_754_Info<type_>::minus_one_u : IEEE_754_Info<type_>::one_u;
+
+    // utype increment = (is_descending) ? IEEE_754_Info<type_>::minus_one_u : IEEE_754_Info<type_>::one_u;
+    // increment = (is_sign_negative_x) ? IEEE_754_Info<type_>::invert_signal_2complement(increment) : increment;
+
+    utype bits_number_only = bits_x & IEEE_754_Info<type_>::number_except_sign_bit_u;
+
+    bits_number_only += increment;
+
+    // overflow, transform bits_number_only into +inf
+    if (bits_number_only & IEEE_754_Info<type_>::sign_bit_u)
+        bits_number_only = IEEE_754_Info<type_>::inf_u;
+
+    bits_x = is_sign_negative_x |
+             (bits_number_only & IEEE_754_Info<type_>::number_except_sign_bit_u);
+
+    return x;
+}
+
+static inline double nextafter_custom_double(double x, double y)
+{
+    // NaN
+    if (std::isnan(x) || std::isnan(y))
+        return std::numeric_limits<double>::quiet_NaN();
+
+    // x == y, including equal infinities
+    if (x == y)
+        return y;
+
+    // Starting from zero
+    if (x == 0.0)
+    {
+        uint64_t bits = std::signbit(y)
+                            ? 0x8000000000000001ULL  // -smallest subnormal
+                            : 0x0000000000000001ULL; // +smallest subnormal
+
+        return bits_to_double(bits);
+    }
+
+    uint64_t bits = double_to_bits(x);
+
+    if (x > 0.0)
+        bits += (y > x) ? 1ULL : -1ULL;
+    else
+        bits += (y > x) ? -1ULL : 1ULL;
+
+    return bits_to_double(bits);
+}
+
+static inline float nextafter_optim(float x, float y)
+{
+    if (IEEE_754_Info<float>::is_nan(x) || IEEE_754_Info<float>::is_nan(y))
+        return IEEE_754_Info<float>::q_nan;
+    if (x == y)
+        return y;
+
+    uint32_t &bits_x = IEEE_754_Info<float>::as_uint(x);
+    uint32_t mantissa_x = bits_x & IEEE_754_Info<float>::mantissa_bit_u;
+    uint32_t is_descending = uint32_t(y < x);
+    if (!mantissa_x)
+    {
+        // is zero
+        uint32_t is_descending_sign = is_descending << IEEE_754_Info<float>::shift_to_sign;
+        bits_x = is_descending_sign | IEEE_754_Info<float>::mantissa_min_u;
+        return x;
+    }
+
+    uint32_t is_sign_negative_x = (bits_x & IEEE_754_Info<float>::sign_bit_u);
+
+    // increment will be -1 if is_descenting is true, and 1 if not
+    uint32_t increment = (is_descending) ? IEEE_754_Info<float>::minus_one_u : IEEE_754_Info<float>::one_u;
+    increment = (is_sign_negative_x) ? IEEE_754_Info<float>::invert_signal_2complement(increment) : increment;
+
+    uint32_t bits_number_only = bits_x & IEEE_754_Info<float>::number_except_sign_bit_u;
+
+    bits_number_only += increment;
+
+    // overflow, transform bits_number_only into +inf
+    if (bits_number_only & IEEE_754_Info<float>::sign_bit_u)
+        bits_number_only = IEEE_754_Info<float>::inf_u;
+
+    bits_x = is_sign_negative_x |
+             (bits_number_only & IEEE_754_Info<float>::number_except_sign_bit_u);
+
+    return x;
+}

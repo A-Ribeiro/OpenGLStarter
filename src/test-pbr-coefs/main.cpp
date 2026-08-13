@@ -65,7 +65,9 @@ void complex_string_hierarchy_as_parameter(
         }
     }
 }
-#include <appkit-gl-engine/util/Animation/all.h>
+// #include <appkit-gl-engine/util/Animation/all.h>
+
+#include "next_after_custom.h"
 
 int main(int argc, char *argv[])
 {
@@ -157,33 +159,37 @@ int main(int argc, char *argv[])
     // double vd = smartToDouble(v); // 1234567.891234567e-10;
     // printf("%.15e\n", vd);
 
-    using namespace AppKit::GLEngine::Animation;
+    // using namespace AppKit::GLEngine::Animation;
 
-    Channel<float> channel;
+    // Channel<float> channel;
 
-    channel.keys.push_back(Key<float>(-2.0f, -2.0f));
-    channel.keys.push_back(Key<float>(-1.0f, -1.0f));
-    channel.keys.push_back(Key<float>(1.0f, 1.0f));
-    channel.keys.push_back(Key<float>(5.0f, 5.0f));
-    channel.keys.push_back(Key<float>(6.0f, 6.0f));
+    // channel.keys.push_back(Key<float>(-2.0f, -2.0f));
+    // channel.keys.push_back(Key<float>(-1.0f, -1.0f));
+    // channel.keys.push_back(Key<float>(1.0f, 1.0f));
+    // channel.keys.push_back(Key<float>(5.0f, 5.0f));
+    // channel.keys.push_back(Key<float>(6.0f, 6.0f));
 
-    channel.clamp_time(0.0f, 3.0f);
+    // channel.clamp_time(0.0f, 3.0f);
 
-    printf("Original:\n");
+    // printf("Original:\n");
 
-    for (const auto &k : channel.keys)
-        printf("time: %g value: %g\n", k.time, k.value);
+    // for (const auto &k : channel.keys)
+    //     printf("time: %g value: %g\n", k.time, k.value);
 
-    Channel<float> channel_resampled;
+    // Channel<float> channel_resampled;
 
-    Sampler<float> sampler;
-    sampler.configure(&channel, 0, 0);
-    sampler.resample(&channel_resampled, 31);
+    // Sampler<float> sampler;
+    // sampler.configure(&channel, 0, 0);
+    // sampler.resample(&channel_resampled, 31);
 
-    printf("Resampled:\n");
+    // printf("Resampled:\n");
 
-    for (const auto &k : channel_resampled.keys)
-        printf("time: %g value: %g\n", k.time, k.value);
+    // for (const auto &k : channel_resampled.keys)
+    //     printf("time: %g value: %g\n", k.time, k.value);
+
+    printf("%.20e\n", std::nextafter(-10, std::numeric_limits<double>::infinity()));
+    printf("%.20e\n", nextafter_custom_double(-10, std::numeric_limits<double>::infinity()));
+    printf("%.20e\n", nextafter_optim<double>(-10, std::numeric_limits<double>::infinity()));
 
     return 0;
 }
