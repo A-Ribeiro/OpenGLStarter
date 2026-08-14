@@ -98,7 +98,8 @@ namespace AppKit
                     for (const auto &sprite : sprite_list_entry.sprite_list)
                         gen.addEntry(sprite.first.c_str());
                 }
-                else if (atlases_count_before == 0 && atlases_count_after > 1)
+                else if (atlases_count_after >= atlases_count_before + 2)
+                    // needs >= 2 more atlas to insert an entry that is configured to be placed in the same atlas
                     throw std::runtime_error("Sprite Pool Generation Failed: Sprites that are marked to be kept in the same atlas cannot fit into a single atlas. Please reduce the number of sprites or increase the maximum atlas resolution.");
             }
 
