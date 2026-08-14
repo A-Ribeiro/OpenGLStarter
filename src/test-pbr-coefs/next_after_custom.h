@@ -135,10 +135,10 @@ struct IEEE_754_Info<double>
 
     static inline uint64_t &as_uint(double &v) noexcept { return *(uint64_t *)&v; }
     static inline constexpr uint64_t invert_signal_2complement(const uint64_t &v) noexcept { return uint64_t(-int64_t(v)); }
-    static inline constexpr bool is_nan(const double &v) noexcept { return std::isnan(v); }
-    static inline constexpr bool is_inf(const double &v) noexcept { return std::isinf(v); }
-    static inline constexpr bool is_nan(const uint64_t &v) noexcept { return (v & expoent_bit_u == inf_u) && (v & mantissa_bit_u != 0); }
-    static inline constexpr bool is_inf(const uint64_t &v) noexcept { return (v & expoent_bit_u == inf_u) && (v & mantissa_bit_u == 0); }
+    static inline constexpr bool is_nan(const double &v) noexcept { return !(v == v); }
+    static inline constexpr bool is_inf(const double &v) noexcept { return (v == inf) || (v == -inf); }
+    static inline constexpr bool is_nan(const uint64_t &v) noexcept { return ((v & expoent_bit_u) == inf_u) && ((v & mantissa_bit_u) != 0); }
+    static inline constexpr bool is_inf(const uint64_t &v) noexcept { return ((v & expoent_bit_u) == inf_u) && ((v & mantissa_bit_u) == 0); }
 };
 
 template <>
@@ -164,10 +164,10 @@ struct IEEE_754_Info<float>
 
     static inline uint32_t &as_uint(float &v) noexcept { return *(uint32_t *)&v; }
     static inline constexpr uint32_t invert_signal_2complement(const uint32_t &v) noexcept { return uint32_t(-int32_t(v)); }
-    static inline constexpr bool is_nan(const float &v) noexcept { return std::isnan(v); }
-    static inline constexpr bool is_inf(const float &v) noexcept { return std::isinf(v); }
-    static inline constexpr bool is_nan(const uint32_t &v) noexcept { return (v & expoent_bit_u == inf_u) && (v & mantissa_bit_u != 0); }
-    static inline constexpr bool is_inf(const uint32_t &v) noexcept { return (v & expoent_bit_u == inf_u) && (v & mantissa_bit_u == 0); }
+    static inline constexpr bool is_nan(const float &v) noexcept { return !(v == v); }
+    static inline constexpr bool is_inf(const float &v) noexcept { return (v == inf) || (v == -inf); }
+    static inline constexpr bool is_nan(const uint32_t &v) noexcept { return ((v & expoent_bit_u) == inf_u) && ((v & mantissa_bit_u) != 0); }
+    static inline constexpr bool is_inf(const uint32_t &v) noexcept { return ((v & expoent_bit_u) == inf_u) && ((v & mantissa_bit_u) == 0); }
 };
 
 template <typename type_>
@@ -213,6 +213,97 @@ static inline type_ nextafter_optim(type_ x, type_ y)
     return x;
 }
 
+#if defined(ITK_SSE2)
+
+#include <InteractiveToolkit/MathCore/impl/simd_common.h>
+
+const __m128i _all_bits_set = _mm_set1_epi32((int)0xffffffff);
+const __m128i _mantissa_bit_u = _mm_set1_epi32((int)0x007FFFFF);
+const __m128i _mantissa_min_u = _mm_set1_epi32((int)1);
+const __m128i _sign_bit_u = _mm_set1_epi32((int)0x80000000);
+const __m128i _minus_one_u = _mm_set1_epi32((int)0xFFFFFFFF);
+const __m128i _one_u = _mm_set1_epi32((int)1);
+const __m128i _number_except_sign_bit_u = _mm_set1_epi32((int)0x7FFFFFFF);
+const __m128i _expoent_bit_u = _mm_set1_epi32((int)0x7F800000);
+const __m128i _inf_u = _mm_set1_epi32((int)0x7F800000);
+const __m128i _zero = _mm_set1_epi32((int)0);
+const __m128i _q_nan = _mm_set1_epi32((int)0x7FC00000);
+
+static inline __m128i _sse2_is_nan_ps(const __m128 &v)
+{
+    // v == v returns false on NaN
+    return _mm_xor_si128(_mm_castps_si128(_mm_cmpeq_ps(v, v)), _all_bits_set);
+}
+
+static inline __m128 _sse2_nextafter_ps(__m128 x, __m128 y)
+{
+    __m128i is_nan_mask = _mm_or_si128( _sse2_is_nan_ps(x), _sse2_is_nan_ps(y) );
+
+    __m128i is_eq_x_y_mask = _mm_castps_si128(_mm_cmpeq_ps(x, y));
+
+    // _mm_test_all_ones
+    // y < x
+    __m128i is_descending = _mm_castps_si128(_mm_cmplt_ps(y, x));
+
+    __m128i bits_x = _mm_castps_si128(x);
+    __m128i mantissa_x = _mm_and_si128(bits_x, _mantissa_bit_u);
+    __m128i expoent_x = _mm_and_si128(bits_x, _expoent_bit_u);
+
+    __m128i is_descending_sign = _mm_slli_epi32(is_descending, 31);
+    __m128i result_bits_x_on_mantissa_zero = _mm_or_si128(is_descending_sign, _mantissa_min_u);
+
+    __m128i is_sign_negative_x = _mm_and_si128(bits_x, _sign_bit_u);
+    __m128i is_sign_negative_x_mask = _mm_srai_epi32(is_sign_negative_x, 31);
+
+    __m128i select_minus_one = _mm_xor_si128(is_descending, is_sign_negative_x_mask);
+
+    __m128i increment_a = _mm_and_si128(select_minus_one, _minus_one_u);
+    __m128i increment_b = _mm_andnot_si128(select_minus_one, _one_u);
+
+    __m128i increment = _mm_or_si128(increment_a, increment_b);
+
+    __m128i bits_number_only = _mm_and_si128(bits_x, _number_except_sign_bit_u);
+
+    __m128i is_inf_mask = _mm_cmpeq_epi32(expoent_x, _inf_u);
+    __m128i bits_number_only_inc = _mm_add_epi32(bits_number_only, increment);
+
+    is_inf_mask = _mm_and_si128(is_inf_mask, bits_number_only);
+    bits_number_only_inc = _mm_andnot_si128(is_inf_mask, bits_number_only_inc);
+
+    bits_number_only = _mm_or_si128(is_inf_mask, bits_number_only_inc);
+
+    // overflow, transform bits_number_only into +inf
+    __m128i has_overflow_mask = _mm_srai_epi32(_mm_and_si128(bits_number_only, _sign_bit_u), 31);
+
+    __m128i sel_inf_a = _mm_and_si128(has_overflow_mask, _inf_u);
+    __m128i sel_num_b = _mm_andnot_si128(has_overflow_mask, bits_number_only);
+
+    bits_number_only = _mm_or_si128(sel_inf_a, sel_num_b);
+
+    __m128i result_bits_x_on_valid_mantissa = _mm_or_si128(is_sign_negative_x, bits_number_only);
+
+    __m128i is_mantissa_zero_mask = _mm_cmpeq_epi32(mantissa_x, _zero);
+
+    result_bits_x_on_mantissa_zero = _mm_and_si128(is_mantissa_zero_mask, result_bits_x_on_mantissa_zero);
+    result_bits_x_on_valid_mantissa = _mm_andnot_si128(is_mantissa_zero_mask, result_bits_x_on_valid_mantissa);
+
+    __m128i result = _mm_or_si128(result_bits_x_on_mantissa_zero, result_bits_x_on_valid_mantissa);
+
+    // remaining filters
+    __m128i is_eq_a = _mm_and_si128(is_eq_x_y_mask, _mm_castps_si128(y));
+    __m128i is_eq_b = _mm_andnot_si128(is_eq_x_y_mask, result);
+
+    result = _mm_or_si128(is_eq_a, is_eq_b);
+
+    __m128i is_nan_a = _mm_and_si128(is_nan_mask, _q_nan);
+    __m128i is_nan_b = _mm_andnot_si128(is_nan_mask, result);
+
+    result = _mm_or_si128(is_nan_a, is_nan_b);
+
+    return _mm_castsi128_ps(result);
+}
+#endif
+
 static inline double nextafter_custom_double(double x, double y)
 {
     // NaN
@@ -236,9 +327,9 @@ static inline double nextafter_custom_double(double x, double y)
     uint64_t bits = double_to_bits(x);
 
     if (x > 0.0)
-        bits += (y > x) ? 1ULL : -1ULL;
+        bits += (y > x) ? 1ULL : UINT64_C(0xFFFFFFFFFFFFFFFF);
     else
-        bits += (y > x) ? -1ULL : 1ULL;
+        bits += (y > x) ? UINT64_C(0xFFFFFFFFFFFFFFFF) : 1ULL;
 
     return bits_to_double(bits);
 }
