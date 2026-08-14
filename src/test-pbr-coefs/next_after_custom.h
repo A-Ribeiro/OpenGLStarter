@@ -127,6 +127,8 @@ struct IEEE_754_Info<double>
     static constexpr uint64_t mantissa_min_u = UINT64_C(1);
 
     static constexpr uint64_t inf_u = UINT64_C(0x7FF0000000000000);
+    static constexpr uint64_t max_float_u = UINT64_C(0x7FEFFFFFFFFFFFFF);
+    static constexpr uint64_t neg_max_float_u = UINT64_C(0xFFEFFFFFFFFFFFFF);
     static constexpr uint64_t q_nan_u = UINT64_C(0x7FF8000000000000);
     static constexpr double inf = std::numeric_limits<double>::infinity();
     static constexpr double q_nan = std::numeric_limits<double>::quiet_NaN();
@@ -156,6 +158,8 @@ struct IEEE_754_Info<float>
     static constexpr uint32_t mantissa_min_u = UINT32_C(1);
 
     static constexpr uint32_t inf_u = UINT32_C(0x7F800000);
+    static constexpr uint32_t max_float_u = UINT32_C(0x7F7FFFFF);
+    static constexpr uint32_t neg_max_float_u = UINT32_C(0xFF7FFFFF);
     static constexpr uint32_t q_nan_u = UINT32_C(0x7FC00000);
     static constexpr float inf = std::numeric_limits<float>::infinity();
     static constexpr float q_nan = std::numeric_limits<float>::quiet_NaN();
@@ -181,9 +185,13 @@ static inline type_ nextafter_optim(type_ x, type_ y)
     typedef typename IEEE_754_Info<type_>::utype utype;
 
     utype &bits_x = IEEE_754_Info<type_>::as_uint(x);
-    utype mantissa_x = bits_x & IEEE_754_Info<type_>::mantissa_bit_u;
+    // utype mantissa_x = bits_x & IEEE_754_Info<type_>::mantissa_bit_u;
+    // utype exponent_x = bits_x & IEEE_754_Info<type_>::expoent_bit_u;
+    utype bits_number_only = bits_x & IEEE_754_Info<type_>::number_except_sign_bit_u;
+
     utype is_descending = utype(y < x);
-    if (!mantissa_x)
+    // Only treat as zero when both mantissa AND exponent are zero
+    if (!bits_number_only)
     {
         // is zero
         utype is_descending_sign = is_descending << IEEE_754_Info<type_>::shift_to_sign;
@@ -194,19 +202,29 @@ static inline type_ nextafter_optim(type_ x, type_ y)
     utype is_sign_negative_x = (bits_x & IEEE_754_Info<type_>::sign_bit_u);
 
     // increment will be -1 if is_descenting is true, and 1 if not
-    bool select_minus_one = is_descending ^ (is_sign_negative_x >> IEEE_754_Info<type_>::shift_to_sign);
+    utype is_sign_negative_x_b = is_sign_negative_x >> IEEE_754_Info<type_>::shift_to_sign;
+    utype select_minus_one = is_descending ^ is_sign_negative_x_b;
     utype increment = (select_minus_one) ? IEEE_754_Info<type_>::minus_one_u : IEEE_754_Info<type_>::one_u;
 
     // utype increment = (is_descending) ? IEEE_754_Info<type_>::minus_one_u : IEEE_754_Info<type_>::one_u;
     // increment = (is_sign_negative_x) ? IEEE_754_Info<type_>::invert_signal_2complement(increment) : increment;
 
-    utype bits_number_only = bits_x & IEEE_754_Info<type_>::number_except_sign_bit_u;
+    // utype bits_number_only = bits_x & IEEE_754_Info<type_>::number_except_sign_bit_u;
 
     bool is_inf = IEEE_754_Info<type_>::is_inf(bits_number_only);
-    bits_number_only = (is_inf) ? bits_number_only : bits_number_only + increment;
+    if (is_inf)
+    {
+        utype selected_max_f = (is_descending) ? IEEE_754_Info<type_>::max_float_u : IEEE_754_Info<type_>::neg_max_float_u;
+        bits_number_only = (is_sign_negative_x_b) ? (selected_max_f) : bits_number_only;
+    }
+    else
+        bits_number_only = bits_number_only + increment;
 
-    // overflow, transform bits_number_only into +inf
-    bits_number_only = (bits_number_only & IEEE_754_Info<type_>::sign_bit_u) ? IEEE_754_Info<type_>::inf_u : bits_number_only;
+    // overflow check: if incrementing max_float overflowed to infinity, clamp back to max_float
+    // bool overflowed = ((bits_number_only & IEEE_754_Info<type_>::expoent_bit_u) == IEEE_754_Info<type_>::inf_u) &&
+    //                   ((bits_number_only & IEEE_754_Info<type_>::mantissa_bit_u) == 0);
+    bool overflowed = ((bits_number_only & IEEE_754_Info<type_>::number_except_sign_bit_u) == IEEE_754_Info<type_>::inf_u);
+    bits_number_only = overflowed ? IEEE_754_Info<type_>::max_float_u : bits_number_only;
 
     bits_x = is_sign_negative_x | bits_number_only;
 
@@ -226,6 +244,10 @@ const __m128i _one_u = _mm_set1_epi32((int)1);
 const __m128i _number_except_sign_bit_u = _mm_set1_epi32((int)0x7FFFFFFF);
 const __m128i _expoent_bit_u = _mm_set1_epi32((int)0x7F800000);
 const __m128i _inf_u = _mm_set1_epi32((int)0x7F800000);
+
+const __m128i _max_float_u = _mm_set1_epi32((int)0x7F7FFFFF);
+const __m128i _neg_max_float_u = _mm_set1_epi32((int)0xFF7FFFFF);
+
 const __m128i _zero = _mm_set1_epi32((int)0);
 const __m128i _q_nan = _mm_set1_epi32((int)0x7FC00000);
 
@@ -237,7 +259,7 @@ static inline __m128i _sse2_is_nan_ps(const __m128 &v)
 
 static inline __m128 _sse2_nextafter_ps(__m128 x, __m128 y)
 {
-    __m128i is_nan_mask = _mm_or_si128( _sse2_is_nan_ps(x), _sse2_is_nan_ps(y) );
+    __m128i is_nan_mask = _mm_or_si128(_sse2_is_nan_ps(x), _sse2_is_nan_ps(y));
 
     __m128i is_eq_x_y_mask = _mm_castps_si128(_mm_cmpeq_ps(x, y));
 
@@ -246,10 +268,15 @@ static inline __m128 _sse2_nextafter_ps(__m128 x, __m128 y)
     __m128i is_descending = _mm_castps_si128(_mm_cmplt_ps(y, x));
 
     __m128i bits_x = _mm_castps_si128(x);
-    __m128i mantissa_x = _mm_and_si128(bits_x, _mantissa_bit_u);
-    __m128i expoent_x = _mm_and_si128(bits_x, _expoent_bit_u);
+    __m128i bits_number_only = _mm_and_si128(bits_x, _number_except_sign_bit_u);
 
-    __m128i is_descending_sign = _mm_slli_epi32(is_descending, 31);
+    // __m128i mantissa_x = _mm_and_si128(bits_x, _mantissa_bit_u);
+    // __m128i expoent_x = _mm_and_si128(bits_x, _expoent_bit_u);
+
+    // Only treat as zero when both mantissa AND exponent are zero
+    //__m128i is_value_zero = _mm_and_si128(_mm_cmpeq_epi32(mantissa_x, _zero), _mm_cmpeq_epi32(expoent_x, _zero));
+    __m128i is_value_zero = _mm_cmpeq_epi32(bits_number_only, _zero);
+    __m128i is_descending_sign = _mm_and_si128(is_descending, _sign_bit_u);
     __m128i result_bits_x_on_mantissa_zero = _mm_or_si128(is_descending_sign, _mantissa_min_u);
 
     __m128i is_sign_negative_x = _mm_and_si128(bits_x, _sign_bit_u);
@@ -257,48 +284,53 @@ static inline __m128 _sse2_nextafter_ps(__m128 x, __m128 y)
 
     __m128i select_minus_one = _mm_xor_si128(is_descending, is_sign_negative_x_mask);
 
-    __m128i increment_a = _mm_and_si128(select_minus_one, _minus_one_u);
-    __m128i increment_b = _mm_andnot_si128(select_minus_one, _one_u);
+    __m128i increment = _mm_or_si128(
+        _mm_and_si128(select_minus_one, _minus_one_u),
+        _mm_andnot_si128(select_minus_one, _one_u));
 
-    __m128i increment = _mm_or_si128(increment_a, increment_b);
+    // __m128i bits_number_only = _mm_and_si128(bits_x, _number_except_sign_bit_u);
+    // __m128i expoent_x = _mm_and_si128(bits_x, _expoent_bit_u);
+    __m128i is_inf_mask = _mm_cmpeq_epi32(bits_number_only, _inf_u);
 
-    __m128i bits_number_only = _mm_and_si128(bits_x, _number_except_sign_bit_u);
+    __m128i selected_max_f =
+        _mm_or_si128(_mm_and_si128(is_descending, _max_float_u),
+                     _mm_andnot_si128(is_descending, _neg_max_float_u));
 
-    __m128i is_inf_mask = _mm_cmpeq_epi32(expoent_x, _inf_u);
+    __m128i bits_number_only_aux =
+        _mm_or_si128(_mm_and_si128(is_sign_negative_x_mask, selected_max_f),
+                     _mm_andnot_si128(is_sign_negative_x_mask, bits_number_only));
+
     __m128i bits_number_only_inc = _mm_add_epi32(bits_number_only, increment);
 
-    is_inf_mask = _mm_and_si128(is_inf_mask, bits_number_only);
-    bits_number_only_inc = _mm_andnot_si128(is_inf_mask, bits_number_only_inc);
-
-    bits_number_only = _mm_or_si128(is_inf_mask, bits_number_only_inc);
+    bits_number_only = _mm_or_si128(
+        _mm_and_si128(is_inf_mask, bits_number_only_aux),
+        _mm_andnot_si128(is_inf_mask, bits_number_only_inc));
 
     // overflow, transform bits_number_only into +inf
-    __m128i has_overflow_mask = _mm_srai_epi32(_mm_and_si128(bits_number_only, _sign_bit_u), 31);
+    //__m128i has_overflow_mask = _mm_srai_epi32(_mm_and_si128(bits_number_only, _sign_bit_u), 31);
 
-    __m128i sel_inf_a = _mm_and_si128(has_overflow_mask, _inf_u);
-    __m128i sel_num_b = _mm_andnot_si128(has_overflow_mask, bits_number_only);
+    __m128i has_overflow_mask = _mm_cmpeq_epi32(
+        _mm_and_si128(bits_number_only, _number_except_sign_bit_u),
+        _inf_u);
 
-    bits_number_only = _mm_or_si128(sel_inf_a, sel_num_b);
+    bits_number_only = _mm_or_si128(
+        _mm_and_si128(has_overflow_mask, _max_float_u),
+        _mm_andnot_si128(has_overflow_mask, bits_number_only));
 
     __m128i result_bits_x_on_valid_mantissa = _mm_or_si128(is_sign_negative_x, bits_number_only);
 
-    __m128i is_mantissa_zero_mask = _mm_cmpeq_epi32(mantissa_x, _zero);
-
-    result_bits_x_on_mantissa_zero = _mm_and_si128(is_mantissa_zero_mask, result_bits_x_on_mantissa_zero);
-    result_bits_x_on_valid_mantissa = _mm_andnot_si128(is_mantissa_zero_mask, result_bits_x_on_valid_mantissa);
-
-    __m128i result = _mm_or_si128(result_bits_x_on_mantissa_zero, result_bits_x_on_valid_mantissa);
+    __m128i result = _mm_or_si128(
+        _mm_and_si128(is_value_zero, result_bits_x_on_mantissa_zero),
+        _mm_andnot_si128(is_value_zero, result_bits_x_on_valid_mantissa));
 
     // remaining filters
-    __m128i is_eq_a = _mm_and_si128(is_eq_x_y_mask, _mm_castps_si128(y));
-    __m128i is_eq_b = _mm_andnot_si128(is_eq_x_y_mask, result);
+    result = _mm_or_si128(
+        _mm_and_si128(is_eq_x_y_mask, _mm_castps_si128(y)),
+        _mm_andnot_si128(is_eq_x_y_mask, result));
 
-    result = _mm_or_si128(is_eq_a, is_eq_b);
-
-    __m128i is_nan_a = _mm_and_si128(is_nan_mask, _q_nan);
-    __m128i is_nan_b = _mm_andnot_si128(is_nan_mask, result);
-
-    result = _mm_or_si128(is_nan_a, is_nan_b);
+    result = _mm_or_si128(
+        _mm_and_si128(is_nan_mask, _q_nan),
+        _mm_andnot_si128(is_nan_mask, result));
 
     return _mm_castsi128_ps(result);
 }
