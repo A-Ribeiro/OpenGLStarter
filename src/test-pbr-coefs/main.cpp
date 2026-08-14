@@ -67,8 +67,6 @@ void complex_string_hierarchy_as_parameter(
 }
 // #include <appkit-gl-engine/util/Animation/all.h>
 
-#include "next_after_custom.h"
-
 int main(int argc, char *argv[])
 {
     // ITKCommon::Path::setWorkingPath(ITKCommon::Path::getExecutablePath(argv[0]));
@@ -188,8 +186,8 @@ int main(int argc, char *argv[])
     //     printf("time: %g value: %g\n", k.time, k.value);
 
     printf("%.20e\n", std::nextafter(-10, std::numeric_limits<double>::infinity()));
-    printf("%.20e\n", nextafter_custom_double(-10, std::numeric_limits<double>::infinity()));
-    printf("%.20e\n", nextafter_optim<double>(-10, std::numeric_limits<double>::infinity()));
+    printf("%.20e\n", MathCore::OP<double>::nextafter_branch(-10, std::numeric_limits<double>::infinity()));
+    printf("%.20e\n", MathCore::OP<double>::nextafter_branchless(-10, std::numeric_limits<double>::infinity()));
 
     return 0;
 }
