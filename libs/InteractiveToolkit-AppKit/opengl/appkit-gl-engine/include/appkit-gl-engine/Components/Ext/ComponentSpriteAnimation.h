@@ -33,7 +33,7 @@ namespace AppKit
         namespace Components
         {
 
-            struct SpriteAnimationFrames
+            struct SpriteAnimationFrame
             {
                 std::shared_ptr<AppKit::GLEngine::SpriteAtlas> atlas;
 
@@ -55,7 +55,7 @@ namespace AppKit
             {
                 std::string name;
 
-                std::vector<SpriteAnimationFrames> frames;
+                std::vector<SpriteAnimationFrame> frames;
 
                 float frame_duration_seconds;
                 bool loop;

@@ -233,7 +233,7 @@ namespace AppKit
 
                     for (const auto &frame_info : anim.frames)
                     {
-                        SpriteAnimationFrames frame;
+                        SpriteAnimationFrame frame;
 
                         frame.atlas = sprite_pool->getAtlasContainingSprite(frame_info.name);
                         frame.atlas_entry = frame.atlas->getSprite(frame_info.name);
