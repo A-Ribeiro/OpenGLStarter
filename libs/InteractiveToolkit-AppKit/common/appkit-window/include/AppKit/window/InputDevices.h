@@ -55,13 +55,18 @@ namespace AppKit
                 JoystickInfo queryJoystickInfo();
 
                 void set_vibration_win32(float low_frequency_left_motor, float high_frequency_right_motor);
-                static bool update_all_joystick_win32();
+                static bool sync_all_joystick_data();
             };
 
             class Keyboard
             {
+                static bool *window_key_states;
+                static void setWindow_key_states(bool *array);
             public:
                 static bool isPressed(KeyCode code);
+                // static bool sync_all_keyboard_data();
+
+                friend class AppKit::Window::Window;
             };
 
             enum class MouseButton : uint8_t

@@ -354,6 +354,8 @@ namespace AppKit
 
         void Window::close()
         {
+            Devices::Keyboard::setWindow_key_states(nullptr);
+
             sf::WindowBase *window = static_cast<sf::WindowBase *>(usr1Handle);
 
 #if defined(_WIN32)
@@ -567,6 +569,8 @@ namespace AppKit
         // TODO: poll window event and feed the InputManager
         void Window::forwardWindowEventsToInputManager(bool alwaysDraw, InputManager *customInputManager)
         {
+            Devices::Keyboard::setWindow_key_states(key_states);
+
             InputManager *targetInputManager = customInputManager;
             if (targetInputManager == nullptr)
                 targetInputManager = &this->inputManager;
@@ -577,7 +581,8 @@ namespace AppKit
             mouseEventg.type = MouseEventType::None;
 
             std::optional<sf::Event> event_reader;
-            while (window->isOpen() && (event_reader = window->pollEvent()) && (Devices::Joystick::update_all_joystick_win32()))
+            while (window->isOpen() && (event_reader = window->pollEvent()) &&
+                   Devices::Joystick::sync_all_joystick_data())
             {
                 const sf::Event &event = event_reader.value();
 
