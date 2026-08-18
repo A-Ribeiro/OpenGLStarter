@@ -8,6 +8,12 @@ namespace AppKit
 {
     namespace ui
     {
+        enum class ScreenMessageBoxChangeEvent : uint8_t
+        {
+            OptionChange,
+            OpenMenu
+        };
+
         class ScreenMessageBox : public ui::Screen, public OsciloscopeWithTrigger
         {
             void layoutElements(const MathCore::vec2f &size);
@@ -22,6 +28,7 @@ namespace AppKit
             ui::ScreenManager *screenManager;
 
             EventCore::Callback<void(const std::string &)> onOptionSelected;
+            EventCore::Callback<void(ScreenMessageBoxChangeEvent event)> onOptionChanged;
 
             std::string text;
 
@@ -42,7 +49,8 @@ namespace AppKit
                 const std::string &rich_message,
                 const std::vector<std::string> &options = {"OK", "Cancel"},
                 const std::string &init_selected = "OK",
-                EventCore::Callback<void(const std::string &)> onOptionSelected = nullptr);
+                const EventCore::Callback<void(const std::string &)> &onOptionSelected = nullptr,
+                const EventCore::Callback<void(AppKit::ui::ScreenMessageBoxChangeEvent event)> &onOptionChanged = nullptr);
 
             static constexpr float button_width = 256;
             static constexpr float button_height = 64;

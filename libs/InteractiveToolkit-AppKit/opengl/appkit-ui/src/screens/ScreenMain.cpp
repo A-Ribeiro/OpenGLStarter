@@ -20,14 +20,20 @@ namespace AppKit
         {
             if (osciloscopeIsLocked())
                 return;
-            selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)buttonManager.visible_count - 1);
+            int new_selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)buttonManager.visible_count - 1);
+            if (new_selected_button != selected_button)
+                onOptionChanged(ScreenMainChangeEvent::OptionChange);
+            selected_button = new_selected_button;
             setPrimaryColorAll();
         }
         void ScreenMain::nextButton()
         {
             if (osciloscopeIsLocked())
                 return;
-            selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)buttonManager.visible_count - 1);
+            int new_selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)buttonManager.visible_count - 1);
+            if (new_selected_button != selected_button)
+                onOptionChanged(ScreenMainChangeEvent::OptionChange);
+            selected_button = new_selected_button;
             setPrimaryColorAll();
         }
         void ScreenMain::backButton()
@@ -146,6 +152,7 @@ namespace AppKit
             {
                 if (event == UIEventEnum::UIEvent_InputActionEnter)
                 {
+                    onOptionChanged(ScreenMainChangeEvent::OpenMenu);
                     osciloscopeTriggerAction();
                 }
                 else if (event == UIEventEnum::UIEvent_InputDown)
@@ -171,9 +178,11 @@ namespace AppKit
         void ScreenMain::show(
             const std::vector<std::string> &options,
             const std::string &init_selected,
-            EventCore::Callback<void(const std::string &)> onOptionSelected)
+            const EventCore::Callback<void(const std::string &)> &onOptionSelected,
+            const EventCore::Callback<void(AppKit::ui::ScreenMainChangeEvent event)> &onOptionChanged)
         {
             this->onOptionSelected = onOptionSelected;
+            this->onOptionChanged = onOptionChanged;
 
             buttonManager.setButtonVisibleCount((int)options.size());
             selected_button = 0;

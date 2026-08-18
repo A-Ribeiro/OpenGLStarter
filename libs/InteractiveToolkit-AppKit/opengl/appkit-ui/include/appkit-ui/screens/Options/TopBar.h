@@ -35,6 +35,8 @@ namespace AppKit
             void shoulderPrevious();
 
             const std::string &getSelectedButtonName() const;
+
+            friend class AppKit::ui::ScreenOptions;
         };
     }
 }

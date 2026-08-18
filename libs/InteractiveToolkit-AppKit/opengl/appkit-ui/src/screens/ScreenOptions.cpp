@@ -289,7 +289,11 @@ namespace AppKit
                     if (topBar)
                     {
                         auto tab_name = topBar->getSelectedButtonName();
-                        optionMap[tab_name]->downButton();
+                        auto &tab = optionMap[tab_name];
+                        int before_idx = tab->selected_item_index;
+                        tab->downButton();
+                        if (before_idx != tab->selected_item_index)
+                            onMenuChange(ScreenOptionsChangeEvent::Vertical);
                     }
                 }
                 else if (event == UIEventEnum::UIEvent_InputUp)
@@ -297,7 +301,11 @@ namespace AppKit
                     if (topBar)
                     {
                         auto tab_name = topBar->getSelectedButtonName();
-                        optionMap[tab_name]->upButton();
+                        auto &tab = optionMap[tab_name];
+                        int before_idx = tab->selected_item_index;
+                        tab->upButton();
+                        if (before_idx != tab->selected_item_index)
+                            onMenuChange(ScreenOptionsChangeEvent::Vertical);
                     }
                 }
                 else if (event == UIEventEnum::UIEvent_InputLeft)
@@ -305,7 +313,11 @@ namespace AppKit
                     if (topBar)
                     {
                         auto tab_name = topBar->getSelectedButtonName();
-                        optionMap[tab_name]->leftButton();
+                        auto &tab = optionMap[tab_name];
+                        int before_idx = tab->items[tab->selected_item_index].selected_index;
+                        tab->leftButton();
+                        if (before_idx != tab->items[tab->selected_item_index].selected_index)
+                            onMenuChange(ScreenOptionsChangeEvent::Horizontal);
                     }
                 }
                 else if (event == UIEventEnum::UIEvent_InputRight)
@@ -313,7 +325,11 @@ namespace AppKit
                     if (topBar)
                     {
                         auto tab_name = topBar->getSelectedButtonName();
-                        optionMap[tab_name]->rightButton();
+                        auto &tab = optionMap[tab_name];
+                        int before_idx = tab->items[tab->selected_item_index].selected_index;
+                        tab->rightButton();
+                        if (before_idx != tab->items[tab->selected_item_index].selected_index)
+                            onMenuChange(ScreenOptionsChangeEvent::Horizontal);
                     }
                 }
                 else if (event == UIEventEnum::UIEvent_InputActionBack)
@@ -340,13 +356,23 @@ namespace AppKit
                 else if (event == UIEventEnum::UIEvent_InputShoulderRight)
                 {
                     if (topBar)
+                    {
+                        int old_sel_idx = topBar->selected_button;
                         topBar->shoulderNext();
+                        if (old_sel_idx != topBar->selected_button)
+                            onMenuChange(ScreenOptionsChangeEvent::Tab);
+                    }
                     activeCurrentTab();
                 }
                 else if (event == UIEventEnum::UIEvent_InputShoulderLeft)
                 {
                     if (topBar)
+                    {
+                        int old_sel_idx = topBar->selected_button;
                         topBar->shoulderPrevious();
+                        if (old_sel_idx != topBar->selected_button)
+                            onMenuChange(ScreenOptionsChangeEvent::Tab);
+                    }
                     activeCurrentTab();
                 }
             }
@@ -357,9 +383,11 @@ namespace AppKit
         }
 
         void ScreenOptions::showOptions(
-            EventCore::Callback<void(OptionsManager *localOptions)> onTryToExitAction)
+            const EventCore::Callback<void(AppKit::ui::OptionsManager *localOptions)> &onTryToExitAction,
+            const EventCore::Callback<void(AppKit::ui::ScreenOptionsChangeEvent eventType)> &onMenuChange)
         {
             this->onTryToExitAction = onTryToExitAction;
+            this->onMenuChange = onMenuChange;
 
             // layoutElements(screenManager->current_size);
 

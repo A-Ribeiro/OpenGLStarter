@@ -11,6 +11,13 @@ namespace AppKit
         class TopBar;
         class OptionSet;
 
+        enum class ScreenOptionsChangeEvent : uint8_t
+        {
+            Vertical,
+            Horizontal,
+            Tab
+        };
+
         class ScreenOptions : public ui::Screen, public OsciloscopeWithTrigger
         {
             ui::ScreenManager *screenManager;
@@ -25,6 +32,7 @@ namespace AppKit
             void loadOptionsFromGlobalContext();
 
             EventCore::Callback<void(OptionsManager *localOptions)> onTryToExitAction;
+            EventCore::Callback<void(ScreenOptionsChangeEvent eventType)> onMenuChange;
 
         protected:
             void onOsciloscopeAction();
@@ -70,7 +78,8 @@ namespace AppKit
             void updateColorPalette();
 
             void showOptions(
-                EventCore::Callback<void(OptionsManager *localOptions)> onTryToExitAction);
+                const EventCore::Callback<void(AppKit::ui::OptionsManager *localOptions)> &onTryToExitAction,
+                const EventCore::Callback<void(AppKit::ui::ScreenOptionsChangeEvent eventType)> &onMenuChange);
         };
 
     }

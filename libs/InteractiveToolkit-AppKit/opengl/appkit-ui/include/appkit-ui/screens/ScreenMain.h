@@ -8,6 +8,14 @@ namespace AppKit
 {
     namespace ui
     {
+
+        enum class ScreenMainChangeEvent : uint8_t
+        {
+            OptionChange,
+            OpenMenu
+        };
+
+
         class ScreenMain : public ui::Screen, public OsciloscopeWithTrigger
         {
             void layoutElements(const MathCore::vec2f &size);
@@ -24,6 +32,7 @@ namespace AppKit
             ButtonManager buttonManager;
 
             EventCore::Callback<void(const std::string &)> onOptionSelected;
+            EventCore::Callback<void(ScreenMainChangeEvent event)> onOptionChanged;
 
         protected:
             void onOsciloscopeAction();
@@ -66,7 +75,8 @@ namespace AppKit
             void show(
                 const std::vector<std::string> &options = {"New Game", "Options", "Exit Game"},
                 const std::string &init_selected = "New Game",
-                EventCore::Callback<void(const std::string &)> onOptionSelected = nullptr);
+                const EventCore::Callback<void(const std::string &)> &onOptionSelected = nullptr,
+                const EventCore::Callback<void(AppKit::ui::ScreenMainChangeEvent event)> &onOptionChanged = nullptr);
         };
     }
 }

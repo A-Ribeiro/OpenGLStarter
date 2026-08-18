@@ -106,14 +106,21 @@ namespace AppKit
         {
             if (osciloscopeIsLocked())
                 return;
-            selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)buttonManager.visible_count - 1);
+            int new_selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)buttonManager.visible_count - 1);
+            if (new_selected_button != selected_button)
+                onOptionChanged(ScreenMessageBoxChangeEvent::OptionChange);
+            selected_button = new_selected_button;
             setPrimaryColorAll();
         }
         void ScreenMessageBox::nextButton()
         {
             if (osciloscopeIsLocked())
                 return;
-            selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)buttonManager.visible_count - 1);
+            int new_selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)buttonManager.visible_count - 1);
+            if (new_selected_button != selected_button)
+                onOptionChanged(ScreenMessageBoxChangeEvent::OptionChange);
+            selected_button = new_selected_button;
+
             setPrimaryColorAll();
         }
         void ScreenMessageBox::backButton()
@@ -152,10 +159,12 @@ namespace AppKit
             const std::string &rich_message,
             const std::vector<std::string> &options,
             const std::string &init_selected,
-            EventCore::Callback<void(const std::string &)> onOptionSelected)
+            const EventCore::Callback<void(const std::string &)> &onOptionSelected,
+            const EventCore::Callback<void(AppKit::ui::ScreenMessageBoxChangeEvent event)> &onOptionChanged)
         {
             this->text = rich_message;
             this->onOptionSelected = onOptionSelected;
+            this->onOptionChanged = onOptionChanged;
             printf("Show message box: %s\n", rich_message.c_str());
 
             buttonManager.setButtonVisibleCount((int)options.size());
@@ -313,6 +322,7 @@ namespace AppKit
             {
                 if (event == UIEventEnum::UIEvent_InputActionEnter)
                 {
+                    onOptionChanged(ScreenMessageBoxChangeEvent::OpenMenu);
                     osciloscopeTriggerAction();
                 }
                 else if (event == UIEventEnum::UIEvent_InputRight)
