@@ -40,6 +40,8 @@ namespace AppKit
         {
             if (osciloscopeIsLocked())
                 return;
+            if (selected_button != ((int)buttonManager.visible_count - 1) && onOptionChanged)
+                onOptionChanged(ScreenMainChangeEvent::OptionChange);
             selected_button = (int)buttonManager.visible_count - 1;
             setPrimaryColorAll();
         }
