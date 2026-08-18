@@ -292,7 +292,7 @@ namespace AppKit
                         auto &tab = optionMap[tab_name];
                         int before_idx = tab->selected_item_index;
                         tab->downButton();
-                        if (before_idx != tab->selected_item_index)
+                        if (before_idx != tab->selected_item_index && onMenuChange)
                             onMenuChange(ScreenOptionsChangeEvent::Vertical);
                     }
                 }
@@ -304,7 +304,7 @@ namespace AppKit
                         auto &tab = optionMap[tab_name];
                         int before_idx = tab->selected_item_index;
                         tab->upButton();
-                        if (before_idx != tab->selected_item_index)
+                        if (before_idx != tab->selected_item_index && onMenuChange)
                             onMenuChange(ScreenOptionsChangeEvent::Vertical);
                     }
                 }
@@ -316,7 +316,7 @@ namespace AppKit
                         auto &tab = optionMap[tab_name];
                         int before_idx = tab->items[tab->selected_item_index].selected_index;
                         tab->leftButton();
-                        if (before_idx != tab->items[tab->selected_item_index].selected_index)
+                        if (before_idx != tab->items[tab->selected_item_index].selected_index && onMenuChange)
                             onMenuChange(ScreenOptionsChangeEvent::Horizontal);
                     }
                 }
@@ -328,7 +328,7 @@ namespace AppKit
                         auto &tab = optionMap[tab_name];
                         int before_idx = tab->items[tab->selected_item_index].selected_index;
                         tab->rightButton();
-                        if (before_idx != tab->items[tab->selected_item_index].selected_index)
+                        if (before_idx != tab->items[tab->selected_item_index].selected_index && onMenuChange)
                             onMenuChange(ScreenOptionsChangeEvent::Horizontal);
                     }
                 }
@@ -359,7 +359,7 @@ namespace AppKit
                     {
                         int old_sel_idx = topBar->selected_button;
                         topBar->shoulderNext();
-                        if (old_sel_idx != topBar->selected_button)
+                        if (old_sel_idx != topBar->selected_button && onMenuChange)
                             onMenuChange(ScreenOptionsChangeEvent::Tab);
                     }
                     activeCurrentTab();
@@ -370,7 +370,7 @@ namespace AppKit
                     {
                         int old_sel_idx = topBar->selected_button;
                         topBar->shoulderPrevious();
-                        if (old_sel_idx != topBar->selected_button)
+                        if (old_sel_idx != topBar->selected_button && onMenuChange)
                             onMenuChange(ScreenOptionsChangeEvent::Tab);
                     }
                     activeCurrentTab();

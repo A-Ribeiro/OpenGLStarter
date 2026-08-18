@@ -107,7 +107,7 @@ namespace AppKit
             if (osciloscopeIsLocked())
                 return;
             int new_selected_button = MathCore::OP<int>::clamp(selected_button - 1, 0, (int)buttonManager.visible_count - 1);
-            if (new_selected_button != selected_button)
+            if (new_selected_button != selected_button && onOptionChanged)
                 onOptionChanged(ScreenMessageBoxChangeEvent::OptionChange);
             selected_button = new_selected_button;
             setPrimaryColorAll();
@@ -117,7 +117,7 @@ namespace AppKit
             if (osciloscopeIsLocked())
                 return;
             int new_selected_button = MathCore::OP<int>::clamp(selected_button + 1, 0, (int)buttonManager.visible_count - 1);
-            if (new_selected_button != selected_button)
+            if (new_selected_button != selected_button && onOptionChanged)
                 onOptionChanged(ScreenMessageBoxChangeEvent::OptionChange);
             selected_button = new_selected_button;
 
@@ -322,7 +322,8 @@ namespace AppKit
             {
                 if (event == UIEventEnum::UIEvent_InputActionEnter)
                 {
-                    onOptionChanged(ScreenMessageBoxChangeEvent::OpenMenu);
+                    if (onOptionChanged)
+                        onOptionChanged(ScreenMessageBoxChangeEvent::OpenMenu);
                     osciloscopeTriggerAction();
                 }
                 else if (event == UIEventEnum::UIEvent_InputRight)
