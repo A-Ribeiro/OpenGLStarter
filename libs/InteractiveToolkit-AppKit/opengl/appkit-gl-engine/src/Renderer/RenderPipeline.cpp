@@ -377,6 +377,7 @@ namespace AppKit
             Platform::ThreadPool *threadPool)
         {
             this->threadPool = threadPool;
+            sortingHelper.threadpool = threadPool;
 
             agregateMesh_ConcatenateLowerThanIndexCount = agregateMesh_ConcatenateLowerThanTriangleCount * 3;
             agregateMesh_FlushMoreThanIndexCount = agregateMesh_FlushMoreThanTriangleCount * 3;

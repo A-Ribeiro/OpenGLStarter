@@ -33,6 +33,14 @@ namespace AppKit
             std::vector<Transform *> transform_tmp;
 
         public:
+
+            Platform::ThreadPool *threadpool;
+
+            Platform::Semaphore completion_semaphore;
+
+
+            SortingHelper();
+
             std::vector<AlgorithmCore::Sorting::SortIndexu64> &sort_by_material(std::vector<Transform *> &v);
             void sort_by_z(std::vector<Transform *> &v, SortingModeEnum mode, bool sort_by_material_p);
             void sort_by_direction(std::vector<Transform *> &v, const MathCore::vec3f &dir, SortingModeEnum mode, bool sort_by_material_p);
