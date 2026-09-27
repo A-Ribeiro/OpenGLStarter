@@ -9,30 +9,12 @@ disable-model-invocation: false
 # C++ Class Documentation (Doxygen)
 
 ## When to Use
-- Creating documentation for new C++ classes
-- Adding Doxygen comments to existing undocumented classes
+- Documenting new C++ classes or adding Doxygen comments to existing ones
 - Reviewing class documentation for consistency with the InteractiveToolkit pattern
-- Generating documentation from code or vice versa
 
 ## Critical Rule: Preserve Implementations
 
-**NEVER remove or strip the original method or function implementation when adding documentation.**
-
-When documenting a class, only add `///` comment blocks above the existing code. The implementation body (function body, constructor initializer list, etc.) must remain intact. Adding documentation should never change the compiled behavior of the code.
-
-**Wrong** — removing the implementation:
-```cpp
-/// \brief Description.
-///
-inline void foo();
-```
-
-**Correct** — preserving the implementation:
-```cpp
-/// \brief Description.
-///
-inline void foo() { /* existing body */ }
-```
+**NEVER remove or strip the original implementation when adding documentation.** Only add `///` comment blocks above existing code; the function body, constructor initializer list, etc. must remain intact. Adding docs must never change compiled behavior.
 
 ## Author Question
 
@@ -40,199 +22,129 @@ When creating new documentation, always ask the user: **"What is the author name
 
 Use the provided author name to fill all `\author` tags in the generated documentation. If the user does not provide an author, use a placeholder like `Unknown` and prompt them to update it.
 
-## The Pattern (from `Sphere.h`)
+## The Pattern
 
-Every documented class follows this structure:
+Tag order is always: `\brief` → extended description → `\author` → `\param` → `\return`.
 
-### Class-Level Documentation
 ```cpp
 /// \brief Short one-line description of the class.
 ///
 /// Extended description explaining purpose, design, and usage.
-/// Can span multiple paragraphs.
-///
-/// \author Author Name
-///
-template <typename T>
-class ClassName { ... };
-```
-
-### Member Variables
-```cpp
-/// \brief Description of the member variable.
-///
-type member_name;
-```
-
-### Constructors
-```cpp
-/// \brief Construct a ClassName with default values.
-///
-/// Extended description of what the constructor does.
 ///
 /// Example:
 ///
 /// \code
-/// ClassName obj;
+/// ClassName<float> obj;
 /// \endcode
 ///
 /// \author Author Name
-///
-inline ClassName();
-```
-
-### Static Methods
-```cpp
-/// \brief Short description of what the method does.
-///
-/// Extended description with mathematical or algorithmic details.
-///
-/// Example:
-///
-/// \code
-/// // setup
-/// Type a, b;
-/// ClassName obj;
-///
-/// Type result = ClassName::methodName( a, b, obj );
-/// \endcode
-///
-/// \author Author Name
-/// \param param_name Description of the parameter.
-/// \param another_param Description of another parameter.
-/// \return Description of the return value.
-///
-static inline return_type methodName(const Type &a, const Type &b);
-```
-
-### Instance Methods
-```cpp
-/// \brief Short description of the method.
-///
-/// Extended description.
-///
-/// Example:
-///
-/// \code
-/// ClassName obj;
-/// Type result = obj.methodName( input );
-/// \endcode
-///
-/// \author Author Name
-/// \param param_name Description.
-/// \return Description.
-///
-inline return_type methodName(const param_type &param);
-```
-
-## Required Doxygen Tags
-
-| Tag | Purpose | Required? |
-|-----|---------|-----------|
-| `\brief` | One-line summary | Yes (class, method, member) |
-| `\author` | Author attribution | Yes (class, constructor, method) |
-| `\param` | Parameter description | Yes (methods with params) |
-| `\return` | Return value description | Yes (methods with return) |
-| `\code` / `\endcode` | Code example | Recommended |
-| `\note` | Additional notes | Optional |
-| `\see` | Cross-references | Optional |
-
-## Decision Flow
-
-```
-Start: Document a class
-  │
-  ├─ Ask: "What is the author name?" → store as $author
-  │
-  ├─ Class-level docs?
-  │   └─ Yes → \brief + extended description + \author ($author)
-  │
-  ├─ Member variables?
-  │   └─ Yes → \brief before each member
-  │
-  ├─ Constructors?
-  │   └─ Yes → \brief + \author ($author) + \code example
-  │
-  ├─ Static methods?
-  │   └─ Yes → \brief + \author ($author) + \param + \return + \code example
-  │
-  └─ Instance methods?
-      └─ Yes → \brief + \author ($author) + \param + \return + \code example
-```
-
-## Implementation Preservation Checklist
-
-Before finalizing any documentation edit:
-- [ ] All original function bodies are preserved
-- [ ] No implementation was stripped or replaced with a declaration-only form
-- [ ] Only `///` comment blocks were added above existing code
-
-## Quality Checklist
-
-- [ ] Class has `\brief` and `\author`
-- [ ] Every public method has `\brief`, `\author`, `\param` (if applicable), `\return` (if applicable)
-- [ ] Every constructor has `\brief` and `\author`
-- [ ] Code examples use `\code` / `\endcode` blocks
-- [ ] Examples show typical usage patterns
-- [ ] Template classes document the template parameter purpose
-- [ ] Overloaded methods are all documented (not just one signature)
-- [ ] Language is English
-- [ ] Descriptions are concise but complete
-
-## Minimal Reference Example
-
-```cpp
-/// \brief A simple sphere collision primitive.
-///
-/// Represents a sphere in 3D space defined by a center point and radius.
-/// Used for broad-phase collision detection.
-///
-/// \author John Doe
 ///
 /// \tparam T Numeric type for coordinates (e.g., float, double).
 ///
 template <typename T>
-class Sphere {
+class ClassName {
 public:
-    /// \brief The center point of the sphere.
+    /// \brief Alias for the fully specialized class type.
     ///
-    Vector3<T> center;
+    using self_type = ClassName<T>;
 
     /// \brief The radius of the sphere.
     ///
     T radius;
 
-    /// \brief Construct a Sphere with default values (center at origin, radius 0).
+    /// \brief Construct a ClassName with the given radius.
     ///
-    /// \author John Doe
+    /// Example:
     ///
-    inline Sphere();
+    /// \code
+    /// ClassName obj(1.0f);
+    /// \endcode
+    ///
+    /// \author Author Name
+    /// \param radius The radius. Must be non-negative.
+    ///
+    ITK_INLINE ClassName(T radius) { /* existing body */ }
 
-    /// \brief Construct a Sphere with the given center and radius.
+    /// \brief Component-wise sum (add) operator overload.
     ///
-    /// \author John Doe
-    /// \param center The center point of the sphere.
-    /// \param radius The radius of the sphere. Must be non-negative.
+    /// Increment the instance by the components of another instance.
     ///
-    inline Sphere(const Vector3<T> &center, T radius);
+    /// Example:
+    ///
+    /// \code
+    /// ClassName a, b;
+    /// a += b;
+    /// \endcode
+    ///
+    /// \author Author Name
+    /// \param v Instance to add to the current instance.
+    /// \return A reference to the current instance after the increment.
+    ///
+    ITK_INLINE self_type &operator+=(const self_type &v) { /* existing body */ return (*this); }
 
     /// \brief Compute the squared distance from a point to the sphere surface.
     ///
     /// Returns zero if the point is inside or on the sphere.
     ///
-    /// \author John Doe
+    /// Example:
+    ///
+    /// \code
+    /// ClassName obj;
+    /// T result = obj.squaredDistanceTo(point);
+    /// \endcode
+    ///
+    /// \author Author Name
     /// \param point The query point.
     /// \return Squared distance to the sphere surface.
     ///
-    inline T squaredDistanceTo(const Vector3<T> &point) const;
+    ITK_INLINE T squaredDistanceTo(const Vector3<T> &point) const { /* existing body */ }
 };
 ```
 
-## Anti-patterns
+All constructs follow this shape:
+- **Type aliases, constants, members**: `\brief` + extended description.
+- **Constructors** (default, SIMD register, scalar, SFINAE-converting, two-argument, difference `b - a`, copy): `\brief` + extended + `\code` example + `\author` + `\param` per argument.
+- **Operators** (assignment, comparison, compound, unary, conversion): same, plus `\return` if applicable.
+- **Methods** (static and instance): same, plus `\return`.
+- **Unions**: document the union (describing its access views) and each member, including nested struct members.
+- **SFINAE partial specializations** (`std::enable_if` on `SIMD_TYPE::SSE`/`NEON`): class-level docs must additionally explain *when the specialization is selected* and describe each template parameter's constraint via `\tparam`.
 
-- **Missing `\author`**: Every class and method should attribute the author.
-- **No code examples**: At minimum, show how to call the method.
-- **Vague `\brief`**: "Does something" is not useful. Be specific.
-- **Inconsistent tag order**: Always `\brief` → extended → `\author` → `\param` → `\return`.
-- **Undocumented overloads**: Document all overloaded signatures.
-- **Referencing other methods instead of documenting**: Never write "Same as \c methodName" or similar cross-references in place of actual documentation. Each method must have its own complete `\brief`, extended description, and examples. For near-identical methods, document each fully.
+## Required Doxygen Tags
+
+| Tag | Purpose | Required? |
+|-----|---------|-----------|
+| `\brief` | One-line summary | Yes (class, method, member, union, struct) |
+| `\author` | Author attribution | Yes (class, constructor, method, operator) |
+| `\param` | Parameter description | Yes (methods with params) |
+| `\return` | Return value description | Yes (methods with return) |
+| `\code` / `\endcode` | Code example | Recommended |
+| `\note` | Additional notes | Optional |
+| `\see` | Cross-references | Optional |
+| `\tparam` | Template parameter description | Yes (template classes/structs) |
+
+## Conditional Compilation
+
+When documenting code with `#if defined(ITK_SSE2)` / `#elif defined(ITK_NEON)` / `#else` / `#endif`, document the **entire block** as a single logical element. The `\brief` and `\author` tags go **before** the `#if` directive; the `#else` / `#endif` remain undocumented. Do not split branches into separate entries.
+
+## What NOT to Document
+
+- **Commented-out code** (e.g. `// float32x2_t diff = ...`) — only document active, compiled code.
+- **Section comments** (e.g. `// inter SIMD types converting...`) — internal organization markers, not Doxygen entries.
+- **`#error` preprocessor directives** — not Doxygen entries.
+
+## Quality Checklist
+
+- [ ] Class has `\brief`, `\author`, and `\tparam` (if templated)
+- [ ] Every public method/operator/constructor has `\brief` and `\author`
+- [ ] Methods have `\param` (per argument) and `\return` (if applicable)
+- [ ] Code examples use `\code` / `\endcode` blocks showing typical usage
+- [ ] SFINAE specializations explain the selection criteria in class-level docs
+- [ ] All overloaded signatures are documented (not just one)
+- [ ] Union members and nested structs are documented
+- [ ] Conditional compilation blocks are documented as a single logical unit
+- [ ] Commented-out code, section comments, and `#error` directives are not documented
+- [ ] All original implementations are preserved (only `///` blocks added)
+- [ ] Language is English; descriptions are concise but complete
+- [ ] No cross-references in place of documentation: never write "Same as \c methodName" — each method needs its own complete `\brief`, description, and example
+
+
